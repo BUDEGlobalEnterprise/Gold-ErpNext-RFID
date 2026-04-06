@@ -6,6 +6,9 @@ def execute():
 	Migrate legacy custom_salesperson_{1..4} fields into the new Salesperson Split child table
 	across all Sales Invoices.
 	"""
+	if not frappe.db.exists("DocType", "Sales Invoice"):
+		return
+
 	frappe.reload_doc("unified_retail_management_system", "doctype", "salesperson_split_detail")
 	from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
@@ -24,7 +27,10 @@ def execute():
 			]
 		}
 	)
-	frappe.reload_doc("accounts", "doctype", "sales_invoice")
+	try:
+		frappe.reload_doc("accounts", "doctype", "sales_invoice")
+	except Exception:
+		pass
 
 	# Fetch all invoices that have at least one of the legacy salesperson fields set
 	invoices = frappe.db.sql(

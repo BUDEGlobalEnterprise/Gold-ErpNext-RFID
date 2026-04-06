@@ -7,7 +7,7 @@ from frappe import _
 from frappe.utils import add_months, flt, today
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["GET"])
 def get_all_layaways(
 	status: str | None = None,
 	customer: str | None = None,
@@ -132,7 +132,7 @@ def get_all_layaways(
 	}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["GET"])
 def get_layaway_details(layaway_id: str) -> dict:
 	"""Return full details of a Layaway Contract including items and schedule."""
 	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])

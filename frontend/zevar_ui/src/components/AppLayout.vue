@@ -47,7 +47,12 @@
 					class="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-gray-400 hover:text-white shrink-0"
 					aria-label="Expand sidebar"
 				>
-					<svg class="w-5 h-5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg
+						class="w-5 h-5 rotate-180"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -73,7 +78,12 @@
 							class="relative z-10 flex items-center gap-4"
 							:class="{ 'justify-center': isSidebarCollapsed }"
 						>
-							<svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg
+								class="w-5 h-5 transition-colors"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -81,7 +91,9 @@
 									d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
 								></path>
 							</svg>
-							<span v-show="!isSidebarCollapsed" class="font-medium tracking-wide text-sm whitespace-nowrap"
+							<span
+								v-show="!isSidebarCollapsed"
+								class="font-medium tracking-wide text-sm whitespace-nowrap"
 								>POS Terminal</span
 							>
 						</div>
@@ -100,7 +112,12 @@
 							class="relative z-10 flex items-center gap-4"
 							:class="{ 'justify-center': isSidebarCollapsed }"
 						>
-							<svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg
+								class="w-5 h-5 transition-colors"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -108,7 +125,9 @@
 									d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
 								></path>
 							</svg>
-							<span v-show="!isSidebarCollapsed" class="font-medium tracking-wide text-sm whitespace-nowrap"
+							<span
+								v-show="!isSidebarCollapsed"
+								class="font-medium tracking-wide text-sm whitespace-nowrap"
 								>Sales History</span
 							>
 						</div>
@@ -127,7 +146,12 @@
 							class="relative z-10 flex items-center gap-4"
 							:class="{ 'justify-center': isSidebarCollapsed }"
 						>
-							<svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg
+								class="w-5 h-5 transition-colors"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -135,7 +159,9 @@
 									d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
 								></path>
 							</svg>
-							<span v-show="!isSidebarCollapsed" class="font-medium tracking-wide text-sm whitespace-nowrap"
+							<span
+								v-show="!isSidebarCollapsed"
+								class="font-medium tracking-wide text-sm whitespace-nowrap"
 								>Catalogues</span
 							>
 						</div>
@@ -154,7 +180,12 @@
 							class="relative z-10 flex items-center gap-4"
 							:class="{ 'justify-center': isSidebarCollapsed }"
 						>
-							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg
+								class="w-5 h-5"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -168,7 +199,9 @@
 									d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
 								></path>
 							</svg>
-							<span v-show="!isSidebarCollapsed" class="font-medium tracking-wide text-sm whitespace-nowrap"
+							<span
+								v-show="!isSidebarCollapsed"
+								class="font-medium tracking-wide text-sm whitespace-nowrap"
 								>Repairs</span
 							>
 						</div>
@@ -187,7 +220,12 @@
 							class="relative z-10 flex items-center gap-4"
 							:class="{ 'justify-center': isSidebarCollapsed }"
 						>
-							<svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg
+								class="w-5 h-5 transition-colors"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -195,7 +233,9 @@
 									d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
 								></path>
 							</svg>
-							<span v-show="!isSidebarCollapsed" class="font-medium tracking-wide text-sm whitespace-nowrap"
+							<span
+								v-show="!isSidebarCollapsed"
+								class="font-medium tracking-wide text-sm whitespace-nowrap"
 								>Support</span
 							>
 						</div>
@@ -214,7 +254,12 @@
 							class="relative z-10 flex items-center gap-4"
 							:class="{ 'justify-center': isSidebarCollapsed }"
 						>
-							<svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg
+								class="w-5 h-5 transition-colors"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -222,13 +267,18 @@
 									d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
 								></path>
 							</svg>
-							<span v-show="!isSidebarCollapsed" class="font-medium tracking-wide text-sm whitespace-nowrap"
+							<span
+								v-show="!isSidebarCollapsed"
+								class="font-medium tracking-wide text-sm whitespace-nowrap"
 								>Layaway</span
 							>
 						</div>
 					</router-link>
 
-					<div v-if="$route.path === '/' && !isSidebarCollapsed" class="mt-6 pt-6 border-t border-white/5">
+					<div
+						v-if="$route.path === '/' && !isSidebarCollapsed"
+						class="mt-6 pt-6 border-t border-white/5"
+					>
 						<FilterSidebar />
 					</div>
 				</nav>
@@ -252,7 +302,12 @@
 						@click="isMobileDrawerOpen = true"
 						class="p-1 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
 					>
-						<svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<svg
+							class="w-6 h-6 text-gray-600 dark:text-gray-300"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -261,16 +316,22 @@
 							></path>
 						</svg>
 					</button>
-					<img src="/logo.svg" alt="Zevar" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg shrink-0" />
+					<img
+						src="/logo.svg"
+						alt="Zevar"
+						class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg shrink-0"
+					/>
 					<div class="relative ml-1 sm:ml-2 min-w-0 flex-1">
 						<select
 							v-model="session.currentWarehouse"
 							@change="session.setWarehouse($event.target.value)"
 							class="h-8 sm:h-9 w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 pl-2 pr-6 rounded-lg text-xs font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] cursor-pointer appearance-none overflow-hidden text-ellipsis whitespace-nowrap"
 						>
-							<option value="null" disabled>Store...</option>
+							<option :value="null" disabled>Store...</option>
 							<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
-								{{ wh.name.replace('Zevar US Stores - ', '').replace(' - ZUS', '') }}
+								{{
+									wh.name.replace('Zevar US Stores - ', '').replace(' - ZUS', '')
+								}}
 							</option>
 						</select>
 						<svg
@@ -279,7 +340,12 @@
 							stroke="currentColor"
 							viewBox="0 0 24 24"
 						>
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M19 9l-7 7-7-7"
+							></path>
 						</svg>
 					</div>
 				</div>
@@ -292,7 +358,7 @@
 							@change="session.setWarehouse($event.target.value)"
 							class="h-11 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 pl-4 pr-10 rounded-lg text-sm font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] cursor-pointer min-w-[200px] transition-all hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm outline-none"
 						>
-							<option value="null" disabled>Select Store Location</option>
+							<option :value="null" disabled>Select Store Location</option>
 							<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
 								{{ wh.name }}
 							</option>
@@ -334,7 +400,9 @@
 								<span
 									class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"
 								></span>
-								<span class="relative inline-flex rounded-full h-1.5 w-1.5 lg:h-2 lg:w-2 bg-green-600"></span>
+								<span
+									class="relative inline-flex rounded-full h-1.5 w-1.5 lg:h-2 lg:w-2 bg-green-600"
+								></span>
 							</span>
 							<span
 								class="text-[8px] lg:text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400"
@@ -380,7 +448,12 @@
 								class="text-sm font-semibold hidden sm:block text-gray-700 dark:text-white truncate max-w-[80px]"
 								>{{ session.user?.full_name?.split(' ')[0] || 'Guest' }}</span
 							>
-							<svg class="w-4 h-4 text-gray-400 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg
+								class="w-4 h-4 text-gray-400 hidden sm:block"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -390,7 +463,11 @@
 							</svg>
 						</button>
 
-						<div v-if="isUserMenuOpen" @click.stop="isUserMenuOpen = false" class="fixed inset-0 z-40"></div>
+						<div
+							v-if="isUserMenuOpen"
+							@click.stop="isUserMenuOpen = false"
+							class="fixed inset-0 z-40"
+						></div>
 
 						<Transition
 							enter-active-class="transition duration-200 ease-out"
@@ -407,10 +484,14 @@
 								<div
 									class="px-4 py-3 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]"
 								>
-									<p class="text-sm font-bold text-gray-900 dark:text-white truncate">
+									<p
+										class="text-sm font-bold text-gray-900 dark:text-white truncate"
+									>
 										{{ session.user?.full_name || 'Guest User' }}
 									</p>
-									<p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+									<p
+										class="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5"
+									>
 										{{ session.user?.email || 'Not logged in' }}
 									</p>
 								</div>
@@ -420,7 +501,12 @@
 										@click.prevent="isUserMenuOpen = false"
 										class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
 									>
-										<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<svg
+											class="w-4 h-4 text-gray-400"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
 											<path
 												stroke-linecap="round"
 												stroke-linejoin="round"
@@ -435,7 +521,12 @@
 										@click.prevent="isUserMenuOpen = false"
 										class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
 									>
-										<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<svg
+											class="w-4 h-4 text-gray-400"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
 											<path
 												stroke-linecap="round"
 												stroke-linejoin="round"
@@ -450,7 +541,12 @@
 										@click.prevent="isUserMenuOpen = false"
 										class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
 									>
-										<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<svg
+											class="w-4 h-4 text-gray-400"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
 											<path
 												stroke-linecap="round"
 												stroke-linejoin="round"
@@ -502,7 +598,11 @@
 										>
 											<div
 												class="w-3 h-3 bg-white rounded-full absolute transition-transform duration-300 shadow-sm"
-												:class="ui.isDark ? 'translate-x-[18px]' : 'translate-x-[2px]'"
+												:class="
+													ui.isDark
+														? 'translate-x-[18px]'
+														: 'translate-x-[2px]'
+												"
 											></div>
 										</div>
 									</button>
@@ -512,7 +612,12 @@
 										@click.stop="session.logoutResource.submit()"
 										class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors font-medium"
 									>
-										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<svg
+											class="w-4 h-4"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
 											<path
 												stroke-linecap="round"
 												stroke-linejoin="round"
@@ -570,9 +675,13 @@
 						<span
 							class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"
 						></span>
-						<span class="relative inline-flex rounded-full h-2 w-2 bg-green-600"></span>
+						<span
+							class="relative inline-flex rounded-full h-2 w-2 bg-green-600"
+						></span>
 					</span>
-					<span class="text-[9px] font-bold uppercase tracking-widest text-gray-400">Spot</span>
+					<span class="text-[9px] font-bold uppercase tracking-widest text-gray-400"
+						>Spot</span
+					>
 				</div>
 				<div class="flex items-center gap-3 overflow-x-auto hide-scrollbar pl-2 flex-1">
 					<div
@@ -580,7 +689,9 @@
 						:key="key"
 						class="flex flex-col flex-shrink-0 leading-tight"
 					>
-						<span class="text-[8px] text-gray-500 font-bold uppercase">{{ key.split('-')[0] }}</span>
+						<span class="text-[8px] text-gray-500 font-bold uppercase">{{
+							key.split('-')[0]
+						}}</span>
 						<span class="text-xs font-bold text-[#D4AF37]">${{ rate }}</span>
 					</div>
 				</div>
@@ -602,12 +713,17 @@
 			:class="isMobileDrawerOpen ? 'translate-x-0' : '-translate-x-full'"
 		>
 			<!-- Drawer Header -->
-			<div class="h-16 flex items-center justify-between px-4 border-b border-white/5 shrink-0">
+			<div
+				class="h-16 flex items-center justify-between px-4 border-b border-white/5 shrink-0"
+			>
 				<div class="flex items-center gap-3">
 					<img src="/logo.svg" alt="Zevar POS" class="w-8 h-8 rounded-lg" />
 					<span class="text-white font-serif font-bold text-xl">ZEVAR</span>
 				</div>
-				<button @click="isMobileDrawerOpen = false" class="text-gray-400 p-2 hover:text-white transition-colors">
+				<button
+					@click="isMobileDrawerOpen = false"
+					class="text-gray-400 p-2 hover:text-white transition-colors"
+				>
 					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
@@ -648,7 +764,7 @@
 						@change="session.setWarehouse($event.target.value)"
 						class="h-11 w-full bg-gray-800 border border-gray-700 text-gray-200 rounded-lg px-3 pr-8 focus:ring-2 focus:ring-[#D4AF37] text-sm appearance-none"
 					>
-						<option value="null" disabled>Select Store Location</option>
+						<option :value="null" disabled>Select Store Location</option>
 						<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
 							{{ wh.name }}
 						</option>
@@ -659,7 +775,12 @@
 						stroke="currentColor"
 						viewBox="0 0 24 24"
 					>
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 9l-7 7-7-7"
+						></path>
 					</svg>
 				</div>
 			</div>
@@ -676,7 +797,12 @@
 							: 'text-gray-400 hover:text-[#D4AF37] hover:bg-white/5'
 					"
 				>
-					<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg
+						class="w-5 h-5 shrink-0"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -697,7 +823,12 @@
 							: 'text-gray-400 hover:text-[#D4AF37] hover:bg-white/5'
 					"
 				>
-					<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg
+						class="w-5 h-5 shrink-0"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -718,7 +849,12 @@
 							: 'text-gray-400 hover:text-[#D4AF37] hover:bg-white/5'
 					"
 				>
-					<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg
+						class="w-5 h-5 shrink-0"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -739,7 +875,12 @@
 							: 'text-gray-400 hover:text-[#D4AF37] hover:bg-white/5'
 					"
 				>
-					<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg
+						class="w-5 h-5 shrink-0"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -766,7 +907,12 @@
 							: 'text-gray-400 hover:text-[#D4AF37] hover:bg-white/5'
 					"
 				>
-					<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg
+						class="w-5 h-5 shrink-0"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -787,7 +933,12 @@
 							: 'text-gray-400 hover:text-[#D4AF37] hover:bg-white/5'
 					"
 				>
-					<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg
+						class="w-5 h-5 shrink-0"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -805,9 +956,13 @@
 							<span
 								class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"
 							></span>
-							<span class="relative inline-flex rounded-full h-2 w-2 bg-green-600"></span>
+							<span
+								class="relative inline-flex rounded-full h-2 w-2 bg-green-600"
+							></span>
 						</span>
-						<span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Live Spot Rates</span>
+						<span class="text-[10px] font-bold uppercase tracking-widest text-gray-500"
+							>Live Spot Rates</span
+						>
 					</div>
 					<div class="grid grid-cols-2 gap-2">
 						<div
@@ -818,7 +973,9 @@
 							<div class="text-[9px] text-gray-400 uppercase font-bold mb-0.5">
 								{{ key.replace(/-/g, ' ') }}
 							</div>
-							<div class="text-sm font-bold text-[#D4AF37]">${{ rate }}<span class="text-[8px] text-gray-500">/oz</span></div>
+							<div class="text-sm font-bold text-[#D4AF37]">
+								${{ rate }}<span class="text-[8px] text-gray-500">/oz</span>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -830,7 +987,13 @@
 						class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-gray-400 hover:text-[#D4AF37] hover:bg-white/5 transition-colors"
 					>
 						<div class="flex items-center gap-3">
-							<svg v-if="ui.isDark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg
+								v-if="ui.isDark"
+								class="w-5 h-5"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -838,7 +1001,13 @@
 									d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
 								></path>
 							</svg>
-							<svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg
+								v-else
+								class="w-5 h-5"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -846,7 +1015,9 @@
 									d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
 								></path>
 							</svg>
-							<span class="text-sm font-medium">{{ ui.isDark ? 'Light Mode' : 'Dark Mode' }}</span>
+							<span class="text-sm font-medium">{{
+								ui.isDark ? 'Light Mode' : 'Dark Mode'
+							}}</span>
 						</div>
 						<div
 							class="w-10 h-5 bg-gray-600 dark:bg-[#C9A962] rounded-full relative transition-colors duration-300 flex items-center"
@@ -998,7 +1169,7 @@ watch(
 		if (newWh) {
 			cartStore.loadTaxForWarehouse(newWh)
 		}
-	}
+	},
 )
 </script>
 

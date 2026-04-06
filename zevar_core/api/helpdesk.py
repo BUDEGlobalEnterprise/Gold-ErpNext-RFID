@@ -23,7 +23,7 @@ def _ensure_mapping(doctype, value, extra_fields=None):
 		return True
 	except Exception:
 		frappe.log_error(
-			"Helpdesk Mapping Create: {}={}".format(doctype, value),
+			f"Helpdesk Mapping Create: {doctype}={value}",
 			frappe.get_traceback(),
 		)
 		return False
@@ -119,7 +119,7 @@ def _create_todo_fallback(subject, full_description, category, assigned_to):
 	todo = frappe.get_doc(
 		{
 			"doctype": "ToDo",
-			"description": "[{}] {}\n\n{}".format(category, subject, full_description),
+			"description": f"[{category}] {subject}\n\n{full_description}",
 			"allocated_to": allocated_to,
 			"status": "Open",
 			"date": frappe.utils.today(),
@@ -194,9 +194,9 @@ def create_support_ticket(
 	)
 
 	if reference_type and reference_name:
-		context_info += "\n**Related {}:** {}".format(reference_type, reference_name)
+		context_info += f"\n**Related {reference_type}:** {reference_name}"
 
-	full_description = ("{}\n\n---\n\n**Issue Description:**\n\n{}").format(context_info, description)
+	full_description = (f"{context_info}\n\n---\n\n**Issue Description:**\n\n{description}")
 
 	ticket = None
 	try:
@@ -243,7 +243,7 @@ def create_support_ticket(
 						"doctype": "ToDo",
 						"reference_type": "Issue",
 						"reference_name": issue.name,
-						"description": "[{}] {}".format(category, subject),
+						"description": f"[{category}] {subject}",
 						"allocated_to": assigned_to,
 						"status": "Open",
 					}
@@ -403,13 +403,13 @@ def create_attendance_issue(
 	dt_str = now_datetime().strftime("%Y-%m-%d %H:%M:%S")
 
 	full_description = (
-		"**Reported by Employee:** {}\n"
-		"**Employee ID:** {}\n"
-		"**Department:** {}\n"
-		"**Designation:** {}\n"
-		"**Date/Time:** {}\n\n---\n\n"
-		"**Issue Description:**\n\n{}"
-	).format(reporter, emp_id, emp_dept, emp_desig, dt_str, description)
+		f"**Reported by Employee:** {reporter}\n"
+		f"**Employee ID:** {emp_id}\n"
+		f"**Department:** {emp_dept}\n"
+		f"**Designation:** {emp_desig}\n"
+		f"**Date/Time:** {dt_str}\n\n---\n\n"
+		f"**Issue Description:**\n\n{description}"
+	)
 
 	ticket = None
 	try:
@@ -451,7 +451,7 @@ def create_attendance_issue(
 						"doctype": "ToDo",
 						"reference_type": "Issue",
 						"reference_name": issue.name,
-						"description": "New issue assigned: {}".format(subject),
+						"description": f"New issue assigned: {subject}",
 						"allocated_to": manager_user_id,
 						"status": "Open",
 					}

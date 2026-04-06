@@ -13,7 +13,6 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
-
 SHORTCUT_CACHE_KEY = "zevar_shortcuts_registry"
 SHORTCUT_FIELDS = [
 	"name",

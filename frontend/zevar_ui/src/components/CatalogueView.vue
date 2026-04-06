@@ -478,8 +478,8 @@
 							showPartners
 								? 'bg-[#8B6914] text-white shadow-lg'
 								: isDark
-								? 'bg-white/10 text-gray-300 hover:bg-white/15'
-								: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+									? 'bg-white/10 text-gray-300 hover:bg-white/15'
+									: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
 						"
 					>
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -677,7 +677,7 @@ const props = defineProps({
 })
 
 const router = useRouter()
-const route = useRoute()
+const router = useRouter()
 const ui = useUIStore()
 const isDark = computed(() => ui.isDark)
 const activeCategory = ref('all')

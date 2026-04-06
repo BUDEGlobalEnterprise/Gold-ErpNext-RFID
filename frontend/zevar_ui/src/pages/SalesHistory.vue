@@ -65,12 +65,7 @@
 						:disabled="loading"
 						class="px-4 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] transition disabled:opacity-50 flex items-center gap-2"
 					>
-						<svg
-							class="w-4 h-4"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -131,7 +126,9 @@
 			</div>
 
 			<!-- Sales Table -->
-			<div class="flex-1 overflow-y-auto bg-white dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700/50">
+			<div
+				class="flex-1 overflow-y-auto bg-white dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700/50"
+			>
 				<div class="overflow-x-auto">
 					<table class="w-full">
 						<thead>
@@ -290,15 +287,34 @@
 					:disabled="loading"
 					class="px-6 py-2.5 text-sm font-bold rounded-lg border-2 border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2"
 				>
-					<svg v-if="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+					<svg
+						v-if="loading"
+						class="w-4 h-4 animate-spin"
+						fill="none"
+						viewBox="0 0 24 24"
+					>
+						<circle
+							class="opacity-25"
+							cx="12"
+							cy="12"
+							r="10"
+							stroke="currentColor"
+							stroke-width="4"
+						></circle>
+						<path
+							class="opacity-75"
+							fill="currentColor"
+							d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+						></path>
 					</svg>
 					{{ loading ? 'Loading...' : 'Load More' }}
 				</button>
 			</div>
-			
-			<div v-else-if="sales.length > 0" class="text-center pt-6 pb-2 text-sm text-gray-500 dark:text-gray-400">
+
+			<div
+				v-else-if="sales.length > 0"
+				class="text-center pt-6 pb-2 text-sm text-gray-500 dark:text-gray-400"
+			>
 				Showing all {{ sales.length }} transactions
 			</div>
 
@@ -346,7 +362,9 @@
 								<span class="text-xs text-gray-500 dark:text-gray-400 font-medium"
 									>Customer</span
 								>
-								<p class="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">
+								<p
+									class="text-sm font-semibold text-gray-900 dark:text-white mt-0.5"
+								>
 									{{ selectedTransaction.invoice.customer }}
 								</p>
 							</div>
@@ -354,7 +372,9 @@
 								<span class="text-xs text-gray-500 dark:text-gray-400 font-medium"
 									>Date & Time</span
 								>
-								<p class="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">
+								<p
+									class="text-sm font-semibold text-gray-900 dark:text-white mt-0.5"
+								>
 									{{ formatDate(selectedTransaction.invoice.posting_date) }}
 									{{ selectedTransaction.invoice.posting_time }}
 								</p>
@@ -379,14 +399,32 @@
 						>
 							Items
 						</h4>
-						<div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl overflow-hidden mb-6">
+						<div
+							class="bg-gray-50 dark:bg-gray-900/50 rounded-xl overflow-hidden mb-6"
+						>
 							<table class="w-full text-sm">
 								<thead>
 									<tr class="border-b border-gray-200 dark:border-gray-700/50">
-										<th class="px-3 py-2 text-left text-xs text-gray-500 dark:text-gray-400">Item</th>
-										<th class="px-3 py-2 text-left text-xs text-gray-500 dark:text-gray-400">Qty</th>
-										<th class="px-3 py-2 text-left text-xs text-gray-500 dark:text-gray-400">Rate</th>
-										<th class="px-3 py-2 text-left text-xs text-gray-500 dark:text-gray-400">Amount</th>
+										<th
+											class="px-3 py-2 text-left text-xs text-gray-500 dark:text-gray-400"
+										>
+											Item
+										</th>
+										<th
+											class="px-3 py-2 text-left text-xs text-gray-500 dark:text-gray-400"
+										>
+											Qty
+										</th>
+										<th
+											class="px-3 py-2 text-left text-xs text-gray-500 dark:text-gray-400"
+										>
+											Rate
+										</th>
+										<th
+											class="px-3 py-2 text-left text-xs text-gray-500 dark:text-gray-400"
+										>
+											Amount
+										</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -395,54 +433,103 @@
 										:key="item.item_code"
 										class="border-b border-gray-100 dark:border-gray-800/50 last:border-0"
 									>
-										<td class="px-3 py-2 text-gray-900 dark:text-white">{{ item.item_name || item.item_code }}</td>
-										<td class="px-3 py-2 text-gray-700 dark:text-gray-300">{{ item.qty }}</td>
-										<td class="px-3 py-2 text-gray-700 dark:text-gray-300">${{ formatAmount(item.rate) }}</td>
-										<td class="px-3 py-2 font-semibold text-gray-900 dark:text-white">${{ formatAmount(item.amount) }}</td>
+										<td class="px-3 py-2 text-gray-900 dark:text-white">
+											{{ item.item_name || item.item_code }}
+										</td>
+										<td class="px-3 py-2 text-gray-700 dark:text-gray-300">
+											{{ item.qty }}
+										</td>
+										<td class="px-3 py-2 text-gray-700 dark:text-gray-300">
+											${{ formatAmount(item.rate) }}
+										</td>
+										<td
+											class="px-3 py-2 font-semibold text-gray-900 dark:text-white"
+										>
+											${{ formatAmount(item.amount) }}
+										</td>
 									</tr>
 								</tbody>
 							</table>
 						</div>
 
 						<div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 mb-6 space-y-2">
-							<div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+							<div
+								class="flex justify-between text-sm text-gray-600 dark:text-gray-400"
+							>
 								<span>Subtotal:</span>
-								<span>${{ formatAmount(selectedTransaction.invoice.subtotal) }}</span>
+								<span
+									>${{
+										formatAmount(selectedTransaction.invoice.subtotal)
+									}}</span
+								>
 							</div>
-							<div v-if="selectedTransaction.invoice.discount > 0" class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+							<div
+								v-if="selectedTransaction.invoice.discount > 0"
+								class="flex justify-between text-sm text-gray-600 dark:text-gray-400"
+							>
 								<span>Discount:</span>
-								<span>-${{ formatAmount(selectedTransaction.invoice.discount) }}</span>
+								<span
+									>-${{
+										formatAmount(selectedTransaction.invoice.discount)
+									}}</span
+								>
 							</div>
-							<div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+							<div
+								class="flex justify-between text-sm text-gray-600 dark:text-gray-400"
+							>
 								<span>Tax:</span>
 								<span>${{ formatAmount(selectedTransaction.invoice.tax) }}</span>
 							</div>
-							<div class="flex justify-between text-lg font-bold text-gray-900 dark:text-white border-t border-gray-200 dark:border-gray-700 pt-3 mt-2">
+							<div
+								class="flex justify-between text-lg font-bold text-gray-900 dark:text-white border-t border-gray-200 dark:border-gray-700 pt-3 mt-2"
+							>
 								<span>Grand Total:</span>
-								<span>${{ formatAmount(selectedTransaction.invoice.grand_total) }}</span>
+								<span
+									>${{
+										formatAmount(selectedTransaction.invoice.grand_total)
+									}}</span
+								>
 							</div>
 						</div>
 
-						<h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Payments</h4>
+						<h4
+							class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2"
+						>
+							Payments
+						</h4>
 						<div class="space-y-2">
 							<div
 								v-for="payment in selectedTransaction.payments"
 								:key="payment.mode_of_payment"
 								class="flex justify-between px-3 py-2 bg-gray-50 dark:bg-gray-900/50 rounded-lg text-sm"
 							>
-								<span class="text-gray-700 dark:text-gray-300">{{ payment.mode_of_payment }}</span>
-								<span class="font-semibold text-gray-900 dark:text-white">${{ formatAmount(payment.amount) }}</span>
+								<span class="text-gray-700 dark:text-gray-300">{{
+									payment.mode_of_payment
+								}}</span>
+								<span class="font-semibold text-gray-900 dark:text-white"
+									>${{ formatAmount(payment.amount) }}</span
+								>
 							</div>
 						</div>
 					</div>
 
-					<div class="flex justify-end gap-3 p-4 border-t border-gray-100 dark:border-white/5">
+					<div
+						class="flex justify-end gap-3 p-4 border-t border-gray-100 dark:border-white/5"
+					>
 						<button
 							@click="printInvoice(selectedTransaction.invoice.name)"
 							class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-white/10 transition flex items-center gap-2"
 						>
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+							<svg
+								class="w-4 h-4"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
 									d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
 								/>
 							</svg>
@@ -534,7 +621,7 @@ async function fetchSales(append = false) {
 	} else {
 		loading.value = true
 	}
-	
+
 	try {
 		const [salesResult, summaryResult] = await Promise.all([
 			salesResource.submit({
@@ -553,7 +640,7 @@ async function fetchSales(append = false) {
 		} else {
 			sales.value = salesResult.sales || []
 		}
-		
+
 		pagination.value = salesResult.pagination || pagination.value
 		summary.value = summaryResult.summary
 	} catch (error) {

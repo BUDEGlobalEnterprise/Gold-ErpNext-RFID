@@ -56,7 +56,10 @@
 			</div>
 
 			<!-- Category Grid View -->
-			<div v-else-if="!selectedCategory" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+			<div
+				v-else-if="!selectedCategory"
+				class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4"
+			>
 				<div
 					v-for="cat in filteredCategories"
 					:key="cat.name"
@@ -105,11 +108,7 @@
 				</div>
 
 				<div v-else class="smart-grid">
-					<div
-						v-for="item in categoryItems"
-						:key="item.item_code"
-						class="group"
-					>
+					<div v-for="item in categoryItems" :key="item.item_code" class="group">
 						<ItemCard
 							:item="item"
 							@quick-add="handleQuickAdd"
@@ -118,7 +117,10 @@
 					</div>
 				</div>
 
-				<div v-if="hasMore && categoryItems.length > 0" class="flex justify-center pt-12 pb-12">
+				<div
+					v-if="hasMore && categoryItems.length > 0"
+					class="flex justify-center pt-12 pb-12"
+				>
 					<button
 						@click="loadMore"
 						:disabled="items.loading"
@@ -167,8 +169,7 @@ const hasMore = ref(true)
 const categoryItems = computed(() => {
 	if (!selectedCategory.value) return []
 	return catalog.value.filter(
-		(item) =>
-			(item.item_group || item.category || 'Other') === selectedCategory.value
+		(item) => (item.item_group || item.category || 'Other') === selectedCategory.value,
 	)
 })
 
@@ -183,97 +184,26 @@ const items = createResource({
 	makeParams() {
 		const { in_stock_only, out_of_stock_only, ...otherFilters } = ui.activeFilters
 		return {
-			warehouse: session.currentWarehouse,
-			page_length: 200,
-			start: start.value,
-			search_term: ui.searchQuery,
-			filters: JSON.stringify(otherFilters),
-			in_stock_only: in_stock_only || false,
-			out_of_stock_only: out_of_stock_only || false,
-		}
-	},
-	onSuccess(data) {
-		if (data.length < PAGE_LENGTH) {
-			hasMore.value = false
-		}
-		if (start.value === 0) {
-			catalog.value = data
-			groupCategories(data)
-		} else {
-			catalog.value.push(...data)
-		}
-		loading.value = false
-	},
-	onError() {
-		loading.value = false
-	},
-})
-
-function groupCategories(items) {
-	const grouped = {}
-	items.forEach((item) => {
-		const cat = item.item_group || item.category || 'Other'
-		if (!grouped[cat]) {
-			grouped[cat] = { name: cat, count: 0 }
-		}
-		grouped[cat].count++
-	})
-	categories.value = Object.values(grouped).sort((a, b) => b.count - a.count)
+		loading.value = true
+    }
+    loading.value = true
+    start.value = 0
+    hasMore.value = true
+    items.fetch()
 }
 
-function selectCategory(cat) {
-	selectedCategory.value = cat.name
-	start.value = 0
-	hasMore.value = true
-	items.fetch()
+ {
+    loading.value = false
+    start.value = 0
+    hasMore.value = true
+    items.fetch()
 }
 
-function loadMore() {
-	if (!hasMore.value || items.loading) return
-	start.value += PAGE_LENGTH
-	items.fetch()
-}
-
-function openItemDetails(itemCode) {
-	if (isMobile.value) return
-	selectedItemCode.value = itemCode
-	showModal.value = true
-}
-
-function handleQuickAdd(item) {
-	cart.addItem(item)
-}
-
-function getCategoryIcon(name) {
-	const lower = name.toLowerCase()
-	if (lower.includes('ring'))
-		return 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z'
-	if (lower.includes('earring') || lower.includes('drop'))
-		return 'M12 2a3 3 0 00-3 3v2a3 3 0 006 0V5a3 3 0 00-3-3zm0 12a3 3 0 00-3 3v2a3 3 0 006 0v-2a3 3 0 00-3-3z'
-	if (lower.includes('necklace') || lower.includes('chain'))
-		return 'M12 2l3 7h-6l3-7zM5 12h14M5 12l2 10h10l2-10'
-	if (lower.includes('bracelet') || lower.includes('bangle'))
-		return 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3a7 7 0 110 14 7 7 0 010-14zm0 3a4 4 0 100 8 4 4 0 000-8z'
-	if (lower.includes('pendant'))
-		return 'M12 2l-2 6h4l-2-6zM8 10h8l-1 12H9L8 10z'
-	if (lower.includes('diamond'))
-		return 'M12 2L2 12l10 10 10-10L12 2zm0 4l6 6-6 6-6-6 6-6z'
-	return 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'
-}
-
-let searchTimeout = null
-
-watch(
-	() => [ui.searchQuery, ui.activeFilters],
-	() => {
-		if (searchTimeout) clearTimeout(searchTimeout)
-		searchTimeout = setTimeout(() => {
-			start.value = 0
-			hasMore.value = true
-			items.fetch()
-		}, 400)
-	},
-	{ deep: true }
+ {
+    catalog.value = []
+    categories.value = []
+    }
+}, { immediate: true }
 )
 
 watch(
@@ -282,13 +212,14 @@ watch(
 		if (newVal) {
 			loading.value = true
 			start.value = 0
+			hasMore.value = true
 			items.fetch()
 		} else {
 			catalog.value = []
 			categories.value = []
 		}
 	},
-	{ immediate: true }
+	{ immediate: true },
 )
 </script>
 
