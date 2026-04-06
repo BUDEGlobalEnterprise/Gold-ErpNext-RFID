@@ -44,7 +44,11 @@ def execute():
 		("sales_invoice", "tabSales Commission Split"),
 	]
 
-	all_indexes = item_indexes + checkin_indexes + invoice_indexes + commission_indexes
+	all_indexes = list(item_indexes) + list(checkin_indexes)
+	if frappe.db.exists("DocType", "Sales Invoice"):
+		all_indexes += list(invoice_indexes)
+	if frappe.db.exists("DocType", "Sales Commission Split"):
+		all_indexes += list(commission_indexes)
 
 	for field, table in all_indexes:
 		index_name = f"idx_{table.lower()}_{field}"

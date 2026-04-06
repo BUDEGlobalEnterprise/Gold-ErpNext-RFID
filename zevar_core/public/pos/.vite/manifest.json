@@ -1,43 +1,59 @@
 {
-  "_AppLayout-!~{009}~.js": {
-    "file": "assets/AppLayout-C88wet-4.css",
-    "src": "_AppLayout-!~{009}~.js"
+  "_AppLayout-!~{00b}~.js": {
+    "file": "assets/AppLayout-_bmj0OdM.css",
+    "src": "_AppLayout-!~{00b}~.js"
   },
-  "_AppLayout-CKkFoB7n.js": {
-    "file": "assets/AppLayout-CKkFoB7n.js",
+  "_AppLayout-BvLUoJeY.js": {
+    "file": "assets/AppLayout-BvLUoJeY.js",
     "name": "AppLayout",
     "imports": [
       "index.html",
-      "_ui-B8ObBgZx.js"
+      "_ui-BXvP8Tt1.js"
     ],
     "css": [
-      "assets/AppLayout-C88wet-4.css"
+      "assets/AppLayout-_bmj0OdM.css"
     ]
   },
-  "_ProductModal-!~{00b}~.js": {
-    "file": "assets/ProductModal-Dt17upUd.css",
-    "src": "_ProductModal-!~{00b}~.js"
+  "_CatalogueView-!~{00d}~.js": {
+    "file": "assets/CatalogueView-DzRud7mI.css",
+    "src": "_CatalogueView-!~{00d}~.js"
   },
-  "_ProductModal-CAKtLeEU.js": {
-    "file": "assets/ProductModal-CAKtLeEU.js",
+  "_CatalogueView-DPllX19k.js": {
+    "file": "assets/CatalogueView-DPllX19k.js",
+    "name": "CatalogueView",
+    "imports": [
+      "index.html",
+      "_ui-BXvP8Tt1.js",
+      "_ProductModal-B7kcoTHS.js"
+    ],
+    "css": [
+      "assets/CatalogueView-DzRud7mI.css"
+    ]
+  },
+  "_ProductModal-!~{00e}~.js": {
+    "file": "assets/ProductModal-Dt17upUd.css",
+    "src": "_ProductModal-!~{00e}~.js"
+  },
+  "_ProductModal-B7kcoTHS.js": {
+    "file": "assets/ProductModal-B7kcoTHS.js",
     "name": "ProductModal",
     "imports": [
       "index.html",
-      "_ui-B8ObBgZx.js"
+      "_ui-BXvP8Tt1.js"
     ],
     "css": [
       "assets/ProductModal-Dt17upUd.css"
     ]
   },
-  "_ui-B8ObBgZx.js": {
-    "file": "assets/ui-B8ObBgZx.js",
+  "_ui-BXvP8Tt1.js": {
+    "file": "assets/ui-BXvP8Tt1.js",
     "name": "ui",
     "imports": [
       "index.html"
     ]
   },
   "index.html": {
-    "file": "assets/index-4OfmzPdm.js",
+    "file": "assets/index-BIdlFv4T.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -46,58 +62,58 @@
       "src/pages/POS.vue",
       "src/pages/SalesHistory.vue",
       "src/pages/Layaway.vue",
+      "src/pages/POSCatalogue.vue",
       "src/pages/CatalogueDashboard.vue",
       "src/pages/CategoryListing.vue",
-      "src/pages/RepairTerminal.vue"
+      "src/pages/RepairTerminal.vue",
+      "src/pages/Support.vue"
     ],
     "css": [
-      "assets/index-jYLAVi4a.css"
+      "assets/index-D6vCNGgL.css"
     ]
   },
   "src/pages/CatalogueDashboard.vue": {
-    "file": "assets/CatalogueDashboard-IUj7dTRT.js",
+    "file": "assets/CatalogueDashboard-C5aYIT4c.js",
     "name": "CatalogueDashboard",
     "src": "src/pages/CatalogueDashboard.vue",
     "isDynamicEntry": true,
     "imports": [
+      "_CatalogueView-DPllX19k.js",
       "index.html",
-      "_ui-B8ObBgZx.js",
-      "_ProductModal-CAKtLeEU.js"
-    ],
-    "css": [
-      "assets/CatalogueDashboard-knsB_zZr.css"
+      "_ui-BXvP8Tt1.js",
+      "_ProductModal-B7kcoTHS.js"
     ]
   },
   "src/pages/CategoryListing.vue": {
-    "file": "assets/CategoryListing-CVsZY9Ks.js",
+    "file": "assets/CategoryListing-WYgxccoX.js",
     "name": "CategoryListing",
     "src": "src/pages/CategoryListing.vue",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_ProductModal-CAKtLeEU.js",
-      "_ui-B8ObBgZx.js"
+      "_ProductModal-B7kcoTHS.js",
+      "_ui-BXvP8Tt1.js"
     ],
     "css": [
       "assets/CategoryListing-arrws4qQ.css"
     ]
   },
   "src/pages/Layaway.vue": {
-    "file": "assets/Layaway-CtzQfZ0n.js",
+    "file": "assets/Layaway-DxllWkya.js",
     "name": "Layaway",
     "src": "src/pages/Layaway.vue",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_AppLayout-CKkFoB7n.js",
-      "_ui-B8ObBgZx.js"
+      "_AppLayout-BvLUoJeY.js",
+      "_ui-BXvP8Tt1.js"
     ],
     "css": [
       "assets/Layaway-Bm9s2GNV.css"
     ]
   },
   "src/pages/Login.vue": {
-    "file": "assets/Login-BxUbfrnz.js",
+    "file": "assets/Login-BNOePIUv.js",
     "name": "Login",
     "src": "src/pages/Login.vue",
     "isDynamicEntry": true,
@@ -106,42 +122,63 @@
     ]
   },
   "src/pages/POS.vue": {
-    "file": "assets/POS-vOCFCORD.js",
+    "file": "assets/POS-DAzxG4ny.js",
     "name": "POS",
     "src": "src/pages/POS.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_AppLayout-CKkFoB7n.js",
+      "_AppLayout-BvLUoJeY.js",
       "index.html",
-      "_ui-B8ObBgZx.js"
+      "_ui-BXvP8Tt1.js"
     ],
     "css": [
       "assets/POS-ROBsf8D-.css"
     ]
   },
+  "src/pages/POSCatalogue.vue": {
+    "file": "assets/POSCatalogue-BbIXiITF.js",
+    "name": "POSCatalogue",
+    "src": "src/pages/POSCatalogue.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_AppLayout-BvLUoJeY.js",
+      "_CatalogueView-DPllX19k.js",
+      "index.html",
+      "_ui-BXvP8Tt1.js",
+      "_ProductModal-B7kcoTHS.js"
+    ]
+  },
   "src/pages/RepairTerminal.vue": {
-    "file": "assets/RepairTerminal-CtH74quJ.js",
+    "file": "assets/RepairTerminal-Ck8M4DtD.js",
     "name": "RepairTerminal",
     "src": "src/pages/RepairTerminal.vue",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_AppLayout-CKkFoB7n.js",
-      "_ui-B8ObBgZx.js"
+      "_AppLayout-BvLUoJeY.js",
+      "_ui-BXvP8Tt1.js"
     ]
   },
   "src/pages/SalesHistory.vue": {
-    "file": "assets/SalesHistory-C78Zhybh.js",
+    "file": "assets/SalesHistory-A1XbKCPM.js",
     "name": "SalesHistory",
     "src": "src/pages/SalesHistory.vue",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_AppLayout-CKkFoB7n.js",
-      "_ui-B8ObBgZx.js"
-    ],
-    "css": [
-      "assets/SalesHistory-CnMnl9_C.css"
+      "_AppLayout-BvLUoJeY.js",
+      "_ui-BXvP8Tt1.js"
+    ]
+  },
+  "src/pages/Support.vue": {
+    "file": "assets/Support-D0KF2CO8.js",
+    "name": "Support",
+    "src": "src/pages/Support.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_AppLayout-BvLUoJeY.js",
+      "_ui-BXvP8Tt1.js"
     ]
   }
 }

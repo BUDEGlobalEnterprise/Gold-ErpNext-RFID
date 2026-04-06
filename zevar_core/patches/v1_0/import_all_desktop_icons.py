@@ -11,9 +11,9 @@ import frappe
 def execute():
     """Execute the desktop icons import."""
     from zevar_core.fix_desktop_icons import (
-        import_all_desktop_icons,
         create_missing_app_icons,
         create_missing_desktop_icons_for_workspaces,
+        import_all_desktop_icons,
     )
 
     # Import all desktop icons from all apps

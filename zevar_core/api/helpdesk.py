@@ -7,6 +7,129 @@ from frappe import _
 from frappe.utils import now_datetime
 
 
+def _ensure_mapping(doctype, value, extra_fields=None):
+	if not value or not frappe.db.exists("DocType", doctype):
+		return False
+	if frappe.db.exists(doctype, value):
+		return True
+	try:
+		doc_fields = {"doctype": doctype, "__newname": value}
+		if extra_fields:
+			doc_fields.update(extra_fields)
+		frappe.get_doc(doc_fields).insert(
+			ignore_permissions=True,
+			ignore_mandatory=True,
+		)
+		return True
+	except Exception:
+		frappe.log_error(
+			f"Helpdesk Mapping Create: {doctype}={value}",
+			frappe.get_traceback(),
+		)
+		return False
+
+
+def _field_exists(doctype, fieldname):
+	return frappe.db.exists("DocField", {"parent": doctype, "fieldname": fieldname})
+
+
+def _link_target_exists(doctype, fieldname, value):
+	if not _field_exists(doctype, fieldname):
+		return False
+	field_meta = frappe.get_meta(doctype).get_field(fieldname)
+	if not field_meta or field_meta.fieldtype != "Link":
+		return True
+	return bool(frappe.db.exists(field_meta.options, value))
+
+
+def _set_if_link_valid(doc_dict, doctype, fieldname, value):
+	if not value:
+		return
+	if _link_target_exists(doctype, fieldname, value):
+		doc_dict[fieldname] = value
+
+
+def _try_create_hd_ticket(subject, description, raised_by, priority, category, extra_fields=None):
+	if not frappe.db.exists("DocType", "HD Ticket"):
+		return None
+
+	_ensure_mapping(
+		"HD Ticket Status",
+		"Open",
+		{"label_agent": "Open", "label_customer": "Open", "category": "Open"},
+	)
+	_ensure_mapping("HD Ticket Priority", priority, {"integer_value": 1})
+	_ensure_mapping("HD Ticket Type", category)
+
+	ticket_doc = {
+		"doctype": "HD Ticket",
+		"subject": subject,
+		"description": description,
+		"raised_by": raised_by,
+	}
+
+	_set_if_link_valid(ticket_doc, "HD Ticket", "status", "Open")
+	_set_if_link_valid(ticket_doc, "HD Ticket", "priority", priority)
+	_set_if_link_valid(ticket_doc, "HD Ticket", "ticket_type", category)
+
+	if extra_fields:
+		for field, val in extra_fields.items():
+			if _field_exists("HD Ticket", field):
+				ticket_doc[field] = val
+
+	ticket = frappe.get_doc(ticket_doc)
+	ticket.flags.ignore_permissions = True
+	ticket.insert()
+	return ticket
+
+
+def _try_create_issue(subject, description, raised_by, priority, category):
+	if not frappe.db.exists("DocType", "Issue"):
+		return None
+
+	_ensure_mapping("Issue Priority", priority)
+	_ensure_mapping("Issue Type", category)
+
+	issue_doc = {
+		"doctype": "Issue",
+		"subject": subject,
+		"description": description,
+		"raised_by": raised_by,
+		"status": "Open",
+	}
+
+	_set_if_link_valid(issue_doc, "Issue", "priority", priority)
+	_set_if_link_valid(issue_doc, "Issue", "issue_type", category)
+
+	issue = frappe.get_doc(issue_doc)
+	issue.flags.ignore_permissions = True
+	issue.insert()
+	return issue
+
+
+def _create_todo_fallback(subject, full_description, category, assigned_to):
+	allocated_to = assigned_to or "Administrator"
+	try:
+		hr_user = frappe.db.get_value("Has Role", {"role": "HR Manager", "parenttype": "User"}, "parent")
+		if hr_user:
+			allocated_to = hr_user
+	except Exception:
+		pass
+
+	todo = frappe.get_doc(
+		{
+			"doctype": "ToDo",
+			"description": f"[{category}] {subject}\n\n{full_description}",
+			"allocated_to": allocated_to,
+			"status": "Open",
+			"date": frappe.utils.today(),
+		}
+	)
+	todo.flags.ignore_permissions = True
+	todo.insert()
+	return todo
+
+
 @frappe.whitelist()
 def create_support_ticket(
 	subject: str,
@@ -18,28 +141,11 @@ def create_support_ticket(
 	reference_type: str | None = None,
 	reference_name: str | None = None,
 ):
-	"""
-	Create a support ticket with enhanced business categories.
-
-	Args:
-	    subject: Ticket subject/title (required)
-	    description: Detailed description (required)
-	    category: Category ('Customer Issue', 'Jewelry Issue', 'Vendor Issue', 'Employee Issue', 'Store Issue', 'Technical', 'Other')
-	    sub_category: Sub-category based on category
-	    priority: Priority ('Low', 'Medium', 'High', 'Urgent')
-	    department: Responsible department
-	    reference_type: Type of reference ('Customer', 'Supplier', 'Employee', 'Item')
-	    reference_name: Name of the referenced document
-
-	Returns:
-	    Dict with success status and ticket ID
-	"""
 	if not subject:
 		frappe.throw(_("Subject is required"))
 	if not description:
 		frappe.throw(_("Description is required"))
 
-	# Get employee info
 	employee = frappe.db.get_value(
 		"Employee",
 		{"user_id": frappe.session.user},
@@ -47,15 +153,12 @@ def create_support_ticket(
 		as_dict=True,
 	)
 
-	# Find reporting manager user ID
 	manager_user_id = None
 	if employee and employee.get("reports_to"):
 		manager_user_id = frappe.db.get_value("Employee", {"name": employee.reports_to}, "user_id")
 
-	# Determine assigned user based on department
 	assigned_to = manager_user_id
 	if department:
-		# Try to find department manager or user with this department
 		dept_user = frappe.db.get_value(
 			"Employee",
 			{"department": department, "status": "Active"},
@@ -65,55 +168,54 @@ def create_support_ticket(
 		if dept_user:
 			assigned_to = dept_user
 
-	# Build full description with employee context
-	context_info = f"""**Reported by:** {employee.employee_name if employee else frappe.session.user}
-**Employee ID:** {employee.name if employee else "N/A"}
-**Employee Department:** {employee.department if employee else "N/A"}
-**Category:** {category}
-**Sub-Category:** {sub_category or "N/A"}
-**Priority:** {priority}
-**Responsible Department:** {department or "N/A"}
-**Date/Time:** {now_datetime().strftime("%Y-%m-%d %H:%M:%S")}"""
+	reporter = employee.employee_name if employee else frappe.session.user
+	emp_id = employee.name if employee else "N/A"
+	emp_dept = employee.department if employee else "N/A"
+	dt_str = now_datetime().strftime("%Y-%m-%d %H:%M:%S")
 
-	# Add reference info if provided
+	context_info = (
+		"**Reported by:** {}\n"
+		"**Employee ID:** {}\n"
+		"**Employee Department:** {}\n"
+		"**Category:** {}\n"
+		"**Sub-Category:** {}\n"
+		"**Priority:** {}\n"
+		"**Responsible Department:** {}\n"
+		"**Date/Time:** {}"
+	).format(
+		reporter,
+		emp_id,
+		emp_dept,
+		category,
+		sub_category or "N/A",
+		priority,
+		department or "N/A",
+		dt_str,
+	)
+
 	if reference_type and reference_name:
 		context_info += f"\n**Related {reference_type}:** {reference_name}"
 
-	full_description = f"""{context_info}
+	full_description = (f"{context_info}\n\n---\n\n**Issue Description:**\n\n{description}")
 
----
+	ticket = None
+	try:
+		ticket = _try_create_hd_ticket(
+			subject,
+			full_description,
+			frappe.session.user,
+			priority,
+			category,
+			{
+				"custom_category": category,
+				"custom_sub_category": sub_category or "",
+				"custom_department": department or "",
+			},
+		)
+	except Exception:
+		frappe.log_error("HD Ticket Create Failed", frappe.get_traceback())
 
-**Issue Description:**
-
-{description}"""
-
-	# Check if Helpdesk is installed
-	if frappe.db.exists("DocType", "HD Ticket"):
-		ticket_doc = {
-			"doctype": "HD Ticket",
-			"subject": subject,
-			"description": full_description,
-			"raised_by": frappe.session.user,
-			"priority": priority,
-			"ticket_type": category,
-			"status": "Open",
-			"custom_category": category,
-			"custom_sub_category": sub_category or "",
-			"custom_department": department or "",
-		}
-
-		# Add custom reference fields only if both type and name are valid
-		if reference_type and reference_name:
-			ticket_doc["custom_reference_type"] = reference_type
-			ticket_doc["custom_reference"] = reference_name
-
-		# Assign to responsible person
-		if assigned_to:
-			ticket_doc["allocated_to"] = assigned_to
-
-		ticket = frappe.get_doc(ticket_doc)
-		ticket.insert()
-
+	if ticket:
 		return {
 			"success": True,
 			"ticket_id": ticket.name,
@@ -121,35 +223,35 @@ def create_support_ticket(
 			"helpdesk_installed": True,
 		}
 
-	# Fallback to Frappe Issue doctype
-	if frappe.db.exists("DocType", "Issue"):
-		issue_doc = {
-			"doctype": "Issue",
-			"subject": subject,
-			"description": full_description,
-			"raised_by": frappe.session.user,
-			"priority": priority,
-			"issue_type": category,
-			"status": "Open",
-		}
+	issue = None
+	try:
+		issue = _try_create_issue(
+			subject,
+			full_description,
+			frappe.session.user,
+			priority,
+			category,
+		)
+	except Exception:
+		frappe.log_error("Issue Create Failed", frappe.get_traceback())
 
-		issue = frappe.get_doc(issue_doc)
-		issue.insert()
-
-		# Assign to responsible person via ToDo
+	if issue:
 		if assigned_to:
-			todo = frappe.get_doc(
-				{
-					"doctype": "ToDo",
-					"reference_type": "Issue",
-					"reference_name": issue.name,
-					"description": f"[{category}] {subject}",
-					"allocated_to": assigned_to,
-					"status": "Open",
-				}
-			)
-			todo.insert(ignore_permissions=True)
-
+			try:
+				todo = frappe.get_doc(
+					{
+						"doctype": "ToDo",
+						"reference_type": "Issue",
+						"reference_name": issue.name,
+						"description": f"[{category}] {subject}",
+						"allocated_to": assigned_to,
+						"status": "Open",
+					}
+				)
+				todo.flags.ignore_permissions = True
+				todo.insert()
+			except Exception:
+				pass
 		return {
 			"success": True,
 			"ticket_id": issue.name,
@@ -157,39 +259,17 @@ def create_support_ticket(
 			"helpdesk_installed": False,
 		}
 
-	# Last resort: Create a TODO
-	allocated_to = (
-		assigned_to or frappe.db.get_value("User", {"role": "HR Manager"}, "name") or "Administrator"
-	)
-
-	todo = frappe.get_doc(
-		{
-			"doctype": "ToDo",
-			"description": f"[{category}] {subject}\n\n{full_description}",
-			"allocated_to": allocated_to,
-			"priority": priority,
-			"status": "Open",
-			"date": frappe.utils.today(),
-		}
-	)
-	todo.insert()
-
+	todo = _create_todo_fallback(subject, full_description, category, assigned_to)
 	return {
 		"success": True,
 		"ticket_id": todo.name,
-		"message": _("Your issue has been reported. A TODO has been created."),
+		"message": _("Your issue has been reported. A ToDo has been created."),
 		"helpdesk_installed": False,
 	}
 
 
 @frappe.whitelist()
 def get_support_categories():
-	"""
-	Get available support categories with sub-categories.
-
-	Returns:
-	    List of category objects with sub-categories
-	"""
 	return [
 		{
 			"value": "Customer Issue",
@@ -266,12 +346,6 @@ def get_support_categories():
 
 @frappe.whitelist()
 def get_responsible_departments():
-	"""
-	Get list of departments with their managers.
-
-	Returns:
-	    List of department objects
-	"""
 	departments = frappe.get_all(
 		"Department",
 		filters={"is_group": 0},
@@ -306,24 +380,11 @@ def create_attendance_issue(
 	issue_type: str = "Attendance",
 	priority: str = "Medium",
 ):
-	"""
-	Create a Helpdesk ticket for attendance/manager issues.
-
-	Args:
-	    subject: Issue subject/title (required)
-	    description: Detailed description (required)
-	    issue_type: Type of issue ('Attendance', 'Manager', 'Payroll', 'Other')
-	    priority: Priority ('Low', 'Medium', 'High', 'Urgent')
-
-	Returns:
-	    Dict with success status and ticket ID
-	"""
 	if not subject:
 		frappe.throw(_("Subject is required"))
 	if not description:
 		frappe.throw(_("Description is required"))
 
-	# Get employee info
 	employee = frappe.db.get_value(
 		"Employee",
 		{"user_id": frappe.session.user},
@@ -331,43 +392,38 @@ def create_attendance_issue(
 		as_dict=True,
 	)
 
-	# Find reporting manager user ID
 	manager_user_id = None
 	if employee and employee.get("reports_to"):
 		manager_user_id = frappe.db.get_value("Employee", {"name": employee.reports_to}, "user_id")
 
-	# Build full description with employee context
-	full_description = f"""**Reported by Employee:** {employee.employee_name if employee else frappe.session.user}
-**Employee ID:** {employee.name if employee else "N/A"}
-**Department:** {employee.department if employee else "N/A"}
-**Designation:** {employee.designation if employee else "N/A"}
-**Date/Time:** {now_datetime().strftime("%Y-%m-%d %H:%M:%S")}
+	reporter = employee.employee_name if employee else frappe.session.user
+	emp_id = employee.name if employee else "N/A"
+	emp_dept = employee.department if employee else "N/A"
+	emp_desig = employee.designation if employee else "N/A"
+	dt_str = now_datetime().strftime("%Y-%m-%d %H:%M:%S")
 
----
+	full_description = (
+		f"**Reported by Employee:** {reporter}\n"
+		f"**Employee ID:** {emp_id}\n"
+		f"**Department:** {emp_dept}\n"
+		f"**Designation:** {emp_desig}\n"
+		f"**Date/Time:** {dt_str}\n\n---\n\n"
+		f"**Issue Description:**\n\n{description}"
+	)
 
-**Issue Description:**
+	ticket = None
+	try:
+		ticket = _try_create_hd_ticket(
+			subject,
+			full_description,
+			frappe.session.user,
+			priority,
+			issue_type,
+		)
+	except Exception:
+		frappe.log_error("HD Ticket Create Failed (attendance)", frappe.get_traceback())
 
-{description}"""
-
-	# Check if Helpdesk is installed
-	if frappe.db.exists("DocType", "HD Ticket"):
-		ticket_doc = {
-			"doctype": "HD Ticket",
-			"subject": subject,
-			"description": full_description,
-			"raised_by": frappe.session.user,
-			"priority": priority,
-			"ticket_type": issue_type,
-			"status": "Open",
-		}
-
-		# Assign to reporting manager if found
-		if manager_user_id:
-			ticket_doc["allocated_to"] = manager_user_id
-
-		ticket = frappe.get_doc(ticket_doc)
-		ticket.insert()
-
+	if ticket:
 		return {
 			"success": True,
 			"ticket_id": ticket.name,
@@ -375,35 +431,35 @@ def create_attendance_issue(
 			"helpdesk_installed": True,
 		}
 
-	# Fallback to Frappe Issue doctype
-	if frappe.db.exists("DocType", "Issue"):
-		issue_doc = {
-			"doctype": "Issue",
-			"subject": subject,
-			"description": full_description,
-			"raised_by": frappe.session.user,
-			"priority": priority,
-			"issue_type": issue_type,
-			"status": "Open",
-		}
+	issue = None
+	try:
+		issue = _try_create_issue(
+			subject,
+			full_description,
+			frappe.session.user,
+			priority,
+			issue_type,
+		)
+	except Exception:
+		frappe.log_error("Issue Create Failed (attendance)", frappe.get_traceback())
 
-		issue = frappe.get_doc(issue_doc)
-		issue.insert()
-
-		# Assign to reporting manager if found (for Frappe Issue, this is usually via ToDo)
+	if issue:
 		if manager_user_id:
-			todo = frappe.get_doc(
-				{
-					"doctype": "ToDo",
-					"reference_type": "Issue",
-					"reference_name": issue.name,
-					"description": f"New issue assigned: {subject}",
-					"allocated_to": manager_user_id,
-					"status": "Open",
-				}
-			)
-			todo.insert(ignore_permissions=True)
-
+			try:
+				todo = frappe.get_doc(
+					{
+						"doctype": "ToDo",
+						"reference_type": "Issue",
+						"reference_name": issue.name,
+						"description": f"New issue assigned: {subject}",
+						"allocated_to": manager_user_id,
+						"status": "Open",
+					}
+				)
+				todo.flags.ignore_permissions = True
+				todo.insert()
+			except Exception:
+				pass
 		return {
 			"success": True,
 			"ticket_id": issue.name,
@@ -411,47 +467,20 @@ def create_attendance_issue(
 			"helpdesk_installed": False,
 		}
 
-	# Last resort: Create a TODO for HR Manager or Reporting Manager
-	allocated_to = manager_user_id
-	if not allocated_to:
-		allocated_to = frappe.db.get_value("User", {"role": "HR Manager"}, "name") or "Administrator"
-
-	todo = frappe.get_doc(
-		{
-			"doctype": "TODO",
-			"description": f"[{issue_type}] {subject}\n\n{full_description}",
-			"allocated_to": allocated_to,
-			"priority": priority,
-			"status": "Open",
-			"date": frappe.utils.today(),
-		}
-	)
-	todo.insert()
-
+	todo = _create_todo_fallback(subject, full_description, issue_type, manager_user_id)
 	return {
 		"success": True,
 		"ticket_id": todo.name,
-		"message": _("Your issue has been reported. A TODO has been created for HR."),
+		"message": _("Your issue has been reported. A ToDo has been created for HR."),
 		"helpdesk_installed": False,
 	}
 
 
 @frappe.whitelist()
 def get_employee_tickets(status: str | None = None, limit: int = 50):
-	"""
-	Get tickets created by current user.
-
-	Args:
-	    status: Filter by status (optional)
-	    limit: Maximum number of tickets to return
-
-	Returns:
-	    List of tickets with details
-	"""
 	tickets = []
 	user = frappe.session.user
 
-	# Try Helpdesk first
 	if frappe.db.exists("DocType", "HD Ticket"):
 		filters = {"raised_by": user}
 		if status:
@@ -477,19 +506,19 @@ def get_employee_tickets(status: str | None = None, limit: int = 50):
 		for t in hd_tickets:
 			tickets.append(
 				{
-					"id": t.name,
+					"name": t.name,
 					"subject": t.subject,
 					"status": t.status,
 					"priority": t.priority,
-					"type": t.ticket_type,
-					"created": str(t.creation),
+					"issue_type": t.ticket_type,
+					"category": t.ticket_type,
+					"creation": str(t.creation),
 					"modified": str(t.modified),
 					"resolution": t.resolution_details,
 					"source": "helpdesk",
 				}
 			)
 
-	# Also check Frappe Issues
 	if frappe.db.exists("DocType", "Issue"):
 		filters = {"raised_by": user}
 		if status:
@@ -515,72 +544,54 @@ def get_employee_tickets(status: str | None = None, limit: int = 50):
 		for i in issues:
 			tickets.append(
 				{
-					"id": i.name,
+					"name": i.name,
 					"subject": i.subject,
 					"status": i.status,
 					"priority": i.priority,
-					"type": i.issue_type,
-					"created": str(i.creation),
+					"issue_type": i.issue_type,
+					"category": i.issue_type,
+					"creation": str(i.creation),
 					"modified": str(i.modified),
 					"resolution": i.resolution_details,
 					"source": "issue",
 				}
 			)
 
-	# Sort by creation date
-	tickets.sort(key=lambda x: x["created"], reverse=True)
-
+	tickets.sort(key=lambda x: x["creation"], reverse=True)
 	return tickets[:limit]
 
 
 @frappe.whitelist()
 def get_ticket_details(ticket_id: str):
-	"""
-	Get details of a specific ticket.
-
-	Args:
-	    ticket_id: Ticket document name
-
-	Returns:
-	    Ticket details dict
-	"""
-	# Try Helpdesk first
 	if frappe.db.exists("DocType", "HD Ticket") and frappe.db.exists("HD Ticket", ticket_id):
 		ticket = frappe.get_doc("HD Ticket", ticket_id)
-
-		# Verify ownership
 		if ticket.raised_by != frappe.session.user:
 			frappe.throw(_("You can only view your own tickets"))
-
 		return {
-			"id": ticket.name,
+			"name": ticket.name,
 			"subject": ticket.subject,
 			"description": ticket.description,
 			"status": ticket.status,
 			"priority": ticket.priority,
-			"type": ticket.ticket_type,
-			"created": str(ticket.creation),
+			"issue_type": ticket.ticket_type,
+			"creation": str(ticket.creation),
 			"modified": str(ticket.modified),
 			"resolution": ticket.resolution_details,
 			"source": "helpdesk",
 		}
 
-	# Try Frappe Issue
 	if frappe.db.exists("Issue", ticket_id):
 		issue = frappe.get_doc("Issue", ticket_id)
-
-		# Verify ownership
 		if issue.raised_by != frappe.session.user:
 			frappe.throw(_("You can only view your own tickets"))
-
 		return {
-			"id": issue.name,
+			"name": issue.name,
 			"subject": issue.subject,
 			"description": issue.description,
 			"status": issue.status,
 			"priority": issue.priority,
-			"type": issue.issue_type,
-			"created": str(issue.creation),
+			"issue_type": issue.issue_type,
+			"creation": str(issue.creation),
 			"modified": str(issue.modified),
 			"resolution": issue.resolution_details,
 			"source": "issue",
@@ -591,29 +602,14 @@ def get_ticket_details(ticket_id: str):
 
 @frappe.whitelist()
 def add_ticket_reply(ticket_id: str, message: str):
-	"""
-	Add a reply/comment to a ticket.
-
-	Args:
-	    ticket_id: Ticket document name
-	    message: Reply message
-
-	Returns:
-	    Dict with success status
-	"""
 	if not message:
 		frappe.throw(_("Message is required"))
 
-	# Try Helpdesk first
 	if frappe.db.exists("DocType", "HD Ticket") and frappe.db.exists("HD Ticket", ticket_id):
 		ticket = frappe.get_doc("HD Ticket", ticket_id)
-
-		# Verify ownership
 		if ticket.raised_by != frappe.session.user:
 			frappe.throw(_("You can only reply to your own tickets"))
-
-		# Add comment
-		comment = frappe.get_doc(
+		frappe.get_doc(
 			{
 				"doctype": "Comment",
 				"comment_type": "Comment",
@@ -622,21 +618,14 @@ def add_ticket_reply(ticket_id: str, message: str):
 				"content": message,
 				"comment_email": frappe.session.user,
 			}
-		)
-		comment.insert()
-
+		).insert(ignore_permissions=True)
 		return {"success": True, "message": _("Reply added successfully")}
 
-	# Try Frappe Issue
 	if frappe.db.exists("Issue", ticket_id):
 		issue = frappe.get_doc("Issue", ticket_id)
-
-		# Verify ownership
 		if issue.raised_by != frappe.session.user:
 			frappe.throw(_("You can only reply to your own tickets"))
-
-		# Add comment
-		comment = frappe.get_doc(
+		frappe.get_doc(
 			{
 				"doctype": "Comment",
 				"comment_type": "Comment",
@@ -645,9 +634,7 @@ def add_ticket_reply(ticket_id: str, message: str):
 				"content": message,
 				"comment_email": frappe.session.user,
 			}
-		)
-		comment.insert()
-
+		).insert(ignore_permissions=True)
 		return {"success": True, "message": _("Reply added successfully")}
 
 	frappe.throw(_("Ticket not found"))
@@ -655,12 +642,6 @@ def add_ticket_reply(ticket_id: str, message: str):
 
 @frappe.whitelist()
 def get_issue_types():
-	"""
-	Get available issue types for ticket creation.
-
-	Returns:
-	    List of issue type options
-	"""
 	return [
 		{"value": "Attendance", "label": "Attendance Issue"},
 		{"value": "Manager", "label": "Manager/Escalation"},
@@ -672,16 +653,9 @@ def get_issue_types():
 
 @frappe.whitelist()
 def get_ticket_stats():
-	"""
-	Get ticket statistics for current user.
-
-	Returns:
-	    Dict with ticket counts by status
-	"""
 	stats = {"total": 0, "open": 0, "closed": 0, "pending": 0}
 	user = frappe.session.user
 
-	# Count Helpdesk tickets
 	if frappe.db.exists("DocType", "HD Ticket"):
 		hd_stats = frappe.db.sql(
 			"""
@@ -693,7 +667,6 @@ def get_ticket_stats():
 			(user,),
 			as_dict=True,
 		)
-
 		for s in hd_stats:
 			stats["total"] += s.count
 			if s.status in ["Open", "Replied"]:
@@ -703,7 +676,6 @@ def get_ticket_stats():
 			else:
 				stats["pending"] += s.count
 
-	# Count Frappe Issues
 	if frappe.db.exists("DocType", "Issue"):
 		issue_stats = frappe.db.sql(
 			"""
@@ -715,7 +687,6 @@ def get_ticket_stats():
 			(user,),
 			as_dict=True,
 		)
-
 		for s in issue_stats:
 			stats["total"] += s.count
 			if s.status in ["Open"]:
