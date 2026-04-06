@@ -7,7 +7,7 @@ from frappe import _
 from frappe.utils import add_months, flt, today
 
 
-@frappe.whitelist(methods=["GET"])
+@frappe.whitelist()
 def get_all_layaways(
 	status: str | None = None,
 	customer: str | None = None,
@@ -97,12 +97,29 @@ def get_all_layaways(
 		item_count = frappe.db.count("Layaway Contract Item", filters={"parent": layaway.name})
 		layaway.item_count = item_count
 
-		# Check if overdue
-		if layaway.status == "Active" and layaway.target_completion_date:
+		# Check if overdue (based on target date OR overdue payment schedule entries)
+		layaway.is_overdue = False
+		if layaway.status == "Active":
 			from frappe.utils import getdate
 
-			if getdate(layaway.target_completion_date) < getdate():
-				layaway.is_overdue = True
+			overdue_flag = False
+			if layaway.target_completion_date and getdate(layaway.target_completion_date) < getdate():
+				overdue_flag = True
+
+			if not overdue_flag:
+				overdue_payments = frappe.get_all(
+					"Layaway Payment Schedule",
+					filters={
+						"parent": layaway.name,
+						"status": "Pending",
+						"payment_date": ["<", today()],
+					},
+					limit=1,
+				)
+				if overdue_payments:
+					overdue_flag = True
+
+			layaway.is_overdue = overdue_flag
 
 	return {
 		"layaways": layaways,
@@ -115,7 +132,7 @@ def get_all_layaways(
 	}
 
 
-@frappe.whitelist(methods=["GET"])
+@frappe.whitelist()
 def get_layaway_details(layaway_id: str) -> dict:
 	"""Return full details of a Layaway Contract including items and schedule."""
 	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
@@ -125,10 +142,44 @@ def get_layaway_details(layaway_id: str) -> dict:
 
 	doc = frappe.get_doc("Layaway Contract", layaway_id)
 
+	from frappe.utils import getdate
+
+	is_overdue = False
+	if doc.status == "Active":
+		if doc.target_completion_date and getdate(doc.target_completion_date) < getdate():
+			is_overdue = True
+		if not is_overdue:
+			overdue_payments = frappe.get_all(
+				"Layaway Payment Schedule",
+				filters={
+					"parent": doc.name,
+					"status": "Pending",
+					"payment_date": ["<", today()],
+				},
+				limit=1,
+			)
+			if overdue_payments:
+				is_overdue = True
+
+	payment_schedule = []
+	for row in doc.payment_schedule:
+		schedule_status = row.status
+		if row.status == "Pending" and getdate(row.payment_date) < getdate():
+			schedule_status = "Overdue"
+		payment_schedule.append(
+			{
+				"payment_date": str(row.payment_date),
+				"expected_amount": flt(row.expected_amount),
+				"paid_amount": flt(row.paid_amount),
+				"status": schedule_status,
+			}
+		)
+
 	return {
 		"layaway_id": doc.name,
 		"customer": doc.customer,
 		"status": doc.status,
+		"is_overdue": is_overdue,
 		"contract_date": str(doc.contract_date),
 		"target_completion_date": str(doc.target_completion_date),
 		"duration_months": doc.maximum_duration_months,
@@ -146,19 +197,11 @@ def get_layaway_details(layaway_id: str) -> dict:
 			}
 			for row in doc.items
 		],
-		"payment_schedule": [
-			{
-				"payment_date": str(row.payment_date),
-				"expected_amount": flt(row.expected_amount),
-				"paid_amount": flt(row.paid_amount),
-				"status": row.status,
-			}
-			for row in doc.payment_schedule
-		],
+		"payment_schedule": payment_schedule,
 	}
 
 
-@frappe.whitelist(methods=["GET"])
+@frappe.whitelist()
 def get_customer_layaways(customer: str) -> list:
 	"""Return all Layaway Contracts for a customer, newest first."""
 	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])

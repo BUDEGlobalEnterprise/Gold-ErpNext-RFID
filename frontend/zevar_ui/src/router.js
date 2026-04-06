@@ -49,6 +49,12 @@ const routes = [
 		component: () => import('./pages/RepairTerminal.vue'),
 		meta: { requiresAuth: true },
 	},
+	{
+		path: '/support',
+		name: 'Support',
+		component: () => import('./pages/Support.vue'),
+		meta: { requiresAuth: true },
+	},
 	// Catch-all → POS
 	{
 		path: '/:pathMatch(.*)*',
