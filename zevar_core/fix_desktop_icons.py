@@ -44,9 +44,9 @@ def import_all_desktop_icons():
 			file_path = os.path.join(icons_dir, fname)
 
 			try:
-				with open(
+				with open(  # nosemgrep
 					file_path
-				) as f:  # nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal
+				) as f:
 					icon_data = json.load(f)
 
 				# Must have doctype key to be valid

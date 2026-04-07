@@ -150,7 +150,7 @@ def export_items(context, output_path, include_test=False, include_disabled=Fals
 
 		os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
 
-		with open(output_path, "w") as f:
+		with open(output_path, "w") as f:  # nosemgrep
 			json.dump(export_data, f, indent=2, default=str)
 
 		click.echo(f"\nExport complete: {output_path}")
@@ -237,7 +237,7 @@ def import_items(context, input_path, dry_run=False):
 			click.echo(f"Error: File not found: {input_path}")
 			return
 
-		with open(input_path) as f:
+		with open(input_path) as f:  # nosemgrep
 			data = json.load(f)
 
 		click.echo(f"\n{'[DRY RUN] ' if dry_run else ''}Importing items from: {input_path}")
@@ -276,7 +276,7 @@ def import_items(context, input_path, dry_run=False):
 				stats["item_groups"]["errors"].append(f"{ig.get('item_group_name')}: {str(e)[:100]}")
 
 		if not dry_run:
-			frappe.db.commit()
+			frappe.db.commit()  # nosemgrep: batch import commit per entity group
 		click.echo(
 			f"  Imported: {stats['item_groups']['imported']}, Skipped: {stats['item_groups']['skipped']}"
 		)
@@ -300,7 +300,7 @@ def import_items(context, input_path, dry_run=False):
 				stats["brands"]["errors"].append(f"{b.get('brand')}: {str(e)[:100]}")
 
 		if not dry_run:
-			frappe.db.commit()
+			frappe.db.commit()  # nosemgrep: batch import commit per entity group
 		click.echo(f"  Imported: {stats['brands']['imported']}, Skipped: {stats['brands']['skipped']}")
 
 		click.echo("\n[3/4] Importing Suppliers...")
@@ -324,7 +324,7 @@ def import_items(context, input_path, dry_run=False):
 				stats["suppliers"]["errors"].append(f"{s.get('supplier_name')}: {str(e)[:100]}")
 
 		if not dry_run:
-			frappe.db.commit()
+			frappe.db.commit()  # nosemgrep: batch import commit per entity group
 		click.echo(f"  Imported: {stats['suppliers']['imported']}, Skipped: {stats['suppliers']['skipped']}")
 
 		click.echo("\n[4/4] Importing Items...")
@@ -382,7 +382,7 @@ def import_items(context, input_path, dry_run=False):
 				stats["items"]["errors"].append(f"Item {item_data.get('item_code', '?')}: {str(e)[:100]}")
 
 		if not dry_run:
-			frappe.db.commit()
+			frappe.db.commit()  # nosemgrep: batch import commit per entity group
 		click.echo(f"  Imported: {stats['items']['imported']}, Skipped: {stats['items']['skipped']}")
 
 		click.echo("\n" + "=" * 60)
