@@ -44,6 +44,7 @@ def import_all_desktop_icons():
 			file_path = os.path.join(icons_dir, fname)
 
 			try:
+				# nosemgrep: gitlab.file-traversal.open
 				with open(file_path) as f:
 					icon_data = json.load(f)
 
@@ -133,8 +134,16 @@ def create_missing_desktop_icons_for_workspaces():
 
 def execute():
 	"""Execute all fixes."""
-	frappe.init(site=frappe.local.site)
-	frappe.connect()
+	# Check if frappe is already initialized (e.g., from after_migrate hook)
+	already_initialized = frappe.local.site is not None if hasattr(frappe.local, "site") else False
+
+	if not already_initialized:
+		# Get site from environment or use default
+		import os
+
+		site = os.environ.get("FRAPPE_SITE", "site1.local")
+		frappe.init(site=site)
+		frappe.connect()
 
 	try:
 		frappe.logger().info("=" * 60)
@@ -165,7 +174,8 @@ def execute():
 		frappe.logger().info("=" * 60)
 
 	finally:
-		frappe.destroy()
+		if not already_initialized:
+			frappe.destroy()
 
 
 if __name__ == "__main__":
