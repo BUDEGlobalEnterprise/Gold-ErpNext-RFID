@@ -78,4 +78,6 @@ after_migrate = [
 bench_commands = [
 	"zevar_core.migration.commands.import_legacy_data",
 	"zevar_core.migration.commands.show_mapping_info",
+	"zevar_core.migration.items_transfer.export_items",
+	"zevar_core.migration.items_transfer.import_items",
 ]
