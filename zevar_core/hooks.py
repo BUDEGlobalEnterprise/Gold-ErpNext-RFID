@@ -51,7 +51,12 @@ doc_events = {
 }
 
 # Scheduler events
-scheduler_events = {"cron": {"*/15 * * * *": ["zevar_core.tasks.fetch_live_gold_rate"]}}
+scheduler_events = {
+	"cron": {
+		"*/15 * * * *": ["zevar_core.tasks.fetch_live_gold_rate"],
+		"0 2 1 * *": ["zevar_core.api.finance.apply_finance_charges"],
+	},
+}
 
 # Installation hooks
 after_install = [

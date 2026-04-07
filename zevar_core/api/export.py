@@ -390,15 +390,36 @@ def schedule_backup(backup_type: str = "daily") -> dict:
 	"""
 	frappe.only_for("System Manager")
 
-	# Create scheduled backup
-	backup = frappe.new_doc("POS Scheduled Backup")
-	backup.backup_type = backup_type
-	backup.status = "Scheduled"
-	backup.scheduled_time = now_datetime()
-	backup.insert()
+	if frappe.db.exists("DocType", "POS Scheduled Backup"):
+		backup = frappe.new_doc("POS Scheduled Backup")
+		backup.backup_type = backup_type
+		backup.status = "Scheduled"
+		backup.scheduled_time = now_datetime()
+		backup.insert()
+
+		return {
+			"success": True,
+			"backup_name": backup.name,
+			"message": _("{0} backup scheduled successfully.").format(backup_type.title()),
+		}
+
+	frappe.msgprint(
+		_("POS Scheduled Backup DocType not found. Running standard backup instead."),
+		title=_("Note"),
+		indicator="blue",
+	)
+
+	from frappe.utils.backups import scheduled_backup
+
+	backup_path = scheduled_backup(
+		ignore_conf=True,
+		backup_path_db=None,
+		backup_path_files=None,
+		backup_path_private_files=None,
+	)
 
 	return {
 		"success": True,
-		"backup_name": backup.name,
-		"message": _("{0} backup scheduled successfully.").format(backup_type.title()),
+		"backup_name": backup_path,
+		"message": _("{0} backup completed (standard backup).").format(backup_type.title()),
 	}
