@@ -16,6 +16,12 @@ from zevar_core.api.attendance import (
 )
 from zevar_core.api.catalog import get_catalog_filters, get_item_details, get_pos_items
 from zevar_core.api.customer import get_customer_details, quick_create_customer, search_customers
+from zevar_core.api.expense import (
+	create_expense_claim,
+	get_expense_claims,
+	get_expense_types,
+	submit_expense_claim,
+)
 from zevar_core.api.helpdesk import (
 	add_ticket_reply,
 	create_attendance_issue,
@@ -28,6 +34,12 @@ from zevar_core.api.item_entry import get_next_vendor_sku, quick_add_item
 from zevar_core.api.payroll import get_payroll_summary, get_salary_slip_details, get_salary_slips
 from zevar_core.api.pos import calculate_invoice_totals, create_pos_invoice, get_pos_settings
 from zevar_core.api.pricing import get_item_price, refresh_gold_rates
+from zevar_core.api.quick_layaway import (
+	create_quick_layaway as create_quick_layaway_shim,
+)
+from zevar_core.api.quick_layaway import (
+	get_layaway_preview as get_layaway_preview_shim,
+)
 from zevar_core.api.repair import (
 	create_repair_order,
 	get_customer_repair_history,
@@ -55,8 +67,10 @@ __all__ = [
 	"clock_in",
 	"clock_out",
 	"create_attendance_issue",
+	"create_expense_claim",
 	"create_personal_todo",
 	"create_pos_invoice",
+	"create_quick_layaway_shim",
 	"delete_todo",
 	"get_attendance_history",
 	"get_catalog_filters",
@@ -66,9 +80,12 @@ __all__ = [
 	"get_employee_roster",
 	"get_employee_tasks",
 	"get_employee_tickets",
+	"get_expense_claims",
+	"get_expense_types",
 	"get_issue_types",
 	"get_item_details",
 	"get_item_price",
+	"get_layaway_preview_shim",
 	"get_next_vendor_sku",
 	"get_payroll_summary",
 	"get_personal_todos",
@@ -91,6 +108,7 @@ __all__ = [
 	"quick_create_customer",
 	"refresh_gold_rates",
 	"search_customers",
+	"submit_expense_claim",
 	"track_trending_click",
 	"update_repair_status",
 	"update_todo_status",

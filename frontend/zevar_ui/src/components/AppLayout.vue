@@ -1169,7 +1169,7 @@ watch(
 		if (newWh) {
 			cartStore.loadTaxForWarehouse(newWh)
 		}
-	},
+	}
 )
 </script>
 

@@ -30,7 +30,9 @@
 		</div>
 
 		<div v-else class="h-full flex flex-col min-h-0">
-			<div class="flex items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-8 flex-shrink-0">
+			<div
+				class="flex items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-8 flex-shrink-0"
+			>
 				<div class="flex items-center gap-2 sm:gap-4">
 					<h2 class="premium-title !text-xl sm:!text-2xl">
 						{{ viewMode === 'catalog' ? 'Catalogue' : 'Collection' }}
@@ -38,7 +40,11 @@
 					<span
 						class="status-label !mb-0 !bg-gray-100 dark:!bg-white/5 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-white/10"
 					>
-						{{ viewMode === 'catalog' ? categories.length + ' Categories' : catalog.length + ' Pieces' }}
+						{{
+							viewMode === 'catalog'
+								? categories.length + ' Categories'
+								: catalog.length + ' Pieces'
+						}}
 					</span>
 				</div>
 				<div class="flex gap-2">
@@ -54,7 +60,10 @@
 						POS
 					</button>
 					<button
-						@click="viewMode = 'catalog'; loadCatalog()"
+						@click="
+							viewMode = 'catalog'
+							loadCatalog()
+						"
 						class="px-3 py-1.5 rounded-lg text-xs font-bold border transition"
 						:class="
 							viewMode === 'catalog'
@@ -74,7 +83,9 @@
 						<div
 							class="animate-spin rounded-full h-8 w-8 border-2 border-gray-900 dark:border-white border-t-transparent mx-auto mb-4"
 						></div>
-						<span class="text-gray-400 text-sm font-medium">Curating Collection...</span>
+						<span class="text-gray-400 text-sm font-medium"
+							>Curating Collection...</span
+						>
 					</div>
 
 					<div
@@ -94,7 +105,10 @@
 						</div>
 					</div>
 
-					<div v-if="hasMore && catalog.length > 0" class="flex justify-center pt-12 pb-12">
+					<div
+						v-if="hasMore && catalog.length > 0"
+						class="flex justify-center pt-12 pb-12"
+					>
 						<button
 							@click="loadMore"
 							:disabled="items.loading"

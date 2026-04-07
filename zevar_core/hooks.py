@@ -51,7 +51,12 @@ doc_events = {
 }
 
 # Scheduler events
-scheduler_events = {"cron": {"*/15 * * * *": ["zevar_core.tasks.fetch_live_gold_rate"]}}
+scheduler_events = {
+	"cron": {
+		"*/15 * * * *": ["zevar_core.tasks.fetch_live_gold_rate"],
+		"0 2 1 * *": ["zevar_core.api.finance.apply_finance_charges"],
+	},
+}
 
 # Installation hooks
 after_install = [
@@ -73,4 +78,6 @@ after_migrate = [
 bench_commands = [
 	"zevar_core.migration.commands.import_legacy_data",
 	"zevar_core.migration.commands.show_mapping_info",
+	"zevar_core.migration.items_transfer.export_items",
+	"zevar_core.migration.items_transfer.import_items",
 ]

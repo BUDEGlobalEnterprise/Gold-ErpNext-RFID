@@ -5,7 +5,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-
 CACHE_KEYS = ("zevar_shortcuts_registry", "zevar_desk_shortcuts")
 
 
@@ -50,7 +49,6 @@ class ZevarDeskShortcut(Document):
 	def on_update(self):
 		"""Clear cache when shortcut is updated."""
 		clear_shortcut_cache()
-
 
 
 def clear_shortcut_cache():

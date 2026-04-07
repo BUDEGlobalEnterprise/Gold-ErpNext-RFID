@@ -524,11 +524,17 @@
 											@click="selectCustomerOption(opt)"
 											class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition border-b border-gray-100 dark:border-gray-700 last:border-0"
 										>
-											<span class="font-medium text-gray-900 dark:text-white">{{ opt.label }}</span>
+											<span
+												class="font-medium text-gray-900 dark:text-white"
+												>{{ opt.label }}</span
+											>
 										</button>
 									</div>
 								</div>
-								<p v-if="newForm.customer" class="mt-1 text-xs text-green-600 dark:text-green-400">
+								<p
+									v-if="newForm.customer"
+									class="mt-1 text-xs text-green-600 dark:text-green-400"
+								>
 									Selected: {{ newForm.customer.label }}
 								</p>
 							</div>

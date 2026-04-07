@@ -67,8 +67,14 @@
 									@click="selectCustomer(customer)"
 									class="w-full px-4 py-3 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition border-b border-gray-100 dark:border-gray-700 last:border-0"
 								>
-									<span class="font-medium text-gray-900 dark:text-white">{{ customer.customer_name }}</span>
-									<span v-if="customer.mobile_no" class="text-gray-500 text-xs ml-2">{{ customer.mobile_no }}</span>
+									<span class="font-medium text-gray-900 dark:text-white">{{
+										customer.customer_name
+									}}</span>
+									<span
+										v-if="customer.mobile_no"
+										class="text-gray-500 text-xs ml-2"
+										>{{ customer.mobile_no }}</span
+									>
 								</button>
 							</div>
 						</div>
@@ -79,7 +85,10 @@
 							<p class="text-sm font-bold text-green-900 dark:text-green-200">
 								{{ selectedCustomer.customer_name }}
 							</p>
-							<p v-if="selectedCustomer.mobile_no" class="text-xs text-green-600 dark:text-green-400">
+							<p
+								v-if="selectedCustomer.mobile_no"
+								class="text-xs text-green-600 dark:text-green-400"
+							>
 								{{ selectedCustomer.mobile_no }}
 							</p>
 						</div>
@@ -112,7 +121,9 @@
 								@click="addItem(item)"
 								class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-[#D4AF37]/50 text-left transition"
 							>
-								<p class="text-xs font-medium text-gray-900 dark:text-white truncate">
+								<p
+									class="text-xs font-medium text-gray-900 dark:text-white truncate"
+								>
 									{{ item.item_name }}
 								</p>
 								<p class="text-xs text-[#D4AF37] font-bold">
@@ -133,17 +144,35 @@
 									<p class="text-xs text-gray-500">{{ item.item_code }}</p>
 								</div>
 								<div class="flex items-center gap-3">
-									<span class="text-sm font-bold text-[#D4AF37]">${{ formatPrice(item.price) }}</span>
-									<button @click="removeItem(index)" class="text-red-500 hover:text-red-600">
-										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+									<span class="text-sm font-bold text-[#D4AF37]"
+										>${{ formatPrice(item.price) }}</span
+									>
+									<button
+										@click="removeItem(index)"
+										class="text-red-500 hover:text-red-600"
+									>
+										<svg
+											class="w-4 h-4"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+											/>
 										</svg>
 									</button>
 								</div>
 							</div>
 							<div class="pt-2 border-t border-gray-200 dark:border-gray-700">
 								<p class="text-right font-bold text-gray-900 dark:text-white">
-									Total: <span class="text-[#D4AF37]">${{ formatPrice(totalAmount) }}</span>
+									Total:
+									<span class="text-[#D4AF37]"
+										>${{ formatPrice(totalAmount) }}</span
+									>
 								</p>
 							</div>
 						</div>
@@ -158,11 +187,16 @@
 						</h3>
 						<div class="grid grid-cols-2 gap-4">
 							<div>
-								<label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+								<label
+									class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+								>
 									Initial Deposit (Min 10%)
 								</label>
 								<div class="relative">
-									<span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+									<span
+										class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+										>$</span
+									>
 									<input
 										v-model.number="form.deposit"
 										type="number"
@@ -171,10 +205,14 @@
 										class="w-full pl-8 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
 									/>
 								</div>
-								<p class="text-xs text-gray-500 mt-1">Min: ${{ formatPrice(minDeposit) }}</p>
+								<p class="text-xs text-gray-500 mt-1">
+									Min: ${{ formatPrice(minDeposit) }}
+								</p>
 							</div>
 							<div>
-								<label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+								<label
+									class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+								>
 									Duration
 								</label>
 								<div class="grid grid-cols-4 gap-2">
@@ -196,7 +234,9 @@
 							</div>
 						</div>
 						<div class="mt-3">
-							<label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+							<label
+								class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+							>
 								Payment Method
 							</label>
 							<div class="grid grid-cols-3 gap-2">
@@ -228,27 +268,39 @@
 						<div class="space-y-2 text-sm">
 							<div class="flex justify-between">
 								<span class="text-gray-500 dark:text-gray-400">Customer</span>
-								<span class="font-medium text-gray-900 dark:text-white">{{ selectedCustomer.customer_name }}</span>
+								<span class="font-medium text-gray-900 dark:text-white">{{
+									selectedCustomer.customer_name
+								}}</span>
 							</div>
 							<div class="flex justify-between">
 								<span class="text-gray-500 dark:text-gray-400">Items</span>
-								<span class="font-medium text-gray-900 dark:text-white">{{ selectedItems.length }} items</span>
+								<span class="font-medium text-gray-900 dark:text-white"
+									>{{ selectedItems.length }} items</span
+								>
 							</div>
 							<div class="flex justify-between">
 								<span class="text-gray-500 dark:text-gray-400">Total</span>
-								<span class="font-medium text-[#D4AF37]">${{ formatPrice(totalAmount) }}</span>
+								<span class="font-medium text-[#D4AF37]"
+									>${{ formatPrice(totalAmount) }}</span
+								>
 							</div>
 							<div class="flex justify-between">
 								<span class="text-gray-500 dark:text-gray-400">Deposit</span>
-								<span class="font-medium text-green-600">${{ formatPrice(form.deposit) }}</span>
+								<span class="font-medium text-green-600"
+									>${{ formatPrice(form.deposit) }}</span
+								>
 							</div>
 							<div class="flex justify-between">
 								<span class="text-gray-500 dark:text-gray-400">Balance</span>
-								<span class="font-medium text-gray-900 dark:text-white">${{ formatPrice(balanceAmount) }}</span>
+								<span class="font-medium text-gray-900 dark:text-white"
+									>${{ formatPrice(balanceAmount) }}</span
+								>
 							</div>
 							<div class="flex justify-between">
 								<span class="text-gray-500 dark:text-gray-400">Monthly</span>
-								<span class="font-medium text-gray-900 dark:text-white">${{ formatPrice(monthlyPayment) }}/mo</span>
+								<span class="font-medium text-gray-900 dark:text-white"
+									>${{ formatPrice(monthlyPayment) }}/mo</span
+								>
 							</div>
 						</div>
 					</div>
@@ -286,8 +338,19 @@
 							fill="none"
 							viewBox="0 0 24 24"
 						>
-							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+							<circle
+								class="opacity-25"
+								cx="12"
+								cy="12"
+								r="10"
+								stroke="currentColor"
+								stroke-width="4"
+							></circle>
+							<path
+								class="opacity-75"
+								fill="currentColor"
+								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+							></path>
 						</svg>
 						{{ submitting ? 'Creating...' : 'Create Layaway' }}
 					</button>

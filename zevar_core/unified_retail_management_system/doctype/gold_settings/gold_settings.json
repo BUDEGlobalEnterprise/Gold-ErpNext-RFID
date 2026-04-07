@@ -46,7 +46,7 @@
    "fieldname": "update_frequency",
    "fieldtype": "Select",
    "label": "Update Frequency",
-   "options": "15 min, 30 min, 60 min"
+   "options": "15 min\n30 min\n60 min"
   },
   {
    "fieldname": "base_currency",

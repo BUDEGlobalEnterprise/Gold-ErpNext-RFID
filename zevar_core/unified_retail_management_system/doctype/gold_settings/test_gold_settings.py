@@ -13,6 +13,8 @@ class TestGoldSettings(FrappeTestCase):
 	def cleanup_test_data(self):
 		if not frappe.db.table_exists("Gold Settings"):
 			return
+		# Ensure DocType is synced from JSON (Select options need correct newline separators)
+		frappe.reload_doc("zevar_core", "doctype", "gold_settings")
 		if frappe.db.exists("Gold Settings", "Gold Settings"):
 			frappe.db.sql("DELETE FROM `tabGold Settings` WHERE name = 'Gold Settings'")
 			frappe.db.commit()

@@ -294,11 +294,7 @@
 			</div>
 		</div>
 
-		<ProductModal
-			:show="showModal"
-			:item-code="selectedItem"
-			@close="closeModal"
-		/>
+		<ProductModal :show="showModal" :item-code="selectedItem" @close="closeModal" />
 	</div>
 </template>
 
