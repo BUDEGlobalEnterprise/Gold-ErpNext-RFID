@@ -71,9 +71,9 @@ export function useAttendance() {
 
 			let totalHours = 0;
 			let activeClockIn = null;
-		const sortedLogs = [...dayData.logs].sort(
-			(a, b) => new Date(a.time) - new Date(b.time)
-		);
+			const sortedLogs = [...dayData.logs].sort(
+				(a, b) => new Date(a.time) - new Date(b.time)
+			);
 			for (const log of sortedLogs) {
 				if (log.log_type === "IN") {
 					activeClockIn = new Date(log.time);

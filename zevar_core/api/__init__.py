@@ -36,6 +36,8 @@ from zevar_core.api.pos import calculate_invoice_totals, create_pos_invoice, get
 from zevar_core.api.pricing import get_item_price, refresh_gold_rates
 from zevar_core.api.quick_layaway import (
 	create_quick_layaway as create_quick_layaway_shim,
+)
+from zevar_core.api.quick_layaway import (
 	get_layaway_preview as get_layaway_preview_shim,
 )
 from zevar_core.api.repair import (

@@ -2,11 +2,11 @@ import frappe
 
 
 def fix_item_groups():
-	count = frappe.db.sql(
+	frappe.db.sql(
 		"UPDATE tabItem SET item_group='All Item Groups' WHERE item_group IS NULL OR item_group='' OR item_group='None'"
 	)
 	frappe.db.commit()
-	print(f"Fixed item groups")
+	print("Fixed item groups")
 
 
 def restock_failed():

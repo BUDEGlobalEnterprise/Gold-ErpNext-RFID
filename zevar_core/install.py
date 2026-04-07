@@ -182,7 +182,6 @@ def import_workspaces():
 					)
 
 
-
 def create_default_desk_shortcuts():
 	"""
 	Create or update the default desk shortcuts for Zevar Core.
@@ -201,7 +200,12 @@ def create_default_desk_shortcuts():
 	for shortcut_data in default_shortcuts:
 		shortcut_name = shortcut_data["shortcut_name"]
 		if not _shortcut_target_exists(shortcut_data):
-			frappe.logger().warning("Skipping desk shortcut %s because target %s (%s) is missing", shortcut_name, shortcut_data.get("link_to"), shortcut_data.get("link_type"))
+			frappe.logger().warning(
+				"Skipping desk shortcut %s because target %s (%s) is missing",
+				shortcut_name,
+				shortcut_data.get("link_to"),
+				shortcut_data.get("link_type"),
+			)
 			continue
 		existing_name = frappe.db.get_value(
 			"Zevar Desk Shortcut",

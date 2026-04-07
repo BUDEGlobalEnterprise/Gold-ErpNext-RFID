@@ -196,7 +196,7 @@ def create_support_ticket(
 	if reference_type and reference_name:
 		context_info += f"\n**Related {reference_type}:** {reference_name}"
 
-	full_description = (f"{context_info}\n\n---\n\n**Issue Description:**\n\n{description}")
+	full_description = f"{context_info}\n\n---\n\n**Issue Description:**\n\n{description}"
 
 	ticket = None
 	try:

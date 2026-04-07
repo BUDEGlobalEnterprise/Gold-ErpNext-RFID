@@ -200,7 +200,6 @@ def get_recent_activity(limit: int = 10) -> list[dict]:
 	return activities[:limit]
 
 
-
 def filter_by_roles(shortcuts: list) -> list:
 	"""Filter shortcuts by user roles."""
 	user_roles = set(frappe.get_roles())
@@ -209,7 +208,9 @@ def filter_by_roles(shortcuts: list) -> list:
 	if not shortcuts:
 		return []
 
-	shortcut_names = [_shortcut_value(shortcut, "name") for shortcut in shortcuts if _shortcut_value(shortcut, "name")]
+	shortcut_names = [
+		_shortcut_value(shortcut, "name") for shortcut in shortcuts if _shortcut_value(shortcut, "name")
+	]
 	all_roles = frappe.get_all(
 		"Zevar Desk Shortcut Role",
 		filters={"parent": ("in", shortcut_names)},
@@ -229,13 +230,11 @@ def filter_by_roles(shortcuts: list) -> list:
 	return filtered
 
 
-
 def _validate_surface(surface: str) -> str:
 	surface = (surface or "desk").lower().strip()
 	if surface not in {"desk", "workspace"}:
 		frappe.throw(_("Unsupported shortcut surface: {0}").format(surface))
 	return surface
-
 
 
 def _get_all_shortcuts() -> list:
@@ -252,12 +251,10 @@ def _get_all_shortcuts() -> list:
 	return shortcuts
 
 
-
 def _is_visible_on_surface(shortcut, surface: str) -> bool:
 	if surface == "workspace":
 		return cint(_shortcut_value(shortcut, "show_on_workspace")) == 1
 	return cint(_shortcut_value(shortcut, "show_on_desk")) == 1
-
 
 
 def _prepare_shortcut(shortcut) -> dict:
@@ -281,7 +278,6 @@ def _prepare_shortcut(shortcut) -> dict:
 	}
 
 
-
 def _build_route(link_type: str | None, link_to: str | None) -> str:
 	if not link_to:
 		return "#"
@@ -292,7 +288,6 @@ def _build_route(link_type: str | None, link_to: str | None) -> str:
 	if link_type == "Report":
 		return f"/app/query-report/{quote(link_to, safe='')}"
 	return link_to
-
 
 
 def _shortcut_value(shortcut, key: str):
