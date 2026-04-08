@@ -327,6 +327,10 @@ const layawaysResource = createResource({
 	auto: false,
 })
 
+function unwrapResponse(result) {
+	return result?.message ?? result
+}
+
 // Methods
 function formatCurrency(amount) {
 	if (!amount) return '$0.00'
@@ -355,14 +359,16 @@ function getStatusClass(status, isOverdue) {
 async function fetchLayaways() {
 	loading.value = true
 	try {
-		const result = await layawaysResource.submit({
+		const result = unwrapResponse(
+			await layawaysResource.submit({
 			...filters.value,
 			page: pagination.value.page,
 			page_size: 20,
-		})
+			})
+		)
 
-		layaways.value = result.layaways || []
-		pagination.value = result.pagination || pagination.value
+		layaways.value = result?.layaways || []
+		pagination.value = result?.pagination || pagination.value
 	} catch (error) {
 		console.error('Failed to fetch layaways:', error)
 	} finally {

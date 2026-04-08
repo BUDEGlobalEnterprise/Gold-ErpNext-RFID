@@ -20,6 +20,18 @@ const routes = [
 		meta: { requiresAuth: true },
 	},
 	{
+		path: '/inventory',
+		name: 'Inventory',
+		component: () => import('./pages/Inventory.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/customers',
+		name: 'Customers',
+		component: () => import('./pages/Customers.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
 		path: '/layaway',
 		name: 'Layaway',
 		component: () => import('./pages/Layaway.vue'),
@@ -47,6 +59,24 @@ const routes = [
 		path: '/repairs',
 		name: 'Repairs',
 		component: () => import('./pages/RepairTerminal.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/trade-ins',
+		name: 'TradeIns',
+		component: () => import('./pages/TradeIns.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/appraisals',
+		name: 'Appraisals',
+		component: () => import('./pages/Appraisals.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/reports',
+		name: 'Reports',
+		component: () => import('./pages/Reports.vue'),
 		meta: { requiresAuth: true },
 	},
 	{

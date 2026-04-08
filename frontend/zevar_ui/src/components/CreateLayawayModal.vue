@@ -361,14 +361,16 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { createResource } from 'frappe-ui'
+import { useSessionStore } from '@/stores/session.js'
 
 const props = defineProps({
 	show: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['close', 'created'])
+const session = useSessionStore()
 
 const submitting = ref(false)
 const customerSearch = ref('')
@@ -449,6 +451,10 @@ function formatPrice(price) {
 	return Number(price).toFixed(2)
 }
 
+function unwrapResponse(result) {
+	return result?.message ?? result
+}
+
 let customerSearchTimer
 async function searchCustomers() {
 	if (!customerSearch.value || customerSearch.value.length < 2) {
@@ -458,14 +464,16 @@ async function searchCustomers() {
 	clearTimeout(customerSearchTimer)
 	customerSearchTimer = setTimeout(async () => {
 		try {
-			const result = await searchCustomersResource.submit({
+			const result = unwrapResponse(
+				await searchCustomersResource.submit({
 				doctype: 'Customer',
 				fields: ['name', 'customer_name', 'mobile_no', 'email_id'],
 				filters: {
 					customer_name: ['like', `%${customerSearch.value}%`],
 				},
 				limit_page_length: 10,
-			})
+				})
+			)
 			customerResults.value = result || []
 		} catch (error) {
 			console.error('Customer search failed:', error)
@@ -489,11 +497,14 @@ async function searchItems() {
 	clearTimeout(itemSearchTimer)
 	itemSearchTimer = setTimeout(async () => {
 		try {
-			const result = await searchItemsResource.submit({
-				search: itemSearch.value,
+			const result = unwrapResponse(
+				await searchItemsResource.submit({
+				search_term: itemSearch.value,
 				page_length: 20,
-			})
-			itemResults.value = (result || []).map((item) => ({
+				warehouse: session.currentWarehouse || undefined,
+				})
+			)
+			itemResults.value = (Array.isArray(result) ? result : []).map((item) => ({
 				item_code: item.item_code,
 				item_name: item.item_name,
 				price: item.price || item.standard_rate || 0,
@@ -521,7 +532,8 @@ async function createLayaway() {
 	submitting.value = true
 
 	try {
-		const result = await createLayawayResource.submit({
+		const result = unwrapResponse(
+			await createLayawayResource.submit({
 			customer: form.value.customer,
 			items: JSON.stringify(
 				selectedItems.value.map((item) => ({
@@ -533,7 +545,9 @@ async function createLayaway() {
 			),
 			deposit_amount: form.value.deposit,
 			duration_months: form.value.duration,
-		})
+			warehouse: session.currentWarehouse || undefined,
+			})
+		)
 
 		if (result?.success || result?.layaway_id) {
 			emit('created', result)
@@ -573,10 +587,16 @@ watch(
 	}
 )
 
-document.addEventListener('click', (e) => {
+const handleDocumentClick = (e) => {
 	if (!e.target.closest('.relative')) {
 		showCustomerDropdown.value = false
 	}
+}
+
+document.addEventListener('click', handleDocumentClick)
+
+onBeforeUnmount(() => {
+	document.removeEventListener('click', handleDocumentClick)
 })
 </script>
 

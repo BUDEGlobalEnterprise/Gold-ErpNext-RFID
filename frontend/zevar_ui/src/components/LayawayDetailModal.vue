@@ -57,6 +57,12 @@
 							>Loading details...</span
 						>
 					</div>
+					<div
+						v-else-if="loadError"
+						class="py-12 text-center text-sm text-red-500 dark:text-red-400"
+					>
+						{{ loadError }}
+					</div>
 
 					<template v-else-if="layaway">
 						<!-- Customer & Contract Info -->
@@ -403,6 +409,7 @@ const layaway = ref(null)
 const showCancelConfirm = ref(false)
 const showPaymentModal = ref(false)
 const cancelling = ref(false)
+const loadError = ref('')
 
 const detailsResource = createResource({
 	url: 'zevar_core.api.layaway.get_layaway_details',
@@ -414,10 +421,14 @@ const cancelResource = createResource({
 	auto: false,
 })
 
+function unwrapResponse(result) {
+	return result?.message ?? result
+}
+
 watch(
-	() => props.show,
-	(isOpen) => {
-		if (isOpen && props.layawayId) {
+	() => [props.show, props.layawayId],
+	([isOpen, layawayId]) => {
+		if (isOpen && layawayId) {
 			fetchDetails()
 		}
 	}
@@ -425,11 +436,14 @@ watch(
 
 async function fetchDetails() {
 	loading.value = true
+	loadError.value = ''
 	try {
-		const result = await detailsResource.submit({ layaway_id: props.layawayId })
+		const result = unwrapResponse(await detailsResource.submit({ layaway_id: props.layawayId }))
 		layaway.value = result
 	} catch (error) {
 		console.error('Failed to fetch layaway details:', error)
+		layaway.value = null
+		loadError.value = error?.message || 'Unable to load layaway details.'
 	} finally {
 		loading.value = false
 	}
@@ -466,6 +480,7 @@ function handlePaymentSuccess() {
 function close() {
 	emit('close')
 	layaway.value = null
+	loadError.value = ''
 }
 
 function printContract() {

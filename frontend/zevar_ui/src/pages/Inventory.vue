@@ -266,10 +266,3 @@ function formatCurrency(val) {
 	return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val)
 }
 </script>
-})
-
-function formatCurrency(val) {
-	if (!val) return '$0.00'
-	return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val)
-}
-</script>
