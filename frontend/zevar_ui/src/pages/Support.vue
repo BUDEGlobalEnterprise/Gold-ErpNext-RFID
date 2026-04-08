@@ -632,11 +632,6 @@ async function submitTicket() {
 		}
 	} catch (error) {
 		console.error('Failed to create ticket:', error)
-		const errorMessage = ref('')
-        errorMessage.value = 'Failed to create ticket. ' + (error.message || 'Unknown error')
-    }
-	}
-}
 	} finally {
 		submitting.value = false
 	}
@@ -654,11 +649,11 @@ async function fetchTickets() {
 	}
 }
 
- function viewTicket(ticketId) {
+function viewTicket(ticketId) {
 	const ticket = tickets.value.find(t => t.name === ticketId)
-	const path = ticket?.source === 'helpdesk' ? 'hd-ticket' : '/app/${path}/${ticketId}`
-	window.open(`/app/${path}/${ticketId}`, '_blank')
-	 }
+	const route = ticket?.source === 'helpdesk' ? '/app/hd-ticket/' + ticketId : '/app/support-ticket/' + ticketId
+	window.open(route, '_blank')
+}
 
 
 function formatDate(dateStr) {

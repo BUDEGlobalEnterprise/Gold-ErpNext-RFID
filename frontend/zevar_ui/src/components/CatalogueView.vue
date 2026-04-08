@@ -677,7 +677,6 @@ const props = defineProps({
 })
 
 const router = useRouter()
-const router = useRouter()
 const ui = useUIStore()
 const isDark = computed(() => ui.isDark)
 const activeCategory = ref('all')

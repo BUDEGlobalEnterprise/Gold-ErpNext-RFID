@@ -1,24 +1,27 @@
 <template>
-	<div>
+	<div class="h-full">
 		<div
-			v-if="isOpen"
+			v-if="isOpen && !persistent"
 			@click="close"
 			class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 transition-opacity"
 		></div>
 
 		<div
-			class="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-white dark:bg-[#1a1c23] shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col border-l border-transparent dark:border-white/5"
-			:class="isOpen ? 'translate-x-0' : 'translate-x-full'"
+			class="h-full bg-white dark:bg-[#1a1c23] transform transition-transform duration-300 ease-in-out flex flex-col border-l border-transparent dark:border-white/5"
+			:class="[
+				persistent ? 'relative translate-x-0 w-[380px] border-l border-gray-200 dark:border-white/5' : 'fixed top-0 right-0 h-full w-full sm:w-[400px] shadow-2xl z-50',
+				!persistent && (isOpen ? 'translate-x-0' : 'translate-x-full')
+			]"
 		>
 			<div
-				class="p-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between bg-gray-50 dark:bg-[#15171e]"
+				class="p-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between"
 			>
 				<h2
 					class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2"
 				>
-					<span>🛒</span> Shopping Bag
+					<span>💎</span> Selection Tray
 					<span class="text-xs font-normal text-gray-500 dark:text-gray-400"
-						>({{ cart.totalItems }} items)</span
+						>({{ cart.totalItems }} {{ cart.totalItems === 1 ? 'piece' : 'pieces' }})</span
 					>
 				</h2>
 
@@ -32,6 +35,7 @@
 					</button>
 
 					<button
+						v-if="!persistent"
 						@click="close"
 						class="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full transition-colors text-gray-500 dark:text-gray-400"
 					>
@@ -64,12 +68,13 @@
 						d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
 					></path>
 				</svg>
-				<p>Your bag is empty.</p>
+				<p>Your selection tray is empty.</p>
+				<p class="text-xs text-gray-400 dark:text-gray-600 mt-1">Add pieces from the collection to begin curating.</p>
 				<button
 					@click="close"
 					class="mt-4 text-sm text-[#D4AF37] font-medium hover:underline"
 				>
-					Start Browsing
+					Browse Collection
 				</button>
 			</div>
 
@@ -378,7 +383,10 @@ import CheckoutModal from '@/components/CheckoutModal.vue'
 import CustomerSelector from '@/components/CustomerSelector.vue'
 import { ref, computed } from 'vue'
 
-const props = defineProps(['isOpen'])
+const props = defineProps({
+	isOpen: Boolean,
+	persistent: Boolean
+})
 const emit = defineEmits(['close'])
 const cart = useCartStore()
 const showCheckout = ref(false)
