@@ -18,6 +18,7 @@ declare module 'vue' {
     CheckoutModal: typeof import('./src/components/CheckoutModal.vue')['default']
     CreateLayawayModal: typeof import('./src/components/CreateLayawayModal.vue')['default']
     CustomerSelector: typeof import('./src/components/CustomerSelector.vue')['default']
+    FilterBar: typeof import('./src/components/FilterBar.vue')['default']
     FilterSidebar: typeof import('./src/components/FilterSidebar.vue')['default']
     Header: typeof import('./src/components/Header.vue')['default']
     HeroSection: typeof import('./src/components/HeroSection.vue')['default']

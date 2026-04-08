@@ -1,42 +1,38 @@
 /**
  * UI Store
  *
- * Manages UI state including search, filters, and theme preferences.
+ * Manages UI state including search, filters, sorting, and theme preferences.
  */
 
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-
-const DEFAULT_ACTIVE_FILTERS = Object.freeze({
-	in_stock_only: true,
-})
-
-function createDefaultFilters() {
-	return { ...DEFAULT_ACTIVE_FILTERS }
-}
+import { ref, computed } from 'vue'
 
 export const useUIStore = defineStore('ui', () => {
-	// ==========================================================================
-	// STATE
-	// ==========================================================================
-
 	const searchQuery = ref('')
-	const activeFilters = ref(createDefaultFilters())
+	const activeFilters = ref({})
 	const sidebarCollapsed = ref(false)
+	const sortBy = ref('')
 
-	// Check localStorage or system preference on load
 	const isDark = ref(localStorage.getItem('theme') === 'dark')
 
-	// Apply the class to the <html> tag immediately
 	if (isDark.value) {
 		document.documentElement.classList.add('dark')
 	} else {
 		document.documentElement.classList.remove('dark')
 	}
 
-	// ==========================================================================
-	// ACTIONS
-	// ==========================================================================
+	const activeFilterCount = computed(() => {
+		let count = 0
+		const f = activeFilters.value
+		if (f.in_stock_only) count++
+		if (f.out_of_stock_only) count++
+		if (f.custom_metal_type) count++
+		if (f.custom_gemstone) count++
+		if (f.custom_purity) count++
+		if (f.custom_jewelry_type) count++
+		if (f.price_min || f.price_max) count++
+		return count
+	})
 
 	function toggleTheme() {
 		isDark.value = !isDark.value
@@ -57,18 +53,26 @@ export const useUIStore = defineStore('ui', () => {
 		}
 	}
 
+	function setSort(value) {
+		sortBy.value = value || ''
+	}
+
 	function resetFilters() {
-		activeFilters.value = createDefaultFilters()
+		activeFilters.value = {}
 		searchQuery.value = ''
+		sortBy.value = ''
 	}
 
 	return {
 		searchQuery,
 		activeFilters,
 		sidebarCollapsed,
+		sortBy,
 		isDark,
+		activeFilterCount,
 		toggleTheme,
 		setFilter,
+		setSort,
 		resetFilters,
 	}
 })

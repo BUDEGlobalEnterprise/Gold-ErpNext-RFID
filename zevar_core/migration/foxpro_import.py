@@ -15,9 +15,30 @@ Legacy File Mapping (verified against actual DBF schemas):
 - COLOR.DBF      → Item Attribute: Color (59 records)
 - CLARITY.DBF    → Item Attribute: Clarity (25 records)
 - GOLD$.dbf      → Gold Rate Log (5 records)
-- 1APTERM1.DBF   → Jewelry Appraisal (schema only, 0 records)
 - saletype.dbf   → Repair Type (65 records)
 - trans.dbf      → Sales Invoice (516 records)
+- CUTS.DBF       → Item Attribute: Cut (12 records)
+- TYPES.DBF      → Item Attribute: Stone Type (25 records)
+- dept.dbf       → Department Item Groups (38 records)
+- subcat.dbf     → Subcategory Item Groups (107 records)
+- taxrate.dbf    → Sales Taxes and Charges Template (28 records)
+- SLUSH.DBF      → Item (20 records, same schema as inventor)
+- NEWAPPR.DBF    → Jewelry Appraisal (147 records)
+- receipt.DBF    → Sales Invoice Items (250 records)
+- TENDER.DBF     → Payment Entry (378 records)
+- jrepair.DBF    → Repair Order (3 records)
+- rep_det.dbf    → Repair history (936 records)
+- lw-maste.DBF   → Layaway Contract (909 records)
+- lw-entry.DBF   → Layaway Payment Schedule (305 records)
+- lw-link.DBF    → Payment Entry layaway links (2355 records)
+- saleman.dbf    → Employee commission data (21 records)
+- bonus.dbf      → Commission Rule + Range (560 records)
+- payroll1.dbf   → Attendance (844 records)
+- audit.dbf      → POS Audit Log (466 records)
+- SOLDPARM.dbf   → Customer Ledger Entry (62 records)
+- invdel.dbf     → POS Audit Log deletions (157 records)
+- wdetails.dbf   → Item watch details (221 records)
+- CONSTANT.DBF   → Gold Settings config (2 records)
 """
 
 import json
@@ -348,6 +369,30 @@ def import_customers(backup_path: str, dry_run: bool = False) -> dict:
 
 			_set_custom_field(doc, "custom_legacy_account_no", accountno)
 			_set_custom_field(doc, "custom_company", company)
+			_set_custom_field(doc, "custom_title", clean_str(record.get("title")))
+			_set_custom_field(doc, "custom_birthday", clean_str(record.get("bday")))
+			_set_custom_field(doc, "custom_anniversary", clean_str(record.get("anniv")))
+			_set_custom_field(doc, "custom_spouse_name", clean_str(record.get("spouse")))
+			_set_custom_field(doc, "custom_discount_rate", clean_float(record.get("discount")))
+			_set_custom_field(doc, "custom_ytd_spend", clean_float(record.get("ytdspend")))
+			_set_custom_field(doc, "custom_lifetime_spend", clean_float(record.get("spend")))
+			_set_custom_field(doc, "custom_salesman1", clean_str(record.get("salesman1")))
+			_set_custom_field(doc, "custom_salesman2", clean_str(record.get("salesman2")))
+			_set_custom_field(doc, "custom_refer_source", clean_str(record.get("refer")))
+			_set_custom_field(doc, "custom_acct_type", clean_str(record.get("accttype")))
+			_set_custom_field(doc, "custom_mailing", 1 if clean_str(record.get("mailing")) == "Y" else 0)
+			_set_custom_field(doc, "custom_store_code", clean_str(record.get("storecode")))
+			_set_custom_field(doc, "custom_custcode", clean_str(record.get("custcode")))
+			_set_custom_field(doc, "custom_link", clean_str(record.get("link")))
+			_set_custom_field(doc, "custom_phone2", clean_str(record.get("phone2")))
+
+			# Concatenate legacy comments
+			comments = []
+			for cf in ["comments", "comment2", "comment3"]:
+				cv = clean_str(record.get(cf))
+				if cv:
+					comments.append(cv)
+			_set_custom_field(doc, "custom_comments", "\n".join(comments) if comments else None)
 
 			doc.insert(ignore_permissions=True, ignore_mandatory=True)
 
@@ -577,6 +622,14 @@ def import_inventory(backup_path: str, dry_run: bool = False) -> dict:
 
 			if goldtype:
 				_set_custom_field(doc, "custom_material_color", _map_material_color(goldtype))
+
+			# Additional legacy fields
+			_set_custom_field(doc, "custom_legacy_abr", abr)
+			_set_custom_field(doc, "custom_legacy_stockno", stockno)
+			_set_custom_field(doc, "custom_showcase", clean_str(record.get("showcase")))
+			_set_custom_field(doc, "custom_date_in", format_date(record.get("datein") or record.get("datebuy")))
+			_set_custom_field(doc, "custom_date_sold", format_date(record.get("datesold")))
+			_set_custom_field(doc, "custom_invoice_ref", clean_str(record.get("invoice")))
 
 			doc.insert(ignore_permissions=True, ignore_mandatory=True)
 			stats["imported"] += 1

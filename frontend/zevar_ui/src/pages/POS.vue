@@ -47,6 +47,12 @@
 						}}
 					</span>
 				</div>
+				
+				<!-- Inline Filter Bar - Occupies the central "blank space" -->
+				<div class="flex-1 hidden md:flex justify-center px-4">
+					<FilterBar />
+				</div>
+
 				<div class="flex gap-2">
 					<button
 						@click="viewMode = 'pos'"
@@ -60,10 +66,7 @@
 						POS
 					</button>
 					<button
-						@click="
-							viewMode = 'catalog'
-							loadCatalog()
-						"
+						@click="viewMode = 'catalog'; loadCatalog()"
 						class="px-3 py-1.5 rounded-lg text-xs font-bold border transition"
 						:class="
 							viewMode === 'catalog'
@@ -174,6 +177,7 @@
  */
 
 import AppLayout from '@/components/AppLayout.vue'
+import FilterBar from '@/components/FilterBar.vue'
 import ItemCard from '@/components/ItemCard.vue'
 import ProductModal from '@/components/POSProductModal.vue'
 import { useSessionStore } from '@/stores/session.js'
@@ -211,16 +215,22 @@ const hasMore = ref(true)
 const items = createResource({
 	url: 'zevar_core.api.get_pos_items',
 	makeParams() {
-		const { in_stock_only, out_of_stock_only, ...otherFilters } = ui.activeFilters
+		const { in_stock_only, out_of_stock_only, price_min, price_max, ...otherFilters } =
+			ui.activeFilters
 
 		return {
 			warehouse: session.currentWarehouse,
 			page_length: PAGE_LENGTH,
 			start: start.value,
 			search_term: ui.searchQuery,
-			filters: JSON.stringify(otherFilters),
+			filters: JSON.stringify({
+				...otherFilters,
+				min_price: price_min,
+				max_price: price_max,
+			}),
 			in_stock_only: in_stock_only || false,
 			out_of_stock_only: out_of_stock_only || false,
+			sort_by: ui.sortBy || undefined,
 		}
 	},
 	onSuccess(data) {
@@ -288,7 +298,7 @@ function viewCategory(cat) {
 let searchTimeout = null
 
 watch(
-	() => [ui.searchQuery, ui.activeFilters],
+	() => [ui.searchQuery, ui.activeFilters, ui.sortBy],
 	() => {
 		if (searchTimeout) clearTimeout(searchTimeout)
 		searchTimeout = setTimeout(() => {

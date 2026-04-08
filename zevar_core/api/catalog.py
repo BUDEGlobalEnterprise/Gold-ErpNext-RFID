@@ -25,6 +25,7 @@ def get_pos_items(
 	warehouse: str | None = None,
 	search_term: str | None = None,
 	filters: str | None = None,
+	sort_by: str | None = None,
 	in_stock_only: bool | str = False,
 	out_of_stock_only: bool | str = False,
 	source_filter: str | None = None,
@@ -38,6 +39,7 @@ def get_pos_items(
 	    warehouse: Warehouse to check stock levels
 	    search_term: Search term to filter item names
 	    filters: JSON string of additional filters
+	    sort_by: Sort key (price_asc, price_desc, weight_asc, weight_desc, newest, name_asc)
 	    in_stock_only: Only return items with stock_qty > 0
 	    out_of_stock_only: Only return items with stock_qty <= 0
 	    source_filter: Filter by custom_source
@@ -232,7 +234,10 @@ def get_pos_items(
 		pos_items.append(_build_item_dict(item, qty, final_price))
 
 	# Keep the default catalog view sale-friendly: in-stock first, then featured groups.
-	pos_items.sort(key=_get_pos_sort_key)
+	if sort_by:
+		pos_items.sort(key=lambda item: _get_custom_sort_key(item, sort_by))
+	else:
+		pos_items.sort(key=_get_pos_sort_key)
 
 	return pos_items[:page_length]
 
@@ -447,3 +452,20 @@ def _get_pos_sort_key(item: dict) -> tuple:
 		(item.get("jewelry_type") or item.get("item_group") or "").casefold(),
 		(item.get("item_name") or "").casefold(),
 	)
+
+
+def _get_custom_sort_key(item: dict, sort_by: str):
+	"""Return sort key based on user-selected sort option."""
+	if sort_by == "price_asc":
+		return (item.get("price") or 0, (item.get("item_name") or "").casefold())
+	elif sort_by == "price_desc":
+		return (-(item.get("price") or 0), (item.get("item_name") or "").casefold())
+	elif sort_by == "weight_asc":
+		return (item.get("gross_weight") or 0, (item.get("item_name") or "").casefold())
+	elif sort_by == "weight_desc":
+		return (-(item.get("gross_weight") or 0), (item.get("item_name") or "").casefold())
+	elif sort_by == "newest":
+		return (item.get("item_name") or "").casefold()
+	elif sort_by == "name_asc":
+		return (item.get("item_name") or "").casefold()
+	return (0, (item.get("item_name") or "").casefold())
