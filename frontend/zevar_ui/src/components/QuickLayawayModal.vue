@@ -291,24 +291,38 @@ async function fetchPreview() {
 async function submitLayaway() {
 	loading.value = true
 	try {
-		const result = await createResource2.submit({
+		const rawResult = await createResource2.submit({
 			items: cartItemsJson.value,
 			customer: form.value.customer,
 			down_payment_percent: form.value.down_payment_percent,
 			term_months: form.value.term_months,
 			initial_payment: form.value.initial_payment,
 			initial_payment_mode: form.value.initial_payment_mode,
-			warehouse: props.warehouse,
+			warehouse: props.warehouse || undefined,
 			notes: form.value.notes,
 		})
 
-		if (result.success) {
+		// Unwrap frappe-ui response
+		const result = rawResult?.message ?? rawResult
+
+		if (result?.success || result?.layaway_id || result?.contract_name) {
 			successResult.value = result
 			emit('created', result)
 		}
 	} catch (error) {
 		console.error('Failed to create layaway:', error)
-		alert('Failed to create layaway: ' + (error.message || 'Unknown error'))
+		// Extract Frappe server messages for better UX
+		let errorMsg = ''
+		if (error?._server_messages) {
+			try {
+				const msgs = JSON.parse(error._server_messages)
+				errorMsg = msgs.map(m => { try { return JSON.parse(m).message } catch { return m } }).join('\n')
+			} catch { errorMsg = String(error._server_messages) }
+		} else {
+			errorMsg = error?.message || error?.exc || 'Unknown error'
+		}
+		errorMsg = errorMsg.replace(/<[^>]+>/g, '')
+		alert('Failed to create layaway: ' + errorMsg)
 	} finally {
 		loading.value = false
 	}

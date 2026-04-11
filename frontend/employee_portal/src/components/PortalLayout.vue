@@ -1,278 +1,190 @@
 <template>
 	<div
-		class="h-[100dvh] w-full flex overflow-hidden bg-white dark:bg-[#0b0f19] font-display text-gray-900 dark:text-white selection:bg-primary/30 relative transition-colors duration-700"
-		:style="{ '--primary-color': routeColor }"
+		class="h-[100dvh] w-full flex overflow-hidden bg-gray-50 dark:bg-[#05070a] font-display text-gray-900 dark:text-gray-100 selection:bg-emerald-500/30 relative transition-colors duration-500"
 	>
-		<!-- Ambient Glows -->
-		<div
-			class="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full -z-10"
-		></div>
-		<div
-			class="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/5 blur-[120px] rounded-full -z-10"
-		></div>
-
 		<!-- Mobile Sidebar Overlay -->
 		<div
 			v-if="mobileMenuOpen"
-			class="fixed inset-0 bg-black/60 z-40 lg:hidden"
+			class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
 			@click="mobileMenuOpen = false"
 		></div>
 
 		<!-- Sidebar -->
 		<aside
-			class="shrink-0 flex flex-col sidebar-standard z-20 transition-all duration-300 fixed lg:relative h-full"
+			class="shrink-0 flex flex-col bg-white dark:bg-[#0a0c1a] border-r border-gray-200 dark:border-white/5 z-50 transition-all duration-300 fixed lg:relative h-full"
 			:class="[
 				sidebarCollapsed ? 'lg:w-20 lg:items-center' : 'lg:w-64',
 				mobileMenuOpen ? 'w-64 translate-x-0' : '-translate-x-full lg:translate-x-0',
 			]"
 		>
-			<!-- Branding & Toggle -->
+			<!-- Branding -->
 			<div
-				class="h-20 flex items-center px-6 gap-4 border-b border-black/5 dark:border-white/5"
+				class="h-32 flex items-center px-10 gap-4 shrink-0"
 				:class="sidebarCollapsed ? 'lg:px-4 justify-center' : 'justify-between'"
 			>
 				<div
 					v-if="!sidebarCollapsed"
-					class="flex items-center gap-2 overflow-hidden transition-all duration-300"
+					class="flex items-center gap-5 overflow-hidden group cursor-pointer"
 				>
-					<img :src="logoUrl" alt="Zevar" class="w-8 h-8 rounded shrink-0" />
-					<span
-						class="font-bold text-gray-900 dark:text-white tracking-wide text-sm whitespace-nowrap"
-						>Zevar</span
+					<div
+						class="w-12 h-12 rounded-2xl bg-emerald-950 flex items-center justify-center text-white shadow-glow-emerald shrink-0 group-hover:scale-105 transition-transform duration-500"
 					>
+                        <span class="material-symbols-outlined text-2xl">diamond</span>
+					</div>
+					<div class="flex flex-col leading-none">
+						<span
+							class="font-black text-gray-900 dark:text-white tracking-tighter text-2xl uppercase mb-1"
+							>Zevar</span
+						>
+						<span class="text-[9px] text-gray-400 font-black uppercase tracking-[0.4em] whitespace-nowrap">The Curated Atelier</span>
+					</div>
 				</div>
-
-				<button
-					@click="sidebarCollapsed = !sidebarCollapsed"
-					class="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/10 transition-all text-gray-500 hover:text-gray-900 dark:text-white/60 dark:hover:text-white"
-					:aria-label="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-				>
-					<span
-						class="material-symbols-outlined text-[20px] transition-transform"
-						:class="sidebarCollapsed ? 'rotate-180' : ''"
-						>menu_open</span
-					>
-				</button>
+                <div v-else class="w-12 h-12 rounded-2xl bg-emerald-950 flex items-center justify-center text-white shadow-glow-emerald shrink-0 hover:scale-105 transition-transform duration-500 cursor-pointer">
+                    <span class="material-symbols-outlined text-2xl">diamond</span>
+                </div>
 			</div>
 
 			<!-- Nav Items -->
-			<nav class="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar pb-6">
+			<nav class="flex-1 px-8 space-y-2.5 overflow-y-auto no-scrollbar pb-10 pt-4">
 				<router-link
 					v-for="item in navItems"
 					:key="item.to"
 					:to="item.to"
 					@click="mobileMenuOpen = false"
-					class="flex items-center rounded-xl transition-all group"
+					class="flex items-center rounded-2xl transition-all duration-300 group relative"
 					:class="[
 						route.path === item.to
-							? 'bg-primary/10 text-primary shadow-sm'
-							: 'text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5',
+							? 'bg-emerald-950 text-white shadow-glow-emerald'
+							: 'text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50/80 dark:hover:bg-white/5',
 						sidebarCollapsed
-							? 'lg:justify-center lg:px-2 lg:py-3'
-							: 'justify-between px-4 py-3',
+							? 'lg:justify-center lg:px-0 lg:py-4'
+							: 'justify-between px-6 py-4',
 					]"
 				>
-					<div class="flex items-center gap-3">
-						<span class="material-symbols-outlined text-[20px] shrink-0">{{
-							item.icon
-						}}</span>
-						<span v-show="!sidebarCollapsed" class="text-sm font-medium">{{
-							item.label
-						}}</span>
+					<div class="flex items-center gap-4">
+						<span
+							class="material-symbols-outlined text-[22px] shrink-0"
+							>{{ item.icon }}</span
+						>
+						<span
+							v-show="!sidebarCollapsed"
+							class="text-[11px] font-black uppercase tracking-[0.25em]"
+							>{{ item.label }}</span
+						>
 					</div>
-					<span
-						v-if="route.path === item.to && !sidebarCollapsed"
-						class="material-symbols-outlined text-[16px]"
-						>chevron_right</span
-					>
+                    <div v-if="route.path === item.to && !sidebarCollapsed" class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgb(52,211,153)]"></div>
 				</router-link>
-
-				<!-- Desk Link (External Handle) -->
-				<a
-					href="/app"
-					target="_blank"
-					class="flex items-center rounded-xl transition-all group text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 mt-4"
-					:class="
-						sidebarCollapsed
-							? 'lg:justify-center lg:px-2 lg:py-3'
-							: 'justify-between px-4 py-3'
-					"
-				>
-					<div class="flex items-center gap-3">
-						<span class="material-symbols-outlined text-[20px] shrink-0"
-							>open_in_new</span
-						>
-						<span v-show="!sidebarCollapsed" class="text-sm font-medium"
-							>Open Desk</span
-						>
-					</div>
-				</a>
 			</nav>
+
+            <!-- Bottom Section (Manager Info) -->
+            <div class="p-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-black/20" v-if="!sidebarCollapsed">
+                <div class="flex items-center gap-3 bg-white dark:bg-white/5 p-3 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm">
+                    <div class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 font-black text-xs">
+                        {{ managerInitials }}
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                        <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Manager</span>
+                        <span class="text-[11px] font-bold text-gray-900 dark:text-white truncate">{{ managerName }}</span>
+                    </div>
+                </div>
+            </div>
 		</aside>
 
 		<!-- Main Content -->
 		<main
-			class="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-white dark:bg-[#0b0f19]"
+			class="flex-1 flex flex-col h-full min-w-0 overflow-hidden"
 		>
 			<!-- Header -->
 			<header
-				class="flex items-center px-4 md:px-8 py-4 border-b border-black/5 dark:border-white/5 shrink-0"
+				class="flex items-center px-4 md:px-10 h-20 bg-white/10 dark:bg-transparent backdrop-blur-md shrink-0"
 			>
-				<!-- Left Side: Header Actions -->
-				<div class="flex items-center gap-4">
-					<!-- Mobile Hamburger (inline in header, only for mobile) -->
-					<button
-						@click="mobileMenuOpen = !mobileMenuOpen"
-						class="lg:hidden w-10 h-10 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-all"
-					>
-						<span class="material-symbols-outlined text-[20px]">{{
-							mobileMenuOpen ? "close" : "menu"
-						}}</span>
-					</button>
-				</div>
+                <!-- Search Bar -->
+                <div class="relative w-full max-w-lg hidden md:block">
+                    <span class="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+                    <input 
+                        type="search" 
+                        placeholder="Search orders, gemstones, or team..." 
+                        class="w-full bg-gray-50/80 dark:bg-white/5 border border-transparent focus:bg-white focus:border-gray-100 dark:focus:border-white/10 rounded-2xl py-3 pl-14 pr-6 text-[13px] focus:outline-none transition-all placeholder-gray-400 font-medium"
+                    />
+                </div>
 
-				<div class="relative ml-auto flex items-center gap-4">
-					<!-- Overlay for clicking outside -->
-					<div
-						v-if="userMenuOpen"
-						class="fixed inset-0 z-40"
-						@click="userMenuOpen = false"
-					></div>
+				<!-- Header Actions (Mobile) -->
+                <button
+                    @click="mobileMenuOpen = !mobileMenuOpen"
+                    class="lg:hidden w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-500"
+                >
+                    <span class="material-symbols-outlined">{{ mobileMenuOpen ? 'close' : 'menu' }}</span>
+                </button>
 
-					<!-- Profile Button -->
-					<button
-						class="relative z-50 flex items-center gap-2 md:gap-3 bg-gray-50 dark:bg-white/5 hover:bg-black/5 dark:hover:bg-white/10 pl-2 pr-3 md:pr-4 py-1.5 rounded-full border border-gray-200 dark:border-white/10 transition-colors"
-						@click="userMenuOpen = !userMenuOpen"
-					>
-						<div
-							class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] md:text-xs"
-						>
-							{{ userInitials }}
-						</div>
-						<span
-							class="text-xs md:text-sm font-semibold text-gray-900 dark:text-white hidden sm:block"
-							>{{ auth.user?.full_name || "User" }}</span
-						>
-						<span
-							class="material-symbols-outlined text-gray-400 dark:text-white/50 text-sm ml-1 transition-transform"
-							:class="{ 'rotate-180': userMenuOpen }"
-							>expand_more</span
-						>
-					</button>
+				<div class="ml-auto flex items-center gap-6">
+                    <!-- Notification & Settings Icons -->
+                    <div class="flex items-center gap-3 text-gray-400">
+                        <button class="w-10 h-10 rounded-full hover:bg-gray-100 hover:text-gray-900 flex items-center justify-center transition-all">
+                            <span class="material-symbols-outlined text-[22px]">notifications</span>
+                        </button>
+                        <button class="w-10 h-10 rounded-full hover:bg-gray-100 hover:text-gray-900 flex items-center justify-center transition-all">
+                            <span class="material-symbols-outlined text-[22px]">settings</span>
+                        </button>
+                    </div>
 
-					<!-- Dropdown Menu -->
-					<div
+                    <div class="h-8 w-px bg-gray-200 dark:bg-white/10"></div>
+
+                    <!-- User Profile Section -->
+                    <div class="flex items-center gap-5">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-[13px] font-black text-gray-900 dark:text-white tracking-tight leading-none mb-1">{{ auth.user?.full_name || 'Marcus Sterling' }}</p>
+                            <p class="text-[9px] text-gray-400 font-bold uppercase tracking-[0.2em]">Master Setter</p>
+                        </div>
+                        <button 
+                            class="w-11 h-11 rounded-2xl bg-gray-100 dark:bg-white/5 p-0.5 overflow-hidden group relative border border-gray-100 dark:border-white/10"
+                            @click="userMenuOpen = !userMenuOpen"
+                        >
+                            <img :src="employeeStore.employee?.image || 'https://i.pravatar.cc/150?u=marcus'" class="w-full h-full object-cover rounded-[14px]" />
+                        </button>
+                    </div>
+
+                    <!-- User Menu Dropdown -->
+                    <div
 						v-show="userMenuOpen"
-						class="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-[#111420] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl py-2 z-50 flex flex-col font-medium text-sm"
-					>
-						<div class="px-4 py-3 border-b border-gray-100 dark:border-white/5 mb-1">
-							<p class="text-gray-900 dark:text-white font-bold">
+                        class="absolute right-8 top-20 mt-2 w-64 bg-white dark:bg-[#0a0c1a] border border-gray-200 dark:border-white/10 rounded-3xl shadow-2xl py-3 z-[60] flex flex-col font-medium overflow-hidden"
+                    >
+                        <div class="px-6 py-4 border-b border-gray-50 dark:border-white/5 mb-1 bg-gray-50/50 dark:bg-white/5">
+							<p class="text-gray-900 dark:text-white font-bold text-sm">
 								{{ auth.user?.full_name || "User" }}
 							</p>
-							<p class="text-xs text-gray-500 mt-0.5">
-								{{ auth.user?.email || "user@zevar.com" }}
+							<p class="text-[11px] text-gray-500 mt-1 uppercase tracking-widest font-black">
+								Master Setter
 							</p>
 						</div>
-
-						<button
-							@click="
-								showComingSoon = true;
-								userMenuOpen = false;
-							"
-							class="w-full text-left px-4 py-2.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-3"
-						>
-							<span class="material-symbols-outlined text-[18px]">person</span>
-							Employee Detail
-						</button>
 
 						<button
 							@click="toggleDarkMode"
-							class="w-full text-left px-4 py-2.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center justify-between"
+							class="w-full text-left px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-white hover:bg-emerald-50 dark:hover:bg-white/5 transition-colors flex items-center justify-between group"
 						>
-							<div class="flex items-center gap-3">
-								<span class="material-symbols-outlined text-[18px]">{{
-									isDark ? "light_mode" : "dark_mode"
-								}}</span>
-								{{ isDark ? "Light Mode" : "Dark Mode" }}
-							</div>
-							<div
-								class="w-8 h-4 bg-primary/30 rounded-full relative flex items-center transition-colors"
-							>
-								<div
-									class="w-3 h-3 bg-primary rounded-full absolute transition-all duration-300"
-									:class="isDark ? 'right-0.5' : 'left-0.5'"
-								></div>
+							<div class="flex items-center gap-4">
+								<span class="material-symbols-outlined text-[20px]">{{ isDark ? "light_mode" : "dark_mode" }}</span>
+								<span class="text-xs font-bold uppercase tracking-widest">{{ isDark ? "Light Mode" : "Dark Mode" }}</span>
 							</div>
 						</button>
-
-						<button
-							@click="
-								showComingSoon = true;
-								userMenuOpen = false;
-							"
-							class="w-full text-left px-4 py-2.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-3"
-						>
-							<span class="material-symbols-outlined text-[18px]">lock</span>
-							Change Password
-						</button>
-
-						<div class="h-px w-full bg-gray-100 dark:bg-white/5 my-1"></div>
 
 						<button
 							@click="auth.logout()"
-							class="w-full text-left px-4 py-2.5 text-red-400 hover:text-red-300 hover:bg-red-400/10 transition-colors flex items-center gap-3"
+							class="w-full text-left px-6 py-3 text-red-500 hover:bg-red-50 transition-colors flex items-center gap-4 group"
 						>
-							<span class="material-symbols-outlined text-[18px]">logout</span>
-							Logout
+							<span class="material-symbols-outlined text-[20px]">logout</span>
+							<span class="text-xs font-bold uppercase tracking-widest text-red-500">Log out</span>
 						</button>
-					</div>
+                    </div>
 				</div>
 			</header>
 
 			<!-- Page Content Container -->
 			<div
-				class="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 custom-scrollbar relative"
+				class="flex-1 overflow-y-auto no-scrollbar p-6 md:p-10 relative"
 			>
 				<slot />
 			</div>
 		</main>
-
-		<!-- Coming Soon Modal for generic actions mapped to buttons temporarily -->
-		<Teleport to="body">
-			<Transition name="fade">
-				<div
-					v-if="showComingSoon"
-					class="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-sm"
-					@click.self="showComingSoon = false"
-				>
-					<div class="absolute inset-0 bg-black/60"></div>
-					<div
-						class="relative bg-white dark:bg-[#15161a] rounded-3xl p-8 w-full max-w-sm border border-gray-200 dark:border-white/10 shadow-2xl text-center transform transition-all"
-					>
-						<div
-							class="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4 border border-primary/20"
-						>
-							<span class="material-symbols-outlined text-3xl">build</span>
-						</div>
-						<h3
-							class="font-display font-bold text-gray-900 dark:text-white text-xl mb-2"
-						>
-							Feature Incoming
-						</h3>
-						<p class="text-sm text-gray-500 dark:text-white/50 mb-6 font-medium">
-							This module is currently being built and will unlock shortly.
-						</p>
-
-						<button
-							@click="showComingSoon = false"
-							class="w-full py-3 bg-gray-50 dark:bg-white/5 hover:bg-black/5 dark:hover:bg-white/10 border border-gray-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-white text-sm font-bold transition-all"
-						>
-							Understood
-						</button>
-					</div>
-				</div>
-			</Transition>
-		</Teleport>
 	</div>
 </template>
 
@@ -280,54 +192,37 @@
 import { computed, ref, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useRoute } from "vue-router";
+import { useEmployeeStore } from "@/stores/employee";
 
 const auth = useAuthStore();
 const route = useRoute();
+const employeeStore = useEmployeeStore();
 
 const sidebarCollapsed = ref(false);
 const mobileMenuOpen = ref(false);
 const userMenuOpen = ref(false);
-const showComingSoon = ref(false);
-const isDark = ref(true); // Default to dark theme as per Zevar design language
+const isDark = ref(false);
 
-// Logo URL
-const logoUrl = "/assets/zevar_core/images/employee_portal_logo.svg";
+const managerName = computed(() => employeeStore.employee?.reports_to_name || "Julian Voss");
+const managerInitials = computed(() => {
+    return managerName.value.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+});
 
 const navItems = [
 	{ to: "/", icon: "dashboard", label: "Dashboard" },
-	{ to: "/tasks", icon: "check_circle", label: "Tasks" },
-	{ to: "/attendance", icon: "calendar_month", label: "Attendance" },
+	{ to: "/tasks", icon: "task_alt", label: "Tasks" },
+	{ to: "/attendance", icon: "calendar_today", label: "Attendance" },
 	{ to: "/roster", icon: "schedule", label: "Roster" },
 	{ to: "/leave", icon: "beach_access", label: "Leave" },
-	{ to: "/expense", icon: "attach_money", label: "Expense" },
+	{ to: "/expense", icon: "payments", label: "Expense" },
 	{ to: "/payroll", icon: "account_balance_wallet", label: "Payroll" },
 	{ to: "/team", icon: "groups", label: "Team" },
 	{ to: "/issues", icon: "support_agent", label: "Issues" },
 ];
 
-const routeColor = computed(() => {
-	const colors = {
-		"/": "#FCD34D", // Gold
-		"/tasks": "#60A5FA", // Sky
-		"/attendance": "#34D399", // Emerald
-		"/roster": "#A78BFA", // Violet
-		"/leave": "#F87171", // Coral
-		"/expense": "#FB923C", // Amber
-		"/payroll": "#818CF8", // Indigo
-		"/team": "#2DD4BF", // Teal
-		"/issues": "#F472B6", // Pink
-	};
-	return colors[route.path] || "#FCD34D";
-});
-
 const userInitials = computed(() => {
 	const name = auth.user?.full_name || "User";
-	return name
-		.split(" ")
-		.map((n) => n[0])
-		.join("")
-		.substring(0, 2)
-		.toUpperCase();
+	return name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase();
 });
 
 const toggleDarkMode = () => {
@@ -342,25 +237,21 @@ const toggleDarkMode = () => {
 	userMenuOpen.value = false;
 };
 
-onMounted(() => {
+onMounted(async () => {
+    await employeeStore.init();
 	const savedTheme = localStorage.getItem("portal_theme");
-	if (savedTheme === "light") {
+	if (savedTheme === "dark") {
+		isDark.value = true;
+		document.documentElement.classList.add("dark");
+	} else {
 		isDark.value = false;
 		document.documentElement.classList.remove("dark");
-	} else {
-		document.documentElement.classList.add("dark");
 	}
 });
 </script>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-	transition: opacity 0.2s ease, transform 0.2s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-	opacity: 0;
-	transform: scale(0.95);
+.router-link-active {
+    @apply bg-primary text-white shadow-glow-emerald;
 }
 </style>

@@ -1,0 +1,139 @@
+<template>
+	<Teleport to="body">
+		<div
+			class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+			@click.self="$emit('close')"
+		>
+			<div class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl max-w-sm w-full mx-4 p-6">
+				<div class="text-center">
+					<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
+						Repair Claim Ticket
+					</h3>
+
+					<div
+						class="bg-white dark:bg-gray-950 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 mb-4"
+					>
+						<div
+							class="mx-auto mb-3 h-40 w-40 rounded-lg border border-gray-200 dark:border-gray-800 bg-[linear-gradient(45deg,#111_25%,transparent_25%,transparent_75%,#111_75%,#111),linear-gradient(45deg,#111_25%,transparent_25%,transparent_75%,#111_75%,#111)] bg-[length:24px_24px] bg-[position:0_0,12px_12px] opacity-80"
+							aria-hidden="true"
+						></div>
+						<p class="text-xs text-gray-500 dark:text-gray-400">
+							Scan placeholder
+						</p>
+					</div>
+
+					<div class="space-y-2 text-left mb-4">
+						<p class="text-2xl font-bold text-[#D4AF37] font-mono">{{ order.name }}</p>
+						<p class="text-gray-600 dark:text-gray-400">{{ order.customer_name }}</p>
+						<p class="text-sm text-gray-500">{{ formatDate(order.received_date || order.creation) }}</p>
+					</div>
+
+					<div class="rounded-lg bg-gray-50 dark:bg-gray-800 p-3 text-left mb-4">
+						<p class="text-xs uppercase tracking-wide text-gray-500 mb-1">Lookup Link</p>
+						<p class="text-xs break-all text-gray-700 dark:text-gray-300">
+							{{ lookupUrl }}
+						</p>
+					</div>
+
+					<div class="flex gap-2">
+						<button
+							@click="copyLookupUrl"
+							class="flex-1 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700"
+						>
+							Copy Link
+						</button>
+						<button
+							@click="printQR"
+							class="flex-1 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-medium hover:bg-[#c9a432]"
+						>
+							Print
+						</button>
+					</div>
+
+					<button
+						@click="$emit('close')"
+						class="mt-4 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+					>
+						Close
+					</button>
+				</div>
+			</div>
+		</div>
+	</Teleport>
+</template>
+
+<script setup>
+import { defineEmits, defineProps } from 'vue'
+import { toast } from 'frappe-ui'
+
+const props = defineProps({
+	order: { type: Object, required: true },
+})
+
+defineEmits(['close'])
+
+const lookupUrl = `${window.location.origin}/pos/repair-lookup#${props.order.name}`
+
+function formatDate(d) {
+	if (!d) return ''
+	return new Date(d).toLocaleDateString('en-US', {
+		month: 'short',
+		day: 'numeric',
+		year: 'numeric',
+	})
+}
+
+async function copyLookupUrl() {
+	try {
+		await navigator.clipboard.writeText(lookupUrl)
+		toast({
+			title: 'Copied',
+			message: 'Repair lookup link copied to clipboard',
+			icon: 'check',
+			intent: 'success',
+		})
+	} catch {
+		toast({
+			title: 'Copy Failed',
+			message: 'Unable to copy the lookup link',
+			icon: 'alert-triangle',
+			intent: 'error',
+		})
+	}
+}
+
+function printQR() {
+	const w = window.open('', '_blank')
+	if (!w) return
+
+	w.document.write(`
+		<html><head><title>Repair Ticket - ${props.order.name}</title>
+		<style>
+			body { font-family: sans-serif; text-align: center; padding: 20px; }
+			.ticket { border: 2px dashed #ccc; padding: 20px; display: inline-block; max-width: 320px; }
+			.code {
+				width: 160px;
+				height: 160px;
+				margin: 0 auto 12px;
+				background-image:
+					linear-gradient(45deg, #111 25%, transparent 25%, transparent 75%, #111 75%, #111),
+					linear-gradient(45deg, #111 25%, transparent 25%, transparent 75%, #111 75%, #111);
+				background-size: 24px 24px;
+				background-position: 0 0, 12px 12px;
+			}
+			.link { font-size: 11px; word-break: break-all; color: #666; }
+		</style></head><body>
+		<div class="ticket">
+			<h2>ZEVAR JEWELERS</h2>
+			<h1>${props.order.name}</h1>
+			<div class="code"></div>
+			<p>${props.order.customer_name || ''}</p>
+			<p>Use this link to check status:</p>
+			<p class="link">${lookupUrl}</p>
+		</div>
+		</body></html>
+	`)
+	w.document.close()
+	w.print()
+}
+</script>

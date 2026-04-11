@@ -320,17 +320,29 @@ async function processPayment() {
 	processing.value = true
 
 	try {
-		const result = await paymentResource.submit({
+		const rawResult = await paymentResource.submit({
 			layaway_id: props.layawayId,
 			payment_amount: paymentAmount.value,
 			mode_of_payment: selectedMode.value,
 		})
 
-		if (result.success) {
+		// Unwrap frappe-ui response
+		const result = rawResult?.message ?? rawResult
+
+		if (result?.success) {
 			emit('success', result)
 		}
 	} catch (e) {
-		error.value = e.message || 'Failed to process payment'
+		let errorMsg = ''
+		if (e?._server_messages) {
+			try {
+				const msgs = JSON.parse(e._server_messages)
+				errorMsg = msgs.map(m => { try { return JSON.parse(m).message } catch { return m } }).join('\n')
+			} catch { errorMsg = String(e._server_messages) }
+		} else {
+			errorMsg = e?.message || 'Failed to process payment'
+		}
+		error.value = errorMsg.replace(/<[^>]+>/g, '')
 		console.error('Payment failed:', e)
 	} finally {
 		processing.value = false

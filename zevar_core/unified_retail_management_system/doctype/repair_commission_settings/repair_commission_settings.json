@@ -1,0 +1,151 @@
+{
+	"actions": [],
+	"allow_rename": 0,
+	"creation": "2026-04-11 00:00:00.000000",
+	"doctype": "DocType",
+	"engine": "InnoDB",
+	"field_order": [
+		"commission_rate_labor_pct",
+		"bonus_on_time_pct",
+		"penalty_late_days",
+		"min_commission_amount",
+		"commission_payment_frequency",
+		"column_break_1",
+		"enable_tiered_commission",
+		"tier_1_threshold",
+		"tier_1_rate",
+		"tier_2_threshold",
+		"tier_2_rate",
+		"tier_3_threshold",
+		"tier_3_rate"
+	],
+	"fields": [
+		{
+			"fieldname": "commission_rate_labor_pct",
+			"fieldtype": "Percent",
+			"label": "Commission Rate (Labor %)",
+			"description": "Percentage of labor cost paid as commission",
+			"default": "20"
+		},
+		{
+			"fieldname": "bonus_on_time_pct",
+			"fieldtype": "Percent",
+			"label": "On-Time Bonus %",
+			"description": "Extra bonus for completing repairs on or before promised date",
+			"default": "5"
+		},
+		{
+			"fieldname": "penalty_late_days",
+			"fieldtype": "Percent",
+			"label": "Late Penalty (Per Day %)",
+			"description": "Penalty percentage of commission per day late",
+			"default": "0.5"
+		},
+		{
+			"fieldname": "min_commission_amount",
+			"fieldtype": "Currency",
+			"label": "Minimum Commission Amount",
+			"description": "Minimum commission amount to process payment",
+			"default": "50"
+		},
+		{
+			"fieldname": "commission_payment_frequency",
+			"fieldtype": "Select",
+			"label": "Payment Frequency",
+			"options": "Weekly\nBi-Weekly\nMonthly",
+			"default": "Monthly"
+		},
+		{
+			"fieldname": "column_break_1",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "enable_tiered_commission",
+			"fieldtype": "Check",
+			"label": "Enable Tiered Commission",
+			"description": "Enable higher commission rates for high performers",
+			"default": 0
+		},
+		{
+			"fieldname": "tier_1_threshold",
+			"fieldtype": "Currency",
+			"label": "Tier 1 Threshold",
+			"description": "Monthly revenue threshold for Tier 1",
+			"default": "0",
+			"depends_on": "enable_tiered_commission"
+		},
+		{
+			"fieldname": "tier_1_rate",
+			"fieldtype": "Percent",
+			"label": "Tier 1 Rate",
+			"description": "Commission rate for Tier 1",
+			"default": "20",
+			"depends_on": "enable_tiered_commission"
+		},
+		{
+			"fieldname": "tier_2_threshold",
+			"fieldtype": "Currency",
+			"label": "Tier 2 Threshold",
+			"description": "Monthly revenue threshold for Tier 2",
+			"default": "5000",
+			"depends_on": "enable_tiered_commission"
+		},
+		{
+			"fieldname": "tier_2_rate",
+			"fieldtype": "Percent",
+			"label": "Tier 2 Rate",
+			"description": "Commission rate for Tier 2",
+			"default": "25",
+			"depends_on": "enable_tiered_commission"
+		},
+		{
+			"fieldname": "tier_3_threshold",
+			"fieldtype": "Currency",
+			"label": "Tier 3 Threshold",
+			"description": "Monthly revenue threshold for Tier 3",
+			"default": "10000",
+			"depends_on": "enable_tiered_commission"
+		},
+		{
+			"fieldname": "tier_3_rate",
+			"fieldtype": "Percent",
+			"label": "Tier 3 Rate",
+			"description": "Commission rate for Tier 3",
+			"default": "30",
+			"depends_on": "enable_tiered_commission"
+		}
+	],
+	"index_web_pages_for_search": 0,
+	"links": [],
+	"modified": "2026-04-11 00:00:00.000000",
+	"modified_by": "Administrator",
+	"module": "Unified Retail Management System",
+	"name": "Repair Commission Settings",
+	"naming_rule": "Expression",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"print": 1,
+			"read": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"email": 1,
+			"print": 1,
+			"read": 1,
+			"role": "Sales Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"states": [],
+	"title_field": "commission_rate_labor_pct",
+	"is_single": 1
+}

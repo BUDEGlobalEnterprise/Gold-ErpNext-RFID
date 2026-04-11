@@ -1,293 +1,226 @@
 <template>
-	<div class="h-full flex flex-col gap-8 overflow-hidden">
-		<div class="shrink-0">
-			<div class="flex items-center justify-between">
+	<div class="h-full flex flex-col gap-10 no-scrollbar overflow-y-auto pb-20">
+		<!-- Header Redesigned -->
+		<div class="shrink-0 px-2">
+			<div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
 				<div>
-					<h2 class="premium-title">Issues & Support</h2>
-					<p class="premium-subtitle">Report attendance issues or get help from HR</p>
+					<h1 class="text-4xl font-black text-gray-900 dark:text-white tracking-tight leading-none mb-3">Support & Helpdesk</h1>
+					<p class="text-gray-500 font-medium font-sans">Get assistance from HR or report workspace issues with precision.</p>
 				</div>
-				<button
-					@click="showIssueModal = true"
-					class="bg-primary text-black px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-yellow-400 transition-all shadow-lg shadow-primary/20"
-				>
-					<span class="material-symbols-outlined">report</span>
-					Report Issue
-				</button>
+                <div class="flex items-center gap-4">
+                    <button class="px-6 py-3 bg-white border border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-all flex items-center gap-3 shadow-sm hover:shadow-md">
+                        <span class="material-symbols-outlined text-lg">contact_support</span>
+                        Documentation
+                    </button>
+                    <button @click="showIssueModal = true" class="px-8 py-3 bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-glow-emerald hover:bg-black transition-all">
+                        Report New Issue
+                    </button>
+                </div>
 			</div>
 		</div>
 
-		<div class="flex-1 overflow-y-auto custom-scrollbar space-y-8 pr-2">
-			<!-- Stats Cards -->
-			<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-				<div class="premium-card !p-6">
-					<div class="flex items-center gap-3 mb-4">
-						<div
-							class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20"
-						>
-							<span class="material-symbols-outlined text-blue-500">inbox</span>
-						</div>
-						<span class="status-label !mb-0">Total Tickets</span>
+		<div class="space-y-10">
+			<!-- Metrics Row Redesigned -->
+			<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Large Resolved Card -->
+				<div class="md:col-span-1 premium-card !p-8 bg-emerald-950 text-white shadow-glow-emerald flex flex-col justify-between min-h-[220px] group hover:scale-[1.02] transition-transform">
+					<div class="flex items-center gap-3">
+						<span class="text-[10px] font-black uppercase tracking-[0.25em] text-white/40">Resolved Tickets</span>
 					</div>
-					<span class="text-4xl font-bold font-mono text-gray-900 dark:text-white">{{
-						issuesStore.ticketStats.total
-					}}</span>
+					<div>
+                        <p class="text-[48px] font-black tracking-tighter leading-none mb-2 tabular-nums">{{ issuesStore.ticketStats.closed }}</p>
+                        <p class="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Successfully Closed Cases</p>
+                    </div>
 				</div>
 
-				<div class="premium-card !p-6">
-					<div class="flex items-center gap-3 mb-4">
-						<div
-							class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20"
-						>
-							<span class="material-symbols-outlined text-amber-500">pending</span>
-						</div>
-						<span class="status-label !mb-0">Open</span>
-					</div>
-					<span class="text-4xl font-bold font-mono text-gray-900 dark:text-white">{{
-						issuesStore.ticketStats.open
-					}}</span>
+				<div class="premium-card !p-8 flex flex-col justify-between shadow-sm">
+					<p class="status-label">Open Tickets</p>
+					<p class="text-[32px] font-black text-gray-900 tracking-tighter tabular-nums mb-4">{{ issuesStore.ticketStats.open }} Cases</p>
+                    <div class="premium-tag tag-amber">
+                        <span class="material-symbols-outlined text-[14px]">schedule</span>
+                        Awaiting Response
+                    </div>
 				</div>
 
-				<div class="premium-card !p-6">
-					<div class="flex items-center gap-3 mb-4">
-						<div
-							class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20"
-						>
-							<span class="material-symbols-outlined text-emerald-500"
-								>check_circle</span
-							>
-						</div>
-						<span class="status-label !mb-0">Resolved</span>
-					</div>
-					<span class="text-4xl font-bold font-mono text-gray-900 dark:text-white">{{
-						issuesStore.ticketStats.closed
-					}}</span>
+				<div class="premium-card !p-8 flex flex-col justify-between shadow-sm">
+					<p class="status-label">Total Submissions</p>
+					<p class="text-[32px] font-black text-gray-900 tracking-tighter tabular-nums mb-4">{{ issuesStore.ticketStats.total }} Total</p>
+                    <div class="premium-tag tag-gray">
+                        <span class="material-symbols-outlined text-[14px]">history</span>
+                        Lifetime Data
+                    </div>
+				</div>
+
+                <div class="premium-card !p-8 flex flex-col justify-between shadow-sm">
+					<p class="status-label">Avg. Resolution</p>
+					<p class="text-[32px] font-black text-gray-900 tracking-tighter tabular-nums mb-4">24 Hours</p>
+                    <div class="premium-tag tag-emerald">
+                        <span class="material-symbols-outlined text-[14px]">speed</span>
+                        SLA Target Met
+                    </div>
 				</div>
 			</div>
 
-			<!-- Tickets Table -->
-			<div class="premium-card !p-0 overflow-hidden">
-				<div
-					class="p-6 border-b border-gray-100 dark:border-white/5 flex items-center justify-between"
-				>
-					<h3 class="premium-title !text-lg">My Tickets</h3>
-					<div class="flex gap-2">
-						<button
-							@click="filterTickets = 'all'"
-							class="px-4 py-2 rounded-xl text-xs font-bold uppercase transition"
-							:class="
-								filterTickets === 'all'
-									? 'bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white'
-									: 'text-gray-400 dark:text-white/40 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5'
-							"
-						>
-							All
-						</button>
-						<button
-							@click="filterTickets = 'open'"
-							class="px-4 py-2 rounded-xl text-xs font-bold uppercase transition"
-							:class="
-								filterTickets === 'open'
-									? 'bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white'
-									: 'text-gray-400 dark:text-white/40 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5'
-							"
-						>
-							Open
-						</button>
-						<button
-							@click="filterTickets = 'resolved'"
-							class="px-4 py-2 rounded-xl text-xs font-bold uppercase transition"
-							:class="
-								filterTickets === 'resolved'
-									? 'bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white'
-									: 'text-gray-400 dark:text-white/40 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5'
-							"
-						>
-							Resolved
-						</button>
-					</div>
-				</div>
+            <!-- Secondary Bar Redesigned -->
+            <div class="flex items-center justify-between px-2 bg-gray-50 p-4 rounded-2xl shrink-0">
+                <div class="flex items-center gap-3">
+                    <button
+                        v-for="f in ['all', 'open', 'resolved']"
+                        :key="f"
+                        @click="filterTickets = f"
+                        class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                        :class="filterTickets === f ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-600'"
+                    >
+                        {{ f }}
+                    </button>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button class="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all">
+                        <span class="material-symbols-outlined text-lg">filter_list</span>
+                    </button>
+                </div>
+            </div>
 
-				<div v-if="issuesStore.loading" class="p-8 text-center">
-					<p class="text-white/40">Loading tickets...</p>
-				</div>
+			<div class="space-y-4">
+                <div v-if="filteredTickets.length === 0" class="premium-card !p-20 text-center border-gray-100 shadow-sm">
+                    <div class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 mx-auto mb-4">
+                        <span class="material-symbols-outlined text-3xl">support_agent</span>
+                    </div>
+                    <p class="text-xs font-black text-gray-400 uppercase tracking-widest">No tickets found</p>
+                </div>
 
-				<div v-else-if="filteredTickets.length === 0" class="p-8 text-center">
-					<div
-						class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4"
-					>
-						<span class="material-symbols-outlined text-3xl text-white/20"
-							>support_agent</span
-						>
-					</div>
-					<h3 class="text-lg font-bold text-white mb-2">No Tickets Found</h3>
-					<p class="text-white/40 text-sm">
-						{{
-							filterTickets === "all"
-								? "You haven't created any tickets yet."
-								: `No ${filterTickets} tickets.`
-						}}
-					</p>
-				</div>
-
-				<div v-else class="overflow-x-auto">
-					<table class="w-full text-left">
-						<thead
-							class="bg-gray-50/50 dark:bg-white/5 text-[10px] text-gray-500 dark:text-white/40 uppercase font-bold tracking-wider"
-						>
-							<tr>
-								<th class="px-6 py-4">Subject</th>
-								<th class="px-6 py-4">Type</th>
-								<th class="px-6 py-4">Priority</th>
-								<th class="px-6 py-4">Created</th>
-								<th class="px-6 py-4 text-right">Status</th>
-							</tr>
-						</thead>
-						<tbody class="divide-y divide-white/5">
-							<tr
-								v-for="ticket in filteredTickets"
-								:key="ticket.name"
-								class="group hover:bg-white/5 transition-colors cursor-pointer"
-								@click="viewTicket(ticket)"
-							>
-								<td class="px-6 py-4">
-									<div class="flex items-center gap-3">
-										<span
-											class="w-2 h-2 rounded-full"
-											:class="getStatusDotColor(ticket.status)"
-										></span>
-										<span class="font-bold text-white">{{
-											ticket.subject
-										}}</span>
-									</div>
-								</td>
-								<td class="px-6 py-4">
-									<span class="text-white/60 text-sm">{{
-										ticket.ticket_type || "General"
-									}}</span>
-								</td>
-								<td class="px-6 py-4">
-									<span
-										class="text-[10px] font-bold px-2 py-1 rounded-md uppercase"
-										:class="getPriorityClass(ticket.priority)"
-									>
-										{{ ticket.priority }}
-									</span>
-								</td>
-								<td class="px-6 py-4">
-									<span class="text-white/40 text-sm">{{
-										formatDate(ticket.creation)
-									}}</span>
-								</td>
-								<td class="px-6 py-4 text-right">
-									<span
-										class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase"
-										:class="getStatusStyle(ticket.status)"
-									>
-										{{ ticket.status }}
-									</span>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
+                <div v-for="ticket in filteredTickets" :key="ticket.name" class="premium-card !p-8 flex flex-col md:flex-row md:items-center justify-between gap-8 border-gray-100 group hover:border-primary transition-all shadow-sm cursor-pointer" @click="viewTicket(ticket)">
+                    <div class="flex items-center gap-6">
+                        <div class="w-14 h-14 rounded-2xl bg-gray-50 flex flex-col items-center justify-center text-gray-400 group-hover:bg-emerald-50 group-hover:text-primary transition-colors">
+                            <span class="text-[9px] font-black uppercase tracking-widest leading-none mb-1">{{ formatDate(ticket.creation).split(' ')[0] }}</span>
+                            <span class="text-lg font-black leading-none text-gray-900">{{ formatDate(ticket.creation).split(' ')[1] }}</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-black text-gray-900 tracking-tight leading-none mb-2">{{ ticket.subject }}</p>
+                            <div class="flex items-center gap-3">
+                                <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ ticket.ticket_type || "General" }}</span>
+                                <div class="w-1 h-1 rounded-full bg-gray-200"></div>
+                                <span class="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded shadow-sm border" :class="getStatusStyle(ticket.status)">{{ ticket.status }}</span>
+                                <div class="w-1 h-1 rounded-full bg-gray-200"></div>
+                                <span class="text-[10px] font-black uppercase tracking-widest text-red-500" v-if="ticket.priority === 'High' || ticket.priority === 'Urgent'">{{ ticket.priority }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-12">
+                        <div class="text-right">
+                            <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Ticket ID</p>
+                            <p class="text-lg font-black text-gray-900 tracking-tighter">{{ ticket.name }}</p>
+                        </div>
+                        <button class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-primary transition-all">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
 			</div>
 		</div>
 
 		<!-- Report Issue Modal -->
 		<Teleport to="body">
-			<div
-				v-if="showIssueModal"
-				class="fixed inset-0 z-50 flex items-center justify-center p-4"
-				@click.self="showIssueModal = false"
-			>
-				<div class="absolute inset-0 bg-black/60"></div>
+			<Transition name="fade">
 				<div
-					class="relative bg-[#111420] rounded-2xl p-6 w-full max-w-md border border-white/10"
+					v-if="showIssueModal"
+					class="fixed inset-0 z-[100] flex items-center justify-center p-4"
 				>
-					<h3 class="font-bold text-white text-lg mb-4">Report an Issue</h3>
-
-					<div class="space-y-4">
-						<div>
-							<label class="block text-xs font-bold text-white/60 uppercase mb-2"
-								>Subject</label
+					<div
+						class="absolute inset-0 bg-black/40 backdrop-blur-sm"
+						@click="showIssueModal = false"
+					></div>
+					<div
+						class="relative bg-white dark:bg-[#0a0c1a] rounded-4xl p-10 w-full max-w-xl shadow-2xl border border-gray-50 transform transition-all"
+					>
+						<div class="flex items-center justify-between mb-10">
+							<div>
+                                <h3 class="text-2xl font-black text-gray-900 tracking-tight">Report Issue</h3>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Personnel Helpdesk Submission</p>
+                            </div>
+							<button
+								@click="showIssueModal = false"
+								class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-all"
 							>
-							<input
-								v-model="newIssue.subject"
-								type="text"
-								placeholder="Brief description of the issue..."
-								class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50"
-							/>
+								<span class="material-symbols-outlined">close</span>
+							</button>
 						</div>
 
-						<div>
-							<label class="block text-xs font-bold text-white/60 uppercase mb-2"
-								>Issue Type</label
-							>
-							<select
-								v-model="newIssue.issue_type"
-								class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50"
-							>
-								<option value="" disabled>Select issue type...</option>
-								<option
-									v-for="type in issuesStore.issueTypes"
-									:key="type.name"
-									:value="type.name"
-								>
-									{{ type.name }}
-								</option>
-								<option value="Attendance">Attendance Issue</option>
-								<option value="Payroll">Payroll Issue</option>
-								<option value="Leave">Leave Issue</option>
-								<option value="Manager">Manager Issue</option>
-								<option value="Other">Other</option>
-							</select>
+						<div class="space-y-6">
+							<div>
+								<label class="status-label">Issue Subject</label>
+								<input
+									v-model="newIssue.subject"
+									type="text"
+									placeholder="Brief summary of your concern..."
+									class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-gray-900 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all"
+								/>
+							</div>
+
+							<div class="grid grid-cols-2 gap-6">
+								<div>
+									<label class="status-label">Category</label>
+									<select
+										v-model="newIssue.issue_type"
+										class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-gray-900 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all appearance-none"
+									>
+										<option value="" disabled>Select type...</option>
+										<option
+											v-for="type in issuesStore.issueTypes"
+											:key="type.name"
+											:value="type.name"
+										>
+											{{ type.name }}
+										</option>
+										<option value="Attendance">Attendance</option>
+										<option value="Payroll">Payroll</option>
+										<option value="Leave">Leave</option>
+										<option value="Other">Other</option>
+									</select>
+								</div>
+								<div>
+									<label class="status-label">Priority</label>
+									<select
+										v-model="newIssue.priority"
+										class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-gray-900 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all appearance-none"
+									>
+										<option value="Low">Low</option>
+										<option value="Medium">Medium</option>
+										<option value="High">High</option>
+										<option value="Urgent">Urgent</option>
+									</select>
+								</div>
+							</div>
+
+							<div>
+								<label class="status-label">Detailed Description</label>
+								<textarea
+									v-model="newIssue.description"
+									rows="4"
+									placeholder="Provide enough context for our artisans to assist you..."
+									class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-gray-900 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all resize-none"
+								></textarea>
+							</div>
 						</div>
 
-						<div>
-							<label class="block text-xs font-bold text-white/60 uppercase mb-2"
-								>Priority</label
+						<div class="flex gap-4 mt-12">
+							<button
+								@click="showIssueModal = false"
+								class="flex-1 py-4 text-gray-400 font-black text-xs uppercase tracking-widest hover:text-gray-900 transition-all"
 							>
-							<select
-								v-model="newIssue.priority"
-								class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50"
+								Dismiss
+							</button>
+							<button
+								@click="submitIssue"
+								:disabled="!canSubmitIssue"
+								class="flex-[1.5] py-4 bg-primary text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-glow-emerald disabled:opacity-50"
 							>
-								<option value="Low">Low</option>
-								<option value="Medium">Medium</option>
-								<option value="High">High</option>
-								<option value="Urgent">Urgent</option>
-							</select>
+								Finalize Submission
+							</button>
 						</div>
-
-						<div>
-							<label class="block text-xs font-bold text-white/60 uppercase mb-2"
-								>Description</label
-							>
-							<textarea
-								v-model="newIssue.description"
-								rows="4"
-								placeholder="Provide details about the issue..."
-								class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 resize-none"
-							></textarea>
-						</div>
-					</div>
-
-					<div class="flex gap-3 mt-6">
-						<button
-							@click="showIssueModal = false"
-							class="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white/60 text-sm font-bold transition-colors"
-						>
-							Cancel
-						</button>
-						<button
-							@click="submitIssue"
-							:disabled="!canSubmitIssue"
-							class="flex-1 py-3 bg-primary text-black rounded-xl text-sm font-bold hover:bg-yellow-400 transition-colors disabled:opacity-50"
-						>
-							Submit Issue
-						</button>
 					</div>
 				</div>
-			</div>
+			</Transition>
 		</Teleport>
 	</div>
 </template>

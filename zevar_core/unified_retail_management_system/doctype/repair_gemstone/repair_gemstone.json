@@ -1,0 +1,84 @@
+{
+  "actions": [],
+  "allow_rename": 0,
+  "creation": "2026-04-10 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "gemstone_type",
+    "quantity",
+    "carat_weight",
+    "color",
+    "clarity",
+    "setting_type",
+    "is_treated",
+    "notes"
+  ],
+  "fields": [
+    {
+      "fieldname": "gemstone_type",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Gemstone Type",
+      "options": "Diamond\nRuby\nSapphire\nEmerald\nAlexandrite\nPearl\nOpal\nGarnet\nTopaz\nAmethyst\nCitrine\nAquamarine\nTourmaline\nPeridot\nTanzanite\nZircon\nJade\nMoonstone\nOther",
+      "reqd": 1
+    },
+    {
+      "fieldname": "quantity",
+      "fieldtype": "Int",
+      "in_list_view": 1,
+      "label": "Quantity",
+      "default": "1"
+    },
+    {
+      "fieldname": "carat_weight",
+      "fieldtype": "Float",
+      "in_list_view": 1,
+      "label": "Carat Weight",
+      "description": "Total carat weight for all stones"
+    },
+    {
+      "fieldname": "color",
+      "fieldtype": "Select",
+      "label": "Color",
+      "options": "D\nE\nF\nG\nH\nI\nJ\nK\nL\nM\nN-Z\nFancy Yellow\nFancy Pink\nFancy Blue\nFancy Green\nOther"
+    },
+    {
+      "fieldname": "clarity",
+      "fieldtype": "Select",
+      "label": "Clarity",
+      "options": "FL\nIF\nVVS1\nVVS2\nVS1\nVS2\nSI1\nSI2\nI1\nI2\nI3"
+    },
+    {
+      "fieldname": "setting_type",
+      "fieldtype": "Select",
+      "label": "Setting Type",
+      "options": "Prong\nBezel\nChannel\nPave\nBezel & Prong\nTension\nBar\nFlush\nGypsy\nOther"
+    },
+    {
+      "default": "0",
+      "fieldname": "is_treated",
+      "fieldtype": "Check",
+      "label": "Is Treated",
+      "description": "Check if the gemstone has been treated (enhanced)"
+    },
+    {
+      "fieldname": "notes",
+      "fieldtype": "Small Text",
+      "label": "Notes"
+    }
+  ],
+  "grid_page_length": 50,
+  "index_web_pages_for_search": 0,
+  "istable": 1,
+  "links": [],
+  "modified": "2026-04-10 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Unified Retail Management System",
+  "name": "Repair Gemstone",
+  "owner": "Administrator",
+  "permissions": [],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": []
+}

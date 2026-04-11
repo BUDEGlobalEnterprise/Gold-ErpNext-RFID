@@ -259,14 +259,21 @@ const currentStockFilter = computed(() => {
 	return 'all'
 })
 const hasActiveFilters = computed(() => {
-	const { in_stock_only, out_of_stock_only, ...otherFilters } = ui.activeFilters
-	const hasCustomFilters = Object.values(otherFilters).some((value) =>
-		Array.isArray(value) ? value.length > 0 : Boolean(value)
-	)
-
-	return (
-		hasCustomFilters || Boolean(ui.searchQuery) || !in_stock_only || Boolean(out_of_stock_only)
-	)
+	const f = ui.activeFilters
+	let count = 0
+	
+	// Check stock filters
+	if (f.in_stock_only) count++
+	if (f.out_of_stock_only) count++
+	
+	// Check custom filters
+	if (f.custom_metal_type) count++
+	if (f.custom_gemstone) count++
+	if (f.custom_purity) count++
+	if (f.custom_jewelry_type) count++
+	if (f.price_min || f.price_max) count++
+	
+	return count > 0 || Boolean(ui.searchQuery)
 })
 
 // Smart Purity Logic
@@ -304,5 +311,4 @@ function updateGemstone(val) {
 
 function handleReset() {
 	ui.resetFilters()
-}
-</script>
+}</script>

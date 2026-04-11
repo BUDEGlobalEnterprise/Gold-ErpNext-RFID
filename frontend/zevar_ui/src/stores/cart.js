@@ -299,11 +299,13 @@ export const useCartStore = defineStore('cart', () => {
 				items: JSON.stringify(itemsPayload),
 				deposit_amount: depositAmount,
 				duration_months: durationMonths,
-				warehouse: warehouse || '',
+				warehouse: warehouse || undefined,
 			},
 		}).fetch()
 
-		return r
+		// Unwrap frappe-ui response (may be wrapped in 'message')
+		const data = r?.message ?? r
+		return data
 	}
 
 	return {

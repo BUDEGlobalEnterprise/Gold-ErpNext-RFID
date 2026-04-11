@@ -401,7 +401,7 @@ function buildQueryFilters() {
 }
 
 const itemsResource = createResource({
-	url: 'zevar_core.api.get_pos_items',
+	url: 'zevar_core.api.catalog.get_pos_items',
 	makeParams() {
 		const queryFilters = buildQueryFilters()
 		let minPrice = null

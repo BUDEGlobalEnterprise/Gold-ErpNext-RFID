@@ -213,27 +213,46 @@ const hasMore = ref(true)
 
 // Fetch Items Resource
 const items = createResource({
-	url: 'zevar_core.api.get_pos_items',
+	url: 'zevar_core.api.catalog.get_pos_items',
 	makeParams() {
-		const { in_stock_only, out_of_stock_only, price_min, price_max, ...otherFilters } =
-			ui.activeFilters
+		const {
+			in_stock_only,
+			out_of_stock_only,
+			price_min,
+			price_max,
+			custom_jewelry_type,
+			custom_metal_type,
+			custom_purity,
+			custom_gemstone,
+			...otherFilters
+		} = ui.activeFilters
 
-		return {
+		const params = {
 			warehouse: session.currentWarehouse,
 			page_length: PAGE_LENGTH,
 			start: start.value,
-			search_term: ui.searchQuery,
+			search_term: ui.searchQuery || undefined,
 			filters: JSON.stringify({
+				custom_jewelry_type: custom_jewelry_type || undefined,
+				custom_metal_type: custom_metal_type || undefined,
+				custom_purity: custom_purity || undefined,
+				custom_gemstone: custom_gemstone || undefined,
 				...otherFilters,
-				min_price: price_min,
-				max_price: price_max,
 			}),
 			in_stock_only: in_stock_only || false,
 			out_of_stock_only: out_of_stock_only || false,
+			min_price: price_min || undefined,
+			max_price: price_max || undefined,
 			sort_by: ui.sortBy || undefined,
 		}
+		
+		console.log('🔍 POS Items API Params:', params)
+		console.log('🎯 Active Filters:', ui.activeFilters)
+		
+		return params
 	},
 	onSuccess(data) {
+		console.log('✅ POS Items API Response:', data.length, 'items')
 		if (data.length < PAGE_LENGTH) {
 			hasMore.value = false
 		}
@@ -242,6 +261,9 @@ const items = createResource({
 		} else {
 			catalog.value.push(...data)
 		}
+	},
+	onError(error) {
+		console.error('❌ POS Items API Error:', error)
 	},
 })
 
@@ -298,7 +320,11 @@ function viewCategory(cat) {
 let searchTimeout = null
 
 watch(
-	() => [ui.searchQuery, ui.activeFilters, ui.sortBy],
+	() => ({
+		search: ui.searchQuery,
+		filters: JSON.stringify(ui.activeFilters),
+		sort: ui.sortBy,
+	}),
 	() => {
 		if (searchTimeout) clearTimeout(searchTimeout)
 		searchTimeout = setTimeout(() => {

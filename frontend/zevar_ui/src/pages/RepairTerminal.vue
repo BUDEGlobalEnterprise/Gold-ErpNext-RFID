@@ -1,7 +1,7 @@
 <template>
 	<AppLayout>
 		<div class="h-full flex flex-col min-h-0">
-			<div class="flex items-center justify-between gap-4 mb-6 flex-shrink-0">
+			<div class="flex items-center justify-between gap-4 mb-4 flex-shrink-0">
 				<div>
 					<h2 class="text-2xl font-serif font-bold text-gray-900 dark:text-white">
 						Repair Terminal
@@ -10,759 +10,448 @@
 						Manage repair orders and customer repairs
 					</p>
 				</div>
-				<button
-					@click="showNewModal = true"
-					class="px-4 py-2.5 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] transition flex items-center gap-2"
-				>
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 4v16m8-8H4"
-						/>
-					</svg>
-					New Repair
-				</button>
+				<div class="flex items-center gap-2">
+					<!-- View Toggle -->
+					<div class="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+						<button
+							@click="viewMode = 'grid'"
+							class="px-3 py-1.5 rounded-md text-sm font-medium transition"
+							:class="viewMode === 'grid' ? 'bg-white dark:bg-gray-700 shadow' : 'text-gray-500 hover:text-gray-700'"
+						>
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+							</svg>
+						</button>
+						<button
+							@click="viewMode = 'kanban'"
+							class="px-3 py-1.5 rounded-md text-sm font-medium transition"
+							:class="viewMode === 'kanban' ? 'bg-white dark:bg-gray-700 shadow' : 'text-gray-500 hover:text-gray-700'"
+						>
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+							</svg>
+						</button>
+						<button
+							v-if="isDesktop"
+							@click="viewMode = 'split'"
+							class="px-3 py-1.5 rounded-md text-sm font-medium transition"
+							:class="viewMode === 'split' ? 'bg-white dark:bg-gray-700 shadow' : 'text-gray-500 hover:text-gray-700'"
+						>
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 16a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+							</svg>
+						</button>
+					</div>
+					<button
+						@click="showNewModal = true"
+						class="px-4 py-2.5 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] transition flex items-center gap-2"
+					>
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+						</svg>
+						New Repair
+					</button>
+				</div>
 			</div>
 
-			<!-- Status Filter Tabs with Count Badges -->
-			<div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+			<!-- Dashboard Stats Widget -->
+			<div v-if="dashboardStats" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-4">
+				<div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-3 border border-red-100 dark:border-red-800/30">
+					<span class="text-xs text-red-600 dark:text-red-400 font-medium">Overdue</span>
+					<p class="text-xl font-bold text-red-700 dark:text-red-300">{{ dashboardStats.overdue_count || 0 }}</p>
+				</div>
+				<div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-100 dark:border-green-800/30">
+					<span class="text-xs text-green-600 dark:text-green-400 font-medium">Ready Pickup</span>
+					<p class="text-xl font-bold text-green-700 dark:text-green-300">{{ dashboardStats.ready_pickup_count || 0 }}</p>
+				</div>
+				<div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-100 dark:border-blue-800/30">
+					<span class="text-xs text-blue-600 dark:text-blue-400 font-medium">Week Revenue</span>
+					<p class="text-xl font-bold text-blue-700 dark:text-blue-300">${{ formatNum(dashboardStats.weekly_revenue || 0) }}</p>
+				</div>
+				<div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-100 dark:border-purple-800/30">
+					<span class="text-xs text-purple-600 dark:text-purple-400 font-medium">Month Revenue</span>
+					<p class="text-xl font-bold text-purple-700 dark:text-purple-300">${{ formatNum(dashboardStats.monthly_revenue || 0) }}</p>
+				</div>
+				<div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-100 dark:border-orange-800/30">
+					<span class="text-xs text-orange-600 dark:text-orange-400 font-medium">Avg Turnaround</span>
+					<p class="text-xl font-bold text-orange-700 dark:text-orange-300">{{ dashboardStats.avg_turnaround_days || 0 }}d</p>
+				</div>
+				<div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border border-yellow-100 dark:border-yellow-800/30">
+					<span class="text-xs text-yellow-600 dark:text-yellow-400 font-medium">Pending Collect</span>
+					<p class="text-xl font-bold text-yellow-700 dark:text-yellow-300">${{ formatNum(dashboardStats.pending_collections_amount || 0) }}</p>
+				</div>
+			</div>
+
+			<!-- Status Filter Tabs -->
+			<div class="flex gap-2 mb-3 overflow-x-auto pb-2">
 				<button
 					v-for="statusItem in statusTabs"
 					:key="statusItem.value"
 					@click="selectStatusTab(statusItem.value)"
-					class="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap"
-					:class="
-						statusFilter === statusItem.value
-							? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30'
-							: 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-transparent hover:bg-gray-200 dark:hover:bg-gray-700'
-					"
+					class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition whitespace-nowrap"
+					:class="statusFilter === statusItem.value
+						? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30'
+						: 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-transparent hover:bg-gray-200 dark:hover:bg-gray-700'"
 				>
 					<span>{{ statusItem.label }}</span>
-					<span
-						v-if="statusItem.count > 0"
-						class="px-1.5 py-0.5 rounded-full text-xs font-bold"
-						:class="
-							statusFilter === statusItem.value
-								? 'bg-[#D4AF37] text-black'
-								: 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-						"
-					>
+					<span v-if="statusItem.count > 0" class="px-1.5 py-0.5 rounded-full text-xs font-bold"
+						:class="statusFilter === statusItem.value
+							? 'bg-[#D4AF37] text-black'
+							: 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300'">
 						{{ statusItem.count }}
 					</span>
 				</button>
 			</div>
 
-			<!-- Search Bar with Quick Search -->
-			<div class="flex gap-3 mb-4">
+			<!-- Search & Filter Bar -->
+			<div class="flex gap-3 mb-3">
 				<div class="flex-1 relative">
-					<svg
-						class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-						/>
+					<svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
 					</svg>
 					<input
 						v-model="searchTerm"
 						@input="debouncedLoad"
 						placeholder="Search by repair #, customer name, or phone..."
-						class="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent placeholder-gray-400"
+						class="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent placeholder-gray-400"
 					/>
 				</div>
 				<button
 					@click="showAdvancedSearch = !showAdvancedSearch"
-					class="px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+					class="px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center gap-2"
+					:class="{ 'bg-[#D4AF37]/10 border-[#D4AF37]/30': hasActiveFilters }"
 				>
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-						/>
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+					</svg>
+					<svg v-if="hasActiveFilters" class="w-4 h-4 text-[#D4AF37]" fill="currentColor" viewBox="0 0 20 20">
+						<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
 					</svg>
 				</button>
 			</div>
 
-			<!-- Stats Summary -->
-			<div v-if="stats" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-				<div
-					class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-100 dark:border-blue-800/30"
-				>
-					<span class="text-xs text-blue-600 dark:text-blue-400 font-medium"
-						>Received</span
-					>
-					<p class="text-xl font-bold text-blue-700 dark:text-blue-300">
-						{{ stats['Received'] || 0 }}
-					</p>
-				</div>
-				<div
-					class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-100 dark:border-orange-800/30"
-				>
-					<span class="text-xs text-orange-600 dark:text-orange-400 font-medium"
-						>In Progress</span
-					>
-					<p class="text-xl font-bold text-orange-700 dark:text-orange-300">
-						{{ stats['In Progress'] || 0 }}
-					</p>
-				</div>
-				<div
-					class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-100 dark:border-purple-800/30"
-				>
-					<span class="text-xs text-purple-600 dark:text-purple-400 font-medium"
-						>Waiting Parts</span
-					>
-					<p class="text-xl font-bold text-purple-700 dark:text-purple-300">
-						{{ stats['Waiting for Parts'] || 0 }}
-					</p>
-				</div>
-				<div
-					class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-100 dark:border-green-800/30"
-				>
-					<span class="text-xs text-green-600 dark:text-green-400 font-medium"
-						>Ready</span
-					>
-					<p class="text-xl font-bold text-green-700 dark:text-green-300">
-						{{ stats['Ready for Pickup'] || 0 }}
-					</p>
-				</div>
-			</div>
-
-			<!-- Orders Grid -->
-			<div class="flex-1 overflow-y-auto pb-20">
-				<div
-					v-if="ordersResource.loading && !orders.length"
-					class="py-20 text-center bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700"
-				>
-					<div
-						class="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-[#D4AF37] mx-auto mb-4"
-					></div>
-					<p class="text-gray-500 dark:text-gray-400">Loading repairs...</p>
-				</div>
-
-				<div
-					v-else-if="!orders.length"
-					class="py-20 text-center bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700"
-				>
-					<svg
-						class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="1.5"
-							d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-						/>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="1.5"
-							d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-						/>
-					</svg>
-					<p class="text-gray-500 dark:text-gray-400 text-sm">No repair orders found</p>
-					<p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-						Create a new repair order to get started
-					</p>
-				</div>
-
-				<div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-					<div
-						v-for="order in orders"
-						:key="order.name"
-						@click="openDetail(order)"
-						class="p-4 rounded-xl border bg-white dark:bg-gray-900 hover:border-[#D4AF37] hover:shadow-md cursor-pointer transition-all group"
-						:class="getStatusBorderColor(order.status)"
-					>
-						<!-- Header -->
-						<div class="flex justify-between items-start mb-3">
-							<div>
-								<span class="font-mono text-sm font-bold text-[#D4AF37]">{{
-									order.name
-								}}</span>
-								<span
-									class="ml-2 inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold"
-									:class="getStatusBadgeClass(order.status)"
-								>
-									{{ order.status }}
-								</span>
-							</div>
-							<span class="text-xs text-gray-400">{{
-								formatDate(order.creation)
-							}}</span>
-						</div>
-
-						<!-- Repair Type -->
-						<p class="font-medium text-gray-900 dark:text-white mb-2 truncate">
-							{{ order.repair_type_name || order.repair_type }}
-						</p>
-
-						<!-- Customer Info -->
-						<div class="space-y-1 mb-3">
-							<div
-								class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
-							>
-								<svg
-									class="w-4 h-4 text-gray-400"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-									/>
-								</svg>
-								<span class="truncate">{{
-									order.customer_name || order.customer
-								}}</span>
-							</div>
-							<div
-								v-if="order.customer_phone"
-								class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-500"
-							>
-								<svg
-									class="w-4 h-4 text-gray-400"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-									/>
-								</svg>
-								<span>{{ order.customer_phone }}</span>
-							</div>
-						</div>
-
-						<!-- Footer -->
-						<div
-							class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800"
-						>
-							<span class="text-xs text-gray-400">
-								By: {{ order.handled_by_name || 'Unassigned' }}
-							</span>
-							<span class="text-sm font-bold text-gray-900 dark:text-white">
-								${{ formatNum(order.estimated_cost || order.total_cost) }}
-							</span>
-						</div>
+			<!-- Advanced Search Panel -->
+			<div v-if="showAdvancedSearch" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-700">
+				<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+					<div>
+						<label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Date From</label>
+						<input v-model="advancedFilters.from_date" type="date" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-sm" />
+					</div>
+					<div>
+						<label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Date To</label>
+						<input v-model="advancedFilters.to_date" type="date" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-sm" />
+					</div>
+					<div>
+						<label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
+						<select v-model="advancedFilters.priority" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-sm">
+							<option value="">All</option>
+							<option value="Low">Low</option>
+							<option value="Medium">Medium</option>
+							<option value="High">High</option>
+							<option value="Urgent">Urgent</option>
+						</select>
+					</div>
+					<div>
+						<label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Technician</label>
+						<select v-model="advancedFilters.assigned_to" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-sm">
+							<option value="">All Technicians</option>
+							<option v-for="tech in technicians" :key="tech.value" :value="tech.value">{{ tech.label }}</option>
+						</select>
 					</div>
 				</div>
+				<div class="flex justify-end gap-2 mt-3">
+					<button @click="clearAdvancedFilters" class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">Clear Filters</button>
+					<button @click="applyAdvancedFilters" class="px-4 py-1.5 bg-[#D4AF37] text-black rounded-lg text-sm font-medium hover:bg-[#c9a432]">Apply</button>
+				</div>
 			</div>
 
-			<!-- Detail Modal -->
-			<Teleport to="body">
-				<div
-					v-if="detailOrder"
-					class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-					@click.self="detailOrder = null"
-				>
-					<div
-						class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto"
-					>
-						<!-- Modal Header -->
-						<div
-							class="sticky top-0 bg-white dark:bg-gray-900 p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-start"
-						>
-							<div>
-								<h3 class="text-lg font-bold text-gray-900 dark:text-white">
-									{{ detailOrder.name }}
+			<!-- Store Selector -->
+			<div class="flex items-center justify-between mb-3">
+				<div class="flex items-center gap-3">
+					<label class="text-sm font-medium text-gray-700 dark:text-gray-300">Store:</label>
+					<select v-model="selectedStore" @change="onStoreChange" class="px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm">
+						<option value="all">All Stores</option>
+						<option v-for="storeStat in multiStoreStats" :key="storeStat.warehouse" :value="storeStat.warehouse">
+							{{ storeStat.warehouse_name }} ({{ storeStat.total_active }} active)
+						</option>
+					</select>
+				</div>
+				<div class="flex items-center gap-2 text-sm text-gray-500">
+					<span>Auto-refresh:</span>
+					<select v-model="refreshInterval" @change="setupAutoRefresh" class="px-2 py-1 border rounded">
+						<option :value="0">Off</option>
+						<option :value="10000">10s</option>
+						<option :value="30000">30s</option>
+						<option :value="60000">1m</option>
+					</select>
+				</div>
+			</div>
+
+			<!-- Main Content Area -->
+			<div class="flex-1 flex min-h-0 overflow-hidden">
+				<!-- Grid View -->
+				<div v-if="viewMode === 'grid'" class="flex-1 overflow-y-auto pb-20">
+					<div v-if="ordersResource.loading && !orders.length" class="py-20 text-center">
+						<div class="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-[#D4AF37] mx-auto mb-4"></div>
+						<p class="text-gray-500">Loading repairs...</p>
+					</div>
+					<div v-else-if="!orders.length" class="py-20 text-center bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
+						<p class="text-gray-500 text-sm">No repair orders found</p>
+					</div>
+					<div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+						<RepairCard
+							v-for="order in orders"
+							:key="order.name"
+							:order="order"
+							@open-detail="openDetail(order)"
+							@quick-status="quickStatusChange"
+							@open-qr="showQRCode(order)"
+							@print-thermal="printThermalReceipt(order)"
+						/>
+					</div>
+				</div>
+
+				<!-- Kanban View -->
+				<div v-else-if="viewMode === 'kanban'" class="flex-1 overflow-x-auto pb-4">
+					<div class="flex gap-3 min-w-max h-full">
+						<div v-for="column in kanbanColumns" :key="column.status" class="w-72 flex-shrink-0 flex flex-col bg-gray-50 dark:bg-gray-800 rounded-xl">
+							<div class="p-3 border-b border-gray-200 dark:border-gray-700">
+								<h3 class="font-bold text-gray-800 dark:text-gray-200 flex items-center justify-between">
+									{{ column.label }}
+									<span class="px-2 py-0.5 rounded-full text-xs font-bold" :class="column.badgeClass">{{ column.count }}</span>
 								</h3>
-								<span
-									class="inline-flex px-2 py-0.5 rounded-full text-xs font-bold mt-1"
-									:class="getStatusBadgeClass(detailOrder.status)"
-								>
-									{{ detailOrder.status }}
-								</span>
 							</div>
-							<button
-								@click="detailOrder = null"
-								class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition"
-							>
-								<svg
-									class="w-5 h-5"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
+							<div class="flex-1 overflow-y-auto p-2 space-y-2" @dragover.prevent @drop="onDrop($event, column.status)">
+								<div
+									v-for="order in column.orders"
+									:key="order.name"
+									draggable="true"
+									@dragstart="onDragStart($event, order)"
+									class="p-3 bg-white dark:bg-gray-900 rounded-lg shadow-sm cursor-pointer hover:shadow-md transition"
+									:class="getStatusBorderColor(order.status)"
 								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M6 18L18 6M6 6l12 12"
-									/>
-								</svg>
-							</button>
-						</div>
-
-						<!-- Modal Body -->
-						<div class="p-4 space-y-4">
-							<!-- Customer Section -->
-							<div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
-								<h4
-									class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2"
-								>
-									Customer
-								</h4>
-								<p class="font-medium text-gray-900 dark:text-white">
-									{{ detailOrder.customer_name }}
-								</p>
-								<p
-									v-if="detailOrder.customer_phone"
-									class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1 mt-1"
-								>
-									<svg
-										class="w-4 h-4"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-										/>
-									</svg>
-									{{ detailOrder.customer_phone }}
-								</p>
-							</div>
-
-							<!-- Repair Details -->
-							<div class="space-y-2">
-								<div class="flex justify-between">
-									<span class="text-gray-500 dark:text-gray-400"
-										>Repair Type:</span
-									>
-									<span class="font-medium text-gray-900 dark:text-white">{{
-										detailOrder.repair_type_name
-									}}</span>
-								</div>
-								<div class="flex justify-between">
-									<span class="text-gray-500 dark:text-gray-400"
-										>Handled by:</span
-									>
-									<span class="font-medium text-gray-900 dark:text-white">{{
-										detailOrder.handled_by_name || 'Unassigned'
-									}}</span>
-								</div>
-								<div class="flex justify-between">
-									<span class="text-gray-500 dark:text-gray-400"
-										>Est. Cost:</span
-									>
-									<span class="font-bold text-[#D4AF37]"
-										>${{ formatNum(detailOrder.estimated_cost) }}</span
-									>
-								</div>
-								<div class="flex justify-between">
-									<span class="text-gray-500 dark:text-gray-400">Total:</span>
-									<span class="font-bold text-gray-900 dark:text-white"
-										>${{ formatNum(detailOrder.total_cost) }}</span
-									>
-								</div>
-							</div>
-
-							<!-- Description -->
-							<div
-								v-if="detailOrder.description"
-								class="border-t border-gray-100 dark:border-gray-800 pt-4"
-							>
-								<h4
-									class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2"
-								>
-									Description
-								</h4>
-								<p class="text-sm text-gray-700 dark:text-gray-300">
-									{{ detailOrder.description }}
-								</p>
-							</div>
-
-							<!-- Quick Actions -->
-							<div
-								class="flex flex-wrap gap-2 pt-4 border-t border-gray-100 dark:border-gray-800"
-							>
-								<button
-									@click="printReceipt(detailOrder.name)"
-									class="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition flex items-center gap-1"
-								>
-									<svg
-										class="w-4 h-4"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-										/>
-									</svg>
-									Print Receipt
-								</button>
-								<button
-									@click="openCustomerHistory(detailOrder.customer)"
-									class="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition flex items-center gap-1"
-								>
-									<svg
-										class="w-4 h-4"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-										/>
-									</svg>
-									History
-								</button>
-							</div>
-
-							<!-- Customer History -->
-							<div
-								v-if="showHistory.length"
-								class="border-t border-gray-100 dark:border-gray-800 pt-4"
-							>
-								<h4
-									class="font-bold text-sm text-gray-700 dark:text-gray-300 mb-2"
-								>
-									Customer repair history
-								</h4>
-								<ul class="text-sm space-y-1">
-									<li
-										v-for="h in showHistory"
-										:key="h.name"
-										class="flex justify-between items-center py-1 border-b border-gray-100 dark:border-gray-800 last:border-0"
-									>
-										<span>{{ h.name }} - {{ h.repair_type_name }}</span>
-										<span
-											class="text-xs px-2 py-0.5 rounded-full"
-											:class="getStatusBadgeClass(h.status)"
-											>{{ h.status }}</span
-										>
-									</li>
-								</ul>
-							</div>
-
-							<!-- Status Update -->
-							<div class="pt-4 border-t border-gray-100 dark:border-gray-800">
-								<label
-									class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
-									>Update status</label
-								>
-								<select
-									v-model="detailStatus"
-									@change="updateStatus(detailOrder.name)"
-									class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
-								>
-									<option v-for="s in statusOptions" :key="s" :value="s">
-										{{ s }}
-									</option>
-								</select>
-							</div>
-						</div>
-					</div>
-				</div>
-			</Teleport>
-
-			<!-- New Repair Modal -->
-			<Teleport to="body">
-				<div
-					v-if="showNewModal"
-					class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-					@click.self="showNewModal = false"
-				>
-					<div
-						class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl max-w-md w-full mx-4 p-6"
-					>
-						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
-							New Repair Order
-						</h3>
-						<form @submit.prevent="submitNewRepair" class="space-y-4">
-							<!-- Customer -->
-							<div>
-								<label
-									class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-									>Customer</label
-								>
-								<div class="relative">
-									<input
-										v-model="customerSearchText"
-										type="text"
-										placeholder="Search customer..."
-										@input="onCustomerSearchInput"
-										@focus="showCustomerDropdown = true"
-										class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent placeholder-gray-400"
-									/>
-									<div
-										v-if="showCustomerDropdown && customerOptions.length > 0"
-										class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto"
-									>
-										<button
-											v-for="opt in customerOptions"
-											:key="opt.value"
-											type="button"
-											@click="selectCustomerOption(opt)"
-											class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition border-b border-gray-100 dark:border-gray-700 last:border-0"
-										>
-											<span
-												class="font-medium text-gray-900 dark:text-white"
-												>{{ opt.label }}</span
-											>
+									<div class="flex justify-between items-start mb-2">
+										<span class="font-mono text-xs font-bold text-[#D4AF37]">{{ order.name }}</span>
+										<span v-if="order.priority === 'Urgent'" class="text-red-500">
+											<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+										</span>
+									</div>
+									<p class="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{{ order.repair_type_name || order.repair_type }}</p>
+									<p class="text-xs text-gray-500 truncate">{{ order.customer_name || order.customer }}</p>
+									<div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
+										<span class="text-xs text-gray-400">{{ formatDate(order.creation) }}</span>
+										<span class="text-sm font-bold">${{ formatNum(order.estimated_cost || order.total_cost) }}</span>
+									</div>
+									<!-- Quick Actions -->
+									<div class="flex gap-1 mt-2">
+										<button @click.stop="quickStatusChange(order.name, getNextStatus(order.status))" class="flex-1 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded">→ Next</button>
+										<button @click.stop="openDetail(order)" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded">
+											<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
 										</button>
 									</div>
 								</div>
-								<p
-									v-if="newForm.customer"
-									class="mt-1 text-xs text-green-600 dark:text-green-400"
-								>
-									Selected: {{ newForm.customer.label }}
-								</p>
 							</div>
-
-							<!-- Repair Type -->
-							<div>
-								<label
-									class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-									>Repair Type</label
-								>
-								<select
-									v-model="newForm.repair_type"
-									required
-									class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
-								>
-									<option value="">Select...</option>
-									<option
-										v-for="rt in repairTypes"
-										:key="rt.name"
-										:value="rt.name"
-									>
-										{{ rt.description || rt.name }}
-									</option>
-								</select>
-							</div>
-
-							<!-- Customer Phone -->
-							<div>
-								<label
-									class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-									>Customer Phone</label
-								>
-								<input
-									v-model="newForm.customer_phone"
-									type="tel"
-									placeholder="(555) 123-4567"
-									class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
-								/>
-							</div>
-
-							<!-- Description -->
-							<div>
-								<label
-									class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-									>Item Description</label
-								>
-								<textarea
-									v-model="newForm.item_description"
-									rows="3"
-									placeholder="Describe the item and repair needed..."
-									class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent resize-none"
-								></textarea>
-							</div>
-
-							<!-- Estimated Cost -->
-							<div>
-								<label
-									class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-									>Estimated Cost ($)</label
-								>
-								<input
-									v-model.number="newForm.estimated_cost"
-									type="number"
-									step="0.01"
-									min="0"
-									placeholder="0.00"
-									class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
-								/>
-							</div>
-
-							<!-- Actions -->
-							<div class="flex gap-3 pt-2">
-								<button
-									type="button"
-									@click="showNewModal = false"
-									class="flex-1 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-								>
-									Cancel
-								</button>
-								<button
-									type="submit"
-									class="flex-1 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] transition"
-								>
-									Create Repair
-								</button>
-							</div>
-						</form>
+						</div>
 					</div>
 				</div>
-			</Teleport>
+
+				<!-- Split View -->
+				<div v-else-if="viewMode === 'split'" class="flex-1 flex gap-4 overflow-hidden">
+					<div class="w-1/2 overflow-y-auto">
+						<div v-if="ordersResource.loading && !orders.length" class="py-20 text-center">
+							<div class="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-[#D4AF37] mx-auto mb-4"></div>
+						</div>
+						<div v-else class="space-y-2">
+							<div
+								v-for="order in orders"
+								:key="order.name"
+								@click="selectedSplitOrder = order"
+								class="p-3 rounded-lg border cursor-pointer transition hover:shadow-md"
+								:class="selectedSplitOrder?.name === order.name ? 'bg-[#D4AF37]/10 border-[#D4AF37]' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700'"
+							>
+								<div class="flex justify-between items-start">
+									<div>
+										<span class="font-mono text-sm font-bold text-[#D4AF37]">{{ order.name }}</span>
+										<span class="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold" :class="getStatusBadgeClass(order.status)">{{ order.status }}</span>
+									</div>
+									<span class="text-sm font-bold">${{ formatNum(order.estimated_cost || order.total_cost) }}</span>
+								</div>
+								<p class="text-sm font-medium mt-1 truncate">{{ order.repair_type_name || order.repair_type }}</p>
+								<p class="text-xs text-gray-500">{{ order.customer_name || order.customer }}</p>
+							</div>
+						</div>
+					</div>
+					<div class="w-1/2 overflow-y-auto">
+						<div v-if="selectedSplitOrder" class="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+							<SplitDetailView :order="selectedSplitOrder" @status-changed="onStatusChanged" @print-thermal="printThermalReceipt" @open-qr="showQRCode" />
+						</div>
+						<div v-else class="flex items-center justify-center h-full text-gray-400">
+							Select a repair to view details
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
+
+		<!-- Detail Modal -->
+		<DetailModal v-if="detailOrder" :order="detailOrder" @close="detailOrder = null" @status-changed="onStatusChanged" @print-thermal="printThermalReceipt" @open-qr="showQRCode" @open-camera="showCameraModal = true" />
+
+		<!-- New Repair Modal -->
+		<NewRepairModal v-if="showNewModal" @close="showNewModal = false" @created="onRepairCreated" />
+
+		<!-- QR Code Modal -->
+		<QRCodeModal v-if="qrOrder" :order="qrOrder" @close="qrOrder = null" />
+
+		<!-- Camera Modal for Photo Capture -->
+		<CameraModal v-if="showCameraModal" @close="showCameraModal = false" @photo-captured="onPhotoCaptured" />
+
+		<!-- Store Transfer Modal -->
+		<StoreTransferModal v-if="showTransferModal" :order="transferOrder" @close="showTransferModal = false" @transferred="onRepairCreated" />
+
+		<!-- Payment Modal -->
+		<PaymentModal v-if="showPaymentModal" :order="paymentOrder" @close="showPaymentModal = false" @payment-recorded="onRepairCreated" />
 	</AppLayout>
 </template>
 
 <script setup>
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import AppLayout from '@/components/AppLayout.vue'
-import { useSessionStore } from '@/stores/session.js'
 import { createResource, call, toast } from 'frappe-ui'
-import { ref, watch, onMounted, computed } from 'vue'
+import { useSessionStore } from '@/stores/session.js'
+import RepairCard from '@/components/RepairCard.vue'
+import DetailModal from '@/components/RepairDetailModal.vue'
+import SplitDetailView from '@/components/SplitDetailView.vue'
+import NewRepairModal from '@/components/NewRepairModal.vue'
+import QRCodeModal from '@/components/QRCodeModal.vue'
+import CameraModal from '@/components/CameraModal.vue'
+import StoreTransferModal from '@/components/StoreTransferModal.vue'
+import PaymentModal from '@/components/PaymentModal.vue'
 
 const session = useSessionStore()
+const viewMode = ref('grid') // grid, kanban, split
 const statusFilter = ref('')
 const searchTerm = ref('')
+const selectedStore = ref('all')
+const showAdvancedSearch = ref(false)
+const refreshInterval = ref(30000) // 30 seconds default
 const orders = ref([])
 const stats = ref(null)
-const showNewModal = ref(false)
+const dashboardStats = ref(null)
+const multiStoreStats = ref([])
 const detailOrder = ref(null)
-const detailStatus = ref('')
-const showHistory = ref([])
-const showAdvancedSearch = ref(false)
-const customerQuery = ref('')
-const customerSearchText = ref('')
-const showCustomerDropdown = ref(false)
+const selectedSplitOrder = ref(null)
+const qrOrder = ref(null)
+const showCameraModal = ref(false)
+const showTransferModal = ref(false)
+const transferOrder = ref(null)
+const showPaymentModal = ref(false)
+const paymentOrder = ref(null)
+const showNewModal = ref(false)
 
-const newForm = ref({
-	customer: null,
-	repair_type: '',
-	item_description: '',
-	customer_phone: '',
-	estimated_cost: null,
+const advancedFilters = ref({
+	from_date: '',
+	to_date: '',
+	priority: '',
+	assigned_to: '',
+	customer: ''
 })
 
-const repairTypes = ref([])
-const statusOptions = [
-	'Received',
-	'Estimated',
-	'Approved',
-	'In Progress',
-	'Waiting for Parts',
-	'Quality Check',
-	'Ready for Pickup',
-	'Delivered',
-	'Cancelled',
-]
+const technicians = ref([])
+let refreshTimer = null
 
-// Status tabs with counts
+// Status tabs
 const statusTabs = computed(() => {
 	const tabs = [
 		{ value: '', label: 'All', count: 0 },
 		{ value: 'Received', label: 'Received', count: stats.value?.['Received'] || 0 },
 		{ value: 'In Progress', label: 'In Progress', count: stats.value?.['In Progress'] || 0 },
-		{
-			value: 'Waiting for Parts',
-			label: 'Parts',
-			count: stats.value?.['Waiting for Parts'] || 0,
-		},
-		{
-			value: 'Ready for Pickup',
-			label: 'Ready',
-			count: stats.value?.['Ready for Pickup'] || 0,
-		},
+		{ value: 'Waiting for Parts', label: 'Parts', count: stats.value?.['Waiting for Parts'] || 0 },
+		{ value: 'Ready for Pickup', label: 'Ready', count: stats.value?.['Ready for Pickup'] || 0 },
 	]
-	// Calculate total
 	tabs[0].count = Object.values(stats.value || {}).reduce((a, b) => a + b, 0)
 	return tabs
 })
 
-const repairTypesResource = createResource({
-	url: 'zevar_core.api.get_repair_types',
-	onSuccess: (data) => {
-		repairTypes.value = data || []
-	},
+const isDesktop = computed(() => window.innerWidth >= 1024)
+
+const hasActiveFilters = computed(() => {
+	return Object.values(advancedFilters.value).some(v => v !== '')
 })
 
-const customersResource = createResource({
-	url: 'frappe.client.get_list',
-	makeParams: () => ({
-		doctype: 'Customer',
-		filters: {
-			customer_name: ['like', `%${customerQuery.value}%`],
-		},
-		fields: ['name', 'customer_name', 'mobile_no'],
-		limit_page_length: 10,
-	}),
-	auto: false,
+// Kanban columns
+const kanbanColumns = computed(() => {
+	const columns = [
+		{ status: 'Received', label: 'Received', badgeClass: 'bg-blue-100 text-blue-700', orders: [] },
+		{ status: 'Estimated', label: 'Estimated', badgeClass: 'bg-yellow-100 text-yellow-700', orders: [] },
+		{ status: 'Approved', label: 'Approved', badgeClass: 'bg-indigo-100 text-indigo-700', orders: [] },
+		{ status: 'In Progress', label: 'In Progress', badgeClass: 'bg-orange-100 text-orange-700', orders: [] },
+		{ status: 'Waiting for Parts', label: 'Waiting Parts', badgeClass: 'bg-purple-100 text-purple-700', orders: [] },
+		{ status: 'Quality Check', label: 'Quality Check', badgeClass: 'bg-cyan-100 text-cyan-700', orders: [] },
+		{ status: 'Ready for Pickup', label: 'Ready', badgeClass: 'bg-green-100 text-green-700', orders: [] },
+	]
+	orders.value.forEach(order => {
+		const col = columns.find(c => c.status === order.status)
+		if (col) col.orders.push(order)
+	})
+	columns.forEach(c => c.count = c.orders.length)
+	return columns
 })
 
-const customerOptions = computed(() => {
-	return (customersResource.data || []).map((c) => ({
-		label: c.customer_name + (c.mobile_no ? ` (${c.mobile_no})` : ''),
-		value: c.name,
-	}))
-})
-
-let customerSearchTimer
-function onCustomerSearchInput() {
-	showCustomerDropdown.value = true
-	const q = customerSearchText.value
-	if (!q || q.length < 2) {
-		return
-	}
-	customerQuery.value = q
-	clearTimeout(customerSearchTimer)
-	customerSearchTimer = setTimeout(() => {
-		customersResource.fetch()
-	}, 300)
-}
-
-function selectCustomerOption(opt) {
-	newForm.value.customer = opt
-	customerSearchText.value = opt.label
-	showCustomerDropdown.value = false
-}
-
+// Resources
 const ordersResource = createResource({
 	url: 'zevar_core.api.get_repair_orders',
 	makeParams: () => ({
 		status: statusFilter.value || undefined,
-		warehouse: session.currentWarehouse || undefined,
+		warehouse: selectedStore.value !== 'all' ? selectedStore.value : undefined,
 		search_term: searchTerm.value || undefined,
-		page_length: 50,
+		from_date: advancedFilters.value.from_date || undefined,
+		to_date: advancedFilters.value.to_date || undefined,
+		priority: advancedFilters.value.priority || undefined,
+		assigned_to: advancedFilters.value.assigned_to || undefined,
+		customer: advancedFilters.value.customer || undefined,
+		page_length: 100,
 	}),
-	onSuccess: (data) => {
-		orders.value = data || []
-	},
+	onSuccess: (data) => { orders.value = data || [] },
 })
 
 const statsResource = createResource({
 	url: 'zevar_core.api.get_repair_stats',
-	makeParams: () => ({ warehouse: session.currentWarehouse || undefined }),
+	makeParams: () => ({ warehouse: selectedStore.value !== 'all' ? selectedStore.value : undefined }),
+	onSuccess: (data) => { stats.value = data },
+})
+
+const dashboardStatsResource = createResource({
+	url: 'zevar_core.api.get_dashboard_stats',
+	makeParams: () => ({ warehouse: selectedStore.value !== 'all' ? selectedStore.value : undefined }),
+	onSuccess: (data) => { dashboardStats.value = data },
+})
+
+const multiStoreStatsResource = createResource({
+	url: 'zevar_core.api.get_multi_store_stats',
+	onSuccess: (data) => { multiStoreStats.value = data || [] },
+})
+
+const techniciansResource = createResource({
+	url: 'frappe.client.get_list',
+	makeParams: () => ({
+		doctype: 'User',
+		filters: { enabled: 1 },
+		fields: ['name', 'full_name', 'first_name', 'last_name'],
+		limit_page_length: 100,
+	}),
 	onSuccess: (data) => {
-		stats.value = data
+		technicians.value = (data || []).map(t => ({
+			value: t.name,
+			label: t.full_name || `${t.first_name || ''} ${t.last_name || ''}`.trim() || t.name
+		}))
 	},
 })
 
 function loadOrders() {
 	ordersResource.fetch()
 	statsResource.fetch()
+	dashboardStatsResource.fetch()
+	if (selectedStore.value === 'all') multiStoreStatsResource.fetch()
 }
 
 function selectStatusTab(value) {
@@ -774,6 +463,20 @@ let debounceTimer
 function debouncedLoad() {
 	clearTimeout(debounceTimer)
 	debounceTimer = setTimeout(loadOrders, 300)
+}
+
+function applyAdvancedFilters() {
+	showAdvancedSearch.value = false
+	loadOrders()
+}
+
+function clearAdvancedFilters() {
+	advancedFilters.value = { from_date: '', to_date: '', priority: '', assigned_to: '', customer: '' }
+	loadOrders()
+}
+
+function onStoreChange() {
+	loadOrders()
 }
 
 function formatNum(n) {
@@ -789,154 +492,128 @@ function formatDate(dateStr) {
 
 function getStatusBorderColor(status) {
 	const colors = {
-		Received: 'border-blue-200 dark:border-blue-800',
-		'In Progress': 'border-orange-200 dark:border-orange-800',
-		'Waiting for Parts': 'border-purple-200 dark:border-purple-800',
-		'Ready for Pickup': 'border-green-200 dark:border-green-800',
-		Delivered: 'border-gray-200 dark:border-gray-700',
-		Cancelled: 'border-red-200 dark:border-red-800',
+		Received: 'border-blue-200',
+		'In Progress': 'border-orange-200',
+		'Waiting for Parts': 'border-purple-200',
+		'Ready for Pickup': 'border-green-200',
+		Delivered: 'border-gray-200',
+		Cancelled: 'border-red-200',
 	}
-	return colors[status] || 'border-gray-200 dark:border-gray-700'
+	return colors[status] || 'border-gray-200'
 }
 
 function getStatusBadgeClass(status) {
 	const classes = {
-		Received: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-		Estimated: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-		Approved: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
-		'In Progress': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-		'Waiting for Parts':
-			'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-		'Quality Check': 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
-		'Ready for Pickup': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-		Delivered: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400',
-		Cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+		Received: 'bg-blue-100 text-blue-700',
+		Estimated: 'bg-yellow-100 text-yellow-700',
+		Approved: 'bg-indigo-100 text-indigo-700',
+		'In Progress': 'bg-orange-100 text-orange-700',
+		'Waiting for Parts': 'bg-purple-100 text-purple-700',
+		'Quality Check': 'bg-cyan-100 text-cyan-700',
+		'Ready for Pickup': 'bg-green-100 text-green-700',
+		Delivered: 'bg-gray-100 text-gray-700',
+		Cancelled: 'bg-red-100 text-red-700',
 	}
-	return classes[status] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-}
-
-async function submitNewRepair() {
-	if (!newForm.value.customer || !newForm.value.customer.value) {
-		toast({
-			title: 'Missing Information',
-			message: 'Please select a customer.',
-			icon: 'alert-circle',
-			intent: 'error',
-		})
-		return
-	}
-	if (!newForm.value.repair_type) {
-		toast({
-			title: 'Missing Information',
-			message: 'Please select a repair type.',
-			icon: 'alert-circle',
-			intent: 'error',
-		})
-		return
-	}
-
-	try {
-		await call('zevar_core.api.create_repair_order', {
-			customer: newForm.value.customer.value,
-			repair_type: newForm.value.repair_type,
-			item_description: newForm.value.item_description || undefined,
-			customer_phone: newForm.value.customer_phone || undefined,
-			estimated_cost: newForm.value.estimated_cost || undefined,
-			warehouse: session.currentWarehouse || undefined,
-			handled_by: session.user?.email || undefined,
-		})
-		showNewModal.value = false
-		customerSearchText.value = ''
-		newForm.value = {
-			customer: null,
-			repair_type: '',
-			item_description: '',
-			customer_phone: '',
-			estimated_cost: null,
-		}
-		loadOrders()
-		toast({
-			title: 'Success',
-			message: 'Repair order created successfully.',
-			icon: 'check',
-			intent: 'success',
-		})
-	} catch (e) {
-		console.error(e)
-		toast({
-			title: 'Error',
-			message: e.messages?.[0] || e.message || 'Failed to create repair order.',
-			icon: 'alert-triangle',
-			intent: 'error',
-		})
-	}
+	return classes[status] || 'bg-gray-100 text-gray-600'
 }
 
 async function openDetail(order) {
 	const d = await call('zevar_core.api.get_repair_order_details', { name: order.name })
 	detailOrder.value = d
-	detailStatus.value = d.status
 }
 
-async function updateStatus(name) {
+async function quickStatusChange(name, newStatus) {
 	try {
-		await call('zevar_core.api.update_repair_status', { name, status: detailStatus.value })
+		await call('zevar_core.api.update_repair_status', { name, status: newStatus })
 		loadOrders()
-		toast({
-			title: 'Updated',
-			message: `Status changed to ${detailStatus.value}`,
-			icon: 'check',
-			intent: 'success',
-		})
+		toast({ title: 'Updated', message: `Status changed to ${newStatus}`, icon: 'check', intent: 'success' })
 	} catch (e) {
-		console.error(e)
-		toast({
-			title: 'Error',
-			message: e.messages?.[0] || e.message || 'Failed to update status',
-			icon: 'alert-triangle',
-			intent: 'error',
-		})
+		toast({ title: 'Error', message: e.messages?.[0] || e.message, icon: 'alert-triangle', intent: 'error' })
 	}
 }
 
-async function printReceipt(name) {
+function getNextStatus(currentStatus) {
+	const flow = ['Received', 'Estimated', 'Approved', 'In Progress', 'Waiting for Parts', 'Quality Check', 'Ready for Pickup', 'Delivered']
+	const idx = flow.indexOf(currentStatus)
+	if (idx >= 0 && idx < flow.length - 1) return flow[idx + 1]
+	return currentStatus
+}
+
+function onStatusChanged() {
+	loadOrders()
+	detailOrder.value = null
+}
+
+function onRepairCreated() {
+	showNewModal.value = false
+	showTransferModal.value = false
+	showPaymentModal.value = false
+	loadOrders()
+}
+
+function showQRCode(order) {
+	qrOrder.value = order
+}
+
+async function printThermalReceipt(order) {
 	try {
-		const html = await call('zevar_core.api.get_repair_receipt_html', { name })
+		const html = await call('zevar_core.api.get_thermal_receipt_html', { name: order.name })
 		const w = window.open('', '_blank')
 		w.document.write(html)
 		w.document.close()
 		w.print()
 	} catch (e) {
-		console.error(e)
-		toast({
-			title: 'Error',
-			message: 'Failed to generate receipt',
-			icon: 'alert-triangle',
-			intent: 'error',
-		})
+		toast({ title: 'Error', message: 'Failed to generate receipt', icon: 'alert-triangle', intent: 'error' })
 	}
 }
 
-async function openCustomerHistory(customer) {
-	try {
-		const list = await call('zevar_core.api.get_customer_repair_history', {
-			customer,
-			limit: 10,
+function onPhotoCaptured(photoData) {
+	// Handle captured photo
+	if (detailOrder.value) {
+		// Attach photo to repair order
+		call('zevar_core.api.attach_repair_photo', {
+			repair_order: detailOrder.value.name,
+			photo_data: photoData,
+			photo_type: 'before'
+		}).then(() => {
+			toast({ title: 'Success', message: 'Photo attached', icon: 'check', intent: 'success' })
+			openDetail(detailOrder.value)
 		})
-		showHistory.value = list || []
-	} catch (e) {
-		console.error(e)
-		toast({
-			title: 'Error',
-			message: 'Failed to load history',
-			icon: 'alert-triangle',
-			intent: 'error',
-		})
+	}
+	showCameraModal.value = false
+}
+
+// Drag and drop for Kanban
+let draggedOrder = null
+
+function onDragStart(event, order) {
+	draggedOrder = order
+	event.dataTransfer.effectAllowed = 'move'
+}
+
+function onDrop(event, newStatus) {
+	event.preventDefault()
+	if (draggedOrder && draggedOrder.status !== newStatus) {
+		quickStatusChange(draggedOrder.name, newStatus)
+	}
+	draggedOrder = null
+}
+
+// Auto-refresh
+function setupAutoRefresh() {
+	if (refreshTimer) clearInterval(refreshTimer)
+	if (refreshInterval.value > 0) {
+		refreshTimer = setInterval(loadOrders, refreshInterval.value)
 	}
 }
 
 onMounted(() => {
 	loadOrders()
-	repairTypesResource.fetch()
+	techniciansResource.fetch()
+	setupAutoRefresh()
+})
+
+onUnmounted(() => {
+	if (refreshTimer) clearInterval(refreshTimer)
 })
 </script>

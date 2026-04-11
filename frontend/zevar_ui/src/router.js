@@ -62,6 +62,24 @@ const routes = [
 		meta: { requiresAuth: true },
 	},
 	{
+		path: '/repair-lookup',
+		name: 'RepairLookup',
+		component: () => import('./pages/RepairLookup.vue'),
+		meta: { guest: true },
+	},
+	{
+		path: '/repair-estimate/:token',
+		name: 'EstimateApproval',
+		component: () => import('./pages/EstimateApproval.vue'),
+		meta: { guest: true },
+	},
+	{
+		path: '/repair-portal',
+		name: 'CustomerRepairPortal',
+		component: () => import('./pages/CustomerRepairPortal.vue'),
+		meta: { guest: true },
+	},
+	{
 		path: '/trade-ins',
 		name: 'TradeIns',
 		component: () => import('./pages/TradeIns.vue'),

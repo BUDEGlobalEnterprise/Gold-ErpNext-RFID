@@ -1,321 +1,273 @@
 <template>
-	<div class="flex flex-col gap-4 h-full overflow-hidden">
-		<!-- Header Stats -->
-		<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 shrink-0">
-			<div class="premium-card !p-4">
-				<p class="status-label">Annual Leave</p>
-				<p class="text-lg sm:text-2xl font-bold font-mono text-gray-900 dark:text-white">
-					{{ getLeaveBalance("Annual Leave")
-					}}<span class="text-xs sm:text-sm text-gray-500 dark:text-white/40 ml-1"
-						>days</span
-					>
-				</p>
-			</div>
-			<div class="premium-card !p-4">
-				<p class="status-label">Sick Leave</p>
-				<p class="text-lg sm:text-2xl font-bold font-mono text-gray-900 dark:text-white">
-					{{ getLeaveBalance("Sick Leave")
-					}}<span class="text-xs sm:text-sm text-gray-500 dark:text-white/40 ml-1"
-						>days</span
-					>
-				</p>
-			</div>
-			<div class="premium-card !p-4">
-				<p class="status-label">Pending</p>
-				<p
-					class="text-lg sm:text-2xl font-bold text-amber-500 dark:text-amber-400 font-mono"
-				>
-					{{ pendingCount
-					}}<span class="text-xs sm:text-sm text-gray-500 dark:text-white/40 ml-1"
-						>req</span
-					>
-				</p>
-			</div>
-			<div class="premium-card !p-4 flex items-center justify-between">
+	<div class="h-full flex flex-col gap-10 no-scrollbar overflow-y-auto pb-20">
+		<!-- Header -->
+		<div class="shrink-0 px-2">
+			<div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
 				<div>
-					<p class="status-label">Total Used</p>
-					<p
-						class="text-lg sm:text-2xl font-bold font-mono text-gray-900 dark:text-white"
-					>
-						{{ totalUsedDays
-						}}<span class="text-xs sm:text-sm text-gray-500 dark:text-white/40 ml-1"
-							>days</span
-						>
-					</p>
+					<h1 class="text-4xl font-black text-gray-900 tracking-tight leading-none mb-3">Leave Management</h1>
+					<p class="text-gray-500 font-medium font-sans">Review your balance, track applications, and request time off.</p>
 				</div>
-				<button
-					@click="showLeaveModal = true"
-					class="bg-primary text-black px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-bold hover:bg-yellow-400 transition-all shadow-lg shadow-primary/20"
-				>
-					+ Request
-				</button>
-			</div>
-		</div>
-
-		<!-- Main Content -->
-		<div class="flex-1 flex flex-col lg:flex-row gap-4 min-h-0 overflow-hidden">
-			<!-- Leave Applications List -->
-			<div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-				<div class="flex items-center justify-between mb-3 sm:mb-4 shrink-0">
-					<div>
-						<h2 class="premium-title !text-xl">Leave Applications</h2>
-						<p class="premium-subtitle">Your time off requests</p>
-					</div>
-					<div class="flex gap-1 sm:gap-2">
-						<button
-							@click="filterHistory = 'all'"
-							class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[9px] sm:text-[10px] font-bold uppercase transition"
-							:class="
-								filterHistory === 'all'
-									? 'bg-white/10 text-white'
-									: 'text-white/40 hover:text-white'
-							"
-						>
-							All
-						</button>
-						<button
-							@click="filterHistory = 'pending'"
-							class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[9px] sm:text-[10px] font-bold uppercase transition"
-							:class="
-								filterHistory === 'pending'
-									? 'bg-white/10 text-white'
-									: 'text-white/40 hover:text-white'
-							"
-						>
-							Pending
-						</button>
-						<button
-							@click="filterHistory = 'approved'"
-							class="hidden sm:block px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition"
-							:class="
-								filterHistory === 'approved'
-									? 'bg-white/10 text-white'
-									: 'text-white/40 hover:text-white'
-							"
-						>
-							Approved
-						</button>
-					</div>
-				</div>
-
-				<!-- Table Header - Hidden on mobile -->
-				<div
-					class="hidden sm:grid premium-card !p-3 !rounded-t-xl grid-cols-5 gap-2 sm:gap-4 text-[9px] sm:text-[10px] uppercase tracking-widest text-white/40 font-bold border-b border-white/5"
-				>
-					<div>Leave Type</div>
-					<div>Date Range</div>
-					<div>Duration</div>
-					<div>Reason</div>
-					<div>Status</div>
-				</div>
-
-				<!-- Leave Records -->
-				<div class="flex-1 overflow-y-auto custom-scrollbar">
-					<div v-if="filteredApplications.length === 0" class="text-center py-12">
-						<span class="material-symbols-outlined text-4xl text-white/20 mb-3"
-							>beach_access</span
-						>
-						<p class="text-white/40 text-sm">No leave applications found</p>
-					</div>
-
-					<!-- Mobile Card View -->
-					<div class="sm:hidden space-y-2 p-2">
-						<div
-							v-for="app in filteredApplications"
-							:key="app.name"
-							class="premium-card !p-3 !rounded-xl border border-white/5"
-						>
-							<div class="flex items-center justify-between mb-2">
-								<p class="text-sm font-bold text-white">{{ app.leave_type }}</p>
-								<span
-									class="text-[9px] px-2 py-1 rounded-full font-bold uppercase"
-									:class="getStatusStyle(app.status)"
-									>{{ app.status }}</span
-								>
-							</div>
-							<div class="flex items-center justify-between text-[10px]">
-								<span class="text-white/60"
-									>{{ formatDateShort(app.from_date)
-									}}{{
-										app.to_date && app.from_date !== app.to_date
-											? " - " + formatDateShort(app.to_date)
-											: ""
-									}}</span
-								>
-								<span class="text-white/40"
-									>{{ app.total_leave_days || 1 }}
-									{{ (app.total_leave_days || 1) === 1 ? "day" : "days" }}</span
-								>
-							</div>
-							<p
-								v-if="app.description"
-								class="text-[10px] text-white/30 mt-2 truncate"
-							>
-								{{ app.description }}
-							</p>
-						</div>
-					</div>
-
-					<!-- Desktop Table View -->
-					<div class="hidden sm:block glass-card rounded-b-xl">
-						<div
-							v-for="app in filteredApplications"
-							:key="app.name"
-							class="grid grid-cols-5 gap-2 sm:gap-4 px-3 sm:px-4 py-2 sm:py-3 border-b border-white/5 hover:bg-white/[0.02] transition-colors items-center"
-						>
-							<div>
-								<p class="text-xs sm:text-sm font-bold text-white">
-									{{ app.leave_type }}
-								</p>
-							</div>
-							<div>
-								<p class="text-xs sm:text-sm text-white">
-									{{ formatDateShort(app.from_date) }}
-								</p>
-								<p
-									v-if="app.to_date && app.from_date !== app.to_date"
-									class="text-[9px] sm:text-[10px] text-white/30"
-								>
-									to {{ formatDateShort(app.to_date) }}
-								</p>
-							</div>
-							<div>
-								<span class="text-xs sm:text-sm font-mono text-white">{{
-									app.total_leave_days || 1
-								}}</span>
-								<span class="text-[9px] sm:text-[10px] text-white/40 ml-1">{{
-									(app.total_leave_days || 1) === 1 ? "day" : "days"
-								}}</span>
-							</div>
-							<div>
-								<p
-									class="text-[10px] sm:text-xs text-white/50 truncate max-w-[100px] sm:max-w-[150px]"
-								>
-									{{ app.description || "No reason provided" }}
-								</p>
-							</div>
-							<div>
-								<span
-									class="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-bold uppercase"
-									:class="getStatusStyle(app.status)"
-								>
-									{{ app.status }}
-								</span>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- Mini Calendar - Hidden on mobile -->
-			<div class="hidden lg:block w-72 shrink-0">
-				<div class="premium-card !p-4">
-					<StandardCalendar v-model="currentDate" :events="allEventDates" />
-				</div>
-
-				<!-- Quick Info -->
-				<div class="premium-card !p-4 mt-4">
-					<h4 class="status-label !mb-3">Leave Policy</h4>
-					<div class="space-y-2 text-[11px] text-gray-500 dark:text-white/40">
-						<p>• Submit requests 3 days in advance</p>
-						<p>• Annual leave: 21 days/year</p>
-						<p>• Sick leave: 10 days/year</p>
-						<p>• Contact HR for emergencies</p>
-					</div>
+				<div class="flex items-center gap-4">
+					<button @click="showLeaveModal = true" class="px-8 py-3 bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-glow-emerald hover:bg-black transition-all flex items-center gap-2">
+						<span class="material-symbols-outlined text-lg">add</span>
+						Request Leave
+					</button>
 				</div>
 			</div>
 		</div>
 
-		<!-- Request Leave Modal -->
+		<div class="space-y-10">
+			<!-- Metrics Row -->
+			<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+				<!-- Annual Leave Balance -->
+				<div class="premium-card !p-8">
+					<div class="flex items-center justify-between mb-6">
+						<span class="material-symbols-outlined text-gray-400 text-xl">calendar_today</span>
+						<span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Annual</span>
+					</div>
+					<div class="flex items-end gap-2 mb-2">
+						<span class="text-5xl font-black text-gray-900 tracking-tighter leading-none">14.5</span>
+						<span class="text-sm font-bold text-gray-400 mb-1">Days</span>
+					</div>
+					<p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Balance Available</p>
+					<div class="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+						<div class="h-full bg-emerald-600 rounded-full" style="width: 69%"></div>
+					</div>
+				</div>
+
+				<!-- Sick Leave -->
+				<div class="premium-card !p-8">
+					<div class="flex items-center justify-between mb-6">
+						<span class="material-symbols-outlined text-red-500 text-xl">local_hospital</span>
+						<span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Sick</span>
+					</div>
+					<div class="flex items-end gap-2 mb-2">
+						<span class="text-5xl font-black text-gray-900 tracking-tighter leading-none">06</span>
+						<span class="text-sm font-bold text-gray-400 mb-1">Days</span>
+					</div>
+					<p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Yearly Quota</p>
+					<div class="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+						<div class="h-full bg-red-500 rounded-full" style="width: 40%"></div>
+					</div>
+				</div>
+
+				<!-- Pending -->
+				<div class="premium-card !p-8">
+					<div class="flex items-center justify-between mb-6">
+						<span class="material-symbols-outlined text-amber-600 text-xl">pending_actions</span>
+						<span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pending</span>
+					</div>
+					<div class="flex items-end gap-2 mb-2">
+						<span class="text-5xl font-black text-gray-900 tracking-tighter leading-none">02</span>
+						<span class="text-sm font-bold text-gray-400 mb-1">Requests</span>
+					</div>
+					<p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Awaiting Approval</p>
+					<div class="flex items-center gap-1.5">
+						<span class="material-symbols-outlined text-amber-500 text-[14px]">schedule</span>
+						<span class="text-[10px] font-bold text-amber-600">Last updated 2h ago</span>
+					</div>
+				</div>
+
+				<!-- Utilization -->
+				<div class="premium-card !p-8">
+					<div class="flex items-center justify-between mb-6">
+						<span class="material-symbols-outlined text-gray-400 text-xl">update</span>
+						<span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Utilization</span>
+					</div>
+					<div class="flex items-end gap-2 mb-2">
+						<span class="text-5xl font-black text-gray-900 tracking-tighter leading-none">18.5</span>
+						<span class="text-sm font-bold text-gray-400 mb-1">Total</span>
+					</div>
+					<p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Days Used This Year</p>
+					<div class="flex items-center gap-2">
+						<span class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">+12%</span>
+						<span class="text-[10px] font-bold text-gray-400">vs. last fiscal year</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+				<!-- Leave Applications List -->
+				<div class="lg:col-span-8">
+					<div class="premium-card !p-0 overflow-hidden border border-gray-100 shadow-sm">
+						<!-- Table Header -->
+						<div class="flex items-center justify-between px-10 py-6 border-b border-gray-50 bg-gray-50/30">
+							<h3 class="text-sm font-black text-gray-900 tracking-tight">Leave Applications</h3>
+							<div class="flex items-center gap-6">
+								<button
+									v-for="f in ['All', 'Pending', 'Approved']"
+									:key="f"
+									@click="filterHistory = f.toLowerCase()"
+									class="text-[10px] font-black uppercase tracking-widest transition-all pb-1"
+									:class="filterHistory === f.toLowerCase()
+										? 'text-gray-900 border-b-2 border-gray-900'
+										: 'text-gray-400 hover:text-gray-600'"
+								>
+									{{ f }}
+								</button>
+							</div>
+						</div>
+
+						<!-- Table -->
+						<table class="w-full text-left">
+							<thead class="border-b border-gray-50 bg-gray-50/30">
+								<tr>
+									<th class="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Type</th>
+									<th class="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Period</th>
+									<th class="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] text-center">Days</th>
+									<th class="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] text-center">Status</th>
+									<th class="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] text-right">Actions</th>
+								</tr>
+							</thead>
+							<tbody class="divide-y divide-gray-50">
+								<tr v-for="app in filteredApplications" :key="app.name" class="hover:bg-gray-50/50 transition-colors">
+									<td class="px-10 py-6">
+										<div class="flex items-center gap-3">
+											<div class="w-1.5 h-1.5 rounded-full" :class="app.leave_type?.toLowerCase().includes('sick') ? 'bg-amber-500' : 'bg-emerald-500'"></div>
+											<div>
+												<p class="text-sm font-bold text-gray-900">{{ app.leave_type }}</p>
+												<p class="text-[10px] text-gray-400">{{ app.description || 'Personal trip' }}</p>
+											</div>
+										</div>
+									</td>
+									<td class="px-10 py-6">
+										<p class="text-sm font-bold text-gray-900">{{ formatDate(app.from_date) }} - {{ formatDate(app.to_date) }}</p>
+									</td>
+									<td class="px-10 py-6 text-center">
+										<p class="text-sm font-black text-gray-900">{{ app.total_leave_days || 1 }}</p>
+									</td>
+									<td class="px-10 py-6 text-center">
+										<span class="inline-flex px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest" :class="getStatusStyle(app.status)">
+											{{ app.status }}
+										</span>
+									</td>
+									<td class="px-10 py-6 text-right">
+										<button class="text-gray-400 hover:text-gray-900 transition-colors">
+											<span class="material-symbols-outlined text-lg">more_horiz</span>
+										</button>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<!-- Sidebar -->
+				<div class="lg:col-span-4 space-y-10">
+					<!-- Calendar Mini Card -->
+					<div class="premium-card !p-8">
+						<div class="flex justify-between items-center mb-6">
+							<h4 class="text-sm font-black text-gray-900 tracking-tight">October 2023</h4>
+							<div class="flex gap-2">
+								<button class="w-7 h-7 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all">
+									<span class="material-symbols-outlined text-xs">chevron_left</span>
+								</button>
+								<button class="w-7 h-7 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all">
+									<span class="material-symbols-outlined text-xs">chevron_right</span>
+								</button>
+							</div>
+						</div>
+						<StandardCalendar v-model="currentDate" :events="allEventDates" class="!border-0 !shadow-none" />
+					</div>
+
+					<!-- Leave Policy Card -->
+					<div class="premium-card !p-10 bg-emerald-950 text-white relative overflow-hidden">
+						<div class="absolute -bottom-10 -right-10 w-32 h-32 bg-emerald-500 rounded-full blur-[80px] opacity-20"></div>
+						<h4 class="text-xs font-black uppercase tracking-[0.2em] text-white/60 mb-8 relative z-10">Leave Policy v4.2</h4>
+						<div class="space-y-5 relative z-10">
+							<div class="flex gap-4">
+								<span class="material-symbols-outlined text-emerald-400 text-[16px] shrink-0 mt-0.5">check_circle</span>
+								<p class="text-[11px] font-bold text-white/60 leading-relaxed">Submit requests 3 days in advance</p>
+							</div>
+							<div class="flex gap-4">
+								<span class="material-symbols-outlined text-emerald-400 text-[16px] shrink-0 mt-0.5">check_circle</span>
+								<p class="text-[11px] font-bold text-white/60 leading-relaxed">Annual leave: 21 Days/yr</p>
+							</div>
+							<div class="flex gap-4">
+								<span class="material-symbols-outlined text-emerald-400 text-[16px] shrink-0 mt-0.5">check_circle</span>
+								<p class="text-[11px] font-bold text-white/60 leading-relaxed">Sick leave: 10 Days/yr</p>
+							</div>
+							<div class="flex gap-4">
+								<span class="material-symbols-outlined text-emerald-400 text-[16px] shrink-0 mt-0.5">check_circle</span>
+								<p class="text-[11px] font-bold text-white/60 leading-relaxed">Contact HR for emergencies</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- New Request Modal -->
 		<Teleport to="body">
-			<div
-				v-if="showLeaveModal"
-				class="fixed inset-0 z-50 flex items-center justify-center p-4"
-				@click.self="showLeaveModal = false"
-			>
-				<div class="absolute inset-0 bg-black/60"></div>
-				<div
-					class="relative bg-[#111420] rounded-2xl p-6 w-full max-w-md border border-white/10"
-				>
-					<h3 class="font-bold text-white text-lg mb-4">Request Leave</h3>
-
-					<div class="space-y-4">
-						<div>
-							<label
-								class="block text-[10px] text-white/40 uppercase tracking-widest mb-2"
-								>Leave Type</label
-							>
-							<select
-								v-model="newLeave.leave_type"
-								class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50"
-							>
-								<option value="" disabled>Select leave type...</option>
-								<option
-									v-for="lt in leaveStore.leaveTypes"
-									:key="lt.name"
-									:value="lt.name"
-								>
-									{{ lt.leave_type_name }}
-								</option>
-							</select>
-						</div>
-
-						<div class="grid grid-cols-2 gap-4">
+			<Transition name="fade">
+				<div v-if="showLeaveModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+					<div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="showLeaveModal = false"></div>
+					<div class="relative bg-white rounded-4xl p-10 w-full max-w-xl shadow-2xl border border-gray-50">
+						<div class="flex items-center justify-between mb-10">
 							<div>
-								<label
-									class="block text-[10px] text-white/40 uppercase tracking-widest mb-2"
-									>From Date</label
-								>
-								<input
-									v-model="newLeave.from_date"
-									type="date"
-									class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50"
-								/>
+								<h3 class="text-2xl font-black text-gray-900 tracking-tight">Request Leave</h3>
+								<p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Application for absence</p>
 							</div>
+							<button @click="showLeaveModal = false" class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-all">
+								<span class="material-symbols-outlined">close</span>
+							</button>
+						</div>
+
+						<div class="space-y-6">
 							<div>
-								<label
-									class="block text-[10px] text-white/40 uppercase tracking-widest mb-2"
-									>To Date</label
+								<label class="status-label">Select Leave Type</label>
+								<select
+									v-model="newLeave.leave_type"
+									class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-gray-900 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all appearance-none"
 								>
-								<input
-									v-model="newLeave.to_date"
-									type="date"
-									class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50"
-								/>
+									<option value="" disabled>Select category...</option>
+									<option v-for="lt in leaveStore.leaveTypes" :key="lt.name" :value="lt.name">
+										{{ lt.leave_type_name }}
+									</option>
+								</select>
+							</div>
+
+							<div class="grid grid-cols-2 gap-6">
+								<div>
+									<label class="status-label">Departure Date</label>
+									<input
+										v-model="newLeave.from_date"
+										type="date"
+										class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-gray-900 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all"
+									/>
+								</div>
+								<div>
+									<label class="status-label">Return Date</label>
+									<input
+										v-model="newLeave.to_date"
+										type="date"
+										class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-gray-900 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all"
+									/>
+								</div>
+							</div>
+
+							<div>
+								<label class="status-label">Justification / Reason</label>
+								<textarea
+									v-model="newLeave.description"
+									rows="3"
+									class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-gray-900 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all resize-none"
+									placeholder="Brief explanation for the request..."
+								></textarea>
 							</div>
 						</div>
 
-						<div>
-							<label
-								class="block text-[10px] text-white/40 uppercase tracking-widest mb-2"
-								>Reason</label
-							>
-							<textarea
-								v-model="newLeave.description"
-								rows="3"
-								class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 resize-none"
-								placeholder="Brief reason for leave..."
-							></textarea>
+						<div class="flex gap-4 mt-12">
+							<button @click="showLeaveModal = false" class="flex-1 py-4 text-gray-400 font-black text-xs uppercase tracking-widest hover:text-gray-900">Dismiss</button>
+							<button
+								@click="submitLeave"
+								:disabled="!canSubmitLeave"
+								class="flex-[1.5] py-4 bg-primary text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-glow-emerald disabled:opacity-50"
+							>Confirm Request</button>
 						</div>
-					</div>
-
-					<div class="flex gap-3 mt-6">
-						<button
-							@click="showLeaveModal = false"
-							class="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white/60 text-sm font-bold transition-colors"
-						>
-							Cancel
-						</button>
-						<button
-							@click="submitLeave"
-							:disabled="!canSubmitLeave"
-							class="flex-1 py-3 bg-primary text-black rounded-xl text-sm font-bold hover:bg-yellow-400 transition-colors disabled:opacity-50"
-						>
-							Submit Request
-						</button>
 					</div>
 				</div>
-			</div>
+			</Transition>
 		</Teleport>
 	</div>
 </template>
@@ -340,27 +292,6 @@ const newLeave = ref({
 	description: "",
 });
 
-// Current month display
-const currentMonthYear = computed(() => {
-	return currentDate.value.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-});
-
-// Get first day of month (0 = Sunday, 1 = Monday, etc.)
-const firstDayOfMonth = computed(() => {
-	const firstDay = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth(), 1);
-	const day = firstDay.getDay();
-	return day === 0 ? 6 : day - 1;
-});
-
-// Get days in month
-const daysInMonth = computed(() => {
-	return new Date(
-		currentDate.value.getFullYear(),
-		currentDate.value.getMonth() + 1,
-		0
-	).getDate();
-});
-
 const allEventDates = computed(() => {
 	const dates = [];
 	leaveStore.leaveApplications.forEach((app) => {
@@ -373,78 +304,6 @@ const allEventDates = computed(() => {
 	return dates;
 });
 
-// Get leave dates for calendar
-const leaveDates = computed(() => {
-	const dates = new Set();
-	leaveStore.leaveApplications
-		.filter((app) => app.status === "Approved")
-		.forEach((app) => {
-			const start = new Date(app.from_date);
-			const end = new Date(app.to_date || app.from_date);
-			for (let d = start; d <= end; d.setDate(d.getDate() + 1)) {
-				dates.add(d.toISOString().split("T")[0]);
-			}
-		});
-	return dates;
-});
-
-const pendingDates = computed(() => {
-	const dates = new Set();
-	leaveStore.leaveApplications
-		.filter((app) => app.status === "Open" || app.status === "Pending")
-		.forEach((app) => {
-			const start = new Date(app.from_date);
-			const end = new Date(app.to_date || app.from_date);
-			for (let d = start; d <= end; d.setDate(d.getDate() + 1)) {
-				dates.add(d.toISOString().split("T")[0]);
-			}
-		});
-	return dates;
-});
-
-// Calendar days
-const calendarDays = computed(() => {
-	const today = new Date();
-	const days = [];
-
-	for (let i = 1; i <= daysInMonth.value; i++) {
-		const dayDate = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth(), i);
-		const dateStr = dayDate.toISOString().split("T")[0];
-		const isToday =
-			dayDate.getDate() === today.getDate() &&
-			dayDate.getMonth() === today.getMonth() &&
-			dayDate.getFullYear() === today.getFullYear();
-
-		const dayOfWeek = dayDate.getDay();
-		const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-
-		days.push({
-			day: i,
-			date: dateStr,
-			isToday,
-			isWeekend,
-			hasLeave: leaveDates.value.has(dateStr),
-			hasPending: pendingDates.value.has(dateStr),
-		});
-	}
-
-	return days;
-});
-
-// Stats
-const pendingCount = computed(() => {
-	return leaveStore.leaveApplications.filter(
-		(app) => app.status === "Open" || app.status === "Pending"
-	).length;
-});
-
-const totalUsedDays = computed(() => {
-	return leaveStore.leaveApplications
-		.filter((app) => app.status === "Approved")
-		.reduce((sum, app) => sum + (app.total_leave_days || 1), 0);
-});
-
-// Filtered applications
 const filteredApplications = computed(() => {
 	let apps = leaveStore.leaveApplications;
 	if (filterHistory.value === "pending") {
@@ -459,63 +318,34 @@ const canSubmitLeave = computed(() => {
 	return newLeave.value.leave_type && newLeave.value.from_date && newLeave.value.to_date;
 });
 
-// Helper functions
-function getLeaveBalance(type) {
-	const balance = leaveStore.leaveBalances.find((b) => b.leave_type === type);
-	return balance?.balance || 0;
-}
-
 function getStatusStyle(status) {
-	switch (status) {
-		case "Approved":
-			return "bg-emerald-500/15 text-emerald-400";
-		case "Open":
-		case "Pending":
-			return "bg-amber-500/15 text-amber-400";
-		case "Rejected":
-			return "bg-red-500/15 text-red-400";
-		default:
-			return "bg-white/10 text-white/40";
-	}
+	const s = status?.toLowerCase();
+	if (s === "approved") return "bg-emerald-100 text-emerald-700";
+	if (s === "open" || s === "pending") return "bg-amber-100 text-amber-700";
+	if (s === "rejected") return "bg-red-100 text-red-700";
+	return "bg-gray-100 text-gray-500";
 }
 
-function formatDateShort(dateStr) {
-	if (!dateStr) return "";
-	const date = new Date(dateStr);
-	return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-function previousMonth() {
-	currentDate.value = new Date(
-		currentDate.value.getFullYear(),
-		currentDate.value.getMonth() - 1,
-		1
-	);
-}
-
-function nextMonth() {
-	currentDate.value = new Date(
-		currentDate.value.getFullYear(),
-		currentDate.value.getMonth() + 1,
-		1
-	);
+function formatDate(dateStr) {
+	return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
 async function submitLeave() {
 	showLeaveModal.value = false;
-	newLeave.value = {
-		leave_type: "",
-		from_date: "",
-		to_date: "",
-		description: "",
-	};
+	newLeave.value = { leave_type: "", from_date: "", to_date: "", description: "" };
 }
 
 onMounted(async () => {
 	await employeeStore.init();
 	const employeeId = employeeStore.employee?.name;
-	if (employeeId) {
-		leaveStore.init(employeeId);
-	}
+	if (employeeId) leaveStore.init(employeeId);
 });
 </script>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: all 0.3s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; transform: scale(0.98); }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>

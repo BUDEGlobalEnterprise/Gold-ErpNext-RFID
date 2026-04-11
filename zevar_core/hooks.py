@@ -22,7 +22,10 @@ add_to_apps_screen = [
 
 boot_session = "zevar_core.api.desk.boot_session"
 
-app_include_js = ["/assets/zevar_core/js/desk_customization.js"]
+app_include_js = [
+	"/assets/zevar_core/js/desk_customization.js",
+	"/assets/zevar_core/js/layaway_desk.js",
+]
 app_include_css = ["/assets/zevar_core/css/desk.css"]
 
 # Jinja

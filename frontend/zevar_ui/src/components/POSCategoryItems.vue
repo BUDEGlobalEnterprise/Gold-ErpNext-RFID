@@ -33,11 +33,11 @@
 
 		<div class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
 			<!-- Loading State -->
-			<div v-if="loading && start === 0" class="py-20 text-center">
+			<div v-if="items.loading && start === 0" class="py-20 text-center">
 				<div
 					class="animate-spin rounded-full h-8 w-8 border-2 border-gray-900 dark:border-white border-t-transparent mx-auto mb-4"
 				></div>
-				<span class="text-gray-400 text-sm font-medium">Loading catalogue...</span>
+				<span class="text-gray-400 text-sm font-medium">Loading items...</span>
 			</div>
 
 			<!-- Empty State -->
@@ -151,7 +151,6 @@ const cart = useCartStore()
 
 const selectedCategory = ref(null)
 const categories = ref([])
-const loading = ref(false)
 
 const showModal = ref(false)
 const selectedItemCode = ref(null)
@@ -179,47 +178,125 @@ const filteredCategories = computed(() => {
 	return categories.value.filter((cat) => cat.name.toLowerCase().includes(query))
 })
 
+// Fetch Items Resource
 const items = createResource({
-	url: 'zevar_core.api.get_pos_items',
+	url: 'zevar_core.api.catalog.get_pos_items',
 	makeParams() {
-		const { in_stock_only, out_of_stock_only, ...otherFilters } = ui.activeFilters
+		const { 
+			in_stock_only, 
+			out_of_stock_only, 
+			price_min, 
+			price_max,
+			custom_jewelry_type,
+			custom_metal_type,
+			custom_purity,
+			custom_gemstone,
+			...otherFilters 
+		} = ui.activeFilters
+
 		return {
-		loading.value = true
-    }
-    loading.value = true
-    start.value = 0
-    hasMore.value = true
-    items.fetch()
+			warehouse: session.currentWarehouse,
+			page_length: PAGE_LENGTH,
+			start: start.value,
+			search_term: ui.searchQuery || undefined,
+			filters: JSON.stringify({
+				custom_jewelry_type: custom_jewelry_type || undefined,
+				custom_metal_type: custom_metal_type || undefined,
+				custom_purity: custom_purity || undefined,
+				custom_gemstone: custom_gemstone || undefined,
+				...otherFilters,
+			}),
+			in_stock_only: in_stock_only || false,
+			out_of_stock_only: out_of_stock_only || false,
+			min_price: price_min || undefined,
+			max_price: price_max || undefined,
+			sort_by: ui.sortBy || undefined,
+		}
+	},
+	onSuccess(data) {
+		if (data.length < PAGE_LENGTH) {
+			hasMore.value = false
+		}
+		if (start.value === 0) {
+			catalog.value = data
+			// Build categories from catalog
+			const grouped = {}
+			data.forEach((item) => {
+				const cat = item.item_group || item.category || 'Other'
+				if (!grouped[cat]) {
+					grouped[cat] = { name: cat, items: [], count: 0 }
+				}
+				grouped[cat].count++
+				if (grouped[cat].items.length < 8) {
+					grouped[cat].items.push(item)
+				}
+			})
+			categories.value = Object.values(grouped)
+		} else {
+			catalog.value.push(...data)
+		}
+	},
+})
+
+function selectCategory(cat) {
+	selectedCategory.value = cat.name
 }
 
- {
-    loading.value = false
-    start.value = 0
-    hasMore.value = true
-    items.fetch()
+function getCategoryIcon(categoryName) {
+	// Return SVG path based on category
+	return 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'
 }
 
- {
-    catalog.value = []
-    categories.value = []
-    }
-}, { immediate: true }
+function loadMore() {
+	if (!hasMore.value || items.loading) return
+	start.value += PAGE_LENGTH
+	items.fetch()
+}
+
+function openItemDetails(itemCode) {
+	if (isMobile.value) return
+	selectedItemCode.value = itemCode
+	showModal.value = true
+}
+
+function handleQuickAdd(item) {
+	cart.addItem(item)
+}
+
+// Watchers
+let searchTimeout = null
+
+watch(
+	() => ({
+		search: ui.searchQuery,
+		filters: JSON.stringify(ui.activeFilters),
+		sort: ui.sortBy,
+	}),
+	() => {
+		if (searchTimeout) clearTimeout(searchTimeout)
+		searchTimeout = setTimeout(() => {
+			start.value = 0
+			hasMore.value = true
+			items.fetch()
+		}, 400)
+	},
+	{ deep: true }
 )
 
 watch(
 	() => session.currentWarehouse,
 	(newVal) => {
 		if (newVal) {
-			loading.value = true
 			start.value = 0
 			hasMore.value = true
 			items.fetch()
 		} else {
 			catalog.value = []
 			categories.value = []
+			selectedCategory.value = null
 		}
 	},
-	{ immediate: true },
+	{ immediate: true }
 )
 </script>
 

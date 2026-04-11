@@ -29,6 +29,8 @@ def get_pos_items(
 	in_stock_only: bool | str = False,
 	out_of_stock_only: bool | str = False,
 	source_filter: str | None = None,
+	min_price: float | None = None,
+	max_price: float | None = None,
 ) -> list:
 	"""
 	Fetch items for POS catalog with filtering, search, and pagination.
@@ -43,6 +45,8 @@ def get_pos_items(
 	    in_stock_only: Only return items with stock_qty > 0
 	    out_of_stock_only: Only return items with stock_qty <= 0
 	    source_filter: Filter by custom_source
+	    min_price: Minimum price filter
+	    max_price: Maximum price filter
 
 	Returns:
 	    List of item dictionaries with stock and price information
@@ -52,6 +56,17 @@ def get_pos_items(
 	# Convert string booleans from frontend
 	in_stock_only = in_stock_only in (True, "true", "1", 1)
 	out_of_stock_only = out_of_stock_only in (True, "true", "1", 1)
+
+	# Convert price filters from string to float
+	if min_price is not None and min_price != "":
+		min_price = float(min_price)
+	else:
+		min_price = None
+		
+	if max_price is not None and max_price != "":
+		max_price = float(max_price)
+	else:
+		max_price = None
 
 	# Build filters
 	query_filters = [["disabled", "=", 0], ["has_variants", "=", 0]]
@@ -63,47 +78,70 @@ def get_pos_items(
 	if source_filter:
 		query_filters.append(["custom_source", "=", source_filter])
 
-	# Parse additional filters
-	min_price = None
-	max_price = None
-
+	# Parse additional filters from JSON
 	if filters:
-		filters_dict = frappe.parse_json(filters)
-		if isinstance(filters_dict, dict):
-			# Handle gemstone filter
-			gem_filter = filters_dict.pop("custom_gemstone", None)
-			if gem_filter:
-				if gem_filter == "No Stone":
-					items_with_stones = frappe.get_all("Zevar Gemstone Detail", pluck="parent")
-					# Filter out any empty/None values
-					items_with_stones = [item for item in items_with_stones if item]
-					if items_with_stones:
-						query_filters.append(["name", "not in", items_with_stones])
-				else:
-					matching_items = frappe.get_all(
-						"Zevar Gemstone Detail", filters={"gem_type": gem_filter}, pluck="parent"
-					)
-					# Filter out any empty/None values
-					matching_items = [item for item in matching_items if item]
-					if not matching_items:
-						return []
-					query_filters.append(["name", "in", matching_items])
+		try:
+			filters_dict = frappe.parse_json(filters)
+			if isinstance(filters_dict, dict):
+				# Handle jewelry type filter
+				jewelry_type = filters_dict.pop("custom_jewelry_type", None)
+				if jewelry_type:
+					query_filters.append(["custom_jewelry_type", "=", jewelry_type])
 
-			# Price range
-			min_price = filters_dict.pop("min_price", None)
-			max_price = filters_dict.pop("max_price", None)
+				# Handle metal filter
+				metal_type = filters_dict.pop("custom_metal_type", None)
+				if metal_type:
+					query_filters.append(["custom_metal_type", "=", metal_type])
 
-			# Apply remaining filters
-			for key, value in filters_dict.items():
-				if value:
-					if isinstance(value, list) and len(value) == 2 and value[0] == "like":
-						# Handle 'like' operator: ["like", "%Gold%"]
-						query_filters.append([key, "like", value[1]])
-					elif isinstance(value, list):
-						# Handle array of values: ["14K", "18K"] -> IN filter
-						query_filters.append([key, "in", value])
+				# Handle purity filter
+				purity = filters_dict.pop("custom_purity", None)
+				if purity:
+					query_filters.append(["custom_purity", "=", purity])
+
+				# Handle gemstone filter
+				gem_filter = filters_dict.pop("custom_gemstone", None)
+				if gem_filter:
+					if gem_filter == "No Stone":
+						items_with_stones = frappe.get_all("Zevar Gemstone Detail", pluck="parent")
+						# Filter out any empty/None values
+						items_with_stones = [item for item in items_with_stones if item]
+						if items_with_stones:
+							query_filters.append(["name", "not in", items_with_stones])
 					else:
-						query_filters.append([key, "=", value])
+						matching_items = frappe.get_all(
+							"Zevar Gemstone Detail", filters={"gem_type": gem_filter}, pluck="parent"
+						)
+						# Filter out any empty/None values
+						matching_items = [item for item in matching_items if item]
+						if not matching_items:
+							return []
+						query_filters.append(["name", "in", matching_items])
+
+				# Handle price filters from JSON (fallback if not passed as direct params)
+				if not min_price:
+					min_price = filters_dict.pop("min_price", None)
+					if min_price is not None and min_price != "":
+						min_price = float(min_price)
+					
+				if not max_price:
+					max_price = filters_dict.pop("max_price", None)
+					if max_price is not None and max_price != "":
+						max_price = float(max_price)
+
+				# Apply any remaining custom filters
+				for key, value in filters_dict.items():
+					if value:
+						if isinstance(value, list) and len(value) == 2 and value[0] == "like":
+							# Handle 'like' operator: ["like", "%Gold%"]
+							query_filters.append([key, "like", value[1]])
+						elif isinstance(value, list):
+							# Handle array of values: ["14K", "18K"] -> IN filter
+							query_filters.append([key, "in", value])
+						else:
+							query_filters.append([key, "=", value])
+		except Exception:
+			# If JSON parsing fails, continue without additional filters
+			pass
 
 	# When stock or price filters are active, overfetch to compensate for post-query filtering
 	page_length = int(page_length)
@@ -456,16 +494,20 @@ def _get_pos_sort_key(item: dict) -> tuple:
 
 def _get_custom_sort_key(item: dict, sort_by: str):
 	"""Return sort key based on user-selected sort option."""
+	price = float(item.get("price") or 0)
+	weight = float(item.get("gross_weight") or 0)
+	name = (item.get("item_name") or "").casefold()
+	
 	if sort_by == "price_asc":
-		return (item.get("price") or 0, (item.get("item_name") or "").casefold())
+		return (price, name)
 	elif sort_by == "price_desc":
-		return (-(item.get("price") or 0), (item.get("item_name") or "").casefold())
+		return (-price, name)
 	elif sort_by == "weight_asc":
-		return (item.get("gross_weight") or 0, (item.get("item_name") or "").casefold())
+		return (weight, name)
 	elif sort_by == "weight_desc":
-		return (-(item.get("gross_weight") or 0), (item.get("item_name") or "").casefold())
+		return (-weight, name)
 	elif sort_by == "newest":
-		return (item.get("item_name") or "").casefold()
+		return name
 	elif sort_by == "name_asc":
-		return (item.get("item_name") or "").casefold()
-	return (0, (item.get("item_name") or "").casefold())
+		return name
+	return (0, name)

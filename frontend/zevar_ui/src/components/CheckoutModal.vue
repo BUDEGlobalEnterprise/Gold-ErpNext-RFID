@@ -1229,14 +1229,59 @@ async function handleLayaway() {
 		const result = await cart.submitLayaway(layawayDeposit.value, layawayDuration.value, {
 			warehouse: session.currentWarehouse,
 		})
-		const data = result?.data || result
+		// Handle all possible response shapes from frappe-ui
+		const data = result?.message || result?.data || result
 		if (data?.layaway_id) {
 			lastOrderId.value = data.layaway_id
+		} else if (data?.contract_name) {
+			lastOrderId.value = data.contract_name
+		} else if (typeof data === 'string') {
+			lastOrderId.value = data
 		}
 		isLayawaySuccess.value = true
 		step.value = 'success'
 	} catch (e) {
-		alert('Layaway failed: ' + (e.message || e))
+		// Extract meaningful error from Frappe's response structure
+		let errorMsg = ''
+		if (e?._server_messages) {
+			try {
+				const msgs = JSON.parse(e._server_messages)
+				errorMsg = msgs
+					.map((m) => {
+						try {
+							const parsed = JSON.parse(m)
+							return parsed.message || parsed.error || m
+						} catch {
+							return m
+						}
+					})
+					.filter(Boolean)
+					.join('\n')
+			} catch {
+				errorMsg = String(e._server_messages)
+			}
+		} else if (e?.response?.data?._server_messages) {
+			try {
+				const msgs = JSON.parse(e.response.data._server_messages)
+				errorMsg = msgs
+					.map((m) => {
+						try {
+							return JSON.parse(m).message
+						} catch {
+							return m
+						}
+					})
+					.join('\n')
+			} catch {
+				errorMsg = String(e.response.data._server_messages)
+			}
+		} else if (e?.response?.data?.message) {
+			errorMsg = e.response.data.message
+		} else {
+			errorMsg = e?.message || e?.error_message || String(e)
+		}
+		errorMsg = errorMsg.replace(/<[^>]+>/g, '')
+		alert('Layaway failed: ' + errorMsg)
 	} finally {
 		processing.value = false
 	}

@@ -1,11 +1,14 @@
 <template>
 	<div
-		class="glass-card rounded-xl p-4 border border-black/5 dark:border-white/5 bg-transparent"
+		class="glass-card rounded-3xl p-6 border border-white/5 bg-transparent overflow-hidden relative"
 	>
+		<div
+			class="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[60px] pointer-events-none"
+		></div>
 		<!-- Calendar Header -->
-		<div class="flex items-center justify-between mb-4">
-			<h3 class="text-sm font-bold text-gray-900 dark:text-white">{{ currentMonthYear }}</h3>
-			<div class="flex items-center gap-1">
+		<div class="flex items-center justify-between mb-6 relative z-10">
+			<h3 class="text-base font-bold text-white tracking-widest uppercase">{{ currentMonthYear }}</h3>
+			<div class="flex items-center gap-2">
 				<!-- Previous Year -->
 				<button
 					@click="previousYear"

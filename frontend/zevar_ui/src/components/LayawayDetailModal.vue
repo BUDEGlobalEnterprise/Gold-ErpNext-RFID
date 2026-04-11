@@ -452,8 +452,9 @@ async function fetchDetails() {
 async function cancelLayaway() {
 	cancelling.value = true
 	try {
-		const result = await cancelResource.submit({ layaway_id: props.layawayId })
-		if (result.success) {
+		const rawResult = await cancelResource.submit({ layaway_id: props.layawayId })
+		const result = rawResult?.message ?? rawResult
+		if (result?.success) {
 			alert(
 				`Layaway cancelled. Store Credit ${
 					result.store_credit_id
@@ -465,7 +466,17 @@ async function cancelLayaway() {
 		}
 	} catch (error) {
 		console.error('Failed to cancel layaway:', error)
-		alert('Failed to cancel layaway: ' + (error.message || 'Unknown error'))
+		let errorMsg = ''
+		if (error?._server_messages) {
+			try {
+				const msgs = JSON.parse(error._server_messages)
+				errorMsg = msgs.map(m => { try { return JSON.parse(m).message } catch { return m } }).join('\n')
+			} catch { errorMsg = String(error._server_messages) }
+		} else {
+			errorMsg = error?.message || 'Unknown error'
+		}
+		errorMsg = errorMsg.replace(/<[^>]+>/g, '')
+		alert('Failed to cancel layaway: ' + errorMsg)
 	} finally {
 		cancelling.value = false
 	}

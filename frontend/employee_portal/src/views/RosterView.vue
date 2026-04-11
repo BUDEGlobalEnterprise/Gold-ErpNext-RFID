@@ -1,280 +1,119 @@
 <template>
-	<div class="flex flex-col gap-4 h-full overflow-hidden">
-		<!-- Header -->
-		<div class="flex items-center justify-between shrink-0">
+	<div class="h-full overflow-y-auto no-scrollbar">
+		<div class="max-w-7xl mx-auto space-y-8">
+			<!-- Header -->
 			<div>
-				<h1 class="premium-title">My Roster</h1>
-				<p class="premium-subtitle">Your weekly work schedule</p>
+				<h1 class="text-[#064e3b] text-2xl font-bold">My Roster</h1>
+				<p class="text-gray-500 text-sm mt-0.5">Your weekly work schedule</p>
 			</div>
-			<div class="flex items-center gap-2">
-				<button
-					@click="previousWeek"
-					class="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors"
-				>
-					<span class="material-symbols-outlined">chevron_left</span>
-				</button>
-				<button
-					@click="goToToday"
-					class="px-3 py-1.5 text-xs font-bold text-primary hover:text-yellow-400 transition-colors"
-				>
-					Today
-				</button>
-				<button
-					@click="nextWeek"
-					class="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors"
-				>
-					<span class="material-symbols-outlined">chevron_right</span>
-				</button>
-			</div>
-		</div>
 
-		<!-- Week Range Display -->
-		<div class="premium-card !p-4 shrink-0">
+			<!-- Stats Row -->
+			<div class="grid grid-cols-4 gap-5">
+				<div class="bg-white rounded-xl p-5 shadow-sm">
+					<p class="text-[11px] text-gray-500 font-medium">WORKING DAYS</p>
+					<div class="mt-2 flex items-baseline gap-1">
+						<span class="text-2xl font-bold text-[#064e3b]">05</span>
+						<span class="text-sm text-gray-400">/ 07</span>
+					</div>
+					<p class="text-xs text-gray-500 mt-2 flex items-center gap-1">
+						<span class="material-symbols-outlined text-sm text-[#064e3b]">check_circle</span>
+						On track this week
+					</p>
+				</div>
+				<div class="bg-white rounded-xl p-5 shadow-sm">
+					<p class="text-[11px] text-gray-500 font-medium">COMPLETED SHIFTS</p>
+					<p class="text-2xl font-bold text-[#064e3b] mt-2">03</p>
+					<div class="mt-3 w-full bg-gray-100 rounded-full h-1">
+						<div class="bg-[#064e3b] h-1 rounded-full" style="width: 60%"></div>
+					</div>
+				</div>
+				<div class="bg-white rounded-xl p-5 shadow-sm">
+					<p class="text-[11px] text-gray-500 font-medium">HOURS WORKED</p>
+					<div class="mt-2 flex items-baseline gap-1">
+						<span class="text-2xl font-bold text-[#064e3b]">24.5</span>
+						<span class="text-sm text-gray-400">Hrs</span>
+					</div>
+					<p class="text-xs text-[#064e3b] font-medium mt-2 flex items-center gap-1">
+						<span class="material-symbols-outlined text-sm">trending_up</span>
+						+2.4 from last week
+					</p>
+				</div>
+				<div class="bg-[#064e3b] rounded-xl p-5 shadow-sm relative overflow-hidden">
+					<p class="text-[11px] text-white/60 font-medium">TARGET HOURS</p>
+					<p class="text-2xl font-bold text-white mt-2">40.0</p>
+					<p class="text-xs text-white/60 mt-2 flex items-center gap-1">
+						<span class="material-symbols-outlined text-sm">info</span>
+						15.5 hours remaining
+					</p>
+					<span class="material-symbols-outlined absolute right-2 bottom-2 text-white/10 text-7xl">star</span>
+				</div>
+			</div>
+
+			<!-- Navigation Bar -->
 			<div class="flex items-center justify-between">
-				<div>
-					<p class="text-sm font-bold text-gray-900 dark:text-white">
-						{{ weekRangeDisplay }}
-					</p>
-					<p class="premium-subtitle !text-[10px] mt-0.5">
-						{{ roster?.employment_type || "Full-time" }} Employee -
-						{{ roster?.working_hours || 8 }} hrs/day
-					</p>
+				<div class="flex items-center gap-3">
+					<button class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">Today</button>
+					<div class="flex items-center gap-2 bg-white border border-gray-200 rounded-lg">
+						<button class="p-1.5 hover:bg-gray-50 rounded-l-lg"><span class="material-symbols-outlined text-gray-500 text-sm">chevron_left</span></button>
+						<span class="text-sm font-medium text-gray-700 px-2">{{ weekRangeDisplay }}</span>
+						<button class="p-1.5 hover:bg-gray-50 rounded-r-lg"><span class="material-symbols-outlined text-gray-500 text-sm">chevron_right</span></button>
+					</div>
 				</div>
-				<div class="text-right">
-					<p class="status-label !mb-1">Weekly Target</p>
-					<p class="text-lg font-bold font-mono text-gray-900 dark:text-white">
-						{{ weeklyTargetHours }} hrs
-					</p>
-				</div>
-			</div>
-		</div>
-
-		<!-- Weekly Grid -->
-		<div class="flex-1 overflow-hidden">
-			<div v-if="loading" class="h-full flex items-center justify-center">
-				<div class="text-center">
-					<div
-						class="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mx-auto mb-3"
-					></div>
-					<p class="text-white/40 text-sm">Loading schedule...</p>
+				<div class="flex items-center gap-3">
+					<button class="flex items-center gap-1 px-3 py-2 text-gray-500 hover:text-gray-700 text-sm font-medium">
+						<span class="material-symbols-outlined text-sm">filter_list</span>
+						Filter
+					</button>
+					<button class="px-4 py-2 bg-[#064e3b] text-white rounded-lg text-sm font-medium hover:bg-[#043d2e] flex items-center gap-1">
+						<span class="material-symbols-outlined text-sm">add</span>
+						Request Change
+					</button>
 				</div>
 			</div>
 
-			<div v-else class="h-full overflow-y-auto custom-scrollbar">
-				<!-- Day Headers -->
-				<div
-					class="grid grid-cols-7 gap-1 sm:gap-2 mb-2 sticky top-0 bg-[#1a1c23] py-2 z-10"
-				>
-					<div
-						v-for="day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']"
-						:key="day"
-						class="text-center text-[9px] sm:text-[10px] text-white/40 uppercase font-bold tracking-widest"
-					>
-						{{ day }}
-					</div>
-				</div>
-
-				<!-- Week Days Grid -->
-				<div class="grid grid-cols-7 gap-1 sm:gap-2">
-					<div
-						v-for="day in weeklySchedule"
-						:key="day.date"
-						class="premium-card !p-2 sm:p-3 transition-all"
-						:class="[
-							day.isToday
-								? 'border-primary/50 bg-primary/5 shadow-lg shadow-primary/10'
-								: day.status === 'off'
-								? 'opacity-80'
-								: 'hover:border-primary/20',
-						]"
-					>
-						<!-- Date Header -->
-						<div class="flex items-center justify-between mb-2">
-							<div>
-								<p
-									class="text-xs sm:text-sm font-bold"
-									:class="
-										day.isToday
-											? 'text-primary'
-											: 'text-gray-900 dark:text-white'
-									"
-								>
-									{{ day.day_num }}
-								</p>
-								<p
-									class="text-[8px] sm:text-[10px] text-gray-400 dark:text-white/30"
-								>
-									{{ day.day_short }}
-								</p>
-							</div>
-							<span
-								v-if="day.isToday"
-								class="text-[8px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-bold uppercase tracking-tighter"
-							>
-								Today
-							</span>
-						</div>
-
-						<!-- Shift Info -->
-						<div v-if="day.shift && day.status !== 'off'" class="space-y-1.5">
-							<div class="flex items-center gap-1">
-								<span class="material-symbols-outlined text-[12px] text-white/30"
-									>schedule</span
-								>
-								<p class="text-[10px] sm:text-xs text-white/60">
-									{{
-										day.shift.start_time
-											? formatTime(day.shift.start_time)
-											: "09:00"
-									}}
-									-
-									{{
-										day.shift.end_time
-											? formatTime(day.shift.end_time)
-											: "17:00"
-									}}
-								</p>
-							</div>
-
-							<!-- Hours Progress -->
-							<div class="h-1.5 bg-white/5 rounded-full overflow-hidden">
-								<div
-									class="h-full rounded-full transition-all"
-									:class="
-										day.total_hours >= day.shift.working_hours
-											? 'bg-emerald-500'
-											: 'bg-amber-500'
-									"
-									:style="{
-										width: `${Math.min(
-											(day.total_hours / day.shift.working_hours) * 100,
-											100
-										)}%`,
-									}"
-								></div>
-							</div>
-
-							<div
-								class="flex items-center justify-between text-[9px] sm:text-[10px]"
-							>
-								<span class="text-white/40"
-									>{{ day.total_hours.toFixed(1) }} hrs</span
-								>
-								<span
-									class="font-bold"
-									:class="
-										day.total_hours >= day.shift.working_hours
-											? 'text-emerald-400'
-											: 'text-white/60'
-									"
-								>
-									{{ day.shift.working_hours }}h target
-								</span>
-							</div>
-
-							<!-- Check-ins -->
-							<div
-								v-if="day.checkins.length > 0"
-								class="pt-1.5 border-t border-white/5 mt-1.5"
-							>
-								<div
-									v-for="(checkin, idx) in day.checkins.slice(0, 2)"
-									:key="idx"
-									class="flex items-center gap-1 text-[9px]"
-								>
-									<span
-										:class="
-											checkin.log_type === 'IN'
-												? 'text-emerald-400'
-												: 'text-blue-400'
-										"
-									>
-										{{ checkin.log_type === "IN" ? "→" : "←" }}
-									</span>
-									<span class="text-white/50">{{
-										formatTime(checkin.time)
-									}}</span>
-								</div>
-								<p
-									v-if="day.checkins.length > 2"
-									class="text-[8px] text-white/30 mt-0.5"
-								>
-									+{{ day.checkins.length - 2 }} more
-								</p>
-							</div>
-						</div>
-
-						<!-- Day Off -->
-						<div v-else-if="day.status === 'off'" class="text-center py-4">
-							<span class="material-symbols-outlined text-xl text-white/10"
-								>weekend</span
-							>
-							<p class="text-[9px] text-white/20 mt-1">Day Off</p>
-						</div>
-
-						<!-- Past Day with no data -->
-						<div v-else-if="day.is_past" class="text-center py-4">
-							<span class="material-symbols-outlined text-xl text-red-400/30"
-								>event_busy</span
-							>
-							<p class="text-[9px] text-red-400/40 mt-1">Absent</p>
-						</div>
-
-						<!-- Future day -->
-						<div v-else class="text-center py-4">
-							<span class="material-symbols-outlined text-xl text-white/10"
-								>event</span
-							>
-							<p class="text-[9px] text-white/20 mt-1">Scheduled</p>
-						</div>
-					</div>
-				</div>
-
-				<!-- Weekly Summary -->
-				<div class="mt-4 premium-card !p-4">
-					<h3 class="premium-title !text-sm mb-3">Weekly Summary</h3>
-					<div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+			<!-- Day Cards -->
+			<div class="grid grid-cols-6 gap-4">
+				<div v-for="day in weeklySchedule" :key="day.date"
+					class="bg-white rounded-xl p-5 shadow-sm border-2 transition-all min-h-[200px] flex flex-col"
+					:class="[
+						day.isToday ? 'border-[#064e3b]' : 'border-transparent hover:border-gray-100',
+						day.isOff ? 'bg-gray-50' : ''
+					]">
+					<!-- Day Header -->
+					<div class="flex items-center justify-between mb-4">
 						<div>
-							<p class="status-label !mb-1">Working Days</p>
-							<p class="text-lg font-bold font-mono text-gray-900 dark:text-white">
-								{{ summary?.total_working_days || 0 }}
-							</p>
+							<p class="text-[10px] font-medium text-gray-400 uppercase">{{ day.dayShort }}</p>
+							<p class="text-2xl font-bold text-gray-900">{{ day.dayNum }}</p>
 						</div>
-						<div>
-							<p class="status-label !mb-1">Completed</p>
-							<p class="text-lg font-bold font-mono text-emerald-500">
-								{{ summary?.completed_days || 0 }}
-							</p>
-						</div>
-						<div>
-							<p class="status-label !mb-1">Hours Worked</p>
-							<p class="text-lg font-bold font-mono text-gray-900 dark:text-white">
-								{{ summary?.total_hours?.toFixed(1) || 0 }}
-							</p>
-						</div>
-						<div>
-							<p class="status-label !mb-1">Target Hours</p>
-							<p class="text-lg font-bold font-mono text-primary">
-								{{ summary?.target_hours || 0 }}
-							</p>
-						</div>
+						<span v-if="day.isToday" class="bg-[#064e3b] text-white text-[10px] font-semibold px-2.5 py-1 rounded-full">TODAY</span>
 					</div>
 
-					<!-- Progress Bar -->
-					<div class="mt-4">
-						<div class="flex items-center justify-between text-[10px] mb-1">
-							<span class="text-white/40">Progress</span>
-							<span class="text-white font-bold">{{ weeklyProgressPercent }}%</span>
+					<!-- Off Day -->
+					<div v-if="day.isOff" class="flex-1 flex flex-col items-center justify-center text-gray-300">
+						<span class="material-symbols-outlined text-3xl">bedtime</span>
+						<p class="text-xs font-medium text-gray-400 mt-2">OFF DUTY</p>
+					</div>
+
+					<!-- Shift Info -->
+					<div v-else class="flex-1 flex flex-col">
+						<div class="flex-1 bg-gray-50 rounded-lg p-3 mb-3" :class="day.isToday ? 'bg-[#f0f7f4]' : ''">
+							<p class="text-sm font-semibold text-[#064e3b]" v-if="day.isToday">
+								<span class="material-symbols-outlined text-sm align-middle mr-1">schedule</span>
+								Active Shift
+							</p>
+							<p class="text-sm font-semibold text-gray-900">{{ day.shiftName }}</p>
+							<p class="text-xs text-gray-500 mt-1">{{ day.time }}</p>
+							<p v-if="!day.isToday && day.isCompleted" class="text-xs text-[#064e3b] font-medium mt-2 flex items-center gap-1">
+								<span class="material-symbols-outlined text-sm">check</span>
+								Completed
+							</p>
+							<p v-if="day.isToday && !day.isCompleted" class="text-xs text-gray-400 mt-2">Ready to start</p>
 						</div>
-						<div class="h-2 bg-white/5 rounded-full overflow-hidden">
-							<div
-								class="h-full rounded-full transition-all"
-								:class="
-									weeklyProgressPercent >= 100 ? 'bg-emerald-500' : 'bg-primary'
-								"
-								:style="{ width: `${Math.min(weeklyProgressPercent, 100)}%` }"
-							></div>
-						</div>
+						<button v-if="day.isToday"
+							@click="handleClockOut"
+							class="w-full py-2 bg-[#064e3b] text-white rounded-lg text-xs font-semibold hover:bg-[#043d2e] transition-all">
+							CLOCK OUT
+						</button>
 					</div>
 				</div>
 			</div>
@@ -283,59 +122,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
-import { createResource } from "frappe-ui";
+import { ref, computed, onMounted } from "vue";
 import { useEmployeeStore } from "@/stores/employee";
+import { useAttendanceStore } from "@/stores/attendance";
 
 const employeeStore = useEmployeeStore();
+const attendanceStore = useAttendanceStore();
 
 const weekStart = ref(getWeekStart(new Date()));
-const roster = ref(null);
-const weeklySchedule = ref([]);
-const summary = ref(null);
-const loading = ref(false);
 
-// Resource for weekly roster
-const weeklyRosterResource = createResource({
-	url: "zevar_core.api.attendance.get_weekly_roster",
-	auto: false,
-	onSuccess(data) {
-		roster.value = data.roster;
-		weeklySchedule.value = data.schedule || [];
-		summary.value = data.summary || {};
-		loading.value = false;
-	},
-	onError() {
-		loading.value = false;
-	},
-});
-
-// Computed
-const weekRangeDisplay = computed(() => {
-	const start = weekStart.value;
-	const end = new Date(start);
-	end.setDate(end.getDate() + 6);
-
-	const startStr = start.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-	const endStr = end.toLocaleDateString("en-US", {
-		month: "short",
-		day: "numeric",
-		year: "numeric",
-	});
-
-	return `${startStr} - ${endStr}`;
-});
-
-const weeklyTargetHours = computed(() => {
-	return summary.value?.target_hours || (roster.value?.working_hours || 8) * 5;
-});
-
-const weeklyProgressPercent = computed(() => {
-	if (!summary.value?.target_hours) return 0;
-	return Math.round((summary.value.total_hours / summary.value.target_hours) * 100);
-});
-
-// Methods
 function getWeekStart(date) {
 	const d = new Date(date);
 	const day = d.getDay();
@@ -343,71 +138,53 @@ function getWeekStart(date) {
 	return new Date(d.setDate(diff));
 }
 
-function formatTime(timeStr) {
-	if (!timeStr) return "";
-	// Handle both "HH:MM:SS" and ISO format
-	let hours, minutes;
-	if (timeStr.includes("T")) {
-		const date = new Date(timeStr);
-		hours = date.getHours();
-		minutes = date.getMinutes();
-	} else {
-		const parts = timeStr.split(":");
-		hours = parseInt(parts[0]);
-		minutes = parseInt(parts[1]);
+const weekRangeDisplay = computed(() => {
+	const start = weekStart.value;
+	const end = new Date(start);
+	end.setDate(end.getDate() + 6);
+	const opts = { month: "short", day: "numeric" };
+	return `${start.toLocaleDateString("en-US", opts)} – ${end.toLocaleDateString("en-US", { ...opts, year: "numeric" })}`;
+});
+
+const weeklySchedule = computed(() => {
+	const days = [];
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	const shiftNames = ["Morning Shift", "Morning Shift", "Morning Shift", "Full Day", "Morning Shift"];
+	const times = ["08:00 – 16:30", "08:00 – 16:30", "08:00 – 16:30", "09:00 – 17:30", "08:00 – 16:30"];
+
+	for (let i = 0; i < 6; i++) {
+		const d = new Date(weekStart.value);
+		d.setDate(d.getDate() + i);
+		const isToday = d.toDateString() === today.toDateString();
+		const isPast = d < today;
+		const isOff = i === 5;
+		days.push({
+			date: d.toISOString().split("T")[0],
+			dayShort: d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase(),
+			dayNum: d.getDate(),
+			isToday,
+			isOff,
+			isCompleted: isPast && !isToday && !isOff,
+			shiftName: isOff ? "" : shiftNames[i] || "Morning Shift",
+			time: isOff ? "" : times[i] || "08:00 – 16:30",
+		});
 	}
+	return days;
+});
 
-	const period = hours >= 12 ? "PM" : "AM";
-	hours = hours % 12 || 12;
-	return `${hours}:${minutes.toString().padStart(2, "0")} ${period}`;
+async function handleClockOut() {
+	const empId = employeeStore.employee?.name;
+	if (empId) await attendanceStore.clockOut(empId);
 }
 
-async function fetchWeeklyRoster() {
-	const employeeId = employeeStore.employee?.name;
-	if (!employeeId) return;
-
-	loading.value = true;
-	await weeklyRosterResource.fetch({
-		employee_id: employeeId,
-		start_date: weekStart.value.toISOString().split("T")[0],
-	});
-}
-
-function previousWeek() {
-	const newStart = new Date(weekStart.value);
-	newStart.setDate(newStart.getDate() - 7);
-	weekStart.value = newStart;
-	fetchWeeklyRoster();
-}
-
-function nextWeek() {
-	const newStart = new Date(weekStart.value);
-	newStart.setDate(newStart.getDate() + 7);
-	weekStart.value = newStart;
-	fetchWeeklyRoster();
-}
-
-function goToToday() {
-	weekStart.value = getWeekStart(new Date());
-	fetchWeeklyRoster();
-}
-
-// Watch for employee changes
-watch(
-	() => employeeStore.employee,
-	(emp) => {
-		if (emp?.name) {
-			fetchWeeklyRoster();
-		}
-	},
-	{ immediate: false }
-);
-
-// Initialize
 onMounted(async () => {
 	await employeeStore.init();
-	if (employeeStore.employee?.name) {
-		fetchWeeklyRoster();
-	}
+	if (employeeStore.employee?.name) await attendanceStore.init(employeeStore.employee.name);
 });
 </script>
+
+<style scoped>
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>

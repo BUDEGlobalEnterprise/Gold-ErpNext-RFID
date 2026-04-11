@@ -64,6 +64,12 @@ const router = createRouter({
 			component: () => import("./views/TeamView.vue"),
 			meta: { requiresAuth: true },
 		},
+		{
+			path: "/reports",
+			name: "reports",
+			component: () => import("./views/ReportsView.vue"),
+			meta: { requiresAuth: true },
+		},
 		// Catch-all → dashboard
 		{
 			path: "/:pathMatch(.*)*",
