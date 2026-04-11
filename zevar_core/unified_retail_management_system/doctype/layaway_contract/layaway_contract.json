@@ -8,16 +8,27 @@
     "engine": "InnoDB",
     "field_order": [
         "customer",
-        "status",
+        "customer_name",
+        "customer_contact",
+        "customer_id_number",
         "column_break_1",
+        "status",
         "contract_date",
         "maximum_duration_months",
         "target_completion_date",
+        "store_location",
+        "sales_person",
+        "pos_profile",
         "section_break_amounts",
         "total_amount",
         "deposit_amount",
+        "down_payment_percent",
         "column_break_amt",
         "balance_amount",
+        "total_paid",
+        "payment_count",
+        "last_payment_date",
+        "last_payment_amount",
         "section_items",
         "items",
         "section_schedule",
@@ -25,6 +36,10 @@
         "section_cancellation",
         "cancellation_refund_type",
         "store_credit_reference",
+        "section_notes",
+        "notes",
+        "terms_accepted",
+        "customer_signature",
         "amended_from"
     ],
     "fields": [
@@ -37,16 +52,52 @@
             "reqd": 1
         },
         {
+            "fieldname": "customer_name",
+            "fieldtype": "Data",
+            "label": "Customer Name",
+            "read_only": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "customer_contact",
+            "fieldtype": "Data",
+            "label": "Contact Number"
+        },
+        {
+            "fieldname": "customer_id_number",
+            "fieldtype": "Data",
+            "label": "ID Number"
+        },
+        {
             "default": "Draft",
             "fieldname": "status",
             "fieldtype": "Select",
             "in_list_view": 1,
             "label": "Status",
-            "options": "Draft\nActive\nCompleted\nCancelled\nForfeited"
+            "options": "Draft\nActive\nCompleted\nCancelled\nForfeited\nOverdue"
         },
         {
             "fieldname": "column_break_1",
             "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "store_location",
+            "fieldtype": "Link",
+            "label": "Store Location",
+            "options": "Store Location",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "sales_person",
+            "fieldtype": "Link",
+            "label": "Sales Person",
+            "options": "Sales Person"
+        },
+        {
+            "fieldname": "pos_profile",
+            "fieldtype": "Link",
+            "label": "POS Profile",
+            "options": "POS Profile"
         },
         {
             "default": "Today",
@@ -91,9 +142,39 @@
             "fieldtype": "Column Break"
         },
         {
+            "fieldname": "down_payment_percent",
+            "fieldtype": "Percent",
+            "label": "Down Payment %",
+            "read_only": 1
+        },
+        {
             "fieldname": "balance_amount",
             "fieldtype": "Currency",
             "label": "Balance Amount",
+            "read_only": 1
+        },
+        {
+            "fieldname": "total_paid",
+            "fieldtype": "Currency",
+            "label": "Total Paid",
+            "read_only": 1
+        },
+        {
+            "fieldname": "payment_count",
+            "fieldtype": "Int",
+            "label": "Payments Made",
+            "read_only": 1
+        },
+        {
+            "fieldname": "last_payment_date",
+            "fieldtype": "Date",
+            "label": "Last Payment Date",
+            "read_only": 1
+        },
+        {
+            "fieldname": "last_payment_amount",
+            "fieldtype": "Currency",
+            "label": "Last Payment Amount",
             "read_only": 1
         },
         {
@@ -139,6 +220,26 @@
             "label": "Issued Store Credit Reference",
             "options": "Gift Card",
             "read_only": 1
+        },
+        {
+            "fieldname": "section_notes",
+            "fieldtype": "Section Break",
+            "label": "Notes & Terms"
+        },
+        {
+            "fieldname": "notes",
+            "fieldtype": "Text Editor",
+            "label": "Notes"
+        },
+        {
+            "fieldname": "terms_accepted",
+            "fieldtype": "Check",
+            "label": "Customer Accepted Terms"
+        },
+        {
+            "fieldname": "customer_signature",
+            "fieldtype": "Attach",
+            "label": "Customer Signature"
         },
         {
             "fieldname": "amended_from",

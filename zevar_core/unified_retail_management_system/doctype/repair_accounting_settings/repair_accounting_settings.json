@@ -1,0 +1,161 @@
+{
+	"actions": [],
+	"allow_rename": 0,
+	"creation": "2026-04-11 00:00:00.000000",
+	"doctype": "DocType",
+	"engine": "InnoDB",
+	"field_order": [
+		"section_revenue",
+		"repair_revenue_account",
+		"repair_deposit_account",
+		"auto_recognize_revenue",
+		"recognize_on_delivery",
+		"section_costs",
+		"material_cost_account",
+		"cogs_account",
+		"track_material_consumption",
+		"section_payments",
+		"default_payment_mode",
+		"payment_terms_template",
+		"auto_create_payment_entry",
+		"section_commission",
+		"commission_payable_account",
+		"commission_expense_account"
+	],
+	"fields": [
+		{
+			"fieldname": "section_revenue",
+			"fieldtype": "Section Break",
+			"label": "Revenue Recognition"
+		},
+		{
+			"fieldname": "repair_revenue_account",
+			"fieldtype": "Link",
+			"label": "Repair Revenue Account",
+			"options": "Account",
+			"description": "Default account for repair revenue recognition"
+		},
+		{
+			"fieldname": "repair_deposit_account",
+			"fieldtype": "Link",
+			"label": "Repair Deposit Liability Account",
+			"options": "Account",
+			"description": "Liability account for customer deposits"
+		},
+		{
+			"fieldname": "auto_recognize_revenue",
+			"fieldtype": "Check",
+			"label": "Auto Recognize Revenue",
+			"description": "Automatically create journal entry when repair is delivered",
+			"default": 0
+		},
+		{
+			"fieldname": "recognize_on_delivery",
+			"fieldtype": "Check",
+			"label": "Recognize on Delivery",
+			"description": "Recognize revenue when repair is delivered (not on completion)",
+			"default": 1
+		},
+		{
+			"fieldname": "section_costs",
+			"fieldtype": "Section Break",
+			"label": "Cost Tracking"
+		},
+		{
+			"fieldname": "material_cost_account",
+			"fieldtype": "Link",
+			"label": "Material Cost Account",
+			"options": "Account",
+			"description": "Account for material consumption costs"
+		},
+		{
+			"fieldname": "cogs_account",
+			"fieldtype": "Link",
+			"label": "Cost of Goods Sold Account",
+			"options": "Account",
+			"description": "COGS account for repair materials"
+		},
+		{
+			"fieldname": "track_material_consumption",
+			"fieldtype": "Check",
+			"label": "Track Material Consumption",
+			"description": "Automatically create stock entries for materials used",
+			"default": 1
+		},
+		{
+			"fieldname": "section_payments",
+			"fieldtype": "Section Break",
+			"label": "Payment Settings"
+		},
+		{
+			"fieldname": "default_payment_mode",
+			"fieldtype": "Link",
+			"label": "Default Payment Mode",
+			"options": "Mode of Payment"
+		},
+		{
+			"fieldname": "payment_terms_template",
+			"fieldtype": "Link",
+			"label": "Payment Terms Template",
+			"options": "Payment Terms Template"
+		},
+		{
+			"fieldname": "auto_create_payment_entry",
+			"fieldtype": "Check",
+			"label": "Auto Create Payment Entry",
+			"description": "Automatically create payment entry when customer pays",
+			"default": 0
+		},
+		{
+			"fieldname": "section_commission",
+			"fieldtype": "Section Break",
+			"label": "Commission Settings"
+		},
+		{
+			"fieldname": "commission_payable_account",
+			"fieldtype": "Link",
+			"label": "Commission Payable Account",
+			"options": "Account",
+			"description": "Liability account for technician commissions"
+		},
+		{
+			"fieldname": "commission_expense_account",
+			"fieldtype": "Link",
+			"label": "Commission Expense Account",
+			"options": "Account",
+			"description": "Expense account for commission costs"
+		}
+	],
+	"index_web_pages_for_search": 0,
+	"links": [],
+	"modified": "2026-04-11 00:00:00.000000",
+	"modified_by": "Administrator",
+	"module": "Unified Retail Management System",
+	"name": "Repair Accounting Settings",
+	"naming_rule": "Expression",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"print": 1,
+			"read": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"email": 1,
+			"print": 1,
+			"read": 1,
+			"role": "Accounts Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"states": [],
+	"is_single": 1
+}

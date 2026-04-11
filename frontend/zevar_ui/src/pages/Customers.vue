@@ -19,7 +19,9 @@
 			</div>
 
 			<!-- Segment Tabs -->
-			<div class="flex gap-1 bg-gray-100 dark:bg-[#1C1F26] p-1 rounded-xl mb-6 flex-shrink-0 overflow-x-auto">
+			<div
+				class="flex gap-1 bg-gray-100 dark:bg-[#1C1F26] p-1 rounded-xl mb-6 flex-shrink-0 overflow-x-auto"
+			>
 				<button
 					v-for="seg in segments"
 					:key="seg.value"
@@ -32,28 +34,50 @@
 					"
 				>
 					{{ seg.label }}
-					<span
-						class="ml-1 text-[10px] font-bold text-gray-400"
-					>{{ getSegmentCount(seg.value) }}</span>
+					<span class="ml-1 text-[10px] font-bold text-gray-400">{{
+						getSegmentCount(seg.value)
+					}}</span>
 				</button>
 			</div>
 
 			<!-- Stats Row -->
 			<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6 flex-shrink-0">
 				<div class="premium-card !p-4">
-					<div class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Total Clients</div>
-					<div class="text-2xl font-bold text-gray-900 dark:text-white">{{ customersData.length }}</div>
+					<div
+						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+					>
+						Total Clients
+					</div>
+					<div class="text-2xl font-bold text-gray-900 dark:text-white">
+						{{ customersData.length }}
+					</div>
 				</div>
 				<div class="premium-card !p-4">
-					<div class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">VIP Members</div>
-					<div class="text-2xl font-bold text-[#D4AF37]">{{ customersData.filter(c => c.tier === 'VIP').length }}</div>
+					<div
+						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+					>
+						VIP Members
+					</div>
+					<div class="text-2xl font-bold text-[#D4AF37]">
+						{{ customersData.filter((c) => c.tier === 'VIP').length }}
+					</div>
 				</div>
 				<div class="premium-card !p-4">
-					<div class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Avg Purchase</div>
-					<div class="text-2xl font-bold text-green-600">{{ formatCurrency(avgPurchase) }}</div>
+					<div
+						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+					>
+						Avg Purchase
+					</div>
+					<div class="text-2xl font-bold text-green-600">
+						{{ formatCurrency(avgPurchase) }}
+					</div>
 				</div>
 				<div class="premium-card !p-4">
-					<div class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Repeat Rate</div>
+					<div
+						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+					>
+						Repeat Rate
+					</div>
 					<div class="text-2xl font-bold text-blue-500">68%</div>
 				</div>
 			</div>
@@ -77,11 +101,22 @@
 										: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
 								"
 							>
-								{{ customer.name.split(' ').map(n => n[0]).join('') }}
+								{{
+									customer.name
+										.split(' ')
+										.map((n) => n[0])
+										.join('')
+								}}
 							</div>
 							<div class="min-w-0 flex-1">
-								<div class="font-bold text-gray-900 dark:text-white text-sm truncate">{{ customer.name }}</div>
-								<div class="text-[10px] text-gray-500 truncate">{{ customer.phone }}</div>
+								<div
+									class="font-bold text-gray-900 dark:text-white text-sm truncate"
+								>
+									{{ customer.name }}
+								</div>
+								<div class="text-[10px] text-gray-500 truncate">
+									{{ customer.phone }}
+								</div>
 							</div>
 							<span
 								class="text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0"
@@ -96,21 +131,32 @@
 								{{ customer.tier }}
 							</span>
 						</div>
-						<div class="grid grid-cols-3 gap-2 text-center border-t border-gray-100 dark:border-white/5 pt-3">
+						<div
+							class="grid grid-cols-3 gap-2 text-center border-t border-gray-100 dark:border-white/5 pt-3"
+						>
 							<div>
 								<div class="text-[10px] text-gray-500 mb-0.5">Purchases</div>
-								<div class="text-xs font-bold text-gray-900 dark:text-white">{{ customer.purchases }}</div>
+								<div class="text-xs font-bold text-gray-900 dark:text-white">
+									{{ customer.purchases }}
+								</div>
 							</div>
 							<div>
 								<div class="text-[10px] text-gray-500 mb-0.5">Lifetime</div>
-								<div class="text-xs font-bold text-[#D4AF37]">{{ formatCurrency(customer.lifetime) }}</div>
+								<div class="text-xs font-bold text-[#D4AF37]">
+									{{ formatCurrency(customer.lifetime) }}
+								</div>
 							</div>
 							<div>
 								<div class="text-[10px] text-gray-500 mb-0.5">Last Visit</div>
-								<div class="text-xs font-bold text-gray-900 dark:text-white">{{ customer.lastVisit }}</div>
+								<div class="text-xs font-bold text-gray-900 dark:text-white">
+									{{ customer.lastVisit }}
+								</div>
 							</div>
 						</div>
-						<div v-if="customer.preferences.length > 0" class="flex flex-wrap gap-1 mt-3">
+						<div
+							v-if="customer.preferences.length > 0"
+							class="flex flex-wrap gap-1 mt-3"
+						>
 							<span
 								v-for="pref in customer.preferences"
 								:key="pref"
@@ -147,18 +193,138 @@ const segments = [
 ]
 
 const customersData = ref([
-	{ id: 1, name: 'Priya Sharma', phone: '+1 (555) 234-5678', email: 'priya@email.com', tier: 'VIP', purchases: 24, lifetime: 128500, lastVisit: '2 days ago', preferences: ['Yellow Gold', 'Diamonds', 'Bridal'] },
-	{ id: 2, name: 'Michael Chen', phone: '+1 (555) 345-6789', email: 'mchen@email.com', tier: 'VIP', purchases: 18, lifetime: 94200, lastVisit: '1 week ago', preferences: ['Platinum', 'Sapphires'] },
-	{ id: 3, name: 'Sarah Williams', phone: '+1 (555) 456-7890', email: 'swilliams@email.com', tier: 'Regular', purchases: 8, lifetime: 22400, lastVisit: '3 days ago', preferences: ['Rose Gold', 'Earrings'] },
-	{ id: 4, name: 'Raj Patel', phone: '+1 (555) 567-8901', email: 'raj@email.com', tier: 'VIP', purchases: 32, lifetime: 186000, lastVisit: 'Yesterday', preferences: ['22K Gold', 'Kundan', 'Necklaces'] },
-	{ id: 5, name: 'Emily Rodriguez', phone: '+1 (555) 678-9012', email: 'emily.r@email.com', tier: 'Regular', purchases: 5, lifetime: 8500, lastVisit: '2 weeks ago', preferences: ['Silver', 'Bracelets'] },
-	{ id: 6, name: 'David Kim', phone: '+1 (555) 789-0123', email: 'dkim@email.com', tier: 'New', purchases: 1, lifetime: 3200, lastVisit: 'Today', preferences: ['White Gold'] },
-	{ id: 7, name: 'Ananya Gupta', phone: '+1 (555) 890-1234', email: 'ananya@email.com', tier: 'VIP', purchases: 15, lifetime: 72800, lastVisit: '4 days ago', preferences: ['Polki', 'Bridal Sets', 'Bangles'] },
-	{ id: 8, name: 'James Thompson', phone: '+1 (555) 901-2345', email: 'jthompson@email.com', tier: 'Regular', purchases: 6, lifetime: 15600, lastVisit: '1 week ago', preferences: ['Rings', 'Diamonds'] },
-	{ id: 9, name: 'Lisa Park', phone: '+1 (555) 012-3456', email: 'lpark@email.com', tier: 'Inactive', purchases: 3, lifetime: 7200, lastVisit: '3 months ago', preferences: ['Earrings'] },
-	{ id: 10, name: 'Ahmed Hassan', phone: '+1 (555) 123-4567', email: 'ahmed@email.com', tier: 'New', purchases: 2, lifetime: 5800, lastVisit: '5 days ago', preferences: ['Yellow Gold', 'Chains'] },
-	{ id: 11, name: 'Jennifer Lee', phone: '+1 (555) 234-5670', email: 'jlee@email.com', tier: 'Regular', purchases: 10, lifetime: 28900, lastVisit: '1 day ago', preferences: ['Pendants', 'Emeralds'] },
-	{ id: 12, name: 'Robert Singh', phone: '+1 (555) 345-6780', email: 'rsingh@email.com', tier: 'Inactive', purchases: 2, lifetime: 4100, lastVisit: '6 months ago', preferences: ['Rings'] },
+	{
+		id: 1,
+		name: 'Priya Sharma',
+		phone: '+1 (555) 234-5678',
+		email: 'priya@email.com',
+		tier: 'VIP',
+		purchases: 24,
+		lifetime: 128500,
+		lastVisit: '2 days ago',
+		preferences: ['Yellow Gold', 'Diamonds', 'Bridal'],
+	},
+	{
+		id: 2,
+		name: 'Michael Chen',
+		phone: '+1 (555) 345-6789',
+		email: 'mchen@email.com',
+		tier: 'VIP',
+		purchases: 18,
+		lifetime: 94200,
+		lastVisit: '1 week ago',
+		preferences: ['Platinum', 'Sapphires'],
+	},
+	{
+		id: 3,
+		name: 'Sarah Williams',
+		phone: '+1 (555) 456-7890',
+		email: 'swilliams@email.com',
+		tier: 'Regular',
+		purchases: 8,
+		lifetime: 22400,
+		lastVisit: '3 days ago',
+		preferences: ['Rose Gold', 'Earrings'],
+	},
+	{
+		id: 4,
+		name: 'Raj Patel',
+		phone: '+1 (555) 567-8901',
+		email: 'raj@email.com',
+		tier: 'VIP',
+		purchases: 32,
+		lifetime: 186000,
+		lastVisit: 'Yesterday',
+		preferences: ['22K Gold', 'Kundan', 'Necklaces'],
+	},
+	{
+		id: 5,
+		name: 'Emily Rodriguez',
+		phone: '+1 (555) 678-9012',
+		email: 'emily.r@email.com',
+		tier: 'Regular',
+		purchases: 5,
+		lifetime: 8500,
+		lastVisit: '2 weeks ago',
+		preferences: ['Silver', 'Bracelets'],
+	},
+	{
+		id: 6,
+		name: 'David Kim',
+		phone: '+1 (555) 789-0123',
+		email: 'dkim@email.com',
+		tier: 'New',
+		purchases: 1,
+		lifetime: 3200,
+		lastVisit: 'Today',
+		preferences: ['White Gold'],
+	},
+	{
+		id: 7,
+		name: 'Ananya Gupta',
+		phone: '+1 (555) 890-1234',
+		email: 'ananya@email.com',
+		tier: 'VIP',
+		purchases: 15,
+		lifetime: 72800,
+		lastVisit: '4 days ago',
+		preferences: ['Polki', 'Bridal Sets', 'Bangles'],
+	},
+	{
+		id: 8,
+		name: 'James Thompson',
+		phone: '+1 (555) 901-2345',
+		email: 'jthompson@email.com',
+		tier: 'Regular',
+		purchases: 6,
+		lifetime: 15600,
+		lastVisit: '1 week ago',
+		preferences: ['Rings', 'Diamonds'],
+	},
+	{
+		id: 9,
+		name: 'Lisa Park',
+		phone: '+1 (555) 012-3456',
+		email: 'lpark@email.com',
+		tier: 'Inactive',
+		purchases: 3,
+		lifetime: 7200,
+		lastVisit: '3 months ago',
+		preferences: ['Earrings'],
+	},
+	{
+		id: 10,
+		name: 'Ahmed Hassan',
+		phone: '+1 (555) 123-4567',
+		email: 'ahmed@email.com',
+		tier: 'New',
+		purchases: 2,
+		lifetime: 5800,
+		lastVisit: '5 days ago',
+		preferences: ['Yellow Gold', 'Chains'],
+	},
+	{
+		id: 11,
+		name: 'Jennifer Lee',
+		phone: '+1 (555) 234-5670',
+		email: 'jlee@email.com',
+		tier: 'Regular',
+		purchases: 10,
+		lifetime: 28900,
+		lastVisit: '1 day ago',
+		preferences: ['Pendants', 'Emeralds'],
+	},
+	{
+		id: 12,
+		name: 'Robert Singh',
+		phone: '+1 (555) 345-6780',
+		email: 'rsingh@email.com',
+		tier: 'Inactive',
+		purchases: 2,
+		lifetime: 4100,
+		lastVisit: '6 months ago',
+		preferences: ['Rings'],
+	},
 ])
 
 const avgPurchase = computed(() => {
@@ -194,6 +360,10 @@ const filteredCustomers = computed(() => {
 
 function formatCurrency(val) {
 	if (!val) return '$0'
-	return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val)
+	return new Intl.NumberFormat('en-US', {
+		style: 'currency',
+		currency: 'USD',
+		maximumFractionDigits: 0,
+	}).format(val)
 }
 </script>

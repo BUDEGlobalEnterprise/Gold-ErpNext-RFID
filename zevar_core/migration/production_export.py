@@ -24,7 +24,7 @@ import urllib.request
 from pathlib import Path
 
 import frappe
-from frappe.utils import now_datetime, flt
+from frappe.utils import flt, now_datetime
 
 EXPORT_DIR = "/tmp/zevar_production_export"
 OUTPUT_FILE = os.path.join(EXPORT_DIR, "zevar_production_data.json")
@@ -504,11 +504,11 @@ def run_export(download_images=True, assign_missing_images=True):
 	print(f"  Images:        {stats['images_downloaded']} downloaded, {stats['images_assigned']} assigned")
 	print(f"  Issues:        {len(stats['quantity_issues'])}")
 	print(f"\nOutput directory: {EXPORT_DIR}/")
-	print(f"  zevar_production_data.json  - All data for import")
-	print(f"  zevar_images_manifest.json  - Image URL to file mapping")
-	print(f"  item_images/                - Downloaded image files")
+	print("  zevar_production_data.json  - All data for import")
+	print("  zevar_images_manifest.json  - Image URL to file mapping")
+	print("  item_images/                - Downloaded image files")
 	if stats["quantity_issues"]:
-		print(f"  quantity_issues.json        - Items with qty/price issues")
+		print("  quantity_issues.json        - Items with qty/price issues")
 	print("=" * 60)
 
 	return export_data

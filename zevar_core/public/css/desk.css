@@ -816,3 +816,395 @@
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
+
+/* ============================================
+   Layaway Desk Pages - Modern UI Components
+   ============================================ */
+
+/* Main Shell Layout */
+.zevar-la-shell {
+	padding: var(--zevar-space-4);
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+/* Hero Section */
+.zevar-la-hero {
+	margin-bottom: var(--zevar-space-6);
+}
+
+.zevar-la-hero h2 {
+	font-size: 1.75rem;
+	font-weight: 700;
+	margin: var(--zevar-space-2) 0;
+	color: var(--zevar-gray-900, #111827);
+}
+
+.zevar-la-eyebrow {
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--zevar-primary, #2563eb);
+	margin-bottom: var(--zevar-space-2);
+}
+
+.zevar-la-hero p {
+	font-size: 1rem;
+	color: var(--zevar-gray-600, #4b5563);
+	margin: 0;
+}
+
+/* Stats Grid */
+.zevar-la-stats-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: var(--zevar-space-4);
+	margin-bottom: var(--zevar-space-6);
+}
+
+.zevar-la-stat-card {
+	background: white;
+	border-radius: var(--zevar-radius-lg);
+	padding: var(--zevar-space-4);
+	box-shadow: var(--zevar-shadow-sm);
+	transition: all var(--zevar-transition-fast);
+}
+
+.zevar-la-stat-card:hover {
+	box-shadow: var(--zevar-shadow-md);
+	transform: translateY(-2px);
+}
+
+.zevar-la-stat-card h3 {
+	font-size: 1.5rem;
+	font-weight: 700;
+	margin: var(--zevar-space-2) 0 0 0;
+	color: var(--zevar-gray-900, #111827);
+}
+
+/* Action Grid */
+.zevar-la-action-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: var(--zevar-space-4);
+}
+
+.zevar-la-action-card {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	background: white;
+	border: 2px solid var(--zevar-gray-200, #e5e7eb);
+	border-radius: var(--zevar-radius-lg);
+	padding: var(--zevar-space-5);
+	cursor: pointer;
+	transition: all var(--zevar-transition-normal);
+	text-align: left;
+	width: 100%;
+}
+
+.zevar-la-action-card:hover {
+	border-color: var(--zevar-primary, #2563eb);
+	box-shadow: var(--zevar-shadow-md);
+	transform: translateY(-2px);
+}
+
+.zevar-la-action-card:focus {
+	outline: none;
+	box-shadow: var(--zevar-focus-ring);
+}
+
+.zevar-la-action-icon {
+	font-size: 2rem;
+	margin-bottom: var(--zevar-space-3);
+}
+
+.zevar-la-action-title {
+	font-size: 1.125rem;
+	font-weight: 600;
+	color: var(--zevar-gray-900, #111827);
+	margin-bottom: var(--zevar-space-2);
+}
+
+.zevar-la-action-desc {
+	font-size: 0.875rem;
+	color: var(--zevar-gray-600, #4b5563);
+	margin: 0;
+}
+
+/* Panel */
+.zevar-la-panel {
+	background: white;
+	border-radius: var(--zevar-radius-lg);
+	padding: var(--zevar-space-5);
+	box-shadow: var(--zevar-shadow-sm);
+}
+
+.zevar-la-stack-gap {
+	margin-bottom: var(--zevar-space-4);
+}
+
+.zevar-la-panel h3 {
+	font-size: 1.25rem;
+	font-weight: 600;
+	margin: var(--zevar-space-2) 0;
+	color: var(--zevar-gray-900, #111827);
+}
+
+.zevar-la-panel p {
+	color: var(--zevar-gray-700, #374151);
+	margin: var(--zevar-space-2) 0;
+}
+
+.zevar-la-panel ul {
+	margin: var(--zevar-space-2) 0;
+	padding-left: var(--zevar-space-5);
+	color: var(--zevar-gray-700, #374151);
+}
+
+.zevar-la-panel li {
+	margin: var(--zevar-space-2) 0;
+}
+
+/* Form Grid */
+.zevar-la-form-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	gap: var(--zevar-space-4);
+}
+
+.zevar-la-form-grid.compact {
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: var(--zevar-space-3);
+}
+
+.zevar-la-form-span {
+	grid-column: 1 / -1;
+}
+
+/* Inline Actions */
+.zevar-la-inline-actions {
+	display: flex;
+	gap: var(--zevar-space-3);
+	margin-top: var(--zevar-space-4);
+	flex-wrap: wrap;
+}
+
+/* Tables */
+.zevar-la-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.zevar-la-table th {
+	background: var(--zevar-gray-50, #f9fafb);
+	font-weight: 600;
+	color: var(--zevar-gray-700, #374151);
+	text-align: left;
+	padding: var(--zevar-space-3);
+}
+
+.zevar-la-table td {
+	padding: var(--zevar-space-3);
+	vertical-align: middle;
+}
+
+/* Summary Grid */
+.zevar-la-summary-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: var(--zevar-space-4);
+	margin-bottom: var(--zevar-space-4);
+}
+
+.zevar-la-summary-grid.compact {
+	grid-template-columns: repeat(4, 1fr);
+}
+
+/* Status Badge */
+.zevar-la-status {
+	display: inline-block;
+	padding: var(--zevar-space-1) var(--zevar-space-3);
+	border-radius: 9999px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+.zevar-la-status.is-success {
+	background: #d1fae5;
+	color: #065f46;
+}
+
+.zevar-la-status.is-warning {
+	background: #fef3c7;
+	color: #92400e;
+}
+
+.zevar-la-status.is-danger {
+	background: #fee2e2;
+	color: #991b1b;
+}
+
+.zevar-la-status.is-neutral {
+	background: var(--zevar-gray-100, #f3f4f6);
+	color: var(--zevar-gray-700, #374151);
+}
+
+/* Result Cards */
+.zevar-la-result {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: white;
+	border: 1px solid var(--zevar-gray-200, #e5e7eb);
+	border-radius: var(--zevar-radius-md);
+	padding: var(--zevar-space-4);
+	margin-bottom: var(--zevar-space-3);
+	cursor: pointer;
+	transition: all var(--zevar-transition-fast);
+	width: 100%;
+	text-align: left;
+}
+
+.zevar-la-result:hover {
+	border-color: var(--zevar-primary, #2563eb);
+	box-shadow: var(--zevar-shadow-sm);
+}
+
+.zevar-la-result:focus {
+	outline: none;
+	box-shadow: var(--zevar-focus-ring);
+}
+
+.zevar-la-result strong {
+	display: block;
+	font-size: 0.875rem;
+	color: var(--zevar-gray-900, #111827);
+	margin-bottom: var(--zevar-space-1);
+}
+
+.zevar-la-result span {
+	font-size: 0.75rem;
+	color: var(--zevar-gray-500, #6b7280);
+}
+
+/* Empty State */
+.zevar-la-empty {
+	padding: var(--zevar-space-6);
+	text-align: center;
+	color: var(--zevar-gray-500, #6b7280);
+	font-style: italic;
+}
+
+/* Link List */
+.zevar-la-link-list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--zevar-space-3);
+}
+
+.zevar-la-link {
+	display: inline-flex;
+	align-items: center;
+	padding: var(--zevar-space-3) var(--zevar-space-4);
+	background: var(--zevar-gray-50, #f9fafb);
+	border-radius: var(--zevar-radius-md);
+	text-decoration: none;
+	color: var(--zevar-primary, #2563eb);
+	font-weight: 500;
+	transition: all var(--zevar-transition-fast);
+}
+
+.zevar-la-link:hover {
+	background: var(--zevar-primary-light, #dbeafe);
+	text-decoration: underline;
+}
+
+/* Warning Panel */
+.zevar-la-warning-panel {
+	background: #fff7ed;
+	border-left: 4px solid var(--zevar-warning, #f59e0b);
+}
+
+/* Two Column Layout */
+.zevar-la-grid.two-col {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: var(--zevar-space-4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	.zevar-la-shell {
+		padding: var(--zevar-space-3);
+	}
+
+	.zevar-la-action-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.zevar-la-stats-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.zevar-la-summary-grid.compact {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.zevar-la-form-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 480px) {
+	.zevar-la-stats-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.zevar-la-summary-grid.compact {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* Loading State */
+.zevar-la-loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: var(--zevar-space-8);
+	color: var(--zevar-gray-500, #6b7280);
+}
+
+.zevar-la-loading-spinner {
+	width: 32px;
+	height: 32px;
+	border: 3px solid var(--zevar-gray-200, #e5e7eb);
+	border-top-color: var(--zevar-primary, #2563eb);
+	border-radius: 50%;
+	animation: zevar-la-spin 0.8s linear infinite;
+	margin-bottom: var(--zevar-space-3);
+}
+
+@keyframes zevar-la-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Error State */
+.zevar-la-error {
+	padding: var(--zevar-space-6);
+	text-align: center;
+	color: var(--zevar-danger, #ef4444);
+	background: #fef2f2;
+	border-radius: var(--zevar-radius-md);
+	border: 1px solid #fecaca;
+}
+
+.zevar-la-error p {
+	margin: 0;
+	font-size: 0.875rem;
+}

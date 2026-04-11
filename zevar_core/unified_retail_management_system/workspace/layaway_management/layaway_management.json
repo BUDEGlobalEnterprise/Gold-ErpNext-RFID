@@ -1,0 +1,85 @@
+{
+    "actions": [],
+    "creation": "2026-04-10 05:55:00",
+    "doctype": "Workspace",
+    "filters": [],
+    "force_show_names": 0,
+    "icon": "layout",
+    "label": "Layaway Management",
+    "links": [
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Layaway Hub",
+            "link_count": 0,
+            "link_type": "Page",
+            "onboard": 0,
+            "options": "layaway",
+            "type": "Link"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "New Layaway",
+            "link_count": 0,
+            "link_type": "Page",
+            "onboard": 0,
+            "options": "new-layaway",
+            "type": "Link"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Layaway Payment",
+            "link_count": 0,
+            "link_type": "Page",
+            "onboard": 0,
+            "options": "layaway-payment",
+            "type": "Link"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Layaway Contracts",
+            "link_count": 0,
+            "link_type": "DocType",
+            "onboard": 0,
+            "options": "Layaway Contract",
+            "type": "List"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Layaway Status",
+            "link_count": 0,
+            "link_type": "Report",
+            "onboard": 0,
+            "options": "Layaway Status",
+            "type": "Report"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Layaway Aging",
+            "link_count": 0,
+            "link_type": "Report",
+            "onboard": 0,
+            "options": "Layaway Aging",
+            "type": "Report"
+        }
+    ],
+    "modified": "2026-04-10 05:55:00",
+    "modified_by": "Administrator",
+    "module": "Unified Retail Management System",
+    "name": "Layaway Management",
+    "owner": "Administrator",
+    "restrict_to_domain": "",
+    "sequence_id": 100,
+    "title": "Layaway Management"
+}

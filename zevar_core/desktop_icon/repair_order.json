@@ -1,0 +1,16 @@
+{
+  "app": "zevar_core",
+  "color": "#f59e0b",
+  "description": "Jewelry repair tracking and management with estimates, workflow, and customer notifications",
+  "doctype": "Desktop Icon",
+  "hidden": 0,
+  "icon": "tools",
+  "label": "Repair Orders",
+  "link_to": "Repair Order",
+  "link_type": "DocType",
+  "name": "Repair Orders",
+  "module": "Unified Retail Management System",
+  "seq": 40,
+  "standard": 0,
+  "type": "Link"
+}

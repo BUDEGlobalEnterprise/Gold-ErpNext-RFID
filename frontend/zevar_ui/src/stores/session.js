@@ -22,6 +22,13 @@ export const useSessionStore = defineStore('session', () => {
 			? localStorage.getItem('active_warehouse')
 			: null
 	)
+	const currentStoreLocation = ref(
+		localStorage.getItem('active_store_location') &&
+			localStorage.getItem('active_store_location') !== 'null' &&
+			localStorage.getItem('active_store_location') !== ''
+			? localStorage.getItem('active_store_location')
+			: null
+	)
 
 	// Resources
 	const userResource = createResource({
@@ -72,12 +79,24 @@ export const useSessionStore = defineStore('session', () => {
 		}
 	}
 
+	function setStoreLocation(storeLocation) {
+		if (!storeLocation || storeLocation === '') {
+			currentStoreLocation.value = null
+			localStorage.removeItem('active_store_location')
+		} else {
+			currentStoreLocation.value = storeLocation
+			localStorage.setItem('active_store_location', storeLocation)
+		}
+	}
+
 	return {
 		user,
 		isLoggedIn,
 		currentWarehouse,
+		currentStoreLocation,
 		userResource,
 		logoutResource,
 		setWarehouse,
+		setStoreLocation,
 	}
 })

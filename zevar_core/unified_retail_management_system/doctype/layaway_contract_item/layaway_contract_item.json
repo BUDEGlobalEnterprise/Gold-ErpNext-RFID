@@ -5,12 +5,17 @@
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
- "field_order": [
-  "item_code",
-  "qty",
-  "rate",
-  "amount"
- ],
+    "field_order": [
+        "item_code",
+        "item_name",
+        "description",
+        "qty",
+        "rate",
+        "amount",
+        "serial_no",
+        "batch_no",
+        "warehouse"
+    ],
  "fields": [
   {
    "fieldname": "item_code",
@@ -35,14 +40,43 @@
    "label": "Rate",
    "reqd": 1
   },
-  {
-   "fieldname": "amount",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Amount",
-   "read_only": 1,
-   "reqd": 1
-  }
+        {
+            "fieldname": "item_name",
+            "fieldtype": "Data",
+            "label": "Item Name",
+            "read_only": 1
+        },
+        {
+            "fieldname": "description",
+            "fieldtype": "Text",
+            "label": "Description"
+        },
+        {
+            "fieldname": "amount",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Amount",
+            "read_only": 1,
+            "reqd": 1
+        },
+        {
+            "fieldname": "serial_no",
+            "fieldtype": "Link",
+            "label": "Serial No",
+            "options": "Serial No"
+        },
+        {
+            "fieldname": "batch_no",
+            "fieldtype": "Link",
+            "label": "Batch No",
+            "options": "Batch"
+        },
+        {
+            "fieldname": "warehouse",
+            "fieldtype": "Link",
+            "label": "Warehouse",
+            "options": "Warehouse"
+        }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,

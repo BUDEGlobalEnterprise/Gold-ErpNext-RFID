@@ -130,7 +130,14 @@ def create_missing_desktop_icons_for_workspaces():
 		create_desktop_icons_from_workspace,
 	)
 
-	create_desktop_icons_from_workspace()
+	try:
+		create_desktop_icons_from_workspace()
+	except Exception as e:
+		frappe.log_error(
+			f"Failed to create desktop icons from workspace: {e}",
+			"Desktop Icon Workspace Creation",
+		)
+		frappe.logger().warning(f"Skipping desktop icon creation: {e}")
 
 
 def execute():
