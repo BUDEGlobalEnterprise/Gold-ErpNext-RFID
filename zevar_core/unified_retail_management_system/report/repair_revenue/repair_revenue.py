@@ -1,10 +1,12 @@
 # Copyright (c) 2026, Zevar and contributors
 # For license information, please see license.txt
 
-import frappe
-from frappe.utils import flt, getdate
-from frappe import _
 from datetime import datetime, timedelta
+
+import frappe
+from frappe import _
+from frappe.utils import flt, getdate
+
 
 def execute(filters=None):
 	columns = get_columns()
@@ -165,7 +167,7 @@ def get_chart_data(data, filters):
 	labels = [row["period"] for row in data]
 	revenue_values = [row["total_revenue"] for row in data]
 	deposit_values = [row["total_deposit"] for row in data]
-	count_values = [row["repair_count"] for row in data]
+	[row["repair_count"] for row in data]
 
 	return {
 		"labels": labels,

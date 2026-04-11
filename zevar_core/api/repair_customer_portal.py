@@ -9,12 +9,10 @@ This module provides public-facing API endpoints for customers to:
 """
 
 from typing import Any
+
 import frappe
 from frappe import _
-from frappe.utils import (
-    nowdate, getdate, add_to_date, now,
-    get_url, cint, random_string
-)
+from frappe.utils import add_to_date, cint, get_url, getdate, now, nowdate, random_string
 
 
 @frappe.whitelist(allow_guest=True)
@@ -429,7 +427,7 @@ def upload_reference_photo(auth_token: str, repair_order: str, photo_data: str, 
 
     except Exception as e:
         frappe.log_error(f"Photo upload failed for {repair_order}: {e}")
-        return {"success": False, "message": f"Failed to upload photo: {str(e)}"}
+        return {"success": False, "message": f"Failed to upload photo: {e!s}"}
 
 
 @frappe.whitelist(allow_guest=True)
@@ -469,7 +467,7 @@ def customer_approve_estimate(auth_token: str, repair_order: str, customer_name:
 
     except Exception as e:
         frappe.log_error(f"Estimate approval failed for {repair_order}: {e}")
-        return {"success": False, "message": f"Failed to approve estimate: {str(e)}"}
+        return {"success": False, "message": f"Failed to approve estimate: {e!s}"}
 
 
 @frappe.whitelist(allow_guest=True)
@@ -512,7 +510,7 @@ def customer_reject_estimate(auth_token: str, repair_order: str, customer_name: 
 
     except Exception as e:
         frappe.log_error(f"Estimate rejection failed for {repair_order}: {e}")
-        return {"success": False, "message": f"Failed to reject estimate: {str(e)}"}
+        return {"success": False, "message": f"Failed to reject estimate: {e!s}"}
 
 
 @frappe.whitelist(allow_guest=True)
@@ -581,7 +579,7 @@ def request_repair_update(auth_token: str, repair_order: str, message: str) -> d
 
     except Exception as e:
         frappe.log_error(f"Failed to send customer message for {repair_order}: {e}")
-        return {"success": False, "message": f"Failed to send message: {str(e)}"}
+        return {"success": False, "message": f"Failed to send message: {e!s}"}
 
 
 @frappe.whitelist(allow_guest=True)
@@ -743,4 +741,4 @@ def schedule_pickup(auth_token: str, repair_order: str, pickup_date: str, pickup
 
     except Exception as e:
         frappe.log_error(f"Failed to schedule pickup for {repair_order}: {e}")
-        return {"success": False, "message": f"Failed to schedule pickup: {str(e)}"}
+        return {"success": False, "message": f"Failed to schedule pickup: {e!s}"}

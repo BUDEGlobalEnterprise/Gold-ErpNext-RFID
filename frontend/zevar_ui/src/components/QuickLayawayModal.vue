@@ -316,8 +316,18 @@ async function submitLayaway() {
 		if (error?._server_messages) {
 			try {
 				const msgs = JSON.parse(error._server_messages)
-				errorMsg = msgs.map(m => { try { return JSON.parse(m).message } catch { return m } }).join('\n')
-			} catch { errorMsg = String(error._server_messages) }
+				errorMsg = msgs
+					.map((m) => {
+						try {
+							return JSON.parse(m).message
+						} catch {
+							return m
+						}
+					})
+					.join('\n')
+			} catch {
+				errorMsg = String(error._server_messages)
+			}
 		} else {
 			errorMsg = error?.message || error?.exc || 'Unknown error'
 		}

@@ -4,16 +4,16 @@ FoxPro Migration Script to be executed via bench
 This script will be called by bench execute
 """
 
+import json
 import os
 import sys
-import json
 from datetime import datetime
 from pathlib import Path
 
 # These imports will work when called via bench execute
 try:
-    from dbfread import DBF
     import pandas as pd
+    from dbfread import DBF
 except ImportError:
     print("Please install required packages: pip install dbfread pandas")
     sys.exit(1)
@@ -25,10 +25,8 @@ def migrate_data():
 
     # Configuration
     LEGACY_DATA_DIR = "/workspace/development/Zevar_URMS/Zevar_URMS/JCSWIN 1(1)/JCSWIN/"
-    MIGRATION_LOG_FILE = f"/workspace/migration_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+    f"/workspace/migration_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
     MIGRATION_STATS_FILE = "/workspace/migration_stats.json"
-    SQL_DUMP_FILE = "/workspace/migrated_data.sql"
-    COMPRESSED_FILE = "/workspace/migrated_data.tar.gz"
 
     stats = {
         'total_processed': 0,
@@ -233,7 +231,7 @@ def migrate_data():
         print(f"    Failed: {table_stats.get('failed', 0)}")
 
     print("="*80)
-    print(f"\n✅ Migration completed!")
+    print("\n✅ Migration completed!")
     print(f"Statistics saved to: {MIGRATION_STATS_FILE}")
 
     return stats

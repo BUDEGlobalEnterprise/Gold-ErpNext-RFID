@@ -47,7 +47,7 @@
 						}}
 					</span>
 				</div>
-				
+
 				<!-- Inline Filter Bar - Occupies the central "blank space" -->
 				<div class="flex-1 hidden md:flex justify-center px-4">
 					<FilterBar />
@@ -66,7 +66,10 @@
 						POS
 					</button>
 					<button
-						@click="viewMode = 'catalog'; loadCatalog()"
+						@click="
+							viewMode = 'catalog'
+							loadCatalog()
+						"
 						class="px-3 py-1.5 rounded-lg text-xs font-bold border transition"
 						:class="
 							viewMode === 'catalog'
@@ -245,10 +248,10 @@ const items = createResource({
 			max_price: price_max || undefined,
 			sort_by: ui.sortBy || undefined,
 		}
-		
+
 		console.log('🔍 POS Items API Params:', params)
 		console.log('🎯 Active Filters:', ui.activeFilters)
-		
+
 		return params
 	},
 	onSuccess(data) {

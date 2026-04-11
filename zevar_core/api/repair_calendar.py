@@ -8,14 +8,22 @@ This module provides calendar-related functionality:
 - iCal feed subscription
 """
 
+from datetime import datetime, timedelta
 from typing import Any
+
 import frappe
 from frappe import _
 from frappe.utils import (
-    nowdate, getdate, add_to_date, now, fmt_datetime,
-    get_url, cint, random_string, add_days
+    add_days,
+    add_to_date,
+    cint,
+    fmt_datetime,
+    get_url,
+    getdate,
+    now,
+    nowdate,
+    random_string,
 )
-from datetime import datetime, timedelta
 
 
 @frappe.whitelist()
@@ -47,7 +55,7 @@ def get_calendar_events(
 
     events = []
     start = getdate(start_date)
-    end = getdate(end_date)
+    getdate(end_date)
 
     # Build filters
     filters = [["promised_date", "between", [start_date, end_date]]]
@@ -568,7 +576,6 @@ def get_ical_feed(token: str) -> str:
         pass
 
     # Get events for next 90 days
-    from datetime import timedelta
     end_date = add_days(nowdate(), 90)
 
     events = get_calendar_events(
@@ -658,7 +665,7 @@ def sync_to_google_calendar(repair_order: str, calendar_id: str | None = None) -
         # from google.oauth2.credentials import Credentials
 
         # For now, store a reference that would be used by actual sync
-        event_ref = {
+        {
             "repair_order": doc.name,
             "title": f"{doc.name} - {doc.repair_type}",
             "date": str(doc.promised_date),
@@ -681,7 +688,7 @@ def sync_to_google_calendar(repair_order: str, calendar_id: str | None = None) -
         frappe.log_error(f"Google Calendar sync failed for {repair_order}: {e}")
         return {
             "success": False,
-            "message": f"Sync failed: {str(e)}"
+            "message": f"Sync failed: {e!s}"
         }
 
 

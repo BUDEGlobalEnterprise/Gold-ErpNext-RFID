@@ -3,98 +3,185 @@
 		<div
 			class="flex items-center gap-4 overflow-x-auto no-scrollbar transition-colors duration-300"
 		>
-		<div class="flex items-center gap-2 pr-4 border-r border-gray-200 dark:border-white/10 flex-shrink-0">
-			<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-			</svg>
-			<span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Filters</span>
-			<span v-if="ui.activeFilterCount > 0" class="flex items-center justify-center bg-[#D4AF37] text-white text-[9px] font-bold rounded-full h-4 min-w-[16px] px-1">
-				{{ ui.activeFilterCount }}
-			</span>
-		</div>
-
-		<!-- Filter Group: Price -->
-		<div
-			ref="priceDropdownRef"
-			class="relative flex-shrink-0"
-		>
-			<button
-				@click.stop="toggleDropdown('price')"
-					:class="hasActivePrice ? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/50' : 'bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'"
-					class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all"
+			<div
+				class="flex items-center gap-2 pr-4 border-r border-gray-200 dark:border-white/10 flex-shrink-0"
 			>
-				Price
-				<svg class="w-3 h-3 transition-transform" :class="{ 'rotate-180': openDropdown === 'price' }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+				<svg
+					class="w-4 h-4 text-gray-400"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+					/>
 				</svg>
-			</button>
-		</div>
+				<span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+					>Filters</span
+				>
+				<span
+					v-if="ui.activeFilterCount > 0"
+					class="flex items-center justify-center bg-[#D4AF37] text-white text-[9px] font-bold rounded-full h-4 min-w-[16px] px-1"
+				>
+					{{ ui.activeFilterCount }}
+				</span>
+			</div>
 
-		<!-- Filter Group: Category -->
-		<div
-			ref="categoryDropdownRef"
-			class="relative flex-shrink-0"
-		>
-			<button @click.stop="toggleDropdown('category')"
-					:class="ui.activeFilters.custom_jewelry_type ? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/50' : 'bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'"
-					class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all">
-				Category
-				<svg class="w-3 h-3 transition-transform" :class="{ 'rotate-180': openDropdown === 'category' }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-				</svg>
-			</button>
-		</div>
+			<!-- Filter Group: Price -->
+			<div ref="priceDropdownRef" class="relative flex-shrink-0">
+				<button
+					@click.stop="toggleDropdown('price')"
+					:class="
+						hasActivePrice
+							? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/50'
+							: 'bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'
+					"
+					class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all"
+				>
+					Price
+					<svg
+						class="w-3 h-3 transition-transform"
+						:class="{ 'rotate-180': openDropdown === 'price' }"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 9l-7 7-7-7"
+						/>
+					</svg>
+				</button>
+			</div>
 
-		<!-- Filter Group: Metal -->
-		<div
-			ref="metalDropdownRef"
-			class="relative flex-shrink-0"
-		>
-			<button @click.stop="toggleDropdown('metal')"
-					:class="ui.activeFilters.custom_metal_type ? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/50' : 'bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'"
-					class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all">
-				Metal
-				<svg class="w-3 h-3 transition-transform" :class="{ 'rotate-180': openDropdown === 'metal' }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-				</svg>
-			</button>
-		</div>
+			<!-- Filter Group: Category -->
+			<div ref="categoryDropdownRef" class="relative flex-shrink-0">
+				<button
+					@click.stop="toggleDropdown('category')"
+					:class="
+						ui.activeFilters.custom_jewelry_type
+							? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/50'
+							: 'bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'
+					"
+					class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all"
+				>
+					Category
+					<svg
+						class="w-3 h-3 transition-transform"
+						:class="{ 'rotate-180': openDropdown === 'category' }"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 9l-7 7-7-7"
+						/>
+					</svg>
+				</button>
+			</div>
 
-		<!-- Filter Group: Gemstone -->
-		<div
-			ref="gemstoneDropdownRef"
-			class="relative flex-shrink-0"
-		>
-			<button @click.stop="toggleDropdown('gemstone')"
-					:class="ui.activeFilters.custom_gemstone ? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/50' : 'bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'"
-					class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all">
-				Gemstone
-				<svg class="w-3 h-3 transition-transform" :class="{ 'rotate-180': openDropdown === 'gemstone' }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-				</svg>
-			</button>
-		</div>
+			<!-- Filter Group: Metal -->
+			<div ref="metalDropdownRef" class="relative flex-shrink-0">
+				<button
+					@click.stop="toggleDropdown('metal')"
+					:class="
+						ui.activeFilters.custom_metal_type
+							? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/50'
+							: 'bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'
+					"
+					class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all"
+				>
+					Metal
+					<svg
+						class="w-3 h-3 transition-transform"
+						:class="{ 'rotate-180': openDropdown === 'metal' }"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 9l-7 7-7-7"
+						/>
+					</svg>
+				</button>
+			</div>
 
-		<!-- Sort -->
-		<div
-			ref="sortDropdownRef"
-			class="relative flex-shrink-0 border-l border-gray-200 dark:border-white/10 pl-4 ml-auto"
-		>
-			<button @click.stop="toggleDropdown('sort')"
+			<!-- Filter Group: Gemstone -->
+			<div ref="gemstoneDropdownRef" class="relative flex-shrink-0">
+				<button
+					@click.stop="toggleDropdown('gemstone')"
+					:class="
+						ui.activeFilters.custom_gemstone
+							? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/50'
+							: 'bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'
+					"
+					class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all"
+				>
+					Gemstone
+					<svg
+						class="w-3 h-3 transition-transform"
+						:class="{ 'rotate-180': openDropdown === 'gemstone' }"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 9l-7 7-7-7"
+						/>
+					</svg>
+				</button>
+			</div>
+
+			<!-- Sort -->
+			<div
+				ref="sortDropdownRef"
+				class="relative flex-shrink-0 border-l border-gray-200 dark:border-white/10 pl-4 ml-auto"
+			>
+				<button
+					@click.stop="toggleDropdown('sort')"
 					:class="ui.sortBy ? 'text-[#D4AF37]' : 'text-gray-500'"
-					class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-colors">
-				Sort
-				<svg class="w-3 h-3 transition-transform" :class="{ 'rotate-180': openDropdown === 'sort' }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-				</svg>
-			</button>
-		</div>
+					class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-colors"
+				>
+					Sort
+					<svg
+						class="w-3 h-3 transition-transform"
+						:class="{ 'rotate-180': openDropdown === 'sort' }"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 9l-7 7-7-7"
+						/>
+					</svg>
+				</button>
+			</div>
 
-		<!-- Reset All -->
-		<button v-if="ui.activeFilterCount > 0" @click="ui.resetFilters()"
-				class="text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-600 transition-colors whitespace-nowrap">
-			Reset
-		</button>
+			<!-- Reset All -->
+			<button
+				v-if="ui.activeFilterCount > 0"
+				@click="ui.resetFilters()"
+				class="text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-600 transition-colors whitespace-nowrap"
+			>
+				Reset
+			</button>
 		</div>
 	</div>
 
@@ -109,82 +196,180 @@
 		>
 			<div class="flex gap-2 items-center mb-3">
 				<div class="flex-1 relative">
-					<span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] font-bold">$</span>
-					<input type="number" :value="ui.activeFilters.price_min ?? ''" @input="updatePriceFilter('price_min', $event.target.value)" @blur="finalizePriceFilter('price_min')" placeholder="Min" class="w-full bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/5 rounded-lg py-1.5 pl-5 pr-2 text-xs text-gray-700 dark:text-white outline-none focus:ring-1 focus:ring-[#D4AF37]" />
+					<span
+						class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] font-bold"
+						>$</span
+					>
+					<input
+						type="number"
+						:value="ui.activeFilters.price_min ?? ''"
+						@input="updatePriceFilter('price_min', $event.target.value)"
+						@blur="finalizePriceFilter('price_min')"
+						placeholder="Min"
+						class="w-full bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/5 rounded-lg py-1.5 pl-5 pr-2 text-xs text-gray-700 dark:text-white outline-none focus:ring-1 focus:ring-[#D4AF37]"
+					/>
 				</div>
 				<span class="text-gray-400 font-bold">–</span>
 				<div class="flex-1 relative">
-					<span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] font-bold">$</span>
-					<input type="number" :value="ui.activeFilters.price_max ?? ''" @input="updatePriceFilter('price_max', $event.target.value)" @blur="finalizePriceFilter('price_max')" placeholder="Max" class="w-full bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/5 rounded-lg py-1.5 pl-5 pr-2 text-xs text-gray-700 dark:text-white outline-none focus:ring-1 focus:ring-[#D4AF37]" />
+					<span
+						class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] font-bold"
+						>$</span
+					>
+					<input
+						type="number"
+						:value="ui.activeFilters.price_max ?? ''"
+						@input="updatePriceFilter('price_max', $event.target.value)"
+						@blur="finalizePriceFilter('price_max')"
+						placeholder="Max"
+						class="w-full bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/5 rounded-lg py-1.5 pl-5 pr-2 text-xs text-gray-700 dark:text-white outline-none focus:ring-1 focus:ring-[#D4AF37]"
+					/>
 				</div>
 			</div>
 			<div class="flex flex-wrap gap-1">
-				<button @click="clearPriceFilter"
-						:class="!hasActivePrice ? 'bg-[#D4AF37] text-white' : 'bg-gray-50 dark:bg-white/5 text-gray-500 hover:bg-gray-100'"
-						class="px-2 py-1 rounded text-[9px] font-bold transition-colors">
+				<button
+					@click="clearPriceFilter"
+					:class="
+						!hasActivePrice
+							? 'bg-[#D4AF37] text-white'
+							: 'bg-gray-50 dark:bg-white/5 text-gray-500 hover:bg-gray-100'
+					"
+					class="px-2 py-1 rounded text-[9px] font-bold transition-colors"
+				>
 					All Prices
 				</button>
-				<button v-for="preset in pricePresets" :key="preset.label" @click="togglePricePreset(preset)"
-						:class="isPricePresetActive(preset) ? 'bg-[#D4AF37] text-white' : 'bg-gray-50 dark:bg-white/5 text-gray-500 hover:bg-gray-100'"
-						class="px-2 py-1 rounded text-[9px] font-bold transition-colors">
+				<button
+					v-for="preset in pricePresets"
+					:key="preset.label"
+					@click="togglePricePreset(preset)"
+					:class="
+						isPricePresetActive(preset)
+							? 'bg-[#D4AF37] text-white'
+							: 'bg-gray-50 dark:bg-white/5 text-gray-500 hover:bg-gray-100'
+					"
+					class="px-2 py-1 rounded text-[9px] font-bold transition-colors"
+				>
 					{{ preset.label }}
 				</button>
 			</div>
 		</div>
 
 		<!-- Category Dropdown -->
-		<div v-if="openDropdown === 'category'"
-			 ref="categoryDropdown"
-			 class="fixed bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl p-3 z-[99999] grid grid-cols-2 gap-1.5 text-gray-700 dark:text-white"
-			 :style="dropdownStyle.category">
-			<button @click="toggleJewelryType('')"
-					:class="!ui.activeFilters.custom_jewelry_type ? 'bg-[#D4AF37] text-white font-bold' : 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'"
-					class="px-3 py-2 text-[10px] rounded-lg text-left transition-colors">All Categories</button>
-			<button v-for="cat in categoryOptions" :key="cat" @click="toggleJewelryType(cat)"
-					:class="ui.activeFilters.custom_jewelry_type === cat ? 'bg-[#D4AF37] text-white font-bold' : 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'"
-					class="px-3 py-2 text-[10px] rounded-lg text-left transition-colors">
+		<div
+			v-if="openDropdown === 'category'"
+			ref="categoryDropdown"
+			class="fixed bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl p-3 z-[99999] grid grid-cols-2 gap-1.5 text-gray-700 dark:text-white"
+			:style="dropdownStyle.category"
+		>
+			<button
+				@click="toggleJewelryType('')"
+				:class="
+					!ui.activeFilters.custom_jewelry_type
+						? 'bg-[#D4AF37] text-white font-bold'
+						: 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'
+				"
+				class="px-3 py-2 text-[10px] rounded-lg text-left transition-colors"
+			>
+				All Categories
+			</button>
+			<button
+				v-for="cat in categoryOptions"
+				:key="cat"
+				@click="toggleJewelryType(cat)"
+				:class="
+					ui.activeFilters.custom_jewelry_type === cat
+						? 'bg-[#D4AF37] text-white font-bold'
+						: 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'
+				"
+				class="px-3 py-2 text-[10px] rounded-lg text-left transition-colors"
+			>
 				{{ cat }}
 			</button>
 		</div>
 
 		<!-- Metal Dropdown -->
-		<div v-if="openDropdown === 'metal'"
-			 ref="metalDropdown"
-			 class="fixed bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl p-2 z-[99999] flex flex-col gap-1 text-gray-700 dark:text-white"
-			 :style="dropdownStyle.metal">
-			<button @click="toggleMetal('')"
-					:class="!ui.activeFilters.custom_metal_type ? 'bg-[#D4AF37] text-white font-bold' : 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'"
-					class="px-3 py-2 text-[11px] rounded-lg text-left transition-colors">All Metals</button>
-			<button v-for="metal in Object.keys(metalPurityMap)" :key="metal" @click="toggleMetal(metal)"
-					:class="ui.activeFilters.custom_metal_type === metal ? 'bg-[#D4AF37] text-white font-bold' : 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'"
-					class="px-3 py-2 text-[11px] rounded-lg text-left transition-colors">
+		<div
+			v-if="openDropdown === 'metal'"
+			ref="metalDropdown"
+			class="fixed bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl p-2 z-[99999] flex flex-col gap-1 text-gray-700 dark:text-white"
+			:style="dropdownStyle.metal"
+		>
+			<button
+				@click="toggleMetal('')"
+				:class="
+					!ui.activeFilters.custom_metal_type
+						? 'bg-[#D4AF37] text-white font-bold'
+						: 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'
+				"
+				class="px-3 py-2 text-[11px] rounded-lg text-left transition-colors"
+			>
+				All Metals
+			</button>
+			<button
+				v-for="metal in Object.keys(metalPurityMap)"
+				:key="metal"
+				@click="toggleMetal(metal)"
+				:class="
+					ui.activeFilters.custom_metal_type === metal
+						? 'bg-[#D4AF37] text-white font-bold'
+						: 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'
+				"
+				class="px-3 py-2 text-[11px] rounded-lg text-left transition-colors"
+			>
 				{{ metal }}
 			</button>
 		</div>
 
 		<!-- Gemstone Dropdown -->
-		<div v-if="openDropdown === 'gemstone'"
-			 ref="gemstoneDropdown"
-			 class="fixed bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl p-2 z-[99999] flex flex-col gap-1 text-gray-700 dark:text-white"
-			 :style="dropdownStyle.gemstone">
-			<button @click="toggleGemstone('')"
-					:class="!ui.activeFilters.custom_gemstone ? 'bg-[#D4AF37] text-white font-bold' : 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'"
-					class="px-3 py-2 text-[11px] rounded-lg text-left transition-colors">Any Stone</button>
-			<button v-for="gem in gemstoneOptions" :key="gem" @click="toggleGemstone(gem)"
-					:class="ui.activeFilters.custom_gemstone === gem ? 'bg-[#D4AF37] text-white font-bold' : 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'"
-					class="px-3 py-2 text-[11px] rounded-lg text-left transition-colors">
+		<div
+			v-if="openDropdown === 'gemstone'"
+			ref="gemstoneDropdown"
+			class="fixed bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl p-2 z-[99999] flex flex-col gap-1 text-gray-700 dark:text-white"
+			:style="dropdownStyle.gemstone"
+		>
+			<button
+				@click="toggleGemstone('')"
+				:class="
+					!ui.activeFilters.custom_gemstone
+						? 'bg-[#D4AF37] text-white font-bold'
+						: 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'
+				"
+				class="px-3 py-2 text-[11px] rounded-lg text-left transition-colors"
+			>
+				Any Stone
+			</button>
+			<button
+				v-for="gem in gemstoneOptions"
+				:key="gem"
+				@click="toggleGemstone(gem)"
+				:class="
+					ui.activeFilters.custom_gemstone === gem
+						? 'bg-[#D4AF37] text-white font-bold'
+						: 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'
+				"
+				class="px-3 py-2 text-[11px] rounded-lg text-left transition-colors"
+			>
 				{{ gem }}
 			</button>
 		</div>
 
 		<!-- Sort Dropdown -->
-		<div v-if="openDropdown === 'sort'"
-			 ref="sortDropdown"
-			 class="fixed bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl p-2 z-[99999] flex flex-col gap-1 text-gray-700 dark:text-white"
-			 :style="dropdownStyle.sort">
-			<button v-for="opt in sortOptions" :key="opt.value" @click="toggleSort(opt.value)"
-					:class="ui.sortBy === opt.value ? 'bg-[#D4AF37] text-white font-bold' : 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'"
-					class="px-3 py-2 text-[11px] rounded-lg text-left transition-colors">
+		<div
+			v-if="openDropdown === 'sort'"
+			ref="sortDropdown"
+			class="fixed bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl p-2 z-[99999] flex flex-col gap-1 text-gray-700 dark:text-white"
+			:style="dropdownStyle.sort"
+		>
+			<button
+				v-for="opt in sortOptions"
+				:key="opt.value"
+				@click="toggleSort(opt.value)"
+				:class="
+					ui.sortBy === opt.value
+						? 'bg-[#D4AF37] text-white font-bold'
+						: 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'
+				"
+				class="px-3 py-2 text-[11px] rounded-lg text-left transition-colors"
+			>
 				{{ opt.label }}
 			</button>
 		</div>
@@ -218,14 +403,27 @@ const dropdownStyle = ref({
 	category: { display: 'none' },
 	metal: { display: 'none' },
 	gemstone: { display: 'none' },
-	sort: { display: 'none' }
+	sort: { display: 'none' },
 })
 
 const categoryOptions = ref([
-	'Rings', 'Necklaces', 'Bracelets', 'Earrings', 'Pendants', 'Bangles', 'Chains', 'Bridal Sets'
+	'Rings',
+	'Necklaces',
+	'Bracelets',
+	'Earrings',
+	'Pendants',
+	'Bangles',
+	'Chains',
+	'Bridal Sets',
 ])
 const gemstoneOptions = ref([
-	'Diamond', 'Ruby', 'Sapphire', 'Emerald', 'Polki', 'Kundan', 'No Stone'
+	'Diamond',
+	'Ruby',
+	'Sapphire',
+	'Emerald',
+	'Polki',
+	'Kundan',
+	'No Stone',
 ])
 
 function toggleDropdown(key) {
@@ -246,45 +444,53 @@ function updateDropdownPosition(key) {
 		category: { button: categoryDropdownRef, panel: categoryDropdown, width: 256 },
 		metal: { button: metalDropdownRef, panel: metalDropdown, width: 192 },
 		gemstone: { button: gemstoneDropdownRef, panel: gemstoneDropdown, width: 192 },
-		sort: { button: sortDropdownRef, panel: sortDropdown, width: 192 }
+		sort: { button: sortDropdownRef, panel: sortDropdown, width: 192 },
 	}
-	
+
 	const ref = refs[key]
 	if (!ref || !ref.button.value || !ref.panel.value) {
 		console.warn('Missing refs for:', key)
 		return
 	}
-	
+
 	const buttonRect = ref.button.value.getBoundingClientRect()
-	
+
 	dropdownStyle.value[key] = {
 		top: `${buttonRect.bottom + 8}px`,
 		left: `${buttonRect.left}px`,
 		width: `${ref.width}px`,
-		display: 'block'
+		display: 'block',
 	}
-	
+
 	console.log(`📍 Position ${key}:`, dropdownStyle.value[key])
 }
 
 function closeAllDropdowns() {
 	console.log('❌ Closing all dropdowns')
 	openDropdown.value = null
-	Object.keys(dropdownStyle.value).forEach(key => {
+	Object.keys(dropdownStyle.value).forEach((key) => {
 		dropdownStyle.value[key] = { display: 'none' }
 	})
 }
 
 function handleGlobalClick(event) {
 	const allRefs = [
-		priceDropdownRef, categoryDropdownRef, metalDropdownRef, gemstoneDropdownRef, sortDropdownRef,
-		priceDropdown, categoryDropdown, metalDropdown, gemstoneDropdown, sortDropdown
+		priceDropdownRef,
+		categoryDropdownRef,
+		metalDropdownRef,
+		gemstoneDropdownRef,
+		sortDropdownRef,
+		priceDropdown,
+		categoryDropdown,
+		metalDropdown,
+		gemstoneDropdown,
+		sortDropdown,
 	]
-	
-	const clickedInside = allRefs.some(ref => {
+
+	const clickedInside = allRefs.some((ref) => {
 		return ref.value && ref.value.contains(event.target)
 	})
-	
+
 	if (!clickedInside) {
 		closeAllDropdowns()
 	}
@@ -322,7 +528,9 @@ const filtersResource = createResource({
 	},
 })
 
-const hasActivePrice = computed(() => ui.activeFilters.price_min != null || ui.activeFilters.price_max != null)
+const hasActivePrice = computed(
+	() => ui.activeFilters.price_min != null || ui.activeFilters.price_max != null
+)
 
 const pricePresets = [
 	{ label: '< $500', min: 0, max: 500 },
@@ -337,7 +545,7 @@ const metalPurityMap = {
 	'White Gold': ['18K', '14K'],
 	'Rose Gold': ['18K', '14K'],
 	Platinum: ['950'],
-	Silver: ['925 Sterling']
+	Silver: ['925 Sterling'],
 }
 
 const sortOptions = [
@@ -386,8 +594,10 @@ function clearPriceFilter() {
 }
 
 function isPricePresetActive(preset) {
-	return (ui.activeFilters.price_min ?? null) === (preset.min ?? null) &&
-		   (ui.activeFilters.price_max ?? null) === (preset.max ?? null)
+	return (
+		(ui.activeFilters.price_min ?? null) === (preset.min ?? null) &&
+		(ui.activeFilters.price_max ?? null) === (preset.max ?? null)
+	)
 }
 
 function selectJewelryType(value) {

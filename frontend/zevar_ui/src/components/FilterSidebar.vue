@@ -261,18 +261,18 @@ const currentStockFilter = computed(() => {
 const hasActiveFilters = computed(() => {
 	const f = ui.activeFilters
 	let count = 0
-	
+
 	// Check stock filters
 	if (f.in_stock_only) count++
 	if (f.out_of_stock_only) count++
-	
+
 	// Check custom filters
 	if (f.custom_metal_type) count++
 	if (f.custom_gemstone) count++
 	if (f.custom_purity) count++
 	if (f.custom_jewelry_type) count++
 	if (f.price_min || f.price_max) count++
-	
+
 	return count > 0 || Boolean(ui.searchQuery)
 })
 
@@ -311,4 +311,5 @@ function updateGemstone(val) {
 
 function handleReset() {
 	ui.resetFilters()
-}</script>
+}
+</script>

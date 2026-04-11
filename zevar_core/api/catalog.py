@@ -62,7 +62,7 @@ def get_pos_items(
 		min_price = float(min_price)
 	else:
 		min_price = None
-		
+
 	if max_price is not None and max_price != "":
 		max_price = float(max_price)
 	else:
@@ -122,7 +122,7 @@ def get_pos_items(
 					min_price = filters_dict.pop("min_price", None)
 					if min_price is not None and min_price != "":
 						min_price = float(min_price)
-					
+
 				if not max_price:
 					max_price = filters_dict.pop("max_price", None)
 					if max_price is not None and max_price != "":
@@ -497,7 +497,7 @@ def _get_custom_sort_key(item: dict, sort_by: str):
 	price = float(item.get("price") or 0)
 	weight = float(item.get("gross_weight") or 0)
 	name = (item.get("item_name") or "").casefold()
-	
+
 	if sort_by == "price_asc":
 		return (price, name)
 	elif sort_by == "price_desc":

@@ -438,7 +438,9 @@ async function fetchDetails() {
 	loading.value = true
 	loadError.value = ''
 	try {
-		const result = unwrapResponse(await detailsResource.submit({ layaway_id: props.layawayId }))
+		const result = unwrapResponse(
+			await detailsResource.submit({ layaway_id: props.layawayId })
+		)
 		layaway.value = result
 	} catch (error) {
 		console.error('Failed to fetch layaway details:', error)
@@ -470,8 +472,18 @@ async function cancelLayaway() {
 		if (error?._server_messages) {
 			try {
 				const msgs = JSON.parse(error._server_messages)
-				errorMsg = msgs.map(m => { try { return JSON.parse(m).message } catch { return m } }).join('\n')
-			} catch { errorMsg = String(error._server_messages) }
+				errorMsg = msgs
+					.map((m) => {
+						try {
+							return JSON.parse(m).message
+						} catch {
+							return m
+						}
+					})
+					.join('\n')
+			} catch {
+				errorMsg = String(error._server_messages)
+			}
 		} else {
 			errorMsg = error?.message || 'Unknown error'
 		}

@@ -2,8 +2,9 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import flt, get_datetime, time_diff_in_hours
 from frappe import _
+from frappe.utils import flt, get_datetime, time_diff_in_hours
+
 
 def execute(filters=None):
 	columns = get_columns()

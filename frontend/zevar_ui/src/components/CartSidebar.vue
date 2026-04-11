@@ -9,8 +9,10 @@
 		<div
 			class="h-full bg-white dark:bg-[#1a1c23] transform transition-transform duration-300 ease-in-out flex flex-col border-l border-transparent dark:border-white/5"
 			:class="[
-				persistent ? 'relative translate-x-0 w-[380px] border-l border-gray-200 dark:border-white/5' : 'fixed top-0 right-0 h-full w-full sm:w-[400px] shadow-2xl z-50',
-				!persistent && (isOpen ? 'translate-x-0' : 'translate-x-full')
+				persistent
+					? 'relative translate-x-0 w-[380px] border-l border-gray-200 dark:border-white/5'
+					: 'fixed top-0 right-0 h-full w-full sm:w-[400px] shadow-2xl z-50',
+				!persistent && (isOpen ? 'translate-x-0' : 'translate-x-full'),
 			]"
 		>
 			<div
@@ -21,7 +23,8 @@
 				>
 					<span>💎</span> Selection Tray
 					<span class="text-xs font-normal text-gray-500 dark:text-gray-400"
-						>({{ cart.totalItems }} {{ cart.totalItems === 1 ? 'piece' : 'pieces' }})</span
+						>({{ cart.totalItems }}
+						{{ cart.totalItems === 1 ? 'piece' : 'pieces' }})</span
 					>
 				</h2>
 
@@ -69,7 +72,9 @@
 					></path>
 				</svg>
 				<p>Your selection tray is empty.</p>
-				<p class="text-xs text-gray-400 dark:text-gray-600 mt-1">Add pieces from the collection to begin curating.</p>
+				<p class="text-xs text-gray-400 dark:text-gray-600 mt-1">
+					Add pieces from the collection to begin curating.
+				</p>
 				<button
 					@click="close"
 					class="mt-4 text-sm text-[#D4AF37] font-medium hover:underline"
@@ -385,7 +390,7 @@ import { ref, computed } from 'vue'
 
 const props = defineProps({
 	isOpen: Boolean,
-	persistent: Boolean
+	persistent: Boolean,
 })
 const emit = defineEmits(['close'])
 const cart = useCartStore()

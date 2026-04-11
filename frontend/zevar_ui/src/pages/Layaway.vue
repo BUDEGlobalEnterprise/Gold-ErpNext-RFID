@@ -361,9 +361,9 @@ async function fetchLayaways() {
 	try {
 		const result = unwrapResponse(
 			await layawaysResource.submit({
-			...filters.value,
-			page: pagination.value.page,
-			page_size: 20,
+				...filters.value,
+				page: pagination.value.page,
+				page_size: 20,
 			})
 		)
 

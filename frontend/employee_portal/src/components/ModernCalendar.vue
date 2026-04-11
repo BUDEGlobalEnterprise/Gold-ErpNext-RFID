@@ -7,7 +7,9 @@
 		></div>
 		<!-- Calendar Header -->
 		<div class="flex items-center justify-between mb-6 relative z-10">
-			<h3 class="text-base font-bold text-white tracking-widest uppercase">{{ currentMonthYear }}</h3>
+			<h3 class="text-base font-bold text-white tracking-widest uppercase">
+				{{ currentMonthYear }}
+			</h3>
 			<div class="flex items-center gap-2">
 				<!-- Previous Year -->
 				<button

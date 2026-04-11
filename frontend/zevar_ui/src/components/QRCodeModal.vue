@@ -17,19 +17,21 @@
 							class="mx-auto mb-3 h-40 w-40 rounded-lg border border-gray-200 dark:border-gray-800 bg-[linear-gradient(45deg,#111_25%,transparent_25%,transparent_75%,#111_75%,#111),linear-gradient(45deg,#111_25%,transparent_25%,transparent_75%,#111_75%,#111)] bg-[length:24px_24px] bg-[position:0_0,12px_12px] opacity-80"
 							aria-hidden="true"
 						></div>
-						<p class="text-xs text-gray-500 dark:text-gray-400">
-							Scan placeholder
-						</p>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Scan placeholder</p>
 					</div>
 
 					<div class="space-y-2 text-left mb-4">
 						<p class="text-2xl font-bold text-[#D4AF37] font-mono">{{ order.name }}</p>
 						<p class="text-gray-600 dark:text-gray-400">{{ order.customer_name }}</p>
-						<p class="text-sm text-gray-500">{{ formatDate(order.received_date || order.creation) }}</p>
+						<p class="text-sm text-gray-500">
+							{{ formatDate(order.received_date || order.creation) }}
+						</p>
 					</div>
 
 					<div class="rounded-lg bg-gray-50 dark:bg-gray-800 p-3 text-left mb-4">
-						<p class="text-xs uppercase tracking-wide text-gray-500 mb-1">Lookup Link</p>
+						<p class="text-xs uppercase tracking-wide text-gray-500 mb-1">
+							Lookup Link
+						</p>
 						<p class="text-xs break-all text-gray-700 dark:text-gray-300">
 							{{ lookupUrl }}
 						</p>

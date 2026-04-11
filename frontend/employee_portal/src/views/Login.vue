@@ -1,32 +1,56 @@
 <template>
-	<div class="h-screen w-screen flex items-center justify-center bg-[#f9fafb] relative overflow-hidden font-display">
+	<div
+		class="h-screen w-screen flex items-center justify-center bg-[#f9fafb] relative overflow-hidden font-display"
+	>
 		<!-- Decorative Background Elements -->
-		<div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-50 rounded-full blur-[120px] opacity-60"></div>
-		<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-50 rounded-full blur-[120px] opacity-60"></div>
-		
+		<div
+			class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-50 rounded-full blur-[120px] opacity-60"
+		></div>
+		<div
+			class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-50 rounded-full blur-[120px] opacity-60"
+		></div>
+
 		<div class="w-full max-w-lg p-8 relative z-10">
 			<!-- Logo Section -->
 			<div class="flex flex-col items-center text-center mb-12">
-				<div class="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center text-white shadow-glow-emerald mb-6 transition-transform hover:scale-105 duration-500">
+				<div
+					class="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center text-white shadow-glow-emerald mb-6 transition-transform hover:scale-105 duration-500"
+				>
 					<span class="material-symbols-outlined text-4xl">diamond</span>
 				</div>
-				<h1 class="text-4xl font-black text-gray-900 tracking-tighter mb-2 uppercase">Zevar</h1>
-				<p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em]">The Curated Atelier • Portal</p>
+				<h1 class="text-4xl font-black text-gray-900 tracking-tighter mb-2 uppercase">
+					Zevar
+				</h1>
+				<p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em]">
+					The Curated Atelier • Portal
+				</p>
 			</div>
 
 			<!-- Login Card -->
-			<div class="premium-card !p-12 shadow-2xl border-white/50 backdrop-blur-sm bg-white/80">
+			<div
+				class="premium-card !p-12 shadow-2xl border-white/50 backdrop-blur-sm bg-white/80"
+			>
 				<div class="mb-12 text-center sm:text-left">
-					<h2 class="text-3xl font-black text-gray-900 tracking-tight mb-2">Secure Entrance</h2>
-					<p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Identify yourself to proceed</p>
+					<h2 class="text-3xl font-black text-gray-900 tracking-tight mb-2">
+						Secure Entrance
+					</h2>
+					<p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">
+						Identify yourself to proceed
+					</p>
 				</div>
 
 				<form @submit.prevent="handleLogin" class="space-y-10">
 					<div class="space-y-8">
 						<div class="group">
-							<label class="status-label !mb-3 block transition-colors group-focus-within:text-primary">Atelier Email</label>
+							<label
+								class="status-label !mb-3 block transition-colors group-focus-within:text-primary"
+								>Atelier Email</label
+							>
 							<div class="relative">
-								<span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 text-lg group-focus-within:text-primary transition-colors">alternate_email</span>
+								<span
+									class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 text-lg group-focus-within:text-primary transition-colors"
+									>alternate_email</span
+								>
 								<input
 									v-model="email"
 									type="text"
@@ -36,14 +60,24 @@
 								/>
 							</div>
 						</div>
-						
+
 						<div class="group">
 							<div class="flex justify-between items-end mb-3">
-								<label class="status-label !mb-0 transition-colors group-focus-within:text-primary">Cipher Key</label>
-								<a href="#" class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] hover:text-primary transition-colors">Security Reset</a>
+								<label
+									class="status-label !mb-0 transition-colors group-focus-within:text-primary"
+									>Cipher Key</label
+								>
+								<a
+									href="#"
+									class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] hover:text-primary transition-colors"
+									>Security Reset</a
+								>
 							</div>
 							<div class="relative">
-								<span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 text-lg group-focus-within:text-primary transition-colors">lock</span>
+								<span
+									class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 text-lg group-focus-within:text-primary transition-colors"
+									>lock</span
+								>
 								<input
 									v-model="password"
 									type="password"
@@ -55,9 +89,16 @@
 						</div>
 					</div>
 
-					<div v-if="errorMsg" class="p-5 rounded-2xl bg-red-50 border border-red-100 flex items-center gap-4">
+					<div
+						v-if="errorMsg"
+						class="p-5 rounded-2xl bg-red-50 border border-red-100 flex items-center gap-4"
+					>
 						<span class="material-symbols-outlined text-red-500 text-lg">error</span>
-						<p class="text-[10px] font-black text-red-600 uppercase tracking-widest leading-relaxed">{{ errorMsg }}</p>
+						<p
+							class="text-[10px] font-black text-red-600 uppercase tracking-widest leading-relaxed"
+						>
+							{{ errorMsg }}
+						</p>
 					</div>
 
 					<button
@@ -65,15 +106,20 @@
 						:disabled="loading"
 						class="w-full py-6 bg-emerald-950 text-white font-black rounded-2xl text-[11px] uppercase tracking-[0.3em] shadow-glow-emerald hover:bg-black hover:shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-4"
 					>
-						<span v-if="loading" class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-						<span>{{ loading ? 'Verifying Identity...' : 'Initiate Access' }}</span>
+						<span
+							v-if="loading"
+							class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"
+						></span>
+						<span>{{ loading ? "Verifying Identity..." : "Initiate Access" }}</span>
 					</button>
 				</form>
 			</div>
 
 			<!-- Footer info -->
 			<div class="mt-12 text-center">
-				<p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">Authorized Access Only • System Version 4.2.0</p>
+				<p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">
+					Authorized Access Only • System Version 4.2.0
+				</p>
 			</div>
 		</div>
 	</div>
@@ -111,6 +157,6 @@ function handleLogin() {
 
 <style scoped>
 .font-display {
-	font-family: 'Plus Jakarta Sans', sans-serif;
+	font-family: "Plus Jakarta Sans", sans-serif;
 }
 </style>

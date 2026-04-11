@@ -4,81 +4,175 @@
 			<div class="flex items-center justify-between gap-4 mb-6 flex-shrink-0">
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Trade-Ins</h2>
-					<span class="status-label !mb-0 !bg-gray-100 dark:!bg-white/5 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-white/10">
+					<span
+						class="status-label !mb-0 !bg-gray-100 dark:!bg-white/5 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-white/10"
+					>
 						{{ filteredRecords.length }} Records
 					</span>
 				</div>
-				<button class="px-4 py-2 bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black text-xs font-bold rounded-lg hover:bg-gray-800 dark:hover:bg-[#b5952f] transition-all shadow-sm">
+				<button
+					class="px-4 py-2 bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black text-xs font-bold rounded-lg hover:bg-gray-800 dark:hover:bg-[#b5952f] transition-all shadow-sm"
+				>
 					+ New Trade-In
 				</button>
 			</div>
 
-			<div class="flex gap-1 bg-gray-100 dark:bg-[#1C1F26] p-1 rounded-xl mb-6 flex-shrink-0 overflow-x-auto">
-				<button v-for="tab in statusTabs" :key="tab.value" @click="activeStatus = tab.value"
+			<div
+				class="flex gap-1 bg-gray-100 dark:bg-[#1C1F26] p-1 rounded-xl mb-6 flex-shrink-0 overflow-x-auto"
+			>
+				<button
+					v-for="tab in statusTabs"
+					:key="tab.value"
+					@click="activeStatus = tab.value"
 					class="flex-1 min-w-fit px-4 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap"
-					:class="activeStatus === tab.value ? 'bg-white dark:bg-[#2a2d37] text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'">
+					:class="
+						activeStatus === tab.value
+							? 'bg-white dark:bg-[#2a2d37] text-gray-900 dark:text-white shadow-sm'
+							: 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+					"
+				>
 					{{ tab.label }}
 				</button>
 			</div>
 
 			<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6 flex-shrink-0">
 				<div class="premium-card !p-4">
-					<div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Pending</div>
-					<div class="text-2xl font-bold text-amber-500">{{ tradeInData.filter(t => t.status === 'Pending Review').length }}</div>
+					<div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+						Pending
+					</div>
+					<div class="text-2xl font-bold text-amber-500">
+						{{ tradeInData.filter((t) => t.status === 'Pending Review').length }}
+					</div>
 				</div>
 				<div class="premium-card !p-4">
-					<div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Accepted</div>
-					<div class="text-2xl font-bold text-green-600">{{ tradeInData.filter(t => t.status === 'Accepted').length }}</div>
+					<div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+						Accepted
+					</div>
+					<div class="text-2xl font-bold text-green-600">
+						{{ tradeInData.filter((t) => t.status === 'Accepted').length }}
+					</div>
 				</div>
 				<div class="premium-card !p-4">
-					<div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Credit Issued</div>
-					<div class="text-2xl font-bold text-[#D4AF37]">{{ formatCurrency(totalCredit) }}</div>
+					<div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+						Credit Issued
+					</div>
+					<div class="text-2xl font-bold text-[#D4AF37]">
+						{{ formatCurrency(totalCredit) }}
+					</div>
 				</div>
 				<div class="premium-card !p-4">
-					<div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Avg Value</div>
-					<div class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatCurrency(avgValue) }}</div>
+					<div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+						Avg Value
+					</div>
+					<div class="text-2xl font-bold text-gray-900 dark:text-white">
+						{{ formatCurrency(avgValue) }}
+					</div>
 				</div>
 			</div>
 
 			<div class="flex-1 overflow-auto min-h-0">
 				<div class="space-y-3">
-					<div v-for="record in filteredRecords" :key="record.id" class="premium-card !p-4 cursor-pointer">
+					<div
+						v-for="record in filteredRecords"
+						:key="record.id"
+						class="premium-card !p-4 cursor-pointer"
+					>
 						<div class="flex items-start justify-between mb-3">
 							<div class="flex items-start gap-3 min-w-0">
-								<div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400">
-									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+								<div
+									class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
+								>
+									<svg
+										class="w-5 h-5"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+										></path>
+									</svg>
 								</div>
 								<div class="min-w-0">
-									<div class="font-bold text-gray-900 dark:text-white text-sm truncate">{{ record.description }}</div>
-									<div class="text-[10px] text-gray-500">{{ record.customer }} · {{ record.date }}</div>
+									<div
+										class="font-bold text-gray-900 dark:text-white text-sm truncate"
+									>
+										{{ record.description }}
+									</div>
+									<div class="text-[10px] text-gray-500">
+										{{ record.customer }} · {{ record.date }}
+									</div>
 								</div>
 							</div>
-							<span class="text-[9px] font-bold px-2 py-1 rounded-full shrink-0 ml-2"
-								:class="record.status === 'Pending Review' ? 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400' : record.status === 'Accepted' ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400' : record.status === 'Rejected' ? 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400' : 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'">
+							<span
+								class="text-[9px] font-bold px-2 py-1 rounded-full shrink-0 ml-2"
+								:class="
+									record.status === 'Pending Review'
+										? 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400'
+										: record.status === 'Accepted'
+										? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'
+										: record.status === 'Rejected'
+										? 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400'
+										: 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
+								"
+							>
 								{{ record.status }}
 							</span>
 						</div>
-						<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-gray-50 dark:bg-white/[0.02] rounded-lg border border-gray-100 dark:border-white/5">
+						<div
+							class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-gray-50 dark:bg-white/[0.02] rounded-lg border border-gray-100 dark:border-white/5"
+						>
 							<div>
-								<div class="text-[9px] text-gray-500 uppercase font-bold mb-0.5">Metal</div>
-								<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400">{{ record.metal }} {{ record.purity }}</span>
+								<div class="text-[9px] text-gray-500 uppercase font-bold mb-0.5">
+									Metal
+								</div>
+								<span
+									class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400"
+									>{{ record.metal }} {{ record.purity }}</span
+								>
 							</div>
 							<div>
-								<div class="text-[9px] text-gray-500 uppercase font-bold mb-0.5">Weight</div>
-								<div class="text-xs font-bold text-gray-900 dark:text-white font-mono">{{ record.weight }}g</div>
+								<div class="text-[9px] text-gray-500 uppercase font-bold mb-0.5">
+									Weight
+								</div>
+								<div
+									class="text-xs font-bold text-gray-900 dark:text-white font-mono"
+								>
+									{{ record.weight }}g
+								</div>
 							</div>
 							<div>
-								<div class="text-[9px] text-gray-500 uppercase font-bold mb-0.5">Appraised</div>
-								<div class="text-xs font-bold text-[#D4AF37] font-mono">{{ formatCurrency(record.appraisedValue) }}</div>
+								<div class="text-[9px] text-gray-500 uppercase font-bold mb-0.5">
+									Appraised
+								</div>
+								<div class="text-xs font-bold text-[#D4AF37] font-mono">
+									{{ formatCurrency(record.appraisedValue) }}
+								</div>
 							</div>
 							<div>
-								<div class="text-[9px] text-gray-500 uppercase font-bold mb-0.5">Min Purchase (2×)</div>
-								<div class="text-xs font-bold font-mono" :class="record.newPurchase >= record.appraisedValue * 2 ? 'text-green-600' : 'text-red-500'">{{ formatCurrency(record.appraisedValue * 2) }}</div>
+								<div class="text-[9px] text-gray-500 uppercase font-bold mb-0.5">
+									Min Purchase (2×)
+								</div>
+								<div
+									class="text-xs font-bold font-mono"
+									:class="
+										record.newPurchase >= record.appraisedValue * 2
+											? 'text-green-600'
+											: 'text-red-500'
+									"
+								>
+									{{ formatCurrency(record.appraisedValue * 2) }}
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-				<div v-if="filteredRecords.length === 0" class="py-20 text-center"><p class="text-gray-400 text-sm">No trade-in records found.</p></div>
+				<div v-if="filteredRecords.length === 0" class="py-20 text-center">
+					<p class="text-gray-400 text-sm">No trade-in records found.</p>
+				</div>
 			</div>
 		</div>
 	</AppLayout>
@@ -100,26 +194,136 @@ const statusTabs = [
 ]
 
 const tradeInData = ref([
-	{ id: 1, description: '22K Yellow Gold Chain Necklace', customer: 'Priya Sharma', date: 'Apr 7, 2026', metal: 'Yellow Gold', purity: '22K', weight: 32.5, appraisedValue: 2400, newPurchase: 6800, status: 'Pending Review' },
-	{ id: 2, description: '18K Diamond Engagement Ring', customer: 'Michael Chen', date: 'Apr 6, 2026', metal: 'White Gold', purity: '18K', weight: 4.8, appraisedValue: 3200, newPurchase: 8500, status: 'Accepted' },
-	{ id: 3, description: 'Platinum Wedding Band', customer: 'Sarah Williams', date: 'Apr 5, 2026', metal: 'Platinum', purity: '950', weight: 6.2, appraisedValue: 1800, newPurchase: 4200, status: 'Accepted' },
-	{ id: 4, description: '14K Gold Bracelet with Diamonds', customer: 'Raj Patel', date: 'Apr 4, 2026', metal: 'Yellow Gold', purity: '14K', weight: 18.0, appraisedValue: 1100, newPurchase: 2800, status: 'Completed' },
-	{ id: 5, description: 'Rose Gold Pendant Necklace', customer: 'Emily Rodriguez', date: 'Apr 3, 2026', metal: 'Rose Gold', purity: '18K', weight: 8.5, appraisedValue: 950, newPurchase: 0, status: 'Rejected' },
-	{ id: 6, description: '22K Kundan Bridal Necklace Set', customer: 'Ananya Gupta', date: 'Apr 2, 2026', metal: 'Yellow Gold', purity: '22K', weight: 85.0, appraisedValue: 8200, newPurchase: 24800, status: 'Pending Review' },
-	{ id: 7, description: 'Sterling Silver Charm Collection', customer: 'Lisa Park', date: 'Apr 1, 2026', metal: 'Silver', purity: '925', weight: 45.0, appraisedValue: 320, newPurchase: 0, status: 'Rejected' },
-	{ id: 8, description: '18K Sapphire Drop Earrings', customer: 'David Kim', date: 'Mar 30, 2026', metal: 'White Gold', purity: '18K', weight: 5.4, appraisedValue: 2100, newPurchase: 6200, status: 'Completed' },
+	{
+		id: 1,
+		description: '22K Yellow Gold Chain Necklace',
+		customer: 'Priya Sharma',
+		date: 'Apr 7, 2026',
+		metal: 'Yellow Gold',
+		purity: '22K',
+		weight: 32.5,
+		appraisedValue: 2400,
+		newPurchase: 6800,
+		status: 'Pending Review',
+	},
+	{
+		id: 2,
+		description: '18K Diamond Engagement Ring',
+		customer: 'Michael Chen',
+		date: 'Apr 6, 2026',
+		metal: 'White Gold',
+		purity: '18K',
+		weight: 4.8,
+		appraisedValue: 3200,
+		newPurchase: 8500,
+		status: 'Accepted',
+	},
+	{
+		id: 3,
+		description: 'Platinum Wedding Band',
+		customer: 'Sarah Williams',
+		date: 'Apr 5, 2026',
+		metal: 'Platinum',
+		purity: '950',
+		weight: 6.2,
+		appraisedValue: 1800,
+		newPurchase: 4200,
+		status: 'Accepted',
+	},
+	{
+		id: 4,
+		description: '14K Gold Bracelet with Diamonds',
+		customer: 'Raj Patel',
+		date: 'Apr 4, 2026',
+		metal: 'Yellow Gold',
+		purity: '14K',
+		weight: 18.0,
+		appraisedValue: 1100,
+		newPurchase: 2800,
+		status: 'Completed',
+	},
+	{
+		id: 5,
+		description: 'Rose Gold Pendant Necklace',
+		customer: 'Emily Rodriguez',
+		date: 'Apr 3, 2026',
+		metal: 'Rose Gold',
+		purity: '18K',
+		weight: 8.5,
+		appraisedValue: 950,
+		newPurchase: 0,
+		status: 'Rejected',
+	},
+	{
+		id: 6,
+		description: '22K Kundan Bridal Necklace Set',
+		customer: 'Ananya Gupta',
+		date: 'Apr 2, 2026',
+		metal: 'Yellow Gold',
+		purity: '22K',
+		weight: 85.0,
+		appraisedValue: 8200,
+		newPurchase: 24800,
+		status: 'Pending Review',
+	},
+	{
+		id: 7,
+		description: 'Sterling Silver Charm Collection',
+		customer: 'Lisa Park',
+		date: 'Apr 1, 2026',
+		metal: 'Silver',
+		purity: '925',
+		weight: 45.0,
+		appraisedValue: 320,
+		newPurchase: 0,
+		status: 'Rejected',
+	},
+	{
+		id: 8,
+		description: '18K Sapphire Drop Earrings',
+		customer: 'David Kim',
+		date: 'Mar 30, 2026',
+		metal: 'White Gold',
+		purity: '18K',
+		weight: 5.4,
+		appraisedValue: 2100,
+		newPurchase: 6200,
+		status: 'Completed',
+	},
 ])
 
-const totalCredit = computed(() => tradeInData.value.filter(t => t.status === 'Accepted' || t.status === 'Completed').reduce((s, t) => s + t.appraisedValue, 0))
-const avgValue = computed(() => { const v = tradeInData.value; return v.length > 0 ? v.reduce((s, t) => s + t.appraisedValue, 0) / v.length : 0 })
+const totalCredit = computed(() =>
+	tradeInData.value
+		.filter((t) => t.status === 'Accepted' || t.status === 'Completed')
+		.reduce((s, t) => s + t.appraisedValue, 0)
+)
+const avgValue = computed(() => {
+	const v = tradeInData.value
+	return v.length > 0 ? v.reduce((s, t) => s + t.appraisedValue, 0) / v.length : 0
+})
 
 const filteredRecords = computed(() => {
 	let records = [...tradeInData.value]
-	if (activeStatus.value !== 'all') records = records.filter(r => r.status === activeStatus.value)
-	if (ui.activeFilters.custom_metal_type) records = records.filter(r => r.metal === ui.activeFilters.custom_metal_type)
-	if (ui.searchQuery) { const q = ui.searchQuery.toLowerCase(); records = records.filter(r => r.description.toLowerCase().includes(q) || r.customer.toLowerCase().includes(q)) }
+	if (activeStatus.value !== 'all')
+		records = records.filter((r) => r.status === activeStatus.value)
+	if (ui.activeFilters.custom_metal_type)
+		records = records.filter((r) => r.metal === ui.activeFilters.custom_metal_type)
+	if (ui.searchQuery) {
+		const q = ui.searchQuery.toLowerCase()
+		records = records.filter(
+			(r) => r.description.toLowerCase().includes(q) || r.customer.toLowerCase().includes(q)
+		)
+	}
 	return records
 })
 
-function formatCurrency(val) { return val ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val) : '$0' }
+function formatCurrency(val) {
+	return val
+		? new Intl.NumberFormat('en-US', {
+				style: 'currency',
+				currency: 'USD',
+				maximumFractionDigits: 0,
+		  }).format(val)
+		: '$0'
+}
 </script>

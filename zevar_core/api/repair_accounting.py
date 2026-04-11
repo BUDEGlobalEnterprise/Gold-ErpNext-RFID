@@ -9,14 +9,12 @@ This module provides accounting-related functionality:
 - Accounting period close
 """
 
+from datetime import datetime, timedelta
 from typing import Any
+
 import frappe
 from frappe import _
-from frappe.utils import (
-    nowdate, getdate, add_to_date, now,
-    flt, fmt_money, get_datetime_str
-)
-from datetime import datetime, timedelta
+from frappe.utils import add_to_date, flt, fmt_money, get_datetime_str, getdate, now, nowdate
 
 
 @frappe.whitelist()
@@ -211,7 +209,7 @@ def get_materials_consumed(
             for part in repair_doc.parts:
                 item_code = part.item_code
                 qty = flt(part.qty or 0)
-                rate = flt(part.rate or 0)
+                flt(part.rate or 0)
                 amount = flt(part.amount or 0)
 
                 if item_code not in parts_used:
@@ -411,7 +409,7 @@ def get_payment_reconciliation(
         frappe.throw(_("Insufficient permissions"), frappe.PermissionError)
 
     # Get repairs with activity in period
-    filters = [
+    [
         [
             {"key": "received_date", "value": "between " + start_date + " and " + end_date},
             "or",
@@ -608,7 +606,7 @@ def create_journal_entry_for_repair(repair_order: str) -> dict[str, Any]:
         frappe.log_error(f"Journal Entry creation failed for {repair_order}: {e}")
         return {
             "success": False,
-            "message": f"Failed to create Journal Entry: {str(e)}"
+            "message": f"Failed to create Journal Entry: {e!s}"
         }
 
 
@@ -671,7 +669,7 @@ def get_profitability_report(
         revenue = flt(repair.get("total_cost", 0))
         labor = flt(repair.get("labor_cost", 0))
         material = flt(repair.get("material_cost", 0))
-        cost = labor + material  # Material cost is tracked, labor is pure profit
+        labor + material  # Material cost is tracked, labor is pure profit
 
         # Labor is typically 100% margin (pure service)
         # Materials cost is what was tracked in parts
@@ -800,5 +798,5 @@ def process_commission_payment(
         frappe.log_error(f"Commission payment failed for {technician}: {e}")
         return {
             "success": False,
-            "message": f"Failed to create Payment Entry: {str(e)}"
+            "message": f"Failed to create Payment Entry: {e!s}"
         }

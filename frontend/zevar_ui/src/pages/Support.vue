@@ -650,11 +650,13 @@ async function fetchTickets() {
 }
 
 function viewTicket(ticketId) {
-	const ticket = tickets.value.find(t => t.name === ticketId)
-	const route = ticket?.source === 'helpdesk' ? '/app/hd-ticket/' + ticketId : '/app/support-ticket/' + ticketId
+	const ticket = tickets.value.find((t) => t.name === ticketId)
+	const route =
+		ticket?.source === 'helpdesk'
+			? '/app/hd-ticket/' + ticketId
+			: '/app/support-ticket/' + ticketId
 	window.open(route, '_blank')
 }
-
 
 function formatDate(dateStr) {
 	if (!dateStr) return ''

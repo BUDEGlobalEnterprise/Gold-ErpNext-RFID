@@ -8,13 +8,20 @@
 			ref="sidebarRef"
 			class="hidden lg:flex bg-white dark:bg-[#15161a] border-r border-gray-200 dark:border-white/5 flex-col shadow-2xl z-30 relative"
 			:class="isResizing ? 'transition-none' : 'transition-all duration-300'"
-			:style="isSidebarCollapsed ? { width: '80px', minWidth: '80px', maxWidth: '80px' } : { width: sidebarWidth + 'px', minWidth: '240px', maxWidth: '400px' }"
+			:style="
+				isSidebarCollapsed
+					? { width: '80px', minWidth: '80px', maxWidth: '80px' }
+					: { width: sidebarWidth + 'px', minWidth: '240px', maxWidth: '400px' }
+			"
 		>
 			<div
 				class="h-20 flex items-center border-b border-gray-200 dark:border-white/5 transition-all duration-300"
 				:class="isSidebarCollapsed ? 'px-4 justify-center' : 'px-4 justify-between'"
 			>
-				<div v-if="!isSidebarCollapsed" class="flex items-center gap-2.5 overflow-hidden min-w-0 pr-2">
+				<div
+					v-if="!isSidebarCollapsed"
+					class="flex items-center gap-2.5 overflow-hidden min-w-0 pr-2"
+				>
 					<img
 						src="/logo.svg"
 						alt="Zevar"
@@ -61,17 +68,30 @@
 			<div class="flex-1 flex flex-col overflow-hidden">
 				<nav class="p-4 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
 					<!-- Grouped Navigation -->
-					<div v-for="(section, groupIdx) in [
-						{ label: 'Operations', items: navOperations },
-						{ label: 'Sales', items: navSales },
-						{ label: 'Services', items: navServices },
-						{ label: 'Management', items: navManagement }
-					]" :key="groupIdx" class="space-y-1">
-						<div v-if="!isSidebarCollapsed" class="px-3 mb-2 flex items-center justify-between">
-							<span class="text-[10px] font-black text-gray-500 uppercase tracking-widest opacity-50">{{ section.label }}</span>
+					<div
+						v-for="(section, groupIdx) in [
+							{ label: 'Operations', items: navOperations },
+							{ label: 'Sales', items: navSales },
+							{ label: 'Services', items: navServices },
+							{ label: 'Management', items: navManagement },
+						]"
+						:key="groupIdx"
+						class="space-y-1"
+					>
+						<div
+							v-if="!isSidebarCollapsed"
+							class="px-3 mb-2 flex items-center justify-between"
+						>
+							<span
+								class="text-[10px] font-black text-gray-500 uppercase tracking-widest opacity-50"
+								>{{ section.label }}</span
+							>
 						</div>
-						<div v-else class="h-px bg-gray-200 dark:bg-white/5 mx-2 mb-4 opacity-50"></div>
-						
+						<div
+							v-else
+							class="h-px bg-gray-200 dark:bg-white/5 mx-2 mb-4 opacity-50"
+						></div>
+
 						<router-link
 							v-for="item in section.items"
 							:key="item.to"
@@ -105,7 +125,10 @@
 									class="font-medium tracking-wide text-sm whitespace-nowrap"
 									>{{ item.label }}</span
 								>
-								<div v-if="isSidebarCollapsed" class="absolute left-14 px-3 py-1 bg-gray-900 text-white text-[10px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-xl">
+								<div
+									v-if="isSidebarCollapsed"
+									class="absolute left-14 px-3 py-1 bg-gray-900 text-white text-[10px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-xl"
+								>
 									{{ item.label }}
 								</div>
 							</div>
@@ -325,7 +348,9 @@
 										{{ session.user?.email || 'Not logged in' }}
 									</p>
 								</div>
-								<div class="py-1 border-b border-gray-100 dark:border-gray-200 dark:border-white/5">
+								<div
+									class="py-1 border-b border-gray-100 dark:border-gray-200 dark:border-white/5"
+								>
 									<a
 										href="#"
 										@click.prevent="isUserMenuOpen = false"
@@ -387,7 +412,9 @@
 										Account History
 									</a>
 								</div>
-								<div class="py-1 border-b border-gray-100 dark:border-gray-200 dark:border-white/5">
+								<div
+									class="py-1 border-b border-gray-100 dark:border-gray-200 dark:border-white/5"
+								>
 									<button
 										@click.stop="ui.toggleTheme()"
 										class="w-full flex items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
@@ -498,7 +525,9 @@
 				</main>
 
 				<!-- Persistent Selection Tray (Right Sidebar) -->
-				<div class="hidden lg:flex flex-col flex-shrink-0 h-full w-[380px] bg-white dark:bg-[#1a1c23] border-l border-gray-200 dark:border-white/5 overflow-hidden">
+				<div
+					class="hidden lg:flex flex-col flex-shrink-0 h-full w-[380px] bg-white dark:bg-[#1a1c23] border-l border-gray-200 dark:border-white/5 overflow-hidden"
+				>
 					<CartSidebar :isOpen="true" :persistent="true" />
 				</div>
 			</div>
@@ -510,14 +539,14 @@
 		<div
 			class="xl:hidden fixed bottom-0 left-0 right-0 z-20 bg-white/95 dark:bg-[#15161a]/95 backdrop-blur-sm border-t border-gray-200 dark:border-white/5 py-2 px-3 flex items-center justify-between flex-shrink-0"
 		>
-			<div class="flex items-center gap-1.5 pr-2 border-r border-gray-200 dark:border-white/10 flex-shrink-0">
+			<div
+				class="flex items-center gap-1.5 pr-2 border-r border-gray-200 dark:border-white/10 flex-shrink-0"
+			>
 				<span class="relative flex h-2 w-2">
 					<span
 						class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"
 					></span>
-					<span
-						class="relative inline-flex rounded-full h-2 w-2 bg-green-600"
-					></span>
+					<span class="relative inline-flex rounded-full h-2 w-2 bg-green-600"></span>
 				</span>
 				<span class="text-[9px] font-bold uppercase tracking-widest text-gray-400"
 					>Spot</span
@@ -555,7 +584,10 @@
 			>
 				<div class="flex items-center gap-3">
 					<img src="/logo.svg" alt="Zevar POS" class="w-8 h-8 rounded-lg" />
-					<span class="text-gray-900 dark:text-white font-black text-2xl tracking-tighter leading-none mt-0.5">ZEVAR</span>
+					<span
+						class="text-gray-900 dark:text-white font-black text-2xl tracking-tighter leading-none mt-0.5"
+						>ZEVAR</span
+					>
 				</div>
 				<button
 					@click="isMobileDrawerOpen = false"
@@ -624,14 +656,20 @@
 
 			<!-- Navigation -->
 			<nav class="flex-1 overflow-y-auto p-4 space-y-0.5 custom-scrollbar">
-				<template v-for="(section, sIdx) in [
-					{ label: 'Operations', items: navOperations },
-					{ label: 'Sales', items: navSales },
-					{ label: 'Services', items: navServices },
-					{ label: 'Management', items: navManagement }
-				]" :key="sIdx">
+				<template
+					v-for="(section, sIdx) in [
+						{ label: 'Operations', items: navOperations },
+						{ label: 'Sales', items: navSales },
+						{ label: 'Services', items: navServices },
+						{ label: 'Management', items: navManagement },
+					]"
+					:key="sIdx"
+				>
 					<div class="px-3 pt-3 pb-1" :class="{ 'pt-1': sIdx === 0 }">
-						<span class="text-[9px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest">{{ section.label }}</span>
+						<span
+							class="text-[9px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest"
+							>{{ section.label }}</span
+						>
 					</div>
 					<router-link
 						v-for="item in section.items"
@@ -639,9 +677,25 @@
 						@click="isMobileDrawerOpen = false"
 						:to="item.to"
 						class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors"
-						:class="isNavActive(item.to) ? 'bg-gradient-to-r from-[#D4AF37]/20 to-transparent text-[#D4AF37]' : 'text-gray-600 dark:text-gray-400 hover:text-[#D4AF37] hover:bg-gray-50 dark:hover:bg-white/5'"
+						:class="
+							isNavActive(item.to)
+								? 'bg-gradient-to-r from-[#D4AF37]/20 to-transparent text-[#D4AF37]'
+								: 'text-gray-600 dark:text-gray-400 hover:text-[#D4AF37] hover:bg-gray-50 dark:hover:bg-white/5'
+						"
 					>
-						<svg class="w-[18px] h-[18px] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon"></path></svg>
+						<svg
+							class="w-[18px] h-[18px] shrink-0"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								:d="item.icon"
+							></path>
+						</svg>
 						<span class="font-medium text-[13px]">{{ item.label }}</span>
 					</router-link>
 				</template>
@@ -772,23 +826,63 @@ const sidebarWidth = ref(288)
 
 // Navigation data
 const navOperations = [
-	{ to: '/', label: 'POS Terminal', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
-	{ to: '/inventory', label: 'Inventory', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
-	{ to: '/customers', label: 'Customers', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
+	{
+		to: '/',
+		label: 'POS Terminal',
+		icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z',
+	},
+	{
+		to: '/inventory',
+		label: 'Inventory',
+		icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
+	},
+	{
+		to: '/customers',
+		label: 'Customers',
+		icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
+	},
 ]
 const navSales = [
-	{ to: '/transactions', label: 'Sales History', icon: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
-	{ to: '/pos-catalogue', label: 'Catalogues', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' },
+	{
+		to: '/transactions',
+		label: 'Sales History',
+		icon: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+	},
+	{
+		to: '/pos-catalogue',
+		label: 'Catalogues',
+		icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10',
+	},
 	{ to: '/layaway', label: 'Layaway', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
 ]
 const navServices = [
-	{ to: '/repairs', label: 'Repairs', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
-	{ to: '/trade-ins', label: 'Trade-Ins', icon: 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4' },
-	{ to: '/appraisals', label: 'Appraisals', icon: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z' },
+	{
+		to: '/repairs',
+		label: 'Repairs',
+		icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z',
+	},
+	{
+		to: '/trade-ins',
+		label: 'Trade-Ins',
+		icon: 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4',
+	},
+	{
+		to: '/appraisals',
+		label: 'Appraisals',
+		icon: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z',
+	},
 ]
 const navManagement = [
-	{ to: '/reports', label: 'Reports', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
-	{ to: '/support', label: 'Support', icon: 'M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z' },
+	{
+		to: '/reports',
+		label: 'Reports',
+		icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+	},
+	{
+		to: '/support',
+		label: 'Support',
+		icon: 'M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z',
+	},
 ]
 
 // Route active check

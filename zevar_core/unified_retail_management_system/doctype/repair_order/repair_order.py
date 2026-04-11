@@ -2,8 +2,8 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.model.document import Document
 from frappe import _
+from frappe.model.document import Document
 
 
 class PaymentStatus:
@@ -1141,11 +1141,11 @@ class RepairOrder(Document):
 
 	def get_estimate_approval_link(self):
 		"""Generate public link for estimate approval"""
-		from frappe.utils import get_url
-
 		# Generate a unique token
 		import hashlib
 		import secrets
+
+		from frappe.utils import get_url
 		token = secrets.token_urlsafe(32)
 
 		# Store token in cache for 30 days
@@ -1335,7 +1335,7 @@ class RepairOrder(Document):
 
 		except Exception as e:
 			frappe.log_error(f"Failed to save intake signature for {self.name}: {e}")
-			return {"success": False, "message": f"Failed to save signature: {str(e)}"}
+			return {"success": False, "message": f"Failed to save signature: {e!s}"}
 
 	def get_compliance_report(self):
 		"""Generate comprehensive compliance report for this repair order"""

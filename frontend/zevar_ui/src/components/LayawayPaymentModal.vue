@@ -337,8 +337,18 @@ async function processPayment() {
 		if (e?._server_messages) {
 			try {
 				const msgs = JSON.parse(e._server_messages)
-				errorMsg = msgs.map(m => { try { return JSON.parse(m).message } catch { return m } }).join('\n')
-			} catch { errorMsg = String(e._server_messages) }
+				errorMsg = msgs
+					.map((m) => {
+						try {
+							return JSON.parse(m).message
+						} catch {
+							return m
+						}
+					})
+					.join('\n')
+			} catch {
+				errorMsg = String(e._server_messages)
+			}
 		} else {
 			errorMsg = e?.message || 'Failed to process payment'
 		}

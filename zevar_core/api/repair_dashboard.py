@@ -2,8 +2,9 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import today, getdate, add_days, flt
 from frappe import _
+from frappe.utils import add_days, flt, getdate, today
+
 
 @frappe.whitelist()
 def get_repair_dashboard_stats(warehouse=None):
@@ -210,6 +211,7 @@ def get_repair_chart_data(warehouse=None, period=30):
 	- Revenue trend
 	"""
 	from datetime import timedelta
+
 	from frappe.utils import add_days
 
 	today_date = getdate(today())

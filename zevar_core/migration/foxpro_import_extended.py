@@ -337,7 +337,7 @@ def import_slush_items(backup_path: str, dry_run: bool = False) -> dict:
 				continue
 
 			category = clean_str(record.get("category"))
-			goldtype = clean_str(record.get("goldtype"))
+			clean_str(record.get("goldtype"))
 
 			doc = frappe.new_doc("Item")
 			doc.item_code = item_code
@@ -405,7 +405,7 @@ def import_system_constants(backup_path: str, dry_run: bool = False) -> dict:
 
 	try:
 		if frappe.db.exists("DocType", "Gold Settings"):
-			doc = frappe.get_single("Gold Settings")
+			frappe.get_single("Gold Settings")
 			# Store spot gold/silver prices as gold rate logs
 			spot_gold = clean_float(constant.get("spotgold"))
 			if spot_gold > 0:
@@ -681,8 +681,8 @@ def import_receipt_lines(backup_path: str, dry_run: bool = False) -> dict:
 					qty = 1
 
 				# Try to find matching item
-				category = clean_str(item_record.get("category"))
-				stocknum = clean_str(item_record.get("stocknum"))
+				clean_str(item_record.get("category"))
+				clean_str(item_record.get("stocknum"))
 				item_code = _get_default_item()
 
 				si_doc.append(
@@ -854,7 +854,7 @@ def import_repair_orders(backup_path: str, dry_run: bool = False) -> dict:
 	repair_types = [rt.name for rt in frappe.get_all("Repair Type")]
 	default_repair_type = repair_types[0] if repair_types else None
 
-	for idx, record in enumerate(records):
+	for _idx, record in enumerate(records):
 		try:
 			rpairno = clean_str(record.get("rpairno"))
 			customer_str = clean_str(record.get("customer"))
@@ -1630,7 +1630,7 @@ def import_watch_details(backup_path: str, dry_run: bool = False) -> dict:
 	records = read_dbf(dbf_path)
 	stats["total"] = len(records)
 
-	for idx, record in enumerate(records):
+	for _idx, record in enumerate(records):
 		try:
 			abr = clean_str(record.get("abr"))
 			stockno = clean_str(record.get("stockno"))

@@ -4,8 +4,12 @@
 			<!-- Header -->
 			<div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
 				<div>
-					<h1 class="text-4xl font-black text-gray-900 tracking-tight leading-none mb-3">Attendance</h1>
-					<p class="text-gray-500 font-medium font-sans">Precise tracking for the Atelier craftsmen.</p>
+					<h1 class="text-4xl font-black text-gray-900 tracking-tight leading-none mb-3">
+						Attendance
+					</h1>
+					<p class="text-gray-500 font-medium font-sans">
+						Precise tracking for the Atelier craftsmen.
+					</p>
 				</div>
 				<div class="flex items-center gap-4">
 					<div class="bg-gray-100 p-1 rounded-xl flex items-center shadow-inner">
@@ -13,7 +17,11 @@
 							@click="handleClockIn"
 							:disabled="isCheckedIn"
 							class="px-6 py-3 rounded-lg text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2"
-							:class="!isCheckedIn ? 'bg-emerald-950 text-white shadow-glow-emerald hover:bg-black' : 'text-gray-400 cursor-not-allowed'"
+							:class="
+								!isCheckedIn
+									? 'bg-emerald-950 text-white shadow-glow-emerald hover:bg-black'
+									: 'text-gray-400 cursor-not-allowed'
+							"
 						>
 							<span class="material-symbols-outlined text-lg">login</span>
 							Clock-In
@@ -23,7 +31,7 @@
 							:disabled="!isCheckedIn"
 							class="px-5 py-3 text-gray-500 hover:text-gray-900 text-[11px] font-black uppercase tracking-[0.2em] transition-all"
 						>
-							{{ isOnBreak ? 'End Break' : 'Break' }}
+							{{ isOnBreak ? "End Break" : "Break" }}
 						</button>
 						<button
 							@click="handleClockOut"
@@ -41,38 +49,61 @@
 				<div class="premium-card !p-8">
 					<p class="status-label">This Month</p>
 					<div class="flex items-end gap-2 mb-6">
-						<span class="text-4xl font-black text-gray-900 leading-none tracking-tighter">22</span>
+						<span
+							class="text-4xl font-black text-gray-900 leading-none tracking-tighter"
+							>22</span
+						>
 						<span class="text-lg font-bold text-gray-400 leading-none">/ 24 Days</span>
 					</div>
 					<div class="inline-flex items-center gap-1.5 px-2 py-1 bg-emerald-50 rounded">
-						<span class="material-symbols-outlined text-emerald-600 text-[14px]">trending_up</span>
+						<span class="material-symbols-outlined text-emerald-600 text-[14px]"
+							>trending_up</span
+						>
 						<span class="text-[10px] font-black text-emerald-600">+2 days</span>
 					</div>
 				</div>
 
 				<div class="premium-card !p-8">
 					<p class="status-label">On-Time Rate</p>
-					<div class="text-4xl font-black text-gray-900 leading-none tracking-tighter mb-6">{{ onTimeRate }}%</div>
+					<div
+						class="text-4xl font-black text-gray-900 leading-none tracking-tighter mb-6"
+					>
+						{{ onTimeRate }}%
+					</div>
 					<div class="inline-flex items-center gap-1.5 px-2 py-1 bg-amber-50 rounded">
-						<span class="material-symbols-outlined text-amber-600 text-[14px]">workspace_premium</span>
+						<span class="material-symbols-outlined text-amber-600 text-[14px]"
+							>workspace_premium</span
+						>
 						<span class="text-[10px] font-black text-amber-600">Premium Tier</span>
 					</div>
 				</div>
 
 				<div class="premium-card !p-8">
 					<p class="status-label">Avg Shift</p>
-					<div class="text-4xl font-black text-gray-900 leading-none tracking-tighter mb-6">{{ averageShiftHours }}</div>
+					<div
+						class="text-4xl font-black text-gray-900 leading-none tracking-tighter mb-6"
+					>
+						{{ averageShiftHours }}
+					</div>
 					<div class="inline-flex items-center gap-1.5 px-2 py-1 bg-gray-100 rounded">
-						<span class="material-symbols-outlined text-gray-400 text-[14px]">schedule</span>
+						<span class="material-symbols-outlined text-gray-400 text-[14px]"
+							>schedule</span
+						>
 						<span class="text-[10px] font-black text-gray-500">Standard</span>
 					</div>
 				</div>
 
 				<div class="premium-card !p-8">
 					<p class="status-label">Overtime</p>
-					<div class="text-4xl font-black text-gray-900 leading-none tracking-tighter mb-6">{{ overtimeHoursMonth }}</div>
+					<div
+						class="text-4xl font-black text-gray-900 leading-none tracking-tighter mb-6"
+					>
+						{{ overtimeHoursMonth }}
+					</div>
 					<div class="inline-flex items-center gap-1.5 px-2 py-1 bg-red-50 rounded">
-						<span class="material-symbols-outlined text-red-500 text-[14px]">pending</span>
+						<span class="material-symbols-outlined text-red-500 text-[14px]"
+							>pending</span
+						>
 						<span class="text-[10px] font-black text-red-600">Pending Approval</span>
 					</div>
 				</div>
@@ -82,48 +113,103 @@
 				<!-- Left: Daily Attendance Table -->
 				<div class="lg:col-span-8 space-y-8">
 					<div class="flex justify-between items-center px-2">
-						<h3 class="text-xl font-black text-gray-900 tracking-tight">Daily Attendance</h3>
+						<h3 class="text-xl font-black text-gray-900 tracking-tight">
+							Daily Attendance
+						</h3>
 						<div class="flex items-center gap-4">
-							<button class="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all">
+							<button
+								class="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all"
+							>
 								<span class="material-symbols-outlined text-lg">filter_list</span>
 							</button>
-							<button class="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all">
+							<button
+								class="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all"
+							>
 								<span class="material-symbols-outlined text-lg">download</span>
 							</button>
 						</div>
 					</div>
 
-					<div class="premium-card !p-0 overflow-hidden border border-gray-100 shadow-sm">
+					<div
+						class="premium-card !p-0 overflow-hidden border border-gray-100 shadow-sm"
+					>
 						<table class="w-full text-left">
 							<thead class="border-b border-gray-50 bg-gray-50/30">
 								<tr>
-									<th class="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Date</th>
-									<th class="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Clock In</th>
-									<th class="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Clock Out</th>
-									<th class="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Total Hours</th>
-									<th class="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] text-right">Status</th>
+									<th
+										class="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]"
+									>
+										Date
+									</th>
+									<th
+										class="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]"
+									>
+										Clock In
+									</th>
+									<th
+										class="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]"
+									>
+										Clock Out
+									</th>
+									<th
+										class="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]"
+									>
+										Total Hours
+									</th>
+									<th
+										class="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] text-right"
+									>
+										Status
+									</th>
 								</tr>
 							</thead>
 							<tbody class="divide-y divide-gray-50">
-								<tr v-for="record in dailyRecords" :key="record.date" class="hover:bg-gray-50/50 transition-colors">
+								<tr
+									v-for="record in dailyRecords"
+									:key="record.date"
+									class="hover:bg-gray-50/50 transition-colors"
+								>
 									<td class="px-10 py-6">
-										<p class="text-sm font-black text-gray-900 tracking-tight">{{ formatDate(record.date) }}</p>
-										<p class="text-[10px] font-bold text-gray-400">{{ formatDay(record.date) }}</p>
+										<p class="text-sm font-black text-gray-900 tracking-tight">
+											{{ formatDate(record.date) }}
+										</p>
+										<p class="text-[10px] font-bold text-gray-400">
+											{{ formatDay(record.date) }}
+										</p>
 									</td>
 									<td class="px-10 py-6">
 										<div class="flex items-center gap-3">
-											<div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-											<p class="text-sm font-black text-gray-900">{{ record.clockIn ? formatTime(record.clockIn) : '--:--' }}</p>
+											<div
+												class="w-1.5 h-1.5 rounded-full bg-emerald-500"
+											></div>
+											<p class="text-sm font-black text-gray-900">
+												{{
+													record.clockIn
+														? formatTime(record.clockIn)
+														: "--:--"
+												}}
+											</p>
 										</div>
 									</td>
 									<td class="px-10 py-6">
-										<p class="text-sm font-black text-gray-900">{{ record.clockOut ? formatTime(record.clockOut) : '--:--' }}</p>
+										<p class="text-sm font-black text-gray-900">
+											{{
+												record.clockOut
+													? formatTime(record.clockOut)
+													: "--:--"
+											}}
+										</p>
 									</td>
 									<td class="px-10 py-6">
-										<p class="text-sm font-black text-gray-900 tabular-nums">{{ record.totalHours }}</p>
+										<p class="text-sm font-black text-gray-900 tabular-nums">
+											{{ record.totalHours }}
+										</p>
 									</td>
 									<td class="px-10 py-6 text-right">
-										<span class="inline-flex px-3 py-1 rounded text-[9px] font-black uppercase tracking-widest" :class="getStatusClasses(record.status)">
+										<span
+											class="inline-flex px-3 py-1 rounded text-[9px] font-black uppercase tracking-widest"
+											:class="getStatusClasses(record.status)"
+										>
 											{{ record.status }}
 										</span>
 									</td>
@@ -131,7 +217,10 @@
 							</tbody>
 						</table>
 
-						<button @click="loadMoreHistory" class="w-full py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-primary hover:bg-gray-50 transition-all border-t border-gray-50">
+						<button
+							@click="loadMoreHistory"
+							class="w-full py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-primary hover:bg-gray-50 transition-all border-t border-gray-50"
+						>
 							Load More Records
 						</button>
 					</div>
@@ -142,13 +231,23 @@
 					<!-- Calendar -->
 					<div class="premium-card !p-8">
 						<div class="flex justify-between items-center mb-6">
-							<h4 class="text-sm font-black text-gray-900 tracking-tight">March 2026</h4>
+							<h4 class="text-sm font-black text-gray-900 tracking-tight">
+								March 2026
+							</h4>
 							<div class="flex gap-2">
-								<button class="w-7 h-7 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all">
-									<span class="material-symbols-outlined text-xs">chevron_left</span>
+								<button
+									class="w-7 h-7 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all"
+								>
+									<span class="material-symbols-outlined text-xs"
+										>chevron_left</span
+									>
 								</button>
-								<button class="w-7 h-7 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all">
-									<span class="material-symbols-outlined text-xs">chevron_right</span>
+								<button
+									class="w-7 h-7 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all"
+								>
+									<span class="material-symbols-outlined text-xs"
+										>chevron_right</span
+									>
 								</button>
 							</div>
 						</div>
@@ -162,33 +261,62 @@
 					<!-- Guidelines -->
 					<div class="premium-card !p-8 bg-gray-50 border-gray-100">
 						<div class="flex items-center gap-3 mb-6">
-							<span class="material-symbols-outlined text-primary text-xl">info</span>
-							<h4 class="text-sm font-black text-gray-900 tracking-tight">Guidelines</h4>
+							<span class="material-symbols-outlined text-primary text-xl"
+								>info</span
+							>
+							<h4 class="text-sm font-black text-gray-900 tracking-tight">
+								Guidelines
+							</h4>
 						</div>
 						<ul class="space-y-4">
 							<li class="flex items-start gap-4">
-								<div class="w-1.5 h-1.5 rounded-full bg-gray-300 mt-1.5 shrink-0"></div>
-								<p class="text-[11px] font-bold text-gray-500 leading-relaxed">Core hours are 09:00 AM - 05:00 PM.</p>
+								<div
+									class="w-1.5 h-1.5 rounded-full bg-gray-300 mt-1.5 shrink-0"
+								></div>
+								<p class="text-[11px] font-bold text-gray-500 leading-relaxed">
+									Core hours are 09:00 AM - 05:00 PM.
+								</p>
 							</li>
 							<li class="flex items-start gap-4">
-								<div class="w-1.5 h-1.5 rounded-full bg-gray-300 mt-1.5 shrink-0"></div>
-								<p class="text-[11px] font-bold text-gray-500 leading-relaxed">Overtime exceeding 2 hours requires Manager sign-off.</p>
+								<div
+									class="w-1.5 h-1.5 rounded-full bg-gray-300 mt-1.5 shrink-0"
+								></div>
+								<p class="text-[11px] font-bold text-gray-500 leading-relaxed">
+									Overtime exceeding 2 hours requires Manager sign-off.
+								</p>
 							</li>
 							<li class="flex items-start gap-4">
-								<div class="w-1.5 h-1.5 rounded-full bg-gray-300 mt-1.5 shrink-0"></div>
-								<p class="text-[11px] font-bold text-gray-500 leading-relaxed">Missed clocks must be rectified via "Issues" tab within 24h.</p>
+								<div
+									class="w-1.5 h-1.5 rounded-full bg-gray-300 mt-1.5 shrink-0"
+								></div>
+								<p class="text-[11px] font-bold text-gray-500 leading-relaxed">
+									Missed clocks must be rectified via "Issues" tab within 24h.
+								</p>
 							</li>
 						</ul>
 					</div>
 
 					<!-- Colleagues -->
 					<div class="px-2">
-						<p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Colleagues Clocked-in</p>
+						<p
+							class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4"
+						>
+							Colleagues Clocked-in
+						</p>
 						<div class="flex items-center -space-x-3">
-							<div v-for="i in 4" :key="i" class="w-10 h-10 rounded-full border-2 border-white overflow-hidden bg-gray-100 ring-2 ring-transparent hover:ring-primary transition-all cursor-pointer">
-								<img :src="`https://i.pravatar.cc/100?u=${i}`" class="w-full h-full object-cover" />
+							<div
+								v-for="i in 4"
+								:key="i"
+								class="w-10 h-10 rounded-full border-2 border-white overflow-hidden bg-gray-100 ring-2 ring-transparent hover:ring-primary transition-all cursor-pointer"
+							>
+								<img
+									:src="`https://i.pravatar.cc/100?u=${i}`"
+									class="w-full h-full object-cover"
+								/>
 							</div>
-							<div class="w-10 h-10 rounded-full border-2 border-white bg-gray-50 flex items-center justify-center text-[10px] font-black text-gray-400">
+							<div
+								class="w-10 h-10 rounded-full border-2 border-white bg-gray-50 flex items-center justify-center text-[10px] font-black text-gray-400"
+							>
 								+12
 							</div>
 						</div>
@@ -263,7 +391,9 @@ const dailyRecords = computed(() => {
 		else if (clockIn) {
 			const inTime = new Date(clockIn);
 			const lateThreshold = new Date(date);
-			const startTime = roster.value?.start_time ? roster.value.start_time.split(":") : [9, 0];
+			const startTime = roster.value?.start_time
+				? roster.value.start_time.split(":")
+				: [9, 0];
 			lateThreshold.setHours(parseInt(startTime[0]), parseInt(startTime[1]), 0);
 
 			if (totalHours >= targetHours) status = "On Time";
@@ -275,22 +405,35 @@ const dailyRecords = computed(() => {
 			if (new Date(date) < todayDate) status = "Absent";
 		}
 
-		const formattedHours = totalHours > 0 ? `${Math.floor(totalHours)}h ${Math.round((totalHours % 1) * 60)}m` : "0h 0m";
-		records.push({ date: dayData.date, clockIn, clockOut, totalHours: formattedHours, status });
+		const formattedHours =
+			totalHours > 0
+				? `${Math.floor(totalHours)}h ${Math.round((totalHours % 1) * 60)}m`
+				: "0h 0m";
+		records.push({
+			date: dayData.date,
+			clockIn,
+			clockOut,
+			totalHours: formattedHours,
+			status,
+		});
 	});
 
 	return records.sort((a, b) => new Date(b.date) - new Date(a.date));
 });
 
 const averageShiftHours = computed(() => {
-	const records = dailyRecords.value.filter((r) => r.totalHours && !r.totalHours.startsWith("0h"));
+	const records = dailyRecords.value.filter(
+		(r) => r.totalHours && !r.totalHours.startsWith("0h")
+	);
 	if (records.length === 0) return "8h 42m";
 	// Return the average of first few records
 	return records[0]?.totalHours || "8h 42m";
 });
 
 const onTimeRate = computed(() => {
-	const present = dailyRecords.value.filter((r) => ["On Time", "Slight Late", "Complete"].includes(r.status));
+	const present = dailyRecords.value.filter((r) =>
+		["On Time", "Slight Late", "Complete"].includes(r.status)
+	);
 	const onTime = present.filter((r) => r.status === "On Time");
 	return present.length > 0 ? Math.round((onTime.length / present.length) * 100) : 98;
 });
@@ -325,7 +468,11 @@ function formatDay(dateStr) {
 	return new Date(dateStr).toLocaleDateString("en-US", { weekday: "long" });
 }
 function formatTime(timeStr) {
-	return new Date(timeStr).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+	return new Date(timeStr).toLocaleTimeString("en-US", {
+		hour: "2-digit",
+		minute: "2-digit",
+		hour12: true,
+	});
 }
 
 async function handleClockIn() {
@@ -357,6 +504,11 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+.no-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
 </style>

@@ -168,7 +168,7 @@ const hasMore = ref(true)
 const categoryItems = computed(() => {
 	if (!selectedCategory.value) return []
 	return catalog.value.filter(
-		(item) => (item.item_group || item.category || 'Other') === selectedCategory.value,
+		(item) => (item.item_group || item.category || 'Other') === selectedCategory.value
 	)
 })
 
@@ -182,16 +182,16 @@ const filteredCategories = computed(() => {
 const items = createResource({
 	url: 'zevar_core.api.catalog.get_pos_items',
 	makeParams() {
-		const { 
-			in_stock_only, 
-			out_of_stock_only, 
-			price_min, 
+		const {
+			in_stock_only,
+			out_of_stock_only,
+			price_min,
 			price_max,
 			custom_jewelry_type,
 			custom_metal_type,
 			custom_purity,
 			custom_gemstone,
-			...otherFilters 
+			...otherFilters
 		} = ui.activeFilters
 
 		return {
