@@ -54,8 +54,7 @@
 			</div>
 			<div class="relative max-w-7xl mx-auto px-6 h-full flex flex-col justify-center">
 				<h1
-					class="text-4xl md:text-5xl font-serif font-bold mb-2 capitalize"
-					:class="isDark ? 'text-white' : 'text-gray-900'"
+					class="premium-title !text-4xl md:!text-5xl mb-2 capitalize"
 				>
 					{{ categoryTitle }}
 				</h1>

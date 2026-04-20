@@ -1,10 +1,18 @@
 <template>
-	<Transition name="fade">
-		<div v-if="show" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-			<div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" @click="close"></div>
+	<component :is="inlineMode ? 'div' : 'Transition'" name="fade" :class="inlineMode ? 'h-full' : ''">
+		<div
+			v-if="inlineMode || show"
+			:class="[
+				inlineMode
+					? 'h-full flex flex-col bg-white dark:bg-[#1a1c23] w-full overflow-hidden'
+					: 'fixed inset-0 z-[100] flex items-center justify-center p-4'
+			]"
+		>
+			<div v-if="!inlineMode" class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" @click="close"></div>
 
 			<div
-				class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] overflow-hidden border border-transparent dark:border-white/10"
+				class="relative bg-white dark:bg-[#1a1c23] w-full overflow-hidden flex flex-col"
+				:class="[inlineMode ? 'flex-1 h-full' : 'max-w-6xl max-h-[95vh] rounded-2xl shadow-2xl border border-transparent dark:border-white/10']"
 			>
 				<!-- Header -->
 				<div
@@ -109,9 +117,9 @@
 				</div>
 
 				<!-- Two Column Layout -->
-				<div class="flex flex-col lg:flex-row">
+				<div class="flex flex-col lg:flex-row flex-1 overflow-hidden">
 					<!-- Left Column - Customer & Details -->
-					<div class="flex-1 p-5 overflow-y-auto" style="max-height: calc(95vh - 140px)">
+					<div class="flex-1 p-5 overflow-y-auto custom-scrollbar" :style="inlineMode ? '' : 'max-height: calc(95vh - 140px)'">
 						<!-- ID Scanner Panel -->
 						<Transition name="slide-down">
 							<div
@@ -668,7 +676,7 @@
 					<!-- Right Column - Items & Summary -->
 					<div
 						class="flex-1 p-5 border-l border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-[#1a1c23]/50 overflow-y-auto"
-						style="max-height: calc(95vh - 140px)"
+						:style="inlineMode ? '' : 'max-height: calc(95vh - 140px)'"
 					>
 						<!-- Layaway Details -->
 						<div class="mb-5">
@@ -711,9 +719,9 @@
 										v-model="form.paymentSchedule"
 										class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 									>
-										<option value="Monthly">Monthly</option>
-										<option value="Bi-Weekly">Bi-Weekly</option>
 										<option value="Weekly">Weekly</option>
+										<option value="Bi-Weekly">Bi-Weekly</option>
+										<option value="Monthly">Monthly</option>
 									</select>
 								</div>
 								<div>
@@ -728,9 +736,9 @@
 										<option :value="1">1 Month (30 Days)</option>
 										<option :value="2">2 Months (60 Days)</option>
 										<option :value="3">3 Months (90 Days)</option>
-										<option :value="6">6 Months</option>
-										<option :value="9">9 Months</option>
-										<option :value="12">12 Months</option>
+										<option :value="6">6 Months (180 Days)</option>
+										<option :value="9">9 Months (270 Days)</option>
+										<option :value="12">12 Months (365 Days)</option>
 									</select>
 								</div>
 								<div>
@@ -772,27 +780,6 @@
 										>
 									</div>
 								</div>
-							</div>
-							<div class="mt-3">
-								<label
-									class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-									>Payment Method</label
-								>
-								<select
-									v-model="form.paymentMethod"
-									class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
-								>
-									<option value="">Select Method</option>
-									<option value="Cash">Cash</option>
-									<option value="Credit Card">Credit Card</option>
-									<option value="Debit Card">Debit Card</option>
-									<option value="Check">Check</option>
-									<option value="Apple Pay">Apple Pay</option>
-									<option value="Google Pay">Google Pay</option>
-									<option value="Venmo">Venmo</option>
-									<option value="Zelle">Zelle</option>
-									<option value="Skip">Pay Later</option>
-								</select>
 							</div>
 							<div class="mt-3">
 								<label
@@ -1009,12 +996,12 @@
 								</table>
 							</div>
 
-								<!-- Quick Add Item Buttons -->
-								<div v-if="selectedItems.length > 0" class="mt-3 flex gap-2">
-									<button
-										@click="clearItemSearch"
-										class="px-3 py-2 text-xs font-medium text-[#D4AF37] border border-[#D4AF37]/30 rounded-lg hover:bg-[#D4AF37]/10 transition flex items-center gap-1"
-									>
+							<!-- Quick Add Item Buttons -->
+							<div v-if="selectedItems.length > 0" class="mt-3 flex gap-2">
+								<button
+									@click="itemSearch = ''; $refs.itemSearchInput?.focus()"
+									class="px-3 py-2 text-xs font-medium text-[#D4AF37] border border-[#D4AF37]/30 rounded-lg hover:bg-[#D4AF37]/10 transition flex items-center gap-1"
+								>
 									<svg
 										class="w-3.5 h-3.5"
 										fill="none"
@@ -1208,7 +1195,7 @@
 								<span class="font-bold">Terms Agreement:</span> I confirm the
 								customer has agreed to the layaway terms including the payment
 								schedule ({{ paymentFrequencyText }} for
-								{{ form.durationMonths }} month{{ form.durationMonths > 1 ? "s" : "" }}), cancellation policy, and that all
+								{{ form.durationMonths }} months), cancellation policy, and that all
 								items will be reserved until full payment is received.
 							</span>
 						</label>
@@ -1232,7 +1219,7 @@
 							Cancel
 						</button>
 						<button
-							@click="createLayaway"
+							@click="proceedToPayment"
 							:disabled="submitting || !canSubmit"
 							class="px-6 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2"
 						>
@@ -1256,29 +1243,44 @@
 									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 								></path>
 							</svg>
-							{{ submitting ? 'Creating...' : 'Create Layaway' }}
+							{{ submitting ? 'Processing...' : 'Proceed to Payment' }}
 						</button>
 					</div>
 				</div>
 			</div>
 		</div>
-	</Transition>
+		<!-- Payment Sidebar (Draft Mode) -->
+		<LayawayPaymentModal
+			v-if="showPaymentSidebar"
+			:show="showPaymentSidebar"
+			layawayId="New Layaway"
+			:balanceAmount="form.deposit"
+			draftMode
+			@close="showPaymentSidebar = false"
+			@success="handlePrePaymentSuccess"
+		/>
+	</component>
 </template>
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch, nextTick } from 'vue'
 import { createResource, createDocumentResource } from 'frappe-ui'
 import { useSessionStore } from '@/stores/session.js'
+import { useCartStore } from '@/stores/cart.js'
+import LayawayPaymentModal from '@/components/LayawayPaymentModal.vue'
 
 const props = defineProps({
 	show: { type: Boolean, default: false },
+	inlineMode: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['close', 'created'])
 const session = useSessionStore()
+const cartStore = useCartStore()
 
 // UI State
 const submitting = ref(false)
+const showPaymentSidebar = ref(false)
 const isNewCustomerMode = ref(false)
 const showIdScanner = ref(false)
 const showSerialInput = ref(false)
@@ -1327,6 +1329,30 @@ const nominee = ref({
 	phone: '',
 	email: '',
 })
+
+// Handle initialization from cart
+watch(() => props.show, (newVal) => {
+	if (newVal) {
+		if (cartStore.items && cartStore.items.length > 0) {
+			selectedItems.value = cartStore.items.map(item => ({
+				item_code: item.item_code,
+				item_name: item.item_name,
+				qty: item.qty,
+				price: item.amount,
+				has_serial: item.has_serial || false,
+				serial_numbers: ''
+			}))
+
+			// Try to set customer from cart if selected
+			if (cartStore.customer) {
+				selectedCustomer.value = cartStore.customer
+				isNewCustomerMode.value = false
+			}
+		}
+	} else {
+		// Reset logic... but we already have a close method for reset
+	}
+}, { immediate: true })
 
 // Helper to get today's date
 const getTodayDate = () => {
@@ -1392,7 +1418,7 @@ const minDeposit = computed(() => {
 })
 
 const numberOfPayments = computed(() => {
-	const months = form.value.durationMonths
+	const months = form.value.durationMonths || 3
 	const schedule = form.value.paymentSchedule
 	switch (schedule) {
 		case 'Weekly':
@@ -1478,6 +1504,11 @@ const createLayawayResource = createResource({
 	auto: false,
 })
 
+const processPaymentResource = createResource({
+	url: 'zevar_core.api.layaway.process_layaway_payment',
+	auto: false,
+})
+
 // Functions
 function formatPrice(price) {
 	if (price == null) return '0.00'
@@ -1501,9 +1532,12 @@ async function searchCustomers() {
 				await searchCustomersResource.submit({
 					doctype: 'Customer',
 					fields: ['name', 'customer_name', 'mobile_no', 'email_id', 'address_display'],
-					filters: {
-						customer_name: ['like', `%${customerSearch.value}%`],
-					},
+					or_filters: [
+						['name', 'like', `%${customerSearch.value}%`],
+						['customer_name', 'like', `%${customerSearch.value}%`],
+						['mobile_no', 'like', `%${customerSearch.value}%`],
+						['email_id', 'like', `%${customerSearch.value}%`]
+					],
 					limit_page_length: 10,
 				})
 			)
@@ -1597,11 +1631,6 @@ function focusBarcodeScanner() {
 	})
 }
 
-function clearItemSearch() {
-	itemSearch.value = ''
-	itemSearchInput.value?.focus()
-}
-
 function handleItemBarcodeScan(event) {
 	if (isScanningBarcode.value) {
 		const barcode = event.target.value
@@ -1648,6 +1677,16 @@ function applyIdData() {
 	showIdScanner.value = false
 }
 
+function proceedToPayment() {
+	if (!canSubmit.value) return
+	showPaymentSidebar.value = true
+}
+
+async function handlePrePaymentSuccess(paymentData) {
+	showPaymentSidebar.value = false
+	await createLayaway(paymentData.payments)
+}
+
 // Create Customer
 async function createNewCustomer() {
 	try {
@@ -1671,7 +1710,7 @@ async function createNewCustomer() {
 	}
 }
 
-async function createLayaway() {
+async function createLayaway(payments) {
 	if (!canSubmit.value) return
 
 	submitting.value = true
@@ -1684,7 +1723,8 @@ async function createLayaway() {
 			customerName = await createNewCustomer()
 		}
 
-					const durationMonths = form.value.durationMonths
+		// Convert weeks to months
+		const durationMonths = Math.max(1, form.value.durationMonths || 3)
 
 		// Prepare items
 		const items = selectedItems.value.map((item) => ({
@@ -1730,6 +1770,17 @@ async function createLayaway() {
 		const result = rawResult?.message ?? rawResult
 
 		if (result?.success || result?.layaway_id) {
+			// Process the collected payments
+			if (payments && payments.length > 0) {
+				for (const payment of payments) {
+					await processPaymentResource.submit({
+						layaway_id: result.layaway_id,
+						payment_amount: payment.amount,
+						mode_of_payment: payment.mode_of_payment || payment.mode,
+					})
+				}
+			}
+
 			emit('created', result)
 			close()
 		}

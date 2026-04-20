@@ -364,18 +364,26 @@
 					</div>
 				</div>
 
-				<button
-					@click="showCheckout = true"
-					:disabled="!isCheckoutReady"
-					class="w-full py-3 rounded-lg font-bold shadow-lg transition-all flex items-center justify-center gap-2"
-					:class="
-						isCheckoutReady
-							? 'bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black hover:bg-gray-800 dark:hover:bg-[#b5952f] active:scale-95'
-							: 'bg-gray-200 dark:bg-white/10 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-					"
-				>
-					{{ checkoutButtonText }}
-				</button>
+				<div class="flex flex-col gap-2 mt-4">
+					<button
+						@click="startLayaway"
+						class="w-full py-3 rounded-lg font-bold shadow-lg transition-all flex items-center justify-center gap-2 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 hover:bg-[#D4AF37]/20 active:scale-95"
+					>
+						Create Layaway
+					</button>
+					<button
+						@click="showCheckout = true"
+						:disabled="!isCheckoutReady"
+						class="w-full py-3 rounded-lg font-bold shadow-lg transition-all flex items-center justify-center gap-2"
+						:class="
+							isCheckoutReady
+								? 'bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black hover:bg-gray-800 dark:hover:bg-[#b5952f] active:scale-95'
+								: 'bg-gray-200 dark:bg-white/10 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+						"
+					>
+						{{ checkoutButtonText }}
+					</button>
+				</div>
 			</div>
 		</div>
 		<CheckoutModal :show="showCheckout" @close="showCheckout = false" />
@@ -387,6 +395,7 @@ import { useCartStore } from '@/stores/cart.js'
 import CheckoutModal from '@/components/CheckoutModal.vue'
 import CustomerSelector from '@/components/CustomerSelector.vue'
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
 	isOpen: Boolean,
@@ -394,15 +403,19 @@ const props = defineProps({
 })
 const emit = defineEmits(['close'])
 const cart = useCartStore()
+const router = useRouter()
 const showCheckout = ref(false)
 
+function startLayaway() {
+	emit('close')
+	router.push({ name: 'Layaway', query: { action: 'new' } })
+}
+
 const isCheckoutReady = computed(() => {
-	if (cart.customerType !== 'Walkin' && !cart.customer) return false
 	return true
 })
 
 const checkoutButtonText = computed(() => {
-	if (cart.customerType !== 'Walkin' && !cart.customer) return 'Select Customer'
 	return 'Checkout'
 })
 

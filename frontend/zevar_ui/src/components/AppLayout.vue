@@ -3,7 +3,7 @@
 		<!-- DESKTOP SIDEBAR -->
 		<aside
 			ref="sidebarRef"
-			class="hidden lg:flex bg-white dark:bg-[#15161a] border-r border-gray-200 dark:border-white/5 flex-col shadow-2xl z-30 relative"
+			class="hidden lg:flex bg-white/40 dark:bg-black/40 backdrop-blur-xl border-r border-gray-200 dark:border-white/5 flex-col shadow-2xl z-30 relative"
 			:class="isResizing ? 'transition-none' : 'transition-all duration-300'"
 			:style="
 				isSidebarCollapsed
@@ -25,7 +25,7 @@
 						class="w-8 h-8 rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.3)] shrink-0"
 					/>
 					<h1
-						class="text-gray-900 dark:text-white font-black text-2xl tracking-tighter whitespace-nowrap leading-none truncate"
+						class="premium-title !text-2xl !tracking-tighter whitespace-nowrap !leading-none truncate"
 					>
 						ZEVAR
 					</h1>
@@ -144,7 +144,7 @@
 
 		<div class="flex-1 flex flex-col relative min-w-0">
 			<header
-				class="h-16 sm:h-20 bg-white dark:bg-[#15161a] border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-3 sm:px-6 z-[60] sticky top-0 shadow-sm transition-colors duration-300 flex-shrink-0"
+				class="h-16 sm:h-20 bg-white/70 dark:bg-black/70 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-3 sm:px-6 z-[60] sticky top-0 shadow-sm transition-colors duration-300 flex-shrink-0"
 			>
 				<!-- Mobile Left Header (Hamburger + Logo + Location) -->
 				<div class="flex lg:hidden items-center gap-2 sm:gap-3 flex-1 min-w-0">
@@ -175,7 +175,7 @@
 						<select
 							v-model="session.currentWarehouse"
 							@change="session.setWarehouse($event.target.value)"
-							class="h-8 sm:h-9 w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 pl-2 pr-6 rounded-lg text-xs font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] cursor-pointer appearance-none overflow-hidden text-ellipsis whitespace-nowrap"
+							class="h-8 sm:h-9 w-full bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 pl-2 pr-6 rounded-lg text-xs font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] cursor-pointer appearance-none overflow-hidden text-ellipsis whitespace-nowrap"
 						>
 							<option :value="null" disabled>Store...</option>
 							<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
@@ -206,7 +206,7 @@
 						<select
 							v-model="session.currentWarehouse"
 							@change="session.setWarehouse($event.target.value)"
-							class="h-11 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 pl-4 pr-10 rounded-lg text-sm font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] cursor-pointer min-w-[200px] transition-all hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm outline-none"
+							class="h-11 bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 pl-4 pr-10 rounded-lg text-sm font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] cursor-pointer min-w-[200px] transition-all hover:bg-gray-100/50 dark:hover:bg-gray-700/50 shadow-sm outline-none"
 						>
 							<option :value="null" disabled>Select Store Location</option>
 							<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
@@ -233,7 +233,7 @@
 							type="text"
 							v-model="ui.searchQuery"
 							placeholder="Search collection..."
-							class="h-11 w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent text-sm font-medium pl-11 transition-all"
+							class="h-11 w-full bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-lg text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent text-sm font-medium pl-11 transition-all"
 						/>
 					</div>
 				</div>
@@ -241,7 +241,7 @@
 				<div class="flex items-center gap-2 sm:gap-3 sm:ml-4 lg:ml-8">
 					<!-- Live Spot Rates - Desktop Only -->
 					<div
-						class="hidden xl:flex items-center gap-0 bg-gray-100 dark:bg-[#15161a] text-gray-900 dark:text-white pl-3 pr-1 py-1 lg:pl-4 lg:pr-2 lg:py-1 rounded-xl border border-gray-200 dark:border-gray-800 max-w-lg overflow-hidden transition-colors duration-300"
+						class="hidden xl:flex items-center gap-0 bg-gray-100/50 dark:bg-[#15161a]/50 backdrop-blur-sm text-gray-900 dark:text-white pl-3 pr-1 py-1 lg:pl-4 lg:pr-2 lg:py-1 rounded-xl border border-gray-200 dark:border-gray-800 max-w-lg overflow-hidden transition-colors duration-300"
 					>
 						<div
 							class="flex items-center gap-1.5 lg:gap-2 border-r border-gray-300 dark:border-gray-800 pr-2 mr-2 lg:pr-3 lg:mr-3 flex-shrink-0"
@@ -284,7 +284,7 @@
 					</div>
 
 					<!-- User Profile Dropdown -->
-					<div class="relative">
+					<div class="relative" ref="userMenuRef">
 						<button
 							@click.stop="isUserMenuOpen = !isUserMenuOpen"
 							class="flex items-center gap-2 p-1.5 pr-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-200 dark:border-white/10"
@@ -313,11 +313,7 @@
 							</svg>
 						</button>
 
-						<div
-							v-if="isUserMenuOpen"
-							@click.stop="isUserMenuOpen = false"
-							class="fixed inset-0 z-40"
-						></div>
+
 
 						<Transition
 							enter-active-class="transition duration-200 ease-out"
@@ -329,7 +325,7 @@
 						>
 							<div
 								v-if="isUserMenuOpen"
-								class="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1a1c23] rounded-xl shadow-xl border border-gray-100 dark:border-gray-800 py-2 z-50 origin-top-right overflow-hidden"
+								class="absolute right-0 mt-2 w-56 bg-white/80 dark:bg-[#1a1c23]/80 backdrop-blur-xl rounded-xl shadow-xl border border-gray-100 dark:border-gray-800 py-2 z-50 origin-top-right overflow-hidden"
 							>
 								<div
 									class="px-4 py-3 border-b border-gray-100 dark:border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]"
@@ -523,7 +519,7 @@
 
 				<!-- Persistent Selection Tray (Right Sidebar) -->
 				<div
-					class="hidden lg:flex flex-col flex-shrink-0 h-full w-[380px] bg-white dark:bg-[#1a1c23] border-l border-gray-200 dark:border-white/5 overflow-hidden"
+					class="hidden lg:flex flex-col flex-shrink-0 h-full w-[380px] bg-white/40 dark:bg-black/40 backdrop-blur-xl border-l border-gray-200 dark:border-white/5 overflow-hidden"
 				>
 					<CartSidebar :isOpen="true" :persistent="true" />
 				</div>
@@ -534,7 +530,7 @@
 
 		<!-- Mobile/Tablet Live Rates Bar - Fixed overlay, Hidden on XL+ -->
 		<div
-			class="xl:hidden fixed bottom-0 left-0 right-0 z-20 bg-white/95 dark:bg-[#15161a]/95 backdrop-blur-sm border-t border-gray-200 dark:border-white/5 py-2 px-3 flex items-center justify-between flex-shrink-0"
+			class="xl:hidden fixed bottom-0 left-0 right-0 z-20 bg-white/60 dark:bg-[#15161a]/60 backdrop-blur-md border-t border-gray-200 dark:border-white/5 py-2 px-3 flex items-center justify-between flex-shrink-0"
 		>
 			<div
 				class="flex items-center gap-1.5 pr-2 border-r border-gray-200 dark:border-white/10 flex-shrink-0"
@@ -572,7 +568,7 @@
 
 		<!-- MOBILE/TABLET DRAWER -->
 		<aside
-			class="fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[320px] bg-white dark:bg-[#15161a] shadow-2xl transform transition-transform duration-300 lg:hidden flex flex-col"
+			class="fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[320px] bg-white/80 dark:bg-[#15161a]/80 backdrop-blur-xl shadow-2xl transform transition-transform duration-300 lg:hidden flex flex-col"
 			:class="isMobileDrawerOpen ? 'translate-x-0' : '-translate-x-full'"
 		>
 			<!-- Drawer Header -->
@@ -621,14 +617,14 @@
 						type="text"
 						v-model="ui.searchQuery"
 						placeholder="Search collection..."
-						class="h-11 w-full bg-gray-800 border border-gray-700 text-gray-200 rounded-lg pl-10 pr-4 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent text-sm"
+						class="h-11 w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700 text-gray-200 rounded-lg pl-10 pr-4 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent text-sm"
 					/>
 				</div>
 				<div class="relative">
 					<select
 						v-model="session.currentWarehouse"
 						@change="session.setWarehouse($event.target.value)"
-						class="h-11 w-full bg-gray-800 border border-gray-700 text-gray-200 rounded-lg px-3 pr-8 focus:ring-2 focus:ring-[#D4AF37] text-sm appearance-none"
+						class="h-11 w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700 text-gray-200 rounded-lg px-3 pr-8 focus:ring-2 focus:ring-[#D4AF37] text-sm appearance-none"
 					>
 						<option :value="null" disabled>Select Store Location</option>
 						<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
@@ -819,7 +815,13 @@ const isUserMenuOpen = ref(false)
 const isMobileDrawerOpen = ref(false)
 const isSidebarCollapsed = ref(false)
 const sidebarRef = ref(null)
-const sidebarWidth = ref(288)
+const savedSidebarWidth = localStorage.getItem('zevar_sidebar_width')
+const sidebarWidth = ref(savedSidebarWidth ? parseInt(savedSidebarWidth) : 288)
+const userMenuRef = ref(null)
+
+watch(sidebarWidth, (newWidth) => {
+	localStorage.setItem('zevar_sidebar_width', newWidth.toString())
+})
 
 // Navigation data
 const navOperations = [
@@ -984,6 +986,7 @@ function stopResize() {
 onUnmounted(() => {
 	document.removeEventListener('mousemove', handleResize)
 	document.removeEventListener('mouseup', stopResize)
+	document.removeEventListener('click', handleDocumentClick)
 })
 
 onMounted(() => {
@@ -991,7 +994,14 @@ onMounted(() => {
 	if (session.currentWarehouse) {
 		cartStore.loadTaxForWarehouse(session.currentWarehouse)
 	}
+	document.addEventListener('click', handleDocumentClick)
 })
+
+function handleDocumentClick(e) {
+	if (isUserMenuOpen.value && userMenuRef.value && !userMenuRef.value.contains(e.target)) {
+		isUserMenuOpen.value = false
+	}
+}
 
 watch(
 	() => session.currentWarehouse,

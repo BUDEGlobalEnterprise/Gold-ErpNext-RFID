@@ -527,6 +527,7 @@
 			<!-- Payment Modal -->
 			<LayawayPaymentModal
 				v-if="showPaymentModal"
+				:show="showPaymentModal"
 				:layawayId="layawayId"
 				:balanceAmount="layaway?.balance_amount || 0"
 				@close="showPaymentModal = false"

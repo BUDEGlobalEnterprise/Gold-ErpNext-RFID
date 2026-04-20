@@ -530,6 +530,9 @@ def create_layaway(
 			"layaway_id": doc.name,
 			"message": "Layaway created successfully",
 		}
+	except frappe.ValidationError:
+		frappe.db.rollback()
+		raise
 	except Exception as e:
 		frappe.db.rollback()
 		frappe.log_error("Layaway Creation Failed", frappe.get_traceback())
