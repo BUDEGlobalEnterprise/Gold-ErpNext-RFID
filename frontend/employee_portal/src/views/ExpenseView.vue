@@ -14,7 +14,7 @@
 				<div class="flex items-center gap-4">
 					<button
 						@click="showClaimModal = true"
-						class="px-8 py-3 bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-glow-emerald hover:bg-black transition-all flex items-center gap-2"
+						class="px-8 py-3 bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-glow-emerald transition-all flex items-center gap-2"
 					>
 						<span class="material-symbols-outlined text-lg">add</span>
 						New Claim
@@ -116,11 +116,11 @@
 				<div
 					v-for="claim in filteredClaims"
 					:key="claim.name"
-					class="premium-card !p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 border-gray-100 group hover:border-primary transition-all shadow-sm"
+					class="premium-card !p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 border-gray-100 group transition-all shadow-sm"
 				>
 					<div class="flex items-center gap-6 flex-1">
 						<div
-							class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-emerald-50 group-hover:text-primary transition-colors shrink-0"
+							class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 transition-colors shrink-0"
 						>
 							<span class="material-symbols-outlined text-xl">{{
 								getTypeIcon(claim.expense_type)
@@ -155,7 +155,7 @@
 								{{ claim.status }}
 							</p>
 						</div>
-						<button class="text-gray-300 hover:text-primary transition-colors">
+						<button class="text-gray-300 transition-colors">
 							<span class="material-symbols-outlined">chevron_right</span>
 						</button>
 					</div>
@@ -241,7 +241,7 @@
 							</div>
 							<button
 								@click="showClaimModal = false"
-								class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-all"
+								class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 transition-all"
 							>
 								<span class="material-symbols-outlined">close</span>
 							</button>
@@ -289,17 +289,17 @@
 							<div class="col-span-2">
 								<label class="status-label">Verification Receipt</label>
 								<div
-									class="border-4 border-dashed border-gray-100 rounded-3xl p-10 flex flex-col items-center justify-center hover:bg-emerald-50 hover:border-emerald-100 group transition-all cursor-pointer"
+									class="border-4 border-dashed border-gray-100 rounded-3xl p-10 flex flex-col items-center justify-center group transition-all cursor-pointer"
 								>
 									<div
-										class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-gray-300 group-hover:text-emerald-500 shadow-sm mb-4 transition-all"
+										class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-gray-300 shadow-sm mb-4 transition-all"
 									>
 										<span class="material-symbols-outlined text-3xl"
 											>upload_file</span
 										>
 									</div>
 									<p
-										class="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover:text-emerald-600 transition-all"
+										class="text-[10px] font-black text-gray-400 uppercase tracking-widest transition-all"
 									>
 										Drag and Drop or
 										<span class="text-primary underline">Choose File</span>
@@ -311,7 +311,7 @@
 						<div class="flex gap-4 mt-12">
 							<button
 								@click="showClaimModal = false"
-								class="flex-1 py-4 text-gray-400 font-black text-xs uppercase tracking-widest hover:text-gray-900 transition-all"
+								class="flex-1 py-4 text-gray-400 font-black text-xs uppercase tracking-widest transition-all"
 							>
 								Dismiss
 							</button>

@@ -7,6 +7,9 @@ app_license = "mit"
 app_logo_url = "/assets/zevar_core/images/pos_logo.svg"
 splash_image = "/assets/zevar_core/images/pos_logo.svg"
 
+# Default homepage — redirect all logged-in users to POS dashboard
+home_page = "pos"
+
 # NOTE: add_to_apps_screen only supports ONE entry per app.
 # Multiple entries for the same app are ignored (only first is used).
 # For additional desk shortcuts, use Desktop Icons (imported via install.py).

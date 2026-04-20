@@ -27,7 +27,7 @@
 					class="flex items-center gap-5 overflow-hidden group cursor-pointer"
 				>
 					<div
-						class="w-12 h-12 rounded-2xl bg-emerald-950 flex items-center justify-center text-white shadow-glow-emerald shrink-0 group-hover:scale-105 transition-transform duration-500"
+						class="w-12 h-12 rounded-2xl bg-emerald-950 flex items-center justify-center text-white shadow-glow-emerald shrink-0 transition-transform duration-500"
 					>
 						<span class="material-symbols-outlined text-2xl">diamond</span>
 					</div>
@@ -44,7 +44,7 @@
 				</div>
 				<div
 					v-else
-					class="w-12 h-12 rounded-2xl bg-emerald-950 flex items-center justify-center text-white shadow-glow-emerald shrink-0 hover:scale-105 transition-transform duration-500 cursor-pointer"
+					class="w-12 h-12 rounded-2xl bg-emerald-950 flex items-center justify-center text-white shadow-glow-emerald shrink-0 transition-transform duration-500 cursor-pointer"
 				>
 					<span class="material-symbols-outlined text-2xl">diamond</span>
 				</div>
@@ -61,7 +61,7 @@
 					:class="[
 						route.path === item.to
 							? 'bg-emerald-950 text-white shadow-glow-emerald'
-							: 'text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50/80 dark:hover:bg-white/5',
+							: 'text-gray-500 dark:text-white/70 hover:bg-gray-100/80 dark:hover:bg-white/5',
 						sidebarCollapsed
 							? 'lg:justify-center lg:px-0 lg:py-4'
 							: 'justify-between px-6 py-4',
@@ -93,9 +93,12 @@
 					class="flex items-center gap-3 bg-white dark:bg-white/5 p-3 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm"
 				>
 					<div
-						class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 font-black text-xs"
+						class="w-9 h-9 rounded-full overflow-hidden border border-gray-100 shrink-0"
 					>
-						{{ managerInitials }}
+						<img
+							src="https://i.pravatar.cc/150?u=julian"
+							class="w-full h-full object-cover"
+						/>
 					</div>
 					<div class="flex flex-col min-w-0">
 						<span
@@ -144,14 +147,14 @@
 					<!-- Notification & Settings Icons -->
 					<div class="flex items-center gap-3 text-gray-400">
 						<button
-							class="w-10 h-10 rounded-full hover:bg-gray-100 hover:text-gray-900 flex items-center justify-center transition-all"
+							class="w-10 h-10 rounded-full flex items-center justify-center transition-all"
 						>
 							<span class="material-symbols-outlined text-[22px]"
 								>notifications</span
 							>
 						</button>
 						<button
-							class="w-10 h-10 rounded-full hover:bg-gray-100 hover:text-gray-900 flex items-center justify-center transition-all"
+							class="w-10 h-10 rounded-full flex items-center justify-center transition-all"
 						>
 							<span class="material-symbols-outlined text-[22px]">settings</span>
 						</button>
@@ -207,7 +210,7 @@
 
 						<button
 							@click="toggleDarkMode"
-							class="w-full text-left px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-white hover:bg-emerald-50 dark:hover:bg-white/5 transition-colors flex items-center justify-between group"
+							class="w-full text-left px-6 py-3 text-gray-600 dark:text-gray-400 transition-colors flex items-center justify-between group"
 						>
 							<div class="flex items-center gap-4">
 								<span class="material-symbols-outlined text-[20px]">{{
@@ -221,7 +224,7 @@
 
 						<button
 							@click="auth.logout()"
-							class="w-full text-left px-6 py-3 text-red-500 hover:bg-red-50 transition-colors flex items-center gap-4 group"
+							class="w-full text-left px-6 py-3 text-red-500 transition-colors flex items-center gap-4 group"
 						>
 							<span class="material-symbols-outlined text-[20px]">logout</span>
 							<span class="text-xs font-bold uppercase tracking-widest text-red-500"
@@ -275,6 +278,7 @@ const navItems = [
 	{ to: "/payroll", icon: "account_balance_wallet", label: "Payroll" },
 	{ to: "/team", icon: "groups", label: "Team" },
 	{ to: "/issues", icon: "support_agent", label: "Issues" },
+	{ to: "/open-desk", icon: "terminal", label: "Open Desk" },
 ];
 
 const userInitials = computed(() => {

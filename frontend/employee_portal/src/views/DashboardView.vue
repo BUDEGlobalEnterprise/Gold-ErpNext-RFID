@@ -20,16 +20,16 @@
 								cy="100"
 								r="86"
 								stroke="currentColor"
-								stroke-width="7"
+								stroke-width="5"
 								fill="transparent"
-								class="text-gray-300"
+								class="text-gray-200"
 							/>
 							<circle
 								cx="100"
 								cy="100"
 								r="86"
 								stroke="currentColor"
-								stroke-width="7"
+								stroke-width="5"
 								fill="transparent"
 								:stroke-dasharray="circleCircumference"
 								:stroke-dashoffset="circleOffset"
@@ -50,13 +50,13 @@
 					<button
 						@click="handleClockOut()"
 						:disabled="attendance.loading"
-						class="w-full py-3 bg-[#064e3b] text-white font-medium rounded-lg text-sm hover:bg-[#043d2e] transition-all disabled:opacity-50"
+						class="w-full py-3 bg-[#064e3b] text-white font-medium rounded-lg text-sm transition-all disabled:opacity-50"
 					>
 						CLOCK OUT
 					</button>
 					<button
 						@click="handleBreak"
-						class="text-sm text-gray-500 mt-3 hover:text-[#064e3b] transition-colors"
+						class="text-sm text-gray-500 mt-3 transition-colors"
 					>
 						{{ attendance.isOnBreak ? "End Break" : "Request Break Extension" }}
 					</button>
@@ -70,7 +70,7 @@
 						>
 							My Profile
 						</p>
-						<button class="text-gray-400 hover:text-[#064e3b]">
+						<button class="text-gray-400 ">
 							<span class="material-symbols-outlined text-base">edit</span>
 						</button>
 					</div>
@@ -138,7 +138,7 @@
 						>
 							<button
 								@click="toggleTodo(todo.id, todo.status)"
-								class="w-5 h-5 rounded border-2 border-gray-300 flex items-center justify-center shrink-0 mt-0.5 transition-all group-hover:border-[#064e3b]"
+								class="w-5 h-5 rounded border-2 border-gray-300 flex items-center justify-center shrink-0 mt-0.5 transition-all group-"
 								:class="
 									todo.status === 'Closed' ? 'bg-[#064e3b] border-[#064e3b]' : ''
 								"
@@ -262,7 +262,7 @@
 						</div>
 					</div>
 					<button
-						class="w-full mt-4 py-2 border border-[#064e3b] text-[#064e3b] text-sm font-medium rounded-lg hover:bg-[#064e3b] hover:text-white transition-all"
+						class="w-full mt-4 py-2 border border-[#064e3b] text-[#064e3b] text-sm font-medium rounded-lg transition-all"
 					>
 						View Full Calendar
 					</button>
@@ -293,7 +293,7 @@
 						</div>
 					</div>
 					<button
-						class="w-full py-3 bg-white text-[#064e3b] font-semibold rounded-lg text-sm flex items-center justify-center gap-2 hover:bg-gray-50 transition-all"
+						class="w-full py-3 bg-white text-[#064e3b] font-semibold rounded-lg text-sm flex items-center justify-center gap-2 transition-all"
 					>
 						<span class="material-symbols-outlined text-lg">download</span>
 						DOWNLOAD STATEMENT

@@ -37,9 +37,6 @@
     @apply bg-white dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-4xl p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-500 overflow-hidden relative;
   }
 
-  .premium-card:hover {
-    @apply -translate-y-1 shadow-[0_20px_40px_rgba(0,0,0,0.08)] border-gray-200 dark:border-white/10;
-  }
 
   .status-label {
     @apply text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 dark:text-white/30 mb-8 block;

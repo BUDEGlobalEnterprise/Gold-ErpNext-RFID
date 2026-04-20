@@ -2,7 +2,7 @@
 	<div class="h-full overflow-y-auto no-scrollbar pb-20">
 		<div class="max-w-7xl mx-auto space-y-10">
 			<!-- Header -->
-			<div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+			<div class="flex flex-col md:flex-row md:items-end justify-between gap-8 px-2">
 				<div>
 					<h1 class="text-4xl font-black text-gray-900 tracking-tight leading-none mb-3">
 						Attendance
@@ -19,7 +19,7 @@
 							class="px-6 py-3 rounded-lg text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2"
 							:class="
 								!isCheckedIn
-									? 'bg-emerald-950 text-white shadow-glow-emerald hover:bg-black'
+									? 'bg-emerald-950 text-white shadow-glow-emerald'
 									: 'text-gray-400 cursor-not-allowed'
 							"
 						>
@@ -29,14 +29,14 @@
 						<button
 							@click="handleBreak"
 							:disabled="!isCheckedIn"
-							class="px-5 py-3 text-gray-500 hover:text-gray-900 text-[11px] font-black uppercase tracking-[0.2em] transition-all"
+							class="px-5 py-3 text-gray-500 text-[11px] font-black uppercase tracking-[0.2em] transition-all"
 						>
 							{{ isOnBreak ? "End Break" : "Break" }}
 						</button>
 						<button
 							@click="handleClockOut"
 							:disabled="!isCheckedIn"
-							class="px-5 py-3 text-gray-500 hover:text-gray-900 text-[11px] font-black uppercase tracking-[0.2em] transition-all"
+							class="px-5 py-3 text-gray-500 text-[11px] font-black uppercase tracking-[0.2em] transition-all"
 						>
 							Clock-Out
 						</button>
@@ -118,12 +118,12 @@
 						</h3>
 						<div class="flex items-center gap-4">
 							<button
-								class="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all"
+								class="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 transition-all"
 							>
 								<span class="material-symbols-outlined text-lg">filter_list</span>
 							</button>
 							<button
-								class="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all"
+								class="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 transition-all"
 							>
 								<span class="material-symbols-outlined text-lg">download</span>
 							</button>
@@ -167,7 +167,7 @@
 								<tr
 									v-for="record in dailyRecords"
 									:key="record.date"
-									class="hover:bg-gray-50/50 transition-colors"
+									class=" transition-colors"
 								>
 									<td class="px-10 py-6">
 										<p class="text-sm font-black text-gray-900 tracking-tight">
@@ -219,7 +219,7 @@
 
 						<button
 							@click="loadMoreHistory"
-							class="w-full py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-primary hover:bg-gray-50 transition-all border-t border-gray-50"
+							class="w-full py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest transition-all border-t border-gray-50"
 						>
 							Load More Records
 						</button>
@@ -236,14 +236,14 @@
 							</h4>
 							<div class="flex gap-2">
 								<button
-									class="w-7 h-7 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all"
+									class="w-7 h-7 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 transition-all"
 								>
 									<span class="material-symbols-outlined text-xs"
 										>chevron_left</span
 									>
 								</button>
 								<button
-									class="w-7 h-7 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all"
+									class="w-7 h-7 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 transition-all"
 								>
 									<span class="material-symbols-outlined text-xs"
 										>chevron_right</span
@@ -307,7 +307,7 @@
 							<div
 								v-for="i in 4"
 								:key="i"
-								class="w-10 h-10 rounded-full border-2 border-white overflow-hidden bg-gray-100 ring-2 ring-transparent hover:ring-primary transition-all cursor-pointer"
+								class="w-10 h-10 rounded-full border-2 border-white overflow-hidden bg-gray-100 ring-2 ring-transparent transition-all cursor-pointer"
 							>
 								<img
 									:src="`https://i.pravatar.cc/100?u=${i}`"

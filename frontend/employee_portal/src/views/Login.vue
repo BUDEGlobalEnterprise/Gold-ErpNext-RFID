@@ -14,7 +14,7 @@
 			<!-- Logo Section -->
 			<div class="flex flex-col items-center text-center mb-12">
 				<div
-					class="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center text-white shadow-glow-emerald mb-6 transition-transform hover:scale-105 duration-500"
+					class="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center text-white shadow-glow-emerald mb-6 transition-transform duration-500"
 				>
 					<span class="material-symbols-outlined text-4xl">diamond</span>
 				</div>
@@ -69,7 +69,7 @@
 								>
 								<a
 									href="#"
-									class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] hover:text-primary transition-colors"
+									class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] transition-colors"
 									>Security Reset</a
 								>
 							</div>
@@ -104,7 +104,7 @@
 					<button
 						type="submit"
 						:disabled="loading"
-						class="w-full py-6 bg-emerald-950 text-white font-black rounded-2xl text-[11px] uppercase tracking-[0.3em] shadow-glow-emerald hover:bg-black hover:shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-4"
+						class="w-full py-6 bg-emerald-950 text-white font-black rounded-2xl text-[11px] uppercase tracking-[0.3em] shadow-glow-emerald active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-4"
 					>
 						<span
 							v-if="loading"

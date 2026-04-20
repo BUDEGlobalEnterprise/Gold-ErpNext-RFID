@@ -15,9 +15,12 @@ class LayawayContract(Document):
 		self._validate_amounts()
 		self._validate_deposit_minimum()
 		self._validate_duration()
+		self._calculate_cancellation_fee()
 
 	def before_insert(self):
 		self._set_default_store()
+		if not self.original_target_date and self.target_completion_date:
+			self.original_target_date = self.target_completion_date
 
 	def _set_default_store(self):
 		"""Set default store location if not specified."""
@@ -27,12 +30,13 @@ class LayawayContract(Document):
 				self.store_location = store_loc
 
 	def _set_customer_details(self):
-		"""Auto-populate customer name from customer link."""
 		if self.customer:
 			customer_doc = frappe.get_doc("Customer", self.customer)
 			self.customer_name = customer_doc.customer_name
 			if not self.customer_contact:
 				self.customer_contact = customer_doc.mobile_no or customer_doc.phone
+			if not self.customer_email:
+				self.customer_email = customer_doc.email_id or ""
 
 	def _set_target_completion_date(self):
 		"""Auto-calculate target completion from contract_date + duration."""
@@ -79,8 +83,15 @@ class LayawayContract(Document):
 			)
 
 	def _validate_duration(self):
-		if self.maximum_duration_months not in ("3", "6", "9", "12"):
-			frappe.throw(frappe._("Duration must be 3, 6, 9, or 12 months."))
+		valid = ("1", "2", "3", "6", "9", "12")
+		if self.maximum_duration_months not in valid:
+			frappe.throw(frappe._("Duration must be 1, 2, 3, 6, 9, or 12 months."))
+
+	def _calculate_cancellation_fee(self):
+		if flt(self.cancellation_fee_percent) > 0 and flt(self.total_paid) > 0:
+			self.cancellation_fee_amount = flt(self.total_paid) * (flt(self.cancellation_fee_percent) / 100)
+		else:
+			self.cancellation_fee_amount = 0
 
 	def update_overdue_status(self):
 		"""Update status to Overdue if payments are overdue."""

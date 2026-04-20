@@ -9,6 +9,12 @@ const routes = [
 	},
 	{
 		path: '/',
+		name: 'Dashboard',
+		component: () => import('./pages/Dashboard.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/terminal',
 		name: 'POS',
 		component: () => import('./pages/POS.vue'),
 		meta: { requiresAuth: true },
@@ -103,7 +109,7 @@ const routes = [
 		component: () => import('./pages/Support.vue'),
 		meta: { requiresAuth: true },
 	},
-	// Catch-all → POS
+	// Catch-all → Dashboard
 	{
 		path: '/:pathMatch(.*)*',
 		redirect: '/',

@@ -1,11 +1,15 @@
 <template>
 	<div class="h-full overflow-y-auto no-scrollbar">
 		<div class="max-w-7xl mx-auto space-y-8">
-			<!-- Header -->
-			<div>
-				<h1 class="text-[#064e3b] text-2xl font-bold">My Roster</h1>
-				<p class="text-gray-500 text-sm mt-0.5">Your weekly work schedule</p>
-			</div>
+		<!-- Header -->
+		<div class="px-2">
+			<h1 class="text-4xl font-black text-gray-900 tracking-tight leading-none mb-3">
+				My Roster
+			</h1>
+			<p class="text-gray-500 font-medium font-sans">
+				Your weekly work schedule
+			</p>
+		</div>
 
 			<!-- Stats Row -->
 			<div class="grid grid-cols-4 gap-5">
@@ -58,14 +62,14 @@
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-3">
 					<button
-						class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+						class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 "
 					>
 						Today
 					</button>
 					<div
 						class="flex items-center gap-2 bg-white border border-gray-200 rounded-lg"
 					>
-						<button class="p-1.5 hover:bg-gray-50 rounded-l-lg">
+						<button class="p-1.5 rounded-l-lg">
 							<span class="material-symbols-outlined text-gray-500 text-sm"
 								>chevron_left</span
 							>
@@ -73,7 +77,7 @@
 						<span class="text-sm font-medium text-gray-700 px-2">{{
 							weekRangeDisplay
 						}}</span>
-						<button class="p-1.5 hover:bg-gray-50 rounded-r-lg">
+						<button class="p-1.5 rounded-r-lg">
 							<span class="material-symbols-outlined text-gray-500 text-sm"
 								>chevron_right</span
 							>
@@ -82,13 +86,13 @@
 				</div>
 				<div class="flex items-center gap-3">
 					<button
-						class="flex items-center gap-1 px-3 py-2 text-gray-500 hover:text-gray-700 text-sm font-medium"
+						class="flex items-center gap-1 px-3 py-2 text-gray-500 text-sm font-medium"
 					>
 						<span class="material-symbols-outlined text-sm">filter_list</span>
 						Filter
 					</button>
 					<button
-						class="px-4 py-2 bg-[#064e3b] text-white rounded-lg text-sm font-medium hover:bg-[#043d2e] flex items-center gap-1"
+						class="px-4 py-2 bg-[#064e3b] text-white rounded-lg text-sm font-medium flex items-center gap-1"
 					>
 						<span class="material-symbols-outlined text-sm">add</span>
 						Request Change
@@ -105,7 +109,7 @@
 					:class="[
 						day.isToday
 							? 'border-[#064e3b]'
-							: 'border-transparent hover:border-gray-100',
+							: 'border-transparent',
 						day.isOff ? 'bg-gray-50' : '',
 					]"
 				>
@@ -164,7 +168,7 @@
 						<button
 							v-if="day.isToday"
 							@click="handleClockOut"
-							class="w-full py-2 bg-[#064e3b] text-white rounded-lg text-xs font-semibold hover:bg-[#043d2e] transition-all"
+							class="w-full py-2 bg-[#064e3b] text-white rounded-lg text-xs font-semibold transition-all"
 						>
 							CLOCK OUT
 						</button>

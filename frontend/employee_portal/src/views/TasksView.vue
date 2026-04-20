@@ -12,13 +12,13 @@
 			</div>
 			<div class="flex items-center gap-4">
 				<button
-					class="px-6 py-3 bg-white border border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-all flex items-center gap-2 shadow-sm hover:shadow-md"
+					class="px-6 py-3 bg-white border border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 transition-all flex items-center gap-2 shadow-sm "
 				>
 					<span class="material-symbols-outlined text-lg">filter_list</span>
 					Filters
 				</button>
 				<button
-					class="px-6 py-3 bg-white border border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-all flex items-center gap-2 shadow-sm hover:shadow-md"
+					class="px-6 py-3 bg-white border border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 transition-all flex items-center gap-2 shadow-sm "
 				>
 					<span class="material-symbols-outlined text-lg">sort</span>
 					Sort
@@ -60,7 +60,7 @@
 					<button
 						@click="addTodo"
 						:disabled="!newTodoText.trim() || tasksStore.loading"
-						class="h-full px-10 py-4 bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-glow-emerald hover:bg-black transition-all flex items-center gap-3 active:scale-[0.98] disabled:opacity-50"
+						class="h-full px-10 py-4 bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-glow-emerald transition-all flex items-center gap-3 active:scale-[0.98] disabled:opacity-50"
 					>
 						<span class="material-symbols-outlined text-lg">add</span>
 						Add Task
@@ -90,7 +90,7 @@
 							class="bg-gray-100 text-gray-500 px-2 py-0.5 rounded text-[10px] font-black"
 							>{{ assignedTasks.length }}</span
 						>
-						<button class="ml-auto text-gray-300 hover:text-gray-600">
+						<button class="ml-auto text-gray-300 ">
 							<span class="material-symbols-outlined">more_horiz</span>
 						</button>
 					</div>
@@ -102,7 +102,7 @@
 							:draggable="true"
 							@dragstart="onDragStart($event, task, 'task')"
 							@dragend="onDragEnd"
-							class="premium-card !p-8 hover:shadow-lg cursor-grab active:cursor-grabbing border-gray-100 group transition-all"
+							class="premium-card !p-8 cursor-grab active:cursor-grabbing border-gray-100 group transition-all"
 							:class="{ 'opacity-50': draggedItem?.id === task.id }"
 						>
 							<div class="flex items-start justify-between mb-4">
@@ -121,7 +121,7 @@
 								</span>
 							</div>
 							<h4
-								class="font-black text-[15px] mb-6 text-gray-900 leading-snug tracking-tight group-hover:text-primary transition-colors"
+								class="font-black text-[15px] mb-6 text-gray-900 leading-snug tracking-tight transition-colors"
 							>
 								{{ task.title }}
 							</h4>
@@ -171,7 +171,7 @@
 							class="bg-amber-100 text-amber-900 px-2 py-0.5 rounded text-[10px] font-black"
 							>{{ inProgressTasks.length }}</span
 						>
-						<button class="ml-auto text-gray-300 hover:text-gray-600">
+						<button class="ml-auto text-gray-300 ">
 							<span class="material-symbols-outlined">more_horiz</span>
 						</button>
 					</div>
@@ -183,7 +183,7 @@
 							:draggable="true"
 							@dragstart="onDragStart($event, task, 'task')"
 							@dragend="onDragEnd"
-							class="premium-card !p-0 hover:shadow-lg cursor-grab border-gray-100 group transition-all overflow-hidden"
+							class="premium-card !p-0 cursor-grab border-gray-100 group transition-all overflow-hidden"
 							:class="{ 'opacity-50': draggedItem?.id === task.id }"
 						>
 							<!-- Card Image -->
@@ -264,7 +264,7 @@
 							class="bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded text-[10px] font-black"
 							>{{ sortedOpenTodos.length }}</span
 						>
-						<button class="ml-auto text-gray-300 hover:text-gray-600">
+						<button class="ml-auto text-gray-300 ">
 							<span class="material-symbols-outlined">more_horiz</span>
 						</button>
 					</div>
@@ -276,7 +276,7 @@
 							:draggable="true"
 							@dragstart="onDragStart($event, todo, 'todo')"
 							@dragend="onDragEnd"
-							class="premium-card !p-8 hover:shadow-lg cursor-grab border-gray-100 group transition-all"
+							class="premium-card !p-8 cursor-grab border-gray-100 group transition-all"
 							:class="{ 'opacity-50': draggedItem?.id === todo.id }"
 						>
 							<div class="flex items-start justify-between mb-4">

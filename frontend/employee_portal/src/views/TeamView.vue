@@ -26,7 +26,7 @@
 						/>
 					</div>
 					<button
-						class="px-8 py-3 bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-glow-emerald hover:bg-black transition-all"
+						class="px-8 py-3 bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-glow-emerald transition-all"
 					>
 						Onboard Member
 					</button>
@@ -38,7 +38,7 @@
 			<!-- Metrics Row Redesigned -->
 			<div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
 				<div
-					class="premium-card !p-10 flex flex-col items-center justify-center group hover:bg-emerald-50/30 transition-all"
+					class="premium-card !p-10 flex flex-col items-center justify-center group transition-all"
 				>
 					<p
 						class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-4"
@@ -52,7 +52,7 @@
 					</p>
 				</div>
 				<div
-					class="premium-card !p-10 flex flex-col items-center justify-center group hover:bg-blue-50/30 transition-all"
+					class="premium-card !p-10 flex flex-col items-center justify-center group transition-all"
 				>
 					<p
 						class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-4"
@@ -66,7 +66,7 @@
 					</p>
 				</div>
 				<div
-					class="premium-card !p-10 flex flex-col items-center justify-center group hover:bg-amber-50/30 transition-all"
+					class="premium-card !p-10 flex flex-col items-center justify-center group transition-all"
 				>
 					<p
 						class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-4"
@@ -80,7 +80,7 @@
 					</p>
 				</div>
 				<div
-					class="premium-card !p-10 flex flex-col items-center justify-center group hover:bg-gray-50/30 transition-all"
+					class="premium-card !p-10 flex flex-col items-center justify-center group transition-all"
 				>
 					<p
 						class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-4"
@@ -101,7 +101,7 @@
 				<div
 					v-for="member in team"
 					:key="member.id"
-					class="premium-card !p-0 flex flex-col items-center text-center relative overflow-hidden bg-white border-gray-100 shadow-sm hover:shadow-md transition-all group cursor-default"
+					class="premium-card !p-0 flex flex-col items-center text-center relative overflow-hidden bg-white border-gray-100 shadow-sm transition-all group cursor-default"
 				>
 					<div class="absolute top-4 right-4">
 						<div
@@ -128,10 +128,10 @@
 
 					<div class="p-8 pb-6">
 						<div
-							class="w-24 h-24 rounded-3xl border-4 border-gray-50 p-1 mb-6 mx-auto relative group-hover:scale-105 transition-transform"
+							class="w-24 h-24 rounded-3xl border-4 border-gray-50 p-1 mb-6 mx-auto relative transition-transform"
 						>
 							<div
-								class="w-full h-full rounded-2xl bg-gray-50 flex items-center justify-center text-2xl font-black text-gray-300 group-hover:bg-emerald-50 group-hover:text-primary transition-colors"
+								class="w-full h-full rounded-2xl bg-gray-50 flex items-center justify-center text-2xl font-black text-gray-300 transition-colors"
 							>
 								{{ member.initials }}
 							</div>
@@ -174,12 +174,12 @@
 
 					<div class="w-full grid grid-cols-2 border-t border-gray-50">
 						<button
-							class="py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-all border-r border-gray-50"
+							class="py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 transition-all border-r border-gray-50"
 						>
 							Portfolio
 						</button>
 						<button
-							class="py-4 text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:bg-emerald-50 transition-all"
+							class="py-4 text-[10px] font-black uppercase tracking-widest text-emerald-600 transition-all"
 						>
 							Message
 						</button>
@@ -188,10 +188,10 @@
 
 				<!-- Expansion Card -->
 				<div
-					class="premium-card !p-8 bg-gray-50/50 border-2 border-dashed border-gray-100 flex flex-col items-center justify-center text-center hover:bg-emerald-50 hover:border-primary transition-all group cursor-pointer"
+					class="premium-card !p-8 bg-gray-50/50 border-2 border-dashed border-gray-100 flex flex-col items-center justify-center text-center transition-all group cursor-pointer"
 				>
 					<div
-						class="w-16 h-16 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-gray-300 font-light text-4xl mb-6 group-hover:text-primary transition-colors animate-pulse"
+						class="w-16 h-16 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-gray-300 font-light text-4xl mb-6 transition-colors animate-pulse"
 					>
 						<span class="material-symbols-outlined">add</span>
 					</div>

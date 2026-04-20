@@ -70,6 +70,12 @@ const router = createRouter({
 			component: () => import("./views/ReportsView.vue"),
 			meta: { requiresAuth: true },
 		},
+		{
+			path: "/open-desk",
+			name: "open-desk",
+			component: () => import("./views/DashboardView.vue"), // Placeholder
+			meta: { requiresAuth: true },
+		},
 		// Catch-all → dashboard
 		{
 			path: "/:pathMatch(.*)*",

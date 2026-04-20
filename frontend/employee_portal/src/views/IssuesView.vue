@@ -15,14 +15,14 @@
 				</div>
 				<div class="flex items-center gap-4">
 					<button
-						class="px-6 py-3 bg-white border border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-all flex items-center gap-3 shadow-sm hover:shadow-md"
+						class="px-6 py-3 bg-white border border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 transition-all flex items-center gap-3 shadow-sm "
 					>
 						<span class="material-symbols-outlined text-lg">contact_support</span>
 						Documentation
 					</button>
 					<button
 						@click="showIssueModal = true"
-						class="px-8 py-3 bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-glow-emerald hover:bg-black transition-all"
+						class="px-8 py-3 bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-glow-emerald transition-all"
 					>
 						Report New Issue
 					</button>
@@ -35,7 +35,7 @@
 			<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
 				<!-- Large Resolved Card -->
 				<div
-					class="md:col-span-1 premium-card !p-8 bg-emerald-950 text-white shadow-glow-emerald flex flex-col justify-between min-h-[220px] group hover:scale-[1.02] transition-transform"
+					class="md:col-span-1 premium-card !p-8 bg-emerald-950 text-white shadow-glow-emerald flex flex-col justify-between min-h-[220px] group transition-transform"
 				>
 					<div class="flex items-center gap-3">
 						<span
@@ -116,7 +116,7 @@
 				</div>
 				<div class="flex items-center gap-4">
 					<button
-						class="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all"
+						class="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 transition-all"
 					>
 						<span class="material-symbols-outlined text-lg">filter_list</span>
 					</button>
@@ -141,12 +141,12 @@
 				<div
 					v-for="ticket in filteredTickets"
 					:key="ticket.name"
-					class="premium-card !p-8 flex flex-col md:flex-row md:items-center justify-between gap-8 border-gray-100 group hover:border-primary transition-all shadow-sm cursor-pointer"
+					class="premium-card !p-8 flex flex-col md:flex-row md:items-center justify-between gap-8 border-gray-100 group transition-all shadow-sm cursor-pointer"
 					@click="viewTicket(ticket)"
 				>
 					<div class="flex items-center gap-6">
 						<div
-							class="w-14 h-14 rounded-2xl bg-gray-50 flex flex-col items-center justify-center text-gray-400 group-hover:bg-emerald-50 group-hover:text-primary transition-colors"
+							class="w-14 h-14 rounded-2xl bg-gray-50 flex flex-col items-center justify-center text-gray-400 transition-colors"
 						>
 							<span
 								class="text-[9px] font-black uppercase tracking-widest leading-none mb-1"
@@ -196,7 +196,7 @@
 							</p>
 						</div>
 						<button
-							class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-primary transition-all"
+							class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 transition-all"
 						>
 							<span class="material-symbols-outlined">chevron_right</span>
 						</button>
@@ -232,7 +232,7 @@
 							</div>
 							<button
 								@click="showIssueModal = false"
-								class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-all"
+								class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 transition-all"
 							>
 								<span class="material-symbols-outlined">close</span>
 							</button>
@@ -298,7 +298,7 @@
 						<div class="flex gap-4 mt-12">
 							<button
 								@click="showIssueModal = false"
-								class="flex-1 py-4 text-gray-400 font-black text-xs uppercase tracking-widest hover:text-gray-900 transition-all"
+								class="flex-1 py-4 text-gray-400 font-black text-xs uppercase tracking-widest transition-all"
 							>
 								Dismiss
 							</button>

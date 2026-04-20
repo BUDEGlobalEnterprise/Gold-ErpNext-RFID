@@ -50,7 +50,7 @@
 			>
 				<div class="flex justify-between items-center mb-4">
 					<h3 class="font-semibold text-gray-900 dark:text-white">Filters</h3>
-					<button @click="clearFilters" class="text-sm text-primary hover:underline">
+					<button @click="clearFilters" class="text-sm text-primary ">
 						Clear All
 					</button>
 				</div>
@@ -886,7 +886,7 @@ onMounted(() => {
 	background: white;
 }
 
-.pagination-btn:hover:not(:disabled) {
+.pagination-btn:hover {
 	background: #f9fafb;
 }
 

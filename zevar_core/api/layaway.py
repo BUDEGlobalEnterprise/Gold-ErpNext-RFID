@@ -4,7 +4,16 @@ Layaway API - Contract creation, payments, and cancellation
 
 import frappe
 from frappe import _
-from frappe.utils import add_months, flt, getdate, nowdate, today
+from frappe.utils import add_months, flt, getdate, nowdate, today, add_days
+
+from zevar_core.constants import (
+	DEFAULT_AUTO_FORFEIT_DAYS,
+	DEFAULT_CANCELLATION_FEE_PERCENT,
+	LAYAWAY_DURATION_OPTIONS,
+	LAYAWAY_DURATION_LABELS,
+	LAYAWAY_PLAN_SUGGESTIONS,
+	MAX_EXTENSIONS_ALLOWED,
+)
 
 LAYAWAY_ALLOWED_ROLES = ["Sales User", "Sales Manager", "System Manager"]
 
@@ -68,6 +77,7 @@ def _serialize_layaway_row(layaway) -> dict:
 		"customer": layaway.customer,
 		"customer_name": getattr(layaway, "customer_name", None) or layaway.customer,
 		"customer_contact": getattr(layaway, "customer_contact", None),
+		"customer_email": getattr(layaway, "customer_email", None),
 		"customer_id_number": getattr(layaway, "customer_id_number", None),
 		"status": layaway.status,
 		"contract_date": str(layaway.contract_date) if getattr(layaway, "contract_date", None) else None,
@@ -78,11 +88,24 @@ def _serialize_layaway_row(layaway) -> dict:
 		"deposit_amount": flt(layaway.deposit_amount),
 		"balance_amount": flt(layaway.balance_amount),
 		"maximum_duration_months": getattr(layaway, "maximum_duration_months", None),
+		"duration_label": LAYAWAY_DURATION_LABELS.get(
+			int(getattr(layaway, "maximum_duration_months", 0) or 0), ""
+		),
 		"cancellation_refund_type": getattr(layaway, "cancellation_refund_type", None),
+		"cancellation_fee_percent": flt(
+			getattr(layaway, "cancellation_fee_percent", DEFAULT_CANCELLATION_FEE_PERCENT)
+		),
+		"cancellation_fee_amount": flt(getattr(layaway, "cancellation_fee_amount", 0)),
 		"store_credit_reference": getattr(layaway, "store_credit_reference", None),
 		"store_location": getattr(layaway, "store_location", None),
 		"sales_person": getattr(layaway, "sales_person", None),
 		"pos_profile": getattr(layaway, "pos_profile", None),
+		"extension_count": getattr(layaway, "extension_count", 0),
+		"original_target_date": str(getattr(layaway, "original_target_date", ""))
+		if getattr(layaway, "original_target_date", None)
+		else None,
+		"auto_forfeit_days": getattr(layaway, "auto_forfeit_days", DEFAULT_AUTO_FORFEIT_DAYS),
+		"inventory_reserved": int(getattr(layaway, "inventory_reserved", 0)),
 		"creation": str(layaway.creation) if getattr(layaway, "creation", None) else None,
 		"item_count": frappe.db.count("Layaway Contract Item", filters={"parent": layaway.name}),
 		"is_overdue": _is_layaway_overdue(
@@ -290,12 +313,14 @@ def get_layaway_details(layaway_id: str) -> dict:
 		"customer": doc.customer,
 		"customer_name": doc.customer_name,
 		"customer_contact": doc.customer_contact,
+		"customer_email": getattr(doc, "customer_email", None),
 		"customer_id_number": doc.customer_id_number,
 		"status": doc.status,
 		"is_overdue": is_overdue,
 		"contract_date": str(doc.contract_date) if doc.contract_date else None,
 		"target_completion_date": str(doc.target_completion_date) if doc.target_completion_date else None,
 		"duration_months": doc.maximum_duration_months,
+		"duration_label": LAYAWAY_DURATION_LABELS.get(int(doc.maximum_duration_months or 0), ""),
 		"store_location": doc.store_location,
 		"sales_person": doc.sales_person,
 		"pos_profile": doc.pos_profile,
@@ -307,7 +332,18 @@ def get_layaway_details(layaway_id: str) -> dict:
 		"last_payment_date": str(doc.last_payment_date) if doc.last_payment_date else None,
 		"last_payment_amount": flt(doc.last_payment_amount),
 		"cancellation_refund_type": doc.cancellation_refund_type,
+		"cancellation_fee_percent": flt(
+			getattr(doc, "cancellation_fee_percent", DEFAULT_CANCELLATION_FEE_PERCENT)
+		),
+		"cancellation_fee_amount": flt(getattr(doc, "cancellation_fee_amount", 0)),
 		"store_credit_reference": doc.store_credit_reference,
+		"extension_count": getattr(doc, "extension_count", 0),
+		"original_target_date": str(getattr(doc, "original_target_date", ""))
+		if getattr(doc, "original_target_date", None)
+		else None,
+		"auto_forfeit_days": getattr(doc, "auto_forfeit_days", DEFAULT_AUTO_FORFEIT_DAYS),
+		"inventory_reserved": int(getattr(doc, "inventory_reserved", 0)),
+		"max_extensions_allowed": MAX_EXTENSIONS_ALLOWED,
 		"notes": doc.notes,
 		"terms_accepted": int(doc.terms_accepted or 0),
 		"customer_signature": doc.customer_signature,
@@ -368,8 +404,9 @@ def create_layaway(
 	terms_accepted: int | bool = 0,
 	customer_contact: str | None = None,
 	customer_email: str | None = None,
+	cancellation_fee_percent: float | None = None,
+	auto_forfeit_days: int | None = None,
 ) -> dict:
-	"""Create a new Layaway Contract with deposit and payment schedule."""
 	_enforce_layaway_access()
 
 	items_list = frappe.parse_json(items) if isinstance(items, str) else items
@@ -383,10 +420,10 @@ def create_layaway(
 	try:
 		duration = int(duration_months)
 	except (ValueError, TypeError):
-		frappe.throw(_("Duration must be a valid number (3, 6, 9, or 12 months)."))
+		frappe.throw(_("Duration must be a valid number (1, 2, 3, 6, 9, or 12 months)."))
 
-	if duration not in (3, 6, 9, 12):
-		frappe.throw(_("Duration must be 3, 6, 9, or 12 months."))
+	if duration not in LAYAWAY_DURATION_OPTIONS:
+		frappe.throw(_("Duration must be 1, 2, 3, 6, 9, or 12 months."))
 
 	if not warehouse:
 		store_loc = frappe.db.get_value("Store Location", {"is_active": 1}, "default_warehouse")
@@ -422,17 +459,23 @@ def create_layaway(
 		doc.contract_date = today()
 		doc.maximum_duration_months = str(duration)
 		doc.target_completion_date = add_months(today(), duration)
+		doc.original_target_date = add_months(today(), duration)
 		doc.cancellation_refund_type = "Store Credit Only"
+		doc.cancellation_fee_percent = (
+			flt(cancellation_fee_percent)
+			if cancellation_fee_percent is not None
+			else DEFAULT_CANCELLATION_FEE_PERCENT
+		)
+		doc.auto_forfeit_days = (
+			int(auto_forfeit_days) if auto_forfeit_days is not None else DEFAULT_AUTO_FORFEIT_DAYS
+		)
 		doc.store_location = store_location
 		doc.sales_person = sales_person
 		doc.pos_profile = pos_profile
 		doc.notes = notes
 		doc.terms_accepted = 1 if int(terms_accepted or 0) else 0
 		doc.customer_contact = customer_contact
-		# Store email in notes if provided
-		if customer_email:
-			email_note = f"\n\nCustomer Email: {customer_email}"
-			doc.notes = (doc.notes or "") + email_note
+		doc.customer_email = customer_email
 
 		for item in items_list:
 			qty = flt(item.get("qty", 1))
@@ -480,6 +523,8 @@ def create_layaway(
 		doc.insert(ignore_permissions=True)
 		doc.submit()
 
+		_reserve_inventory(doc)
+
 		return {
 			"success": True,
 			"layaway_id": doc.name,
@@ -505,8 +550,8 @@ def get_layaway_preview(
 	if not items_list:
 		frappe.throw(_("At least one item is required."))
 
-	if int(term_months) not in (3, 6, 9, 12):
-		frappe.throw(_("Duration must be 3, 6, 9, or 12 months."))
+	if int(term_months) not in LAYAWAY_DURATION_OPTIONS:
+		frappe.throw(_("Duration must be 1, 2, 3, 6, 9, or 12 months."))
 
 	total = sum(flt(item.get("qty", 1)) * flt(item.get("rate")) for item in items_list)
 	down_payment = total * (flt(down_payment_percent) / 100)
@@ -607,13 +652,15 @@ def update_layaway_contract(layaway_id: str, updates: str | dict) -> dict:
 		if fieldname in allowed_fields:
 			setattr(doc, fieldname, value)
 
-	doc.save(ignore_permissions=True)
+		doc.save(ignore_permissions=True)
 
-	return {
-		"success": True,
-		"layaway_id": doc.name,
-		"message": _("Layaway updated successfully."),
-	}
+		send_payment_confirmation(doc.name, amount, flt(doc.balance_amount))
+
+		return {
+			"success": True,
+			"layaway_id": doc.name,
+			"message": _("Layaway updated successfully."),
+		}
 
 
 @frappe.whitelist(methods=["POST"])
@@ -689,7 +736,6 @@ def process_layaway_payment(
 
 @frappe.whitelist(methods=["POST"])
 def cancel_layaway(layaway_id: str, cancellation_reason: str | None = None) -> dict:
-	"""Cancel an active layaway. Generates a Gift Card as strict Store Credit."""
 	_enforce_layaway_access()
 
 	if not layaway_id or not frappe.db.exists("Layaway Contract", layaway_id):
@@ -704,18 +750,31 @@ def cancel_layaway(layaway_id: str, cancellation_reason: str | None = None) -> d
 		frappe.throw(_("No payments to refund."))
 
 	try:
-		gc = frappe.new_doc("Gift Card")
-		gc.customer = doc.customer
-		gc.initial_value = doc.deposit_amount
-		gc.balance = doc.deposit_amount
-		gc.source = "Layaway Cancellation"
-		gc.issue_date = today()
-		gc.status = "Active"
-		gc.insert(ignore_permissions=True)
-		gc.submit()
+		cancellation_fee = flt(getattr(doc, "cancellation_fee_amount", 0))
+		if cancellation_fee <= 0 and flt(getattr(doc, "cancellation_fee_percent", 0)) > 0:
+			cancellation_fee = flt(doc.total_paid) * (flt(doc.cancellation_fee_percent) / 100)
+
+		refund_amount = flt(doc.deposit_amount) - cancellation_fee
+		if refund_amount < 0:
+			refund_amount = 0
+
+		if refund_amount > 0:
+			gc = frappe.new_doc("Gift Card")
+			gc.customer = doc.customer
+			gc.initial_value = refund_amount
+			gc.balance = refund_amount
+			gc.source = "Layaway Cancellation"
+			gc.issue_date = today()
+			gc.status = "Active"
+			gc.insert(ignore_permissions=True)
+			gc.submit()
+			gc_name = gc.name
+		else:
+			gc_name = None
 
 		doc.status = "Cancelled"
-		doc.store_credit_reference = gc.name
+		doc.store_credit_reference = gc_name
+		doc.cancellation_fee_amount = cancellation_fee
 		if cancellation_reason:
 			doc.notes = "\n\n".join(
 				part
@@ -727,13 +786,486 @@ def cancel_layaway(layaway_id: str, cancellation_reason: str | None = None) -> d
 			)
 		doc.save(ignore_permissions=True)
 
-		return {
+		_release_inventory(doc)
+
+		result = {
 			"success": True,
-			"store_credit_id": gc.name,
-			"amount_refunded": flt(doc.deposit_amount),
-			"message": f"Layaway cancelled. Store Credit {gc.name} generated.",
+			"amount_refunded": refund_amount,
+			"cancellation_fee": cancellation_fee,
+			"message": f"Layaway cancelled.",
 		}
+		if gc_name:
+			result["store_credit_id"] = gc_name
+			result["message"] = (
+				f"Store Credit {gc_name} generated for ${refund_amount:.2f}. Cancellation fee: ${cancellation_fee:.2f}."
+			)
+		else:
+			result["message"] = (
+				f"Layaway cancelled. Full cancellation fee of ${cancellation_fee:.2f} applied. No store credit issued."
+			)
+
+		return result
 	except Exception as e:
 		frappe.db.rollback()
 		frappe.log_error("Layaway Cancellation Failed", frappe.get_traceback())
 		frappe.throw(_("Failed to cancel layaway: {0}").format(str(e)))
+
+
+def _reserve_inventory(doc) -> None:
+	for item in doc.items:
+		if item.warehouse and item.item_code:
+			try:
+				reservation_note = f"Layaway {doc.name}"
+				existing = frappe.db.get_value(
+					"Stock Reservation Entry",
+					{"item_code": item.item_code, "warehouse": item.warehouse, "docstatus": 1},
+					"name",
+				)
+				if not existing:
+					from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+						create_stock_reservation_entry,
+					)
+
+					create_stock_reservation_entry(
+						item_code=item.item_code,
+						warehouse=item.warehouse,
+						qty=item.qty,
+						reservation_note=reservation_note,
+					)
+			except Exception:
+				frappe.log_error(f"Inventory Reservation Failed for {doc.name}", frappe.get_traceback())
+
+		frappe.db.set_value("Layaway Contract", doc.name, "inventory_reserved", 1)
+
+
+def _release_inventory(doc) -> None:
+	if not getattr(doc, "inventory_reserved", 0):
+		return
+	try:
+		reservations = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"reservation_note": f"Layaway {doc.name}", "docstatus": 1},
+			pluck="name",
+		)
+		for res_name in reservations:
+			res_doc = frappe.get_doc("Stock Reservation Entry", res_name)
+			res_doc.cancel()
+	except Exception:
+		frappe.log_error(f"Inventory Release Failed for {doc.name}", frappe.get_traceback())
+
+	frappe.db.set_value("Layaway Contract", doc.name, "inventory_reserved", 0)
+
+
+@frappe.whitelist(methods=["GET"])
+def suggest_layaway_plan(total_amount: float) -> dict:
+	_enforce_layaway_access()
+
+	amount = flt(total_amount)
+	if amount <= 0:
+		frappe.throw(_("Total amount must be greater than zero."))
+
+	suggestion = None
+	for plan in LAYAWAY_PLAN_SUGGESTIONS:
+		if amount <= plan["max_price"]:
+			suggestion = plan
+			break
+
+	if not suggestion:
+		suggestion = LAYAWAY_PLAN_SUGGESTIONS[-1]
+
+	duration = suggestion["suggested_duration"]
+	down_percent = suggestion["suggested_down_percent"]
+	down_payment = amount * (down_percent / 100)
+	balance = amount - down_payment
+	installment = balance / duration if duration > 0 else 0
+
+	warnings = []
+	if duration >= 9:
+		warnings.append("Longer plans carry higher forfeiture risk.")
+	if amount > 5000:
+		warnings.append("High-value items may require manager approval for extended terms.")
+
+	return {
+		"suggested_duration": duration,
+		"suggested_duration_label": LAYAWAY_DURATION_LABELS.get(duration, f"{duration} months"),
+		"suggested_down_percent": down_percent,
+		"down_payment": flt(down_payment),
+		"balance": flt(balance),
+		"installment_amount": flt(installment),
+		"warnings": warnings,
+		"all_plans": [
+			{
+				"duration": d,
+				"label": LAYAWAY_DURATION_LABELS.get(d, f"{d} months"),
+				"down_percent": down_percent,
+				"down_payment": flt(amount * (down_percent / 100)),
+				"installment": flt((amount - amount * (down_percent / 100)) / d) if d > 0 else 0,
+			}
+			for d in LAYAWAY_DURATION_OPTIONS
+		],
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def extend_layaway(
+	layaway_id: str,
+	additional_months: int,
+	reason: str | None = None,
+	approver: str | None = None,
+) -> dict:
+	_enforce_layaway_access()
+	frappe.only_for("Sales Manager", "System Manager")
+
+	if not layaway_id or not frappe.db.exists("Layaway Contract", layaway_id):
+		frappe.throw(_("Layaway Contract '{0}' not found.").format(layaway_id))
+
+	try:
+		additional = int(additional_months)
+	except (ValueError, TypeError):
+		frappe.throw(_("Additional months must be a valid number."))
+
+	if additional not in (1, 2, 3):
+		frappe.throw(_("Can extend by 1, 2, or 3 months at a time."))
+
+	doc = frappe.get_doc("Layaway Contract", layaway_id)
+
+	if doc.status not in ("Active", "Overdue"):
+		frappe.throw(_("Layaway is {0}, cannot extend.").format(doc.status))
+
+	current_extensions = int(getattr(doc, "extension_count", 0) or 0)
+	if current_extensions >= MAX_EXTENSIONS_ALLOWED:
+		frappe.throw(_("Maximum {0} extensions already used.").format(MAX_EXTENSIONS_ALLOWED))
+
+	try:
+		old_target = doc.target_completion_date
+		new_target = add_months(getdate(doc.target_completion_date), additional)
+
+		balance = flt(doc.balance_amount)
+		if balance > 0:
+			remaining_schedule = [s for s in doc.payment_schedule if s.status == "Pending"]
+			for row in remaining_schedule:
+				new_date = add_months(getdate(row.payment_date), additional)
+				row.payment_date = new_date
+
+			if len(remaining_schedule) == 0 and balance > 0:
+				installment = balance / additional
+				for m in range(1, additional + 1):
+					doc.append(
+						"payment_schedule",
+						{
+							"payment_date": add_months(old_target, m),
+							"expected_amount": installment,
+							"paid_amount": 0,
+							"status": "Pending",
+						},
+					)
+
+		doc.target_completion_date = new_target
+		doc.maximum_duration_months = str(int(doc.maximum_duration_months) + additional)
+		doc.extension_count = current_extensions + 1
+		if reason:
+			doc.notes = "\n\n".join(
+				part
+				for part in [
+					(doc.notes or "").strip(),
+					_("Extension ({0}): +{1} months. Reason: {2}").format(
+						nowdate(), additional, reason.strip()
+					),
+				]
+				if part
+			)
+		if doc.status == "Overdue":
+			doc.status = "Active"
+
+		doc.save(ignore_permissions=True)
+
+		return {
+			"success": True,
+			"layaway_id": doc.name,
+			"new_target_date": str(new_target),
+			"new_duration_months": doc.maximum_duration_months,
+			"extensions_used": doc.extension_count,
+			"extensions_remaining": MAX_EXTENSIONS_ALLOWED - doc.extension_count,
+			"message": _("Layaway extended by {0} months.").format(additional),
+		}
+	except Exception as e:
+		frappe.db.rollback()
+		frappe.log_error("Layaway Extension Failed", frappe.get_traceback())
+		frappe.throw(_("Failed to extend layaway: {0}").format(str(e)))
+
+
+@frappe.whitelist(methods=["POST"])
+def process_split_layaway_payment(
+	layaway_id: str,
+	payments: str,
+) -> dict:
+	_enforce_layaway_access()
+
+	if not layaway_id or not frappe.db.exists("Layaway Contract", layaway_id):
+		frappe.throw(_("Layaway Contract '{0}' not found.").format(layaway_id))
+
+	doc = frappe.get_doc("Layaway Contract", layaway_id)
+
+	if doc.status not in ("Active", "Overdue"):
+		frappe.throw(_("Layaway is {0}, cannot process payment.").format(doc.status))
+
+	payments_list = frappe.parse_json(payments) if isinstance(payments, str) else payments
+	if not payments_list:
+		frappe.throw(_("At least one payment entry is required."))
+
+	total_payment = sum(flt(p.get("amount", 0)) for p in payments_list)
+	if total_payment <= 0:
+		frappe.throw(_("Total payment amount must be greater than zero."))
+
+	if total_payment > flt(doc.balance_amount):
+		frappe.throw(_("Total payment cannot exceed balance amount."))
+
+	try:
+		remaining = total_payment
+		for row in doc.payment_schedule:
+			if row.status == "Pending" and remaining > 0:
+				needed = flt(row.expected_amount) - flt(row.paid_amount)
+				applied = min(remaining, needed)
+				row.paid_amount += applied
+				primary_payment = payments_list[0] if payments_list else {}
+				row.mode_of_payment = primary_payment.get("mode_of_payment", "Cash")
+				row.reference_number = primary_payment.get("reference_number", "")
+				remaining -= applied
+
+				if row.paid_amount >= row.expected_amount:
+					row.status = "Paid"
+
+		doc.balance_amount = flt(doc.balance_amount) - total_payment
+		doc.deposit_amount = flt(doc.deposit_amount) + total_payment
+		doc.total_paid = flt(doc.total_paid) + total_payment
+		doc.last_payment_date = nowdate()
+		doc.last_payment_amount = total_payment
+
+		if doc.balance_amount <= 0:
+			doc.status = "Completed"
+			doc.balance_amount = 0
+			_release_inventory(doc)
+		elif _is_layaway_overdue(doc.name, doc.status, doc.target_completion_date):
+			doc.status = "Overdue"
+		else:
+			doc.status = "Active"
+
+		doc.save(ignore_permissions=True)
+
+		return {
+			"success": True,
+			"layaway_id": doc.name,
+			"new_balance": flt(doc.balance_amount),
+			"status": doc.status,
+			"payment_breakdown": [
+				{
+					"mode": p.get("mode_of_payment", "Cash"),
+					"amount": flt(p.get("amount", 0)),
+				}
+				for p in payments_list
+			],
+			"message": "Split payment processed successfully",
+		}
+	except Exception as e:
+		frappe.db.rollback()
+		frappe.log_error("Split Layaway Payment Failed", frappe.get_traceback())
+		frappe.throw(_("Failed to process payment: {0}").format(str(e)))
+
+
+def check_overdue_and_forfeit():
+	overdue_contracts = frappe.get_all(
+		"Layaway Contract",
+		filters={"status": ["in", ["Active", "Overdue"]], "docstatus": ["!=", 2]},
+		fields=["name", "status", "target_completion_date", "auto_forfeit_days"],
+	)
+
+	today_date = getdate()
+
+	for contract in overdue_contracts:
+		doc = frappe.get_doc("Layaway Contract", contract.name)
+
+		has_overdue_payments = False
+		days_overdue = 0
+
+		for payment in doc.payment_schedule:
+			if payment.status == "Pending" and getdate(payment.payment_date) < today_date:
+				has_overdue_payments = True
+				days_late = (today_date - getdate(payment.payment_date)).days
+				days_overdue = max(days_overdue, days_late)
+				payment.status = "Overdue"
+
+		if has_overdue_payments:
+			forfeit_days = int(getattr(doc, "auto_forfeit_days", DEFAULT_AUTO_FORFEIT_DAYS))
+			if days_overdue >= forfeit_days:
+				_auto_forfeit_layaway(doc)
+			else:
+				if doc.status != "Overdue":
+					doc.status = "Overdue"
+				doc.save(ignore_permissions=True)
+				_send_overdue_reminder(doc, days_overdue)
+
+
+def _auto_forfeit_layaway(doc):
+	cancellation_fee = flt(doc.total_paid)
+	refund_amount = flt(doc.deposit_amount) - cancellation_fee
+
+	if refund_amount > 0:
+		gc = frappe.new_doc("Gift Card")
+		gc.customer = doc.customer
+		gc.initial_value = refund_amount
+		gc.balance = refund_amount
+		gc.source = "Layaway Cancellation"
+		gc.issue_date = today()
+		gc.status = "Active"
+		gc.insert(ignore_permissions=True)
+		gc.submit()
+		doc.store_credit_reference = gc.name
+
+	doc.status = "Forfeited"
+	doc.cancellation_fee_amount = cancellation_fee
+	doc.notes = "\n\n".join(
+		part
+		for part in [
+			(doc.notes or "").strip(),
+			_("Auto-forfeited on {0} due to {1} days overdue.").format(
+				nowdate(), getattr(doc, "auto_forfeit_days", DEFAULT_AUTO_FORFEIT_DAYS)
+			),
+		]
+		if part
+	)
+	doc.save(ignore_permissions=True)
+	_release_inventory(doc)
+
+
+def _send_overdue_reminder(doc, days_overdue):
+	customer_contact = getattr(doc, "customer_contact", None)
+	customer_email = getattr(doc, "customer_email", None)
+
+	if customer_contact:
+		try:
+			next_payment = _get_next_pending_payment(doc.name)
+			amount_str = f"${flt(next_payment['expected_amount']):.2f}" if next_payment else "N/A"
+			message = f"Your Zevar layaway payment of {amount_str} is {days_overdue} day(s) overdue. Please visit the store to make a payment. Contract: {doc.name}"
+
+			frappe.get_doc(
+				{
+					"doctype": "SMS Log",
+					"sender_name": "Zevar POS",
+					"receiver_number": customer_contact,
+					"message": message,
+				}
+			).insert(ignore_permissions=True)
+		except Exception:
+			frappe.log_error(f"Overdue SMS Failed for {doc.name}", frappe.get_traceback())
+
+	if customer_email:
+		try:
+			next_payment = _get_next_pending_payment(doc.name)
+			amount_str = f"${flt(next_payment['expected_amount']):.2f}" if next_payment else "N/A"
+			frappe.sendmail(
+				recipients=[customer_email],
+				subject=f"Layaway Payment Reminder - {doc.name}",
+				message=f"""
+				<p>Dear {doc.customer_name},</p>
+				<p>Your layaway payment of <strong>{amount_str}</strong> is <strong>{days_overdue} day(s) overdue</strong>.</p>
+				<p>Contract: {doc.name}</p>
+				<p>Please visit our store to make a payment at your earliest convenience.</p>
+				<p>Thank you,<br>Zevar Jewelry</p>
+				""",
+				reference_doctype="Layaway Contract",
+				reference_name=doc.name,
+			)
+		except Exception:
+			frappe.log_error(f"Overdue Email Failed for {doc.name}", frappe.get_traceback())
+
+
+def send_payment_reminders():
+	upcoming = frappe.get_all(
+		"Layaway Payment Schedule",
+		filters={
+			"status": "Pending",
+			"payment_date": ["between", [today(), add_days(today(), 3)]],
+		},
+		fields=["parent", "payment_date", "expected_amount"],
+	)
+
+	reminded = set()
+	for entry in upcoming:
+		if entry.parent in reminded:
+			continue
+		reminded.add(entry.parent)
+
+		try:
+			doc = frappe.get_doc("Layaway Contract", entry.parent)
+			if doc.status not in ("Active", "Overdue"):
+				continue
+
+			customer_contact = getattr(doc, "customer_contact", None)
+			customer_email = getattr(doc, "customer_email", None)
+			amount_str = f"${flt(entry.expected_amount):.2f}"
+			date_str = getdate(entry.payment_date).strftime("%b %d, %Y")
+
+			if customer_contact:
+				message = f"Reminder: Your Zevar layaway payment of {amount_str} is due on {date_str}. Contract: {doc.name}"
+				frappe.get_doc(
+					{
+						"doctype": "SMS Log",
+						"sender_name": "Zevar POS",
+						"receiver_number": customer_contact,
+						"message": message,
+					}
+				).insert(ignore_permissions=True)
+
+			if customer_email:
+				frappe.sendmail(
+					recipients=[customer_email],
+					subject=f"Layaway Payment Due Soon - {doc.name}",
+					message=f"""
+					<p>Dear {doc.customer_name},</p>
+					<p>This is a friendly reminder that your layaway payment of <strong>{amount_str}</strong> is due on <strong>{date_str}</strong>.</p>
+					<p>Contract: {doc.name}</p>
+					<p>Please visit our store to make a payment.</p>
+					<p>Thank you,<br>Zevar Jewelry</p>
+					""",
+					reference_doctype="Layaway Contract",
+					reference_name=doc.name,
+				)
+		except Exception:
+			frappe.log_error(f"Payment Reminder Failed for {entry.parent}", frappe.get_traceback())
+
+
+def send_payment_confirmation(layaway_id: str, amount: float, new_balance: float):
+	try:
+		doc = frappe.get_doc("Layaway Contract", layaway_id)
+		customer_contact = getattr(doc, "customer_contact", None)
+		customer_email = getattr(doc, "customer_email", None)
+		amount_str = f"${flt(amount):.2f}"
+		balance_str = f"${flt(new_balance):.2f}"
+
+		if customer_contact:
+			message = f"Payment of {amount_str} received for layaway {doc.name}. Remaining balance: {balance_str}. Thank you!"
+			frappe.get_doc(
+				{
+					"doctype": "SMS Log",
+					"sender_name": "Zevar POS",
+					"receiver_number": customer_contact,
+					"message": message,
+				}
+			).insert(ignore_permissions=True)
+
+		if customer_email:
+			frappe.sendmail(
+				recipients=[customer_email],
+				subject=f"Payment Received - Layaway {doc.name}",
+				message=f"""
+				<p>Dear {doc.customer_name},</p>
+				<p>We received your layaway payment of <strong>{amount_str}</strong>.</p>
+				<p>Remaining balance: <strong>{balance_str}</strong></p>
+				<p>Contract: {doc.name}</p>
+				<p>Thank you for your payment!<br>Zevar Jewelry</p>
+				""",
+				reference_doctype="Layaway Contract",
+				reference_name=doc.name,
+			)
+	except Exception:
+		frappe.log_error(f"Payment Confirmation Failed for {layaway_id}", frappe.get_traceback())

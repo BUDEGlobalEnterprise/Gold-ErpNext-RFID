@@ -122,10 +122,7 @@
 								</button>
 								<button
 									type="button"
-									@click="
-										authStep = 'lookup'
-										verificationCode = ''
-									"
+									@click="returnToLookup"
 									class="w-full py-2 text-gray-500 hover:text-gray-700 text-sm"
 								>
 									Back
@@ -210,10 +207,7 @@
 							<div
 								v-for="repair in repairs"
 								:key="repair.name"
-								@click="
-									selectedRepair = repair
-									showRepairDetail = true
-								"
+								@click="openRepairDetail(repair)"
 								class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-[#D4AF37] cursor-pointer transition-colors"
 							>
 								<div class="flex items-start justify-between">
@@ -584,10 +578,7 @@
 				></textarea>
 				<div class="flex gap-2">
 					<button
-						@click="
-							rejecting = false
-							rejectReason = ''
-						"
+						@click="cancelEstimateRejection"
 						class="flex-1 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg font-medium"
 					>
 						Cancel
@@ -652,6 +643,21 @@ const tabs = computed(() => [
 ])
 
 // Methods
+function returnToLookup() {
+	authStep.value = 'lookup'
+	verificationCode.value = ''
+}
+
+function openRepairDetail(repair) {
+	selectedRepair.value = repair
+	showRepairDetail.value = true
+}
+
+function cancelEstimateRejection() {
+	rejecting.value = false
+	rejectReason.value = ''
+}
+
 async function lookupCustomer() {
 	if (!lookupIdentifier.value.trim()) return
 

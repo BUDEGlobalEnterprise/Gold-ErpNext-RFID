@@ -27,7 +27,7 @@
 							@click="searchCustomers"
 							:disabled="loading"
 						>
-							🔍
+							&#128269;
 						</button>
 					</div>
 				</div>
@@ -38,7 +38,7 @@
 					<div class="items-summary">
 						<div v-for="item in cartItems" :key="item.item_code" class="item-row">
 							<span class="item-name">{{ item.item_name || item.item_code }}</span>
-							<span class="item-qty">×{{ item.qty }}</span>
+							<span class="item-qty">&times;{{ item.qty }}</span>
 							<span class="item-price"
 								>${{ formatAmount(item.rate * item.qty) }}</span
 							>
@@ -56,15 +56,16 @@
 					<div class="terms-grid">
 						<button
 							v-for="term in validTerms"
-							:key="term"
+							:key="term.value"
 							class="term-btn"
-							:class="{ active: form.term_months === term }"
-							@click="selectTerm(term)"
+							:class="{ active: form.term_months === term.value, recommended: suggestedTerm === term.value }"
+							@click="selectTerm(term.value)"
 							:disabled="loading"
 						>
-							<span class="term-duration">{{ term }} months</span>
+							<span v-if="suggestedTerm === term.value" class="recommended-badge">Recommended</span>
+							<span class="term-duration">{{ term.label }}</span>
 							<span class="term-payment"
-								>${{ formatAmount(calculateMonthlyPayment(term)) }}/mo</span
+								>${{ formatAmount(calculateMonthlyPayment(term.value)) }}/mo</span
 							>
 						</button>
 					</div>
@@ -90,26 +91,30 @@
 					</div>
 				</div>
 
-				<!-- Payment Schedule Preview -->
-				<div class="schedule-preview" v-if="preview">
-					<h4>Payment Schedule</h4>
-					<div class="schedule-header">
-						<span>Installment</span>
-						<span>Due Date</span>
-						<span>Amount</span>
+				<!-- Payment Timeline (Visual) -->
+				<div class="timeline-preview" v-if="preview && preview.payment_schedule">
+					<h4>Payment Timeline</h4>
+					<div class="timeline-bar">
+						<div class="timeline-track">
+							<div
+								v-for="(payment, idx) in preview.payment_schedule"
+								:key="idx"
+								class="timeline-segment"
+								:style="{ width: (100 / preview.payment_schedule.length) + '%' }"
+							>
+								<div class="segment-fill"></div>
+								<div class="segment-dot"></div>
+								<span class="segment-label">${{ formatAmount(payment.amount) }}</span>
+							</div>
+						</div>
 					</div>
-					<div
-						v-for="payment in preview.payment_schedule"
-						:key="payment.installment"
-						class="schedule-row"
-					>
-						<span>#{{ payment.installment }}</span>
-						<span>{{ formatDate(payment.due_date) }}</span>
-						<span>${{ formatAmount(payment.amount) }}</span>
-					</div>
-					<div class="schedule-total">
-						<span>Total:</span>
-						<strong>${{ formatAmount(preview.preview.total) }}</strong>
+					<div class="timeline-dates">
+						<span v-if="preview.payment_schedule.length" class="timeline-start">
+							{{ formatDate(preview.payment_schedule[0].due_date) }}
+						</span>
+						<span v-if="preview.payment_schedule.length" class="timeline-end">
+							{{ formatDate(preview.payment_schedule[preview.payment_schedule.length - 1].due_date) }}
+						</span>
 					</div>
 				</div>
 
@@ -132,10 +137,7 @@
 						v-model="form.initial_payment_mode"
 						:disabled="loading || !form.initial_payment"
 					>
-						<option value="Cash">Cash</option>
-						<option value="Credit Card">Credit Card</option>
-						<option value="Debit Card">Debit Card</option>
-						<option value="Check">Check</option>
+						<option v-for="mode in paymentModeOptions" :key="mode" :value="mode">{{ mode }}</option>
 					</select>
 				</div>
 			</div>
@@ -157,7 +159,7 @@
 			<!-- Success State -->
 			<div v-if="successResult" class="success-overlay">
 				<div class="success-content">
-					<div class="success-icon">✅</div>
+					<div class="success-icon">&#9989;</div>
 					<h3>Layaway Created!</h3>
 					<p>Contract: {{ successResult.contract_name }}</p>
 					<div class="success-details">
@@ -185,7 +187,6 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { createResource } from 'frappe-ui'
 
-// Props
 const props = defineProps({
 	show: { type: Boolean, default: false },
 	cartItems: { type: Array, default: () => [] },
@@ -195,11 +196,11 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'created'])
 
-// State
 const loading = ref(false)
 const customers = ref([])
 const preview = ref(null)
 const successResult = ref(null)
+const suggestedTerm = ref(null)
 
 const form = ref({
 	customer: '',
@@ -210,10 +211,28 @@ const form = ref({
 	notes: '',
 })
 
-const validTerms = [3, 6, 9, 12]
-const downPaymentOptions = [10, 20, 30, 50]
+const validTerms = [
+	{ value: 1, label: '30 Days' },
+	{ value: 2, label: '60 Days' },
+	{ value: 3, label: '90 Days' },
+	{ value: 6, label: '6 Mo' },
+	{ value: 9, label: '9 Mo' },
+	{ value: 12, label: '12 Mo' },
+]
 
-// Resources
+const downPaymentOptions = [20, 25, 30, 50]
+
+const paymentModeOptions = [
+	'Cash',
+	'Credit Card',
+	'Debit Card',
+	'Check',
+	'Apple Pay',
+	'Google Pay',
+	'Venmo',
+	'Zelle',
+]
+
 const customersResource = createResource({
 	url: 'zevar_core.api.customer.search_customers',
 	auto: false,
@@ -229,7 +248,11 @@ const createResource2 = createResource({
 	auto: false,
 })
 
-// Computed
+const suggestResource = createResource({
+	url: 'zevar_core.api.layaway.suggest_layaway_plan',
+	auto: false,
+})
+
 const cartItemsJson = computed(() =>
 	JSON.stringify(
 		props.cartItems.map((item) => ({
@@ -240,7 +263,6 @@ const cartItemsJson = computed(() =>
 	)
 )
 
-// Methods
 function formatAmount(amount) {
 	if (!amount) return '0.00'
 	return Number(amount).toFixed(2)
@@ -261,6 +283,23 @@ function calculateMonthlyPayment(term) {
 function selectTerm(term) {
 	form.value.term_months = term
 	fetchPreview()
+}
+
+async function fetchSuggestion() {
+	if (!props.cartTotal) return
+	try {
+		const raw = await suggestResource.submit({ total_amount: props.cartTotal })
+		const result = raw?.message ?? raw
+		if (result?.suggested_duration) {
+			suggestedTerm.value = result.suggested_duration
+			form.value.term_months = result.suggested_duration
+			if (result.suggested_down_percent) {
+				form.value.down_payment_percent = result.suggested_down_percent
+			}
+		}
+	} catch (e) {
+		console.error('Failed to fetch suggestion:', e)
+	}
 }
 
 async function searchCustomers() {
@@ -302,7 +341,6 @@ async function submitLayaway() {
 			notes: form.value.notes,
 		})
 
-		// Unwrap frappe-ui response
 		const result = rawResult?.message ?? rawResult
 
 		if (result?.success || result?.layaway_id || result?.contract_name) {
@@ -311,7 +349,6 @@ async function submitLayaway() {
 		}
 	} catch (error) {
 		console.error('Failed to create layaway:', error)
-		// Extract Frappe server messages for better UX
 		let errorMsg = ''
 		if (error?._server_messages) {
 			try {
@@ -340,7 +377,6 @@ async function submitLayaway() {
 
 function close() {
 	emit('close')
-	// Reset form
 	form.value = {
 		customer: '',
 		term_months: 3,
@@ -351,14 +387,15 @@ function close() {
 	}
 	preview.value = null
 	successResult.value = null
+	suggestedTerm.value = null
 }
 
-// Watchers
 watch(
 	() => props.show,
 	(newVal) => {
 		if (newVal) {
 			searchCustomers()
+			fetchSuggestion()
 			fetchPreview()
 		}
 	}
@@ -374,6 +411,7 @@ watch(
 onMounted(() => {
 	if (props.show) {
 		searchCustomers()
+		fetchSuggestion()
 		fetchPreview()
 	}
 })
@@ -503,7 +541,7 @@ onMounted(() => {
 
 .terms-grid {
 	display: grid;
-	grid-template-columns: repeat(4, 1fr);
+	grid-template-columns: repeat(3, 1fr);
 	gap: 8px;
 }
 
@@ -515,6 +553,7 @@ onMounted(() => {
 	cursor: pointer;
 	text-align: center;
 	transition: all 0.2s;
+	position: relative;
 }
 
 .term-btn:hover {
@@ -524,6 +563,31 @@ onMounted(() => {
 .term-btn.active {
 	background: rgba(59, 130, 246, 0.2);
 	border-color: #3b82f6;
+}
+
+.term-btn.recommended {
+	border-color: #D4AF37;
+	background: rgba(212, 175, 55, 0.1);
+}
+
+.term-btn.recommended.active {
+	background: rgba(212, 175, 55, 0.2);
+	border-color: #D4AF37;
+}
+
+.recommended-badge {
+	display: inline-block;
+	position: absolute;
+	top: -8px;
+	right: -4px;
+	background: #D4AF37;
+	color: #000;
+	font-size: 9px;
+	font-weight: 700;
+	padding: 1px 6px;
+	border-radius: 4px;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
 }
 
 .term-duration {
@@ -573,41 +637,67 @@ onMounted(() => {
 	font-weight: normal;
 }
 
-.schedule-preview {
+.timeline-preview {
 	background: rgba(255, 255, 255, 0.05);
 	border-radius: 8px;
 	padding: 16px;
 	margin-bottom: 24px;
 }
 
-.schedule-preview h4 {
+.timeline-preview h4 {
 	color: white;
 	margin-bottom: 12px;
 }
 
-.schedule-header {
-	display: grid;
-	grid-template-columns: 80px 1fr 100px;
-	padding: 8px;
+.timeline-bar {
+	padding: 0 8px;
+}
+
+.timeline-track {
+	display: flex;
+	gap: 4px;
+	position: relative;
+}
+
+.timeline-segment {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	position: relative;
+}
+
+.segment-fill {
+	width: 100%;
+	height: 8px;
+	background: rgba(212, 175, 55, 0.3);
+	border-radius: 4px;
+	position: relative;
+}
+
+.segment-dot {
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: #D4AF37;
+	border: 2px solid rgba(255, 255, 255, 0.3);
+	margin-top: -10px;
+	position: relative;
+	z-index: 1;
+}
+
+.segment-label {
+	font-size: 10px;
 	color: rgba(255, 255, 255, 0.6);
-	font-size: 12px;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	margin-top: 4px;
+	white-space: nowrap;
 }
 
-.schedule-row {
-	display: grid;
-	grid-template-columns: 80px 1fr 100px;
-	padding: 8px;
-	color: white;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.schedule-total {
+.timeline-dates {
 	display: flex;
 	justify-content: space-between;
-	padding-top: 12px;
-	color: white;
-	font-weight: 600;
+	margin-top: 8px;
+	font-size: 11px;
+	color: rgba(255, 255, 255, 0.5);
 }
 
 .currency-input {

@@ -711,26 +711,26 @@
 										v-model="form.paymentSchedule"
 										class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 									>
-										<option value="Weekly">Weekly</option>
-										<option value="Bi-Weekly">Bi-Weekly</option>
 										<option value="Monthly">Monthly</option>
+										<option value="Bi-Weekly">Bi-Weekly</option>
+										<option value="Weekly">Weekly</option>
 									</select>
 								</div>
 								<div>
 									<label
 										class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-										>Duration (Weeks) *</label
+										>Duration *</label
 									>
 									<select
-										v-model.number="form.durationWeeks"
+										v-model.number="form.durationMonths"
 										class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 									>
-										<option :value="2">2 weeks</option>
-										<option :value="4">4 weeks</option>
-										<option :value="6">6 weeks</option>
-										<option :value="8">8 weeks</option>
-										<option :value="10">10 weeks</option>
-										<option :value="12">12 weeks</option>
+										<option :value="1">1 Month (30 Days)</option>
+										<option :value="2">2 Months (60 Days)</option>
+										<option :value="3">3 Months (90 Days)</option>
+										<option :value="6">6 Months</option>
+										<option :value="9">9 Months</option>
+										<option :value="12">12 Months</option>
 									</select>
 								</div>
 								<div>
@@ -784,8 +784,13 @@
 								>
 									<option value="">Select Method</option>
 									<option value="Cash">Cash</option>
-									<option value="Card">Card</option>
-									<option value="Bank Transfer">Bank Transfer</option>
+									<option value="Credit Card">Credit Card</option>
+									<option value="Debit Card">Debit Card</option>
+									<option value="Check">Check</option>
+									<option value="Apple Pay">Apple Pay</option>
+									<option value="Google Pay">Google Pay</option>
+									<option value="Venmo">Venmo</option>
+									<option value="Zelle">Zelle</option>
 									<option value="Skip">Pay Later</option>
 								</select>
 							</div>
@@ -1004,15 +1009,12 @@
 								</table>
 							</div>
 
-							<!-- Quick Add Item Buttons -->
-							<div v-if="selectedItems.length > 0" class="mt-3 flex gap-2">
-								<button
-									@click="
-										itemSearch = ''
-										$refs.itemSearchInput?.focus()
-									"
-									class="px-3 py-2 text-xs font-medium text-[#D4AF37] border border-[#D4AF37]/30 rounded-lg hover:bg-[#D4AF37]/10 transition flex items-center gap-1"
-								>
+								<!-- Quick Add Item Buttons -->
+								<div v-if="selectedItems.length > 0" class="mt-3 flex gap-2">
+									<button
+										@click="clearItemSearch"
+										class="px-3 py-2 text-xs font-medium text-[#D4AF37] border border-[#D4AF37]/30 rounded-lg hover:bg-[#D4AF37]/10 transition flex items-center gap-1"
+									>
 									<svg
 										class="w-3.5 h-3.5"
 										fill="none"
@@ -1206,7 +1208,7 @@
 								<span class="font-bold">Terms Agreement:</span> I confirm the
 								customer has agreed to the layaway terms including the payment
 								schedule ({{ paymentFrequencyText }} for
-								{{ form.durationWeeks }} weeks), cancellation policy, and that all
+								{{ form.durationMonths }} month{{ form.durationMonths > 1 ? "s" : "" }}), cancellation policy, and that all
 								items will be reserved until full payment is received.
 							</span>
 						</label>
@@ -1338,8 +1340,8 @@ const form = ref({
 	email: '',
 	startDate: getTodayDate(),
 	status: 'Active',
-	paymentSchedule: 'Weekly',
-	durationWeeks: 4,
+	paymentSchedule: 'Monthly',
+	durationMonths: 3,
 	deposit: 0,
 	taxRate: 0,
 	paymentMethod: '',
@@ -1390,17 +1392,17 @@ const minDeposit = computed(() => {
 })
 
 const numberOfPayments = computed(() => {
-	const weeks = form.value.durationWeeks
+	const months = form.value.durationMonths
 	const schedule = form.value.paymentSchedule
 	switch (schedule) {
 		case 'Weekly':
-			return weeks
+			return months * 4
 		case 'Bi-Weekly':
-			return Math.ceil(weeks / 2)
+			return months * 2
 		case 'Monthly':
-			return Math.ceil(weeks / 4)
+			return months
 		default:
-			return weeks
+			return months * 4
 	}
 })
 
@@ -1449,7 +1451,7 @@ const canSubmit = computed(() => {
 		selectedItems.value.length > 0 &&
 		form.value.deposit >= minDeposit.value &&
 		form.value.deposit < totalAmount.value &&
-		form.value.durationWeeks > 0 &&
+		form.value.durationMonths > 0 &&
 		form.value.startDate &&
 		form.value.agreedToTerms
 	)
@@ -1595,6 +1597,11 @@ function focusBarcodeScanner() {
 	})
 }
 
+function clearItemSearch() {
+	itemSearch.value = ''
+	itemSearchInput.value?.focus()
+}
+
 function handleItemBarcodeScan(event) {
 	if (isScanningBarcode.value) {
 		const barcode = event.target.value
@@ -1677,8 +1684,7 @@ async function createLayaway() {
 			customerName = await createNewCustomer()
 		}
 
-		// Convert weeks to months
-		const durationMonths = Math.max(1, Math.round(form.value.durationWeeks / 4))
+					const durationMonths = form.value.durationMonths
 
 		// Prepare items
 		const items = selectedItems.value.map((item) => ({
@@ -1799,8 +1805,8 @@ function close() {
 		email: '',
 		startDate: getTodayDate(),
 		status: 'Active',
-		paymentSchedule: 'Weekly',
-		durationWeeks: 4,
+		paymentSchedule: 'Monthly',
+		durationMonths: 3,
 		deposit: 0,
 		taxRate: 0,
 		paymentMethod: '',

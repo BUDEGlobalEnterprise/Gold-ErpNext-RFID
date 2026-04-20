@@ -58,6 +58,10 @@ scheduler_events = {
 	"cron": {
 		"*/15 * * * *": ["zevar_core.tasks.fetch_live_gold_rate"],
 		"0 2 1 * *": ["zevar_core.api.finance.apply_finance_charges"],
+		"0 8 * * *": [
+			"zevar_core.api.layaway.check_overdue_and_forfeit",
+			"zevar_core.api.layaway.send_payment_reminders",
+		],
 	},
 }
 

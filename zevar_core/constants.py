@@ -45,4 +45,32 @@ PAYMENT_MODES = [
 	"Zelle",
 	"Gift Card",
 	"Trade-In",
+	"Apple Pay",
+	"Google Pay",
+	"Venmo",
+	"Cash App",
 ]
+
+LAYAWAY_DURATION_OPTIONS = [1, 2, 3, 6, 9, 12]
+
+LAYAWAY_DURATION_LABELS = {
+	1: "30 Days",
+	2: "60 Days",
+	3: "90 Days",
+	6: "6 Months",
+	9: "9 Months",
+	12: "12 Months",
+}
+
+LAYAWAY_PLAN_SUGGESTIONS = [
+	{"max_price": 500, "suggested_duration": 1, "suggested_down_percent": 30},
+	{"max_price": 1000, "suggested_duration": 2, "suggested_down_percent": 25},
+	{"max_price": 2500, "suggested_duration": 3, "suggested_down_percent": 20},
+	{"max_price": 5000, "suggested_duration": 6, "suggested_down_percent": 20},
+	{"max_price": 10000, "suggested_duration": 9, "suggested_down_percent": 20},
+	{"max_price": float("inf"), "suggested_duration": 12, "suggested_down_percent": 25},
+]
+
+DEFAULT_CANCELLATION_FEE_PERCENT = 10
+DEFAULT_AUTO_FORFEIT_DAYS = 15
+MAX_EXTENSIONS_ALLOWED = 2

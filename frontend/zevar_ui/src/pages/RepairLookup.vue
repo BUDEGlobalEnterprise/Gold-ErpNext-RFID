@@ -207,10 +207,7 @@
 					number or phone number and try again.
 				</p>
 				<button
-					@click="
-						searchQuery = ''
-						searched = false
-					"
+					@click="resetSearch"
 					class="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-medium hover:bg-gray-200"
 				>
 					Search Again
@@ -294,6 +291,11 @@ async function search() {
 	} finally {
 		searching.value = false
 	}
+}
+
+function resetSearch() {
+	searchQuery.value = ''
+	searched.value = false
 }
 
 function formatNum(n) {

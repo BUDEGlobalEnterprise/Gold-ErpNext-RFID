@@ -14,7 +14,7 @@
 				<div class="flex items-center gap-4">
 					<button
 						@click="showLeaveModal = true"
-						class="px-8 py-3 bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-glow-emerald hover:bg-black transition-all flex items-center gap-2"
+						class="px-8 py-3 bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-glow-emerald transition-all flex items-center gap-2"
 					>
 						<span class="material-symbols-outlined text-lg">add</span>
 						Request Leave
@@ -205,7 +205,7 @@
 								<tr
 									v-for="app in filteredApplications"
 									:key="app.name"
-									class="hover:bg-gray-50/50 transition-colors"
+									class=" transition-colors"
 								>
 									<td class="px-10 py-6">
 										<div class="flex items-center gap-3">
@@ -248,7 +248,7 @@
 									</td>
 									<td class="px-10 py-6 text-right">
 										<button
-											class="text-gray-400 hover:text-gray-900 transition-colors"
+											class="text-gray-400 transition-colors"
 										>
 											<span class="material-symbols-outlined text-lg"
 												>more_horiz</span
@@ -271,14 +271,14 @@
 							</h4>
 							<div class="flex gap-2">
 								<button
-									class="w-7 h-7 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all"
+									class="w-7 h-7 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 transition-all"
 								>
 									<span class="material-symbols-outlined text-xs"
 										>chevron_left</span
 									>
 								</button>
 								<button
-									class="w-7 h-7 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary transition-all"
+									class="w-7 h-7 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 transition-all"
 								>
 									<span class="material-symbols-outlined text-xs"
 										>chevron_right</span
@@ -375,7 +375,7 @@
 							</div>
 							<button
 								@click="showLeaveModal = false"
-								class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-all"
+								class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 transition-all"
 							>
 								<span class="material-symbols-outlined">close</span>
 							</button>
@@ -432,7 +432,7 @@
 						<div class="flex gap-4 mt-12">
 							<button
 								@click="showLeaveModal = false"
-								class="flex-1 py-4 text-gray-400 font-black text-xs uppercase tracking-widest hover:text-gray-900"
+								class="flex-1 py-4 text-gray-400 font-black text-xs uppercase tracking-widest "
 							>
 								Dismiss
 							</button>

@@ -34,7 +34,7 @@
 						>
 					</div>
 					<button
-						class="px-6 py-2.5 bg-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-glow-emerald hover:bg-black transition-all flex items-center gap-2"
+						class="px-6 py-2.5 bg-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-glow-emerald transition-all flex items-center gap-2"
 					>
 						<span class="material-symbols-outlined text-lg">add</span>
 						Generate Run
@@ -107,13 +107,13 @@
 				</h3>
 				<div class="flex items-center gap-6">
 					<button
-						class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-all"
+						class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 transition-all"
 					>
 						<span class="material-symbols-outlined text-lg">filter_list</span>
 						Filter
 					</button>
 					<button
-						class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-all"
+						class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 transition-all"
 					>
 						<span class="material-symbols-outlined text-lg">download</span>
 						Export All
@@ -155,7 +155,7 @@
 					<tr
 						v-for="slip in payrollStore.salarySlips"
 						:key="slip.id"
-						class="hover:bg-gray-50/50 transition-colors"
+						class=" transition-colors"
 					>
 						<td class="px-10 py-6">
 							<div class="flex items-center gap-3">
@@ -183,7 +183,7 @@
 							</span>
 						</td>
 						<td class="px-10 py-6 text-center">
-							<button class="text-gray-400 hover:text-primary transition-colors">
+							<button class="text-gray-400 transition-colors">
 								<span class="material-symbols-outlined text-lg">download</span>
 							</button>
 						</td>
@@ -196,7 +196,7 @@
 				<p class="text-[10px] font-bold text-gray-400">Showing 1 to 4 of 12 records</p>
 				<div class="flex items-center gap-2">
 					<button
-						class="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-all"
+						class="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 transition-all"
 					>
 						<span class="material-symbols-outlined text-sm">chevron_left</span>
 					</button>
@@ -206,17 +206,17 @@
 						1
 					</button>
 					<button
-						class="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-all"
+						class="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold text-gray-400 transition-all"
 					>
 						2
 					</button>
 					<button
-						class="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-all"
+						class="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold text-gray-400 transition-all"
 					>
 						3
 					</button>
 					<button
-						class="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-all"
+						class="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 transition-all"
 					>
 						<span class="material-symbols-outlined text-sm">chevron_right</span>
 					</button>
@@ -242,7 +242,7 @@
 					You can request a digital compliance signature for internal reporting below.
 				</p>
 				<button
-					class="text-[11px] font-black text-emerald-950 uppercase tracking-widest hover:text-emerald-600 transition-colors"
+					class="text-[11px] font-black text-emerald-950 uppercase tracking-widest transition-colors"
 				>
 					Download Compliance Report (PDF)
 				</button>
@@ -257,7 +257,7 @@
 					Need help with complex deductions?
 				</h4>
 				<button
-					class="w-full py-3.5 bg-white border border-gray-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-900 hover:bg-gray-50 transition-all mt-6"
+					class="w-full py-3.5 bg-white border border-gray-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-900 transition-all mt-6"
 				>
 					Connect with Payroll Expert
 				</button>

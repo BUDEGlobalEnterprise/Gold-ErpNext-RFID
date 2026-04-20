@@ -66,10 +66,7 @@
 						POS
 					</button>
 					<button
-						@click="
-							viewMode = 'catalog'
-							loadCatalog()
-						"
+						@click="showCatalogView"
 						class="px-3 py-1.5 rounded-lg text-xs font-bold border transition"
 						:class="
 							viewMode === 'catalog'
@@ -296,6 +293,11 @@ const catalogResource = createResource({
 function loadCatalog() {
 	catalogLoading.value = true
 	catalogResource.fetch()
+}
+
+function showCatalogView() {
+	viewMode.value = 'catalog'
+	loadCatalog()
 }
 
 // Actions

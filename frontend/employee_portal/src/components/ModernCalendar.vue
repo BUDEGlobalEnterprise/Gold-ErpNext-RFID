@@ -14,7 +14,7 @@
 				<!-- Previous Year -->
 				<button
 					@click="previousYear"
-					class="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 text-gray-400 dark:text-white/40 hover:text-gray-900 dark:hover:text-white transition-colors"
+					class="p-1 rounded text-gray-400 dark:text-white/40 transition-colors"
 					title="Previous Year"
 				>
 					<span class="material-symbols-outlined text-base"
@@ -24,7 +24,7 @@
 				<!-- Previous Month -->
 				<button
 					@click="previousMonth"
-					class="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 text-gray-400 dark:text-white/40 hover:text-gray-900 dark:hover:text-white transition-colors"
+					class="p-1 rounded text-gray-400 dark:text-white/40 transition-colors"
 					title="Previous Month"
 				>
 					<span class="material-symbols-outlined text-lg">chevron_left</span>
@@ -32,7 +32,7 @@
 				<!-- Today Button -->
 				<button
 					@click="goToToday"
-					class="px-2 py-0.5 text-[9px] font-bold text-primary hover:text-yellow-600 dark:hover:text-yellow-400 bg-primary/10 hover:bg-primary/20 rounded transition-colors"
+					class="px-2 py-0.5 text-[9px] font-bold text-primary bg-primary/10 rounded transition-colors"
 					title="Go to Today"
 				>
 					Today
@@ -40,7 +40,7 @@
 				<!-- Next Month -->
 				<button
 					@click="nextMonth"
-					class="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 text-gray-400 dark:text-white/40 hover:text-gray-900 dark:hover:text-white transition-colors"
+					class="p-1 rounded text-gray-400 dark:text-white/40 transition-colors"
 					title="Next Month"
 				>
 					<span class="material-symbols-outlined text-lg">chevron_right</span>
@@ -48,7 +48,7 @@
 				<!-- Next Year -->
 				<button
 					@click="nextYear"
-					class="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 text-gray-400 dark:text-white/40 hover:text-gray-900 dark:hover:text-white transition-colors"
+					class="p-1 rounded text-gray-400 dark:text-white/40 transition-colors"
 					title="Next Year"
 				>
 					<span class="material-symbols-outlined text-base"
@@ -285,7 +285,7 @@ function getDayClasses(day) {
 	} else if (day.status === "weekend" || day.isWeekend) {
 		classes.push("text-gray-300 dark:text-white/10");
 	} else {
-		classes.push("text-gray-600 dark:text-white/50 hover:bg-black/5 dark:hover:bg-white/5");
+		classes.push("text-gray-600 dark:text-white/50 hover:bg-gray-100 dark:hover:bg-white/5");
 	}
 
 	return classes;

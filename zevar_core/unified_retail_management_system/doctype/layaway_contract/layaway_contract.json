@@ -10,6 +10,7 @@
         "customer",
         "customer_name",
         "customer_contact",
+        "customer_email",
         "customer_id_number",
         "column_break_1",
         "status",
@@ -35,7 +36,15 @@
         "payment_schedule",
         "section_cancellation",
         "cancellation_refund_type",
+        "cancellation_fee_percent",
+        "cancellation_fee_amount",
         "store_credit_reference",
+        "section_extension",
+        "extended_from",
+        "extension_count",
+        "original_target_date",
+        "auto_forfeit_days",
+        "inventory_reserved",
         "section_notes",
         "notes",
         "terms_accepted",
@@ -62,6 +71,12 @@
             "fieldname": "customer_contact",
             "fieldtype": "Data",
             "label": "Contact Number"
+        },
+        {
+            "fieldname": "customer_email",
+            "fieldtype": "Data",
+            "label": "Customer Email",
+            "options": "Email"
         },
         {
             "fieldname": "customer_id_number",
@@ -111,7 +126,7 @@
             "fieldname": "maximum_duration_months",
             "fieldtype": "Select",
             "label": "Duration (Months)",
-            "options": "\n3\n6\n9\n12",
+            "options": "\n1\n2\n3\n6\n9\n12",
             "reqd": 1
         },
         {
@@ -219,6 +234,62 @@
             "fieldtype": "Link",
             "label": "Issued Store Credit Reference",
             "options": "Gift Card",
+            "read_only": 1
+        },
+        {
+            "default": "10",
+            "fieldname": "cancellation_fee_percent",
+            "fieldtype": "Percent",
+            "label": "Cancellation Fee %",
+            "description": "Percentage of total paid that is deducted as cancellation fee"
+        },
+        {
+            "fieldname": "cancellation_fee_amount",
+            "fieldtype": "Currency",
+            "label": "Cancellation Fee Amount",
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_extension",
+            "fieldtype": "Section Break",
+            "label": "Extension & Safety"
+        },
+        {
+            "fieldname": "extended_from",
+            "fieldtype": "Link",
+            "label": "Extended From",
+            "options": "Layaway Contract",
+            "read_only": 1
+        },
+        {
+            "fieldname": "extension_count",
+            "fieldtype": "Int",
+            "label": "Extensions Used",
+            "default": "0",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_ext",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "original_target_date",
+            "fieldtype": "Date",
+            "label": "Original Target Date",
+            "read_only": 1
+        },
+        {
+            "default": "15",
+            "fieldname": "auto_forfeit_days",
+            "fieldtype": "Int",
+            "label": "Auto-Forfeit After (Days)",
+            "description": "Number of days overdue before auto-forfeiture"
+        },
+        {
+            "default": "0",
+            "fieldname": "inventory_reserved",
+            "fieldtype": "Check",
+            "label": "Inventory Reserved",
             "read_only": 1
         },
         {
