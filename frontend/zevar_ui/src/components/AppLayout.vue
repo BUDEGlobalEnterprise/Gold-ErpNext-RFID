@@ -1,8 +1,5 @@
 <template>
-	<div
-		class="flex h-screen w-screen bg-[#F8F9FA] dark:bg-[#1e1e24] overflow-hidden transition-colors duration-300"
-		style="font-family: 'Inter', sans-serif"
-	>
+	<div class="flex h-screen w-screen overflow-hidden transition-colors duration-300">
 		<!-- DESKTOP SIDEBAR -->
 		<aside
 			ref="sidebarRef"
@@ -519,7 +516,7 @@
 
 			<div class="flex-1 flex overflow-hidden">
 				<main
-					class="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 lg:p-6 pb-16 xl:pb-6 bg-[#F8F9FA] dark:bg-[#1e1e24] transition-colors duration-300"
+					class="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 lg:p-6 pb-16 xl:pb-6 transition-colors duration-300"
 				>
 					<slot></slot>
 				</main>

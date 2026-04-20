@@ -117,8 +117,6 @@ function switchUser() {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 30%, #FED7AA 70%, #FDBA74 100%);
-	font-family: 'Inter', -apple-system, sans-serif;
 	padding: 1rem;
 }
 
