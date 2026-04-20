@@ -41,9 +41,10 @@
 }
 
 .dark .premium-card {
-    background: rgba(25, 28, 45, 0.4);
+    background: rgba(15, 17, 21, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
 }
 
 .premium-card:hover {
@@ -58,11 +59,11 @@
 }
 
 .premium-title {
-    font-family: 'Cinzel', serif !important;
+    font-family: var(--font-body) !important;
     font-size: 1.5rem; /* text-2xl */
-    font-weight: 800;
+    font-weight: 900;
     color: #111827;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.05em;
     @apply leading-tight;
 }
 
@@ -101,6 +102,10 @@ body {
   background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 30%, #FED7AA 70%, #FDBA74 100%);
   background-attachment: fixed;
   min-height: 100vh;
+}
+
+.dark body {
+  background: linear-gradient(135deg, #0F1115 0%, #15171E 30%, #1C1F26 70%, #2D1B0D 100%);
 }
 
 /* 3. Utility Class for Serif Headings */

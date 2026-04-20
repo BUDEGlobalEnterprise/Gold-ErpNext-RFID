@@ -3,7 +3,7 @@
 		<div class="h-full flex flex-col min-h-0">
 			<div class="flex items-center justify-between gap-4 mb-4 flex-shrink-0">
 				<div>
-					<h2 class="text-2xl font-serif font-bold text-gray-900 dark:text-white">
+					<h2 class="premium-title !text-xl sm:!text-2xl">
 						Repair Terminal
 					</h2>
 					<p class="text-sm text-gray-500 dark:text-gray-400 mt-1">

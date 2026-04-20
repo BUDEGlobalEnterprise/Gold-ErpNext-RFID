@@ -80,6 +80,7 @@ export const useSessionStore = defineStore('session', () => {
 			isLoggedIn.value = true
 			localStorage.setItem('session_user', JSON.stringify(user.value))
 			localStorage.setItem('session_roles', JSON.stringify(userRoles.value))
+			startActivityTracking()
 		},
 		onError() {
 			user.value = null
@@ -104,6 +105,7 @@ export const useSessionStore = defineStore('session', () => {
 			localStorage.removeItem('session_roles')
 			currentWarehouse.value = null
 			localStorage.removeItem('active_warehouse')
+			stopActivityTracking()
 			window.location.href = '/pos/login'
 		},
 	})
@@ -135,6 +137,48 @@ export const useSessionStore = defineStore('session', () => {
 			currentStoreLocation.value = storeLocation
 			localStorage.setItem('active_store_location', storeLocation)
 		}
+	}
+
+	// Activity tracking for auto logout (4 hours)
+	const AUTO_LOGOUT_MS = 4 * 60 * 60 * 1000
+	let activityInterval = null
+
+	function updateActivity() {
+		localStorage.setItem('last_activity', Date.now().toString())
+	}
+
+	function startActivityTracking() {
+		if (activityInterval) clearInterval(activityInterval)
+		updateActivity()
+		
+		window.addEventListener('mousemove', updateActivity, { passive: true })
+		window.addEventListener('keydown', updateActivity, { passive: true })
+		window.addEventListener('click', updateActivity, { passive: true })
+		window.addEventListener('scroll', updateActivity, { passive: true })
+		
+		activityInterval = setInterval(() => {
+			const lastActivity = parseInt(localStorage.getItem('last_activity') || '0')
+			if (Date.now() - lastActivity > AUTO_LOGOUT_MS && isLoggedIn.value) {
+				console.log('Session expired due to inactivity. Logging out.')
+				stopActivityTracking()
+				logoutResource.submit()
+			}
+		}, 60 * 1000)
+	}
+
+	function stopActivityTracking() {
+		if (activityInterval) {
+			clearInterval(activityInterval)
+			activityInterval = null
+		}
+		window.removeEventListener('mousemove', updateActivity)
+		window.removeEventListener('keydown', updateActivity)
+		window.removeEventListener('click', updateActivity)
+		window.removeEventListener('scroll', updateActivity)
+	}
+
+	if (isLoggedIn.value) {
+		startActivityTracking()
 	}
 
 	return {

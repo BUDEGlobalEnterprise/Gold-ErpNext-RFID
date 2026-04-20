@@ -8,7 +8,7 @@
 						Z
 					</div>
 					<div>
-						<h1 class="logo-title">Zevar Fine Jewelers</h1>
+						<h1 class="premium-title !text-[1.35rem] !leading-[1.2]">Zevar Fine Jewelers</h1>
 						<p class="logo-subtitle">Point of Sale Management</p>
 					</div>
 				</div>

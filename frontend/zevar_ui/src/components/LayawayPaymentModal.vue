@@ -1,45 +1,63 @@
 <template>
-	<Transition name="fade">
-		<div class="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6">
-			<div class="absolute inset-0 bg-gray-900/70 backdrop-blur-sm" @click="close"></div>
-
-			<div
-				class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-transparent dark:border-white/10"
+	<Teleport to="body">
+		<div class="fixed inset-0 z-[110] pointer-events-none">
+			<Transition
+				enter-active-class="transition-opacity duration-300"
+				enter-from-class="opacity-0"
+				enter-to-class="opacity-100"
+				leave-active-class="transition-opacity duration-300"
+				leave-from-class="opacity-100"
+				leave-to-class="opacity-0"
 			>
-				<!-- Header -->
-				<div
-					class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-white/5"
-				>
-					<div>
-						<h2 class="text-lg font-bold text-gray-900 dark:text-white">
-							Process Payment
-						</h2>
-						<p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-							Layaway: {{ layawayId }}
-						</p>
-					</div>
-					<button
-						@click="close"
-						class="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition"
-					>
-						<svg
-							class="w-5 h-5 text-gray-400"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
-					</button>
-				</div>
+				<div v-if="show" class="absolute inset-0 bg-gray-900/70 backdrop-blur-sm pointer-events-auto" @click="close"></div>
+			</Transition>
 
-				<!-- Content -->
-				<div class="p-6 space-y-4">
+			<Transition
+				enter-active-class="transform transition-transform duration-300 ease-in-out"
+				enter-from-class="translate-x-full"
+				enter-to-class="translate-x-0"
+				leave-active-class="transform transition-transform duration-300 ease-in-out"
+				leave-from-class="translate-x-0"
+				leave-to-class="translate-x-full"
+			>
+				<div
+					v-if="show"
+					class="absolute top-0 right-0 h-full w-full sm:w-[400px] bg-white dark:bg-[#1a1c23] shadow-2xl flex flex-col border-l border-gray-200 dark:border-white/10 pointer-events-auto"
+				>
+					<!-- Header -->
+					<div
+						class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-white/5 flex-shrink-0"
+					>
+						<div>
+							<h2 class="text-lg font-bold text-gray-900 dark:text-white">
+								Process Payment
+							</h2>
+							<p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+								Layaway: {{ layawayId }}
+							</p>
+						</div>
+						<button
+							@click="close"
+							class="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition"
+						>
+							<svg
+								class="w-5 h-5 text-gray-400"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M6 18L18 6M6 6l12 12"
+								/>
+							</svg>
+						</button>
+					</div>
+
+					<!-- Content -->
+					<div class="p-6 space-y-4 flex-1 overflow-y-auto custom-scrollbar">
 					<!-- Balance Info -->
 					<div
 						class="bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10 rounded-xl p-4 border border-orange-200 dark:border-orange-800/30"
@@ -54,204 +72,70 @@
 						</div>
 					</div>
 
-					<!-- Single vs Split toggle -->
-					<div class="flex rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+					<!-- Payment Methods -->
+					<div class="space-y-2 mb-4">
 						<button
-							@click="paymentMode = 'single'"
-							class="flex-1 py-2 text-sm font-bold transition"
-							:class="paymentMode === 'single'
-								? 'bg-[#D4AF37]/10 text-[#D4AF37] border-b-2 border-[#D4AF37]'
-								: 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'"
+							v-for="mode in allPaymentModes"
+							:key="mode.value"
+							@click="togglePaymentMode(mode.value)"
+							class="w-full flex items-center justify-between p-3 border rounded-xl transition-all"
+							:class="
+								isPaymentSelected(mode.value)
+									? 'border-[#D4AF37] bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]'
+									: 'border-gray-200 hover:border-gray-400 dark:border-white/10 dark:hover:border-white/30'
+							"
 						>
-							Single Payment
-						</button>
-						<button
-							@click="paymentMode = 'split'"
-							class="flex-1 py-2 text-sm font-bold transition"
-							:class="paymentMode === 'split'
-								? 'bg-[#D4AF37]/10 text-[#D4AF37] border-b-2 border-[#D4AF37]'
-								: 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'"
-						>
-							Split Payment
+							<div class="flex items-center gap-3">
+								<div
+									class="w-8 h-8 rounded-full flex items-center justify-center"
+									:class="
+										mode.value === 'Cash'
+											? 'bg-green-100 text-green-600'
+											: 'bg-blue-100 text-blue-600'
+									"
+								>
+									<svg v-if="mode.value === 'Cash'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+									<svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+								</div>
+								<span class="font-medium text-gray-900 dark:text-white text-sm">{{ mode.label }}</span>
+							</div>
+							<div v-if="isPaymentSelected(mode.value)" class="w-2 h-2 rounded-full bg-green-500"></div>
 						</button>
 					</div>
 
-					<!-- SINGLE PAYMENT MODE -->
-					<template v-if="paymentMode === 'single'">
-						<!-- Payment Amount -->
-						<div>
-							<label
-								class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-								>Payment Amount</label
-							>
-							<div class="relative">
-								<span
-									class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 font-medium"
-									>$</span
-								>
+					<!-- Payment Amounts -->
+					<div
+						v-if="selectedPayments.length > 0"
+						class="bg-gray-50 dark:bg-[#15171e] rounded-xl p-4 mb-4 border border-gray-100 dark:border-white/5"
+					>
+						<h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+							Amounts
+						</h4>
+						<div
+							v-for="payment in selectedPayments"
+							:key="payment.mode"
+							class="flex items-center justify-between mb-2"
+						>
+							<span class="text-sm text-gray-600 dark:text-gray-300">{{ payment.mode }}</span>
+							<div class="flex items-center gap-2">
+								<span class="text-gray-400">$</span>
 								<input
 									type="number"
-									v-model.number="paymentAmount"
-									step="0.01"
-									min="0.01"
+									v-model.number="payment.amount"
+									@input="recalculateSplit(payment.mode)"
+									class="w-24 px-2 py-1 bg-white dark:bg-[#0F1115] border border-gray-200 dark:border-white/10 rounded text-right font-mono text-sm"
+									min="0"
 									:max="balanceAmount"
-									:disabled="processing"
-									class="w-full pl-8 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-lg font-bold text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent placeholder-gray-400"
-									placeholder="0.00"
 								/>
 							</div>
-							<div class="flex items-center gap-2 mt-2">
-								<button
-									@click="paymentAmount = balanceAmount"
-									:disabled="processing"
-									class="flex-1 px-2 py-1.5 text-xs font-bold bg-[#D4AF37]/10 text-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/20 transition disabled:opacity-50"
-								>
-									Pay Full Balance
-								</button>
-								<button
-									v-for="percent in [25, 50, 75]"
-									:key="percent"
-									@click="setPaymentPercent(percent)"
-									:disabled="processing"
-									class="flex-1 px-2 py-1.5 text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition disabled:opacity-50"
-								>
-									{{ percent }}%
-								</button>
-							</div>
 						</div>
-
-						<!-- Mode of Payment -->
-						<div>
-							<label
-								class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-								>Mode of Payment</label
+						<div class="flex justify-between text-sm pt-2 border-t border-gray-200 dark:border-white/10 mt-2">
+							<span class="text-gray-500">{{ remainingAmount < 0 ? 'Change Due' : 'Remaining' }}</span>
+							<span
+								:class="remainingAmount === 0 ? 'text-green-500 font-bold' : remainingAmount < 0 ? 'text-orange-500 font-bold' : 'text-red-500 font-bold'"
 							>
-							<div class="grid grid-cols-2 gap-2">
-								<button
-									v-for="mode in allPaymentModes"
-									:key="mode.value"
-									@click="selectedMode = mode.value"
-									:disabled="processing"
-									class="px-4 py-3 rounded-xl text-sm font-bold border transition flex items-center justify-center gap-2"
-									:class="
-										selectedMode === mode.value
-											? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#D4AF37]'
-											: 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300'
-									"
-								>
-									{{ mode.label }}
-								</button>
-							</div>
-						</div>
-					</template>
-
-					<!-- SPLIT PAYMENT MODE -->
-					<template v-if="paymentMode === 'split'">
-						<div>
-							<div class="flex items-center justify-between mb-2">
-								<label class="text-xs font-medium text-gray-700 dark:text-gray-300">Payment Methods</label>
-								<button
-									@click="addSplitPayment"
-									:disabled="processing || splitPayments.length >= allPaymentModes.length"
-									class="text-xs font-bold text-[#D4AF37] hover:underline disabled:opacity-50"
-								>
-									+ Add Method
-								</button>
-							</div>
-
-							<div class="space-y-3">
-								<div
-									v-for="(sp, idx) in splitPayments"
-									:key="idx"
-									class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 border border-gray-100 dark:border-gray-700/50"
-								>
-									<div class="flex items-center gap-2 mb-2">
-										<select
-											v-model="sp.mode"
-											:disabled="processing"
-											class="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37]"
-										>
-											<option v-for="mode in availableModesForSplit(idx)" :key="mode.value" :value="mode.value">
-												{{ mode.label }}
-											</option>
-										</select>
-										<button
-											v-if="splitPayments.length > 1"
-											@click="removeSplitPayment(idx)"
-											class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition"
-										>
-											<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-											</svg>
-										</button>
-									</div>
-									<div class="relative">
-										<span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
-										<input
-											type="number"
-											v-model.number="sp.amount"
-											step="0.01"
-											min="0.01"
-											:disabled="processing"
-											class="w-full pl-7 pr-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37]"
-											placeholder="0.00"
-										/>
-									</div>
-								</div>
-							</div>
-
-							<!-- Split Summary -->
-							<div class="mt-3 flex items-center justify-between text-sm">
-								<span class="text-gray-500 dark:text-gray-400">Split Total:</span>
-								<span
-									class="font-bold"
-									:class="splitTotal === balanceAmount ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'"
-								>
-									{{ formatCurrency(splitTotal) }} / {{ formatCurrency(balanceAmount) }}
-								</span>
-							</div>
-							<div
-								v-if="splitTotal !== balanceAmount"
-								class="mt-1 text-xs text-red-500 dark:text-red-400"
-							>
-								Split total must equal the outstanding balance ({{ formatCurrency(balanceAmount) }})
-							</div>
-						</div>
-					</template>
-
-					<!-- Payment Summary -->
-					<div
-						v-if="effectivePaymentAmount > 0"
-						class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50"
-					>
-						<div class="space-y-2">
-							<div class="flex justify-between text-sm">
-								<span class="text-gray-500 dark:text-gray-400"
-									>Payment Amount</span
-								>
-								<span class="text-gray-900 dark:text-white font-bold">{{
-									formatCurrency(effectivePaymentAmount)
-								}}</span>
-							</div>
-							<div class="flex justify-between text-sm">
-								<span class="text-gray-500 dark:text-gray-400"
-									>Remaining Balance</span
-								>
-								<span class="text-green-600 dark:text-green-400 font-bold">{{
-									formatCurrency(balanceAmount - effectivePaymentAmount)
-								}}</span>
-							</div>
-							<div
-								v-if="balanceAmount - effectivePaymentAmount <= 0"
-								class="flex justify-between text-sm pt-2 border-t border-gray-200 dark:border-gray-700"
-							>
-								<span class="text-blue-600 dark:text-blue-400 font-medium"
-									>Contract Status</span
-								>
-								<span class="text-blue-600 dark:text-blue-400 font-bold"
-									>Will be Completed</span
-								>
-							</div>
+								{{ remainingAmount < 0 ? formatCurrency(Math.abs(remainingAmount)) : formatCurrency(remainingAmount) }}
+							</span>
 						</div>
 					</div>
 
@@ -339,9 +223,10 @@
 						</button>
 					</div>
 				</div>
-			</div>
+				</div>
+			</Transition>
 		</div>
-	</Transition>
+	</Teleport>
 </template>
 
 <script setup>
@@ -349,23 +234,19 @@ import { ref, computed } from 'vue'
 import { createResource } from 'frappe-ui'
 
 const props = defineProps({
+	show: { type: Boolean, default: false },
 	layawayId: { type: String, required: true },
 	balanceAmount: { type: Number, default: 0 },
+	draftMode: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['close', 'success'])
 
-const paymentAmount = ref(0)
-const selectedMode = ref('Cash')
 const processing = ref(false)
 const error = ref('')
-const paymentMode = ref('single')
 const paymentBreakdown = ref(null)
 
-const splitPayments = ref([
-	{ mode: 'Cash', amount: 0 },
-	{ mode: 'Credit Card', amount: 0 },
-])
+const selectedPayments = ref([])
 
 const allPaymentModes = [
 	{ value: 'Cash', label: 'Cash' },
@@ -381,43 +262,49 @@ const allPaymentModes = [
 	{ value: 'Wire Transfer', label: 'Wire Transfer' },
 ]
 
-const splitTotal = computed(() =>
-	splitPayments.value.reduce((sum, sp) => sum + (sp.amount || 0), 0)
+const totalPaid = computed(() =>
+	selectedPayments.value.reduce((sum, sp) => sum + (Number(sp.amount) || 0), 0)
 )
 
-const effectivePaymentAmount = computed(() =>
-	paymentMode.value === 'split' ? splitTotal.value : paymentAmount.value
-)
+const remainingAmount = computed(() => {
+	return props.balanceAmount - totalPaid.value
+})
 
-function availableModesForSplit(idx) {
-	const usedModes = splitPayments.value
-		.filter((_, i) => i !== idx)
-		.map((sp) => sp.mode)
-	return allPaymentModes.filter((m) => !usedModes.includes(m.value))
+function isPaymentSelected(mode) {
+	return selectedPayments.value.some((p) => p.mode === mode)
 }
 
-function addSplitPayment() {
-	const unused = allPaymentModes.find(
-		(m) => !splitPayments.value.some((sp) => sp.mode === m.value)
-	)
-	if (unused) {
-		splitPayments.value.push({ mode: unused.value, amount: 0 })
+function togglePaymentMode(mode) {
+	const index = selectedPayments.value.findIndex((p) => p.mode === mode)
+	if (index >= 0) {
+		selectedPayments.value.splice(index, 1)
+	} else {
+		if (selectedPayments.value.length === 0) {
+			selectedPayments.value.push({ mode, amount: props.balanceAmount })
+		} else {
+			selectedPayments.value.push({ mode, amount: null })
+		}
 	}
 }
 
-function removeSplitPayment(idx) {
-	splitPayments.value.splice(idx, 1)
+function recalculateSplit(changedMode) {
+	const changedPayment = selectedPayments.value.find((p) => p.mode === changedMode)
+	if (changedPayment) {
+		changedPayment.amount = Number(Number(changedPayment.amount || 0).toFixed(2))
+	}
+
+	if (selectedPayments.value.length === 2 && changedPayment) {
+		const otherPayment = selectedPayments.value.find((p) => p.mode !== changedMode)
+		if (otherPayment) {
+			const remaining = props.balanceAmount - changedPayment.amount
+			otherPayment.amount = Number(remaining.toFixed(2))
+		}
+	}
 }
 
 const canSubmit = computed(() => {
-	if (processing.value) return false
-	if (paymentMode.value === 'single') {
-		return paymentAmount.value > 0 && paymentAmount.value <= props.balanceAmount && selectedMode.value
-	}
-	return (
-		splitTotal.value === props.balanceAmount &&
-		splitPayments.value.every((sp) => sp.amount > 0 && sp.mode)
-	)
+	if (processing.value || selectedPayments.value.length === 0) return false
+	return Math.abs(remainingAmount.value) < 0.01
 })
 
 const paymentResource = createResource({
@@ -447,6 +334,16 @@ async function processPayment() {
 	paymentBreakdown.value = null
 
 	try {
+		if (props.draftMode) {
+			const payments = paymentMode.value === 'split'
+				? splitPayments.value.filter((sp) => sp.amount > 0).map((sp) => ({ mode_of_payment: sp.mode, amount: sp.amount }))
+				: [{ mode_of_payment: selectedMode.value, amount: paymentAmount.value }]
+
+			emit('success', { success: true, payments })
+			processing.value = false
+			return
+		}
+
 		if (paymentMode.value === 'split') {
 			const payments = splitPayments.value
 				.filter((sp) => sp.amount > 0)

@@ -1,16 +1,17 @@
 <template>
-	<Transition name="fade">
-		<div v-if="show" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-			<div
-				@click="close"
-				class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"
-			></div>
+	<Teleport to="body">
+		<Transition name="fade">
+			<div v-if="show" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+				<div
+					@click="close"
+					class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"
+				></div>
 
-			<div
-				class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col md:flex-row transition-all duration-500 ease-in-out border border-transparent dark:border-white/10"
-				:class="step === 'success' ? 'max-w-md' : 'max-w-4xl h-[650px]'"
-			>
-				<template v-if="step === 'review'">
+				<div
+					class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col md:flex-row transition-all duration-500 ease-in-out border border-transparent dark:border-white/10"
+					:class="step === 'success' ? 'max-w-md' : 'max-w-4xl h-[650px]'"
+				>
+					<template v-if="step === 'review'">
 					<div
 						class="w-full md:w-1/2 bg-gray-50 dark:bg-[#15171e] p-6 border-r border-gray-100 dark:border-white/5 flex flex-col"
 					>
@@ -893,7 +894,8 @@
 				</template>
 			</div>
 		</div>
-	</Transition>
+		</Transition>
+	</Teleport>
 </template>
 
 <script setup>

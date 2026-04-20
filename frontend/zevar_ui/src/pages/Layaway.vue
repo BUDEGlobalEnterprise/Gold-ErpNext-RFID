@@ -1,6 +1,6 @@
 <template>
 	<AppLayout>
-		<div class="h-full flex flex-col">
+		<div v-if="!showCreateModal" class="h-full flex flex-col">
 			<!-- Page Header -->
 			<div class="flex items-center justify-between mb-6">
 				<div>
@@ -43,7 +43,6 @@
 							<option value="Active">Active</option>
 							<option value="Completed">Completed</option>
 							<option value="Cancelled">Cancelled</option>
-							<option value="Overdue">Overdue</option>
 							<option value="Defaulted">Defaulted</option>
 						</select>
 					</div>
@@ -175,20 +174,12 @@
 									{{ layaway.customer_name || layaway.customer || 'Unknown' }}
 								</p>
 							</div>
-							<div class="flex items-center gap-1.5">
-								<span
-									class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold"
-									:class="getStatusClass(layaway.status, layaway.is_overdue)"
-								>
-									{{ layaway.is_overdue ? 'Overdue' : layaway.status }}
-								</span>
-								<span
-									v-if="layaway.extension_count > 0"
-									class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
-								>
-									{{ layaway.extension_count }}x Ext
-								</span>
-							</div>
+							<span
+								class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold"
+								:class="getStatusClass(layaway.status, layaway.is_overdue)"
+							>
+								{{ layaway.is_overdue ? 'Overdue' : layaway.status }}
+							</span>
 						</div>
 
 						<!-- Amounts -->
@@ -237,16 +228,6 @@
 							</div>
 						</div>
 
-						<!-- Auto-forfeit Warning -->
-						<div
-							v-if="layaway.is_overdue && layaway.auto_forfeit_days"
-							class="mb-3 px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-lg"
-						>
-							<span class="text-xs font-medium text-red-600 dark:text-red-400">
-								Auto-forfeit in {{ layaway.auto_forfeit_days }} days
-							</span>
-						</div>
-
 						<!-- Footer -->
 						<div
 							class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
@@ -286,6 +267,24 @@
 			</div>
 		</div>
 
+		<!-- Create Layaway Inline View -->
+		<div v-else class="h-full flex flex-col">
+			<div class="mb-4">
+				<button @click="closeCreateMode" class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center gap-1">
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+					Back to Layaways
+				</button>
+			</div>
+			<div class="flex-1 overflow-hidden">
+				<CreateLayawayModal
+					:show="showCreateModal"
+					inlineMode
+					@close="closeCreateMode"
+					@created="onLayawayCreated"
+				/>
+			</div>
+		</div>
+
 		<!-- Layaway Detail Modal -->
 		<LayawayDetailModal
 			:show="showDetailModal"
@@ -294,25 +293,37 @@
 			@refresh="fetchLayaways"
 		/>
 
-		<!-- Create Layaway Modal -->
-		<CreateLayawayModal
-			:show="showCreateModal"
-			@close="showCreateModal = false"
-			@created="onLayawayCreated"
+		<!-- Layaway Payment Modal -->
+		<LayawayPaymentModal
+			v-if="showPaymentModal"
+			:show="showPaymentModal"
+			:layawayId="selectedLayaway"
+			:balanceAmount="paymentLayawayBalance"
+			@close="showPaymentModal = false"
+			@success="onPaymentSuccess"
 		/>
 	</AppLayout>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { createResource } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
 import LayawayDetailModal from '@/components/LayawayDetailModal.vue'
 import CreateLayawayModal from '@/components/CreateLayawayModal.vue'
+import LayawayPaymentModal from '@/components/LayawayPaymentModal.vue'
 
+// Routing
+const route = useRoute()
+const router = useRouter()
+
+// State
 const loading = ref(false)
 const layaways = ref([])
 const showDetailModal = ref(false)
+const showPaymentModal = ref(false)
+const paymentLayawayBalance = ref(0)
 const selectedLayaway = ref(null)
 const showCreateModal = ref(false)
 const pagination = ref({ page: 1, total_pages: 1, total_count: 0 })
@@ -323,6 +334,7 @@ const filters = ref({
 	search: '',
 })
 
+// Computed summary
 const summary = computed(() => {
 	if (!layaways.value.length) return null
 
@@ -338,6 +350,7 @@ const summary = computed(() => {
 	}
 })
 
+// Resources
 const layawaysResource = createResource({
 	url: 'zevar_core.api.layaway.get_all_layaways',
 	auto: false,
@@ -347,6 +360,7 @@ function unwrapResponse(result) {
 	return result?.message ?? result
 }
 
+// Methods
 function formatCurrency(amount) {
 	if (!amount) return '$0.00'
 	return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
@@ -402,15 +416,33 @@ function goToPage(page) {
 }
 
 function onLayawayCreated(result) {
-	showCreateModal.value = false
+	closeCreateMode()
 	fetchLayaways()
+	// Optionally show success message or navigate to the new layaway
 	if (result?.layaway_id) {
 		selectedLayaway.value = result.layaway_id
 		showDetailModal.value = true
 	}
 }
 
+function onPaymentSuccess() {
+	showPaymentModal.value = false
+	showDetailModal.value = true
+	fetchLayaways()
+}
+
+function closeCreateMode() {
+	showCreateModal.value = false
+	if (route.query.action === 'new') {
+		router.replace({ name: 'Layaway' })
+	}
+}
+
+// Lifecycle
 onMounted(() => {
 	fetchLayaways()
+	if (route.query.action === 'new') {
+		showCreateModal.value = true
+	}
 })
 </script>
