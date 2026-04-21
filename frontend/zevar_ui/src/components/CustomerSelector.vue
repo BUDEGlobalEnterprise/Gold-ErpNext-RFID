@@ -808,6 +808,13 @@ function debouncedSearch() {
 	}, 300)
 }
 
+// Search customers resource (persistent)
+const customerSearchResource = createResource({
+	url: 'zevar_core.api.customer.search_customers',
+	auto: false,
+})
+
+// Search customers
 // Search customers
 async function performSearch() {
 	if (!searchQuery.value || searchQuery.value.length < 2) {
@@ -819,11 +826,15 @@ async function performSearch() {
 	showDropdown.value = true
 
 	try {
-		const r = await createResource({
-			url: 'zevar_core.api.customer.search_customers',
-			params: { query: searchQuery.value },
-		}).fetch()
-		searchResults.value = r?.data || r || []
+		const results = await customerSearchResource.submit({
+			query: searchQuery.value,
+		})
+		const list = results || []
+		searchResults.value = list.map(c => ({
+			...c,
+			name: c.name || c.customer_name,
+			customer_name: c.display_name || c.customer_name,
+		}))
 	} catch (e) {
 		console.error('Customer search failed:', e)
 		searchResults.value = []
@@ -831,21 +842,27 @@ async function performSearch() {
 		searching.value = false
 	}
 }
+// Customer details resource (persistent)
+const customerDetailsResource = createResource({
+	url: 'zevar_core.api.customer.get_customer_details',
+	auto: false,
+})
 
 // Select an existing customer
 async function selectCustomer(customerData) {
 	// Fetch full details
 	try {
-		const r = await createResource({
-			url: 'zevar_core.api.customer.get_customer_details',
-			params: { customer_name: customerData.customer_name },
-		}).fetch()
+		const r = await customerDetailsResource.submit({ customer_name: customerData.customer_name || customerData.name })
 		const fullData = r?.data || r
 		// Ensure name field is set for compatibility
-		if (fullData.customer_name && !fullData.name) {
+		if (fullData && fullData.customer_name && !fullData.name) {
 			fullData.name = fullData.customer_name
 		}
-		cart.setCustomer(fullData)
+		if (fullData) {
+			cart.setCustomer(fullData)
+		} else {
+			cart.setCustomer(customerData)
+		}
 	} catch (e) {
 		// Fallback to basic data, ensure name field is set
 		const basicData = { ...customerData }
@@ -872,7 +889,6 @@ async function createCustomer() {
 	try {
 		const r = await createResource({
 			url: 'zevar_core.api.customer.quick_create_customer',
-			method: 'POST',
 			params: {
 				customer_name: newCustomer.value.name,
 				customer_type: cart.customerType !== 'Walkin' ? cart.customerType : 'Individual',

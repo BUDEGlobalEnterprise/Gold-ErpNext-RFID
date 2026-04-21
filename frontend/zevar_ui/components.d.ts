@@ -29,6 +29,7 @@ declare module 'vue' {
     LayawayDetailModal: typeof import('./src/components/LayawayDetailModal.vue')['default']
     LayawayPaymentModal: typeof import('./src/components/LayawayPaymentModal.vue')['default']
     LiveGoldPrice: typeof import('./src/components/LiveGoldPrice.vue')['default']
+    NewRepairFormContent: typeof import('./src/components/NewRepairFormContent.vue')['default']
     NewRepairModal: typeof import('./src/components/NewRepairModal.vue')['default']
     PaymentModal: typeof import('./src/components/PaymentModal.vue')['default']
     PortalLayout: typeof import('./src/components/PortalLayout.vue')['default']

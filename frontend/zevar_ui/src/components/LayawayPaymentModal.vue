@@ -334,42 +334,25 @@ async function processPayment() {
 	paymentBreakdown.value = null
 
 	try {
-		if (props.draftMode) {
-			const payments = paymentMode.value === 'split'
-				? splitPayments.value.filter((sp) => sp.amount > 0).map((sp) => ({ mode_of_payment: sp.mode, amount: sp.amount }))
-				: [{ mode_of_payment: selectedMode.value, amount: paymentAmount.value }]
+		const payments = selectedPayments.value
+			.filter((sp) => sp.amount > 0)
+			.map((sp) => ({ mode_of_payment: sp.mode, amount: sp.amount }))
 
+		if (props.draftMode) {
 			emit('success', { success: true, payments })
 			processing.value = false
 			return
 		}
 
-		if (paymentMode.value === 'split') {
-			const payments = splitPayments.value
-				.filter((sp) => sp.amount > 0)
-				.map((sp) => ({ mode_of_payment: sp.mode, amount: sp.amount }))
+		const rawResult = await splitPaymentResource.submit({
+			layaway_id: props.layawayId,
+			payments: JSON.stringify(payments),
+		})
+		const result = rawResult?.message ?? rawResult
 
-			const rawResult = await splitPaymentResource.submit({
-				layaway_id: props.layawayId,
-				payments: JSON.stringify(payments),
-			})
-			const result = rawResult?.message ?? rawResult
-
-			if (result?.success) {
-				paymentBreakdown.value = result.payment_breakdown || payments
-				emit('success', result)
-			}
-		} else {
-			const rawResult = await paymentResource.submit({
-				layaway_id: props.layawayId,
-				payment_amount: paymentAmount.value,
-				mode_of_payment: selectedMode.value,
-			})
-			const result = rawResult?.message ?? rawResult
-
-			if (result?.success) {
-				emit('success', result)
-			}
+		if (result?.success) {
+			paymentBreakdown.value = result.payment_breakdown || payments
+			emit('success', result)
 		}
 	} catch (e) {
 		let errorMsg = ''

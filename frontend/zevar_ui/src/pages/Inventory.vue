@@ -102,7 +102,7 @@
 			</div>
 
 			<!-- Table View -->
-			<div class="flex-1 overflow-auto min-h-0">
+			<div class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
 				<div v-if="viewMode === 'table'" class="premium-card !p-0 overflow-hidden">
 					<table class="w-full text-sm">
 						<thead>
@@ -316,162 +316,40 @@ import FilterBar from '@/components/FilterBar.vue'
 import { useUIStore } from '@/stores/ui.js'
 import { ref, computed } from 'vue'
 
+import { createResource } from 'frappe-ui'
+import { useSessionStore } from '@/stores/session.js'
+
 const ui = useUIStore()
+const session = useSessionStore()
 const viewMode = ref('table')
 
-// Mock inventory data - jewelry themed
-const inventoryData = ref([
-	{
-		code: 'ZV-RG-001',
-		name: 'Royal Solitaire Diamond Ring',
-		metal: 'Yellow Gold',
-		purity: '18K',
-		weight: 4.2,
-		stock: 3,
-		price: 8500,
-		category: 'Rings',
+const inventoryData = ref([])
+
+const inventoryResource = createResource({
+	url: 'zevar_core.api.catalog.get_pos_items',
+	makeParams() {
+		return { 
+			warehouse: session.currentWarehouse,
+			page_length: 500, // Fetch up to 500 for local grid filtering, alternatively implement server-side pagination
+		}
 	},
-	{
-		code: 'ZV-RG-002',
-		name: 'Emerald Cut Platinum Band',
-		metal: 'Platinum',
-		purity: '950',
-		weight: 6.8,
-		stock: 1,
-		price: 12400,
-		category: 'Rings',
-	},
-	{
-		code: 'ZV-NK-001',
-		name: 'Heritage Polki Necklace Set',
-		metal: 'Yellow Gold',
-		purity: '22K',
-		weight: 48.5,
-		stock: 2,
-		price: 24800,
-		category: 'Necklaces',
-	},
-	{
-		code: 'ZV-NK-002',
-		name: 'Riviera Diamond Tennis Necklace',
-		metal: 'White Gold',
-		purity: '18K',
-		weight: 22.3,
-		stock: 0,
-		price: 18500,
-		category: 'Necklaces',
-	},
-	{
-		code: 'ZV-BR-001',
-		name: 'Kundan Bridal Bangle Set (4pc)',
-		metal: 'Yellow Gold',
-		purity: '22K',
-		weight: 65.0,
-		stock: 4,
-		price: 32000,
-		category: 'Bangles',
-	},
-	{
-		code: 'ZV-ER-001',
-		name: 'Ruby Halo Drop Earrings',
-		metal: 'Rose Gold',
-		purity: '18K',
-		weight: 5.6,
-		stock: 7,
-		price: 4200,
-		category: 'Earrings',
-	},
-	{
-		code: 'ZV-ER-002',
-		name: 'Diamond Studs - Round Brilliant',
-		metal: 'White Gold',
-		purity: '14K',
-		weight: 2.1,
-		stock: 12,
-		price: 3800,
-		category: 'Earrings',
-	},
-	{
-		code: 'ZV-PD-001',
-		name: 'Sapphire Pendant with Chain',
-		metal: 'Yellow Gold',
-		purity: '18K',
-		weight: 8.4,
-		stock: 0,
-		price: 6200,
-		category: 'Pendants',
-	},
-	{
-		code: 'ZV-CH-001',
-		name: 'Cuban Link Chain 24"',
-		metal: 'Yellow Gold',
-		purity: '14K',
-		weight: 32.0,
-		stock: 6,
-		price: 9800,
-		category: 'Chains',
-	},
-	{
-		code: 'ZV-BR-002',
-		name: 'Diamond Tennis Bracelet',
-		metal: 'White Gold',
-		purity: '18K',
-		weight: 12.5,
-		stock: 2,
-		price: 14200,
-		category: 'Bracelets',
-	},
-	{
-		code: 'ZV-RG-003',
-		name: 'Vintage Art Deco Ring',
-		metal: 'Platinum',
-		purity: '950',
-		weight: 5.3,
-		stock: 1,
-		price: 9800,
-		category: 'Rings',
-	},
-	{
-		code: 'ZV-BS-001',
-		name: 'Maharani Bridal Set',
-		metal: 'Yellow Gold',
-		purity: '22K',
-		weight: 120.0,
-		stock: 1,
-		price: 58000,
-		category: 'Bridal Sets',
-	},
-	{
-		code: 'ZV-SV-001',
-		name: 'Sterling Silver Charm Bracelet',
-		metal: 'Silver',
-		purity: '925 Sterling',
-		weight: 18.0,
-		stock: 15,
-		price: 450,
-		category: 'Bracelets',
-	},
-	{
-		code: 'ZV-NK-003',
-		name: 'Rose Gold Choker Necklace',
-		metal: 'Rose Gold',
-		purity: '18K',
-		weight: 15.2,
-		stock: 3,
-		price: 7200,
-		category: 'Necklaces',
-	},
-	{
-		code: 'ZV-ER-003',
-		name: 'Emerald Chandelier Earrings',
-		metal: 'Yellow Gold',
-		purity: '18K',
-		weight: 9.8,
-		stock: 0,
-		price: 11500,
-		category: 'Earrings',
-	},
-])
+	onSuccess(data) {
+		inventoryData.value = data.map(i => ({
+			code: i.item_code,
+			name: i.item_name,
+			metal: i.metal || '-',
+			purity: i.purity || '-',
+			weight: i.gross_weight || 0,
+			stock: i.stock_qty || 0,
+			price: i.price || i.msrp || 0,
+			category: i.jewelry_type || i.item_group || 'Other'
+		}))
+	}
+})
+
+// Fetch on mount
+inventoryResource.fetch()
+
 
 const totalValue = computed(() =>
 	inventoryData.value.reduce((sum, i) => sum + i.price * Math.max(i.stock, 0), 0)

@@ -193,104 +193,33 @@ const statusTabs = [
 	{ value: 'Completed', label: 'Completed' },
 ]
 
-const tradeInData = ref([
-	{
-		id: 1,
-		description: '22K Yellow Gold Chain Necklace',
-		customer: 'Priya Sharma',
-		date: 'Apr 7, 2026',
-		metal: 'Yellow Gold',
-		purity: '22K',
-		weight: 32.5,
-		appraisedValue: 2400,
-		newPurchase: 6800,
-		status: 'Pending Review',
-	},
-	{
-		id: 2,
-		description: '18K Diamond Engagement Ring',
-		customer: 'Michael Chen',
-		date: 'Apr 6, 2026',
-		metal: 'White Gold',
-		purity: '18K',
-		weight: 4.8,
-		appraisedValue: 3200,
-		newPurchase: 8500,
-		status: 'Accepted',
-	},
-	{
-		id: 3,
-		description: 'Platinum Wedding Band',
-		customer: 'Sarah Williams',
-		date: 'Apr 5, 2026',
-		metal: 'Platinum',
-		purity: '950',
-		weight: 6.2,
-		appraisedValue: 1800,
-		newPurchase: 4200,
-		status: 'Accepted',
-	},
-	{
-		id: 4,
-		description: '14K Gold Bracelet with Diamonds',
-		customer: 'Raj Patel',
-		date: 'Apr 4, 2026',
-		metal: 'Yellow Gold',
-		purity: '14K',
-		weight: 18.0,
-		appraisedValue: 1100,
-		newPurchase: 2800,
-		status: 'Completed',
-	},
-	{
-		id: 5,
-		description: 'Rose Gold Pendant Necklace',
-		customer: 'Emily Rodriguez',
-		date: 'Apr 3, 2026',
-		metal: 'Rose Gold',
-		purity: '18K',
-		weight: 8.5,
-		appraisedValue: 950,
-		newPurchase: 0,
-		status: 'Rejected',
-	},
-	{
-		id: 6,
-		description: '22K Kundan Bridal Necklace Set',
-		customer: 'Ananya Gupta',
-		date: 'Apr 2, 2026',
-		metal: 'Yellow Gold',
-		purity: '22K',
-		weight: 85.0,
-		appraisedValue: 8200,
-		newPurchase: 24800,
-		status: 'Pending Review',
-	},
-	{
-		id: 7,
-		description: 'Sterling Silver Charm Collection',
-		customer: 'Lisa Park',
-		date: 'Apr 1, 2026',
-		metal: 'Silver',
-		purity: '925',
-		weight: 45.0,
-		appraisedValue: 320,
-		newPurchase: 0,
-		status: 'Rejected',
-	},
-	{
-		id: 8,
-		description: '18K Sapphire Drop Earrings',
-		customer: 'David Kim',
-		date: 'Mar 30, 2026',
-		metal: 'White Gold',
-		purity: '18K',
-		weight: 5.4,
-		appraisedValue: 2100,
-		newPurchase: 6200,
-		status: 'Completed',
-	},
-])
+import { createResource } from 'frappe-ui'
+
+const tradeInData = ref([])
+
+const tradeInResource = createResource({
+	type: 'list',
+	doctype: 'Trade In Record',
+	fields: ['*'],
+	limit: 100,
+	onSuccess(data) {
+		tradeInData.value = data.map(t => ({
+			id: t.name,
+			description: t.description || t.item_description || t.name,
+			customer: t.customer || t.customer_name || 'Unknown',
+			date: t.creation ? new Date(t.creation).toLocaleDateString() : 'Unknown',
+			metal: t.metal || '-',
+			purity: t.purity || '-',
+			weight: t.weight || t.gross_weight || 0,
+			appraisedValue: t.appraised_value || t.total_offer_amount || 0,
+			newPurchase: t.new_purchase_amount || 0, // Fallback, could be matched to Sales Invoice
+			status: t.status || 'Pending Review'
+		}))
+	}
+})
+
+tradeInResource.fetch()
+
 
 const totalCredit = computed(() =>
 	tradeInData.value

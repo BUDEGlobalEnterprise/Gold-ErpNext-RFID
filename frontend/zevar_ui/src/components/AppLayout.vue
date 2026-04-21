@@ -3,7 +3,7 @@
 		<!-- DESKTOP SIDEBAR -->
 		<aside
 			ref="sidebarRef"
-			class="hidden lg:flex bg-white/40 dark:bg-black/40 backdrop-blur-xl border-r border-gray-200 dark:border-white/5 flex-col shadow-2xl z-30 relative"
+			class="hidden lg:flex bg-white/40 dark:bg-black/40 backdrop-blur-xl border-r border-gray-200 dark:border-white/5 flex-col z-30 relative"
 			:class="isResizing ? 'transition-none' : 'transition-all duration-300'"
 			:style="
 				isSidebarCollapsed
@@ -287,7 +287,7 @@
 					<div class="relative" ref="userMenuRef">
 						<button
 							@click.stop="isUserMenuOpen = !isUserMenuOpen"
-							class="flex items-center gap-2 p-1.5 pr-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-200 dark:border-white/10"
+							class="flex items-center gap-2 p-1.5 pr-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 transition-colors border border-transparent hover:border-gray-200 dark:border-white/10"
 						>
 							<div
 								class="w-8 h-8 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] flex items-center justify-center text-[#0F1115] font-bold text-xs shadow-sm"
@@ -340,13 +340,19 @@
 									>
 										{{ session.user?.email || 'Not logged in' }}
 									</p>
+									<p
+										v-if="userDesignation"
+										class="text-[11px] font-semibold text-[#D4AF37] mt-1 truncate"
+									>
+										{{ userDesignation }}
+									</p>
 								</div>
 								<div
 									class="py-1 border-b border-gray-100 dark:border-gray-200 dark:border-white/5"
 								>
 									<a
 										href="#"
-										@click.prevent="isUserMenuOpen = false"
+										@click.prevent="handleChangePassword"
 										class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
 									>
 										<svg
@@ -359,14 +365,14 @@
 												stroke-linecap="round"
 												stroke-linejoin="round"
 												stroke-width="2"
-												d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+												d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
 											></path>
 										</svg>
-										Profile Settings
+										Change Password
 									</a>
 									<a
 										href="#"
-										@click.prevent="isUserMenuOpen = false"
+										@click.prevent="goToEmployeePortal"
 										class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
 									>
 										<svg
@@ -379,30 +385,10 @@
 												stroke-linecap="round"
 												stroke-linejoin="round"
 												stroke-width="2"
-												d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+												d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
 											></path>
 										</svg>
-										Preferences
-									</a>
-									<a
-										href="#"
-										@click.prevent="isUserMenuOpen = false"
-										class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-									>
-										<svg
-											class="w-4 h-4 text-gray-400"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-											></path>
-										</svg>
-										Account History
+										Go to Employee Portal
 									</a>
 								</div>
 								<div
@@ -448,11 +434,7 @@
 										>
 											<div
 												class="w-3 h-3 bg-white rounded-full absolute transition-transform duration-300 shadow-sm"
-												:class="
-													ui.isDark
-														? 'translate-x-[18px]'
-														: 'translate-x-[2px]'
-												"
+												:class="ui.isDark ? 'translate-x-[18px]' : 'translate-x-[2px]'"
 											></div>
 										</div>
 									</button>
@@ -528,7 +510,15 @@
 
 		<CartSidebar :isOpen="isCartOpen" :persistent="false" @close="isCartOpen = false" />
 
-		<!-- Mobile/Tablet Live Rates Bar - Fixed overlay, Hidden on XL+ -->
+		<!-- Global Layaway Payment Sidebar -->
+		<LayawayPaymentModal
+			v-if="ui.layawayPayment.show"
+			:show="ui.layawayPayment.show"
+			:layawayId="ui.layawayPayment.layawayId"
+			:balanceAmount="ui.layawayPayment.balance"
+			@close="ui.closeLayawayPayment"
+			@success="handleGlobalPaymentSuccess"
+		/>
 		<div
 			class="xl:hidden fixed bottom-0 left-0 right-0 z-20 bg-white/60 dark:bg-[#15161a]/60 backdrop-blur-md border-t border-gray-200 dark:border-white/5 py-2 px-3 flex items-center justify-between flex-shrink-0"
 		>
@@ -794,14 +784,15 @@
 </template>
 
 <script setup>
-import { useSessionStore } from '@/stores/session'
+import { useSessionStore } from '@/stores/session.js'
 import { useGoldStore } from '@/stores/gold.js'
 import { useCartStore } from '@/stores/cart.js'
-import { useUIStore } from '@/stores/ui'
+import { useUIStore } from '@/stores/ui.js'
 import { createResource } from 'frappe-ui'
 import { onMounted, ref, computed, watch, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import CartSidebar from '@/components/CartSidebar.vue'
+import LayawayPaymentModal from '@/components/LayawayPaymentModal.vue'
 import FilterBar from '@/components/FilterBar.vue'
 import FilterSidebar from '@/components/FilterSidebar.vue'
 
@@ -809,6 +800,7 @@ const session = useSessionStore()
 const goldStore = useGoldStore()
 const cartStore = useCartStore()
 const ui = useUIStore()
+const emit = defineEmits(['layaway-payment-success', 'layaway-created'])
 
 const isCartOpen = ref(false)
 const isUserMenuOpen = ref(false)
@@ -1000,6 +992,57 @@ onMounted(() => {
 function handleDocumentClick(e) {
 	if (isUserMenuOpen.value && userMenuRef.value && !userMenuRef.value.contains(e.target)) {
 		isUserMenuOpen.value = false
+	}
+}
+
+const userDesignation = computed(() => session.user?.designation || '')
+
+function handleChangePassword() {
+	isUserMenuOpen.value = false
+	window.location.href = '/app/user/password-update'
+}
+
+function goToEmployeePortal() {
+	isUserMenuOpen.value = false
+	const portalUrl = window.location.origin + '/portal'
+	window.open(portalUrl, '_blank')
+}
+
+async function handleGlobalPaymentSuccess(result) {
+	const draftPayload = ui.layawayPayment.draftPayload
+	
+	if (draftPayload) {
+		try {
+			// This was a draft payment, now create the actual contract
+			const payload = {
+				...draftPayload,
+				payments: JSON.stringify(result.payments || []),
+			}
+			
+			const createRes = createResource({
+				url: 'zevar_core.api.layaway.create_layaway',
+				method: 'POST',
+			})
+			
+			const rawResult = await createRes.submit(payload)
+			const creationResult = rawResult?.message ?? rawResult
+			
+			if (creationResult?.success || creationResult?.layaway_id) {
+				ui.closeLayawayPayment()
+				emit('layaway-created', creationResult)
+				// Show a success message or let the child handle it
+			}
+		} catch (error) {
+			console.error('Global layaway finalization failed:', error)
+			let errorMsg = error?.message || 'Failed to finalize layaway'
+			alert(errorMsg.replace(/<[^>]+>/g, ''))
+			// Keep sidebar open so they don't lose payment state? 
+			// Actually better to close and let them try again.
+			ui.closeLayawayPayment()
+		}
+	} else {
+		ui.closeLayawayPayment()
+		emit('layaway-payment-success', result)
 	}
 }
 

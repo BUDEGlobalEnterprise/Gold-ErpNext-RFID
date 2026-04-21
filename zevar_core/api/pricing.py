@@ -46,6 +46,111 @@ def get_item_price(item_code: str) -> dict:
 
 
 @frappe.whitelist()
+def get_live_metal_rates():
+	"""
+	Get current live metal rates for all metals and purities.
+	Accessible to all logged-in users (employees, POS users, etc).
+
+	Returns:
+		dict: Current rates grouped by metal type with metadata.
+	"""
+	from frappe.utils import now_datetime, time_diff_in_seconds
+
+	rates = frappe.get_all(
+		"Gold Rate Log",
+		fields=["metal", "purity", "rate_per_gram", "source", "timestamp"],
+		filters={"docstatus": 0},
+		order_by="metal, purity",
+		ignore_permissions=True,
+	)
+
+	if not rates:
+		# No rates in DB yet — try fetching live
+		from zevar_core.tasks import fetch_live_metal_rates
+
+		fetch_result = fetch_live_metal_rates()
+		return {
+			"success": True,
+			"rates": _format_rates_from_fetch(fetch_result),
+			"last_updated": now_datetime().isoformat(),
+			"source": fetch_result.get("source", "live"),
+		}
+
+	# Group rates by metal
+	grouped = {}
+	for r in rates:
+		metal = r["metal"]
+		if metal not in grouped:
+			grouped[metal] = []
+		grouped[metal].append(
+			{
+				"purity": r["purity"],
+				"rate_per_gram": r["rate_per_gram"],
+			}
+		)
+
+	# Get the most recent timestamp
+	latest_ts = max(r["timestamp"] for r in rates if r.get("timestamp"))
+
+	# Calculate how long ago the rates were updated
+	age_seconds = time_diff_in_seconds(now_datetime(), latest_ts) if latest_ts else 0
+	is_stale = age_seconds > 900  # older than 15 minutes
+
+	return {
+		"success": True,
+		"rates": grouped,
+		"last_updated": latest_ts.isoformat() if latest_ts else None,
+		"source": rates[0]["source"] if rates else "unknown",
+		"is_stale": is_stale,
+	}
+
+
+@frappe.whitelist()
+def get_live_rate_history(metal="Yellow Gold", days=7):
+	"""
+	Get historical rate data for a specific metal.
+	Accessible to all logged-in users.
+
+	Args:
+	    metal: Metal type to get history for (default: Yellow Gold)
+	    days: Number of days of history (default: 7)
+
+	Returns:
+	    dict: Historical rates with timestamps for charting.
+	"""
+	from frappe.utils import add_days, now_datetime
+
+	since = add_days(now_datetime(), -int(days))
+
+	logs = frappe.get_all(
+		"Gold Rate Log",
+		fields=["purity", "rate_per_gram", "timestamp"],
+		filters={"metal": metal, "timestamp": [">=", since]},
+		order_by="timestamp asc",
+	)
+
+	# Group by purity
+	series = {}
+	for log in logs:
+		p = log["purity"]
+		if p not in series:
+			series[p] = []
+		series[p].append(
+			{
+				"rate": log["rate_per_gram"],
+				"timestamp": log["timestamp"].isoformat() if log["timestamp"] else None,
+			}
+		)
+
+	return {
+		"success": True,
+		"metal": metal,
+		"days": int(days),
+		"series": series,
+	}
+
+
+@frappe.whitelist()
 def refresh_gold_rates():
 	"""Manually trigger gold rate refresh."""
 	from zevar_core.tasks import fetch_live_metal_rates
@@ -56,6 +161,23 @@ def refresh_gold_rates():
 	except Exception as e:
 		frappe.log_error(f"Gold rate refresh failed: {e!s}")
 		return {"success": False, "message": f"Failed to refresh rates: {e!s}"}
+
+
+def _format_rates_from_fetch(fetch_result):
+	"""Convert fetch result dict to grouped format matching DB structure."""
+	grouped = {}
+
+	for purity, rate in fetch_result.get("gold", {}).items():
+		if "Yellow Gold" not in grouped:
+			grouped["Yellow Gold"] = []
+		grouped["Yellow Gold"].append({"purity": purity, "rate_per_gram": rate})
+
+	for purity, rate in fetch_result.get("silver", {}).items():
+		if "Silver" not in grouped:
+			grouped["Silver"] = []
+		grouped["Silver"].append({"purity": purity, "rate_per_gram": rate})
+
+	return grouped
 
 
 def _calculate_gold_value(item) -> float:
@@ -94,7 +216,7 @@ def _get_gold_rate(metal: str, purity: str) -> float:
 		filters={"metal": metal, "purity": purity},
 		fieldname="rate_per_gram",
 		order_by="timestamp desc",
-	)
+	)  # db.get_value bypasses permissions
 
 	return float(rate_log) if rate_log else 0.0
 

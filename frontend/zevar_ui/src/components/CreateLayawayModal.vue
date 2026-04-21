@@ -4,7 +4,7 @@
 			v-if="inlineMode || show"
 			:class="[
 				inlineMode
-					? 'h-full flex flex-col bg-white dark:bg-[#1a1c23] w-full overflow-hidden'
+					? 'h-full flex flex-col bg-white dark:bg-[#1a1c23] w-full rounded-3xl overflow-hidden'
 					: 'fixed inset-0 z-[100] flex items-center justify-center p-4'
 			]"
 		>
@@ -12,11 +12,15 @@
 
 			<div
 				class="relative bg-white dark:bg-[#1a1c23] w-full overflow-hidden flex flex-col"
-				:class="[inlineMode ? 'flex-1 h-full' : 'max-w-6xl max-h-[95vh] rounded-2xl shadow-2xl border border-transparent dark:border-white/10']"
+				:class="[
+					inlineMode
+						? 'flex-1 h-full rounded-3xl'
+						: 'max-w-6xl max-h-[95vh] rounded-3xl shadow-2xl border border-transparent dark:border-white/10',
+				]"
 			>
 				<!-- Header -->
 				<div
-					class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-white/5 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-[#1a1c23]"
+					class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-white/5 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-[#1a1c23] rounded-t-3xl flex-shrink-0"
 				>
 					<div class="flex items-center gap-4">
 						<div
@@ -119,7 +123,7 @@
 				<!-- Two Column Layout -->
 				<div class="flex flex-col lg:flex-row flex-1 overflow-hidden">
 					<!-- Left Column - Customer & Details -->
-					<div class="flex-1 p-5 overflow-y-auto custom-scrollbar" :style="inlineMode ? '' : 'max-height: calc(95vh - 140px)'">
+					<div class="flex-1 p-5 overflow-y-auto custom-scrollbar rounded-bl-3xl" :style="inlineMode ? '' : 'max-height: calc(95vh - 140px)'">
 						<!-- ID Scanner Panel -->
 						<Transition name="slide-down">
 							<div
@@ -675,7 +679,7 @@
 
 					<!-- Right Column - Items & Summary -->
 					<div
-						class="flex-1 p-5 border-l border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-[#1a1c23]/50 overflow-y-auto"
+						class="flex-1 p-5 border-l border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-[#1a1c23]/50 overflow-y-auto rounded-br-3xl"
 						:style="inlineMode ? '' : 'max-height: calc(95vh - 140px)'"
 					>
 						<!-- Layaway Details -->
@@ -727,18 +731,28 @@
 								<div>
 									<label
 										class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-										>Duration *</label
+										>Duration ({{ form.paymentSchedule === 'Monthly' ? 'Months' : 'Weeks' }}) *</label
 									>
 									<select
-										v-model.number="form.durationMonths"
+										v-model.number="form.durationWeeks"
 										class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 									>
-										<option :value="1">1 Month (30 Days)</option>
-										<option :value="2">2 Months (60 Days)</option>
-										<option :value="3">3 Months (90 Days)</option>
-										<option :value="6">6 Months (180 Days)</option>
-										<option :value="9">9 Months (270 Days)</option>
-										<option :value="12">12 Months (365 Days)</option>
+										<template v-if="form.paymentSchedule === 'Monthly'">
+											<option :value="1">1 month</option>
+											<option :value="2">2 months</option>
+											<option :value="3">3 months</option>
+											<option :value="6">6 months</option>
+											<option :value="9">9 months</option>
+											<option :value="12">12 months</option>
+										</template>
+										<template v-else>
+											<option :value="2">2 weeks</option>
+											<option :value="4">4 weeks</option>
+											<option :value="6">6 weeks</option>
+											<option :value="8">8 weeks</option>
+											<option :value="10">10 weeks</option>
+											<option :value="12">12 weeks</option>
+										</template>
 									</select>
 								</div>
 								<div>
@@ -760,6 +774,9 @@
 										/>
 									</div>
 								</div>
+								<p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+									Deposit payment method is selected from the sidebar.
+								</p>
 								<div>
 									<label
 										class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
@@ -1078,7 +1095,7 @@
 
 						<!-- Summary Card -->
 						<div
-							class="p-4 bg-gradient-to-br from-gray-900 to-gray-800 dark:from-black dark:to-gray-900 rounded-xl text-white"
+							class="p-4 bg-gradient-to-br from-gray-900 to-gray-800 dark:from-black dark:to-gray-900 rounded-2xl text-white"
 						>
 							<h4 class="text-sm font-bold mb-3 flex items-center gap-2">
 								<svg
@@ -1195,7 +1212,7 @@
 								<span class="font-bold">Terms Agreement:</span> I confirm the
 								customer has agreed to the layaway terms including the payment
 								schedule ({{ paymentFrequencyText }} for
-								{{ form.durationMonths }} months), cancellation policy, and that all
+								{{ form.durationWeeks }} {{ form.paymentSchedule === 'Monthly' ? 'months' : 'weeks' }}), cancellation policy, and that all
 								items will be reserved until full payment is received.
 							</span>
 						</label>
@@ -1204,7 +1221,7 @@
 
 				<!-- Footer -->
 				<div
-					class="flex items-center justify-between px-6 py-4 border-t border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-gray-900/30"
+					class="flex items-center justify-between px-6 py-4 border-t border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-gray-900/30 rounded-b-3xl"
 				>
 					<div class="text-xs text-gray-500 dark:text-gray-400">
 						<span v-if="selectedItems.length"
@@ -1214,14 +1231,14 @@
 					<div class="flex items-center gap-3">
 						<button
 							@click="close"
-							class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+							class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition"
 						>
 							Cancel
 						</button>
 						<button
-							@click="proceedToPayment"
+							@click="createLayaway"
 							:disabled="submitting || !canSubmit"
-							class="px-6 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2"
+							class="px-6 py-2 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:bg-[#c9a432] disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2"
 						>
 							<svg
 								v-if="submitting"
@@ -1249,16 +1266,6 @@
 				</div>
 			</div>
 		</div>
-		<!-- Payment Sidebar (Draft Mode) -->
-		<LayawayPaymentModal
-			v-if="showPaymentSidebar"
-			:show="showPaymentSidebar"
-			layawayId="New Layaway"
-			:balanceAmount="form.deposit"
-			draftMode
-			@close="showPaymentSidebar = false"
-			@success="handlePrePaymentSuccess"
-		/>
 	</component>
 </template>
 
@@ -1267,26 +1274,25 @@ import { computed, onBeforeUnmount, onMounted, ref, watch, nextTick } from 'vue'
 import { createResource, createDocumentResource } from 'frappe-ui'
 import { useSessionStore } from '@/stores/session.js'
 import { useCartStore } from '@/stores/cart.js'
-import LayawayPaymentModal from '@/components/LayawayPaymentModal.vue'
 
 const props = defineProps({
 	show: { type: Boolean, default: false },
 	inlineMode: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['close', 'created'])
+const emit = defineEmits(['close', 'created', 'proceedToPayment'])
 const session = useSessionStore()
 const cartStore = useCartStore()
 
 // UI State
 const submitting = ref(false)
-const showPaymentSidebar = ref(false)
 const isNewCustomerMode = ref(false)
 const showIdScanner = ref(false)
 const showSerialInput = ref(false)
 const isScanningBarcode = ref(false)
 const hasNominee = ref(false)
 const showCustomerDropdown = ref(false)
+const storeTaxDetails = ref(null)
 
 // Search State
 const customerSearch = ref('')
@@ -1348,6 +1354,12 @@ watch(() => props.show, (newVal) => {
 				selectedCustomer.value = cartStore.customer
 				isNewCustomerMode.value = false
 			}
+
+			// Auto-apply 10% deposit and fetch tax details
+			nextTick(() => {
+				form.value.deposit = minDeposit.value
+				fetchStoreTaxDetails()
+			})
 		}
 	} else {
 		// Reset logic... but we already have a close method for reset
@@ -1367,10 +1379,9 @@ const form = ref({
 	startDate: getTodayDate(),
 	status: 'Active',
 	paymentSchedule: 'Monthly',
-	durationMonths: 3,
+	durationWeeks: 4,
 	deposit: 0,
 	taxRate: 0,
-	paymentMethod: '',
 	notes: '',
 	agreedToTerms: false,
 	address: '',
@@ -1418,17 +1429,17 @@ const minDeposit = computed(() => {
 })
 
 const numberOfPayments = computed(() => {
-	const months = form.value.durationMonths || 3
+	const val = form.value.durationWeeks
 	const schedule = form.value.paymentSchedule
 	switch (schedule) {
 		case 'Weekly':
-			return months * 4
+			return val
 		case 'Bi-Weekly':
-			return months * 2
+			return Math.ceil(val / 2)
 		case 'Monthly':
-			return months
+			return val // In monthly mode, durationWeeks is used as durationMonths
 		default:
-			return months * 4
+			return val
 	}
 })
 
@@ -1477,15 +1488,27 @@ const canSubmit = computed(() => {
 		selectedItems.value.length > 0 &&
 		form.value.deposit >= minDeposit.value &&
 		form.value.deposit < totalAmount.value &&
-		form.value.durationMonths > 0 &&
+		form.value.durationWeeks > 0 &&
 		form.value.startDate &&
 		form.value.agreedToTerms
 	)
 })
 
+watch(
+	() => form.value.paymentSchedule,
+	(newVal) => {
+		if (newVal === 'Monthly') {
+			form.value.durationWeeks = 3 // 3 months default
+		} else {
+			form.value.durationWeeks = 4 // 4 weeks default
+		}
+	}
+)
+
+// Watchers
 // Resources
 const searchCustomersResource = createResource({
-	url: 'frappe.client.get_list',
+	url: 'zevar_core.api.customer.search_customers',
 	auto: false,
 })
 
@@ -1504,15 +1527,31 @@ const createLayawayResource = createResource({
 	auto: false,
 })
 
-const processPaymentResource = createResource({
-	url: 'zevar_core.api.layaway.process_layaway_payment',
+const storeTaxResource = createResource({
+	url: 'zevar_core.api.tax.get_tax_details_by_warehouse',
 	auto: false,
 })
 
 // Functions
 function formatPrice(price) {
 	if (price == null) return '0.00'
-	return Number(price).toFixed(2)
+	return Number(price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+async function fetchStoreTaxDetails() {
+	if (!session.currentWarehouse) return
+	try {
+		const result = await storeTaxResource.submit({
+			warehouse: session.currentWarehouse,
+		})
+		const details = result?.message ?? result
+		if (details && details.county_tax_rate) {
+			storeTaxDetails.value = details
+			form.value.taxRate = details.county_tax_rate
+		}
+	} catch (error) {
+		console.error('Failed to fetch store tax details:', error)
+	}
 }
 
 function unwrapResponse(result) {
@@ -1528,20 +1567,15 @@ async function searchCustomers() {
 	clearTimeout(customerSearchTimer)
 	customerSearchTimer = setTimeout(async () => {
 		try {
-			const result = unwrapResponse(
-				await searchCustomersResource.submit({
-					doctype: 'Customer',
-					fields: ['name', 'customer_name', 'mobile_no', 'email_id', 'address_display'],
-					or_filters: [
-						['name', 'like', `%${customerSearch.value}%`],
-						['customer_name', 'like', `%${customerSearch.value}%`],
-						['mobile_no', 'like', `%${customerSearch.value}%`],
-						['email_id', 'like', `%${customerSearch.value}%`]
-					],
-					limit_page_length: 10,
-				})
-			)
-			customerResults.value = result || []
+			const customers = await searchCustomersResource.submit({
+				query: customerSearch.value,
+			})
+			const list = customers || []
+			customerResults.value = list.map(c => ({
+				...c,
+				name: c.name || c.customer_name,
+				customer_name: c.display_name || c.customer_name,
+			}))
 		} catch (error) {
 			console.error('Customer search failed:', error)
 		}
@@ -1613,6 +1647,14 @@ function removeItem(index) {
 	}
 }
 
+// Watch duration to update deposit if changed significantly? 
+// Actually 10% should be dynamic but let user override.
+watch([subtotal, () => form.value.taxRate], () => {
+	if (form.value.deposit === 0 || form.value.deposit < minDeposit.value) {
+		form.value.deposit = minDeposit.value
+	}
+})
+
 function calculateTotals() {
 	// Triggered by qty change - computed properties auto-update
 }
@@ -1677,16 +1719,6 @@ function applyIdData() {
 	showIdScanner.value = false
 }
 
-function proceedToPayment() {
-	if (!canSubmit.value) return
-	showPaymentSidebar.value = true
-}
-
-async function handlePrePaymentSuccess(paymentData) {
-	showPaymentSidebar.value = false
-	await createLayaway(paymentData.payments)
-}
-
 // Create Customer
 async function createNewCustomer() {
 	try {
@@ -1710,7 +1742,7 @@ async function createNewCustomer() {
 	}
 }
 
-async function createLayaway(payments) {
+async function createLayaway() {
 	if (!canSubmit.value) return
 
 	submitting.value = true
@@ -1723,8 +1755,11 @@ async function createLayaway(payments) {
 			customerName = await createNewCustomer()
 		}
 
-		// Convert weeks to months
-		const durationMonths = Math.max(1, form.value.durationMonths || 3)
+		// Duration months logic
+		const durationMonths =
+			form.value.paymentSchedule === 'Monthly'
+				? form.value.durationWeeks // Actually months in this mode
+				: Math.max(1, Math.round(form.value.durationWeeks / 4))
 
 		// Prepare items
 		const items = selectedItems.value.map((item) => ({
@@ -1749,8 +1784,7 @@ async function createLayaway(payments) {
 			notes += `\n\nNominee: ${nominee.value.name} (${nominee.value.relationship || 'N/A'})`
 			if (nominee.value.phone) notes += ` - ${nominee.value.phone}`
 		}
-
-		const rawResult = await createLayawayResource.submit({
+		const payload = {
 			customer: customerName,
 			items: JSON.stringify(items),
 			deposit_amount: form.value.deposit,
@@ -1765,48 +1799,12 @@ async function createLayaway(payments) {
 			customer_email: isNewCustomerMode.value
 				? newCustomer.value.email
 				: form.value.email || selectedCustomer.value?.email_id,
-		})
-
-		const result = rawResult?.message ?? rawResult
-
-		if (result?.success || result?.layaway_id) {
-			// Process the collected payments
-			if (payments && payments.length > 0) {
-				for (const payment of payments) {
-					await processPaymentResource.submit({
-						layaway_id: result.layaway_id,
-						payment_amount: payment.amount,
-						mode_of_payment: payment.mode_of_payment || payment.mode,
-					})
-				}
-			}
-
-			emit('created', result)
-			close()
 		}
+
+		emit('proceedToPayment', payload)
+		// Do not clear cart or close yet, Layaway.vue will handle it
 	} catch (error) {
-		console.error('Failed to create layaway:', error)
-		let errorMsg = ''
-		if (error?._server_messages) {
-			try {
-				const msgs = JSON.parse(error._server_messages)
-				errorMsg = msgs
-					.map((m) => {
-						try {
-							return JSON.parse(m).message
-						} catch {
-							return m
-						}
-					})
-					.join('\n')
-			} catch {
-				errorMsg = String(error._server_messages)
-			}
-		} else {
-			errorMsg = error?.message || error?.exc || 'Unknown error'
-		}
-		errorMsg = errorMsg.replace(/<[^>]+>/g, '')
-		alert('Failed to create layaway: ' + errorMsg)
+		console.error('Failed to prepare layaway payload:', error)
 	} finally {
 		submitting.value = false
 	}
@@ -1856,11 +1854,10 @@ function close() {
 		email: '',
 		startDate: getTodayDate(),
 		status: 'Active',
-		paymentSchedule: 'Monthly',
-		durationMonths: 3,
+		paymentSchedule: 'Weekly',
+		durationWeeks: 4,
 		deposit: 0,
 		taxRate: 0,
-		paymentMethod: '',
 		notes: '',
 		agreedToTerms: false,
 		address: '',

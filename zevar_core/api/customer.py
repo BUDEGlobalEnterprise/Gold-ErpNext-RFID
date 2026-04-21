@@ -22,7 +22,24 @@ def search_customers(query: str):
 	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
 
 	if not query or len(query) < 2:
-		return []
+		# Return all active customers (limited) when no query provided
+		customers = frappe.db.sql(
+			"""
+			SELECT
+				name as customer_name,
+				customer_name as display_name,
+				mobile_no,
+				email_id,
+				customer_group,
+				territory
+			FROM `tabCustomer`
+			WHERE disabled = 0
+			ORDER BY customer_name
+			LIMIT 100
+		""",
+			as_dict=True,
+		)
+		return customers
 
 	query_lower = f"%{query.lower()}%"
 

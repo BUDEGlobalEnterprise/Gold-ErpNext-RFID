@@ -63,6 +63,27 @@ export const useUIStore = defineStore('ui', () => {
 		sortBy.value = ''
 	}
 
+	const layawayPayment = ref({
+		show: false,
+		layawayId: null,
+		balance: 0,
+		draftPayload: null,
+	})
+
+	function openLayawayPayment(layawayId, balance, draftPayload = null) {
+		layawayPayment.value = {
+			show: true,
+			layawayId,
+			balance,
+			draftPayload,
+		}
+	}
+
+	function closeLayawayPayment() {
+		layawayPayment.value.show = false
+		layawayPayment.value.draftPayload = null
+	}
+
 	return {
 		searchQuery,
 		activeFilters,
@@ -74,5 +95,8 @@ export const useUIStore = defineStore('ui', () => {
 		setFilter,
 		setSort,
 		resetFilters,
+		layawayPayment,
+		openLayawayPayment,
+		closeLayawayPayment,
 	}
 })

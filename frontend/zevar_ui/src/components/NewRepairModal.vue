@@ -69,7 +69,7 @@
 									>
 										<span>{{ c.customer_name }}</span>
 										<span class="text-gray-400 text-xs">{{
-											c.phone || c.mobile || ''
+											c.mobile_no || c.phone || ''
 										}}</span>
 									</button>
 								</div>
@@ -745,24 +745,27 @@ function searchCustomers() {
 		return
 	}
 	searchTimer = setTimeout(async () => {
-		const results = await call('frappe.client.get_list', {
-			doctype: 'Customer',
-			or_filters: {
-				customer_name: ['like', `%${customerSearch.value}%`],
-				phone: ['like', `%${customerSearch.value}%`],
-				mobile: ['like', `%${customerSearch.value}%`],
-			},
-			fields: ['name', 'customer_name', 'phone', 'mobile'],
-			limit_page_length: 10,
-		})
-		customerResults.value = results || []
+		try {
+			const results = await call('zevar_core.api.customer.search_customers', {
+				query: customerSearch.value,
+			})
+			const list = results || []
+			customerResults.value = list.map(c => ({
+				...c,
+				name: c.name || c.customer_name,
+				customer_name: c.display_name || c.customer_name,
+			}))
+		} catch (e) {
+			console.error('Customer search failed:', e)
+			customerResults.value = []
+		}
 	}, 300)
 }
 
 async function selectCustomer(customer) {
 	form.value.customer = customer.name
 	form.value.customer_name = customer.customer_name
-	form.value.customer_phone = customer.phone || customer.mobile || ''
+	form.value.customer_phone = customer.mobile_no || customer.phone || customer.mobile || ''
 	customerSearch.value = customer.customer_name
 	customerResults.value = []
 	// Load customer repair history

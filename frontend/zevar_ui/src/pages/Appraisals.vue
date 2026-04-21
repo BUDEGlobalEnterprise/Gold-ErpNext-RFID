@@ -186,112 +186,34 @@ const statusTabs = [
 	{ value: 'Completed', label: 'Completed' },
 ]
 
-const appraisalData = ref([
-	{
-		id: 1,
-		description: 'Antique Diamond Tiara',
-		customer: 'Priya Sharma',
-		date: 'Apr 7, 2026',
-		metal: 'Yellow Gold',
-		purity: '22K',
-		weight: 38.5,
-		estimatedValue: 45000,
-		certification: 'GIA',
-		certNumber: 'GIA-2026-44821',
-		status: 'In Progress',
-	},
-	{
-		id: 2,
-		description: 'Art Deco Emerald Ring',
-		customer: 'Michael Chen',
-		date: 'Apr 6, 2026',
-		metal: 'Platinum',
-		purity: '950',
-		weight: 8.2,
-		estimatedValue: 18500,
-		certification: 'AGS',
-		certNumber: 'AGS-78432',
-		status: 'Completed',
-	},
-	{
-		id: 3,
-		description: 'Kashmir Sapphire Pendant',
-		customer: 'Sarah Williams',
-		date: 'Apr 5, 2026',
-		metal: 'White Gold',
-		purity: '18K',
-		weight: 12.4,
-		estimatedValue: 32000,
-		certification: 'GIA',
-		certNumber: 'GIA-2026-44956',
-		status: 'Pending',
-	},
-	{
-		id: 4,
-		description: 'Victorian Pearl Necklace',
-		customer: 'Raj Patel',
-		date: 'Apr 4, 2026',
-		metal: 'Yellow Gold',
-		purity: '18K',
-		weight: 42.0,
-		estimatedValue: 15800,
-		certification: null,
-		certNumber: '',
-		status: 'Pending',
-	},
-	{
-		id: 5,
-		description: 'Burmese Ruby Suite (Ring + Earrings)',
-		customer: 'Ananya Gupta',
-		date: 'Apr 3, 2026',
-		metal: 'Yellow Gold',
-		purity: '22K',
-		weight: 18.6,
-		estimatedValue: 28400,
-		certification: 'IGI',
-		certNumber: 'IGI-91205',
-		status: 'Completed',
-	},
-	{
-		id: 6,
-		description: 'Estate Diamond Tennis Bracelet',
-		customer: 'David Kim',
-		date: 'Apr 2, 2026',
-		metal: 'White Gold',
-		purity: '14K',
-		weight: 15.2,
-		estimatedValue: 12200,
-		certification: 'GIA',
-		certNumber: 'GIA-2026-45102',
-		status: 'In Progress',
-	},
-	{
-		id: 7,
-		description: 'Mughal-Era Gold Bangle Pair',
-		customer: 'Ahmed Hassan',
-		date: 'Apr 1, 2026',
-		metal: 'Yellow Gold',
-		purity: '24K',
-		weight: 85.0,
-		estimatedValue: 62000,
-		certification: null,
-		certNumber: '',
-		status: 'Pending',
-	},
-	{
-		id: 8,
-		description: 'Colombian Emerald Brooch',
-		customer: 'Jennifer Lee',
-		date: 'Mar 31, 2026',
-		metal: 'Yellow Gold',
-		purity: '18K',
-		weight: 22.8,
-		estimatedValue: 24600,
-		certification: 'EGL',
-		certNumber: 'EGL-EU-67890',
-		status: 'Completed',
-	},
-])
+import { createResource } from 'frappe-ui'
+
+const appraisalData = ref([])
+
+const appraisalResource = createResource({
+	type: 'list',
+	doctype: 'Jewelry Appraisal',
+	fields: ['*'],
+	limit: 100,
+	onSuccess(data) {
+		appraisalData.value = data.map(a => ({
+			id: a.name,
+			description: a.description || a.item_description || a.name,
+			customer: a.customer || a.customer_name || 'Unknown',
+			date: a.creation ? new Date(a.creation).toLocaleDateString() : 'Unknown',
+			metal: a.metal || '-',
+			purity: a.purity || '-',
+			weight: a.weight || a.gross_weight || 0,
+			estimatedValue: a.estimated_value || a.appraised_value || 0,
+			certification: a.certification || null,
+			certNumber: a.certification_number || '',
+			status: a.status || 'Pending'
+		}))
+	}
+})
+
+appraisalResource.fetch()
+
 
 const totalAppraised = computed(() =>
 	appraisalData.value
