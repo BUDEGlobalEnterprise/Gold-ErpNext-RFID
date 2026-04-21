@@ -126,9 +126,10 @@
 			</div>
 
 			<!-- Sales Table -->
-			<div
-				class="flex-1 overflow-y-auto bg-white dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700/50"
-			>
+			<div class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar flex flex-col">
+				<div
+					class="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700/50 mb-6"
+				>
 				<div class="overflow-x-auto">
 					<table class="w-full">
 						<thead>
@@ -275,47 +276,48 @@
 						</tbody>
 					</table>
 				</div>
-			</div>
+				</div>
 
-			<!-- Load More Pagination -->
-			<div
-				v-if="pagination.page < pagination.total_pages"
-				class="flex items-center justify-center pt-6"
-			>
-				<button
-					@click="loadMore"
-					:disabled="loading"
-					class="px-6 py-2.5 text-sm font-bold rounded-lg border-2 border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2"
+				<!-- Load More Pagination -->
+				<div
+					v-if="pagination.page < pagination.total_pages"
+					class="flex items-center justify-center pt-6 pb-8"
 				>
-					<svg
-						v-if="loading"
-						class="w-4 h-4 animate-spin"
-						fill="none"
-						viewBox="0 0 24 24"
+					<button
+						@click="loadMore"
+						:disabled="loading"
+						class="px-6 py-2.5 text-sm font-bold rounded-lg border-2 border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2"
 					>
-						<circle
-							class="opacity-25"
-							cx="12"
-							cy="12"
-							r="10"
-							stroke="currentColor"
-							stroke-width="4"
-						></circle>
-						<path
-							class="opacity-75"
-							fill="currentColor"
-							d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-						></path>
-					</svg>
-					{{ loading ? 'Loading...' : 'Load More' }}
-				</button>
-			</div>
+						<svg
+							v-if="loading"
+							class="w-4 h-4 animate-spin"
+							fill="none"
+							viewBox="0 0 24 24"
+						>
+							<circle
+								class="opacity-25"
+								cx="12"
+								cy="12"
+								r="10"
+								stroke="currentColor"
+								stroke-width="4"
+							></circle>
+							<path
+								class="opacity-75"
+								fill="currentColor"
+								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+							></path>
+						</svg>
+						{{ loading ? 'Loading...' : 'Load More' }}
+					</button>
+				</div>
 
-			<div
-				v-else-if="sales.length > 0"
-				class="text-center pt-6 pb-2 text-sm text-gray-500 dark:text-gray-400"
-			>
-				Showing all {{ sales.length }} transactions
+				<div
+					v-else-if="sales.length > 0"
+					class="text-center pt-6 pb-8 text-sm text-gray-500 dark:text-gray-400"
+				>
+					Showing all {{ sales.length }} transactions
+				</div>
 			</div>
 
 			<!-- Transaction Details Modal -->

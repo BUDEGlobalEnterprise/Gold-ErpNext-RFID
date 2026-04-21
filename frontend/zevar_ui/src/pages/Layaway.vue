@@ -1,5 +1,5 @@
 <template>
-	<AppLayout>
+	<AppLayout @layaway-created="onLayawayCreated">
 		<div v-if="!showCreateModal" class="h-full flex flex-col">
 			<!-- Page Header -->
 			<div class="flex items-center justify-between mb-6">
@@ -268,23 +268,25 @@
 		</div>
 
 		<!-- Create Layaway Inline View -->
-		<div v-else class="h-full flex flex-col">
+		<div v-else class="h-full flex flex-col p-2">
 			<div class="mb-4">
 				<button @click="closeCreateMode" class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center gap-1">
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
 					Back to Layaways
 				</button>
 			</div>
-			<div class="flex-1 overflow-hidden">
+			<div class="flex-1 overflow-hidden rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm">
 				<CreateLayawayModal
-					:show="showCreateModal"
-					inlineMode
-					@close="closeCreateMode"
-					@created="onLayawayCreated"
-				/>
+				:show="showCreateModal"
+				inlineMode
+				@close="closeCreateMode"
+				@created="onLayawayCreated"
+				@proceedToPayment="onProceedToPayment"
+			/>
 			</div>
 		</div>
 
+		<!-- Layaway Detail Modal -->
 		<!-- Layaway Detail Modal -->
 		<LayawayDetailModal
 			:show="showDetailModal"
@@ -293,15 +295,53 @@
 			@refresh="fetchLayaways"
 		/>
 
-		<!-- Layaway Payment Modal -->
-		<LayawayPaymentModal
-			v-if="showPaymentModal"
-			:show="showPaymentModal"
-			:layawayId="selectedLayaway"
-			:balanceAmount="paymentLayawayBalance"
-			@close="showPaymentModal = false"
-			@success="onPaymentSuccess"
-		/>
+		<!-- Layaway Success Confirmation Overlay -->
+		<Teleport to="body">
+			<Transition name="fade">
+				<div v-if="showSuccessConfirmation" class="fixed inset-0 z-[120] flex items-center justify-center p-4">
+					<div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" @click="dismissSuccess"></div>
+					<div class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl max-w-md w-full p-10 flex flex-col items-center text-center border border-transparent dark:border-white/10 animate-bounce-in">
+						<div class="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-6">
+							<svg class="w-10 h-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+							</svg>
+						</div>
+						<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Layaway Created!</h2>
+						<p class="text-gray-500 dark:text-gray-400 mb-6">Contract has been created and deposit payment recorded successfully.</p>
+
+						<div class="bg-gray-50 dark:bg-[#15171e] rounded-xl p-4 w-full mb-6 border border-gray-100 dark:border-white/5 space-y-2">
+							<div class="flex justify-between text-sm">
+								<span class="text-gray-500 dark:text-gray-400">Contract ID</span>
+								<span class="font-mono font-bold text-gray-900 dark:text-white">{{ successData?.layaway_id || '—' }}</span>
+							</div>
+							<div class="flex justify-between text-sm">
+								<span class="text-gray-500 dark:text-gray-400">Deposit Paid</span>
+								<span class="font-mono font-bold text-[#D4AF37]">{{ formatCurrency(successData?.deposit_amount) }}</span>
+							</div>
+							<div class="flex justify-between text-sm">
+								<span class="text-gray-500 dark:text-gray-400">Status</span>
+								<span class="font-bold text-green-600 dark:text-green-400">{{ successData?.status || 'Active' }}</span>
+							</div>
+						</div>
+
+						<div class="flex gap-3 w-full">
+							<button
+								@click="viewCreatedLayaway"
+								class="flex-1 py-3 rounded-xl font-bold text-sm bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 hover:bg-[#D4AF37]/20 transition"
+							>
+								View Details
+							</button>
+							<button
+								@click="dismissSuccess"
+								class="flex-1 py-3 rounded-xl font-bold text-sm bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black hover:bg-gray-800 dark:hover:bg-[#b5952f] transition"
+							>
+								Done
+							</button>
+						</div>
+					</div>
+				</div>
+			</Transition>
+		</Teleport>
 	</AppLayout>
 </template>
 
@@ -309,23 +349,24 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createResource } from 'frappe-ui'
+import { useUIStore } from '@/stores/ui.js'
 import AppLayout from '@/components/AppLayout.vue'
 import LayawayDetailModal from '@/components/LayawayDetailModal.vue'
 import CreateLayawayModal from '@/components/CreateLayawayModal.vue'
-import LayawayPaymentModal from '@/components/LayawayPaymentModal.vue'
 
 // Routing
 const route = useRoute()
 const router = useRouter()
+const ui = useUIStore()
 
 // State
 const loading = ref(false)
 const layaways = ref([])
 const showDetailModal = ref(false)
-const showPaymentModal = ref(false)
-const paymentLayawayBalance = ref(0)
+const showSuccessConfirmation = ref(false)
 const selectedLayaway = ref(null)
 const showCreateModal = ref(false)
+const successData = ref(null)
 const pagination = ref({ page: 1, total_pages: 1, total_count: 0 })
 
 const filters = ref({
@@ -415,20 +456,33 @@ function goToPage(page) {
 	fetchLayaways()
 }
 
-function onLayawayCreated(result) {
-	closeCreateMode()
-	fetchLayaways()
-	// Optionally show success message or navigate to the new layaway
-	if (result?.layaway_id) {
-		selectedLayaway.value = result.layaway_id
-		showDetailModal.value = true
-	}
+// Step 1: CreateLayawayModal emits proceedToPayment with the payload
+async function onProceedToPayment(payload) {
+	// Trigger global payment sidebar with draft payload
+	ui.openLayawayPayment(null, payload.deposit_amount || 0, payload)
 }
 
-function onPaymentSuccess() {
-	showPaymentModal.value = false
-	showDetailModal.value = true
+// Step 2: AppLayout emits layaway-created after sidebar payment success
+function onLayawayCreated(result) {
+	successData.value = result
+	selectedLayaway.value = result.layaway_id
+	closeCreateMode()
 	fetchLayaways()
+	showSuccessConfirmation.value = true
+}
+
+function viewCreatedLayaway() {
+	showSuccessConfirmation.value = false
+	if (successData.value?.layaway_id) {
+		selectedLayaway.value = successData.value.layaway_id
+		showDetailModal.value = true
+	}
+	successData.value = null
+}
+
+function dismissSuccess() {
+	showSuccessConfirmation.value = false
+	successData.value = null
 }
 
 function closeCreateMode() {
@@ -446,3 +500,22 @@ onMounted(() => {
 	}
 })
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+	transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+	opacity: 0;
+}
+@keyframes bounce-in {
+	0% { transform: scale(0.9); opacity: 0; }
+	50% { transform: scale(1.02); }
+	100% { transform: scale(1); opacity: 1; }
+}
+.animate-bounce-in {
+	animation: bounce-in 0.4s ease-out;
+}
+</style>

@@ -33,7 +33,12 @@ from zevar_core.api.helpdesk import (
 from zevar_core.api.item_entry import get_next_vendor_sku, quick_add_item
 from zevar_core.api.payroll import get_payroll_summary, get_salary_slip_details, get_salary_slips
 from zevar_core.api.pos import calculate_invoice_totals, create_pos_invoice, get_pos_settings
-from zevar_core.api.pricing import get_item_price, refresh_gold_rates
+from zevar_core.api.pricing import (
+	get_item_price,
+	get_live_metal_rates,
+	get_live_rate_history,
+	refresh_gold_rates,
+)
 from zevar_core.api.quick_layaway import (
 	create_quick_layaway as create_quick_layaway_shim,
 )
@@ -96,6 +101,8 @@ __all__ = [
 	"get_issue_types",
 	"get_item_details",
 	"get_item_price",
+	"get_live_metal_rates",
+	"get_live_rate_history",
 	"get_layaway_preview_shim",
 	"get_multi_store_stats",
 	"get_next_vendor_sku",

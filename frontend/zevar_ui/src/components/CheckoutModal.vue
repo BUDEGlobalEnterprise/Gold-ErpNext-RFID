@@ -710,7 +710,7 @@
 									}}
 								</span>
 								<span v-else
-									>Confirm Layaway —
+									>Proceed to Payment —
 									{{ formatCurrency(layawayDeposit) }} Deposit</span
 								>
 							</button>
@@ -903,12 +903,14 @@ import { ref, watch, computed } from 'vue'
 import { createResource } from 'frappe-ui'
 import { useCartStore } from '@/stores/cart.js'
 import { useSessionStore } from '@/stores/session.js'
+import { useUIStore } from '@/stores/ui.js'
 import CustomerSelector from '@/components/CustomerSelector.vue'
 
 const props = defineProps(['show'])
 const emit = defineEmits(['close'])
 const cart = useCartStore()
 const session = useSessionStore()
+const ui = useUIStore()
 
 // State
 const processing = ref(false)
@@ -936,11 +938,11 @@ const salespersonSplitTotal = computed(() => {
 
 // Layaway computeds
 const minimumDeposit = computed(() => {
-	return Number((cart.subtotal * 0.1).toFixed(2))
+	return Number((grandTotalWithTaxExempt.value * 0.1).toFixed(2))
 })
 
 const layawayMonthlyPayment = computed(() => {
-	const remaining = cart.subtotal - (layawayDeposit.value || 0)
+	const remaining = grandTotalWithTaxExempt.value - (layawayDeposit.value || 0)
 	const months = (layawayDuration.value || 6) - 1
 	if (remaining <= 0 || months <= 0) return 0
 	return Number((remaining / months).toFixed(2))
@@ -1226,67 +1228,35 @@ async function handlePayment() {
 async function handleLayaway() {
 	if (!canSubmitLayaway.value) return
 
-	processing.value = true
-	try {
-		const result = await cart.submitLayaway(layawayDeposit.value, layawayDuration.value, {
-			warehouse: session.currentWarehouse,
-		})
-		// Handle all possible response shapes from frappe-ui
-		const data = result?.message || result?.data || result
-		if (data?.layaway_id) {
-			lastOrderId.value = data.layaway_id
-		} else if (data?.contract_name) {
-			lastOrderId.value = data.contract_name
-		} else if (typeof data === 'string') {
-			lastOrderId.value = data
-		}
-		isLayawaySuccess.value = true
-		step.value = 'success'
-	} catch (e) {
-		// Extract meaningful error from Frappe's response structure
-		let errorMsg = ''
-		if (e?._server_messages) {
-			try {
-				const msgs = JSON.parse(e._server_messages)
-				errorMsg = msgs
-					.map((m) => {
-						try {
-							const parsed = JSON.parse(m)
-							return parsed.message || parsed.error || m
-						} catch {
-							return m
-						}
-					})
-					.filter(Boolean)
-					.join('\n')
-			} catch {
-				errorMsg = String(e._server_messages)
-			}
-		} else if (e?.response?.data?._server_messages) {
-			try {
-				const msgs = JSON.parse(e.response.data._server_messages)
-				errorMsg = msgs
-					.map((m) => {
-						try {
-							return JSON.parse(m).message
-						} catch {
-							return m
-						}
-					})
-					.join('\n')
-			} catch {
-				errorMsg = String(e.response.data._server_messages)
-			}
-		} else if (e?.response?.data?.message) {
-			errorMsg = e.response.data.message
-		} else {
-			errorMsg = e?.message || e?.error_message || String(e)
-		}
-		errorMsg = errorMsg.replace(/<[^>]+>/g, '')
-		alert('Layaway failed: ' + errorMsg)
-	} finally {
-		processing.value = false
+	const itemsPayload = cart.items.map((i) => ({
+		item_code: i.item_code,
+		qty: i.qty || 1,
+		rate: i.amount || 0,
+		warehouse: session.currentWarehouse || undefined,
+	}))
+
+	const customerName =
+		cart.customerType === 'Walkin'
+			? 'Walk-In Customer'
+			: cart.customer?.name || 'Walk-In Customer'
+
+	const payload = {
+		customer: customerName,
+		items: JSON.stringify(itemsPayload),
+		deposit_amount: layawayDeposit.value,
+		duration_months: layawayDuration.value,
+		warehouse: session.currentWarehouse || undefined,
+		store_location: session.currentStoreLocation || undefined,
+		customer_contact: cart.customer?.mobile_no,
+		customer_email: cart.customer?.email_id,
 	}
+
+	// Trigger global payment sidebar with draft payload
+	emit('close')
+	ui.openLayawayPayment(null, layawayDeposit.value, payload)
+	
+	// Reset for next time
+	step.value = 'review'
 }
 
 function close() {

@@ -118,7 +118,7 @@ def _serialize_layaway_row(layaway) -> dict:
 	}
 
 
-@frappe.whitelist(methods=["GET"])
+@frappe.whitelist(methods=["GET", "POST"])
 def get_layaway_hub_stats() -> dict:
 	"""Return aggregate stats for the Layaway Hub dashboard."""
 	_enforce_layaway_access()
@@ -149,7 +149,7 @@ def get_layaway_hub_stats() -> dict:
 	}
 
 
-@frappe.whitelist(methods=["GET"])
+@frappe.whitelist(methods=["GET", "POST"])
 def get_all_layaways(
 	status: str | None = None,
 	customer: str | None = None,
@@ -406,6 +406,7 @@ def create_layaway(
 	customer_email: str | None = None,
 	cancellation_fee_percent: float | None = None,
 	auto_forfeit_days: int | None = None,
+	payments: str | list | None = None,
 ) -> dict:
 	_enforce_layaway_access()
 
@@ -493,15 +494,16 @@ def create_layaway(
 
 		doc.total_amount = total_amount
 		doc.deposit_amount = deposit
-		doc.balance_amount = total_amount - deposit
+		doc.balance_amount = total_amount
+		doc.total_paid = 0
 
 		doc.append(
 			"payment_schedule",
 			{
 				"payment_date": today(),
 				"expected_amount": deposit,
-				"paid_amount": deposit,
-				"status": "Paid",
+				"paid_amount": 0,
+				"status": "Pending",
 			},
 		)
 
@@ -525,10 +527,20 @@ def create_layaway(
 
 		_reserve_inventory(doc)
 
+		# If payments are provided, process them immediately
+		payment_results = []
+		if payments:
+			payments_list = frappe.parse_json(payments) if isinstance(payments, str) else payments
+			if payments_list:
+				res = process_split_layaway_payment(doc.name, payments_list)
+				payment_results = res.get("payment_breakdown", [])
+
 		return {
 			"success": True,
 			"layaway_id": doc.name,
-			"message": "Layaway created successfully",
+			"deposit_amount": doc.deposit_amount,
+			"payment_results": payment_results,
+			"message": "Layaway created and deposit recorded successfully",
 		}
 	except frappe.ValidationError:
 		frappe.db.rollback()
@@ -536,6 +548,7 @@ def create_layaway(
 	except Exception as e:
 		frappe.db.rollback()
 		frappe.log_error("Layaway Creation Failed", frappe.get_traceback())
+		frappe.throw(_("Could not create layaway: {0}").format(str(e)))
 		frappe.throw(_("Failed to create layaway: {0}").format(str(e)))
 
 
@@ -709,7 +722,6 @@ def process_layaway_payment(
 					row.status = "Paid"
 
 		doc.balance_amount = flt(doc.balance_amount) - amount
-		doc.deposit_amount = flt(doc.deposit_amount) + amount
 		doc.total_paid = flt(doc.total_paid) + amount
 		doc.last_payment_date = nowdate()
 		doc.last_payment_amount = amount
@@ -749,7 +761,7 @@ def cancel_layaway(layaway_id: str, cancellation_reason: str | None = None) -> d
 	if doc.status not in ("Active", "Overdue"):
 		frappe.throw(_("Layaway is {0}, cannot cancel.").format(doc.status))
 
-	if flt(doc.deposit_amount) <= 0:
+	if flt(doc.total_paid) <= 0:
 		frappe.throw(_("No payments to refund."))
 
 	try:
@@ -757,7 +769,7 @@ def cancel_layaway(layaway_id: str, cancellation_reason: str | None = None) -> d
 		if cancellation_fee <= 0 and flt(getattr(doc, "cancellation_fee_percent", 0)) > 0:
 			cancellation_fee = flt(doc.total_paid) * (flt(doc.cancellation_fee_percent) / 100)
 
-		refund_amount = flt(doc.deposit_amount) - cancellation_fee
+		refund_amount = flt(doc.total_paid) - cancellation_fee
 		if refund_amount < 0:
 			refund_amount = 0
 
@@ -1039,7 +1051,6 @@ def process_split_layaway_payment(
 					row.status = "Paid"
 
 		doc.balance_amount = flt(doc.balance_amount) - total_payment
-		doc.deposit_amount = flt(doc.deposit_amount) + total_payment
 		doc.total_paid = flt(doc.total_paid) + total_payment
 		doc.last_payment_date = nowdate()
 		doc.last_payment_amount = total_payment
@@ -1110,7 +1121,7 @@ def check_overdue_and_forfeit():
 
 def _auto_forfeit_layaway(doc):
 	cancellation_fee = flt(doc.total_paid)
-	refund_amount = flt(doc.deposit_amount) - cancellation_fee
+	refund_amount = flt(doc.total_paid) - cancellation_fee
 
 	if refund_amount > 0:
 		gc = frappe.new_doc("Gift Card")
