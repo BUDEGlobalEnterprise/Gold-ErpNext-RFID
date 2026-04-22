@@ -51,6 +51,69 @@
 					<p class="tile-hero-sub">Point of Sale Terminal</p>
 				</div>
 			</router-link>
+<br>
+			<!-- Section: Primary Operations (Legacy Mapping) -->
+			<div class="admin-section">
+				<h4 class="section-label">Primary Operations</h4>
+				<div class="tile-row-4">
+					<!-- End Of Day Reports -->
+					<router-link to="/reports" class="tile-secondary">
+						<div class="tile-icon-sm" style="background: #3B82F6">
+							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><polyline points="14,2 14,8 20,8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+						</div>
+						<h3 class="tile-title-sm">End Of Day Reports</h3>
+					</router-link>
+					<!-- Customer List -->
+					<router-link to="/customers" class="tile-secondary">
+						<div class="tile-icon-sm" style="background: #10B981">
+							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 00-3-3.87"></path><path d="M16 3.13a4 4 0 010 7.75"></path></svg>
+						</div>
+						<h3 class="tile-title-sm">Customer List</h3>
+					</router-link>
+					<!-- Source Management -->
+					<router-link to="/catalogues" class="tile-secondary">
+						<div class="tile-icon-sm" style="background: #8B5CF6">
+							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+						</div>
+						<h3 class="tile-title-sm">Source Management</h3>
+					</router-link>
+					<!-- Reports -->
+					<router-link to="/reports" class="tile-secondary">
+						<div class="tile-icon-sm" style="background: #EC4899">
+							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+						</div>
+						<h3 class="tile-title-sm">Reports</h3>
+					</router-link>
+					<!-- Inventory -->
+					<router-link to="/inventory" class="tile-secondary">
+						<div class="tile-icon-sm" style="background: #64748B">
+							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"></path><polyline points="3.27,6.96 12,12.01 20.73,6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+						</div>
+						<h3 class="tile-title-sm">Inventory</h3>
+					</router-link>
+					<!-- Time Clock -->
+					<a href="/employee-portal" class="tile-secondary">
+						<div class="tile-icon-sm" style="background: #F43F5E">
+							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+						</div>
+						<h3 class="tile-title-sm">Time Clock</h3>
+					</a>
+					<!-- Back Up -->
+					<router-link to="/support" class="tile-secondary">
+						<div class="tile-icon-sm" style="background: #6B7280">
+							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+						</div>
+						<h3 class="tile-title-sm">Back Up</h3>
+					</router-link>
+					<!-- Repairs -->
+					<router-link to="/repairs" class="tile-secondary">
+						<div class="tile-icon-sm" style="background: #6366F1">
+							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"></path></svg>
+						</div>
+						<h3 class="tile-title-sm">Repairs</h3>
+					</router-link>
+				</div>
+			</div>
 
 			<!-- Section: Core Operations -->
 			<div class="admin-section">
