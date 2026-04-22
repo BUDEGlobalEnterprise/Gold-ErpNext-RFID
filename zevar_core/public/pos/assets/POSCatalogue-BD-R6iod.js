@@ -1,1 +1,0 @@
-import{A as t}from"./AppLayout-BMSLiSQe.js";import{C as e}from"./CatalogueView-g8pm3DHV.js";import{o,q as a,p as r,n as p}from"./index-Cyejrwhd.js";import"./ui-CEtK4Gbs.js";import"./gold-CwlqK1Vs.js";import"./ProductModal-BMIq_kM8.js";const f={__name:"POSCatalogue",setup(m){return(s,i)=>(o(),a(t,null,{default:r(()=>[p(e,{isEmbedded:!0})]),_:1}))}};export{f as default};

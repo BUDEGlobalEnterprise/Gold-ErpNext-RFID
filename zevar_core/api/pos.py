@@ -222,7 +222,10 @@ def create_pos_invoice(
 			si.taxes_and_charges = tax_template
 			si.custom_no_tax_override = 0
 		else:
-			si.custom_no_tax_override = 0
+			# Prevent auto-fetching company default if store has no tax template
+			si.taxes = []
+			si.taxes_and_charges = ""
+			si.custom_no_tax_override = 1
 
 		for sp in salesperson_data:
 			si.append(
@@ -357,6 +360,19 @@ def get_pos_settings(warehouse: str | None = None):
 	Returns:
 	    POS settings dictionary
 	"""
+	# Fallback to active store location warehouse if not provided
+	if not warehouse:
+		store_loc_wh = frappe.db.get_value("Store Location", {"is_active": 1}, "default_warehouse")
+		if store_loc_wh:
+			warehouse = store_loc_wh
+		else:
+			# Try to get default warehouse from company
+			company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value(
+				"Global Defaults", "default_company"
+			)
+			if company:
+				warehouse = frappe.db.get_value("Company", company, "default_warehouse")
+
 	# Determine tax rate: Store Location > hardcoded fallback
 	tax_rate = 0.0
 	if warehouse:
