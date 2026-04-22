@@ -25,6 +25,7 @@ export const useGoldStore = defineStore('gold', () => {
 
 	const fetchRates = createResource({
 		url: 'zevar_core.api.pricing.get_live_metal_rates',
+		method: 'GET',
 		onSuccess(data) {
 			const result = data?.message || data
 			if (!result || !result.rates) return
