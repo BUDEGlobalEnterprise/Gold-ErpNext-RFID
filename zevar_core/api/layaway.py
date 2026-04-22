@@ -4,13 +4,13 @@ Layaway API - Contract creation, payments, and cancellation
 
 import frappe
 from frappe import _
-from frappe.utils import add_months, flt, getdate, nowdate, today, add_days
+from frappe.utils import add_days, add_months, flt, getdate, nowdate, today
 
 from zevar_core.constants import (
 	DEFAULT_AUTO_FORFEIT_DAYS,
 	DEFAULT_CANCELLATION_FEE_PERCENT,
-	LAYAWAY_DURATION_OPTIONS,
 	LAYAWAY_DURATION_LABELS,
+	LAYAWAY_DURATION_OPTIONS,
 	LAYAWAY_PLAN_SUGGESTIONS,
 	MAX_EXTENSIONS_ALLOWED,
 )
@@ -105,7 +105,7 @@ def _serialize_layaway_row(layaway) -> dict:
 		if getattr(layaway, "original_target_date", None)
 		else None,
 		"auto_forfeit_days": getattr(layaway, "auto_forfeit_days", DEFAULT_AUTO_FORFEIT_DAYS),
-		"inventory_reserved": int(getattr(layaway, "inventory_reserved", 0)),
+		"inventory_reserved": int(getattr(layaway, "inventory_reserved", None) or 0),
 		"creation": str(layaway.creation) if getattr(layaway, "creation", None) else None,
 		"item_count": frappe.db.count("Layaway Contract Item", filters={"parent": layaway.name}),
 		"is_overdue": _is_layaway_overdue(
@@ -226,7 +226,7 @@ def get_all_layaways(
 	}
 
 
-@frappe.whitelist(methods=["GET"])
+@frappe.whitelist(methods=["GET", "POST"])
 def search_layaway_contracts(
 	query: str | None = None, statuses: str | list | tuple | None = None, limit: int = 20
 ) -> list[dict]:
@@ -280,7 +280,7 @@ def search_layaway_contracts(
 	return [_serialize_layaway_row(contract) for contract in contracts]
 
 
-@frappe.whitelist(methods=["GET"])
+@frappe.whitelist(methods=["GET", "POST"])
 def get_layaway_details(layaway_id: str) -> dict:
 	"""Return full details of a Layaway Contract including items and schedule."""
 	_enforce_layaway_access()
@@ -342,7 +342,7 @@ def get_layaway_details(layaway_id: str) -> dict:
 		if getattr(doc, "original_target_date", None)
 		else None,
 		"auto_forfeit_days": getattr(doc, "auto_forfeit_days", DEFAULT_AUTO_FORFEIT_DAYS),
-		"inventory_reserved": int(getattr(doc, "inventory_reserved", 0)),
+		"inventory_reserved": int(getattr(doc, "inventory_reserved", None) or 0),
 		"max_extensions_allowed": MAX_EXTENSIONS_ALLOWED,
 		"notes": doc.notes,
 		"terms_accepted": int(doc.terms_accepted or 0),
@@ -871,7 +871,7 @@ def _release_inventory(doc) -> None:
 	frappe.db.set_value("Layaway Contract", doc.name, "inventory_reserved", 0)
 
 
-@frappe.whitelist(methods=["GET"])
+@frappe.whitelist(methods=["GET", "POST"])
 def suggest_layaway_plan(total_amount: float) -> dict:
 	_enforce_layaway_access()
 
@@ -1109,7 +1109,7 @@ def check_overdue_and_forfeit():
 				payment.status = "Overdue"
 
 		if has_overdue_payments:
-			forfeit_days = int(getattr(doc, "auto_forfeit_days", DEFAULT_AUTO_FORFEIT_DAYS))
+			forfeit_days = int(getattr(doc, "auto_forfeit_days", None) or DEFAULT_AUTO_FORFEIT_DAYS)
 			if days_overdue >= forfeit_days:
 				_auto_forfeit_layaway(doc)
 			else:

@@ -144,7 +144,7 @@
 
 		<div class="flex-1 flex flex-col relative min-w-0">
 			<header
-				class="h-16 sm:h-20 bg-white/70 dark:bg-black/70 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-3 sm:px-6 z-[60] sticky top-0 shadow-sm transition-colors duration-300 flex-shrink-0"
+				class="h-16 sm:h-20 bg-white/70 dark:bg-black/70 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-3 sm:px-6 z-20 sticky top-0 shadow-sm transition-colors duration-300 flex-shrink-0"
 			>
 				<!-- Mobile Left Header (Hamburger + Logo + Location) -->
 				<div class="flex lg:hidden items-center gap-2 sm:gap-3 flex-1 min-w-0">
