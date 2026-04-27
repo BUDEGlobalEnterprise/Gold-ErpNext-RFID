@@ -3,7 +3,7 @@
 		class="premium-card !p-0 shadow-sm hover:shadow-xl transition-all cursor-pointer flex flex-col h-full group relative overflow-hidden"
 		@click="emit('open-details', item.item_code)"
 	>
-		<div class="aspect-square bg-gray-100 dark:bg-gray-800 relative">
+		<div class="aspect-square bg-gray-100 dark:bg-warm-dark-900 relative">
 			<img
 				v-if="item.image"
 				:src="item.image"
@@ -63,7 +63,7 @@
 					{{ item.metal || 'Gold' }}
 				</span>
 				<span
-					class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+					class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-800 dark:bg-warm-dark-900 dark:text-gray-300"
 				>
 					{{ item.purity || 'Standard' }}
 				</span>
@@ -72,7 +72,7 @@
 			<!-- Weight Breakdown -->
 			<div
 				v-if="item.net_weight > 0 || item.gross_weight > 0"
-				class="hidden lg:block text-[9px] text-gray-500 dark:text-white/40 mb-3 space-y-0.5 bg-gray-50 dark:bg-white/5 p-2 rounded-xl border border-gray-100 dark:border-white/5"
+				class="hidden lg:block text-[9px] text-gray-500 dark:text-white/40 mb-3 space-y-0.5 bg-gray-50 dark:bg-warm-dark-700 p-2 rounded-xl border border-gray-100 dark:border-warm-border/50"
 			>
 				<div v-if="item.gross_weight > 0" class="flex justify-between">
 					<span>Gross:</span>
@@ -85,7 +85,7 @@
 				</div>
 				<div
 					v-if="item.net_weight > 0"
-					class="flex justify-between font-bold text-gray-900 dark:text-white border-t border-gray-100 dark:border-white/10 pt-1 mt-1"
+					class="flex justify-between font-bold text-gray-900 dark:text-white border-t border-gray-100 dark:border-warm-border pt-1 mt-1"
 				>
 					<span>Net Weight:</span> <span>{{ item.net_weight }}g</span>
 				</div>

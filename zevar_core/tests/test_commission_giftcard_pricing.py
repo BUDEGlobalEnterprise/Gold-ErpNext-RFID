@@ -694,7 +694,7 @@ class TestPricingEngineCalculated(FrappeTestCase):
 	def test_gold_rate_returns_zero_for_missing_metal(self):
 		from zevar_core.api.pricing import _get_gold_rate
 
-		rate = _get_gold_rate("", "24K")
+		rate = _get_gold_rate("", "22Kt")
 		self.assertEqual(rate, 0.0)
 
 	def test_gold_rate_returns_zero_for_missing_purity(self):
@@ -706,15 +706,15 @@ class TestPricingEngineCalculated(FrappeTestCase):
 	def test_rose_gold_uses_yellow_gold_rate(self):
 		from zevar_core.api.pricing import _get_gold_rate
 
-		rate = _get_gold_rate("Rose Gold", "18K")
-		yellow_rate = _get_gold_rate("Yellow Gold", "18K")
+		rate = _get_gold_rate("Rose Gold", "18Kt")
+		yellow_rate = _get_gold_rate("Yellow Gold", "18Kt")
 		self.assertEqual(rate, yellow_rate)
 
 	def test_white_gold_uses_yellow_gold_rate(self):
 		from zevar_core.api.pricing import _get_gold_rate
 
-		rate = _get_gold_rate("White Gold", "14K")
-		yellow_rate = _get_gold_rate("Yellow Gold", "14K")
+		rate = _get_gold_rate("White Gold", "14Kt")
+		yellow_rate = _get_gold_rate("Yellow Gold", "14Kt")
 		self.assertEqual(rate, yellow_rate)
 
 	def test_calculated_price_with_no_metal_data(self):
@@ -755,7 +755,7 @@ class TestPricingEngineHelperFunctions(FrappeTestCase):
 			name = "TEST-001"
 			item_name = "Test Item"
 			custom_metal_type = "Yellow Gold"
-			custom_purity = "18K"
+			custom_purity = "18Kt"
 			custom_gross_weight_g = 10.0
 			custom_stone_weight_g = 1.0
 			custom_net_weight_g = 9.0
@@ -766,7 +766,7 @@ class TestPricingEngineHelperFunctions(FrappeTestCase):
 		self.assertEqual(result["final_price"], 500.0)
 		self.assertEqual(result["price_source"], "MSRP")
 		self.assertEqual(result["metal"], "Yellow Gold")
-		self.assertEqual(result["purity"], "18K")
+		self.assertEqual(result["purity"], "18Kt")
 
 	def test_calculate_gold_value_zero_without_data(self):
 		from zevar_core.api.pricing import _calculate_gold_value

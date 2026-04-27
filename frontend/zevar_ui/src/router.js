@@ -101,6 +101,12 @@ const routes = [
 		path: '/reports',
 		name: 'Reports',
 		component: () => import('./pages/Reports.vue'),
+		meta: { requiresAuth: true, requiresManagement: true },
+	},
+	{
+		path: '/contacts',
+		name: 'Contacts',
+		component: () => import('./pages/Contacts.vue'),
 		meta: { requiresAuth: true },
 	},
 	{
@@ -121,6 +127,23 @@ const router = createRouter({
 	routes,
 })
 
+// Check if user has management role (for Reports page access)
+async function checkUserRole() {
+	try {
+		const res = await fetch('/api/method/zevar_core.api.user_info.get_user_info', {
+			headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
+		})
+		if (!res.ok) return false
+		const data = await res.json()
+		if (!data || !data.roles) return false
+
+		const managementRoles = ['System Manager', 'Administrator', 'Store Manager', 'Accounts Manager']
+		return data.roles.some(role => managementRoles.includes(role))
+	} catch {
+		return false
+	}
+}
+
 // Auth guard — redirect unauthenticated users to login
 router.beforeEach(async (to, _from, next) => {
 	// Skip guard for guest routes
@@ -138,6 +161,15 @@ router.beforeEach(async (to, _from, next) => {
 			const data = await res.json()
 			if (!data.message || data.message === 'Guest') {
 				return next({ name: 'Login' })
+			}
+
+			// Role-based access check for Reports page
+			if (to.meta.requiresManagement) {
+				const hasManagementAccess = await checkUserRole()
+				if (!hasManagementAccess) {
+					// Redirect to dashboard with access denied message
+					return next({ name: 'Dashboard', query: { accessDenied: 'true' } })
+				}
 			}
 		} catch {
 			return next({ name: 'Login' })

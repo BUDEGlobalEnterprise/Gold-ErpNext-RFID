@@ -1,161 +1,178 @@
 <template>
-	<div v-if="show" class="modal-overlay" @click.self="close">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h2>POS Preferences</h2>
-				<button class="close-btn" @click="close">&times;</button>
-			</div>
+	<BaseModal :show="show" max-width="max-w-lg" @close="close">
+		<template #header>
+			<h2 class="text-lg font-bold text-gray-900 dark:text-white">POS Preferences</h2>
+		</template>
 
-			<div class="modal-body">
-				<!-- Default Behavior -->
-				<div class="settings-section">
-					<h4>Default Behavior</h4>
+		<!-- Default Behavior -->
+		<div class="space-y-6 p-6">
+			<div>
+				<h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+					Default Behavior
+				</h4>
 
-					<div class="setting-item">
-						<div class="setting-info">
-							<span class="setting-label">Auto-print Receipt</span>
-							<span class="setting-desc"
-								>Automatically print receipt after each sale</span
-							>
+				<div class="space-y-3">
+					<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+						<div class="flex-1">
+							<span class="block text-sm font-medium text-gray-900 dark:text-white">Auto-print Receipt</span>
+							<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Automatically print receipt after each sale</span>
 						</div>
-						<label class="toggle">
+						<label class="relative inline-flex items-center cursor-pointer">
 							<input
 								type="checkbox"
 								v-model="prefs.auto_print_receipt"
 								@change="savePrefs"
+								class="sr-only peer"
 							/>
-							<span class="toggle-slider"></span>
+							<div class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
 						</label>
 					</div>
 
-					<div class="setting-item">
-						<div class="setting-info">
-							<span class="setting-label">Auto-email Receipt</span>
-							<span class="setting-desc">Send receipt to customer email</span>
+					<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+						<div class="flex-1">
+							<span class="block text-sm font-medium text-gray-900 dark:text-white">Auto-email Receipt</span>
+							<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Send receipt to customer email</span>
 						</div>
-						<label class="toggle">
+						<label class="relative inline-flex items-center cursor-pointer">
 							<input
 								type="checkbox"
 								v-model="prefs.auto_email_receipt"
 								@change="savePrefs"
+								class="sr-only peer"
 							/>
-							<span class="toggle-slider"></span>
+							<div class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
 						</label>
 					</div>
 
-					<div class="setting-item">
-						<div class="setting-info">
-							<span class="setting-label">Ask for Customer</span>
-							<span class="setting-desc"
-								>Prompt to select customer before checkout</span
-							>
+					<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+						<div class="flex-1">
+							<span class="block text-sm font-medium text-gray-900 dark:text-white">Ask for Customer</span>
+							<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Prompt to select customer before checkout</span>
 						</div>
-						<label class="toggle">
+						<label class="relative inline-flex items-center cursor-pointer">
 							<input
 								type="checkbox"
 								v-model="prefs.ask_for_customer"
 								@change="savePrefs"
+								class="sr-only peer"
 							/>
-							<span class="toggle-slider"></span>
+							<div class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
 						</label>
 					</div>
 
-					<div class="setting-item">
-						<div class="setting-info">
-							<span class="setting-label">Confirm Void</span>
-							<span class="setting-desc">Require confirmation before voiding</span>
+					<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+						<div class="flex-1">
+							<span class="block text-sm font-medium text-gray-900 dark:text-white">Confirm Void</span>
+							<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Require confirmation before voiding</span>
 						</div>
-						<label class="toggle">
+						<label class="relative inline-flex items-center cursor-pointer">
 							<input
 								type="checkbox"
 								v-model="prefs.confirm_void"
 								@change="savePrefs"
+								class="sr-only peer"
 							/>
-							<span class="toggle-slider"></span>
+							<div class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
 						</label>
 					</div>
 				</div>
+			</div>
 
-				<!-- Receipt Settings -->
-				<div class="settings-section">
-					<h4>Receipt Settings</h4>
+			<!-- Receipt Settings -->
+			<div>
+				<h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+					Receipt Settings
+				</h4>
 
-					<div class="setting-item">
-						<div class="setting-info">
-							<span class="setting-label">Receipt Format</span>
+				<div class="space-y-3">
+					<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+						<div class="flex-1">
+							<span class="block text-sm font-medium text-gray-900 dark:text-white">Receipt Format</span>
 						</div>
-						<select v-model="prefs.receipt_format" @change="savePrefs">
+						<select v-model="prefs.receipt_format" @change="savePrefs"
+							class="px-3 py-1.5 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white min-w-[120px]"
+						>
 							<option value="thermal">Thermal (80mm)</option>
 							<option value="standard">Standard (A4)</option>
 							<option value="compact">Compact</option>
 						</select>
 					</div>
 
-					<div class="setting-item">
-						<div class="setting-info">
-							<span class="setting-label">Show Tax Breakdown</span>
-							<span class="setting-desc">Display tax details on receipt</span>
+					<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+						<div class="flex-1">
+							<span class="block text-sm font-medium text-gray-900 dark:text-white">Show Tax Breakdown</span>
+							<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Display tax details on receipt</span>
 						</div>
-						<label class="toggle">
+						<label class="relative inline-flex items-center cursor-pointer">
 							<input
 								type="checkbox"
 								v-model="prefs.show_tax_breakdown"
 								@change="savePrefs"
+								class="sr-only peer"
 							/>
-							<span class="toggle-slider"></span>
+							<div class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
 						</label>
 					</div>
 
-					<div class="setting-item">
-						<div class="setting-info">
-							<span class="setting-label">Print Item Details</span>
-							<span class="setting-desc">Include item descriptions on receipt</span>
+					<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+						<div class="flex-1">
+							<span class="block text-sm font-medium text-gray-900 dark:text-white">Print Item Details</span>
+							<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Include item descriptions on receipt</span>
 						</div>
-						<label class="toggle">
+						<label class="relative inline-flex items-center cursor-pointer">
 							<input
 								type="checkbox"
 								v-model="prefs.print_item_details"
 								@change="savePrefs"
+								class="sr-only peer"
 							/>
-							<span class="toggle-slider"></span>
+							<div class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
 						</label>
 					</div>
 
-					<div class="setting-item">
-						<div class="setting-info">
-							<span class="setting-label">Receipt Footer</span>
-							<span class="setting-desc">Custom message on receipts</span>
+					<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+						<div class="flex-1">
+							<span class="block text-sm font-medium text-gray-900 dark:text-white">Receipt Footer</span>
+							<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Custom message on receipts</span>
 						</div>
 						<input
 							type="text"
 							v-model="prefs.receipt_footer"
 							placeholder="Thank you for shopping with us!"
 							@change="savePrefs"
-							class="text-input"
+							class="px-3 py-1.5 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white flex-1 max-w-[200px] ml-4"
 						/>
 					</div>
 				</div>
+			</div>
 
-				<!-- Payment Defaults -->
-				<div class="settings-section">
-					<h4>Payment Defaults</h4>
+			<!-- Payment Defaults -->
+			<div>
+				<h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+					Payment Defaults
+				</h4>
 
-					<div class="setting-item">
-						<div class="setting-info">
-							<span class="setting-label">Default Payment Method</span>
+				<div class="space-y-3">
+					<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+						<div class="flex-1">
+							<span class="block text-sm font-medium text-gray-900 dark:text-white">Default Payment Method</span>
 						</div>
-						<select v-model="prefs.default_payment_method" @change="savePrefs">
+						<select v-model="prefs.default_payment_method" @change="savePrefs"
+							class="px-3 py-1.5 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white min-w-[120px]"
+						>
 							<option value="Cash">Cash</option>
 							<option value="Credit Card">Credit Card</option>
 							<option value="Debit Card">Debit Card</option>
 						</select>
 					</div>
 
-					<div class="setting-item">
-						<div class="setting-info">
-							<span class="setting-label">Round to Nearest</span>
+					<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+						<div class="flex-1">
+							<span class="block text-sm font-medium text-gray-900 dark:text-white">Round to Nearest</span>
 						</div>
-						<select v-model="prefs.rounding" @change="savePrefs">
+						<select v-model="prefs.rounding" @change="savePrefs"
+							class="px-3 py-1.5 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white min-w-[120px]"
+						>
 							<option value="0.01">Cent</option>
 							<option value="0.05">Nickel</option>
 							<option value="0.10">Dime</option>
@@ -164,35 +181,50 @@
 						</select>
 					</div>
 				</div>
-
-				<!-- Quick Keys -->
-				<div class="settings-section">
-					<h4>Quick Cash Amounts</h4>
-					<div class="quick-amounts">
-						<button
-							v-for="amount in quickAmounts"
-							:key="amount"
-							class="amount-chip"
-							:class="{ active: prefs.quick_amounts?.includes(amount) }"
-							@click="toggleQuickAmount(amount)"
-						>
-							${{ amount }}
-						</button>
-					</div>
-					<p class="hint">Click to toggle quick cash buttons</p>
-				</div>
 			</div>
 
-			<div class="modal-footer">
-				<button class="btn btn-secondary" @click="resetPrefs">Reset to Defaults</button>
-				<button class="btn btn-primary" @click="close">Done</button>
+			<!-- Quick Keys -->
+			<div>
+				<h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+					Quick Cash Amounts
+				</h4>
+				<div class="flex flex-wrap gap-2">
+					<button
+						v-for="amount in quickAmounts"
+						:key="amount"
+						class="px-4 py-2 text-sm font-medium rounded-full transition-all"
+						:class="prefs.quick_amounts?.includes(amount)
+							? 'bg-blue-600 text-white border-2 border-blue-600'
+							: 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 border-2 border-transparent hover:border-blue-400'"
+						@click="toggleQuickAmount(amount)"
+					>
+						${{ amount }}
+					</button>
+				</div>
+				<p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Click to toggle quick cash buttons</p>
 			</div>
 		</div>
-	</div>
+
+		<template #footer>
+			<button
+				class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-white/10 transition"
+				@click="resetPrefs"
+			>
+				Reset to Defaults
+			</button>
+			<button
+				class="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+				@click="close"
+			>
+				Done
+			</button>
+		</template>
+	</BaseModal>
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
+import BaseModal from './BaseModal.vue'
 
 const props = defineProps({
 	show: { type: Boolean, default: false },
@@ -264,211 +296,3 @@ watch(
 
 onMounted(loadPrefs)
 </script>
-
-<style scoped>
-.modal-overlay {
-	position: fixed;
-	inset: 0;
-	background: rgba(0, 0, 0, 0.7);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 1000;
-}
-
-.modal-content {
-	background: #1e293b;
-	border-radius: 16px;
-	width: 90%;
-	max-width: 500px;
-	max-height: 90vh;
-	overflow-y: auto;
-}
-
-.modal-header {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 20px 24px;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.modal-header h2 {
-	color: white;
-	font-size: 18px;
-	margin: 0;
-}
-
-.close-btn {
-	background: transparent;
-	border: none;
-	color: rgba(255, 255, 255, 0.6);
-	font-size: 24px;
-	cursor: pointer;
-}
-
-.modal-body {
-	padding: 24px;
-}
-
-.settings-section {
-	margin-bottom: 24px;
-}
-
-.settings-section h4 {
-	color: rgba(255, 255, 255, 0.6);
-	font-size: 12px;
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
-	margin-bottom: 12px;
-}
-
-.setting-item {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 12px 0;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.setting-info {
-	flex: 1;
-}
-
-.setting-label {
-	display: block;
-	color: white;
-	font-weight: 500;
-}
-
-.setting-desc {
-	display: block;
-	color: rgba(255, 255, 255, 0.5);
-	font-size: 12px;
-	margin-top: 2px;
-}
-
-.toggle {
-	position: relative;
-	display: inline-block;
-	width: 48px;
-	height: 24px;
-}
-
-.toggle input {
-	opacity: 0;
-	width: 0;
-	height: 0;
-}
-
-.toggle-slider {
-	position: absolute;
-	cursor: pointer;
-	inset: 0;
-	background: rgba(255, 255, 255, 0.2);
-	border-radius: 24px;
-	transition: 0.3s;
-}
-
-.toggle-slider::before {
-	position: absolute;
-	content: '';
-	height: 18px;
-	width: 18px;
-	left: 3px;
-	bottom: 3px;
-	background: white;
-	border-radius: 50%;
-	transition: 0.3s;
-}
-
-.toggle input:checked + .toggle-slider {
-	background: #3b82f6;
-}
-
-.toggle input:checked + .toggle-slider::before {
-	transform: translateX(24px);
-}
-
-select,
-.text-input {
-	padding: 8px 12px;
-	background: rgba(255, 255, 255, 0.1);
-	border: 1px solid rgba(255, 255, 255, 0.2);
-	border-radius: 6px;
-	color: white;
-	min-width: 120px;
-}
-
-.text-input {
-	flex: 1;
-	max-width: 200px;
-}
-
-.quick-amounts {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-}
-
-.amount-chip {
-	padding: 8px 16px;
-	background: rgba(255, 255, 255, 0.1);
-	border: 2px solid rgba(255, 255, 255, 0.1);
-	border-radius: 20px;
-	color: white;
-	cursor: pointer;
-	transition: all 0.2s;
-}
-
-.amount-chip:hover {
-	border-color: rgba(59, 130, 246, 0.5);
-}
-
-.amount-chip.active {
-	background: rgba(59, 130, 246, 0.2);
-	border-color: #3b82f6;
-}
-
-.hint {
-	font-size: 12px;
-	color: rgba(255, 255, 255, 0.5);
-	margin-top: 8px;
-}
-
-.modal-footer {
-	display: flex;
-	justify-content: flex-end;
-	gap: 12px;
-	padding: 16px 24px;
-	border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.btn {
-	padding: 10px 20px;
-	border-radius: 8px;
-	font-weight: 600;
-	cursor: pointer;
-	transition: all 0.2s;
-}
-
-.btn-primary {
-	background: #3b82f6;
-	color: white;
-	border: none;
-}
-
-.btn-primary:hover {
-	background: #2563eb;
-}
-
-.btn-secondary {
-	background: transparent;
-	color: rgba(255, 255, 255, 0.8);
-	border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.btn-secondary:hover {
-	background: rgba(255, 255, 255, 0.1);
-}
-</style>

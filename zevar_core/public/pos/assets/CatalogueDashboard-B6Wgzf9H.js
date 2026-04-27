@@ -1,1 +1,0 @@
-import{C as o}from"./CatalogueView-AxgFlRIS.js";import{o as a,q as r}from"./index-VmyOSRtf.js";import"./ui-CwPNztwq.js";import"./ProductModal-DBmqLLHb.js";const i={__name:"CatalogueDashboard",setup(t){return(e,p)=>(a(),r(o))}};export{i as default};

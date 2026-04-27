@@ -1,6 +1,6 @@
 <template>
 	<div
-		class="p-4 rounded-xl border bg-white dark:bg-gray-900 hover:border-[#D4AF37] hover:shadow-md cursor-pointer transition-all group"
+		class="p-4 rounded-xl border bg-white dark:bg-warm-card hover:border-[#D4AF37] hover:shadow-md cursor-pointer transition-all group"
 		:class="getStatusBorderColor(order.status)"
 		@click="$emit('open-detail')"
 	>
@@ -51,7 +51,7 @@
 		<div class="flex flex-wrap gap-1 mb-2">
 			<span
 				v-if="order.item_type"
-				class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-[10px] text-gray-600"
+				class="px-1.5 py-0.5 bg-gray-100 dark:bg-warm-dark-700 rounded text-[10px] text-gray-600"
 			>
 				{{ order.item_type }}
 			</span>
@@ -113,7 +113,7 @@
 
 		<!-- Footer with Quick Actions -->
 		<div
-			class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800"
+			class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-warm-border-subtle"
 		>
 			<span class="text-xs text-gray-400"
 				>By: {{ order.handled_by_name || 'Unassigned' }}</span
@@ -134,7 +134,7 @@
 			</button>
 			<button
 				@click.stop="$emit('print-thermal', order)"
-				class="px-2 py-1.5 text-xs bg-gray-100 dark:bg-gray-800 rounded hover:bg-gray-200"
+				class="px-2 py-1.5 text-xs bg-gray-100 dark:bg-warm-dark-700 rounded hover:bg-gray-200"
 				title="Print thermal receipt"
 			>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -148,7 +148,7 @@
 			</button>
 			<button
 				@click.stop="$emit('open-qr', order)"
-				class="px-2 py-1.5 text-xs bg-gray-100 dark:bg-gray-800 rounded hover:bg-gray-200"
+				class="px-2 py-1.5 text-xs bg-gray-100 dark:bg-warm-dark-700 rounded hover:bg-gray-200"
 				title="Show QR Code"
 			>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,6 +181,7 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
+	import { formatDate } from '@/utils/dates.js'
 
 const props = defineProps({
 	order: { type: Object, required: true },
@@ -193,12 +194,6 @@ function formatNum(n) {
 	return Number(n).toFixed(2)
 }
 
-function formatDate(dateStr) {
-	if (!dateStr) return ''
-	const date = new Date(dateStr)
-	return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-}
-
 function isOverdue(dateStr) {
 	if (!dateStr) return false
 	return new Date(dateStr) < new Date()
@@ -206,30 +201,30 @@ function isOverdue(dateStr) {
 
 function getStatusBorderColor(status) {
 	const colors = {
-		Received: 'border-blue-200 dark:border-blue-800',
-		'In Progress': 'border-orange-200 dark:border-orange-800',
-		'Waiting for Parts': 'border-purple-200 dark:border-purple-800',
-		'Ready for Pickup': 'border-green-200 dark:border-green-800',
-		Delivered: 'border-gray-200 dark:border-gray-700',
-		Cancelled: 'border-red-200 dark:border-red-800',
+		Received: 'border-blue-200 dark:border-blue-900/60',
+		'In Progress': 'border-orange-200 dark:border-orange-900/60',
+		'Waiting for Parts': 'border-purple-200 dark:border-purple-900/60',
+		'Ready for Pickup': 'border-green-200 dark:border-green-900/60',
+		Delivered: 'border-gray-200 dark:border-warm-border',
+		Cancelled: 'border-red-200 dark:border-red-900/60',
 	}
-	return colors[status] || 'border-gray-200 dark:border-gray-700'
+	return colors[status] || 'border-gray-200 dark:border-warm-border'
 }
 
 function getStatusBadgeClass(status) {
 	const classes = {
-		Received: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-		Estimated: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-		Approved: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
-		'In Progress': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+		Received: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+		Estimated: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
+		Approved: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
+		'In Progress': 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
 		'Waiting for Parts':
-			'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-		'Quality Check': 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
-		'Ready for Pickup': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-		Delivered: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400',
-		Cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+			'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+		'Quality Check': 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
+		'Ready for Pickup': 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+		Delivered: 'bg-gray-100 text-gray-700 dark:bg-warm-dark-700 dark:text-warm-dark-600',
+		Cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
 	}
-	return classes[status] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+	return classes[status] || 'bg-gray-100 text-gray-600 dark:bg-warm-dark-700 dark:text-warm-dark-600'
 }
 
 function getNextStatus(currentStatus) {

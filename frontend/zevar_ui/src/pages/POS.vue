@@ -60,7 +60,7 @@
 						:class="
 							viewMode === 'pos'
 								? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#D4AF37]'
-								: 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300'
+								: 'border-gray-200 dark:border-warm-border text-gray-600 dark:text-gray-400 hover:border-gray-300'
 						"
 					>
 						POS
@@ -71,7 +71,7 @@
 						:class="
 							viewMode === 'catalog'
 								? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#D4AF37]'
-								: 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300'
+								: 'border-gray-200 dark:border-warm-border text-gray-600 dark:text-gray-400 hover:border-gray-300'
 						"
 					>
 						Catalogue
@@ -115,7 +115,7 @@
 						<button
 							@click="loadMore"
 							:disabled="items.loading"
-							class="px-8 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-full shadow-sm hover:shadow-md hover:border-gray-900 dark:hover:border-white transition-all text-sm font-bold uppercase tracking-wider disabled:opacity-50"
+							class="px-8 py-3 bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border text-gray-900 dark:text-white rounded-full shadow-sm hover:shadow-md hover:border-gray-900 dark:hover:border-white transition-all text-sm font-bold uppercase tracking-wider disabled:opacity-50"
 						>
 							{{ items.loading ? 'Loading...' : 'Load More' }}
 						</button>

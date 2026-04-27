@@ -12,7 +12,7 @@
 				<button
 					@click="exportHistory"
 					:disabled="exporting"
-					class="px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition flex items-center gap-2"
+					class="px-4 py-2 bg-gray-100 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-warm-dark-800 transition flex items-center gap-2"
 				>
 					<svg
 						v-if="exporting"
@@ -54,7 +54,7 @@
 
 			<!-- Filters Bar -->
 			<div
-				class="bg-white dark:bg-gray-800/50 rounded-xl p-4 mb-6 border border-gray-100 dark:border-gray-700/50"
+				class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 mb-6 border border-gray-100 dark:border-warm-border/50"
 			>
 				<div class="flex flex-wrap gap-3 items-end">
 					<div class="flex flex-col gap-1">
@@ -65,7 +65,7 @@
 							type="date"
 							v-model="filters.from_date"
 							@change="fetchSales"
-							class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
 						/>
 					</div>
 					<div class="flex flex-col gap-1">
@@ -76,7 +76,7 @@
 							type="date"
 							v-model="filters.to_date"
 							@change="fetchSales"
-							class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
 						/>
 					</div>
 					<div class="flex flex-col gap-1">
@@ -88,7 +88,7 @@
 							v-model="filters.customer"
 							placeholder="Search customer..."
 							@keyup.enter="fetchSales"
-							class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-40"
+							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-40"
 						/>
 					</div>
 					<div class="flex flex-col gap-1">
@@ -98,7 +98,7 @@
 						<select
 							v-model="filters.status"
 							@change="fetchSales"
-							class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
 						>
 							<option value="">All</option>
 							<option value="Paid">Paid</option>
@@ -116,7 +116,7 @@
 							v-model="filters.search"
 							placeholder="Invoice #..."
 							@keyup.enter="fetchSales"
-							class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-36"
+							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-36"
 						/>
 					</div>
 					<button
@@ -132,7 +132,7 @@
 			<!-- Summary Cards -->
 			<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" v-if="summary">
 				<div
-					class="bg-white dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50"
+					class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
 				>
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
@@ -153,7 +153,7 @@
 					</p>
 				</div>
 				<div
-					class="bg-white dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50"
+					class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
 				>
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
@@ -164,7 +164,7 @@
 					</p>
 				</div>
 				<div
-					class="bg-white dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50"
+					class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
 				>
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
@@ -178,13 +178,13 @@
 
 			<!-- Transactions Table -->
 			<div
-				class="flex-1 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700/50 overflow-hidden"
+				class="flex-1 bg-white dark:bg-warm-dark-900/50 rounded-xl border border-gray-100 dark:border-warm-border/50 overflow-hidden"
 			>
 				<div class="overflow-x-auto">
 					<table class="w-full">
 						<thead>
 							<tr
-								class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700/50"
+								class="bg-gray-50 dark:bg-warm-dark-900/50 border-b border-gray-100 dark:border-warm-border/50"
 							>
 								<th
 									class="px-4 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
@@ -263,7 +263,7 @@
 								v-for="sale in sales"
 								:key="sale.name"
 								@click="viewDetails(sale.name)"
-								class="hover:bg-gray-50 dark:hover:bg-gray-700/30 cursor-pointer transition"
+								class="hover:bg-gray-50 dark:hover:bg-warm-dark-800/30 cursor-pointer transition"
 							>
 								<td class="px-4 py-3">
 									<span class="font-mono font-bold text-[#D4AF37] text-sm">{{
@@ -296,7 +296,7 @@
 									<div class="flex items-center justify-center gap-2">
 										<button
 											@click.stop="viewDetails(sale.name)"
-											class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+											class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-warm-dark-800 rounded-lg transition"
 											title="View Details"
 										>
 											<svg
@@ -321,7 +321,7 @@
 										</button>
 										<button
 											@click.stop="printInvoice(sale.name)"
-											class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+											class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-warm-dark-800 rounded-lg transition"
 											title="Print Receipt"
 										>
 											<svg
@@ -348,7 +348,7 @@
 				<!-- Pagination -->
 				<div
 					v-if="pagination.total_pages > 1"
-					class="px-4 py-3 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between"
+					class="px-4 py-3 border-t border-gray-100 dark:border-warm-border/50 flex items-center justify-between"
 				>
 					<span class="text-sm text-gray-500 dark:text-gray-400">
 						Showing {{ (pagination.page - 1) * 20 + 1 }} to
@@ -359,14 +359,14 @@
 						<button
 							@click="goToPage(pagination.page - 1)"
 							:disabled="pagination.page === 1"
-							class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+							class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 dark:border-warm-border text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-warm-dark-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
 						>
 							Previous
 						</button>
 						<button
 							@click="goToPage(pagination.page + 1)"
 							:disabled="pagination.page === pagination.total_pages"
-							class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+							class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 dark:border-warm-border text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-warm-dark-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
 						>
 							Next
 						</button>
@@ -389,6 +389,7 @@ import { ref, onMounted } from 'vue'
 import { createResource } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
 import TransactionDetailModal from '@/components/TransactionDetailModal.vue'
+	import { formatDate } from '@/utils/dates.js'
 
 // State
 const loading = ref(false)
@@ -434,21 +435,15 @@ function formatCurrency(amount) {
 	return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
 }
 
-function formatDate(dateStr) {
-	if (!dateStr) return ''
-	const date = new Date(dateStr)
-	return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
 function getStatusClass(status) {
 	const classes = {
 		Paid: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
 		Unpaid: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
 		Overdue: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-		Cancelled: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+		Cancelled: 'bg-gray-100 text-gray-600 dark:bg-warm-dark-900 dark:text-gray-400',
 		Return: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
 	}
-	return classes[status] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+	return classes[status] || 'bg-gray-100 text-gray-600 dark:bg-warm-dark-900 dark:text-gray-400'
 }
 
 async function fetchSales() {

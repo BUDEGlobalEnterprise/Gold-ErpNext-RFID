@@ -5,7 +5,7 @@
 			@click.self="$emit('close')"
 		>
 			<div
-				class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto"
+				class="bg-white dark:bg-warm-dark-900 rounded-2xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto"
 			>
 				<div class="p-6">
 					<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
@@ -18,7 +18,7 @@
 								v-model="form.repair_name"
 								type="text"
 								placeholder="e.g., Ring Sizing, Stone Replacement"
-								class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+								class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
 							/>
 						</div>
 						<div>
@@ -27,7 +27,7 @@
 								v-model="form.category"
 								type="text"
 								placeholder="e.g., Sizing, Cleaning, Stone Work"
-								class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+								class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
 							/>
 						</div>
 						<div class="grid grid-cols-2 gap-3">
@@ -40,7 +40,7 @@
 									type="number"
 									step="0.01"
 									min="0"
-									class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+									class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
 								/>
 							</div>
 							<div>
@@ -49,7 +49,7 @@
 									v-model.number="form.estimated_days"
 									type="number"
 									min="1"
-									class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+									class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
 								/>
 							</div>
 						</div>
@@ -59,7 +59,7 @@
 								v-model="form.description"
 								rows="2"
 								placeholder="Describe this repair type..."
-								class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm resize-none"
+								class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm resize-none"
 							></textarea>
 						</div>
 						<div class="flex gap-3">

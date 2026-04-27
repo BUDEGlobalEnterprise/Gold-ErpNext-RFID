@@ -77,7 +77,7 @@
 						:key="item.id"
 						class="premium-card !p-0 overflow-hidden cursor-pointer group"
 					>
-						<div class="aspect-[4/3] bg-gray-100 dark:bg-gray-800 relative">
+						<div class="aspect-[4/3] bg-gray-100 dark:bg-warm-dark-900 relative">
 							<div
 								class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600"
 							>
@@ -111,7 +111,7 @@
 							</div>
 							<div v-if="item.certification" class="absolute top-2 right-2">
 								<span
-									class="text-[9px] font-bold px-2 py-1 rounded-full bg-white/90 dark:bg-black/70 text-gray-800 dark:text-white border border-gray-200 dark:border-gray-700"
+									class="text-[9px] font-bold px-2 py-1 rounded-full bg-white/90 dark:bg-black/70 text-gray-800 dark:text-white border border-gray-200 dark:border-warm-border"
 								>
 									{{ item.certification }}
 								</span>
@@ -132,7 +132,7 @@
 									>{{ item.metal }}</span
 								>
 								<span
-									class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+									class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-400"
 									>{{ item.purity }}</span
 								>
 								<span class="text-[9px] text-gray-500 ml-auto font-mono"
@@ -140,7 +140,7 @@
 								>
 							</div>
 							<div
-								class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-white/5"
+								class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-warm-border/50"
 							>
 								<div>
 									<div class="text-[9px] text-gray-500 uppercase font-bold">
@@ -187,6 +187,7 @@ const statusTabs = [
 ]
 
 import { createResource } from 'frappe-ui'
+	import { formatDate } from '@/utils/dates.js'
 
 const appraisalData = ref([])
 
@@ -200,7 +201,7 @@ const appraisalResource = createResource({
 			id: a.name,
 			description: a.description || a.item_description || a.name,
 			customer: a.customer || a.customer_name || 'Unknown',
-			date: a.creation ? new Date(a.creation).toLocaleDateString() : 'Unknown',
+			date: a.creation ? formatDate(a.creation) : 'Unknown',
 			metal: a.metal || '-',
 			purity: a.purity || '-',
 			weight: a.weight || a.gross_weight || 0,

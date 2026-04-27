@@ -15,12 +15,12 @@
 				:class="[
 					inlineMode
 						? 'flex-1 h-full rounded-3xl'
-						: 'max-w-6xl max-h-[95vh] rounded-3xl shadow-2xl border border-transparent dark:border-white/10',
+						: 'max-w-6xl max-h-[95vh] rounded-3xl shadow-2xl border border-transparent dark:border-warm-border',
 				]"
 			>
 				<!-- Header -->
 				<div
-					class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-white/5 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-[#1a1c23] rounded-t-3xl flex-shrink-0"
+					class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-warm-border/50 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-[#1a1c23] rounded-t-3xl flex-shrink-0"
 				>
 					<div class="flex items-center gap-4">
 						<div
@@ -176,7 +176,7 @@
 										>
 										<select
 											v-model="idScan.type"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										>
 											<option value="">Select Type</option>
 											<option value="drivers_license">
@@ -196,7 +196,7 @@
 											v-model="idScan.number"
 											type="text"
 											placeholder="Scan or enter ID number"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										/>
 									</div>
 								</div>
@@ -223,7 +223,7 @@
 									<button
 										@click="applyIdData"
 										:disabled="!idScan.number"
-										class="flex-1 px-3 py-2 text-xs font-medium bg-gray-900 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 transition"
+										class="flex-1 px-3 py-2 text-xs font-medium bg-gray-900 dark:bg-warm-dark-800 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 transition"
 									>
 										Apply Data
 									</button>
@@ -282,19 +282,19 @@
 										placeholder="Search by name, phone, or customer ID..."
 										@input="searchCustomers"
 										@focus="showCustomerDropdown = true"
-										class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+										class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
 									/>
 								</div>
 								<div
 									v-if="showCustomerDropdown && customerResults.length > 0"
-									class="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-56 overflow-y-auto"
+									class="absolute z-20 w-full mt-1 bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg shadow-lg max-h-56 overflow-y-auto"
 								>
 									<button
 										v-for="customer in customerResults"
 										:key="customer.name"
 										type="button"
 										@click="selectCustomer(customer)"
-										class="w-full px-4 py-3 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition border-b border-gray-100 dark:border-gray-700 last:border-0"
+										class="w-full px-4 py-3 text-left text-sm hover:bg-gray-50 dark:hover:bg-warm-dark-800 transition border-b border-gray-100 dark:border-warm-border last:border-0"
 									>
 										<div class="flex items-center justify-between">
 											<div>
@@ -320,7 +320,7 @@
 							<!-- New Customer Form -->
 							<div
 								v-else
-								class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700"
+								class="p-4 bg-gray-50 dark:bg-warm-dark-900 rounded-lg border border-gray-200 dark:border-warm-border"
 							>
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 									<div>
@@ -332,7 +332,7 @@
 											v-model="newCustomer.name"
 											type="text"
 											placeholder="Full legal name"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										/>
 									</div>
 									<div>
@@ -344,7 +344,7 @@
 											v-model="newCustomer.phone"
 											type="tel"
 											placeholder="Phone number"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										/>
 									</div>
 									<div>
@@ -356,7 +356,7 @@
 											v-model="newCustomer.email"
 											type="email"
 											placeholder="Email address"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										/>
 									</div>
 									<div>
@@ -366,7 +366,7 @@
 										>
 										<select
 											v-model="newCustomer.type"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										>
 											<option value="Individual">Individual</option>
 											<option value="Company">Company</option>
@@ -382,7 +382,7 @@
 										v-model="newCustomer.address"
 										rows="2"
 										placeholder="Full street address"
-										class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37] resize-none"
+										class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37] resize-none"
 									></textarea>
 								</div>
 								<div class="grid grid-cols-3 gap-3 mt-3">
@@ -395,7 +395,7 @@
 											v-model="newCustomer.city"
 											type="text"
 											placeholder="City"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										/>
 									</div>
 									<div>
@@ -407,7 +407,7 @@
 											v-model="newCustomer.state"
 											type="text"
 											placeholder="State"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										/>
 									</div>
 									<div>
@@ -419,7 +419,7 @@
 											v-model="newCustomer.zip"
 											type="text"
 											placeholder="ZIP Code"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										/>
 									</div>
 								</div>
@@ -478,7 +478,24 @@
 										>Address</span
 									>
 									<p class="font-medium text-gray-900 dark:text-white truncate">
-										{{ form.address || 'Not provided' }}
+										{{ form.address || form.city || 'Not provided' }}
+									</p>
+								</div>
+								<div v-if="hasNominee && nominee.name">
+									<span class="text-gray-500 dark:text-gray-400 text-xs"
+										>Nominee</span
+									>
+									<p class="font-medium text-[#D4AF37]">
+										{{ nominee.name }}
+										<span v-if="nominee.relationship" class="text-xs text-gray-400">({{ nominee.relationship }})</span>
+									</p>
+								</div>
+								<div v-if="hasNominee && nominee.phone">
+									<span class="text-gray-500 dark:text-gray-400 text-xs"
+										>Nominee Phone</span
+									>
+									<p class="font-medium text-gray-900 dark:text-white">
+										{{ nominee.phone }}
 									</p>
 								</div>
 							</div>
@@ -499,7 +516,7 @@
 									>
 									<select
 										v-model="form.idType"
-										class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+										class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 									>
 										<option value="">Select</option>
 										<option value="drivers_license">Driver's License</option>
@@ -518,7 +535,7 @@
 										v-model="form.idNumber"
 										type="text"
 										placeholder="Enter ID number"
-										class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+										class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 									/>
 								</div>
 							</div>
@@ -532,16 +549,24 @@
 								>
 									Nominee / Secondary Contact
 								</h3>
-								<label class="flex items-center gap-2 cursor-pointer">
-									<input
-										type="checkbox"
-										v-model="hasNominee"
-										class="w-4 h-4 text-[#D4AF37] rounded focus:ring-[#D4AF37]"
-									/>
-									<span class="text-xs text-gray-600 dark:text-gray-400"
-										>Add nominee</span
+								<div class="flex items-center gap-3">
+									<span
+										v-if="hasNominee && nominee.name"
+										class="text-xs text-blue-500 font-medium"
 									>
-								</label>
+										{{ nominee.name }} ({{ nominee.relationship || 'N/A' }})
+									</span>
+									<label class="flex items-center gap-2 cursor-pointer">
+										<input
+											type="checkbox"
+											v-model="hasNominee"
+											class="w-4 h-4 text-[#D4AF37] rounded focus:ring-[#D4AF37]"
+										/>
+										<span class="text-xs text-gray-600 dark:text-gray-400">{{
+											hasNominee ? 'Remove nominee' : 'Add nominee'
+										}}</span>
+									</label>
+								</div>
 							</div>
 							<Transition name="slide-down">
 								<div v-if="hasNominee" class="grid grid-cols-2 gap-3">
@@ -554,7 +579,7 @@
 											v-model="nominee.name"
 											type="text"
 											placeholder="Nominee name"
-											class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										/>
 									</div>
 									<div>
@@ -564,7 +589,7 @@
 										>
 										<select
 											v-model="nominee.relationship"
-											class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										>
 											<option value="">Select</option>
 											<option value="spouse">Spouse</option>
@@ -584,7 +609,7 @@
 											v-model="nominee.phone"
 											type="tel"
 											placeholder="Contact number"
-											class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										/>
 									</div>
 									<div>
@@ -596,7 +621,7 @@
 											v-model="nominee.email"
 											type="email"
 											placeholder="Email address"
-											class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										/>
 									</div>
 								</div>
@@ -620,7 +645,7 @@
 										v-model="form.address"
 										type="text"
 										placeholder="Street address, apt/suite number"
-										class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+										class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 									/>
 								</div>
 								<div class="grid grid-cols-4 gap-3">
@@ -633,7 +658,7 @@
 											v-model="form.city"
 											type="text"
 											placeholder="City"
-											class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										/>
 									</div>
 									<div class="col-span-1">
@@ -645,7 +670,7 @@
 											v-model="form.state"
 											type="text"
 											placeholder="State"
-											class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										/>
 									</div>
 									<div class="col-span-1">
@@ -657,7 +682,7 @@
 											v-model="form.zip"
 											type="text"
 											placeholder="ZIP"
-											class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										/>
 									</div>
 									<div class="col-span-1">
@@ -669,7 +694,7 @@
 											v-model="form.country"
 											type="text"
 											placeholder="Country"
-											class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										/>
 									</div>
 								</div>
@@ -679,7 +704,7 @@
 
 					<!-- Right Column - Items & Summary -->
 					<div
-						class="flex-1 p-5 border-l border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-[#1a1c23]/50 overflow-y-auto rounded-br-3xl"
+						class="flex-1 p-5 border-l border-gray-100 dark:border-warm-border/50 bg-gray-50/50 dark:bg-[#1a1c23]/50 overflow-y-auto rounded-br-3xl"
 						:style="inlineMode ? '' : 'max-height: calc(95vh - 140px)'"
 					>
 						<!-- Layaway Details -->
@@ -698,7 +723,7 @@
 									<input
 										v-model="form.startDate"
 										type="date"
-										class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+										class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 									/>
 								</div>
 								<div>
@@ -708,7 +733,7 @@
 									>
 									<select
 										v-model="form.status"
-										class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+										class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 									>
 										<option value="Active">Active</option>
 										<option value="Draft">Draft</option>
@@ -721,7 +746,7 @@
 									>
 									<select
 										v-model="form.paymentSchedule"
-										class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+										class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 									>
 										<option value="Weekly">Weekly</option>
 										<option value="Bi-Weekly">Bi-Weekly</option>
@@ -735,7 +760,7 @@
 									>
 									<select
 										v-model.number="form.durationWeeks"
-										class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+										class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 									>
 										<template v-if="form.paymentSchedule === 'Monthly'">
 											<option :value="1">1 month</option>
@@ -770,7 +795,7 @@
 											type="number"
 											min="0"
 											:step="0.01"
-											class="w-full pl-7 pr-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full pl-7 pr-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
 										/>
 									</div>
 								</div>
@@ -789,7 +814,7 @@
 											min="0"
 											max="100"
 											:step="0.1"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37] pr-8"
+											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37] pr-8"
 										/>
 										<span
 											class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"
@@ -807,7 +832,7 @@
 									v-model="form.notes"
 									rows="2"
 									placeholder="Additional notes..."
-									class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37] resize-none"
+									class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37] resize-none"
 								></textarea>
 							</div>
 						</div>
@@ -844,7 +869,7 @@
 											placeholder="Search by SKU, barcode, or name..."
 											@input="searchItems"
 											@keydown.enter="handleItemBarcodeScan"
-											class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-[#D4AF37]"
+											class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:ring-2 focus:ring-[#D4AF37]"
 										/>
 										<div
 											v-if="isScanningBarcode"
@@ -877,14 +902,14 @@
 								<!-- Search Results Dropdown -->
 								<div
 									v-if="itemResults.length > 0"
-									class="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+									class="absolute z-20 w-full mt-1 bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg shadow-lg max-h-48 overflow-y-auto"
 								>
 									<button
 										v-for="item in itemResults"
 										:key="item.item_code"
 										type="button"
 										@click="addItem(item)"
-										class="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition border-b border-gray-100 dark:border-gray-700 last:border-0"
+										class="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-warm-dark-800 transition border-b border-gray-100 dark:border-warm-border last:border-0"
 									>
 										<div class="flex items-center justify-between">
 											<div>
@@ -910,10 +935,10 @@
 							<!-- Items Table -->
 							<div
 								v-if="selectedItems.length > 0"
-								class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
+								class="overflow-hidden rounded-lg border border-gray-200 dark:border-warm-border"
 							>
 								<table class="w-full text-sm">
-									<thead class="bg-gray-50 dark:bg-gray-900">
+									<thead class="bg-gray-50 dark:bg-warm-dark-900">
 										<tr>
 											<th
 												class="px-3 py-2 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase"
@@ -949,7 +974,7 @@
 										<tr
 											v-for="(item, index) in selectedItems"
 											:key="item.item_code"
-											class="bg-white dark:bg-[#1a1c23] hover:bg-gray-50 dark:hover:bg-gray-800/50"
+											class="bg-white dark:bg-[#1a1c23] hover:bg-gray-50 dark:hover:bg-warm-dark-800"
 										>
 											<td
 												class="px-3 py-2 text-gray-900 dark:text-white font-mono text-xs"
@@ -975,7 +1000,7 @@
 													type="number"
 													min="1"
 													@change="calculateTotals"
-													class="w-14 px-2 py-1 text-center bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded text-sm text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-[#D4AF37]"
+													class="w-14 px-2 py-1 text-center bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded text-sm text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-[#D4AF37]"
 												/>
 											</td>
 											<td
@@ -1036,7 +1061,7 @@
 								</button>
 								<button
 									@click="showSerialInput = !showSerialInput"
-									class="px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition flex items-center gap-1"
+									class="px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition flex items-center gap-1"
 								>
 									<svg
 										class="w-3.5 h-3.5"
@@ -1060,7 +1085,7 @@
 						<Transition name="slide-down">
 							<div
 								v-if="showSerialInput"
-								class="mb-5 p-3 bg-gray-100 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700"
+								class="mb-5 p-3 bg-gray-100 dark:bg-warm-dark-900 rounded-lg border border-gray-200 dark:border-warm-border"
 							>
 								<h4
 									class="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2"
@@ -1081,7 +1106,7 @@
 										v-model="item.serial_numbers"
 										rows="2"
 										:placeholder="`Enter ${item.qty} serial numbers (one per line)`"
-										class="w-full px-3 py-2 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-[#D4AF37] resize-none"
+										class="w-full px-3 py-2 text-xs bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-1 focus:ring-[#D4AF37] resize-none"
 									></textarea>
 								</div>
 								<p
@@ -1221,7 +1246,7 @@
 
 				<!-- Footer -->
 				<div
-					class="flex items-center justify-between px-6 py-4 border-t border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-gray-900/30 rounded-b-3xl"
+					class="flex items-center justify-between px-6 py-4 border-t border-gray-100 dark:border-warm-border/50 bg-gray-50 dark:bg-warm-dark-700 rounded-b-3xl"
 				>
 					<div class="text-xs text-gray-500 dark:text-gray-400">
 						<span v-if="selectedItems.length"
@@ -1231,7 +1256,7 @@
 					<div class="flex items-center gap-3">
 						<button
 							@click="close"
-							class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+							class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-warm-border rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition"
 						>
 							Cancel
 						</button>
@@ -1522,6 +1547,11 @@ const createCustomerResource = createResource({
 	auto: false,
 })
 
+const customerDetailsResource = createResource({
+	url: 'zevar_core.api.customer.get_customer_details',
+	auto: false,
+})
+
 const createLayawayResource = createResource({
 	url: 'zevar_core.api.layaway.create_layaway',
 	auto: false,
@@ -1582,13 +1612,37 @@ async function searchCustomers() {
 	}, 300)
 }
 
-function selectCustomer(customer) {
+async function selectCustomer(customer) {
 	selectedCustomer.value = customer
 	customerSearch.value = customer.customer_name
+	showCustomerDropdown.value = false
+
 	form.value.phone = customer.mobile_no || ''
 	form.value.email = customer.email_id || ''
-	form.value.address = customer.address_display || ''
-	showCustomerDropdown.value = false
+
+	try {
+		const result = await customerDetailsResource.submit({ customer_name: customer.customer_name })
+		const details = result?.message ?? result
+		if (details) {
+			form.value.phone = details.mobile_no || form.value.phone
+			form.value.email = details.email_id || form.value.email
+			form.value.address = details.address || ''
+			form.value.city = details.city || ''
+			form.value.state = details.state || ''
+			form.value.zip = details.zip || ''
+			form.value.country = details.country || ''
+
+			if (details.nominee_name) {
+				hasNominee.value = true
+				nominee.value.name = details.nominee_name || ''
+				nominee.value.relationship = details.nominee_relationship || ''
+				nominee.value.phone = details.nominee_phone || ''
+				nominee.value.email = ''
+			}
+		}
+	} catch (e) {
+		console.error('Failed to fetch customer details:', e)
+	}
 }
 
 let itemSearchTimer
@@ -1732,6 +1786,7 @@ async function createNewCustomer() {
 				address_line1: newCustomer.value.address,
 				city: newCustomer.value.city,
 				state: newCustomer.value.state,
+				country: newCustomer.value.country || 'United States',
 				pincode: newCustomer.value.zip,
 			},
 		})

@@ -21,6 +21,7 @@ def get_sales_history(
 	search: str | None = None,
 	page: int = 1,
 	page_size: int = 20,
+	owner: str | None = None,
 ) -> dict:
 	"""
 	Get sales history with filtering and pagination.
@@ -37,7 +38,7 @@ def get_sales_history(
 	Returns:
 		dict: Contains 'sales' list and 'pagination' info
 	"""
-	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
+	frappe.only_for(["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"])
 
 	# Set default date range
 	if not from_date:
@@ -51,6 +52,10 @@ def get_sales_history(
 		"is_pos": 1,
 		"posting_date": ["between", [cstr(from_date), cstr(to_date)]],
 	}
+
+	# Add owner filter for non-admin users
+	if owner:
+		filters["owner"] = owner
 
 	if customer:
 		filters["customer"] = ["like", f"%{customer}%"]
@@ -135,6 +140,7 @@ def get_sales_history(
 def get_sales_summary(
 	from_date: str | None = None,
 	to_date: str | None = None,
+	owner: str | None = None,
 ) -> dict:
 	"""
 	Get sales summary statistics for a date range.
@@ -142,11 +148,12 @@ def get_sales_summary(
 	Args:
 		from_date: Start date filter (default: 30 days ago)
 		to_date: End date filter (default: today)
+		owner: Filter by owner (email) - for non-admin users to see their own sales only
 
 	Returns:
 		dict: Contains 'summary' with transaction_count, total_sales, average_sale, unique_customers
 	"""
-	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
+	frappe.only_for(["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"])
 
 	# Set default date range
 	if not from_date:
@@ -155,8 +162,7 @@ def get_sales_summary(
 		to_date = getdate()
 
 	# Get sales statistics
-	stats = frappe.db.sql(
-		"""
+	query = """
 		SELECT
 			COUNT(*) as transaction_count,
 			COALESCE(SUM(grand_total), 0) as total_sales,
@@ -166,8 +172,17 @@ def get_sales_summary(
 		AND is_pos = 1
 		AND posting_date >= %s
 		AND posting_date <= %s
-		""",
-		(cstr(from_date), cstr(to_date)),
+	"""
+	params = [cstr(from_date), cstr(to_date)]
+
+	# Add owner filter if specified
+	if owner:
+		query += " AND owner = %s"
+		params.append(owner)
+
+	stats = frappe.db.sql(
+		query,
+		tuple(params),
 		as_dict=True,
 	)
 
@@ -209,7 +224,7 @@ def get_transaction_details(invoice_name: str) -> dict:
 	Returns:
 		dict: Contains 'invoice', 'items', 'payments' details
 	"""
-	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
+	frappe.only_for(["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"])
 
 	if not invoice_name or not frappe.db.exists("Sales Invoice", invoice_name):
 		frappe.throw(_("Invoice '{0}' not found.").format(invoice_name or ""))
@@ -314,7 +329,7 @@ def get_sales_by_payment_mode(
 	Returns:
 		dict: Payment mode breakdown with amounts
 	"""
-	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
+	frappe.only_for(["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"])
 
 	if not from_date:
 		from_date = add_days(getdate(), -30)
@@ -365,7 +380,7 @@ def export_sales_history(
 	Returns:
 		str: Download URL or file content
 	"""
-	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
+	frappe.only_for(["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"])
 
 	# Get sales data
 	result = get_sales_history(

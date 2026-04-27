@@ -371,6 +371,104 @@ def execute():
 				"insert_after": "custom_legacy_desc",
 			},
 		],
+		"Supplier": [
+			{
+				"fieldname": "custom_legacy_abbrev",
+				"label": "Legacy Abbreviation",
+				"fieldtype": "Data",
+				"insert_after": "supplier_name",
+			},
+			{
+				"fieldname": "custom_legacy_account",
+				"label": "Legacy Account No",
+				"fieldtype": "Data",
+				"insert_after": "custom_legacy_abbrev",
+			},
+			{
+				"fieldname": "custom_budget",
+				"label": "Budget",
+				"fieldtype": "Currency",
+				"insert_after": "custom_legacy_account",
+			},
+			{
+				"fieldname": "custom_markup",
+				"label": "Markup (%)",
+				"fieldtype": "Percent",
+				"insert_after": "custom_budget",
+			},
+			{
+				"fieldname": "custom_discount",
+				"label": "Discount (%)",
+				"fieldtype": "Percent",
+				"insert_after": "custom_markup",
+			},
+			{
+				"fieldname": "custom_fax",
+				"label": "Fax",
+				"fieldtype": "Data",
+				"insert_after": "custom_discount",
+			},
+			{
+				"fieldname": "custom_phone2",
+				"label": "Phone 2",
+				"fieldtype": "Data",
+				"insert_after": "custom_fax",
+			},
+			{
+				"fieldname": "custom_total_purchases",
+				"label": "Total Purchases",
+				"fieldtype": "Currency",
+				"insert_after": "custom_phone2",
+			},
+			{
+				"fieldname": "custom_mtd_purchases",
+				"label": "MTD Purchases",
+				"fieldtype": "Currency",
+				"insert_after": "custom_total_purchases",
+			},
+			{
+				"fieldname": "custom_ptd_purchases",
+				"label": "PTD Purchases",
+				"fieldtype": "Currency",
+				"insert_after": "custom_mtd_purchases",
+			},
+			{
+				"fieldname": "custom_consigned",
+				"label": "Consigned",
+				"fieldtype": "Check",
+				"insert_after": "custom_ptd_purchases",
+			},
+			{
+				"fieldname": "custom_use_commission",
+				"fieldtype": "Int",
+				"label": "Use Commission",
+				"insert_after": "custom_consigned",
+			},
+			{
+				"fieldname": "custom_stock_turnover",
+				"label": "Stock Turnover",
+				"fieldtype": "Float",
+				"insert_after": "custom_use_commission",
+			},
+			{
+				"fieldname": "custom_product_line",
+				"label": "Product Line",
+				"fieldtype": "Small Text",
+				"insert_after": "custom_stock_turnover",
+			},
+			{
+				"fieldname": "custom_inactive",
+				"label": "Inactive (Legacy)",
+				"fieldtype": "Check",
+				"insert_after": "custom_product_line",
+			},
+			{
+				"fieldname": "custom_legacy_export",
+				"label": "Legacy Export Ref",
+				"fieldtype": "Data",
+				"insert_after": "custom_inactive",
+			},
+		],
 		"Jewelry Appraisal": [
 			{
 				"fieldname": "custom_legacy_stock_no",
@@ -438,9 +536,7 @@ def execute():
 	for doctype, fields in custom_fields.items():
 		for cf in fields:
 			fieldname = cf["fieldname"]
-			if not frappe.db.exists(
-				"Custom Field", {"dt": doctype, "fieldname": fieldname}
-			):
+			if not frappe.db.exists("Custom Field", {"dt": doctype, "fieldname": fieldname}):
 				try:
 					doc = frappe.get_doc(
 						{
@@ -456,7 +552,7 @@ def execute():
 						f"Failed to create {doctype}.{fieldname}: {e}",
 						"Migration Custom Fields",
 					)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	# Create modes of payment for legacy tenders
 	for mode in ["Cash", "Check", "Credit Card", "Debit Card"]:
@@ -468,4 +564,4 @@ def execute():
 				doc.insert(ignore_permissions=True)
 			except frappe.DuplicateEntryError:
 				pass
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep

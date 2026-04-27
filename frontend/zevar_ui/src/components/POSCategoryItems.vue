@@ -5,7 +5,7 @@
 				<button
 					v-if="selectedCategory"
 					@click="selectedCategory = null"
-					class="p-2 rounded-lg bg-white/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-white/10 transition-all text-gray-600 dark:text-gray-400 hover:text-[#D4AF37]"
+					class="p-2 rounded-lg bg-white/5 dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border hover:bg-white/10 transition-all text-gray-600 dark:text-gray-400 hover:text-[#D4AF37]"
 				>
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -67,7 +67,7 @@
 					class="group cursor-pointer"
 				>
 					<div
-						class="relative overflow-hidden rounded-xl bg-[#2a2a32] dark:bg-[#2a2a32] border border-white/5 dark:border-white/5 hover:border-[#D4AF37]/40 transition-all duration-300 shadow-sm hover:shadow-lg aspect-square flex flex-col items-center justify-center p-4"
+						class="relative overflow-hidden rounded-xl bg-[#2a2a32] dark:bg-[#2a2a32] border border-white/5 dark:border-warm-border/50 hover:border-[#D4AF37]/40 transition-all duration-300 shadow-sm hover:shadow-lg aspect-square flex flex-col items-center justify-center p-4"
 					>
 						<div
 							class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-white/5 flex items-center justify-center text-[#D4AF37] mb-3 group-hover:bg-[#D4AF37]/10 transition-colors"
@@ -124,7 +124,7 @@
 					<button
 						@click="loadMore"
 						:disabled="items.loading"
-						class="px-8 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-full shadow-sm hover:shadow-md hover:border-gray-900 dark:hover:border-white transition-all text-sm font-bold uppercase tracking-wider disabled:opacity-50"
+						class="px-8 py-3 bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border text-gray-900 dark:text-white rounded-full shadow-sm hover:shadow-md hover:border-gray-900 dark:hover:border-white transition-all text-sm font-bold uppercase tracking-wider disabled:opacity-50"
 					>
 						{{ items.loading ? 'Loading...' : 'Load More' }}
 					</button>

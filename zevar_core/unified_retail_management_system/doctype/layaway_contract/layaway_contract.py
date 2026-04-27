@@ -34,7 +34,7 @@ class LayawayContract(Document):
 			customer_doc = frappe.get_doc("Customer", self.customer)
 			self.customer_name = customer_doc.customer_name
 			if not self.customer_contact:
-				self.customer_contact = customer_doc.mobile_no or customer_doc.phone
+				self.customer_contact = customer_doc.mobile_no or getattr(customer_doc, 'phone', '') or ''
 			if not self.customer_email:
 				self.customer_email = customer_doc.email_id or ""
 
@@ -47,7 +47,9 @@ class LayawayContract(Document):
 		"""Calculate derived amount fields."""
 		if flt(self.total_amount) > 0:
 			self.down_payment_percent = (flt(self.deposit_amount) / flt(self.total_amount)) * 100
-		self.total_paid = flt(self.deposit_amount)
+		if self.is_new():
+			self.total_paid = flt(self.deposit_amount)
+			self.balance_amount = flt(self.total_amount) - flt(self.deposit_amount)
 
 	def _calculate_payment_stats(self):
 		"""Calculate payment statistics from schedule."""

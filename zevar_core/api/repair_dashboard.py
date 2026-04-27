@@ -34,8 +34,7 @@ def get_repair_dashboard_stats(warehouse=None):
 		f"""
 		SELECT COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
-			AND promised_date < %(today)s
+		WHERE promised_date < %(today)s
 			AND status NOT IN ('Delivered', 'Cancelled')
 			{conditions}
 		""",
@@ -48,8 +47,7 @@ def get_repair_dashboard_stats(warehouse=None):
 		f"""
 		SELECT COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
-			AND status = 'Ready for Pickup'
+		WHERE status = 'Ready for Pickup'
 			{conditions}
 		""",
 		values=values,
@@ -61,8 +59,7 @@ def get_repair_dashboard_stats(warehouse=None):
 		f"""
 		SELECT SUM(total_cost) as revenue
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
-			AND received_date >= %(week_start)s
+		WHERE received_date >= %(week_start)s
 			AND received_date <= %(today)s
 			{conditions}
 		""",
@@ -76,8 +73,7 @@ def get_repair_dashboard_stats(warehouse=None):
 		f"""
 		SELECT SUM(total_cost) as revenue
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
-			AND received_date >= %(month_start)s
+		WHERE received_date >= %(month_start)s
 			AND received_date <= %(today)s
 			{conditions}
 		""",
@@ -91,8 +87,7 @@ def get_repair_dashboard_stats(warehouse=None):
 		f"""
 		SELECT AVG(TIMESTAMPDIFF(HOUR, received_date, delivered_date) / 24) as avg_days
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
-			AND status = 'Delivered'
+		WHERE status = 'Delivered'
 			AND delivered_date IS NOT NULL
 			AND received_date >= DATE_SUB(%(today)s, INTERVAL 30 DAY)
 			{conditions}
@@ -107,8 +102,7 @@ def get_repair_dashboard_stats(warehouse=None):
 		f"""
 		SELECT status, COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
-			AND status NOT IN ('Delivered', 'Cancelled')
+		WHERE status NOT IN ('Delivered', 'Cancelled')
 			{conditions}
 		GROUP BY status
 		ORDER BY count DESC
@@ -126,8 +120,7 @@ def get_repair_dashboard_stats(warehouse=None):
 			COUNT(*) as count,
 			SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) as in_progress
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
-			AND assigned_to IS NOT NULL
+		WHERE assigned_to IS NOT NULL
 			AND status NOT IN ('Delivered', 'Cancelled')
 			{conditions}
 		GROUP BY assigned_to
@@ -150,8 +143,7 @@ def get_repair_dashboard_stats(warehouse=None):
 			status,
 			priority
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
-			AND promised_date < %(today)s
+		WHERE promised_date < %(today)s
 			AND status NOT IN ('Delivered', 'Cancelled')
 			{conditions}
 		ORDER BY promised_date ASC
@@ -168,8 +160,7 @@ def get_repair_dashboard_stats(warehouse=None):
 			repair_type,
 			COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
-			AND received_date >= %(month_start)s
+		WHERE received_date >= %(month_start)s
 			{conditions}
 		GROUP BY repair_type
 		ORDER BY count DESC
@@ -187,8 +178,7 @@ def get_repair_dashboard_stats(warehouse=None):
 			SUM(balance_due) as total_pending,
 			COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
-			AND status IN ('Ready for Pickup', 'Delivered')
+		WHERE status IN ('Ready for Pickup', 'Delivered')
 			AND balance_due > 0
 			{conditions}
 		""",
@@ -230,8 +220,7 @@ def get_repair_chart_data(warehouse=None, period=30):
 			DATE(received_date) as date,
 			COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
-			AND received_date >= %(from_date)s
+		WHERE received_date >= %(from_date)s
 			AND received_date <= %(to_date)s
 			{conditions}
 		GROUP BY DATE(received_date)
@@ -265,8 +254,7 @@ def get_repair_chart_data(warehouse=None, period=30):
 			status,
 			COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
-			AND received_date >= %(from_date)s
+		WHERE received_date >= %(from_date)s
 			AND received_date <= %(to_date)s
 			{conditions}
 		GROUP BY status
@@ -288,8 +276,7 @@ def get_repair_chart_data(warehouse=None, period=30):
 			DATE(received_date) as date,
 			SUM(total_cost) as revenue
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
-			AND received_date >= %(from_date)s
+		WHERE received_date >= %(from_date)s
 			AND received_date <= %(to_date)s
 			{conditions}
 		GROUP BY DATE(received_date)

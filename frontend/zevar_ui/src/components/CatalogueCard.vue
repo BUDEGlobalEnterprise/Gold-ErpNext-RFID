@@ -3,7 +3,7 @@
 		:href="catalogue.url"
 		target="_blank"
 		rel="noopener noreferrer"
-		class="group block bg-white dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl border border-gray-100 dark:border-gray-800/50 overflow-hidden transition-all hover:shadow-2xl hover:shadow-[#D4AF37]/10 hover:border-[#D4AF37]/40 hover:-translate-y-1"
+		class="group block bg-white dark:bg-warm-dark-900/80 backdrop-blur-sm rounded-2xl border border-gray-100 dark:border-gray-800/50 overflow-hidden transition-all hover:shadow-2xl hover:shadow-[#D4AF37]/10 hover:border-[#D4AF37]/40 hover:-translate-y-1"
 	>
 		<!-- Header with gradient -->
 		<div
@@ -62,7 +62,7 @@
 				<span
 					v-for="feature in catalogue.features"
 					:key="feature"
-					class="px-2 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 text-[10px] sm:text-xs border border-gray-200 dark:border-white/10"
+					class="px-2 py-1 rounded-lg bg-gray-100 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-400 text-[10px] sm:text-xs border border-gray-200 dark:border-warm-border"
 				>
 					{{ feature }}
 				</span>

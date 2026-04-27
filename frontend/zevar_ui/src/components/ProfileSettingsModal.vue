@@ -1,142 +1,168 @@
 <template>
-	<div v-if="show" class="modal-overlay" @click.self="close">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h2>Profile Settings</h2>
-				<button class="close-btn" @click="close">&times;</button>
-			</div>
+	<BaseModal :show="show" max-width="max-w-lg" @close="close">
+		<template #header>
+			<h2 class="text-lg font-bold text-gray-900 dark:text-white">Profile Settings</h2>
+		</template>
 
-			<div class="modal-body">
-				<!-- User Info -->
-				<div class="user-info">
-					<div class="avatar">
-						{{ userInitials }}
-					</div>
-					<div class="user-details">
-						<h3>{{ user?.full_name || user?.email || 'User' }}</h3>
-						<p>{{ user?.email }}</p>
-					</div>
+		<div class="p-6">
+			<!-- User Info -->
+			<div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-warm-dark-700 rounded-xl mb-6">
+				<div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+					{{ userInitials }}
 				</div>
-
-				<!-- Settings Sections -->
-				<div class="settings-section">
-					<h4>Display Settings</h4>
-
-					<div class="setting-item">
-						<div class="setting-info">
-							<span class="setting-label">Dark Mode</span>
-							<span class="setting-desc">Use dark theme throughout the app</span>
-						</div>
-						<label class="toggle">
-							<input
-								type="checkbox"
-								v-model="settings.dark_mode"
-								@change="saveSettings"
-							/>
-							<span class="toggle-slider"></span>
-						</label>
-					</div>
-
-					<div class="setting-item">
-						<div class="setting-info">
-							<span class="setting-label">Compact View</span>
-							<span class="setting-desc">Reduce spacing in lists and cards</span>
-						</div>
-						<label class="toggle">
-							<input
-								type="checkbox"
-								v-model="settings.compact_view"
-								@change="saveSettings"
-							/>
-							<span class="toggle-slider"></span>
-						</label>
-					</div>
-
-					<div class="setting-item">
-						<div class="setting-info">
-							<span class="setting-label">Currency Display</span>
-							<span class="setting-desc">How to show prices</span>
-						</div>
-						<select v-model="settings.currency_display" @change="saveSettings">
-							<option value="symbol">$ Symbol</option>
-							<option value="code">USD Code</option>
-							<option value="name">US Dollar</option>
-						</select>
-					</div>
-				</div>
-
-				<div class="settings-section">
-					<h4>Notification Settings</h4>
-
-					<div class="setting-item">
-						<div class="setting-info">
-							<span class="setting-label">Sound Alerts</span>
-							<span class="setting-desc">Play sound on order completion</span>
-						</div>
-						<label class="toggle">
-							<input
-								type="checkbox"
-								v-model="settings.sound_alerts"
-								@change="saveSettings"
-							/>
-							<span class="toggle-slider"></span>
-						</label>
-					</div>
-
-					<div class="setting-item">
-						<div class="setting-info">
-							<span class="setting-label">Low Stock Alerts</span>
-							<span class="setting-desc">Alert when items are low in stock</span>
-						</div>
-						<label class="toggle">
-							<input
-								type="checkbox"
-								v-model="settings.low_stock_alerts"
-								@change="saveSettings"
-							/>
-							<span class="toggle-slider"></span>
-						</label>
-					</div>
-				</div>
-
-				<div class="settings-section">
-					<h4>Language & Region</h4>
-
-					<div class="setting-item">
-						<div class="setting-info">
-							<span class="setting-label">Language</span>
-						</div>
-						<select v-model="settings.language" @change="saveSettings">
-							<option value="en">English</option>
-							<option value="es">Spanish</option>
-							<option value="ar">Arabic</option>
-						</select>
-					</div>
-
-					<div class="setting-item">
-						<div class="setting-info">
-							<span class="setting-label">Timezone</span>
-						</div>
-						<select v-model="settings.timezone" @change="saveSettings">
-							<option value="America/New_York">Eastern Time</option>
-							<option value="America/Chicago">Central Time</option>
-							<option value="America/Denver">Mountain Time</option>
-							<option value="America/Los_Angeles">Pacific Time</option>
-						</select>
-					</div>
+				<div>
+					<h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ user?.full_name || user?.email || 'User' }}</h3>
+					<p class="text-xs text-gray-500 dark:text-gray-400">{{ user?.email }}</p>
 				</div>
 			</div>
 
-			<div class="modal-footer">
-				<button class="btn btn-secondary" @click="resetSettings">Reset to Defaults</button>
-				<button class="btn btn-primary" @click="close">Done</button>
+			<!-- Settings Sections -->
+			<div class="space-y-6">
+				<div>
+					<h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Display Settings</h4>
+
+					<div class="space-y-3">
+						<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+							<div class="flex-1">
+								<span class="block text-sm font-medium text-gray-900 dark:text-white">Dark Mode</span>
+								<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Use dark theme throughout the app</span>
+							</div>
+							<label class="relative inline-flex items-center cursor-pointer">
+								<input
+									type="checkbox"
+									v-model="settings.dark_mode"
+									@change="saveSettings"
+									class="sr-only peer"
+								/>
+								<div class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+							</label>
+						</div>
+
+						<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+							<div class="flex-1">
+								<span class="block text-sm font-medium text-gray-900 dark:text-white">Compact View</span>
+								<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Reduce spacing in lists and cards</span>
+							</div>
+							<label class="relative inline-flex items-center cursor-pointer">
+								<input
+									type="checkbox"
+									v-model="settings.compact_view"
+									@change="saveSettings"
+									class="sr-only peer"
+								/>
+								<div class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+							</label>
+						</div>
+
+						<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+							<div class="flex-1">
+								<span class="block text-sm font-medium text-gray-900 dark:text-white">Currency Display</span>
+								<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">How to show prices</span>
+							</div>
+							<select v-model="settings.currency_display" @change="saveSettings"
+								class="px-3 py-1.5 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white min-w-[120px]"
+							>
+								<option value="symbol">$ Symbol</option>
+								<option value="code">USD Code</option>
+								<option value="name">US Dollar</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<div>
+					<h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Notification Settings</h4>
+
+					<div class="space-y-3">
+						<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+							<div class="flex-1">
+								<span class="block text-sm font-medium text-gray-900 dark:text-white">Sound Alerts</span>
+								<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Play sound on order completion</span>
+							</div>
+							<label class="relative inline-flex items-center cursor-pointer">
+								<input
+									type="checkbox"
+									v-model="settings.sound_alerts"
+									@change="saveSettings"
+									class="sr-only peer"
+								/>
+								<div class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+							</label>
+						</div>
+
+						<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+							<div class="flex-1">
+								<span class="block text-sm font-medium text-gray-900 dark:text-white">Low Stock Alerts</span>
+								<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Alert when items are low in stock</span>
+							</div>
+							<label class="relative inline-flex items-center cursor-pointer">
+								<input
+									type="checkbox"
+									v-model="settings.low_stock_alerts"
+									@change="saveSettings"
+									class="sr-only peer"
+								/>
+								<div class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<div>
+					<h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Language & Region</h4>
+
+					<div class="space-y-3">
+						<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+							<div class="flex-1">
+								<span class="block text-sm font-medium text-gray-900 dark:text-white">Language</span>
+							</div>
+							<select v-model="settings.language" @change="saveSettings"
+								class="px-3 py-1.5 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white min-w-[120px]"
+							>
+								<option value="en">English</option>
+								<option value="es">Spanish</option>
+								<option value="ar">Arabic</option>
+							</select>
+						</div>
+
+						<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+							<div class="flex-1">
+								<span class="block text-sm font-medium text-gray-900 dark:text-white">Timezone</span>
+							</div>
+							<select v-model="settings.timezone" @change="saveSettings"
+								class="px-3 py-1.5 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white min-w-[120px]"
+							>
+								<option value="America/New_York">Eastern Time</option>
+								<option value="America/Chicago">Central Time</option>
+								<option value="America/Denver">Mountain Time</option>
+								<option value="America/Los_Angeles">Pacific Time</option>
+							</select>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
-	</div>
+
+		<template #footer>
+			<button
+				class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-white/10 transition"
+				@click="resetSettings"
+			>
+				Reset to Defaults
+			</button>
+			<button
+				class="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+				@click="close"
+			>
+				Done
+			</button>
+		</template>
+	</BaseModal>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import BaseModal from './BaseModal.vue'
 
 const props = defineProps({
 	show: { type: Boolean, default: false },
@@ -200,208 +226,3 @@ watch(
 
 onMounted(loadSettings)
 </script>
-
-<style scoped>
-.modal-overlay {
-	position: fixed;
-	inset: 0;
-	background: rgba(0, 0, 0, 0.7);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 1000;
-}
-
-.modal-content {
-	background: #1e293b;
-	border-radius: 16px;
-	width: 90%;
-	max-width: 500px;
-	max-height: 90vh;
-	overflow-y: auto;
-}
-
-.modal-header {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 20px 24px;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.modal-header h2 {
-	color: white;
-	font-size: 18px;
-	margin: 0;
-}
-
-.close-btn {
-	background: transparent;
-	border: none;
-	color: rgba(255, 255, 255, 0.6);
-	font-size: 24px;
-	cursor: pointer;
-}
-
-.modal-body {
-	padding: 24px;
-}
-
-.user-info {
-	display: flex;
-	align-items: center;
-	gap: 16px;
-	padding: 16px;
-	background: rgba(255, 255, 255, 0.05);
-	border-radius: 12px;
-	margin-bottom: 24px;
-}
-
-.avatar {
-	width: 56px;
-	height: 56px;
-	background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: white;
-	font-weight: 700;
-	font-size: 18px;
-}
-
-.user-details h3 {
-	color: white;
-	margin: 0 0 4px 0;
-}
-
-.user-details p {
-	color: rgba(255, 255, 255, 0.6);
-	margin: 0;
-	font-size: 14px;
-}
-
-.settings-section {
-	margin-bottom: 24px;
-}
-
-.settings-section h4 {
-	color: rgba(255, 255, 255, 0.6);
-	font-size: 12px;
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
-	margin-bottom: 12px;
-}
-
-.setting-item {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 12px 0;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.setting-info {
-	flex: 1;
-}
-
-.setting-label {
-	display: block;
-	color: white;
-	font-weight: 500;
-}
-
-.setting-desc {
-	display: block;
-	color: rgba(255, 255, 255, 0.5);
-	font-size: 12px;
-	margin-top: 2px;
-}
-
-.toggle {
-	position: relative;
-	display: inline-block;
-	width: 48px;
-	height: 24px;
-}
-
-.toggle input {
-	opacity: 0;
-	width: 0;
-	height: 0;
-}
-
-.toggle-slider {
-	position: absolute;
-	cursor: pointer;
-	inset: 0;
-	background: rgba(255, 255, 255, 0.2);
-	border-radius: 24px;
-	transition: 0.3s;
-}
-
-.toggle-slider::before {
-	position: absolute;
-	content: '';
-	height: 18px;
-	width: 18px;
-	left: 3px;
-	bottom: 3px;
-	background: white;
-	border-radius: 50%;
-	transition: 0.3s;
-}
-
-.toggle input:checked + .toggle-slider {
-	background: #3b82f6;
-}
-
-.toggle input:checked + .toggle-slider::before {
-	transform: translateX(24px);
-}
-
-select {
-	padding: 8px 12px;
-	background: rgba(255, 255, 255, 0.1);
-	border: 1px solid rgba(255, 255, 255, 0.2);
-	border-radius: 6px;
-	color: white;
-	min-width: 120px;
-}
-
-.modal-footer {
-	display: flex;
-	justify-content: flex-end;
-	gap: 12px;
-	padding: 16px 24px;
-	border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.btn {
-	padding: 10px 20px;
-	border-radius: 8px;
-	font-weight: 600;
-	cursor: pointer;
-	transition: all 0.2s;
-}
-
-.btn-primary {
-	background: #3b82f6;
-	color: white;
-	border: none;
-}
-
-.btn-primary:hover {
-	background: #2563eb;
-}
-
-.btn-secondary {
-	background: transparent;
-	color: rgba(255, 255, 255, 0.8);
-	border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.btn-secondary:hover {
-	background: rgba(255, 255, 255, 0.1);
-}
-</style>

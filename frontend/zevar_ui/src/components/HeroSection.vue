@@ -63,7 +63,7 @@
 								v-model="searchQuery"
 								@input="$emit('search', searchQuery)"
 								placeholder="Search jewelry..."
-								class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition-all"
+								class="w-full bg-white dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition-all"
 							/>
 						</div>
 					</div>

@@ -27,7 +27,7 @@
 
 			<!-- Filters Bar -->
 			<div
-				class="bg-white dark:bg-gray-800/50 rounded-xl p-4 mb-6 border border-gray-100 dark:border-gray-700/50"
+				class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 mb-6 border border-gray-100 dark:border-warm-border/50"
 			>
 				<div class="flex flex-wrap gap-3 items-end">
 					<div class="flex flex-col gap-1">
@@ -37,7 +37,7 @@
 						<select
 							v-model="filters.status"
 							@change="fetchLayaways"
-							class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
 						>
 							<option value="">All</option>
 							<option value="Active">Active</option>
@@ -55,7 +55,7 @@
 							v-model="filters.customer"
 							placeholder="Search customer..."
 							@keyup.enter="fetchLayaways"
-							class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-40"
+							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-40"
 						/>
 					</div>
 					<div class="flex flex-col gap-1">
@@ -67,7 +67,7 @@
 							v-model="filters.search"
 							placeholder="Contract #..."
 							@keyup.enter="fetchLayaways"
-							class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-36"
+							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-36"
 						/>
 					</div>
 					<button
@@ -83,7 +83,7 @@
 			<!-- Summary Cards -->
 			<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" v-if="summary">
 				<div
-					class="bg-white dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50"
+					class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
 				>
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
@@ -104,7 +104,7 @@
 					</p>
 				</div>
 				<div
-					class="bg-white dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50"
+					class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
 				>
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
@@ -115,7 +115,7 @@
 					</p>
 				</div>
 				<div
-					class="bg-white dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50"
+					class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
 				>
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
@@ -162,7 +162,7 @@
 						v-for="layaway in layaways"
 						:key="layaway.name"
 						@click="viewDetails(layaway.name)"
-						class="bg-white dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50 hover:border-[#D4AF37]/30 transition cursor-pointer"
+						class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50 hover:border-[#D4AF37]/30 transition cursor-pointer"
 					>
 						<!-- Header -->
 						<div class="flex items-start justify-between mb-3">
@@ -215,7 +215,7 @@
 								>
 							</div>
 							<div
-								class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden"
+								class="h-2 bg-gray-200 dark:bg-warm-dark-800 rounded-full overflow-hidden"
 							>
 								<div
 									class="h-full bg-[#D4AF37] transition-all duration-300"
@@ -249,7 +249,7 @@
 					<button
 						@click="goToPage(pagination.page - 1)"
 						:disabled="pagination.page === 1"
-						class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+						class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 dark:border-warm-border text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-warm-dark-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
 					>
 						Previous
 					</button>
@@ -259,7 +259,7 @@
 					<button
 						@click="goToPage(pagination.page + 1)"
 						:disabled="pagination.page === pagination.total_pages"
-						class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+						class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 dark:border-warm-border text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-warm-dark-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
 					>
 						Next
 					</button>
@@ -275,7 +275,7 @@
 					Back to Layaways
 				</button>
 			</div>
-			<div class="flex-1 overflow-hidden rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm">
+			<div class="flex-1 overflow-hidden rounded-2xl border border-gray-100 dark:border-warm-border shadow-sm">
 				<CreateLayawayModal
 				:show="showCreateModal"
 				inlineMode
@@ -300,7 +300,7 @@
 			<Transition name="fade">
 				<div v-if="showSuccessConfirmation" class="fixed inset-0 z-[120] flex items-center justify-center p-4">
 					<div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" @click="dismissSuccess"></div>
-					<div class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl max-w-md w-full p-10 flex flex-col items-center text-center border border-transparent dark:border-white/10 animate-bounce-in">
+					<div class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl max-w-md w-full p-10 flex flex-col items-center text-center border border-transparent dark:border-warm-border animate-bounce-in">
 						<div class="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-6">
 							<svg class="w-10 h-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
@@ -309,7 +309,7 @@
 						<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Layaway Created!</h2>
 						<p class="text-gray-500 dark:text-gray-400 mb-6">Contract has been created and deposit payment recorded successfully.</p>
 
-						<div class="bg-gray-50 dark:bg-[#15171e] rounded-xl p-4 w-full mb-6 border border-gray-100 dark:border-white/5 space-y-2">
+						<div class="bg-gray-50 dark:bg-[#15171e] rounded-xl p-4 w-full mb-6 border border-gray-100 dark:border-warm-border/50 space-y-2">
 							<div class="flex justify-between text-sm">
 								<span class="text-gray-500 dark:text-gray-400">Contract ID</span>
 								<span class="font-mono font-bold text-gray-900 dark:text-white">{{ successData?.layaway_id || '—' }}</span>
@@ -350,14 +350,17 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createResource } from 'frappe-ui'
 import { useUIStore } from '@/stores/ui.js'
+import { useCartStore } from '@/stores/cart.js'
 import AppLayout from '@/components/AppLayout.vue'
 import LayawayDetailModal from '@/components/LayawayDetailModal.vue'
 import CreateLayawayModal from '@/components/CreateLayawayModal.vue'
+	import { formatDate as formatDateUtil } from '@/utils/dates.js'
 
 // Routing
 const route = useRoute()
 const router = useRouter()
 const ui = useUIStore()
+const cart = useCartStore()
 
 // State
 const loading = ref(false)
@@ -408,9 +411,7 @@ function formatCurrency(amount) {
 }
 
 function formatDate(dateStr) {
-	if (!dateStr) return ''
-	const date = new Date(dateStr)
-	return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+	return formatDateUtil(dateStr)
 }
 
 function getStatusClass(status, isOverdue) {
@@ -420,10 +421,10 @@ function getStatusClass(status, isOverdue) {
 	const classes = {
 		Active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
 		Completed: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-		Cancelled: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+		Cancelled: 'bg-gray-100 text-gray-600 dark:bg-warm-dark-900 dark:text-gray-400',
 		Defaulted: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 	}
-	return classes[status] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+	return classes[status] || 'bg-gray-100 text-gray-600 dark:bg-warm-dark-900 dark:text-gray-400'
 }
 
 async function fetchLayaways() {
@@ -466,6 +467,7 @@ async function onProceedToPayment(payload) {
 function onLayawayCreated(result) {
 	successData.value = result
 	selectedLayaway.value = result.layaway_id
+	cart.clearCart()
 	closeCreateMode()
 	fetchLayaways()
 	showSuccessConfirmation.value = true

@@ -6,12 +6,15 @@
 				<h1 class="premium-title !text-2xl">Sales History</h1>
 				<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
 					View and manage past transactions
+					<span v-if="isOwnSalesOnly" class="text-xs text-amber-600 dark:text-amber-400 ml-2">
+						(Showing your sales only)
+					</span>
 				</p>
 			</div>
 
 			<!-- Filters -->
 			<div
-				class="bg-white dark:bg-gray-800/50 rounded-xl p-4 mb-6 border border-gray-100 dark:border-gray-700/50"
+				class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 mb-6 border border-gray-100 dark:border-warm-border/50"
 			>
 				<div class="flex flex-wrap gap-3 items-end">
 					<div class="flex flex-col gap-1">
@@ -22,7 +25,7 @@
 							type="date"
 							v-model="filters.from_date"
 							@change="fetchSales"
-							class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
 						/>
 					</div>
 					<div class="flex flex-col gap-1">
@@ -33,7 +36,7 @@
 							type="date"
 							v-model="filters.to_date"
 							@change="fetchSales"
-							class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
 						/>
 					</div>
 					<div class="flex flex-col gap-1">
@@ -45,7 +48,7 @@
 							v-model="filters.customer"
 							placeholder="Search customer..."
 							@keyup.enter="fetchSales"
-							class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-40"
+							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-40"
 						/>
 					</div>
 					<div class="flex flex-col gap-1">
@@ -57,7 +60,7 @@
 							v-model="filters.search"
 							placeholder="Invoice #..."
 							@keyup.enter="fetchSales"
-							class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-36"
+							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-36"
 						/>
 					</div>
 					<button
@@ -81,7 +84,7 @@
 			<!-- Summary Cards -->
 			<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" v-if="summary">
 				<div
-					class="bg-white dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50"
+					class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
 				>
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
@@ -102,7 +105,7 @@
 					</p>
 				</div>
 				<div
-					class="bg-white dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50"
+					class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
 				>
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
@@ -113,7 +116,7 @@
 					</p>
 				</div>
 				<div
-					class="bg-white dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50"
+					class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
 				>
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
@@ -128,13 +131,13 @@
 			<!-- Sales Table -->
 			<div class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar flex flex-col">
 				<div
-					class="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700/50 mb-6"
+					class="bg-white dark:bg-warm-dark-900/50 rounded-xl border border-gray-100 dark:border-warm-border/50 mb-6"
 				>
 				<div class="overflow-x-auto">
 					<table class="w-full">
 						<thead>
 							<tr
-								class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700/50"
+								class="bg-gray-50 dark:bg-warm-dark-900/50 border-b border-gray-100 dark:border-warm-border/50"
 							>
 								<th
 									class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
@@ -197,7 +200,7 @@
 								v-for="sale in sales"
 								:key="sale.name"
 								@click="viewDetails(sale.name)"
-								class="hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer transition"
+								class="hover:bg-gray-50 dark:hover:bg-warm-dark-700 cursor-pointer transition"
 							>
 								<td class="px-4 py-3 text-sm font-semibold text-[#D4AF37]">
 									{{ sale.name }}
@@ -227,7 +230,7 @@
 								<td class="px-4 py-3">
 									<div class="flex items-center gap-1">
 										<button
-											class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition text-gray-400 hover:text-gray-600 dark:hover:text-white"
+											class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 transition text-gray-400 hover:text-gray-600 dark:hover:text-white"
 											@click.stop="viewDetails(sale.name)"
 											title="View Details"
 										>
@@ -252,7 +255,7 @@
 											</svg>
 										</button>
 										<button
-											class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition text-gray-400 hover:text-gray-600 dark:hover:text-white"
+											class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 transition text-gray-400 hover:text-gray-600 dark:hover:text-white"
 											@click.stop="printInvoice(sale.name)"
 											title="Print"
 										>
@@ -330,17 +333,17 @@
 					@click="selectedTransaction = null"
 				></div>
 				<div
-					class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden border border-gray-200 dark:border-white/10"
+					class="relative bg-white dark:bg-warm-card rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden border border-gray-200 dark:border-warm-border"
 				>
 					<div
-						class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-white/5"
+						class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-warm-border/50"
 					>
 						<h2 class="text-lg font-bold text-gray-900 dark:text-white">
 							Invoice {{ selectedTransaction.invoice.name }}
 						</h2>
 						<button
 							@click="selectedTransaction = null"
-							class="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition"
+							class="p-2 hover:bg-gray-100 dark:hover:bg-warm-dark-700 rounded-full transition"
 						>
 							<svg
 								class="w-5 h-5 text-gray-400"
@@ -402,11 +405,11 @@
 							Items
 						</h4>
 						<div
-							class="bg-gray-50 dark:bg-gray-900/50 rounded-xl overflow-hidden mb-6"
+							class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-xl overflow-hidden mb-6"
 						>
 							<table class="w-full text-sm">
 								<thead>
-									<tr class="border-b border-gray-200 dark:border-gray-700/50">
+									<tr class="border-b border-gray-200 dark:border-warm-border/50">
 										<th
 											class="px-3 py-2 text-left text-xs text-gray-500 dark:text-gray-400"
 										>
@@ -454,7 +457,7 @@
 							</table>
 						</div>
 
-						<div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 mb-6 space-y-2">
+						<div class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-xl p-4 mb-6 space-y-2">
 							<div
 								class="flex justify-between text-sm text-gray-600 dark:text-gray-400"
 							>
@@ -483,7 +486,7 @@
 								<span>${{ formatAmount(selectedTransaction.invoice.tax) }}</span>
 							</div>
 							<div
-								class="flex justify-between text-lg font-bold text-gray-900 dark:text-white border-t border-gray-200 dark:border-gray-700 pt-3 mt-2"
+								class="flex justify-between text-lg font-bold text-gray-900 dark:text-white border-t border-gray-200 dark:border-warm-border pt-3 mt-2"
 							>
 								<span>Grand Total:</span>
 								<span
@@ -503,7 +506,7 @@
 							<div
 								v-for="payment in selectedTransaction.payments"
 								:key="payment.mode_of_payment"
-								class="flex justify-between px-3 py-2 bg-gray-50 dark:bg-gray-900/50 rounded-lg text-sm"
+								class="flex justify-between px-3 py-2 bg-gray-50 dark:bg-warm-dark-900/50 rounded-lg text-sm"
 							>
 								<span class="text-gray-700 dark:text-gray-300">{{
 									payment.mode_of_payment
@@ -516,11 +519,11 @@
 					</div>
 
 					<div
-						class="flex justify-end gap-3 p-4 border-t border-gray-100 dark:border-white/5"
+						class="flex justify-end gap-3 p-4 border-t border-gray-100 dark:border-warm-border/50"
 					>
 						<button
 							@click="printInvoice(selectedTransaction.invoice.name)"
-							class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-white/10 transition flex items-center gap-2"
+							class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition flex items-center gap-2"
 						>
 							<svg
 								class="w-4 h-4"
@@ -539,7 +542,7 @@
 						</button>
 						<button
 							@click="selectedTransaction = null"
-							class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-white/10 transition"
+							class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition"
 						>
 							Close
 						</button>
@@ -551,9 +554,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { createResource } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
+import { useSessionStore } from '@/stores/session'
+import { canViewAllSalesHistory } from '@/utils/permissions.js'
+
+const session = useSessionStore()
+const isOwnSalesOnly = computed(() => !canViewAllSalesHistory())
 
 const loading = ref(false)
 const sales = ref([])
@@ -610,10 +618,10 @@ function getStatusClass(status) {
 		Paid: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
 		Unpaid: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
 		Overdue: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-		Cancelled: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+		Cancelled: 'bg-gray-100 text-gray-600 dark:bg-warm-dark-900 dark:text-gray-400',
 		Return: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
 	}
-	return classes[status] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+	return classes[status] || 'bg-gray-100 text-gray-600 dark:bg-warm-dark-900 dark:text-gray-400'
 }
 
 async function fetchSales(append = false) {
@@ -625,16 +633,27 @@ async function fetchSales(append = false) {
 	}
 
 	try {
+		// Add owner filter for non-admin users
+		const requestParams = {
+			...filters.value,
+			page: pagination.value.page,
+			page_size: 20,
+		}
+		if (isOwnSalesOnly.value && session.user?.email) {
+			requestParams.owner = session.user.email
+		}
+
+		const summaryParams = {
+			from_date: filters.value.from_date,
+			to_date: filters.value.to_date,
+		}
+		if (isOwnSalesOnly.value && session.user?.email) {
+			summaryParams.owner = session.user.email
+		}
+
 		const [salesResult, summaryResult] = await Promise.all([
-			salesResource.submit({
-				...filters.value,
-				page: pagination.value.page,
-				page_size: 20,
-			}),
-			summaryResource.submit({
-				from_date: filters.value.from_date,
-				to_date: filters.value.to_date,
-			}),
+			salesResource.submit(requestParams),
+			summaryResource.submit(summaryParams),
 		])
 
 		if (append) {

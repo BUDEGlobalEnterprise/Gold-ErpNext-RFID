@@ -7,16 +7,16 @@
 		></div>
 
 		<div
-			class="h-full bg-white dark:bg-[#1a1c23] transform transition-transform duration-300 ease-in-out flex flex-col border-l border-transparent dark:border-white/5"
+			class="h-full bg-white dark:bg-warm-card transform transition-transform duration-300 ease-in-out flex flex-col border-l border-transparent dark:border-warm-border"
 			:class="[
 				persistent
-					? 'relative translate-x-0 w-[380px] border-l border-gray-200 dark:border-white/5'
+					? 'relative translate-x-0 w-[380px] border-l border-gray-200 dark:border-warm-border'
 					: 'fixed top-0 right-0 h-full w-full sm:w-[400px] shadow-2xl z-50',
 				!persistent && (isOpen ? 'translate-x-0' : 'translate-x-full'),
 			]"
 		>
 			<div
-				class="p-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between"
+				class="p-4 border-b border-gray-100 dark:border-warm-border/50 flex items-center justify-between"
 			>
 				<h2
 					class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2"
@@ -86,19 +86,19 @@
 			<div v-else class="flex-1 flex flex-col overflow-hidden">
 				<!-- Customer Selector -->
 				<div
-					class="p-4 border-b border-gray-100 dark:border-white/5 bg-white dark:bg-[#1a1c23] flex-shrink-0 z-10"
+					class="p-4 border-b border-gray-100 dark:border-warm-border/50 bg-white dark:bg-warm-card flex-shrink-0 z-10"
 				>
 					<div class="mb-3">
 						<label
 							class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-2"
 							>Customer <span class="text-red-500">*</span></label
 						>
-						<div class="flex bg-gray-100 dark:bg-[#0F1115] p-1 rounded-lg">
+						<div class="flex bg-gray-100 dark:bg-warm-dark-700 p-1 rounded-lg">
 							<button
 								class="flex-1 text-xs font-medium py-1.5 rounded-md transition-colors"
 								:class="
 									cart.customerType === 'Individual'
-										? 'bg-white dark:bg-[#1a1c23] shadow-sm text-gray-900 dark:text-white'
+										? 'bg-white dark:bg-warm-card shadow-sm text-gray-900 dark:text-white'
 										: 'text-gray-500'
 								"
 								@click="setCustomerType('Individual')"
@@ -109,7 +109,7 @@
 								class="flex-1 text-xs font-medium py-1.5 rounded-md transition-colors"
 								:class="
 									cart.customerType === 'Company'
-										? 'bg-white dark:bg-[#1a1c23] shadow-sm text-gray-900 dark:text-white'
+										? 'bg-white dark:bg-warm-card shadow-sm text-gray-900 dark:text-white'
 										: 'text-gray-500'
 								"
 								@click="setCustomerType('Company')"
@@ -120,7 +120,7 @@
 								class="flex-1 text-xs font-medium py-1.5 rounded-md transition-colors"
 								:class="
 									cart.customerType === 'Walkin'
-										? 'bg-white dark:bg-[#1a1c23] shadow-sm text-gray-900 dark:text-white'
+										? 'bg-white dark:bg-warm-card shadow-sm text-gray-900 dark:text-white'
 										: 'text-gray-500'
 								"
 								@click="setCustomerType('Walkin')"
@@ -136,10 +136,10 @@
 					<div
 						v-for="(item, index) in cart.items"
 						:key="index"
-						class="flex gap-4 border-b border-gray-100 dark:border-white/5 pb-4 last:border-0"
+						class="flex gap-4 border-b border-gray-100 dark:border-warm-border/50 pb-4 last:border-0"
 					>
 						<div
-							class="w-16 h-16 bg-gray-100 dark:bg-[#0F1115] rounded-lg flex-shrink-0 overflow-hidden border border-gray-200 dark:border-white/5 relative"
+							class="w-16 h-16 bg-gray-100 dark:bg-warm-dark-700 rounded-lg flex-shrink-0 overflow-hidden border border-gray-200 dark:border-warm-border/50 relative"
 						>
 							<img
 								v-if="item.image"
@@ -176,7 +176,7 @@
 									>{{ item.metal }}</span
 								>
 								<span
-									class="text-[10px] uppercase font-bold bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 px-1.5 py-0.5 rounded"
+									class="text-[10px] uppercase font-bold bg-gray-100 dark:bg-warm-dark-900 text-gray-800 dark:text-gray-300 px-1.5 py-0.5 rounded"
 									>{{ item.purity }}</span
 								>
 							</div>
@@ -220,7 +220,7 @@
 
 			<!-- Trade-Ins Section -->
 			<div v-if="cart.items.length > 0" class="px-4 pb-2">
-				<div class="border-t border-gray-100 dark:border-white/5 pt-3">
+				<div class="border-t border-gray-100 dark:border-warm-border/50 pt-3">
 					<button
 						@click="showTradeInForm = !showTradeInForm"
 						class="w-full flex items-center justify-between text-sm font-medium text-[#D4AF37] hover:text-[#b5952f] transition"
@@ -301,7 +301,7 @@
 								v-model="tradeInDescription"
 								type="text"
 								placeholder="Item description (e.g. Gold Ring)"
-								class="w-full px-3 py-2 bg-white dark:bg-[#0F1115] border border-gray-200 dark:border-white/10 rounded-lg text-sm"
+								class="w-full px-3 py-2 bg-white dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm"
 							/>
 							<div class="flex gap-2">
 								<div class="flex items-center gap-1 flex-1">
@@ -311,7 +311,7 @@
 										type="number"
 										min="0"
 										placeholder="Trade-in value"
-										class="w-full px-2 py-2 bg-white dark:bg-[#0F1115] border border-gray-200 dark:border-white/10 rounded-lg text-sm font-mono"
+										class="w-full px-2 py-2 bg-white dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm font-mono"
 									/>
 								</div>
 								<button
@@ -338,7 +338,7 @@
 
 			<div
 				v-if="cart.items.length > 0"
-				class="p-6 bg-gray-50 dark:bg-[#15171e] border-t border-gray-200 dark:border-white/5"
+				class="p-6 bg-gray-50 dark:bg-warm-dark-700 border-t border-gray-200 dark:border-warm-border"
 			>
 				<div class="space-y-2 mb-4 text-sm">
 					<div class="flex justify-between text-gray-600 dark:text-gray-400">
@@ -357,7 +357,7 @@
 						<span>-{{ formatCurrency(tradeInTotal) }}</span>
 					</div>
 					<div
-						class="flex justify-between text-lg font-bold text-gray-900 dark:text-white pt-2 border-t border-gray-200 dark:border-white/10"
+						class="flex justify-between text-lg font-bold text-gray-900 dark:text-white pt-2 border-t border-gray-200 dark:border-warm-border"
 					>
 						<span>Total</span>
 						<span>{{ formatCurrency(cart.grandTotal) }}</span>
@@ -378,7 +378,7 @@
 						:class="
 							isCheckoutReady
 								? 'bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black hover:bg-gray-800 dark:hover:bg-[#b5952f] active:scale-95'
-								: 'bg-gray-200 dark:bg-white/10 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+								: 'bg-gray-200 dark:bg-warm-dark-700 text-gray-400 dark:text-gray-600 cursor-not-allowed'
 						"
 					>
 						{{ checkoutButtonText }}
