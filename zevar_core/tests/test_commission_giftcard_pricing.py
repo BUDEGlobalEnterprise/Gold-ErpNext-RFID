@@ -151,6 +151,12 @@ class TestCommissionFlatRate(FrappeTestCase):
 		from zevar_core.api.pos import create_pos_invoice
 
 		emp2 = _create_test_employee("CommFlat2", "Test")
+		_create_commission_rule(
+			rule_name=f"Test Flat Rate {emp2}",
+			calculation_type="Flat Rate",
+			flat_rate=5.0,
+			employee=emp2,
+		)
 		result = create_pos_invoice(
 			items=json.dumps([{"item_code": self.item, "qty": 1, "rate": 1000.0}]),
 			payments=json.dumps([{"mode_of_payment": "Cash", "amount": 1000.0}]),
@@ -398,8 +404,11 @@ class TestCommissionDefaultRule(FrappeTestCase):
 		cls.company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value(
 			"Global Defaults", "default_company"
 		)
+		# Clear existing default rules
+		frappe.db.sql("UPDATE `tabCommission Rule` SET is_default = 0")
+		frappe.db.commit()
 		cls.default_rule = _create_commission_rule(
-			rule_name="Test Default Commission Rule",
+			rule_name=f"Test Default Commission Rule {frappe.generate_hash(length=8)}",
 			calculation_type="Flat Rate",
 			flat_rate=3.0,
 			is_default=True,
@@ -452,6 +461,7 @@ class TestGiftCardLifecycle(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		cls.customer = ensure_customer("GC Lifecycle Customer")
+		frappe.db.commit()
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -535,6 +545,7 @@ class TestGiftCardExpiry(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		cls.customer = ensure_customer("GC Expiry Customer")
+		frappe.db.commit()
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -694,7 +705,7 @@ class TestPricingEngineCalculated(FrappeTestCase):
 	def test_gold_rate_returns_zero_for_missing_metal(self):
 		from zevar_core.api.pricing import _get_gold_rate
 
-		rate = _get_gold_rate("", "24K")
+		rate = _get_gold_rate("", "22Kt")
 		self.assertEqual(rate, 0.0)
 
 	def test_gold_rate_returns_zero_for_missing_purity(self):
@@ -706,15 +717,15 @@ class TestPricingEngineCalculated(FrappeTestCase):
 	def test_rose_gold_uses_yellow_gold_rate(self):
 		from zevar_core.api.pricing import _get_gold_rate
 
-		rate = _get_gold_rate("Rose Gold", "18K")
-		yellow_rate = _get_gold_rate("Yellow Gold", "18K")
+		rate = _get_gold_rate("Rose Gold", "18Kt")
+		yellow_rate = _get_gold_rate("Yellow Gold", "18Kt")
 		self.assertEqual(rate, yellow_rate)
 
 	def test_white_gold_uses_yellow_gold_rate(self):
 		from zevar_core.api.pricing import _get_gold_rate
 
-		rate = _get_gold_rate("White Gold", "14K")
-		yellow_rate = _get_gold_rate("Yellow Gold", "14K")
+		rate = _get_gold_rate("White Gold", "14Kt")
+		yellow_rate = _get_gold_rate("Yellow Gold", "14Kt")
 		self.assertEqual(rate, yellow_rate)
 
 	def test_calculated_price_with_no_metal_data(self):
@@ -755,7 +766,7 @@ class TestPricingEngineHelperFunctions(FrappeTestCase):
 			name = "TEST-001"
 			item_name = "Test Item"
 			custom_metal_type = "Yellow Gold"
-			custom_purity = "18K"
+			custom_purity = "18Kt"
 			custom_gross_weight_g = 10.0
 			custom_stone_weight_g = 1.0
 			custom_net_weight_g = 9.0
@@ -766,7 +777,7 @@ class TestPricingEngineHelperFunctions(FrappeTestCase):
 		self.assertEqual(result["final_price"], 500.0)
 		self.assertEqual(result["price_source"], "MSRP")
 		self.assertEqual(result["metal"], "Yellow Gold")
-		self.assertEqual(result["purity"], "18K")
+		self.assertEqual(result["purity"], "18Kt")
 
 	def test_calculate_gold_value_zero_without_data(self):
 		from zevar_core.api.pricing import _calculate_gold_value

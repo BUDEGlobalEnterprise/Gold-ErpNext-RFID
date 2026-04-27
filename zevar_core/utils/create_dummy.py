@@ -11,12 +11,12 @@ def run():
 
 	# EXACT Valid Metal/Purity Pairs
 	valid_pairs = [
-		("Yellow Gold", "24K"),
-		("Yellow Gold", "22K"),
-		("Yellow Gold", "18K"),
-		("Rose Gold", "18K"),
-		("White Gold", "18K"),
-		("White Gold", "14K"),
+		("Yellow Gold", "24Kt"),
+		("Yellow Gold", "22Kt"),
+		("Yellow Gold", "18Kt"),
+		("Rose Gold", "18Kt"),
+		("White Gold", "18Kt"),
+		("White Gold", "14Kt"),
 		("Silver", "925 Sterling"),
 		("Silver", "999 Fine"),
 		("Platinum", "950"),
@@ -120,7 +120,7 @@ def run():
 				for _ in range(random.randint(1, 5)):
 					# Logic: Higher quality for better metals
 					g_cut = random.choice(cuts)
-					g_color = random.choice(colors[:6]) if "18K" in purity else random.choice(colors)
+					g_color = random.choice(colors[:6]) if "18Kt" in purity else random.choice(colors)
 					g_clarity = random.choice(clarities[:6]) if "Diamond" == main_gem else "SI1"
 
 					g_carat = round(random.uniform(0.1, 2.0), 2)

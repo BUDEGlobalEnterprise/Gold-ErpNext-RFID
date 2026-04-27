@@ -7,20 +7,20 @@
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Repair Terminal</h2>
 					<span
-						class="text-xs font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-3 py-1 rounded-full border border-gray-200 dark:border-white/10"
+						class="text-xs font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-warm-dark-700 px-3 py-1 rounded-full border border-gray-200 dark:border-warm-border"
 					>
 						{{ orders.length }} Orders
 					</span>
 				</div>
 				<div class="flex items-center gap-2">
 					<!-- View Toggle -->
-					<div class="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+					<div class="flex bg-gray-100 dark:bg-warm-dark-900 rounded-lg p-1">
 						<button
 							@click="viewMode = 'grid'"
 							class="px-3 py-1.5 rounded-md text-sm font-medium transition"
 							:class="
 								viewMode === 'grid'
-									? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-white'
+									? 'bg-white dark:bg-warm-dark-800 shadow text-gray-900 dark:text-white'
 									: 'text-gray-500 hover:text-gray-700'
 							"
 						>
@@ -43,7 +43,7 @@
 							class="px-3 py-1.5 rounded-md text-sm font-medium transition"
 							:class="
 								viewMode === 'kanban'
-									? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-white'
+									? 'bg-white dark:bg-warm-dark-800 shadow text-gray-900 dark:text-white'
 									: 'text-gray-500 hover:text-gray-700'
 							"
 						>
@@ -67,7 +67,7 @@
 							class="px-3 py-1.5 rounded-md text-sm font-medium transition"
 							:class="
 								viewMode === 'split'
-									? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-white'
+									? 'bg-white dark:bg-warm-dark-800 shadow text-gray-900 dark:text-white'
 									: 'text-gray-500 hover:text-gray-700'
 							"
 						>
@@ -168,7 +168,7 @@
 					:class="
 						statusFilter === statusItem.value
 							? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30'
-							: 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-transparent hover:bg-gray-200 dark:hover:bg-gray-700'
+							: 'bg-gray-100 dark:bg-warm-dark-900 text-gray-500 dark:text-gray-400 border border-transparent hover:bg-gray-200 dark:hover:bg-warm-dark-800'
 					"
 				>
 					<span>{{ statusItem.label }}</span>
@@ -206,12 +206,12 @@
 						v-model="searchTerm"
 						@input="debouncedLoad"
 						placeholder="Search repairs..."
-						class="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent placeholder-gray-400"
+						class="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-warm-border rounded-lg bg-white dark:bg-warm-dark-900 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent placeholder-gray-400"
 					/>
 				</div>
 				<button
 					@click="showAdvancedSearch = !showAdvancedSearch"
-					class="px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center gap-1.5"
+					class="px-3 py-2 border border-gray-200 dark:border-warm-border rounded-lg bg-white dark:bg-warm-dark-900 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-warm-dark-800 transition flex items-center gap-1.5"
 					:class="{ 'bg-[#D4AF37]/10 border-[#D4AF37]/30': hasActiveFilters }"
 				>
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,7 +240,7 @@
 			<!-- Advanced Search Panel -->
 			<div
 				v-if="showAdvancedSearch"
-				class="bg-white dark:bg-gray-800/50 rounded-xl p-4 mb-3 border border-gray-100 dark:border-gray-700/50 flex-shrink-0"
+				class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 mb-3 border border-gray-100 dark:border-warm-border/50 flex-shrink-0"
 			>
 				<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
 					<div>
@@ -251,7 +251,7 @@
 						<input
 							v-model="advancedFilters.from_date"
 							type="date"
-							class="w-full px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-sm"
+							class="w-full px-3 py-1.5 border border-gray-200 dark:border-warm-border rounded-lg bg-gray-50 dark:bg-warm-dark-950 text-sm"
 						/>
 					</div>
 					<div>
@@ -262,7 +262,7 @@
 						<input
 							v-model="advancedFilters.to_date"
 							type="date"
-							class="w-full px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-sm"
+							class="w-full px-3 py-1.5 border border-gray-200 dark:border-warm-border rounded-lg bg-gray-50 dark:bg-warm-dark-950 text-sm"
 						/>
 					</div>
 					<div>
@@ -272,7 +272,7 @@
 						>
 						<select
 							v-model="advancedFilters.priority"
-							class="w-full px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-sm"
+							class="w-full px-3 py-1.5 border border-gray-200 dark:border-warm-border rounded-lg bg-gray-50 dark:bg-warm-dark-950 text-sm"
 						>
 							<option value="">All</option>
 							<option value="Low">Low</option>
@@ -288,7 +288,7 @@
 						>
 						<select
 							v-model="advancedFilters.assigned_to"
-							class="w-full px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-sm"
+							class="w-full px-3 py-1.5 border border-gray-200 dark:border-warm-border rounded-lg bg-gray-50 dark:bg-warm-dark-950 text-sm"
 						>
 							<option value="">All</option>
 							<option
@@ -329,7 +329,7 @@
 					</div>
 					<div
 						v-else-if="!orders.length"
-						class="py-20 text-center bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700"
+						class="py-20 text-center bg-white dark:bg-warm-dark-900 rounded-2xl border border-dashed border-gray-200 dark:border-warm-border"
 					>
 						<p class="text-gray-500 text-sm">No repair orders found</p>
 					</div>
@@ -355,9 +355,9 @@
 						<div
 							v-for="column in kanbanColumns"
 							:key="column.status"
-							class="w-72 flex-shrink-0 flex flex-col bg-gray-50 dark:bg-gray-800 rounded-xl"
+							class="w-72 flex-shrink-0 flex flex-col bg-gray-50 dark:bg-warm-dark-900 rounded-xl"
 						>
-							<div class="p-3 border-b border-gray-200 dark:border-gray-700">
+							<div class="p-3 border-b border-gray-200 dark:border-warm-border/50">
 								<h3
 									class="font-bold text-gray-800 dark:text-gray-200 flex items-center justify-between"
 								>
@@ -379,7 +379,7 @@
 									:key="order.name"
 									draggable="true"
 									@dragstart="onDragStart($event, order)"
-									class="p-3 bg-white dark:bg-gray-900 rounded-lg shadow-sm cursor-pointer hover:shadow-md transition"
+									class="p-3 bg-white dark:bg-warm-card rounded-lg shadow-sm cursor-pointer hover:shadow-md transition"
 									:class="getStatusBorderColor(order.status)"
 								>
 									<div class="flex justify-between items-start mb-2">
@@ -487,7 +487,7 @@
 								:class="
 									selectedSplitOrder?.name === order.name
 										? 'bg-[#D4AF37]/10 border-[#D4AF37]'
-										: 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700'
+										: 'bg-white dark:bg-warm-card border-gray-200 dark:border-warm-border'
 								"
 							>
 								<div class="flex justify-between items-start">
@@ -519,7 +519,7 @@
 					<div class="w-1/2 overflow-y-auto">
 						<div
 							v-if="selectedSplitOrder"
-							class="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
+							class="bg-white dark:bg-warm-card rounded-xl p-4 border border-gray-200 dark:border-warm-border"
 						>
 							<SplitDetailView
 								:order="selectedSplitOrder"
@@ -595,6 +595,7 @@ import QRCodeModal from '@/components/QRCodeModal.vue'
 import CameraModal from '@/components/CameraModal.vue'
 import StoreTransferModal from '@/components/StoreTransferModal.vue'
 import PaymentModal from '@/components/PaymentModal.vue'
+	import { formatDate } from '@/utils/dates.js'
 
 const session = useSessionStore()
 const viewMode = ref('grid') // grid, kanban, split
@@ -649,6 +650,16 @@ const statusTabs = computed(() => {
 			value: 'Ready for Pickup',
 			label: 'Ready',
 			count: stats.value?.['Ready for Pickup'] || 0,
+		},
+		{
+			value: 'Delivered',
+			label: 'Delivered',
+			count: stats.value?.['Delivered'] || 0,
+		},
+		{
+			value: 'Cancelled',
+			label: 'Cancelled',
+			count: stats.value?.['Cancelled'] || 0,
 		},
 	]
 	tabs[0].count = Object.values(stats.value || {}).reduce((a, b) => a + b, 0)
@@ -727,7 +738,7 @@ const ordersResource = createResource({
 		priority: advancedFilters.value.priority || undefined,
 		assigned_to: advancedFilters.value.assigned_to || undefined,
 		customer: advancedFilters.value.customer || undefined,
-		page_length: 100,
+		page_length: 500,
 	}),
 	onSuccess: (data) => {
 		orders.value = data || []
@@ -815,12 +826,6 @@ function clearAdvancedFilters() {
 function formatNum(n) {
 	if (n == null) return '0.00'
 	return Number(n).toFixed(2)
-}
-
-function formatDate(dateStr) {
-	if (!dateStr) return ''
-	const date = new Date(dateStr)
-	return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
 function getStatusBorderColor(status) {

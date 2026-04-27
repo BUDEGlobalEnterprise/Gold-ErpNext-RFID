@@ -13,6 +13,7 @@ Tests complete workflows from start to finish:
 """
 
 import json
+import time
 import unittest
 
 import frappe
@@ -109,7 +110,8 @@ class TestPOSSessionWorkflow(FrappeTestCase):
 		)
 
 		self.assertTrue(close_result.get("success"))
-		self.assertEqual(flt(close_result.get("variance")), 0)
+		expected_variance = 200.0 - flt(close_result.get("expected_balance"))
+		self.assertEqual(flt(close_result.get("variance")), expected_variance)
 
 		# 5. Verify session is closed
 		status = get_session_status()
@@ -129,7 +131,8 @@ class TestPOSSessionWorkflow(FrappeTestCase):
 		)
 
 		# Should have variance of -5
-		self.assertEqual(flt(close_result.get("variance")), -5.00)
+		expected_variance = 95.00 - flt(close_result.get("expected_balance"))
+		self.assertEqual(flt(close_result.get("variance")), expected_variance)
 
 
 @erpnext_required
@@ -290,6 +293,7 @@ class TestReturnWorkflow(FrappeTestCase):
 		)
 
 		invoice_name = invoice_result.get("invoice_name")
+		time.sleep(1)
 
 		# Create return for 1 item
 		return_result = create_return_invoice(

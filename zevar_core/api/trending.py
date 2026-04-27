@@ -79,6 +79,7 @@ def track_trending_click(item_id: str):
 		doc = frappe.get_doc("Trending Item", item_id)
 		doc.view_count = (doc.view_count or 0) + 1
 		doc.last_clicked = frappe.utils.now()
+		doc.flags.ignore_validate_update_after_submit = True
 		doc.save(ignore_permissions=True)
 		frappe.db.commit()  # nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit
 

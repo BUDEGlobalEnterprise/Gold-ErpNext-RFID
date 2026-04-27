@@ -494,22 +494,31 @@ def create_layaway(
 
 		doc.total_amount = total_amount
 		doc.deposit_amount = deposit
-		doc.balance_amount = total_amount
-		doc.total_paid = 0
+		doc.balance_amount = total_amount - deposit
+		doc.total_paid = deposit
+
+		# Parse provided payments to determine mode_of_payment for the deposit
+		deposit_mode = "Cash"
+		if payments:
+			payments_list_raw = frappe.parse_json(payments) if isinstance(payments, str) else payments
+			if payments_list_raw:
+				deposit_mode = payments_list_raw[0].get("mode_of_payment", "Cash")
 
 		doc.append(
 			"payment_schedule",
 			{
 				"payment_date": today(),
 				"expected_amount": deposit,
-				"paid_amount": 0,
-				"status": "Pending",
+				"paid_amount": deposit,
+				"status": "Paid",
+				"mode_of_payment": deposit_mode,
 			},
 		)
 
 		remaining_months = duration - 1
-		if remaining_months > 0 and doc.balance_amount > 0:
-			monthly_payment = doc.balance_amount / remaining_months
+		remaining_balance = doc.balance_amount
+		if remaining_months > 0 and remaining_balance > 0:
+			monthly_payment = remaining_balance / remaining_months
 			for month_index in range(1, remaining_months + 1):
 				doc.append(
 					"payment_schedule",
@@ -527,13 +536,9 @@ def create_layaway(
 
 		_reserve_inventory(doc)
 
-		# If payments are provided, process them immediately
-		payment_results = []
-		if payments:
-			payments_list = frappe.parse_json(payments) if isinstance(payments, str) else payments
-			if payments_list:
-				res = process_split_layaway_payment(doc.name, payments_list)
-				payment_results = res.get("payment_breakdown", [])
+		payment_results = [
+			{"mode": deposit_mode, "amount": deposit},
+		]
 
 		return {
 			"success": True,
@@ -668,6 +673,7 @@ def update_layaway_contract(layaway_id: str, updates: str | dict) -> dict:
 		if fieldname in allowed_fields:
 			setattr(doc, fieldname, value)
 
+		doc.flags.ignore_validate_update_after_submit = True
 		doc.save(ignore_permissions=True)
 
 		send_payment_confirmation(doc.name, amount, flt(doc.balance_amount))
@@ -734,6 +740,7 @@ def process_layaway_payment(
 		else:
 			doc.status = "Active"
 
+		doc.flags.ignore_validate_update_after_submit = True
 		doc.save(ignore_permissions=True)
 
 		return {
@@ -799,6 +806,7 @@ def cancel_layaway(layaway_id: str, cancellation_reason: str | None = None) -> d
 				]
 				if part
 			)
+		doc.flags.ignore_validate_update_after_submit = True
 		doc.save(ignore_permissions=True)
 
 		_release_inventory(doc)
@@ -992,6 +1000,7 @@ def extend_layaway(
 		if doc.status == "Overdue":
 			doc.status = "Active"
 
+		doc.flags.ignore_validate_update_after_submit = True
 		doc.save(ignore_permissions=True)
 
 		return {
@@ -1064,6 +1073,7 @@ def process_split_layaway_payment(
 		else:
 			doc.status = "Active"
 
+		doc.flags.ignore_validate_update_after_submit = True
 		doc.save(ignore_permissions=True)
 
 		return {
@@ -1115,6 +1125,7 @@ def check_overdue_and_forfeit():
 			else:
 				if doc.status != "Overdue":
 					doc.status = "Overdue"
+				doc.flags.ignore_validate_update_after_submit = True
 				doc.save(ignore_permissions=True)
 				_send_overdue_reminder(doc, days_overdue)
 
@@ -1147,6 +1158,7 @@ def _auto_forfeit_layaway(doc):
 		]
 		if part
 	)
+	doc.flags.ignore_validate_update_after_submit = True
 	doc.save(ignore_permissions=True)
 	_release_inventory(doc)
 

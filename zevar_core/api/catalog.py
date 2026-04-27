@@ -7,7 +7,7 @@ import re
 import frappe
 from frappe.rate_limiter import rate_limit
 
-from zevar_core.constants import DEFAULT_PAGE_LENGTH, PARTNER_SOURCES
+from zevar_core.constants import DEFAULT_PAGE_LENGTH, PARTNER_SOURCES, PURITY_ALIASES, PURITY_VALUES
 
 
 def _sanitize_search(term):
@@ -244,7 +244,15 @@ def get_pos_items(
 				if item.custom_metal_type in ["Rose Gold", "White Gold"]
 				else item.custom_metal_type
 			)
-			rate_per_gram = float(gold_rate_map.get((metal_search, item.custom_purity), 0.0))
+			purity = item.custom_purity or ""
+			# Normalize purity for lookup (e.g. "18K" → "18Kt")
+			purity_lower = purity.lower().strip()
+			normalized_purity = PURITY_ALIASES.get(purity_lower, purity)
+			# Try normalized first, then original
+			rate_per_gram = float(
+				gold_rate_map.get((metal_search, normalized_purity), 0.0)
+				or gold_rate_map.get((metal_search, purity), 0.0)
+			)
 			gold_value = float(item.custom_net_weight_g or 0) * rate_per_gram
 			gemstone_value = float(gem_sum_map.get(item.name, 0.0))
 			calculated_price = gold_value + gemstone_value
@@ -308,7 +316,7 @@ def get_catalog_filters() -> dict:
         WHERE custom_purity IS NOT NULL
         ORDER BY custom_purity
     """)
-	filters["purities"] = purities or ["14K", "18K"]
+	filters["purities"] = purities or ["14Kt", "18Kt"]
 
 	# Gemstones
 	gemstones = frappe.db.sql_list("""

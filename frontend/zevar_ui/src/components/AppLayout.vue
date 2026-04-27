@@ -3,7 +3,7 @@
 		<!-- DESKTOP SIDEBAR -->
 		<aside
 			ref="sidebarRef"
-			class="hidden lg:flex bg-white/40 dark:bg-black/40 backdrop-blur-xl border-r border-gray-200 dark:border-white/5 flex-col z-30 relative"
+			class="hidden lg:flex bg-white/40 dark:bg-warm-dark-900/60 backdrop-blur-xl border-r border-gray-200 dark:border-warm-border/50 flex-col z-30 relative"
 			:class="isResizing ? 'transition-none' : 'transition-all duration-300'"
 			:style="
 				isSidebarCollapsed
@@ -12,7 +12,7 @@
 			"
 		>
 			<div
-				class="h-20 flex items-center border-b border-gray-200 dark:border-white/5 transition-all duration-300"
+				class="h-20 flex items-center border-b border-gray-200 dark:border-warm-border/50 transition-all duration-300"
 				:class="isSidebarCollapsed ? 'px-4 justify-center' : 'px-4 justify-between'"
 			>
 				<div
@@ -33,7 +33,7 @@
 				<button
 					v-if="!isSidebarCollapsed"
 					@click="isSidebarCollapsed = true"
-					class="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-white/10 transition-all text-gray-400 hover:text-white shrink-0"
+					class="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-gray-200 dark:border-warm-border/50 hover:bg-white/10 transition-all text-gray-400 hover:text-white shrink-0"
 					aria-label="Collapse sidebar"
 				>
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,7 +48,7 @@
 				<button
 					v-else
 					@click="isSidebarCollapsed = false"
-					class="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-white/10 transition-all text-gray-400 hover:text-white shrink-0"
+					class="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-gray-200 dark:border-warm-border/50 hover:bg-white/10 transition-all text-gray-400 hover:text-white shrink-0"
 					aria-label="Expand sidebar"
 				>
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,6 +68,7 @@
 					<div
 						v-for="(section, groupIdx) in [
 							{ label: 'Operations', items: navOperations },
+							...(navEmployee.length ? [{ label: 'Employee Portal', items: navEmployee }] : []),
 							{ label: 'Sales', items: navSales },
 							{ label: 'Services', items: navServices },
 							{ label: 'Management', items: navManagement },
@@ -86,7 +87,7 @@
 						</div>
 						<div
 							v-else
-							class="h-px bg-gray-200 dark:bg-white/5 mx-2 mb-4 opacity-50"
+							class="h-px bg-gray-200 dark:bg-warm-border-subtle mx-2 mb-4 opacity-50"
 						></div>
 
 						<router-link
@@ -144,7 +145,7 @@
 
 		<div class="flex-1 flex flex-col relative min-w-0">
 			<header
-				class="h-16 sm:h-20 bg-white/70 dark:bg-black/70 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-3 sm:px-6 z-20 sticky top-0 shadow-sm transition-colors duration-300 flex-shrink-0"
+				class="h-16 sm:h-20 bg-white/70 dark:bg-warm-dark-950/80 backdrop-blur-md border-b border-gray-200 dark:border-warm-border/50 flex items-center justify-between px-3 sm:px-6 z-20 sticky top-0 shadow-sm transition-colors duration-300 flex-shrink-0"
 			>
 				<!-- Mobile Left Header (Hamburger + Logo + Location) -->
 				<div class="flex lg:hidden items-center gap-2 sm:gap-3 flex-1 min-w-0">
@@ -175,7 +176,7 @@
 						<select
 							v-model="session.currentWarehouse"
 							@change="session.setWarehouse($event.target.value)"
-							class="h-8 sm:h-9 w-full bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 pl-2 pr-6 rounded-lg text-xs font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] cursor-pointer appearance-none overflow-hidden text-ellipsis whitespace-nowrap"
+							class="h-8 sm:h-9 w-full bg-gray-50/50 dark:bg-warm-dark-900/50 backdrop-blur-sm border border-gray-200 dark:border-warm-border/50 pl-2 pr-6 rounded-lg text-xs font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] cursor-pointer appearance-none overflow-hidden text-ellipsis whitespace-nowrap"
 						>
 							<option :value="null" disabled>Store...</option>
 							<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
@@ -206,7 +207,7 @@
 						<select
 							v-model="session.currentWarehouse"
 							@change="session.setWarehouse($event.target.value)"
-							class="h-11 bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 pl-4 pr-10 rounded-lg text-sm font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] cursor-pointer min-w-[200px] transition-all hover:bg-gray-100/50 dark:hover:bg-gray-700/50 shadow-sm outline-none"
+							class="h-11 bg-gray-50/50 dark:bg-warm-dark-900/50 backdrop-blur-sm border border-gray-200 dark:border-warm-border/50 pl-4 pr-10 rounded-lg text-sm font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] cursor-pointer min-w-[200px] transition-all hover:bg-gray-100/50 dark:hover:bg-warm-dark-800/50 shadow-sm outline-none"
 						>
 							<option :value="null" disabled>Select Store Location</option>
 							<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
@@ -233,7 +234,7 @@
 							type="text"
 							v-model="ui.searchQuery"
 							placeholder="Search collection..."
-							class="h-11 w-full bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-lg text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent text-sm font-medium pl-11 transition-all"
+							class="h-11 w-full bg-gray-50/50 dark:bg-warm-dark-900/50 backdrop-blur-sm border border-gray-200 dark:border-warm-border rounded-lg text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent text-sm font-medium pl-11 transition-all"
 						/>
 					</div>
 				</div>
@@ -241,44 +242,42 @@
 				<div class="flex items-center gap-2 sm:gap-3 sm:ml-4 lg:ml-8">
 					<!-- Live Spot Rates - Desktop Only -->
 					<div
-						class="hidden xl:flex items-center gap-0 bg-gray-100/50 dark:bg-[#15161a]/50 backdrop-blur-sm text-gray-900 dark:text-white pl-3 pr-1 py-1 lg:pl-4 lg:pr-2 lg:py-1 rounded-xl border border-gray-200 dark:border-gray-800 max-w-lg overflow-hidden transition-colors duration-300"
+						class="hidden xl:flex items-center h-11 bg-gray-50/50 dark:bg-warm-dark-900/50 backdrop-blur-sm border border-gray-200 dark:border-warm-border rounded-lg shadow-sm flex-1 max-w-2xl overflow-x-auto overflow-y-hidden custom-scrollbar-horizontal transition-colors duration-300"
 					>
 						<div
-							class="flex items-center gap-1.5 lg:gap-2 border-r border-gray-300 dark:border-gray-800 pr-2 mr-2 lg:pr-3 lg:mr-3 flex-shrink-0"
+							class="flex items-center gap-2 border-r border-gray-200 dark:border-warm-border pr-3 mr-0 flex-shrink-0 pl-4 bg-gray-100/50 dark:bg-warm-dark-700 h-full"
 						>
-							<span class="relative flex h-1.5 w-1.5 lg:h-2 lg:w-2">
+							<span class="relative flex h-2 w-2">
 								<span
 									class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"
 								></span>
 								<span
-									class="relative inline-flex rounded-full h-1.5 w-1.5 lg:h-2 lg:w-2 bg-green-600"
+									class="relative inline-flex rounded-full h-2 w-2 bg-green-600"
 								></span>
 							</span>
 							<span
-								class="text-[8px] lg:text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400"
-								>Live Spot</span
+								class="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400"
+								>LIVE</span
 							>
 						</div>
-						<div
-							class="flex items-center gap-3 lg:gap-8 overflow-x-auto pr-1 lg:pr-2 custom-scrollbar-horizontal pb-1 lg:pb-2 pt-0.5 lg:pt-1"
-						>
+						<div class="flex-1 overflow-x-auto flex items-center h-full ml-1 min-w-0">
 							<div
-								v-for="[key, rate] in sortedRates"
-								:key="key"
-								class="flex flex-col leading-tight flex-shrink-0 px-1 lg:px-3"
+								class="flex items-center divide-x divide-gray-200 dark:divide-gray-700 min-w-max justify-start xl:justify-center h-full"
 							>
-								<span
-									class="text-[8px] lg:text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold whitespace-nowrap mb-0"
-									>{{ key.replace(/-/g, ' ') }}</span
+								<div
+									v-for="[key, rate] in sortedRates"
+									:key="`ticker-${key}`"
+									class="flex items-center justify-center gap-2 px-6 leading-none flex-shrink-0 h-full"
 								>
-								<span
-									class="text-[11px] lg:text-base font-mono font-bold text-[#D4AF37] tracking-wide"
-									>${{ rate
-									}}<span
-										class="text-[7px] lg:text-[9px] text-gray-500 dark:text-gray-500 ml-0.5 font-normal"
-										>/oz</span
-									></span
-								>
+									<span
+										class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight whitespace-nowrap"
+										>{{ formatShortLabel(key) }}</span
+									>
+									<span
+										class="text-base font-mono font-black text-[#D4AF37] whitespace-nowrap"
+										>${{ rate }}</span
+									>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -287,7 +286,7 @@
 					<div class="relative" ref="userMenuRef">
 						<button
 							@click.stop="isUserMenuOpen = !isUserMenuOpen"
-							class="flex items-center gap-2 p-1.5 pr-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 transition-colors border border-transparent hover:border-gray-200 dark:border-white/10"
+							class="flex items-center gap-2 p-1.5 pr-3 rounded-full hover:bg-gray-100 dark:hover:bg-warm-dark-700 transition-colors border border-transparent hover:border-gray-200 dark:border-warm-border"
 						>
 							<div
 								class="w-8 h-8 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] flex items-center justify-center text-[#0F1115] font-bold text-xs shadow-sm"
@@ -325,10 +324,10 @@
 						>
 							<div
 								v-if="isUserMenuOpen"
-								class="absolute right-0 mt-2 w-56 bg-white/80 dark:bg-[#1a1c23]/80 backdrop-blur-xl rounded-xl shadow-xl border border-gray-100 dark:border-gray-800 py-2 z-50 origin-top-right overflow-hidden"
+								class="absolute right-0 mt-2 w-56 bg-white/80 dark:bg-warm-card/80 backdrop-blur-xl rounded-xl shadow-xl border border-gray-100 dark:border-warm-border py-2 z-50 origin-top-right overflow-hidden"
 							>
 								<div
-									class="px-4 py-3 border-b border-gray-100 dark:border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]"
+									class="px-4 py-3 border-b border-gray-100 dark:border-warm-border bg-gray-50/50 dark:bg-warm-dark-950/50"
 								>
 									<p
 										class="text-sm font-bold text-gray-900 dark:text-white truncate"
@@ -348,12 +347,12 @@
 									</p>
 								</div>
 								<div
-									class="py-1 border-b border-gray-100 dark:border-gray-200 dark:border-white/5"
+									class="py-1 border-b border-gray-100 dark:border-gray-200 dark:border-warm-border/50"
 								>
 									<a
 										href="#"
 										@click.prevent="handleChangePassword"
-										class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+										class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition-colors"
 									>
 										<svg
 											class="w-4 h-4 text-gray-400"
@@ -373,7 +372,7 @@
 									<a
 										href="#"
 										@click.prevent="goToEmployeePortal"
-										class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+										class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition-colors"
 									>
 										<svg
 											class="w-4 h-4 text-gray-400"
@@ -392,11 +391,11 @@
 									</a>
 								</div>
 								<div
-									class="py-1 border-b border-gray-100 dark:border-gray-200 dark:border-white/5"
+									class="py-1 border-b border-gray-100 dark:border-gray-200 dark:border-warm-border/50"
 								>
 									<button
 										@click.stop="ui.toggleTheme()"
-										class="w-full flex items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+										class="w-full flex items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition-colors"
 									>
 										<div class="flex items-center gap-3">
 											<svg
@@ -501,7 +500,7 @@
 
 				<!-- Persistent Selection Tray (Right Sidebar) -->
 				<div
-					class="hidden lg:flex flex-col flex-shrink-0 h-full w-[380px] bg-white/40 dark:bg-black/40 backdrop-blur-xl border-l border-gray-200 dark:border-white/5 overflow-hidden"
+					class="hidden lg:flex flex-col flex-shrink-0 h-full w-[380px] bg-white/40 dark:bg-warm-dark-900/60 backdrop-blur-xl border-l border-gray-200 dark:border-warm-border/50 overflow-hidden"
 				>
 					<CartSidebar :isOpen="true" :persistent="true" />
 				</div>
@@ -516,35 +515,38 @@
 			:show="ui.layawayPayment.show"
 			:layawayId="ui.layawayPayment.layawayId"
 			:balanceAmount="ui.layawayPayment.balance"
+			:draftMode="!!ui.layawayPayment.draftPayload"
 			@close="ui.closeLayawayPayment"
 			@success="handleGlobalPaymentSuccess"
 		/>
 		<div
-			class="xl:hidden fixed bottom-0 left-0 right-0 z-20 bg-white/60 dark:bg-[#15161a]/60 backdrop-blur-md border-t border-gray-200 dark:border-white/5 py-2 px-3 flex items-center justify-between flex-shrink-0"
+			class="xl:hidden fixed bottom-0 left-0 right-0 z-20 bg-white/80 dark:bg-warm-dark-900/80 backdrop-blur-md border-t border-gray-200 dark:border-warm-border/50 h-12 flex items-center flex-shrink-0 shadow-[0_-4px_15px_rgba(0,0,0,0.1)] overflow-x-auto custom-scrollbar-horizontal"
 		>
 			<div
-				class="flex items-center gap-1.5 pr-2 border-r border-gray-200 dark:border-white/10 flex-shrink-0"
+				class="flex items-center gap-1.5 pr-3 pl-3 border-r border-gray-200 dark:border-warm-border/50 flex-shrink-0 bg-gray-100/50 dark:bg-warm-dark-950/50 h-full"
 			>
-				<span class="relative flex h-2 w-2">
+				<span class="relative flex h-1.5 w-1.5">
 					<span
 						class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"
 					></span>
-					<span class="relative inline-flex rounded-full h-2 w-2 bg-green-600"></span>
+					<span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-600"></span>
 				</span>
-				<span class="text-[9px] font-bold uppercase tracking-widest text-gray-400"
-					>Spot</span
+				<span class="text-[8px] font-black uppercase tracking-widest text-gray-500"
+					>LIVE</span
 				>
 			</div>
-			<div class="flex items-center gap-3 overflow-x-auto hide-scrollbar pl-2 flex-1">
-				<div
-					v-for="[key, rate] in sortedRates.slice(0, 4)"
-					:key="key"
-					class="flex flex-col flex-shrink-0 leading-tight"
-				>
-					<span class="text-[8px] text-gray-500 font-bold uppercase">{{
-						key.split('-')[0]
-					}}</span>
-					<span class="text-xs font-bold text-[#D4AF37]">${{ rate }}</span>
+			<div class="flex-1 overflow-x-auto flex items-center h-full min-w-0">
+				<div class="flex items-center divide-x divide-gray-200 dark:divide-gray-800 min-w-max justify-start h-full">
+					<div
+						v-for="[key, rate] in sortedRates"
+						:key="key"
+						class="flex items-center justify-center gap-2 px-4 leading-none flex-shrink-0 h-full"
+					>
+						<span class="text-[9px] text-gray-500 dark:text-gray-400 font-bold uppercase whitespace-nowrap">{{
+							formatShortLabel(key)
+						}}</span>
+						<span class="text-xs font-mono font-black text-[#D4AF37] whitespace-nowrap">${{ rate }}</span>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -558,12 +560,12 @@
 
 		<!-- MOBILE/TABLET DRAWER -->
 		<aside
-			class="fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[320px] bg-white/80 dark:bg-[#15161a]/80 backdrop-blur-xl shadow-2xl transform transition-transform duration-300 lg:hidden flex flex-col"
+			class="fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[320px] bg-white/80 dark:bg-warm-dark-900/80 backdrop-blur-xl shadow-2xl transform transition-transform duration-300 lg:hidden flex flex-col"
 			:class="isMobileDrawerOpen ? 'translate-x-0' : '-translate-x-full'"
 		>
 			<!-- Drawer Header -->
 			<div
-				class="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-white/5 shrink-0"
+				class="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-warm-border/50 shrink-0"
 			>
 				<div class="flex items-center gap-3">
 					<img src="/logo.svg" alt="Zevar POS" class="w-8 h-8 rounded-lg" />
@@ -588,7 +590,7 @@
 			</div>
 
 			<!-- Search & Store -->
-			<div class="p-4 space-y-3 border-b border-gray-200 dark:border-white/5 shrink-0">
+			<div class="p-4 space-y-3 border-b border-gray-200 dark:border-warm-border/50 shrink-0">
 				<div class="relative">
 					<svg
 						class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
@@ -642,6 +644,7 @@
 				<template
 					v-for="(section, sIdx) in [
 						{ label: 'Operations', items: navOperations },
+						...(navEmployee.length ? [{ label: 'Employee Portal', items: navEmployee }] : []),
 						{ label: 'Sales', items: navSales },
 						{ label: 'Services', items: navServices },
 						{ label: 'Management', items: navManagement },
@@ -663,7 +666,7 @@
 						:class="
 							isNavActive(item.to)
 								? 'bg-gradient-to-r from-[#D4AF37]/20 to-transparent text-[#D4AF37]'
-								: 'text-gray-600 dark:text-gray-400 hover:text-[#D4AF37] hover:bg-gray-50 dark:hover:bg-white/5'
+								: 'text-gray-600 dark:text-gray-400 hover:text-[#D4AF37] hover:bg-gray-50 dark:hover:bg-warm-dark-700'
 						"
 					>
 						<svg
@@ -684,7 +687,7 @@
 				</template>
 
 				<!-- Live Rates in Mobile Drawer -->
-				<div class="mt-6 pt-6 border-t border-gray-200 dark:border-white/5">
+				<div class="mt-6 pt-6 border-t border-gray-200 dark:border-warm-border/50">
 					<div class="flex items-center gap-2 mb-3 px-1">
 						<span class="relative flex h-2 w-2">
 							<span
@@ -700,9 +703,9 @@
 					</div>
 					<div class="grid grid-cols-2 gap-2">
 						<div
-							v-for="[key, rate] in sortedRates.slice(0, 4)"
+							v-for="[key, rate] in sortedRates.slice(0, 6)"
 							:key="key"
-							class="bg-gray-800/80 p-2.5 rounded-lg text-center border border-gray-200 dark:border-white/5"
+							class="bg-gray-800/80 p-2.5 rounded-lg text-center border border-gray-200 dark:border-warm-border/50"
 						>
 							<div class="text-[9px] text-gray-400 uppercase font-bold mb-0.5">
 								{{ key.replace(/-/g, ' ') }}
@@ -715,10 +718,10 @@
 				</div>
 
 				<!-- Theme Toggle in Mobile Drawer -->
-				<div class="mt-4 pt-4 border-t border-gray-200 dark:border-white/5">
+				<div class="mt-4 pt-4 border-t border-gray-200 dark:border-warm-border/50">
 					<button
 						@click="ui.toggleTheme()"
-						class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:text-[#D4AF37] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+						class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:text-[#D4AF37] hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition-colors"
 					>
 						<div class="flex items-center gap-3">
 							<svg
@@ -795,6 +798,11 @@ import CartSidebar from '@/components/CartSidebar.vue'
 import LayawayPaymentModal from '@/components/LayawayPaymentModal.vue'
 import FilterBar from '@/components/FilterBar.vue'
 import FilterSidebar from '@/components/FilterSidebar.vue'
+import { canAccessReports } from '@/utils/permissions.js'
+
+const isEmployeeOnly = computed(() => {
+	return session.hasAnyRole(['Employee', 'Employee Self Service']) && !session.isAdmin
+})
 
 const session = useSessionStore()
 const goldStore = useGoldStore()
@@ -868,18 +876,57 @@ const navServices = [
 		icon: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z',
 	},
 ]
-const navManagement = [
-	{
-		to: '/reports',
-		label: 'Reports',
-		icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
-	},
-	{
-		to: '/support',
-		label: 'Support',
-		icon: 'M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z',
-	},
-]
+const navManagement = computed(() => {
+	const items = [
+		{
+			to: '/contacts',
+			label: 'Contacts',
+			icon: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z',
+		},
+		{
+			to: '/support',
+			label: 'Support',
+			icon: 'M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z',
+		},
+	]
+
+	if (canAccessReports()) {
+		items.unshift({
+			to: '/reports',
+			label: 'Reports',
+			icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+		})
+	}
+
+	return items
+})
+
+const navEmployee = computed(() => {
+	if (!isEmployeeOnly.value) return []
+	const base = '/employee-portal/#'
+	return [
+		{
+			to: `${base}/`,
+			label: 'My Portal',
+			icon: 'M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z',
+		},
+		{
+			to: `${base}/tasks`,
+			label: 'My Tasks',
+			icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4',
+		},
+		{
+			to: `${base}/attendance`,
+			label: 'Attendance',
+			icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+		},
+		{
+			to: `${base}/leave`,
+			label: 'Leave',
+			icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+		},
+	]
+})
 
 // Route active check
 const route = useRoute()
@@ -897,26 +944,67 @@ const showFilterSidebar = computed(() => {
 
 const TROY_OZ_GRAMS = 31.1035
 
+const DISPLAY_RATE_PRIORITIES = [
+	'Yellow Gold-22Kt',
+	'Yellow Gold-18Kt',
+	'Yellow Gold-14Kt',
+	'Yellow Gold-10Kt',
+	'Silver-925 Sterling',
+	'Silver-999 Fine',
+]
+
+const HIDDEN_RATE_KEYS = [
+	'24Kt', '24K', '24kt',
+]
+
 const sortedRates = computed(() => {
 	if (!goldStore.rates) return []
-	const priority = [
-		'Yellow Gold-24K',
-		'Yellow Gold-22K',
-		'Yellow Gold-18Kt',
-		'Silver-925 Sterling',
-	]
-	return Object.entries(goldStore.rates)
-		.filter(([key]) => !key.includes('Platinum'))
-		.map(([key, ratePerGram]) => [key, (ratePerGram * TROY_OZ_GRAMS).toFixed(2)])
+	
+	const entries = Object.entries(goldStore.rates).filter(([key, ratePerGram]) => {
+		if (!key || key === 'null' || !ratePerGram) return false
+		if (key.includes('Platinum')) return false
+		
+		// Hide 24K strictly
+		const lowerKey = key.toLowerCase()
+		if (lowerKey.includes('24k') || lowerKey.includes('24kt')) return false
+		
+		return true
+	})
+
+	return entries
 		.sort((a, b) => {
-			const indexA = priority.indexOf(a[0])
-			const indexB = priority.indexOf(b[0])
+			const indexA = DISPLAY_RATE_PRIORITIES.findIndex(p => a[0].toLowerCase().includes(p.toLowerCase()))
+			const indexB = DISPLAY_RATE_PRIORITIES.findIndex(p => b[0].toLowerCase().includes(p.toLowerCase()))
+			
 			if (indexA !== -1 && indexB !== -1) return indexA - indexB
 			if (indexA !== -1) return -1
 			if (indexB !== -1) return 1
 			return a[0].localeCompare(b[0])
 		})
+		.map(([key, ratePerGram]) => {
+			const perOz = (ratePerGram * TROY_OZ_GRAMS).toFixed(2)
+			return [
+				key,
+				Number(perOz).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+				}),
+			]
+		})
 })
+
+function formatShortLabel(key) {
+	if (!key || key === 'null') return ''
+	if (key.startsWith('Silver-')) {
+		const purity = key.split('-')[1]
+		if (purity.includes('925')) return 'Silver 925'
+		if (purity.includes('999')) return 'Silver 999'
+		return 'Silver'
+	}
+	const parts = key.split('-')
+	if (parts.length >= 2) return 'Gold ' + parts[1].replace('Kt', 'K')
+	return key
+}
 
 const warehouses = createResource({
 	url: 'frappe.client.get_list',
@@ -1004,40 +1092,53 @@ function handleChangePassword() {
 
 function goToEmployeePortal() {
 	isUserMenuOpen.value = false
-	const portalUrl = window.location.origin + '/portal'
-	window.open(portalUrl, '_blank')
+	window.open('/employee-portal/', '_blank')
 }
 
 async function handleGlobalPaymentSuccess(result) {
 	const draftPayload = ui.layawayPayment.draftPayload
 	
 	if (draftPayload) {
+		const payload = {
+			...draftPayload,
+			payments: JSON.stringify(result.payments || []),
+		}
 		try {
-			// This was a draft payment, now create the actual contract
-			const payload = {
-				...draftPayload,
-				payments: JSON.stringify(result.payments || []),
+			const res = await fetch('/api/method/zevar_core.api.layaway.create_layaway', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'X-Frappe-CSRF-Token': window.csrf_token },
+				body: JSON.stringify(payload),
+			})
+			const data = await res.json()
+			
+			if (!res.ok || data.exc_type) {
+				let errorMsg = ''
+				if (data._server_messages) {
+					try {
+						const msgs = JSON.parse(data._server_messages)
+						errorMsg = msgs.map((m) => { try { return JSON.parse(m).message } catch { return m } }).join('\n')
+					} catch {
+						errorMsg = String(data._server_messages)
+					}
+				}
+				if (!errorMsg && data.exception) {
+					errorMsg = data.exception.split('\n').pop() || data.exception
+				}
+				if (!errorMsg) errorMsg = data.message || `HTTP ${res.status}`
+				console.error('Layaway creation failed:', data, 'Payload:', JSON.stringify(payload, null, 2))
+				alert('Layaway creation failed:\n' + errorMsg.replace(/<[^>]+>/g, ''))
+				ui.closeLayawayPayment()
+				return
 			}
 			
-			const createRes = createResource({
-				url: 'zevar_core.api.layaway.create_layaway',
-				method: 'POST',
-			})
-			
-			const rawResult = await createRes.submit(payload)
-			const creationResult = rawResult?.message ?? rawResult
-			
+			const creationResult = data.message ?? data
 			if (creationResult?.success || creationResult?.layaway_id) {
 				ui.closeLayawayPayment()
 				emit('layaway-created', creationResult)
-				// Show a success message or let the child handle it
 			}
-		} catch (error) {
-			console.error('Global layaway finalization failed:', error)
-			let errorMsg = error?.message || 'Failed to finalize layaway'
-			alert(errorMsg.replace(/<[^>]+>/g, ''))
-			// Keep sidebar open so they don't lose payment state? 
-			// Actually better to close and let them try again.
+		} catch (err) {
+			console.error('Layaway creation network error:', err)
+			alert('Layaway creation failed:\n' + (err.message || 'Network error'))
 			ui.closeLayawayPayment()
 		}
 	} else {
@@ -1092,5 +1193,28 @@ watch(
 }
 .hide-scrollbar::-webkit-scrollbar {
 	display: none;
+}
+
+/* Visible scrollbar for rate tickers */
+.rate-scrollbar::-webkit-scrollbar {
+	height: 6px;
+}
+.rate-scrollbar::-webkit-scrollbar-track {
+	background: rgba(0, 0, 0, 0.05);
+	border-radius: 0 0 6px 6px;
+}
+.rate-scrollbar::-webkit-scrollbar-thumb {
+	background: rgba(212, 175, 55, 0.5);
+	border-radius: 0 0 6px 6px;
+}
+.rate-scrollbar::-webkit-scrollbar-thumb:hover {
+	background: rgba(212, 175, 55, 0.8);
+}
+.dark .rate-scrollbar::-webkit-scrollbar-track {
+	background: rgba(255, 255, 255, 0.05);
+}
+.rate-scrollbar {
+	-ms-overflow-style: auto;
+	scrollbar-width: auto;
 }
 </style>

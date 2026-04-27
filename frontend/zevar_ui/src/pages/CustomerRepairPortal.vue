@@ -3,7 +3,7 @@
 		class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800"
 	>
 		<!-- Header -->
-		<header class="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50">
+		<header class="bg-white dark:bg-warm-dark-900 shadow-sm sticky top-0 z-50">
 			<div class="max-w-6xl mx-auto px-4 py-4">
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-3">
@@ -32,7 +32,7 @@
 		<main class="max-w-6xl mx-auto px-4 py-8">
 			<!-- Authentication View -->
 			<div v-if="!authenticated" class="max-w-md mx-auto">
-				<div class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-8">
+				<div class="bg-white dark:bg-warm-dark-900 rounded-2xl shadow-xl p-8">
 					<div class="text-center mb-8">
 						<div
 							class="w-16 h-16 bg-[#D4AF37]/10 rounded-full flex items-center justify-center mx-auto mb-4"
@@ -72,7 +72,7 @@
 										v-model="lookupIdentifier"
 										type="text"
 										placeholder="(555) 123-4567 or email@example.com"
-										class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+										class="w-full px-4 py-3 border border-gray-200 dark:border-warm-border rounded-lg bg-gray-50 dark:bg-warm-dark-900 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
 									/>
 								</div>
 								<button
@@ -110,7 +110,7 @@
 										type="text"
 										maxlength="6"
 										placeholder="123456"
-										class="w-full px-4 py-3 text-center text-2xl tracking-widest border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent uppercase"
+										class="w-full px-4 py-3 text-center text-2xl tracking-widest border border-gray-200 dark:border-warm-border rounded-lg bg-gray-50 dark:bg-warm-dark-900 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent uppercase"
 									/>
 								</div>
 								<button
@@ -146,7 +146,7 @@
 			<!-- Authenticated View -->
 			<div v-else>
 				<!-- Tabs -->
-				<div class="bg-white dark:bg-gray-900 rounded-t-2xl shadow-lg px-4 pt-4">
+				<div class="bg-white dark:bg-warm-dark-900 rounded-t-2xl shadow-lg px-4 pt-4">
 					<div class="flex gap-2">
 						<button
 							v-for="tab in tabs"
@@ -171,7 +171,7 @@
 				</div>
 
 				<!-- Tab Content -->
-				<div class="bg-white dark:bg-gray-900 rounded-b-2xl shadow-lg p-6">
+				<div class="bg-white dark:bg-warm-dark-900 rounded-b-2xl shadow-lg p-6">
 					<!-- Active Repairs Tab -->
 					<div v-if="activeTab === 'repairs'">
 						<div v-if="loadingRepairs" class="text-center py-8">
@@ -208,7 +208,7 @@
 								v-for="repair in repairs"
 								:key="repair.name"
 								@click="openRepairDetail(repair)"
-								class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-[#D4AF37] cursor-pointer transition-colors"
+								class="p-4 border border-gray-200 dark:border-warm-border rounded-lg hover:border-[#D4AF37] cursor-pointer transition-colors"
 							>
 								<div class="flex items-start justify-between">
 									<div>
@@ -261,7 +261,7 @@
 							<div
 								v-for="item in history"
 								:key="item.repair_number"
-								class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+								class="p-4 bg-gray-50 dark:bg-warm-dark-900 rounded-lg"
 							>
 								<div class="flex items-center justify-between">
 									<div>
@@ -283,7 +283,7 @@
 								</div>
 								<div
 									v-if="item.warranty?.has_warranty"
-									class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700"
+									class="mt-2 pt-2 border-t border-gray-200 dark:border-warm-border"
 								>
 									<p
 										class="text-xs"
@@ -337,7 +337,7 @@
 										>
 										<select
 											v-model="messageRepairId"
-											class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+											class="w-full px-4 py-2 border border-gray-200 dark:border-warm-border rounded-lg bg-white dark:bg-warm-dark-900"
 										>
 											<option value="">General Inquiry</option>
 											<option
@@ -360,7 +360,7 @@
 											v-model="messageText"
 											rows="4"
 											placeholder="Type your message..."
-											class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+											class="w-full px-4 py-2 border border-gray-200 dark:border-warm-border rounded-lg bg-white dark:bg-warm-dark-900"
 										></textarea>
 									</div>
 									<button
@@ -385,7 +385,7 @@
 			@click.self="showRepairDetail = false"
 		>
 			<div
-				class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+				class="bg-white dark:bg-warm-dark-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
 			>
 				<div class="p-6">
 					<div class="flex items-start justify-between mb-6">
@@ -457,7 +457,7 @@
 					</div>
 
 					<!-- Financial -->
-					<div class="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+					<div class="mb-6 p-4 bg-gray-50 dark:bg-warm-dark-900 rounded-lg">
 						<h3 class="font-bold text-gray-900 dark:text-white mb-3">
 							Financial Summary
 						</h3>
@@ -481,7 +481,7 @@
 								>
 							</div>
 							<div
-								class="flex justify-between pt-2 border-t border-gray-200 dark:border-gray-700"
+								class="flex justify-between pt-2 border-t border-gray-200 dark:border-warm-border"
 							>
 								<span class="font-bold">Balance Due:</span>
 								<span
@@ -544,7 +544,7 @@
 							/>
 							<button
 								@click="$refs.photoInput?.click()"
-								class="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700"
+								class="px-4 py-2 bg-gray-100 dark:bg-warm-dark-900 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-warm-dark-800"
 							>
 								Choose Photo
 							</button>
@@ -562,7 +562,7 @@
 			v-if="rejecting"
 			class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
 		>
-			<div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-6">
+			<div class="bg-white dark:bg-warm-dark-900 rounded-2xl shadow-2xl max-w-md w-full p-6">
 				<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
 					Reject Estimate
 				</h3>
@@ -574,12 +574,12 @@
 					v-model="rejectReason"
 					rows="3"
 					placeholder="Reason for rejection..."
-					class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 mb-4"
+					class="w-full px-4 py-2 border border-gray-200 dark:border-warm-border rounded-lg bg-white dark:bg-warm-dark-900 mb-4"
 				></textarea>
 				<div class="flex gap-2">
 					<button
 						@click="cancelEstimateRejection"
-						class="flex-1 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg font-medium"
+						class="flex-1 py-2 bg-gray-100 dark:bg-warm-dark-900 rounded-lg font-medium"
 					>
 						Cancel
 					</button>

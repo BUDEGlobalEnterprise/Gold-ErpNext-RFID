@@ -71,6 +71,61 @@ def search_customers(query: str):
 
 
 @frappe.whitelist()
+def get_customer_details(customer_name: str) -> dict:
+	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
+
+	if not customer_name or not frappe.db.exists("Customer", customer_name):
+		frappe.throw(_("Customer '{0}' not found.").format(customer_name))
+
+	customer = frappe.get_doc("Customer", customer_name)
+
+	result = {
+		"name": customer.name,
+		"customer_name": customer.customer_name,
+		"mobile_no": customer.mobile_no or "",
+		"email_id": customer.email_id or "",
+		"customer_type": customer.customer_type or "Individual",
+	}
+
+	address = frappe.get_all(
+		"Address",
+		filters={"name": ["in", [d.parent for d in frappe.get_all("Dynamic Link", filters={"link_name": customer_name, "parenttype": "Address"}, fields=["parent"] )]]},
+		fields=["address_line1", "city", "state", "pincode", "country", "phone", "is_primary_address"],
+		order_by="is_primary_address desc",
+		limit=1,
+	)
+	if address:
+		addr = address[0]
+		result["address"] = addr.address_line1 or ""
+		result["city"] = addr.city or ""
+		result["state"] = addr.state or ""
+		result["zip"] = addr.pincode or ""
+		result["country"] = addr.country or ""
+
+	nominee = frappe.get_all(
+		"Layaway Contract",
+		filters={"customer": customer_name, "docstatus": ["!=", 2]},
+		fields=["notes"],
+		order_by="creation desc",
+		limit=1,
+	)
+	if nominee and nominee[0].notes and "Nominee:" in (nominee[0].notes or ""):
+		notes = nominee[0].notes
+		for line in notes.split("\n"):
+			if line.strip().startswith("Nominee:"):
+				nominee_str = line.replace("Nominee:", "").strip()
+				if "(" in nominee_str and ")" in nominee_str:
+					parts = nominee_str.split("(")
+					result["nominee_name"] = parts[0].strip()
+					result["nominee_relationship"] = parts[1].replace(")", "").strip()
+				else:
+					result["nominee_name"] = nominee_str
+				phone_match = [p for p in nominee_str.split("-") if p.strip() and len(p.strip()) >= 10]
+				if phone_match:
+					result["nominee_phone"] = phone_match[-1].strip()
+				break
+
+	return result
 @rate_limit(limit=100, seconds=60)
 def get_customer_details(customer_name: str):
 	"""

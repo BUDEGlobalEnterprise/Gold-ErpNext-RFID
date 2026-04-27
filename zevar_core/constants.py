@@ -12,14 +12,57 @@ PARTNER_SOURCES = ["QGold", "Stuller", "Demo"]
 # Metal Types
 METAL_TYPES = ["Yellow Gold", "White Gold", "Rose Gold", "Silver", "Platinum"]
 
-# Purity Values
 PURITY_VALUES = {
-	"24K": 0.999,
-	"22K": 0.916,
+	"24Kt": 0.999,
+	"22Kt": 0.916,
 	"18Kt": 0.750,
 	"14Kt": 0.585,
-	"10k": 0.417,
-	"999 Sterling": 0.999,
+	"10Kt": 0.417,
+	"999 Fine": 0.999,
+	"925 Sterling": 0.925,
+}
+
+PURITY_ALIASES = {
+	"24k": "24Kt",
+	"22k": "22Kt",
+	"18k": "18Kt",
+	"14k": "14Kt",
+	"10k": "10Kt",
+	"24kt": "24Kt",
+	"22kt": "22Kt",
+	"18kt": "18Kt",
+	"14kt": "14Kt",
+	"10kt": "10Kt",
+	"24 karat": "24Kt",
+	"22 karat": "22Kt",
+	"18 karat": "18Kt",
+	"14 karat": "14Kt",
+	"10 karat": "10Kt",
+	"999 sterling": "999 Fine",
+	"925": "925 Sterling",
+	"sterling": "925 Sterling",
+	"fine silver": "999 Fine",
+}
+
+GOLD_PURITY_RATES = {
+	"24Kt": 0.999,
+	"22Kt": 0.916,
+	"18Kt": 0.750,
+	"14Kt": 0.585,
+	"10Kt": 0.417,
+}
+
+GOLD_PURITY_ALIASES = {
+	"24K": "24Kt",
+	"22K": "22Kt",
+	"18K": "18Kt",
+	"14K": "14Kt",
+	"10K": "10Kt",
+}
+
+# Silver purities used by rate fetcher
+SILVER_PURITY_RATES = {
+	"999 Fine": 0.999,
 	"925 Sterling": 0.925,
 }
 

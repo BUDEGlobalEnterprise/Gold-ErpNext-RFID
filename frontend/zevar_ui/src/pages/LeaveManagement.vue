@@ -82,7 +82,7 @@
 						<!-- Stats -->
 						<div class="grid grid-cols-2 gap-4">
 							<div
-								class="premium-card !p-6 border border-gray-100 dark:border-white/10 hover:border-portal-primary/30 transition-colors"
+								class="premium-card !p-6 border border-gray-100 dark:border-warm-border hover:border-portal-primary/30 transition-colors"
 							>
 								<span class="status-label !mb-2">Vacation Left</span>
 								<div class="flex items-end gap-1">
@@ -95,7 +95,7 @@
 								</div>
 							</div>
 							<div
-								class="premium-card !p-6 border border-gray-100 dark:border-white/10 hover:border-portal-accent-peach/30 transition-colors"
+								class="premium-card !p-6 border border-gray-100 dark:border-warm-border hover:border-portal-accent-peach/30 transition-colors"
 							>
 								<span class="status-label !mb-2">Sick Leave</span>
 								<div class="flex items-end gap-1">

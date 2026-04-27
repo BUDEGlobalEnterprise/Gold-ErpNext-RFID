@@ -3,7 +3,7 @@
 		<!-- Selected Customer Display -->
 		<div
 			v-if="customer && !showSearch"
-			class="flex items-center justify-between p-3 bg-gray-50 dark:bg-[#15171e] border border-gray-200 dark:border-white/10 rounded-xl"
+			class="flex items-center justify-between p-3 bg-gray-50 dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border rounded-xl"
 		>
 			<div class="flex items-center gap-3">
 				<div
@@ -65,7 +65,7 @@
 					:placeholder="placeholder"
 					@input="debouncedSearch"
 					@focus="showDropdown = true"
-					class="w-full px-4 py-3 pl-10 bg-white dark:bg-[#0F1115] border border-gray-200 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37]"
+					class="w-full px-4 py-3 pl-10 bg-white dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37]"
 				/>
 				<svg
 					class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
@@ -105,7 +105,7 @@
 					v-if="
 						showDropdown && (searchResults.length > 0 || searching || showCreateOption)
 					"
-					class="absolute z-50 w-full mt-1 bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-white/10 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+					class="absolute z-50 w-full mt-1 bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-warm-border rounded-xl shadow-lg max-h-60 overflow-y-auto"
 				>
 					<!-- Searching indicator -->
 					<div
@@ -135,10 +135,10 @@
 						v-for="result in searchResults"
 						:key="result.customer_name"
 						@click="selectCustomer(result)"
-						class="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-3 border-b border-gray-100 dark:border-white/5 last:border-0"
+						class="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-warm-dark-700 flex items-center gap-3 border-b border-gray-100 dark:border-warm-border/50 last:border-0"
 					>
 						<div
-							class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500"
+							class="w-8 h-8 rounded-full bg-gray-100 dark:bg-warm-dark-900 flex items-center justify-center text-gray-500"
 						>
 							<svg
 								class="w-4 h-4"
@@ -179,7 +179,7 @@
 					<button
 						v-if="showCreateOption"
 						@click="openCreateModal"
-						class="w-full px-4 py-3 text-left hover:bg-[#D4AF37]/10 flex items-center gap-3 border-t-2 border-gray-100 dark:border-white/10"
+						class="w-full px-4 py-3 text-left hover:bg-[#D4AF37]/10 flex items-center gap-3 border-t-2 border-gray-100 dark:border-warm-border"
 					>
 						<div
 							class="w-8 h-8 rounded-full bg-[#D4AF37]/20 flex items-center justify-center text-[#D4AF37]"
@@ -245,11 +245,11 @@
 						class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
 					></div>
 					<div
-						class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col border border-transparent dark:border-white/10"
+						class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col border border-transparent dark:border-warm-border"
 					>
 						<!-- Header -->
 						<div
-							class="p-6 pb-4 border-b border-gray-100 dark:border-white/10 flex-shrink-0"
+							class="p-6 pb-4 border-b border-gray-100 dark:border-warm-border flex-shrink-0"
 						>
 							<h3 class="text-lg font-bold text-gray-900 dark:text-white">
 								Add New Customer
@@ -297,7 +297,7 @@
 											v-model="newCustomer.name"
 											type="text"
 											placeholder="John Doe"
-											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 										/>
 									</div>
 									<div>
@@ -310,7 +310,7 @@
 											v-model="newCustomer.phone"
 											type="tel"
 											placeholder="(555) 123-4567"
-											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 										/>
 									</div>
 									<div>
@@ -323,7 +323,7 @@
 											v-model="newCustomer.email"
 											type="email"
 											placeholder="john@example.com"
-											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 										/>
 									</div>
 								</div>
@@ -331,11 +331,11 @@
 
 							<!-- Address Section (Collapsible) -->
 							<div
-								class="border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden"
+								class="border border-gray-200 dark:border-warm-border rounded-xl overflow-hidden"
 							>
 								<button
 									@click="showAddressFields = !showAddressFields"
-									class="w-full px-4 py-3 flex items-center justify-between bg-gray-50 dark:bg-[#15171e] hover:bg-gray-100 dark:hover:bg-white/5 transition"
+									class="w-full px-4 py-3 flex items-center justify-between bg-gray-50 dark:bg-warm-dark-700 hover:bg-gray-100 dark:hover:bg-warm-dark-700 transition"
 								>
 									<span
 										class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2"
@@ -389,7 +389,7 @@
 											v-model="newCustomer.address_line1"
 											type="text"
 											placeholder="123 Main St"
-											class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+											class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 										/>
 									</div>
 									<div>
@@ -401,7 +401,7 @@
 											v-model="newCustomer.address_line2"
 											type="text"
 											placeholder="Apt 4B"
-											class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+											class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 										/>
 									</div>
 									<div class="grid grid-cols-3 gap-3">
@@ -414,7 +414,7 @@
 												v-model="newCustomer.city"
 												type="text"
 												placeholder="New York"
-												class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+												class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 											/>
 										</div>
 										<div>
@@ -426,7 +426,7 @@
 												v-model="newCustomer.state"
 												type="text"
 												placeholder="NY"
-												class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+												class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 											/>
 										</div>
 									</div>
@@ -439,7 +439,7 @@
 											v-model="newCustomer.pincode"
 											type="text"
 											placeholder="10001"
-											class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+											class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 										/>
 									</div>
 								</div>
@@ -447,11 +447,11 @@
 
 							<!-- Jewelry Preferences (Collapsible) -->
 							<div
-								class="border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden"
+								class="border border-gray-200 dark:border-warm-border rounded-xl overflow-hidden"
 							>
 								<button
 									@click="showPreferenceFields = !showPreferenceFields"
-									class="w-full px-4 py-3 flex items-center justify-between bg-gray-50 dark:bg-[#15171e] hover:bg-gray-100 dark:hover:bg-white/5 transition"
+									class="w-full px-4 py-3 flex items-center justify-between bg-gray-50 dark:bg-warm-dark-700 hover:bg-gray-100 dark:hover:bg-warm-dark-700 transition"
 								>
 									<span
 										class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2"
@@ -498,7 +498,7 @@
 											>
 											<select
 												v-model="newCustomer.ring_size"
-												class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+												class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 											>
 												<option value="">Select...</option>
 												<option
@@ -517,7 +517,7 @@
 											>
 											<select
 												v-model="newCustomer.preferred_metal"
-												class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+												class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 											>
 												<option value="">Select...</option>
 												<option value="Yellow Gold">Yellow Gold</option>
@@ -535,14 +535,13 @@
 										>
 										<select
 											v-model="newCustomer.preferred_purity"
-											class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+											class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 										>
 											<option value="">Select...</option>
-											<option value="24K">24K (99.9%)</option>
-											<option value="22K">22K (91.6%)</option>
-											<option value="18K">18K (75%)</option>
-											<option value="14K">14K (58.3%)</option>
-											<option value="10K">10K (41.7%)</option>
+											<option value="22Kt">22Kt (91.6%)</option>
+											<option value="18Kt">18Kt (75%)</option>
+											<option value="14Kt">14Kt (58.3%)</option>
+											<option value="10Kt">10Kt (41.7%)</option>
 										</select>
 									</div>
 								</div>
@@ -551,11 +550,11 @@
 							<!-- Additional Info (Collapsible) -->
 							<div
 								v-if="cart.customerType !== 'Company'"
-								class="border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden"
+								class="border border-gray-200 dark:border-warm-border rounded-xl overflow-hidden"
 							>
 								<button
 									@click="showAdditionalFields = !showAdditionalFields"
-									class="w-full px-4 py-3 flex items-center justify-between bg-gray-50 dark:bg-[#15171e] hover:bg-gray-100 dark:hover:bg-white/5 transition"
+									class="w-full px-4 py-3 flex items-center justify-between bg-gray-50 dark:bg-warm-dark-700 hover:bg-gray-100 dark:hover:bg-warm-dark-700 transition"
 								>
 									<span
 										class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2"
@@ -604,7 +603,7 @@
 												v-model="newCustomer.spouse_name"
 												type="text"
 												placeholder="Jane Doe"
-												class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+												class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 											/>
 										</div>
 										<div>
@@ -615,7 +614,7 @@
 											<input
 												v-model="newCustomer.anniversary"
 												type="date"
-												class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+												class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 											/>
 										</div>
 									</div>
@@ -651,11 +650,11 @@
 
 						<!-- Footer -->
 						<div
-							class="p-6 pt-4 border-t border-gray-100 dark:border-white/10 flex gap-3 flex-shrink-0"
+							class="p-6 pt-4 border-t border-gray-100 dark:border-warm-border flex gap-3 flex-shrink-0"
 						>
 							<button
 								@click="handleCancelCreate"
-								class="flex-1 py-2.5 rounded-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 transition"
+								class="flex-1 py-2.5 rounded-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-warm-dark-700 dark:text-gray-300 dark:hover:bg-white/10 transition"
 							>
 								Cancel
 							</button>

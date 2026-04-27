@@ -18,13 +18,13 @@ class TestGoldRateLog(FrappeTestCase):
 			)
 		if not frappe.db.exists("Zevar Metal", "Silver"):
 			frappe.get_doc({"doctype": "Zevar Metal", "__newname": "Silver"}).insert(ignore_permissions=True)
-		if not frappe.db.exists("Zevar Purity", "24K"):
+		if not frappe.db.exists("Zevar Purity", "22Kt"):
 			frappe.get_doc(
-				{"doctype": "Zevar Purity", "__newname": "24K", "fine_metal_content": 0.999}
+				{"doctype": "Zevar Purity", "__newname": "22Kt", "fine_metal_content": 0.916}
 			).insert(ignore_permissions=True)
-		if not frappe.db.exists("Zevar Purity", "22K"):
+		if not frappe.db.exists("Zevar Purity", "18Kt"):
 			frappe.get_doc(
-				{"doctype": "Zevar Purity", "__newname": "22K", "fine_metal_content": 0.916}
+				{"doctype": "Zevar Purity", "__newname": "18Kt", "fine_metal_content": 0.750}
 			).insert(ignore_permissions=True)
 		frappe.db.commit()
 
@@ -38,14 +38,14 @@ class TestGoldRateLog(FrappeTestCase):
 			{
 				"doctype": "Gold Rate Log",
 				"metal": "Yellow Gold",
-				"purity": "24K",
+				"purity": "22Kt",
 				"rate_per_gram": 78.50,
 				"source": "test",
 			}
 		).insert(ignore_permissions=True)
 		self.assertTrue(doc.name)
 		self.assertEqual(doc.metal, "Yellow Gold")
-		self.assertEqual(doc.purity, "24K")
+		self.assertEqual(doc.purity, "22Kt")
 		self.assertEqual(float(doc.rate_per_gram), 78.50)
 
 	def test_gold_rate_log_autoname_format(self):
@@ -53,7 +53,7 @@ class TestGoldRateLog(FrappeTestCase):
 			{
 				"doctype": "Gold Rate Log",
 				"metal": "Yellow Gold",
-				"purity": "24K",
+				"purity": "22Kt",
 				"rate_per_gram": 75.00,
 				"source": "test",
 			}
@@ -64,7 +64,7 @@ class TestGoldRateLog(FrappeTestCase):
 		doc = frappe.get_doc(
 			{
 				"doctype": "Gold Rate Log",
-				"purity": "24K",
+				"purity": "22Kt",
 				"rate_per_gram": 75.00,
 				"source": "test",
 			}
@@ -76,7 +76,7 @@ class TestGoldRateLog(FrappeTestCase):
 			{
 				"doctype": "Gold Rate Log",
 				"metal": "Yellow Gold",
-				"purity": "24K",
+				"purity": "22Kt",
 				"source": "test",
 			}
 		)
@@ -87,7 +87,7 @@ class TestGoldRateLog(FrappeTestCase):
 			{
 				"doctype": "Gold Rate Log",
 				"metal": "Yellow Gold",
-				"purity": "24K",
+				"purity": "22Kt",
 				"rate_per_gram": 75.00,
 				"source": "test",
 			}
@@ -103,7 +103,7 @@ class TestGoldRateLog(FrappeTestCase):
 				{
 					"doctype": "Gold Rate Log",
 					"metal": "Yellow Gold",
-					"purity": "24K",
+					"purity": "22Kt",
 					"rate_per_gram": rate,
 					"source": "test",
 				}
@@ -111,7 +111,7 @@ class TestGoldRateLog(FrappeTestCase):
 
 		entries = frappe.get_all(
 			"Gold Rate Log",
-			filters={"source": "test", "metal": "Yellow Gold", "purity": "24K"},
+			filters={"source": "test", "metal": "Yellow Gold", "purity": "22Kt"},
 			pluck="rate_per_gram",
 		)
 		self.assertEqual(len(entries), 3)
@@ -121,7 +121,7 @@ class TestGoldRateLog(FrappeTestCase):
 			{
 				"doctype": "Gold Rate Log",
 				"metal": "Yellow Gold",
-				"purity": "24K",
+				"purity": "22Kt",
 				"rate_per_gram": 78.50,
 				"source": "test",
 			}
@@ -130,7 +130,7 @@ class TestGoldRateLog(FrappeTestCase):
 		if frappe.db.exists("Zevar Purity", "999 Fine"):
 			purity = "999 Fine"
 		else:
-			purity = "24K"
+			purity = "22Kt"
 
 		frappe.get_doc(
 			{
@@ -156,7 +156,7 @@ class TestGoldRateLog(FrappeTestCase):
 			{
 				"doctype": "Gold Rate Log",
 				"metal": "Yellow Gold",
-				"purity": "24K",
+				"purity": "22Kt",
 				"rate_per_gram": 78.50,
 				"source": "test",
 			}
@@ -168,7 +168,7 @@ class TestGoldRateLog(FrappeTestCase):
 			{
 				"doctype": "Gold Rate Log",
 				"metal": "Yellow Gold",
-				"purity": "24K",
+				"purity": "22Kt",
 				"rate_per_gram": 75.00,
 				"source": "test",
 			}
@@ -178,7 +178,7 @@ class TestGoldRateLog(FrappeTestCase):
 			{
 				"doctype": "Gold Rate Log",
 				"metal": "Yellow Gold",
-				"purity": "24K",
+				"purity": "22Kt",
 				"rate_per_gram": 80.00,
 				"source": "test",
 			}
@@ -186,7 +186,7 @@ class TestGoldRateLog(FrappeTestCase):
 
 		latest = frappe.get_all(
 			"Gold Rate Log",
-			filters={"metal": "Yellow Gold", "purity": "24K"},
+			filters={"metal": "Yellow Gold", "purity": "22Kt"},
 			fields=["rate_per_gram"],
 			order_by="creation desc",
 			limit=1,

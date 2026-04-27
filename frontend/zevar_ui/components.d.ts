@@ -10,6 +10,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AccountHistoryModal: typeof import('./src/components/AccountHistoryModal.vue')['default']
     AppLayout: typeof import('./src/components/AppLayout.vue')['default']
+    BaseModal: typeof import('./src/components/BaseModal.vue')['default']
     CameraModal: typeof import('./src/components/CameraModal.vue')['default']
     CartSidebar: typeof import('./src/components/CartSidebar.vue')['default']
     CatalogProductCard: typeof import('./src/components/CatalogProductCard.vue')['default']
@@ -53,5 +54,6 @@ declare module 'vue' {
     SupportModal: typeof import('./src/components/SupportModal.vue')['default']
     TransactionDetailModal: typeof import('./src/components/TransactionDetailModal.vue')['default']
     TrendingSection: typeof import('./src/components/TrendingSection.vue')['default']
+    ViewToggle: typeof import('./src/components/ViewToggle.vue')['default']
   }
 }

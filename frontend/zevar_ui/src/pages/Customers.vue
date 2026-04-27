@@ -6,7 +6,7 @@
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Customers</h2>
 					<span
-						class="status-label !mb-0 !bg-gray-100 dark:!bg-white/5 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-white/10"
+						class="status-label !mb-0 !bg-gray-100 dark:!bg-warm-dark-700 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-warm-border"
 					>
 						{{ pagination.total_count }} Clients
 					</span>
@@ -20,7 +20,7 @@
 							v-model="searchQuery"
 							@input="onSearchInput"
 							placeholder="Search by name, phone, email..."
-							class="pl-9 pr-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-64"
+							class="pl-9 pr-4 py-2 bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-64"
 						/>
 					</div>
 					<button
@@ -53,11 +53,11 @@
 
 			<!-- Table View Wrapper with Outside Scrollbar -->
 			<div class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
-				<div class="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700/50 flex flex-col shadow-sm relative min-h-min">
+				<div class="bg-white dark:bg-warm-dark-900/50 rounded-xl border border-gray-100 dark:border-warm-border/50 flex flex-col shadow-sm relative min-h-min">
 					<div class="overflow-x-auto">
 						<table class="w-full text-sm">
 							<thead>
-								<tr class="bg-gray-50 dark:bg-gray-900/90 border-b border-gray-100 dark:border-gray-700/50 sticky top-0 z-10 backdrop-blur-sm">
+								<tr class="bg-gray-50 dark:bg-warm-dark-900/90 border-b border-gray-100 dark:border-warm-border/50 sticky top-0 z-10 backdrop-blur-sm">
 								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Name</th>
 								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Contact</th>
 								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Group</th>
@@ -81,12 +81,12 @@
 							<tr
 								v-for="customer in customers"
 								:key="customer.name"
-								class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+								class="hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition-colors cursor-pointer"
 							>
 								<td class="px-4 py-3">
 									<div class="flex items-center gap-3">
 										<div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-											:class="customer.customer_group === 'VIP' ? 'bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] text-[#0F1115]' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'">
+											:class="customer.customer_group === 'VIP' ? 'bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] text-[#0F1115]' : 'bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-300'">
 											{{ getInitials(customer.customer_name || customer.name) }}
 										</div>
 										<div class="font-bold text-gray-900 dark:text-white">
@@ -100,7 +100,7 @@
 								</td>
 								<td class="px-4 py-3">
 									<span class="px-2 py-1 rounded-full text-[10px] font-bold"
-										:class="customer.customer_group === 'VIP' ? 'bg-[#D4AF37]/15 text-[#D4AF37]' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'">
+										:class="customer.customer_group === 'VIP' ? 'bg-[#D4AF37]/15 text-[#D4AF37]' : 'bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-400'">
 										{{ customer.customer_group || 'Standard' }}
 									</span>
 								</td>
@@ -111,7 +111,7 @@
 									{{ customer.territory || '-' }}
 								</td>
 								<td class="px-4 py-3 text-right">
-									<button class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-white transition">
+									<button class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition">
 										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
 									</button>
 								</td>
@@ -121,17 +121,17 @@
 				</div>
 
 				<!-- Pagination Controls -->
-				<div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700/50 bg-gray-50 dark:bg-gray-900/30 flex items-center justify-between mt-auto shrink-0 sticky bottom-0 z-10">
+				<div class="px-4 py-3 border-t border-gray-100 dark:border-warm-border/50 bg-gray-50 dark:bg-warm-dark-700 flex items-center justify-between mt-auto shrink-0 sticky bottom-0 z-10">
 					<div class="flex items-center gap-3">
 						<div class="text-xs text-gray-500 dark:text-gray-400">
 							Showing {{ (pagination.page - 1) * pagination.page_length + 1 }} to {{ Math.min(pagination.page * pagination.page_length, pagination.total_count) }} of {{ pagination.total_count }} entries
 						</div>
-						<div class="flex items-center gap-2 border-l border-gray-200 dark:border-gray-700 pl-3">
+						<div class="flex items-center gap-2 border-l border-gray-200 dark:border-warm-border pl-3">
 							<label class="text-xs text-gray-500 dark:text-gray-400">Per page:</label>
 							<select 
 								v-model="pagination.page_length" 
 								@change="changePageSize"
-								class="text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded p-1 focus:ring-1 focus:ring-[#D4AF37] outline-none"
+								class="text-xs bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded p-1 focus:ring-1 focus:ring-[#D4AF37] outline-none"
 							>
 								<option :value="20">20</option>
 								<option :value="50">50</option>
@@ -145,7 +145,7 @@
 						<button 
 							@click="prevPage" 
 							:disabled="pagination.page === 1 || loading"
-							class="px-3 py-1.5 text-xs font-bold rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 transition"
+							class="px-3 py-1.5 text-xs font-bold rounded-lg border border-gray-200 dark:border-warm-border hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 transition"
 						>
 							Previous
 						</button>
@@ -153,7 +153,7 @@
 						<button 
 							@click="nextPage" 
 							:disabled="(pagination.page * pagination.page_length) >= pagination.total_count || loading"
-							class="px-3 py-1.5 text-xs font-bold rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 transition"
+							class="px-3 py-1.5 text-xs font-bold rounded-lg border border-gray-200 dark:border-warm-border hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 transition"
 						>
 							Next
 						</button>
@@ -169,6 +169,7 @@
 import AppLayout from '@/components/AppLayout.vue'
 import { ref, onMounted } from 'vue'
 import { createResource } from 'frappe-ui'
+	import { formatDate } from '@/utils/dates.js'
 
 const customers = ref([])
 const loading = ref(true)
@@ -298,10 +299,6 @@ function getInitials(name) {
 	return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
 }
 
-function formatDate(dateStr) {
-	if (!dateStr) return 'Unknown'
-	return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-}
 
 onMounted(() => {
 	fetchCustomers()

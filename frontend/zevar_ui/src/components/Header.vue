@@ -290,8 +290,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useGoldStore } from '@/stores/gold.js'
 
 defineProps({
 	isDark: { type: Boolean, default: false },
@@ -302,9 +303,17 @@ defineEmits(['toggleTheme', 'search'])
 
 const router = useRouter()
 const searchQuery = ref('')
-const goldPrice = ref('2,031.47')
-const priceChange = ref(0.52)
+const goldStore = useGoldStore()
 const openDropdown = ref(null)
+
+const goldPrice = computed(() => {
+	const rate22kt = goldStore.rates['Yellow Gold-22Kt']
+	if (!rate22kt) return '---'
+	const perOz = (rate22kt * 31.1035).toFixed(2)
+	return Number(perOz).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+})
+
+const priceChange = ref(0.0)
 
 const navCategories = [
 	{ id: 'all', name: 'All Jewellery' },
@@ -417,26 +426,7 @@ function navigateTo(category, subcategory = null) {
 }
 
 onMounted(async () => {
-	try {
-		const r = await fetch('https://api.metals.live/v1/spot')
-		if (!r.ok) return
-		const d = await r.json()
-		const g = d.find((m) => m.metal === 'gold')
-		if (
-			g &&
-			typeof g.price === 'number' &&
-			typeof g.previous === 'number' &&
-			g.previous !== 0
-		) {
-			goldPrice.value = g.price.toLocaleString('en-US', {
-				minimumFractionDigits: 2,
-				maximumFractionDigits: 2,
-			})
-			priceChange.value = ((g.price - g.previous) / g.previous) * 100
-		}
-	} catch (e) {
-		/* keep defaults */
-	}
+	goldStore.startPolling()
 })
 </script>
 

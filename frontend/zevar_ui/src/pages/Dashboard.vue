@@ -32,6 +32,9 @@
 		<div class="dashboard-container" style="padding-top: 0;">
 			<div v-if="session.user" class="welcome-text" style="width: 100%; margin-bottom: 1.25rem;">
 				Welcome back, <strong>{{ session.user?.full_name?.split(' ')[0] || 'User' }}</strong>
+				<span v-if="visibility.ownSalesOnly" class="text-xs text-gray-500 ml-2">
+					(Limited access - your sales only)
+				</span>
 			</div>
 			
 			<div class="dashboard-layout">
@@ -52,12 +55,44 @@
 				</div>
 			</router-link>
 <br>
+
+			<!-- Section: Employee Portal (for Employee/ESS roles) -->
+			<div class="admin-section" v-if="session.hasAnyRole(['Employee', 'Employee Self Service']) && !session.isAdmin">
+				<h4 class="section-label">Employee Portal</h4>
+				<div class="tile-row-4">
+					<a href="/employee-portal/#/" class="tile-secondary">
+						<div class="tile-icon-sm" style="background: #0EA5E9">
+							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+						</div>
+						<h3 class="tile-title-sm">My Portal</h3>
+					</a>
+					<a href="/employee-portal/#/tasks" class="tile-secondary">
+						<div class="tile-icon-sm" style="background: #F43F5E">
+							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path></svg>
+						</div>
+						<h3 class="tile-title-sm">My Tasks</h3>
+					</a>
+					<a href="/employee-portal/#/attendance" class="tile-secondary">
+						<div class="tile-icon-sm" style="background: #10B981">
+							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+						</div>
+						<h3 class="tile-title-sm">Attendance</h3>
+					</a>
+					<a href="/employee-portal/#/leave" class="tile-secondary">
+						<div class="tile-icon-sm" style="background: #8B5CF6">
+							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+						</div>
+						<h3 class="tile-title-sm">Leave</h3>
+					</a>
+				</div>
+			</div>
+
 			<!-- Section: Primary Operations (Legacy Mapping) -->
 			<div class="admin-section">
 				<h4 class="section-label">Primary Operations</h4>
 				<div class="tile-row-4">
 					<!-- End Of Day Reports -->
-					<router-link to="/reports" class="tile-secondary">
+					<router-link v-if="visibility.reportsTile" to="/reports" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #3B82F6">
 							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><polyline points="14,2 14,8 20,8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
 						</div>
@@ -78,7 +113,7 @@
 						<h3 class="tile-title-sm">Source Management</h3>
 					</router-link>
 					<!-- Reports -->
-					<router-link to="/reports" class="tile-secondary">
+					<router-link v-if="visibility.reportsTile" to="/reports" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #EC4899">
 							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
 						</div>
@@ -92,7 +127,7 @@
 						<h3 class="tile-title-sm">Inventory</h3>
 					</router-link>
 					<!-- Time Clock -->
-					<a href="/employee-portal" class="tile-secondary">
+					<a href="/employee-portal/#/" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #F43F5E">
 							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
 						</div>
@@ -162,7 +197,7 @@
 						<h3 class="tile-title-sm">Products</h3>
 					</router-link>
 					<!-- Tasks -->
-					<a href="/employee-portal/tasks" class="tile-secondary">
+					<a href="/employee-portal/#/tasks" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #F43F5E">
 							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path></svg>
 						</div>
@@ -173,11 +208,11 @@
 
 			<!-- Section: Inventory Management -->
 			<div class="admin-section" v-if="session.hasAnyRole(['Store Manager', 'System Manager', 'Administrator'])">
-				<h4 class="section-label">Inventory Management</h4>
+				<h4 class="section-label">Stock</h4>
 				<div class="tile-row-4">
 					<router-link to="#" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #64748B"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path></svg></div>
-						<h3 class="tile-title-sm">Vendor Orders</h3>
+						<h3 class="tile-title-sm">Supplier Orders</h3>
 					</router-link>
 					<router-link to="#" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #64748B"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path></svg></div>
@@ -185,11 +220,11 @@
 					</router-link>
 					<router-link to="/inventory" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #64748B"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"></path><polyline points="3.27,6.96 12,12.01 20.73,6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>
-						<h3 class="tile-title-sm">Receiving</h3>
+						<h3 class="tile-title-sm">Stock In</h3>
 					</router-link>
 					<router-link to="#" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #64748B"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"></path></svg></div>
-						<h3 class="tile-title-sm">Custom Jobs</h3>
+						<h3 class="tile-title-sm">Assemblies</h3>
 					</router-link>
 					<router-link to="#" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #64748B"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></div>
@@ -197,15 +232,15 @@
 					</router-link>
 					<router-link to="#" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #64748B"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon></svg></div>
-						<h3 class="tile-title-sm">Diamonds & Gems</h3>
+						<h3 class="tile-title-sm">Gems</h3>
 					</router-link>
 					<router-link to="#" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #64748B"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
-						<h3 class="tile-title-sm">Physical Inventory</h3>
+						<h3 class="tile-title-sm">Inventory Counts</h3>
 					</router-link>
 					<router-link to="#" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #64748B"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"></path></svg></div>
-						<h3 class="tile-title-sm">Vaults & Safes</h3>
+						<h3 class="tile-title-sm">Storages</h3>
 					</router-link>
 					<router-link to="#" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #64748B"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></div>
@@ -228,7 +263,7 @@
 
 			<!-- Section: Accounting & Financials -->
 			<div class="admin-section" v-if="session.hasAnyRole(['Store Manager', 'System Manager', 'Administrator', 'Accounts Manager'])">
-				<h4 class="section-label">Accounting & Financials</h4>
+				<h4 class="section-label">Accounting</h4>
 				<div class="tile-row-4">
 					<router-link to="#" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #14B8A6"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"></path></svg></div>
@@ -236,39 +271,39 @@
 					</router-link>
 					<router-link to="#" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #14B8A6"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"></path></svg></div>
-						<h3 class="tile-title-sm">End of Day Close</h3>
+						<h3 class="tile-title-sm">End-of-day Closing</h3>
 					</router-link>
-					<router-link to="/reports" class="tile-secondary">
+					<router-link v-if="visibility.accountingSection" to="/reports" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #EC4899"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
 						<h3 class="tile-title-sm">Reports</h3>
 					</router-link>
 					<router-link to="#" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #14B8A6"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></div>
-						<h3 class="tile-title-sm">Registers</h3>
+						<h3 class="tile-title-sm">Terminals</h3>
 					</router-link>
 					<router-link to="#" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #14B8A6"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div>
-						<h3 class="tile-title-sm">Pending Invoices</h3>
+						<h3 class="tile-title-sm">Invoices to be Processed</h3>
 					</router-link>
 					<router-link to="#" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #14B8A6"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div>
-						<h3 class="tile-title-sm">Vendor Bills</h3>
+						<h3 class="tile-title-sm">Incoming Invoices</h3>
 					</router-link>
 					<router-link to="#" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #14B8A6"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div>
-						<h3 class="tile-title-sm">Customer Invoices</h3>
+						<h3 class="tile-title-sm">Outgoing Invoices</h3>
 					</router-link>
 					<router-link to="#" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #14B8A6"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div>
-						<h3 class="tile-title-sm">Vendor Credits</h3>
+						<h3 class="tile-title-sm">Incoming Credit Notes</h3>
 					</router-link>
 					<router-link to="#" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #14B8A6"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div>
-						<h3 class="tile-title-sm">Customer Credits</h3>
+						<h3 class="tile-title-sm">Outgoing Credit Notes</h3>
 					</router-link>
 					<router-link to="#" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #14B8A6"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></div>
-						<h3 class="tile-title-sm">Accounting Export</h3>
+						<h3 class="tile-title-sm">Export UBL</h3>
 					</router-link>
 				</div>
 			</div>
@@ -277,7 +312,7 @@
 			<div v-if="session.isAdmin" class="admin-section">
 				<h4 class="section-label">System Administration</h4>
 				<div class="tile-row-4">
-					<a href="/employee-portal" class="tile-secondary">
+					<a href="/employee-portal/#/" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #0EA5E9">
 							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
 						</div>
@@ -318,14 +353,8 @@
 						</h4>
 						<div class="market-grid">
 							<div v-for="[key, rate, change] in sortedRates" :key="key" class="market-card">
-								<div class="market-name">{{ formatMetalName(key) }}</div>
-								<div style="display: flex; justify-content: space-between; align-items: baseline;">
-									<div class="market-price">${{ rate }}</div>
-									<div class="market-change" :class="change >= 0 ? 'up' : 'down'">
-										<span>{{ change >= 0 ? '+' : '' }}{{ change.toFixed(2) }}</span>
-										<span class="market-pct">{{ change >= 0 ? '▲' : '▼' }} {{ Math.abs(change / parseFloat(rate) * 100).toFixed(2) }}%</span>
-									</div>
-								</div>
+								<div class="market-name">{{ formatPurityLabel(key) }}</div>
+								<div class="market-price">${{ rate }}</div>
 							</div>
 						</div>
 					</div>
@@ -339,9 +368,13 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useSessionStore } from '@/stores/session'
 import { useGoldStore } from '@/stores/gold.js'
+import { getDashboardVisibility } from '@/utils/permissions.js'
 
 const session = useSessionStore()
 const goldStore = useGoldStore()
+
+// Role-based dashboard visibility
+const visibility = getDashboardVisibility()
 
 // Clock
 const currentTime = ref('')
@@ -356,29 +389,40 @@ function updateClock() {
 
 const TROY_OZ_GRAMS = 31.1035
 
+const DASHBOARD_RATE_PRIORITIES = [
+	'Yellow Gold-22Kt',
+	'Yellow Gold-18Kt',
+	'Yellow Gold-14Kt',
+	'Yellow Gold-10Kt',
+	'Silver-925 Sterling',
+	'Silver-999 Fine',
+]
+
 const sortedRates = computed(() => {
 	if (!goldStore.rates) return []
-	const priority = ['Yellow Gold-24K', 'Silver-925 Sterling', 'Platinum-950', 'Diamond-Natural']
 	return Object.entries(goldStore.rates)
-		.slice(0, 4)
-		.map(([key, ratePerGram]) => {
-			const price = (ratePerGram * TROY_OZ_GRAMS).toFixed(2)
-			const change = (Math.random() - 0.4) * 20 // Simulated change
-			return [key, price, change]
+		.filter(([key, ratePerGram]) => {
+			if (!key || key === 'null' || !ratePerGram) return false
+			if (key.includes('Platinum')) return false
+			if (key.includes('24Kt') || key.includes('24K') || key.includes('24kt')) return false
+			return true
 		})
+		.map(([key, ratePerGram]) => [key, (ratePerGram * TROY_OZ_GRAMS).toFixed(2)])
 		.sort((a, b) => {
-			const iA = priority.indexOf(a[0])
-			const iB = priority.indexOf(b[0])
-			if (iA !== -1 && iB !== -1) return iA - iB
-			if (iA !== -1) return -1
-			if (iB !== -1) return 1
-			return 0
+			const iA = DASHBOARD_RATE_PRIORITIES.findIndex(p => a[0].includes(p))
+			const iB = DASHBOARD_RATE_PRIORITIES.findIndex(p => b[0].includes(p))
+			return (iA === -1 ? 99 : iA) - (iB === -1 ? 99 : iB)
 		})
 })
 
-function formatMetalName(key) {
+function formatPurityLabel(key) {
+	if (key.startsWith('Silver-')) {
+		const purity = key.split('-').slice(1).join(' ')
+		return purity.replace('Sterling', '').replace('Fine', '').trim() + ' Silver'
+	}
 	const parts = key.split('-')
-	return parts[0]
+	if (parts.length >= 2) return parts[1] + ' Gold'
+	return key
 }
 
 function handleLogout() {
@@ -625,22 +669,16 @@ onUnmounted(() => {
 }
 .market-grid {
 	display: grid;
-	grid-template-columns: 1fr;
+	grid-template-columns: 1fr 1fr;
 	gap: 0;
 }
 .market-card {
-	padding: 0.85rem 0;
+	padding: 0.5rem 0.5rem;
 	border-bottom: 1px solid #F3F4F6;
 	background: transparent;
 }
-.market-card:last-child { border-bottom: none; padding-bottom: 0; }
-.market-card:first-child { padding-top: 0; }
-.market-name { font-size: 0.65rem; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.05em; }
-.market-price { font-size: 1.1rem; font-weight: 800; color: #1F2937; margin: 0.15rem 0; }
-.market-change { font-size: 0.65rem; font-weight: 600; display: flex; align-items: center; gap: 0.35rem; }
-.market-change.up { color: #16A34A; }
-.market-change.down { color: #DC2626; }
-.market-pct { font-size: 0.6rem; }
+.market-name { font-size: 0.6rem; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.03em; }
+.market-price { font-size: 0.95rem; font-weight: 800; color: #1F2937; margin-top: 0.1rem; font-variant-numeric: tabular-nums; }
 
 /* Responsive */
 @media (max-width: 1024px) {
@@ -655,14 +693,12 @@ onUnmounted(() => {
 	.tile-row-2 { grid-template-columns: 1fr; }
 	.tile-row-3 { grid-template-columns: 1fr 1fr; }
 	.tile-row-4 { grid-template-columns: 1fr 1fr; }
-	.market-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
-	.market-card { border-bottom: none; }
 	.tile-hero { padding: 1.5rem; }
 }
 
 @media (max-width: 480px) {
 	.tile-row-3 { grid-template-columns: 1fr; }
-	.market-grid { grid-template-columns: 1fr 1fr; }
+	.market-grid { grid-template-columns: 1fr; }
 	.clock-block { display: none; }
 }
 </style>

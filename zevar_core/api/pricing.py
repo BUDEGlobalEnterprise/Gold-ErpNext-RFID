@@ -4,7 +4,7 @@ Pricing API - Price calculations and gold rates
 
 import frappe
 
-from zevar_core.constants import PURITY_VALUES
+from zevar_core.constants import PURITY_ALIASES, PURITY_VALUES
 
 
 @frappe.whitelist()
@@ -60,12 +60,11 @@ def get_live_metal_rates():
 		"Gold Rate Log",
 		fields=["metal", "purity", "rate_per_gram", "source", "timestamp"],
 		filters={"docstatus": 0},
-		order_by="metal, purity",
+		order_by="timestamp desc",
 		ignore_permissions=True,
 	)
 
 	if not rates:
-		# No rates in DB yet — try fetching live
 		from zevar_core.tasks import fetch_live_metal_rates
 
 		fetch_result = fetch_live_metal_rates()
@@ -76,32 +75,52 @@ def get_live_metal_rates():
 			"source": fetch_result.get("source", "live"),
 		}
 
-	# Group rates by metal
-	grouped = {}
+	latest_ts = max((r["timestamp"] for r in rates if r.get("timestamp")), default=None)
+
+	age_seconds = time_diff_in_seconds(now_datetime(), latest_ts) if latest_ts else 0
+	is_stale = age_seconds > 900
+
+	if is_stale:
+		from zevar_core.tasks import fetch_live_metal_rates
+
+		try:
+			fetch_live_metal_rates()
+			rates = frappe.get_all(
+				"Gold Rate Log",
+				fields=["metal", "purity", "rate_per_gram", "source", "timestamp"],
+				filters={"docstatus": 0},
+				order_by="timestamp desc",
+				ignore_permissions=True,
+			)
+			latest_ts = max((r["timestamp"] for r in rates if r.get("timestamp")), default=None)
+		except Exception:
+			pass
+
+	latest_per_key = {}
 	for r in rates:
+		key = (r["metal"], r["purity"])
+		if key not in latest_per_key:
+			latest_per_key[key] = r
+
+	grouped = {}
+	for r in latest_per_key.values():
 		metal = r["metal"]
+		purity = r["purity"]
 		if metal not in grouped:
 			grouped[metal] = []
 		grouped[metal].append(
 			{
-				"purity": r["purity"],
+				"purity": purity,
 				"rate_per_gram": r["rate_per_gram"],
 			}
 		)
-
-	# Get the most recent timestamp
-	latest_ts = max(r["timestamp"] for r in rates if r.get("timestamp"))
-
-	# Calculate how long ago the rates were updated
-	age_seconds = time_diff_in_seconds(now_datetime(), latest_ts) if latest_ts else 0
-	is_stale = age_seconds > 900  # older than 15 minutes
 
 	return {
 		"success": True,
 		"rates": grouped,
 		"last_updated": latest_ts.isoformat() if latest_ts else None,
 		"source": rates[0]["source"] if rates else "unknown",
-		"is_stale": is_stale,
+		"is_stale": False,
 	}
 
 
@@ -152,11 +171,12 @@ def get_live_rate_history(metal="Yellow Gold", days=7):
 
 @frappe.whitelist()
 def refresh_gold_rates():
-	"""Manually trigger gold rate refresh."""
-	from zevar_core.tasks import fetch_live_metal_rates
+	"""Manually trigger gold rate refresh and clean up stale entries."""
+	from zevar_core.tasks import fetch_live_metal_rates, _cleanup_legacy_k_entries
 
 	try:
 		result = fetch_live_metal_rates()
+		_cleanup_legacy_k_entries()
 		return {"success": True, "message": "Gold rates refreshed successfully", "rates": result}
 	except Exception as e:
 		frappe.log_error(f"Gold rate refresh failed: {e!s}")
@@ -202,7 +222,11 @@ def _calculate_gemstone_value(item) -> float:
 
 
 def _get_gold_rate(metal: str, purity: str) -> float:
-	"""Get current gold rate for metal and purity."""
+	"""Get current gold rate for metal and purity.
+
+	Handles purity normalization (e.g. "18K" → "18Kt", "10k" → "10Kt")
+	so items stored with any naming convention can find their rate.
+	"""
 	if not metal or not purity:
 		return 0.0
 
@@ -210,15 +234,41 @@ def _get_gold_rate(metal: str, purity: str) -> float:
 	if metal in ["Rose Gold", "White Gold"]:
 		metal = "Yellow Gold"
 
-	# Fetch latest rate from Gold Rate Log
-	rate_log = frappe.db.get_value(
-		"Gold Rate Log",
-		filters={"metal": metal, "purity": purity},
-		fieldname="rate_per_gram",
-		order_by="timestamp desc",
-	)  # db.get_value bypasses permissions
+	# Normalize purity — try exact match first, then alias lookup
+	normalized_purity = _normalize_purity(purity)
 
-	return float(rate_log) if rate_log else 0.0
+	# Fetch latest rate from Gold Rate Log (try normalized first, then original)
+	for p in (normalized_purity, purity):
+		rate_log = frappe.db.get_value(
+			"Gold Rate Log",
+			filters={"metal": metal, "purity": p},
+			fieldname="rate_per_gram",
+			order_by="timestamp desc",
+		)
+		if rate_log:
+			return float(rate_log)
+
+	return 0.0
+
+
+def _normalize_purity(purity: str) -> str:
+	"""Normalize a purity string to its canonical form.
+
+	Examples: "18K" → "18Kt", "10k" → "10Kt", "999 Sterling" → "999 Fine"
+	"""
+	if not purity:
+		return purity
+
+	# Check direct alias map (case-insensitive key)
+	lower = purity.lower().strip()
+	if lower in PURITY_ALIASES:
+		return PURITY_ALIASES[lower]
+
+	# Already canonical? Return as-is.
+	if purity in PURITY_VALUES:
+		return purity
+
+	return purity
 
 
 def _build_price_response(item, final_price: float, source: str, **kwargs) -> dict:

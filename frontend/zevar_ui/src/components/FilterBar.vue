@@ -4,7 +4,7 @@
 			class="flex items-center gap-4 overflow-x-auto no-scrollbar transition-colors duration-300"
 		>
 			<div
-				class="flex items-center gap-2 pr-4 border-r border-gray-200 dark:border-white/10 flex-shrink-0"
+				class="flex items-center gap-2 pr-4 border-r border-gray-200 dark:border-warm-border flex-shrink-0"
 			>
 				<svg
 					class="w-4 h-4 text-gray-400"
@@ -37,7 +37,7 @@
 					:class="
 						hasActivePrice
 							? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/50'
-							: 'bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'
+							: 'bg-gray-50 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-warm-border hover:border-gray-300 dark:hover:border-white/20'
 					"
 					class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all"
 				>
@@ -66,7 +66,7 @@
 					:class="
 						ui.activeFilters.custom_jewelry_type
 							? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/50'
-							: 'bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'
+							: 'bg-gray-50 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-warm-border hover:border-gray-300 dark:hover:border-white/20'
 					"
 					class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all"
 				>
@@ -95,7 +95,7 @@
 					:class="
 						ui.activeFilters.custom_metal_type
 							? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/50'
-							: 'bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'
+							: 'bg-gray-50 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-warm-border hover:border-gray-300 dark:hover:border-white/20'
 					"
 					class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all"
 				>
@@ -124,7 +124,7 @@
 					:class="
 						ui.activeFilters.custom_gemstone
 							? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/50'
-							: 'bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'
+							: 'bg-gray-50 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-warm-border hover:border-gray-300 dark:hover:border-white/20'
 					"
 					class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all"
 				>
@@ -149,7 +149,7 @@
 			<!-- Sort -->
 			<div
 				ref="sortDropdownRef"
-				class="relative flex-shrink-0 border-l border-gray-200 dark:border-white/10 pl-4 ml-auto"
+				class="relative flex-shrink-0 border-l border-gray-200 dark:border-warm-border pl-4 ml-auto"
 			>
 				<button
 					@click.stop="toggleDropdown('sort')"
@@ -191,7 +191,7 @@
 		<div
 			v-if="openDropdown === 'price'"
 			ref="priceDropdown"
-			class="fixed bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl p-4 z-[99999] text-gray-700 dark:text-white"
+			class="fixed bg-white dark:bg-warm-card border border-gray-200 dark:border-warm-border rounded-xl shadow-2xl p-4 z-[99999] text-gray-700 dark:text-white"
 			:style="dropdownStyle.price"
 		>
 			<div class="flex gap-2 items-center mb-3">
@@ -206,7 +206,7 @@
 						@input="updatePriceFilter('price_min', $event.target.value)"
 						@blur="finalizePriceFilter('price_min')"
 						placeholder="Min"
-						class="w-full bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/5 rounded-lg py-1.5 pl-5 pr-2 text-xs text-gray-700 dark:text-white outline-none focus:ring-1 focus:ring-[#D4AF37]"
+						class="w-full bg-gray-50 dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border/50 rounded-lg py-1.5 pl-5 pr-2 text-xs text-gray-700 dark:text-white outline-none focus:ring-1 focus:ring-[#D4AF37]"
 					/>
 				</div>
 				<span class="text-gray-400 font-bold">–</span>
@@ -221,7 +221,7 @@
 						@input="updatePriceFilter('price_max', $event.target.value)"
 						@blur="finalizePriceFilter('price_max')"
 						placeholder="Max"
-						class="w-full bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-white/5 rounded-lg py-1.5 pl-5 pr-2 text-xs text-gray-700 dark:text-white outline-none focus:ring-1 focus:ring-[#D4AF37]"
+						class="w-full bg-gray-50 dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border/50 rounded-lg py-1.5 pl-5 pr-2 text-xs text-gray-700 dark:text-white outline-none focus:ring-1 focus:ring-[#D4AF37]"
 					/>
 				</div>
 			</div>
@@ -231,7 +231,7 @@
 					:class="
 						!hasActivePrice
 							? 'bg-[#D4AF37] text-white'
-							: 'bg-gray-50 dark:bg-white/5 text-gray-500 hover:bg-gray-100'
+							: 'bg-gray-50 dark:bg-warm-dark-700 text-gray-500 hover:bg-gray-100'
 					"
 					class="px-2 py-1 rounded text-[9px] font-bold transition-colors"
 				>
@@ -244,7 +244,7 @@
 					:class="
 						isPricePresetActive(preset)
 							? 'bg-[#D4AF37] text-white'
-							: 'bg-gray-50 dark:bg-white/5 text-gray-500 hover:bg-gray-100'
+							: 'bg-gray-50 dark:bg-warm-dark-700 text-gray-500 hover:bg-gray-100'
 					"
 					class="px-2 py-1 rounded text-[9px] font-bold transition-colors"
 				>
@@ -257,7 +257,7 @@
 		<div
 			v-if="openDropdown === 'category'"
 			ref="categoryDropdown"
-			class="fixed bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl p-3 z-[99999] grid grid-cols-2 gap-1.5 text-gray-700 dark:text-white"
+			class="fixed bg-white dark:bg-warm-card border border-gray-200 dark:border-warm-border rounded-xl shadow-2xl p-3 z-[99999] grid grid-cols-2 gap-1.5 text-gray-700 dark:text-white"
 			:style="dropdownStyle.category"
 		>
 			<button
@@ -265,7 +265,7 @@
 				:class="
 					!ui.activeFilters.custom_jewelry_type
 						? 'bg-[#D4AF37] text-white font-bold'
-						: 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'
+						: 'hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-500 dark:text-gray-300'
 				"
 				class="px-3 py-2 text-[10px] rounded-lg text-left transition-colors"
 			>
@@ -278,7 +278,7 @@
 				:class="
 					ui.activeFilters.custom_jewelry_type === cat
 						? 'bg-[#D4AF37] text-white font-bold'
-						: 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'
+						: 'hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-500 dark:text-gray-300'
 				"
 				class="px-3 py-2 text-[10px] rounded-lg text-left transition-colors"
 			>
@@ -290,7 +290,7 @@
 		<div
 			v-if="openDropdown === 'metal'"
 			ref="metalDropdown"
-			class="fixed bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl p-2 z-[99999] flex flex-col gap-1 text-gray-700 dark:text-white"
+			class="fixed bg-white dark:bg-warm-card border border-gray-200 dark:border-warm-border rounded-xl shadow-2xl p-2 z-[99999] flex flex-col gap-1 text-gray-700 dark:text-white"
 			:style="dropdownStyle.metal"
 		>
 			<button
@@ -298,7 +298,7 @@
 				:class="
 					!ui.activeFilters.custom_metal_type
 						? 'bg-[#D4AF37] text-white font-bold'
-						: 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'
+						: 'hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-500 dark:text-gray-300'
 				"
 				class="px-3 py-2 text-[11px] rounded-lg text-left transition-colors"
 			>
@@ -311,7 +311,7 @@
 				:class="
 					ui.activeFilters.custom_metal_type === metal
 						? 'bg-[#D4AF37] text-white font-bold'
-						: 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'
+						: 'hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-500 dark:text-gray-300'
 				"
 				class="px-3 py-2 text-[11px] rounded-lg text-left transition-colors"
 			>
@@ -323,7 +323,7 @@
 		<div
 			v-if="openDropdown === 'gemstone'"
 			ref="gemstoneDropdown"
-			class="fixed bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl p-2 z-[99999] flex flex-col gap-1 text-gray-700 dark:text-white"
+			class="fixed bg-white dark:bg-warm-card border border-gray-200 dark:border-warm-border rounded-xl shadow-2xl p-2 z-[99999] flex flex-col gap-1 text-gray-700 dark:text-white"
 			:style="dropdownStyle.gemstone"
 		>
 			<button
@@ -331,7 +331,7 @@
 				:class="
 					!ui.activeFilters.custom_gemstone
 						? 'bg-[#D4AF37] text-white font-bold'
-						: 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'
+						: 'hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-500 dark:text-gray-300'
 				"
 				class="px-3 py-2 text-[11px] rounded-lg text-left transition-colors"
 			>
@@ -344,7 +344,7 @@
 				:class="
 					ui.activeFilters.custom_gemstone === gem
 						? 'bg-[#D4AF37] text-white font-bold'
-						: 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'
+						: 'hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-500 dark:text-gray-300'
 				"
 				class="px-3 py-2 text-[11px] rounded-lg text-left transition-colors"
 			>
@@ -356,7 +356,7 @@
 		<div
 			v-if="openDropdown === 'sort'"
 			ref="sortDropdown"
-			class="fixed bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl p-2 z-[99999] flex flex-col gap-1 text-gray-700 dark:text-white"
+			class="fixed bg-white dark:bg-warm-card border border-gray-200 dark:border-warm-border rounded-xl shadow-2xl p-2 z-[99999] flex flex-col gap-1 text-gray-700 dark:text-white"
 			:style="dropdownStyle.sort"
 		>
 			<button
@@ -366,7 +366,7 @@
 				:class="
 					ui.sortBy === opt.value
 						? 'bg-[#D4AF37] text-white font-bold'
-						: 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300'
+						: 'hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-500 dark:text-gray-300'
 				"
 				class="px-3 py-2 text-[11px] rounded-lg text-left transition-colors"
 			>
@@ -541,11 +541,11 @@ const pricePresets = [
 ]
 
 const metalPurityMap = {
-	'Yellow Gold': ['24K', '22K', '18K', '14K'],
+	'Yellow Gold': ['24K', '22K', '18K', '14K', '10K'],
 	'White Gold': ['18K', '14K'],
 	'Rose Gold': ['18K', '14K'],
 	Platinum: ['950'],
-	Silver: ['925 Sterling'],
+	Silver: ['999 Fine', '925 Sterling'],
 }
 
 const sortOptions = [

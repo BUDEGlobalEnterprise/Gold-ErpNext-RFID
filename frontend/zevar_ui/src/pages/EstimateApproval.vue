@@ -6,7 +6,7 @@
 			<!-- Loading -->
 			<div
 				v-if="loading"
-				class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-8 text-center"
+				class="bg-white dark:bg-warm-dark-900 rounded-2xl shadow-xl p-8 text-center"
 			>
 				<div
 					class="animate-spin w-12 h-12 border-2 border-[#D4AF37] border-t-transparent rounded-full mx-auto mb-4"
@@ -17,7 +17,7 @@
 			<!-- Error -->
 			<div
 				v-else-if="error"
-				class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-8 text-center"
+				class="bg-white dark:bg-warm-dark-900 rounded-2xl shadow-xl p-8 text-center"
 			>
 				<svg
 					class="w-16 h-16 text-red-500 mx-auto mb-4"
@@ -44,7 +44,7 @@
 			<!-- Estimate Details -->
 			<div
 				v-else-if="estimate"
-				class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden"
+				class="bg-white dark:bg-warm-dark-900 rounded-2xl shadow-xl overflow-hidden"
 			>
 				<!-- Header -->
 				<div class="bg-[#D4AF37] p-6 text-center">
@@ -62,7 +62,7 @@
 					</div>
 
 					<!-- Customer Info -->
-					<div class="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+					<div class="mb-6 p-4 bg-gray-50 dark:bg-warm-dark-900 rounded-lg">
 						<p class="font-medium text-gray-900 dark:text-white">
 							{{ estimate.customer_name }}
 						</p>
@@ -78,7 +78,7 @@
 					</div>
 
 					<!-- Cost Breakdown -->
-					<div class="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+					<div class="mb-6 p-4 border border-gray-200 dark:border-warm-border rounded-lg">
 						<h3 class="font-bold text-gray-900 dark:text-white mb-3">
 							Cost Breakdown
 						</h3>
@@ -96,7 +96,7 @@
 								>
 							</div>
 							<div
-								class="flex justify-between pt-2 border-t border-gray-200 dark:border-gray-700"
+								class="flex justify-between pt-2 border-t border-gray-200 dark:border-warm-border"
 							>
 								<span class="font-bold text-gray-900 dark:text-white"
 									>Total Cost</span
@@ -161,13 +161,13 @@
 									v-model="customerName"
 									type="text"
 									placeholder="Your Full Name"
-									class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+									class="w-full px-4 py-2 border border-gray-200 dark:border-warm-border rounded-lg bg-white dark:bg-warm-dark-900"
 								/>
 								<textarea
 									v-model="approveNotes"
 									rows="2"
 									placeholder="Optional notes..."
-									class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+									class="w-full px-4 py-2 border border-gray-200 dark:border-warm-border rounded-lg bg-white dark:bg-warm-dark-900"
 								></textarea>
 								<div class="flex gap-2">
 									<button
@@ -179,7 +179,7 @@
 									</button>
 									<button
 										@click="showApproveForm = false"
-										class="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg"
+										class="px-4 py-2 bg-gray-100 dark:bg-warm-dark-900 rounded-lg"
 									>
 										Cancel
 									</button>
@@ -191,7 +191,7 @@
 						<div class="border-2 border-red-200 dark:border-red-800 rounded-lg p-4">
 							<button
 								@click="showRejectForm = true"
-								class="w-full py-3 bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-700 rounded-lg font-bold hover:bg-red-50 dark:hover:bg-red-900/20"
+								class="w-full py-3 bg-white dark:bg-warm-dark-900 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-700 rounded-lg font-bold hover:bg-red-50 dark:hover:bg-red-900/20"
 							>
 								Reject Estimate
 							</button>
@@ -204,13 +204,13 @@
 									v-model="rejectReason"
 									rows="3"
 									placeholder="Reason for rejection..."
-									class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+									class="w-full px-4 py-2 border border-gray-200 dark:border-warm-border rounded-lg bg-white dark:bg-warm-dark-900"
 								></textarea>
 								<input
 									v-model="customerName"
 									type="text"
 									placeholder="Your Full Name"
-									class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+									class="w-full px-4 py-2 border border-gray-200 dark:border-warm-border rounded-lg bg-white dark:bg-warm-dark-900"
 								/>
 								<div class="flex gap-2">
 									<button
@@ -222,7 +222,7 @@
 									</button>
 									<button
 										@click="showRejectForm = false"
-										class="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg"
+										class="px-4 py-2 bg-gray-100 dark:bg-warm-dark-900 rounded-lg"
 									>
 										Cancel
 									</button>
@@ -257,7 +257,7 @@
 
 				<!-- Footer -->
 				<div
-					class="p-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700"
+					class="p-4 bg-gray-50 dark:bg-warm-dark-900 border-t border-gray-200 dark:border-warm-border"
 				>
 					<p class="text-xs text-gray-500 text-center">
 						Have questions? Call us at

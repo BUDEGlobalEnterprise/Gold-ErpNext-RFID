@@ -17,7 +17,7 @@
 			<div class="flex gap-2">
 				<button
 					@click="$emit('print-thermal', order)"
-					class="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200"
+					class="p-2 bg-gray-100 dark:bg-warm-dark-900 rounded-lg hover:bg-gray-200"
 					title="Print Receipt"
 				>
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -31,7 +31,7 @@
 				</button>
 				<button
 					@click="$emit('open-qr', order)"
-					class="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200"
+					class="p-2 bg-gray-100 dark:bg-warm-dark-900 rounded-lg hover:bg-gray-200"
 					title="QR Code"
 				>
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,7 +77,7 @@
 		</div>
 
 		<!-- Customer -->
-		<div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+		<div class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-3">
 			<p class="text-xs text-gray-500 mb-1">Customer</p>
 			<p class="font-medium">{{ order.customer_name }}</p>
 			<p v-if="order.customer_phone" class="text-sm text-gray-600">
@@ -143,7 +143,7 @@
 		</div>
 
 		<!-- Costs -->
-		<div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+		<div class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-3">
 			<div class="flex justify-between mb-1">
 				<span class="text-gray-600">Est. Cost</span>
 				<span class="font-medium">${{ formatNum(order.estimated_cost) }}</span>
@@ -160,7 +160,7 @@
 			<select
 				v-model="selectedStatus"
 				@change="updateStatus"
-				class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
+				class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900"
 			>
 				<option v-for="s in statusOptions" :key="s" :value="s">{{ s }}</option>
 			</select>

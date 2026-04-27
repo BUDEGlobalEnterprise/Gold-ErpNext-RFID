@@ -3,7 +3,7 @@
 		class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800"
 	>
 		<!-- Header -->
-		<header class="bg-white dark:bg-gray-900 shadow-sm">
+		<header class="bg-white dark:bg-warm-dark-900 shadow-sm">
 			<div class="max-w-4xl mx-auto px-4 py-6">
 				<div class="flex items-center gap-4">
 					<h1 class="text-2xl font-bold text-[#D4AF37]">ZEVAR JEWELERS</h1>
@@ -16,7 +16,7 @@
 		<!-- Main Content -->
 		<main class="max-w-4xl mx-auto px-4 py-8">
 			<!-- Search Section -->
-			<div class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 mb-8">
+			<div class="bg-white dark:bg-warm-dark-900 rounded-2xl shadow-xl p-6 mb-8">
 				<h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
 					Check Your Repair Status
 				</h2>
@@ -43,7 +43,7 @@
 							v-model="searchQuery"
 							type="text"
 							placeholder="Enter Repair # (e.g., RPR-2026-00001) or Phone Number"
-							class="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-lg focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+							class="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-warm-border rounded-lg bg-gray-50 dark:bg-warm-dark-900 text-lg focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
 						/>
 					</div>
 					<button
@@ -59,7 +59,7 @@
 			<!-- Results Section -->
 			<div
 				v-if="searchResult"
-				class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden"
+				class="bg-white dark:bg-warm-dark-900 rounded-2xl shadow-xl overflow-hidden"
 			>
 				<!-- Status Header -->
 				<div class="p-6" :class="getStatusHeaderClass(searchResult.status)">
@@ -82,7 +82,7 @@
 				</div>
 
 				<!-- Progress Bar -->
-				<div class="px-6 py-4 bg-gray-50 dark:bg-gray-800">
+				<div class="px-6 py-4 bg-gray-50 dark:bg-warm-dark-900">
 					<div class="flex justify-between mb-2">
 						<span
 							v-for="step in progressSteps"
@@ -93,7 +93,7 @@
 							{{ step.label }}
 						</span>
 					</div>
-					<div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+					<div class="h-2 bg-gray-200 dark:bg-warm-dark-800 rounded-full overflow-hidden">
 						<div
 							class="h-full bg-[#D4AF37] transition-all duration-500"
 							:style="{ width: progressPercent + '%' }"
@@ -184,7 +184,7 @@
 			<!-- No Results -->
 			<div
 				v-else-if="searched && !searchResult"
-				class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-8 text-center"
+				class="bg-white dark:bg-warm-dark-900 rounded-2xl shadow-xl p-8 text-center"
 			>
 				<svg
 					class="w-16 h-16 text-gray-300 mx-auto mb-4"
@@ -208,7 +208,7 @@
 				</p>
 				<button
 					@click="resetSearch"
-					class="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-medium hover:bg-gray-200"
+					class="px-4 py-2 bg-gray-100 dark:bg-warm-dark-900 rounded-lg text-sm font-medium hover:bg-gray-200"
 				>
 					Search Again
 				</button>

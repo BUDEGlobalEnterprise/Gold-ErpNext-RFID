@@ -17,7 +17,7 @@
 			<div class="flex flex-col md:flex-row gap-6 h-[calc(100vh-200px)]">
 				<!-- Left: New Ticket Form -->
 				<div
-					class="w-full md:w-1/2 bg-white dark:bg-[#1a1c23] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-white/5 overflow-y-auto custom-scrollbar"
+					class="w-full md:w-1/2 bg-white dark:bg-warm-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-warm-border/50 overflow-y-auto custom-scrollbar"
 				>
 					<h3
 						class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6"
@@ -37,7 +37,7 @@
 								required
 								:disabled="submitting"
 								@change="onCategoryChange"
-								class="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+								class="w-full px-3 py-2.5 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
 							>
 								<option value="" disabled>Select category...</option>
 								<option
@@ -59,7 +59,7 @@
 							<select
 								v-model="form.sub_category"
 								:disabled="submitting"
-								class="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+								class="w-full px-3 py-2.5 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
 							>
 								<option value="">Select sub-category...</option>
 								<option
@@ -89,7 +89,7 @@
 									:class="
 										form.priority === p.value
 											? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#D4AF37]'
-											: 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300'
+											: 'border-gray-200 dark:border-warm-border text-gray-600 dark:text-gray-400 hover:border-gray-300'
 									"
 								>
 									{{ p.label }}
@@ -108,7 +108,7 @@
 							<select
 								v-model="form.department"
 								:disabled="submitting"
-								class="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+								class="w-full px-3 py-2.5 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
 							>
 								<option value="">Select department...</option>
 								<option
@@ -136,19 +136,19 @@
 									:disabled="submitting"
 									@input="searchReference"
 									@focus="showReferenceDropdown = true"
-									class="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent placeholder-gray-400"
+									class="w-full px-3 py-2.5 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent placeholder-gray-400"
 								/>
 								<!-- Dropdown -->
 								<div
 									v-if="showReferenceDropdown && referenceResults.length > 0"
-									class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+									class="absolute z-10 w-full mt-1 bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg shadow-lg max-h-48 overflow-y-auto"
 								>
 									<button
 										v-for="item in referenceResults"
 										:key="item.value"
 										type="button"
 										@click="selectReference(item)"
-										class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+										class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-warm-dark-800 transition"
 									>
 										<span class="font-medium text-gray-900 dark:text-white">{{
 											item.label
@@ -181,7 +181,7 @@
 								required
 								placeholder="Brief summary of the issue..."
 								:disabled="submitting"
-								class="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent placeholder-gray-400"
+								class="w-full px-3 py-2.5 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent placeholder-gray-400"
 							/>
 						</div>
 
@@ -197,7 +197,7 @@
 								rows="4"
 								placeholder="Provide detailed description of the issue..."
 								:disabled="submitting"
-								class="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent placeholder-gray-400 resize-none"
+								class="w-full px-3 py-2.5 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent placeholder-gray-400 resize-none"
 							></textarea>
 						</div>
 
@@ -270,7 +270,7 @@
 
 				<!-- Right: My Tickets -->
 				<div
-					class="w-full md:w-1/2 bg-gray-50 dark:bg-[#1a1c23]/50 rounded-2xl p-6 border border-gray-100 dark:border-white/5 overflow-y-auto custom-scrollbar"
+					class="w-full md:w-1/2 bg-gray-50 dark:bg-warm-card/50 rounded-2xl p-6 border border-gray-100 dark:border-warm-border/50 overflow-y-auto custom-scrollbar"
 				>
 					<div class="flex items-center justify-between mb-6">
 						<h3
@@ -303,7 +303,7 @@
 						class="py-12 text-center relative max-w-sm mx-auto"
 					>
 						<div
-							class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4"
+							class="w-20 h-20 bg-gray-100 dark:bg-warm-dark-900 rounded-full flex items-center justify-center mx-auto mb-4"
 						>
 							<svg
 								class="w-10 h-10 text-gray-400"
@@ -332,7 +332,7 @@
 						<div
 							v-for="ticket in tickets"
 							:key="ticket.name"
-							class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700/50 hover:border-[#D4AF37]/50 hover:shadow-md transition cursor-pointer"
+							class="bg-white dark:bg-warm-dark-900 rounded-xl p-5 border border-gray-100 dark:border-warm-border/50 hover:border-[#D4AF37]/50 hover:shadow-md transition cursor-pointer"
 							@click="viewTicket(ticket.name)"
 						>
 							<div class="flex items-start justify-between mb-3">
@@ -352,7 +352,7 @@
 								{{ ticket.subject }}
 							</p>
 							<div
-								class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-700/50"
+								class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-100 dark:border-warm-border/50"
 							>
 								<span class="flex items-center gap-1.5 font-medium">
 									<svg
@@ -399,6 +399,7 @@
 import { ref, watch, onMounted, computed, onUnmounted } from 'vue'
 import { createResource } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
+	import { formatDate } from '@/utils/dates.js'
 
 // State
 const submitting = ref(false)
@@ -658,21 +659,15 @@ function viewTicket(ticketId) {
 	window.open(route, '_blank')
 }
 
-function formatDate(dateStr) {
-	if (!dateStr) return ''
-	const date = new Date(dateStr)
-	return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
 function getStatusClass(status) {
 	const classes = {
 		Open: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
 		'In Progress': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
 		Resolved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-		Closed: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+		Closed: 'bg-gray-100 text-gray-600 dark:bg-warm-dark-900 dark:text-gray-400',
 		Replied: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
 	}
-	return classes[status] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+	return classes[status] || 'bg-gray-100 text-gray-600 dark:bg-warm-dark-900 dark:text-gray-400'
 }
 
 let clickListener = null

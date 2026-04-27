@@ -212,7 +212,7 @@ def import_stores(backup_path: str, dry_run: bool = False) -> dict:
 			stats["errors"].append(f"Store {record.get('loc', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -300,13 +300,13 @@ def import_employees(backup_path: str, dry_run: bool = False) -> dict:
 
 			# Batch commit every 100 records
 			if (idx + 1) % 100 == 0:
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 
 		except Exception as e:
 			stats["errors"].append(f"Employee {record.get('empid', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -420,7 +420,7 @@ def import_customers(backup_path: str, dry_run: bool = False) -> dict:
 					pass
 
 			if (idx + 1) % 200 == 0:
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 
 			stats["imported"] += 1
 
@@ -428,7 +428,7 @@ def import_customers(backup_path: str, dry_run: bool = False) -> dict:
 			stats["errors"].append(f"Customer {record.get('accountno', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -452,15 +452,15 @@ GOLDTYPE_TO_METAL = {
 }
 
 GOLDTYPE_TO_PURITY = {
-	"10KYG": "10k",
-	"10KWG": "10k",
-	"10KRG": "10k",
+	"10KYG": "10Kt",
+	"10KWG": "10Kt",
+	"10KRG": "10Kt",
 	"14KYG": "14Kt",
 	"14KWG": "14Kt",
 	"14KRG": "14Kt",
 	"18KYG": "18Kt",
 	"18KWG": "18Kt",
-	"22KYG": "22K",
+	"22KYG": "22Kt",
 	"SS": "925 Sterling",
 	"PLAT": "999 Fine",
 }
@@ -627,7 +627,9 @@ def import_inventory(backup_path: str, dry_run: bool = False) -> dict:
 			_set_custom_field(doc, "custom_legacy_abr", abr)
 			_set_custom_field(doc, "custom_legacy_stockno", stockno)
 			_set_custom_field(doc, "custom_showcase", clean_str(record.get("showcase")))
-			_set_custom_field(doc, "custom_date_in", format_date(record.get("datein") or record.get("datebuy")))
+			_set_custom_field(
+				doc, "custom_date_in", format_date(record.get("datein") or record.get("datebuy"))
+			)
 			_set_custom_field(doc, "custom_date_sold", format_date(record.get("datesold")))
 			_set_custom_field(doc, "custom_invoice_ref", clean_str(record.get("invoice")))
 
@@ -635,13 +637,13 @@ def import_inventory(backup_path: str, dry_run: bool = False) -> dict:
 			stats["imported"] += 1
 
 			if (idx + 1) % 200 == 0:
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 
 		except Exception as e:
 			stats["errors"].append(f"Item {record.get('barcode', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -672,7 +674,7 @@ def _get_or_create_supplier_link(abr: str) -> str | None:
 
 
 def import_suppliers(backup_path: str, dry_run: bool = False) -> dict:
-	"""Import suppliers/vendors from supplier.dbf."""
+	"""Import suppliers/vendors from supplier.dbf with full vendor details."""
 	stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
 
 	dbf_path = find_dbf(backup_path, "supplier.dbf")
@@ -683,6 +685,8 @@ def import_suppliers(backup_path: str, dry_run: bool = False) -> dict:
 	records = read_dbf(dbf_path)
 	stats["total"] = len(records)
 
+	ensure_supplier_custom_fields()
+
 	for record in records:
 		try:
 			abbrev = clean_str(record.get("abbrev"))
@@ -692,8 +696,16 @@ def import_suppliers(backup_path: str, dry_run: bool = False) -> dict:
 				continue
 
 			supplier_name = fullname or abbrev
-			if frappe.db.exists("Supplier", {"supplier_name": supplier_name}):
-				stats["skipped"] += 1
+			existing = frappe.db.get_value("Supplier", {"supplier_name": supplier_name}, "name")
+
+			if existing:
+				if dry_run:
+					stats["imported"] += 1
+					continue
+				doc = frappe.get_doc("Supplier", existing)
+				_update_supplier_custom_fields(doc, record)
+				doc.save(ignore_permissions=True)
+				stats["imported"] += 1
 				continue
 
 			if dry_run:
@@ -705,31 +717,62 @@ def import_suppliers(backup_path: str, dry_run: bool = False) -> dict:
 			doc.supplier_group = "All Supplier Groups"
 			doc.supplier_type = "Company"
 
+			is_inactive = record.get("inactive")
+			if is_inactive and str(is_inactive).strip().upper() in ("T", "Y", "TRUE", "1"):
+				doc.disabled = 1
+
 			contact = clean_str(record.get("contact"))
 			if contact:
 				doc.contact_person = contact
 
+			_update_supplier_custom_fields(doc, record)
 			doc.insert(ignore_permissions=True, ignore_mandatory=True)
 
-			# Create address
 			address = clean_str(record.get("address"))
+			address2 = clean_str(record.get("address2"))
 			city = clean_str(record.get("city"))
 			state = clean_str(record.get("state"))
+			zipcode = clean_str(record.get("zip"))
 			phone = clean_str(record.get("phone"))
 			email = clean_str(record.get("email"))
+			fax = clean_str(record.get("fax"))
 
 			if any([address, city, state]):
-				addr = frappe.new_doc("Address")
-				addr.address_title = supplier_name
-				addr.address_type = "Billing"
-				addr.address_line1 = address
-				addr.city = city
-				addr.state = state
-				addr.pincode = clean_str(record.get("zip"))
-				addr.phone = phone
-				addr.email_id = email
-				addr.append("links", {"link_doctype": "Supplier", "link_name": doc.name})
-				addr.insert(ignore_permissions=True, ignore_mandatory=True)
+				if not frappe.db.exists("Address", {"address_title": supplier_name, "link_doctype": "Supplier", "link_name": doc.name}):
+					addr = frappe.new_doc("Address")
+					addr.address_title = supplier_name[:140]
+					addr.address_type = "Billing"
+					addr.address_line1 = address[:140] if address else "N/A"
+					if address2:
+						addr.address_line2 = address2[:140]
+					addr.city = city
+					addr.state = state
+					addr.pincode = zipcode
+					addr.phone = phone
+					addr.email_id = email
+					addr.fax = fax
+					addr.append("links", {"link_doctype": "Supplier", "link_name": doc.name})
+					addr.insert(ignore_permissions=True, ignore_mandatory=True)
+
+			if contact or email or phone:
+				if not frappe.db.exists("Contact", {"first_name": contact or supplier_name, "link_doctype": "Supplier", "link_name": doc.name}):
+					try:
+						contact_doc = frappe.new_doc("Contact")
+						contact_doc.first_name = contact or supplier_name
+						if contact and contact != supplier_name:
+							parts = contact.split(" ", 1)
+							contact_doc.first_name = parts[0]
+							if len(parts) > 1:
+								contact_doc.last_name = parts[1]
+						contact_doc.email_id = email
+						contact_doc.phone = phone
+						phone2 = clean_str(record.get("phone2"))
+						if phone2:
+							contact_doc.phone = f"{phone} / {phone2}" if phone else phone2
+						contact_doc.append("links", {"link_doctype": "Supplier", "link_name": doc.name})
+						contact_doc.insert(ignore_permissions=True, ignore_mandatory=True)
+					except Exception:
+						pass
 
 			stats["imported"] += 1
 
@@ -737,8 +780,73 @@ def import_suppliers(backup_path: str, dry_run: bool = False) -> dict:
 			stats["errors"].append(f"Supplier {record.get('abbrev', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
+
+
+def _update_supplier_custom_fields(doc, record):
+	"""Set enhanced custom fields on a Supplier document from legacy record."""
+	abbrev = clean_str(record.get("abbrev"))
+	_set_custom_field(doc, "custom_legacy_abbrev", abbrev)
+	_set_custom_field(doc, "custom_legacy_account", clean_str(record.get("account")))
+	_set_custom_field(doc, "custom_budget", clean_float(record.get("budget")))
+	_set_custom_field(doc, "custom_markup", clean_float(record.get("markup")))
+	_set_custom_field(doc, "custom_discount", clean_float(record.get("discount")))
+	_set_custom_field(doc, "custom_fax", clean_str(record.get("fax")))
+	_set_custom_field(doc, "custom_phone2", clean_str(record.get("phone2")))
+	_set_custom_field(doc, "custom_total_purchases", clean_float(record.get("tot_purc")))
+	_set_custom_field(doc, "custom_mtd_purchases", clean_float(record.get("mtd_purc")))
+	_set_custom_field(doc, "custom_ptd_purchases", clean_float(record.get("ptd_purc")))
+
+	consigned = record.get("consigned")
+	if consigned and str(consigned).strip().upper() in ("T", "Y", "TRUE", "1"):
+		_set_custom_field(doc, "custom_consigned", 1)
+
+	_set_custom_field(doc, "custom_use_commission", clean_int(record.get("usecomm")))
+	_set_custom_field(doc, "custom_stock_turnover", clean_float(record.get("stkturn")))
+	_set_custom_field(doc, "custom_legacy_export", clean_str(record.get("vindexp")))
+
+	product1 = clean_str(record.get("product1"))
+	product2 = clean_str(record.get("product2"))
+	product_line = " | ".join(p for p in [product1, product2] if p)
+	_set_custom_field(doc, "custom_product_line", product_line if product_line else None)
+
+	is_inactive = record.get("inactive")
+	if is_inactive and str(is_inactive).strip().upper() in ("T", "Y", "TRUE", "1"):
+		_set_custom_field(doc, "custom_inactive", 1)
+
+
+def ensure_supplier_custom_fields():
+	"""Create Supplier custom fields if they don't exist."""
+	from frappe import _
+
+	supplier_fields = [
+		{"fieldname": "custom_legacy_abbrev", "label": "Legacy Abbreviation", "fieldtype": "Data", "insert_after": "supplier_name"},
+		{"fieldname": "custom_legacy_account", "label": "Legacy Account No", "fieldtype": "Data", "insert_after": "custom_legacy_abbrev"},
+		{"fieldname": "custom_budget", "label": "Budget", "fieldtype": "Currency", "insert_after": "custom_legacy_account"},
+		{"fieldname": "custom_markup", "label": "Markup (%)", "fieldtype": "Percent", "insert_after": "custom_budget"},
+		{"fieldname": "custom_discount", "label": "Discount (%)", "fieldtype": "Percent", "insert_after": "custom_markup"},
+		{"fieldname": "custom_fax", "label": "Fax", "fieldtype": "Data", "insert_after": "custom_discount"},
+		{"fieldname": "custom_phone2", "label": "Phone 2", "fieldtype": "Data", "insert_after": "custom_fax"},
+		{"fieldname": "custom_total_purchases", "label": "Total Purchases", "fieldtype": "Currency", "insert_after": "custom_phone2"},
+		{"fieldname": "custom_mtd_purchases", "label": "MTD Purchases", "fieldtype": "Currency", "insert_after": "custom_total_purchases"},
+		{"fieldname": "custom_ptd_purchases", "label": "PTD Purchases", "fieldtype": "Currency", "insert_after": "custom_mtd_purchases"},
+		{"fieldname": "custom_consigned", "label": "Consigned", "fieldtype": "Check", "insert_after": "custom_ptd_purchases"},
+		{"fieldname": "custom_use_commission", "label": "Use Commission", "fieldtype": "Int", "insert_after": "custom_consigned"},
+		{"fieldname": "custom_stock_turnover", "label": "Stock Turnover", "fieldtype": "Float", "insert_after": "custom_use_commission"},
+		{"fieldname": "custom_product_line", "label": "Product Line", "fieldtype": "Small Text", "insert_after": "custom_stock_turnover"},
+		{"fieldname": "custom_inactive", "label": "Inactive (Legacy)", "fieldtype": "Check", "insert_after": "custom_product_line"},
+		{"fieldname": "custom_legacy_export", "label": "Legacy Export Ref", "fieldtype": "Data", "insert_after": "custom_inactive"},
+	]
+
+	for cf in supplier_fields:
+		if not frappe.db.exists("Custom Field", {"dt": "Supplier", "fieldname": cf["fieldname"]}):
+			try:
+				doc = frappe.get_doc({"doctype": "Custom Field", "dt": "Supplier", "module": "Unified Retail Management System", **cf})
+				doc.insert(ignore_permissions=True)
+			except Exception as e:
+				frappe.log_error(f"Failed to create Supplier.{cf['fieldname']}: {e}", "Supplier Custom Fields")
+	frappe.db.commit()  # nosemgrep
 
 
 # ──────────────────────────────────────────────────
@@ -784,7 +892,7 @@ def import_categories(backup_path: str, dry_run: bool = False) -> dict:
 			stats["errors"].append(f"Category {record.get('fullname', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -833,7 +941,7 @@ def import_purities(backup_path: str, dry_run: bool = False) -> dict:
 			stats["errors"].append(f"Purity {record.get('karat', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -905,7 +1013,7 @@ def import_item_attributes(backup_path: str, dry_run: bool = False) -> dict:
 				stats["errors"].append(f"{attr_name} {record.get(field_name, '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -949,7 +1057,7 @@ def import_gold_rates(backup_path: str, dry_run: bool = False) -> dict:
 			stats["errors"].append(f"Gold rate: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -1023,7 +1131,7 @@ def import_repair_types(backup_path: str, dry_run: bool = False) -> dict:
 			stats["errors"].append(f"Repair Type {record.get('type', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -1116,13 +1224,13 @@ def import_transactions(backup_path: str, dry_run: bool = False) -> dict:
 
 			# Batch commit every 50 records
 			if (idx + 1) % 50 == 0:
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 
 		except Exception as e:
 			stats["errors"].append(f"Trans {record.get('transno', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -1197,7 +1305,7 @@ def import_appraisals(backup_path: str, dry_run: bool = False) -> dict:
 			stats["errors"].append(f"Appraisal {i}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -1405,10 +1513,32 @@ def get_mapping_info() -> dict:
 			"file": "supplier.dbf",
 			"doctype": "Supplier",
 			"fields": {
-				"ABBREV": "supplier_name (fallback)",
+				"ABBREV": "custom_legacy_abbrev",
 				"FULLNAME": "supplier_name",
 				"PHONE": "phone",
+				"ADDRESS": "address_line1",
+				"ADDRESS2": "address_line2",
+				"CITY": "city",
+				"STATE": "state",
+				"ZIP": "pincode",
+				"ACCOUNT": "custom_legacy_account",
+				"CONTACT": "contact_person",
+				"BUDGET": "custom_budget",
+				"MARKUP": "custom_markup",
+				"DISCOUNT": "custom_discount",
+				"FAX": "custom_fax",
 				"EMAIL": "email_id",
+				"PHONE2": "custom_phone2",
+				"TOT_PURC": "custom_total_purchases",
+				"MTD_PURC": "custom_mtd_purchases",
+				"PTD_PURC": "custom_ptd_purchases",
+				"CONSIGNED": "custom_consigned",
+				"USECOMM": "custom_use_commission",
+				"STKTURN": "custom_stock_turnover",
+				"VENDEXP": "custom_legacy_export",
+				"PRODUCT1": "custom_product_line",
+				"PRODUCT2": "custom_product_line",
+				"INACTIVE": "disabled / custom_inactive",
 			},
 		},
 		"customers": {

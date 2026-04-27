@@ -235,11 +235,11 @@ onMounted(() => {
 })
 
 const metalPurityMap = {
-	'Yellow Gold': ['24K', '22K', '18K', '14K'],
+	'Yellow Gold': ['24K', '22K', '18K', '14K', '10K'],
 	'White Gold': ['18K', '14K'],
 	'Rose Gold': ['18K', '14K'],
 	Platinum: ['950'],
-	Silver: ['925 Sterling', '999 Fine'],
+	Silver: ['999 Fine', '925 Sterling'],
 }
 
 const lowStockCount = ref(0) // This would be fetched from API in production

@@ -1,413 +1,305 @@
 <template>
-	<Transition name="fade">
-		<div v-if="show" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-			<div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" @click="close"></div>
-
-			<div
-				class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden border border-transparent dark:border-white/10"
-			>
-				<!-- Header -->
-				<div
-					class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-white/5"
+	<BaseModal :show="show" max-width="max-w-3xl" @close="close">
+		<template #header>
+			<div class="flex items-center gap-3">
+				<div>
+					<h2 class="text-lg font-bold text-gray-900 dark:text-white">
+						Layaway Contract
+					</h2>
+					<p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+						{{ layawayId }}
+					</p>
+				</div>
+				<span
+					v-if="layaway?.extension_count > 0"
+					class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
 				>
-					<div class="flex items-center gap-3">
-						<div>
-							<h2 class="text-lg font-bold text-gray-900 dark:text-white">
-								Layaway Contract
-							</h2>
-							<p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-								{{ layawayId }}
+					{{ layaway.extension_count }}x Extended
+				</span>
+				<span
+					v-if="layaway?.inventory_reserved"
+					class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+				>
+					Inventory Reserved
+				</span>
+			</div>
+			<span
+				class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold"
+				:class="getStatusClass(layaway?.status, layaway?.is_overdue)"
+			>
+				{{ layaway?.is_overdue ? 'Overdue' : layaway?.status }}
+			</span>
+		</template>
+
+		<!-- Content - wrapped in relative container for inner overlays -->
+		<div class="relative">
+			<div class="p-6 space-y-6">
+				<!-- Loading State -->
+				<div v-if="loading" class="py-12 text-center">
+					<div
+						class="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-[#D4AF37] mx-auto mb-4"
+					></div>
+					<span class="text-gray-500 dark:text-gray-400 text-sm"
+						>Loading details...</span
+					>
+				</div>
+				<div
+					v-else-if="loadError"
+					class="py-12 text-center text-sm text-red-500 dark:text-red-400"
+				>
+					{{ loadError }}
+				</div>
+
+				<template v-else-if="layaway">
+					<!-- Visual Payment Timeline -->
+					<div
+						v-if="layaway.payment_schedule && layaway.payment_schedule.length > 0"
+						class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
+					>
+						<div class="flex items-center justify-between mb-3">
+							<span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Payment Progress</span>
+							<span class="text-xs font-medium text-gray-500 dark:text-gray-400">
+								{{ paidPaymentsCount }} / {{ layaway.payment_schedule.length }} payments
+							</span>
+						</div>
+						<div class="flex gap-1 h-3 rounded-full overflow-hidden bg-gray-200 dark:bg-warm-dark-800">
+							<div
+								v-for="(payment, idx) in layaway.payment_schedule"
+								:key="idx"
+								class="h-full transition-all duration-300"
+								:style="{ width: (100 / layaway.payment_schedule.length) + '%' }"
+								:class="{
+									'bg-green-500': payment.status === 'Paid',
+									'bg-yellow-400': payment.status === 'Pending',
+									'bg-red-500': payment.status === 'Overdue',
+									'bg-gray-300 dark:bg-gray-600': !['Paid', 'Pending', 'Overdue'].includes(payment.status),
+								}"
+							></div>
+						</div>
+						<div class="flex items-center gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
+							<span class="flex items-center gap-1">
+								<span class="w-2 h-2 rounded-full bg-green-500"></span> Paid
+							</span>
+							<span class="flex items-center gap-1">
+								<span class="w-2 h-2 rounded-full bg-yellow-400"></span> Pending
+							</span>
+							<span class="flex items-center gap-1">
+								<span class="w-2 h-2 rounded-full bg-red-500"></span> Overdue
+							</span>
+						</div>
+					</div>
+
+					<!-- Customer & Contract Info -->
+					<div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+						<div class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-xl p-4">
+							<span
+								class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
+								>Customer</span
+							>
+							<p class="text-sm font-bold text-gray-900 dark:text-white mt-1">
+								{{ layaway.customer || 'N/A' }}
 							</p>
 						</div>
-						<span
-							v-if="layaway?.extension_count > 0"
-							class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
-						>
-							{{ layaway.extension_count }}x Extended
-						</span>
-						<span
-							v-if="layaway?.inventory_reserved"
-							class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-						>
-							Inventory Reserved
-						</span>
-					</div>
-					<div class="flex items-center gap-2">
-						<span
-							class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold"
-							:class="getStatusClass(layaway?.status, layaway?.is_overdue)"
-						>
-							{{ layaway?.is_overdue ? 'Overdue' : layaway?.status }}
-						</span>
-						<button
-							@click="close"
-							class="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition"
-						>
-							<svg
-								class="w-5 h-5 text-gray-400"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
+						<div class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-xl p-4">
+							<span
+								class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
+								>Contract Date</span
 							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M6 18L18 6M6 6l12 12"
-								/>
-							</svg>
-						</button>
+							<p class="text-sm font-bold text-gray-900 dark:text-white mt-1">
+								{{ formatDate(layaway.contract_date) }}
+							</p>
+						</div>
+						<div class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-xl p-4">
+							<span
+								class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
+								>Duration</span
+							>
+							<p class="text-sm font-bold text-gray-900 dark:text-white mt-1">
+								{{ layaway.duration_months }} months
+							</p>
+						</div>
+						<div class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-xl p-4">
+							<span
+								class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
+								>Target Date</span
+							>
+							<p class="text-sm font-bold text-gray-900 dark:text-white mt-1">
+								{{ formatDate(layaway.target_completion_date) }}
+							</p>
+						</div>
 					</div>
-				</div>
 
-				<!-- Content -->
-				<div class="overflow-y-auto p-6 space-y-6 max-h-[calc(90vh-180px)]">
-					<!-- Loading State -->
-					<div v-if="loading" class="py-12 text-center">
-						<div
-							class="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-[#D4AF37] mx-auto mb-4"
-						></div>
-						<span class="text-gray-500 dark:text-gray-400 text-sm"
-							>Loading details...</span
+					<!-- Items -->
+					<div>
+						<h3
+							class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3"
 						>
+							Items
+						</h3>
+						<div class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-xl overflow-hidden">
+							<table class="w-full">
+								<thead>
+									<tr
+										class="border-b border-gray-100 dark:border-warm-border/50"
+									>
+										<th
+											class="px-4 py-2 text-left text-xs font-bold text-gray-500 dark:text-gray-400"
+										>
+											Item
+										</th>
+										<th
+											class="px-4 py-2 text-center text-xs font-bold text-gray-500 dark:text-gray-400"
+										>
+											Qty
+										</th>
+										<th
+											class="px-4 py-2 text-right text-xs font-bold text-gray-500 dark:text-gray-400"
+										>
+											Rate
+										</th>
+										<th
+											class="px-4 py-2 text-right text-xs font-bold text-gray-500 dark:text-gray-400"
+										>
+											Amount
+										</th>
+									</tr>
+								</thead>
+								<tbody
+									class="divide-y divide-gray-100 dark:divide-gray-700/50"
+								>
+									<tr v-for="item in layaway.items" :key="item.item_code">
+										<td
+											class="px-4 py-2 text-sm text-gray-900 dark:text-white"
+										>
+											{{ item.item_code }}
+										</td>
+										<td
+											class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 text-center"
+										>
+											{{ item.qty }}
+										</td>
+										<td
+											class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 text-right"
+										>
+											{{ formatCurrency(item.rate) }}
+										</td>
+										<td
+											class="px-4 py-2 text-sm font-bold text-gray-900 dark:text-white text-right"
+										>
+											{{ formatCurrency(item.amount) }}
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
 					</div>
+
+					<!-- Totals -->
 					<div
-						v-else-if="loadError"
-						class="py-12 text-center text-sm text-red-500 dark:text-red-400"
+						class="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-800/30 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
 					>
-						{{ loadError }}
+						<div class="space-y-2">
+							<div class="flex justify-between text-sm">
+								<span class="text-gray-500 dark:text-gray-400"
+									>Total Amount</span
+								>
+								<span class="text-gray-900 dark:text-white font-bold">{{
+									formatCurrency(layaway.total_amount)
+								}}</span>
+							</div>
+							<div class="flex justify-between text-sm">
+								<span class="text-gray-500 dark:text-gray-400">Paid</span>
+								<span class="text-green-600 dark:text-green-400 font-bold">{{
+									formatCurrency(layaway.deposit_amount)
+								}}</span>
+							</div>
+							<div
+								class="flex justify-between text-lg font-bold pt-2 border-t border-gray-200 dark:border-warm-border"
+							>
+								<span class="text-gray-900 dark:text-white">Balance</span>
+								<span class="text-orange-600 dark:text-orange-400">{{
+									formatCurrency(layaway.balance_amount)
+								}}</span>
+							</div>
+						</div>
 					</div>
 
-					<template v-else-if="layaway">
-						<!-- Visual Payment Timeline -->
-						<div
-							v-if="layaway.payment_schedule && layaway.payment_schedule.length > 0"
-							class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50"
+					<!-- Payment Schedule -->
+					<div
+						v-if="layaway.payment_schedule && layaway.payment_schedule.length > 0"
+					>
+						<h3
+							class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3"
 						>
-							<div class="flex items-center justify-between mb-3">
-								<span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Payment Progress</span>
-								<span class="text-xs font-medium text-gray-500 dark:text-gray-400">
-									{{ paidPaymentsCount }} / {{ layaway.payment_schedule.length }} payments
-								</span>
-							</div>
-							<div class="flex gap-1 h-3 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-								<div
-									v-for="(payment, idx) in layaway.payment_schedule"
-									:key="idx"
-									class="h-full transition-all duration-300"
-									:style="{ width: (100 / layaway.payment_schedule.length) + '%' }"
-									:class="{
-										'bg-green-500': payment.status === 'Paid',
-										'bg-yellow-400': payment.status === 'Pending',
-										'bg-red-500': payment.status === 'Overdue',
-										'bg-gray-300 dark:bg-gray-600': !['Paid', 'Pending', 'Overdue'].includes(payment.status),
-									}"
-								></div>
-							</div>
-							<div class="flex items-center gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
-								<span class="flex items-center gap-1">
-									<span class="w-2 h-2 rounded-full bg-green-500"></span> Paid
-								</span>
-								<span class="flex items-center gap-1">
-									<span class="w-2 h-2 rounded-full bg-yellow-400"></span> Pending
-								</span>
-								<span class="flex items-center gap-1">
-									<span class="w-2 h-2 rounded-full bg-red-500"></span> Overdue
-								</span>
-							</div>
-						</div>
-
-						<!-- Customer & Contract Info -->
-						<div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-							<div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
-								<span
-									class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
-									>Customer</span
-								>
-								<p class="text-sm font-bold text-gray-900 dark:text-white mt-1">
-									{{ layaway.customer || 'N/A' }}
-								</p>
-							</div>
-							<div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
-								<span
-									class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
-									>Contract Date</span
-								>
-								<p class="text-sm font-bold text-gray-900 dark:text-white mt-1">
-									{{ formatDate(layaway.contract_date) }}
-								</p>
-							</div>
-							<div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
-								<span
-									class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
-									>Duration</span
-								>
-								<p class="text-sm font-bold text-gray-900 dark:text-white mt-1">
-									{{ layaway.duration_months }} months
-								</p>
-							</div>
-							<div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
-								<span
-									class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
-									>Target Date</span
-								>
-								<p class="text-sm font-bold text-gray-900 dark:text-white mt-1">
-									{{ formatDate(layaway.target_completion_date) }}
-								</p>
-							</div>
-						</div>
-
-						<!-- Items -->
-						<div>
-							<h3
-								class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3"
-							>
-								Items
-							</h3>
-							<div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl overflow-hidden">
-								<table class="w-full">
-									<thead>
-										<tr
-											class="border-b border-gray-100 dark:border-gray-700/50"
-										>
-											<th
-												class="px-4 py-2 text-left text-xs font-bold text-gray-500 dark:text-gray-400"
-											>
-												Item
-											</th>
-											<th
-												class="px-4 py-2 text-center text-xs font-bold text-gray-500 dark:text-gray-400"
-											>
-												Qty
-											</th>
-											<th
-												class="px-4 py-2 text-right text-xs font-bold text-gray-500 dark:text-gray-400"
-											>
-												Rate
-											</th>
-											<th
-												class="px-4 py-2 text-right text-xs font-bold text-gray-500 dark:text-gray-400"
-											>
-												Amount
-											</th>
-										</tr>
-									</thead>
-									<tbody
-										class="divide-y divide-gray-100 dark:divide-gray-700/50"
+							Payment Schedule
+						</h3>
+						<div class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-xl overflow-hidden">
+							<table class="w-full">
+								<thead>
+									<tr
+										class="border-b border-gray-100 dark:border-warm-border/50"
 									>
-										<tr v-for="item in layaway.items" :key="item.item_code">
-											<td
-												class="px-4 py-2 text-sm text-gray-900 dark:text-white"
-											>
-												{{ item.item_code }}
-											</td>
-											<td
-												class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 text-center"
-											>
-												{{ item.qty }}
-											</td>
-											<td
-												class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 text-right"
-											>
-												{{ formatCurrency(item.rate) }}
-											</td>
-											<td
-												class="px-4 py-2 text-sm font-bold text-gray-900 dark:text-white text-right"
-											>
-												{{ formatCurrency(item.amount) }}
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
-
-						<!-- Totals -->
-						<div
-							class="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-800/30 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50"
-						>
-							<div class="space-y-2">
-								<div class="flex justify-between text-sm">
-									<span class="text-gray-500 dark:text-gray-400"
-										>Total Amount</span
-									>
-									<span class="text-gray-900 dark:text-white font-bold">{{
-										formatCurrency(layaway.total_amount)
-									}}</span>
-								</div>
-								<div class="flex justify-between text-sm">
-									<span class="text-gray-500 dark:text-gray-400">Paid</span>
-									<span class="text-green-600 dark:text-green-400 font-bold">{{
-										formatCurrency(layaway.deposit_amount)
-									}}</span>
-								</div>
-								<div
-									class="flex justify-between text-lg font-bold pt-2 border-t border-gray-200 dark:border-gray-700"
+										<th
+											class="px-4 py-2 text-left text-xs font-bold text-gray-500 dark:text-gray-400"
+										>
+											Due Date
+										</th>
+										<th
+											class="px-4 py-2 text-right text-xs font-bold text-gray-500 dark:text-gray-400"
+										>
+											Expected
+										</th>
+										<th
+											class="px-4 py-2 text-right text-xs font-bold text-gray-500 dark:text-gray-400"
+										>
+											Paid
+										</th>
+										<th
+											class="px-4 py-2 text-center text-xs font-bold text-gray-500 dark:text-gray-400"
+										>
+											Status
+										</th>
+									</tr>
+								</thead>
+								<tbody
+									class="divide-y divide-gray-100 dark:divide-gray-700/50"
 								>
-									<span class="text-gray-900 dark:text-white">Balance</span>
-									<span class="text-orange-600 dark:text-orange-400">{{
-										formatCurrency(layaway.balance_amount)
-									}}</span>
-								</div>
-							</div>
-						</div>
-
-						<!-- Payment Schedule -->
-						<div
-							v-if="layaway.payment_schedule && layaway.payment_schedule.length > 0"
-						>
-							<h3
-								class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3"
-							>
-								Payment Schedule
-							</h3>
-							<div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl overflow-hidden">
-								<table class="w-full">
-									<thead>
-										<tr
-											class="border-b border-gray-100 dark:border-gray-700/50"
-										>
-											<th
-												class="px-4 py-2 text-left text-xs font-bold text-gray-500 dark:text-gray-400"
-											>
-												Due Date
-											</th>
-											<th
-												class="px-4 py-2 text-right text-xs font-bold text-gray-500 dark:text-gray-400"
-											>
-												Expected
-											</th>
-											<th
-												class="px-4 py-2 text-right text-xs font-bold text-gray-500 dark:text-gray-400"
-											>
-												Paid
-											</th>
-											<th
-												class="px-4 py-2 text-center text-xs font-bold text-gray-500 dark:text-gray-400"
-											>
-												Status
-											</th>
-										</tr>
-									</thead>
-									<tbody
-										class="divide-y divide-gray-100 dark:divide-gray-700/50"
+									<tr
+										v-for="(payment, index) in layaway.payment_schedule"
+										:key="index"
 									>
-										<tr
-											v-for="(payment, index) in layaway.payment_schedule"
-											:key="index"
+										<td
+											class="px-4 py-2 text-sm text-gray-900 dark:text-white"
 										>
-											<td
-												class="px-4 py-2 text-sm text-gray-900 dark:text-white"
+											{{ formatDate(payment.payment_date) }}
+										</td>
+										<td
+											class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 text-right"
+										>
+											{{ formatCurrency(payment.expected_amount) }}
+										</td>
+										<td
+											class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 text-right"
+										>
+											{{ formatCurrency(payment.paid_amount) }}
+										</td>
+										<td class="px-4 py-2 text-center">
+											<span
+												class="inline-flex px-2 py-0.5 rounded-full text-xs font-bold"
+												:class="getPaymentStatusClass(payment.status)"
 											>
-												{{ formatDate(payment.payment_date) }}
-											</td>
-											<td
-												class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 text-right"
-											>
-												{{ formatCurrency(payment.expected_amount) }}
-											</td>
-											<td
-												class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 text-right"
-											>
-												{{ formatCurrency(payment.paid_amount) }}
-											</td>
-											<td class="px-4 py-2 text-center">
-												<span
-													class="inline-flex px-2 py-0.5 rounded-full text-xs font-bold"
-													:class="getPaymentStatusClass(payment.status)"
-												>
-													{{ payment.status }}
-												</span>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
+												{{ payment.status }}
+											</span>
+										</td>
+									</tr>
+								</tbody>
+							</table>
 						</div>
-					</template>
-				</div>
-
-				<!-- Footer Actions -->
-				<div
-					class="flex items-center justify-between gap-3 p-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-gray-900/50"
-				>
-					<div class="flex items-center gap-2">
-						<button
-							v-if="layaway?.status === 'Active' || layaway?.is_overdue"
-							@click="showExtendDialog = true"
-							class="px-4 py-2 bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-800/30 rounded-lg text-sm font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition flex items-center gap-2"
-						>
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-							</svg>
-							Extend Plan
-						</button>
-						<button
-							v-if="layaway?.status === 'Active'"
-							@click="showCancelConfirm = true"
-							class="px-4 py-2 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800/30 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition flex items-center gap-2"
-						>
-							<svg
-								class="w-4 h-4"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M6 18L18 6M6 6l12 12"
-								/>
-							</svg>
-							Cancel Layaway
-						</button>
 					</div>
-					<div class="flex items-center gap-2">
-						<button
-							@click="printContract"
-							class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center gap-2"
-						>
-							<svg
-								class="w-4 h-4"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-								/>
-							</svg>
-							Print Contract
-						</button>
-						<button
-							v-if="layaway?.status === 'Active' && layaway?.balance_amount > 0"
-							@click="showPaymentModal = true"
-							class="px-4 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] transition flex items-center gap-2"
-						>
-							<svg
-								class="w-4 h-4"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-								/>
-							</svg>
-							Process Payment
-						</button>
-					</div>
-				</div>
+				</template>
 			</div>
 
-			<!-- Cancel Confirmation Dialog -->
+			<!-- Cancel Confirmation Dialog (inner overlay) -->
 			<div
 				v-if="showCancelConfirm"
 				class="absolute inset-0 bg-gray-900/80 flex items-center justify-center p-4 z-10"
@@ -420,7 +312,7 @@
 						<p class="text-sm text-gray-500 dark:text-gray-400">
 							This will cancel the layaway contract. A cancellation fee will be deducted before issuing store credit.
 						</p>
-						<div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 space-y-1.5">
+						<div class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-lg p-3 space-y-1.5">
 							<div class="flex justify-between text-sm">
 								<span class="text-gray-500 dark:text-gray-400">Paid Amount</span>
 								<span class="text-gray-900 dark:text-white font-bold">{{ formatCurrency(layaway?.deposit_amount) }}</span>
@@ -429,7 +321,7 @@
 								<span class="text-gray-500 dark:text-gray-400">Cancellation Fee ({{ layaway?.cancellation_fee_percent || 10 }}%)</span>
 								<span class="text-red-600 dark:text-red-400 font-bold">-{{ formatCurrency(cancellationFee) }}</span>
 							</div>
-							<div class="flex justify-between text-sm pt-1.5 border-t border-gray-200 dark:border-gray-700">
+							<div class="flex justify-between text-sm pt-1.5 border-t border-gray-200 dark:border-warm-border">
 								<span class="text-gray-900 dark:text-white font-medium">Store Credit Issued</span>
 								<span class="text-[#D4AF37] font-bold">{{ formatCurrency(netRefund) }}</span>
 							</div>
@@ -438,7 +330,7 @@
 					<div class="flex items-center justify-end gap-3">
 						<button
 							@click="showCancelConfirm = false"
-							class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+							class="px-4 py-2 bg-gray-100 dark:bg-warm-dark-900 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-warm-dark-800 transition"
 						>
 							Keep Active
 						</button>
@@ -453,7 +345,7 @@
 				</div>
 			</div>
 
-			<!-- Extend Plan Dialog -->
+			<!-- Extend Plan Dialog (inner overlay) -->
 			<div
 				v-if="showExtendDialog"
 				class="absolute inset-0 bg-gray-900/80 flex items-center justify-center p-4 z-10"
@@ -487,7 +379,7 @@
 									class="py-3 rounded-xl text-sm font-bold border transition"
 									:class="extendForm.months === m
 										? 'border-purple-400 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-										: 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300'"
+										: 'border-gray-200 dark:border-warm-border text-gray-600 dark:text-gray-400 hover:border-gray-300'"
 								>
 									{{ m }} Month{{ m > 1 ? 's' : '' }}
 								</button>
@@ -500,7 +392,7 @@
 								v-model="extendForm.reason"
 								rows="2"
 								placeholder="Reason for extension..."
-								class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] resize-none"
+								class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] resize-none"
 							></textarea>
 						</div>
 					</div>
@@ -508,7 +400,7 @@
 					<div class="flex items-center justify-end gap-3 mt-4">
 						<button
 							@click="showExtendDialog = false"
-							class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+							class="px-4 py-2 bg-gray-100 dark:bg-warm-dark-900 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-warm-dark-800 transition"
 						>
 							Cancel
 						</button>
@@ -523,23 +415,101 @@
 					</div>
 				</div>
 			</div>
-
-			<!-- Payment Modal -->
-			<LayawayPaymentModal
-				v-if="showPaymentModal"
-				:show="showPaymentModal"
-				:layawayId="layawayId"
-				:balanceAmount="layaway?.balance_amount || 0"
-				@close="showPaymentModal = false"
-				@success="handlePaymentSuccess"
-			/>
 		</div>
-	</Transition>
+
+		<template #footer>
+			<div class="flex items-center gap-2">
+				<button
+					v-if="layaway?.status === 'Active' || layaway?.is_overdue"
+					@click="showExtendDialog = true"
+					class="px-4 py-2 bg-white dark:bg-warm-dark-900 border border-purple-200 dark:border-purple-800/30 rounded-lg text-sm font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition flex items-center gap-2"
+				>
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+					Extend Plan
+				</button>
+				<button
+					v-if="layaway?.status === 'Active'"
+					@click="showCancelConfirm = true"
+					class="px-4 py-2 bg-white dark:bg-warm-dark-900 border border-red-200 dark:border-red-800/30 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition flex items-center gap-2"
+				>
+					<svg
+						class="w-4 h-4"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
+					</svg>
+					Cancel Layaway
+				</button>
+			</div>
+			<div class="flex items-center gap-2">
+				<button
+					@click="printContract"
+					class="px-4 py-2 bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-warm-dark-800 transition flex items-center gap-2"
+				>
+					<svg
+						class="w-4 h-4"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+						/>
+					</svg>
+					Print Contract
+				</button>
+				<button
+					v-if="layaway?.status === 'Active' && layaway?.balance_amount > 0"
+					@click="showPaymentModal = true"
+					class="px-4 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] transition flex items-center gap-2"
+				>
+					<svg
+						class="w-4 h-4"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+						/>
+					</svg>
+					Process Payment
+				</button>
+			</div>
+		</template>
+	</BaseModal>
+
+	<!-- Payment Modal (rendered outside BaseModal, as its own independent modal) -->
+	<LayawayPaymentModal
+		v-if="showPaymentModal"
+		:show="showPaymentModal"
+		:layawayId="layawayId"
+		:balanceAmount="layaway?.balance_amount || 0"
+		@close="showPaymentModal = false"
+		@success="handlePaymentSuccess"
+	/>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { createResource } from 'frappe-ui'
+import { formatDate, formatDateTime } from '@/utils/dates.js'
+import BaseModal from './BaseModal.vue'
 import LayawayPaymentModal from '@/components/LayawayPaymentModal.vue'
 
 const props = defineProps({
@@ -739,12 +709,6 @@ function formatCurrency(amount) {
 	return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
 }
 
-function formatDate(dateStr) {
-	if (!dateStr) return ''
-	const date = new Date(dateStr)
-	return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
 function getStatusClass(status, isOverdue) {
 	if (isOverdue) {
 		return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
@@ -752,10 +716,10 @@ function getStatusClass(status, isOverdue) {
 	const classes = {
 		Active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
 		Completed: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-		Cancelled: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+		Cancelled: 'bg-gray-100 text-gray-600 dark:bg-warm-dark-900 dark:text-gray-400',
 		Defaulted: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 	}
-	return classes[status] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+	return classes[status] || 'bg-gray-100 text-gray-600 dark:bg-warm-dark-900 dark:text-gray-400'
 }
 
 function getPaymentStatusClass(status) {
@@ -764,17 +728,6 @@ function getPaymentStatusClass(status) {
 		Pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
 		Overdue: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 	}
-	return classes[status] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+	return classes[status] || 'bg-gray-100 text-gray-600 dark:bg-warm-dark-900 dark:text-gray-400'
 }
 </script>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-	transition: opacity 0.2s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-	opacity: 0;
-}
-</style>

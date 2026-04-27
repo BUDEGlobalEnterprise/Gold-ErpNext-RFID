@@ -6,7 +6,7 @@
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Inventory</h2>
 					<span
-						class="status-label !mb-0 !bg-gray-100 dark:!bg-white/5 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-white/10"
+						class="status-label !mb-0 !bg-gray-100 dark:!bg-warm-dark-700 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-warm-border"
 					>
 						{{ filteredItems.length }} Items
 					</span>
@@ -24,7 +24,7 @@
 						:class="
 							viewMode === 'grid'
 								? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#D4AF37]'
-								: 'border-gray-200 dark:border-gray-700 text-gray-400 hover:text-gray-600'
+								: 'border-gray-200 dark:border-warm-border text-gray-400 hover:text-gray-600'
 						"
 					>
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,7 +42,7 @@
 						:class="
 							viewMode === 'table'
 								? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#D4AF37]'
-								: 'border-gray-200 dark:border-gray-700 text-gray-400 hover:text-gray-600'
+								: 'border-gray-200 dark:border-warm-border text-gray-400 hover:text-gray-600'
 						"
 					>
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,7 +107,7 @@
 					<table class="w-full text-sm">
 						<thead>
 							<tr
-								class="bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/5"
+								class="bg-gray-50 dark:bg-warm-dark-700 border-b border-gray-200 dark:border-warm-border/50"
 							>
 								<th
 									class="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider"
@@ -150,12 +150,12 @@
 							<tr
 								v-for="item in filteredItems"
 								:key="item.code"
-								class="border-b border-gray-100 dark:border-white/5 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors"
+								class="border-b border-gray-100 dark:border-warm-border/50 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors"
 							>
 								<td class="px-4 py-3">
 									<div class="flex items-center gap-3">
 										<div
-											class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden shrink-0"
+											class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-warm-dark-900 overflow-hidden shrink-0"
 										>
 											<div
 												class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600 text-[10px]"
@@ -246,7 +246,7 @@
 						:key="item.code"
 						class="premium-card !p-0 overflow-hidden group cursor-pointer"
 					>
-						<div class="aspect-square bg-gray-100 dark:bg-gray-800 relative">
+						<div class="aspect-square bg-gray-100 dark:bg-warm-dark-900 relative">
 							<div
 								class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600"
 							>
@@ -291,7 +291,7 @@
 									>{{ item.metal }}</span
 								>
 								<span
-									class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+									class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-400"
 									>{{ item.purity }}</span
 								>
 							</div>

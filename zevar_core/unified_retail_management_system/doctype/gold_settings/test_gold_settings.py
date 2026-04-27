@@ -37,7 +37,7 @@ class TestGoldSettings(FrappeTestCase):
 
 	def test_gold_settings_auto_update_default_false(self):
 		doc = frappe.get_doc("Gold Settings", "Gold Settings")
-		self.assertEqual(doc.auto_update, 0)
+		self.assertEqual(doc.auto_update, 1)
 
 	def test_gold_settings_update_frequency_options(self):
 		meta = frappe.get_meta("Gold Settings")

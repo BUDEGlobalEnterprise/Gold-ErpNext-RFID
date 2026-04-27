@@ -28,7 +28,7 @@ def get_repair_orders(
 	warehouse: str | None = None,
 	search_term: str | None = None,
 	start: int = 0,
-	page_length: int = 20,
+	page_length: int = 500,
 	customer: str | None = None,
 	handled_by: str | None = None,
 	priority: str | None = None,
@@ -47,7 +47,8 @@ def get_repair_orders(
 	if status:
 		filters.append(["status", "=", status])
 	if warehouse:
-		filters.append(["warehouse", "=", warehouse])
+		# Include orders with matching warehouse OR no warehouse set (legacy/imported data)
+		filters.append(["warehouse", "in", [warehouse, "", None]])
 	if customer:
 		filters.append(["customer", "=", customer])
 	if handled_by:
@@ -87,6 +88,8 @@ def get_repair_orders(
 		fields=[
 			"name",
 			"creation",
+			"modified",
+			"docstatus",
 			"status",
 			"priority",
 			"customer",
@@ -138,9 +141,10 @@ def get_repair_orders(
 def get_repair_stats(warehouse: str | None = None) -> dict[str, int]:
 	frappe.has_permission("Repair Order", ptype="read", throw=True)
 
-	filters = {}
+	base_filter_conditions = {}
+	warehouse_filter = None
 	if warehouse:
-		filters["warehouse"] = warehouse
+		warehouse_filter = [["warehouse", "in", [warehouse, "", None]]]
 
 	statuses = [
 		"Received",
@@ -155,8 +159,13 @@ def get_repair_stats(warehouse: str | None = None) -> dict[str, int]:
 	]
 	counts = {}
 	for s in statuses:
-		counts[s] = frappe.db.count("Repair Order", filters={**filters, "status": s})
-	counts["total"] = frappe.db.count("Repair Order", filters=filters)
+		filters = [["status", "=", s]]
+		if warehouse_filter:
+			filters.extend(warehouse_filter)
+		counts[s] = frappe.db.count("Repair Order", filters=filters)
+
+	total_filters = warehouse_filter or []
+	counts["total"] = frappe.db.count("Repair Order", filters=total_filters or None)
 	return counts
 
 

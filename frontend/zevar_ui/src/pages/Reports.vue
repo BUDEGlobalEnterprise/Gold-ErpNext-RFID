@@ -1,11 +1,27 @@
 <template>
 	<AppLayout>
 		<div class="h-full flex flex-col min-h-0">
+			<!-- Access Denied Message -->
+			<div v-if="accessDenied" class="flex items-center justify-center h-full">
+				<div class="text-center">
+					<div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+						<svg class="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+						</svg>
+					</div>
+					<h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Access Denied</h2>
+					<p class="text-gray-500 dark:text-gray-400 mb-4">You don't have permission to view Reports.</p>
+					<p class="text-sm text-gray-400">Redirecting to Dashboard...</p>
+				</div>
+			</div>
+
+			<!-- Reports Content (shown only if access granted) -->
+			<div v-else class="flex-1 overflow-auto min-h-0">
 			<div class="flex items-center justify-between gap-4 mb-6 flex-shrink-0">
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Reports</h2>
 					<span
-						class="status-label !mb-0 !bg-gray-100 dark:!bg-white/5 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-white/10"
+						class="status-label !mb-0 !bg-gray-100 dark:!bg-warm-dark-700 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-warm-border"
 					>
 						Dashboard
 					</span>
@@ -13,7 +29,7 @@
 				<div class="flex gap-2">
 					<select
 						v-model="period"
-						class="h-9 bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-white/10 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-300 px-3 pr-8 focus:ring-2 focus:ring-[#D4AF37] outline-none cursor-pointer appearance-none"
+						class="h-9 bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-warm-border rounded-lg text-xs font-bold text-gray-700 dark:text-gray-300 px-3 pr-8 focus:ring-2 focus:ring-[#D4AF37] outline-none cursor-pointer appearance-none"
 					>
 						<option value="today">Today</option>
 						<option value="week">This Week</option>
@@ -105,7 +121,7 @@
 									>
 								</div>
 								<div
-									class="w-full h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden"
+									class="w-full h-2 bg-gray-100 dark:bg-warm-dark-900 rounded-full overflow-hidden"
 								>
 									<div
 										class="h-full rounded-full transition-all"
@@ -134,7 +150,7 @@
 										idx === 0
 											? 'bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] text-[#0F1115]'
 											: idx === 1
-											? 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+											? 'bg-gray-200 dark:bg-warm-dark-800 text-gray-600 dark:text-gray-300'
 											: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400'
 									"
 								>
@@ -173,7 +189,7 @@
 							<div
 								v-for="metal in metalPerformance"
 								:key="metal.name"
-								class="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-white/[0.02]"
+								class="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-warm-dark-700"
 							>
 								<div class="flex items-center gap-2">
 									<div class="w-3 h-3 rounded-full" :class="metal.dot"></div>
@@ -202,10 +218,10 @@
 							<div
 								v-for="sale in recentSales"
 								:key="sale.id"
-								class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-white/[0.02]"
+								class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-warm-dark-700"
 							>
 								<div
-									class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 shrink-0 text-[10px]"
+									class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-warm-dark-900 flex items-center justify-center text-gray-400 shrink-0 text-[10px]"
 								>
 									IMG
 								</div>
@@ -227,15 +243,32 @@
 					</div>
 				</div>
 			</div>
+			</div>
 		</div>
 	</AppLayout>
 </template>
 
 <script setup>
 import AppLayout from '@/components/AppLayout.vue'
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+	import { useRoute, useRouter } from 'vue-router'
+	import { canAccessReports } from '@/utils/permissions.js'
+
+const route = useRoute()
+const router = useRouter()
 
 const period = ref('week')
+const accessDenied = ref(false)
+
+// Check access on mount
+onMounted(() => {
+	if (!canAccessReports()) {
+		accessDenied.value = true
+		setTimeout(() => {
+			router.push('/')
+		}, 3000)
+	}
+})
 
 const kpis = [
 	{

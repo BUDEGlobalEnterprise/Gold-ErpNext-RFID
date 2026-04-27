@@ -1,7 +1,7 @@
 <template>
 	<form @submit.prevent="$emit('submit')" class="space-y-4">
 		<!-- Customer Section -->
-		<div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+		<div class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-4">
 			<div class="flex items-center justify-between mb-2">
 				<label class="block text-sm font-medium">Customer *</label>
 				<button
@@ -19,7 +19,7 @@
 			<!-- Inline New Customer Form -->
 			<div
 				v-if="showNewCustomer"
-				class="mb-3 p-3 bg-white dark:bg-gray-900 rounded-lg border border-[#D4AF37]/30 space-y-3"
+				class="mb-3 p-3 bg-white dark:bg-warm-dark-900 rounded-lg border border-[#D4AF37]/30 space-y-3"
 			>
 				<div class="grid grid-cols-2 gap-3">
 					<div>
@@ -28,7 +28,7 @@
 							v-model="newCustomerForm.customer_name"
 							type="text"
 							placeholder="Customer full name"
-							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
 						/>
 					</div>
 					<div>
@@ -37,7 +37,7 @@
 							v-model="newCustomerForm.phone"
 							type="tel"
 							placeholder="(555) 123-4567"
-							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
 						/>
 					</div>
 				</div>
@@ -47,7 +47,7 @@
 						v-model="newCustomerForm.email"
 						type="email"
 						placeholder="customer@example.com"
-						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
 					/>
 				</div>
 				<div>
@@ -56,7 +56,7 @@
 						v-model="newCustomerForm.address"
 						type="text"
 						placeholder="Street, City, State, ZIP"
-						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
 					/>
 				</div>
 				<div class="flex justify-end">
@@ -78,18 +78,18 @@
 					@input="$emit('update:customer-search', $event.target.value); $emit('search-customers')"
 					type="text"
 					placeholder="Search customer by name or phone..."
-					class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-sm"
+					class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
 				/>
 				<div
 					v-if="customerResults.length > 0"
-					class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border rounded-lg shadow-lg max-h-48 overflow-y-auto"
+					class="absolute z-10 w-full mt-1 bg-white dark:bg-warm-dark-900 border rounded-lg shadow-lg max-h-48 overflow-y-auto"
 				>
 					<button
 						v-for="c in customerResults"
 						:key="c.name"
 						type="button"
 						@click="$emit('select-customer', c)"
-						class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 border-b last:border-0 flex justify-between"
+						class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-warm-dark-800 border-b last:border-0 flex justify-between"
 					>
 						<span>{{ c.customer_name }}</span>
 						<span class="text-gray-400 text-xs">{{ c.phone || c.mobile || '' }}</span>
@@ -111,7 +111,7 @@
 			<!-- Customer Repair History -->
 			<div
 				v-if="showHistory && customerRepairHistory.length > 0"
-				class="mt-3 p-2 bg-white dark:bg-gray-900 rounded text-xs"
+				class="mt-3 p-2 bg-white dark:bg-warm-dark-900 rounded text-xs"
 			>
 				<p class="font-medium text-gray-700 mb-2">Previous Repairs</p>
 				<div class="space-y-1 max-h-24 overflow-y-auto">
@@ -134,7 +134,7 @@
 				v-model="form.customer_phone"
 				type="tel"
 				placeholder="(555) 123-4567"
-				class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+				class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
 			/>
 		</div>
 
@@ -145,7 +145,7 @@
 				<select
 					:value="selectedCategory"
 					@change="$emit('update:selected-category', $event.target.value)"
-					class="px-3 py-1 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+					class="px-3 py-1 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
 				>
 					<option value="">All Categories</option>
 					<option v-for="cat in repairCategories" :key="cat" :value="cat">{{ cat }}</option>
@@ -155,13 +155,13 @@
 					@input="$emit('update:repair-type-search', $event.target.value)"
 					type="text"
 					placeholder="Search repair types..."
-					class="flex-1 px-3 py-1 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+					class="flex-1 px-3 py-1 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
 				/>
 			</div>
 			<select
 				v-model="form.repair_type"
 				required
-				class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+				class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
 			>
 				<option value="">Select...</option>
 				<optgroup
@@ -198,7 +198,7 @@
 					:key="idx"
 					type="button"
 					@click="$emit('add-note-template', template)"
-					class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-800 rounded hover:bg-gray-200"
+					class="px-2 py-1 text-xs bg-gray-100 dark:bg-warm-dark-900 rounded hover:bg-gray-200"
 				>
 					{{ template.label }}
 				</button>
@@ -209,7 +209,7 @@
 		<div class="grid grid-cols-2 gap-3">
 			<div>
 				<label class="block text-sm font-medium mb-1">Item Type</label>
-				<select v-model="form.item_type" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm">
+				<select v-model="form.item_type" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm">
 					<option value="">Select...</option>
 					<option>Ring</option>
 					<option>Necklace</option>
@@ -224,7 +224,7 @@
 			</div>
 			<div>
 				<label class="block text-sm font-medium mb-1">Priority</label>
-				<select v-model="form.priority" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm">
+				<select v-model="form.priority" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm">
 					<option value="Low">Low</option>
 					<option value="Medium">Medium</option>
 					<option value="High">High</option>
@@ -237,50 +237,50 @@
 		<div class="grid grid-cols-2 gap-3">
 			<div>
 				<label class="block text-sm font-medium mb-1">Brand</label>
-				<input v-model="form.item_brand" type="text" placeholder="e.g., Rolex, Tiffany" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+				<input v-model="form.item_brand" type="text" placeholder="e.g., Rolex, Tiffany" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" />
 			</div>
 			<div>
 				<label class="block text-sm font-medium mb-1">Serial Number</label>
-				<input v-model="form.serial_number" type="text" placeholder="For watches, etc." class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+				<input v-model="form.serial_number" type="text" placeholder="For watches, etc." class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" />
 			</div>
 		</div>
 
 		<!-- Description -->
 		<div>
 			<label class="block text-sm font-medium mb-1">Item Description</label>
-			<textarea v-model="form.item_description" rows="2" placeholder="Describe the item and repair needed..." class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm resize-none"></textarea>
+			<textarea v-model="form.item_description" rows="2" placeholder="Describe the item and repair needed..." class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm resize-none"></textarea>
 		</div>
 
 		<!-- Weight & Stones -->
 		<div class="grid grid-cols-2 gap-3">
 			<div>
 				<label class="block text-sm font-medium mb-1">Item Weight (g)</label>
-				<input v-model.number="form.item_weight" type="number" step="0.01" placeholder="0.00" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+				<input v-model.number="form.item_weight" type="number" step="0.01" placeholder="0.00" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" />
 			</div>
 			<div>
 				<label class="block text-sm font-medium mb-1">Stone Weight (ct)</label>
-				<input v-model.number="form.stone_weight" type="number" step="0.01" placeholder="0.00" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+				<input v-model.number="form.stone_weight" type="number" step="0.01" placeholder="0.00" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" />
 			</div>
 		</div>
 
 		<!-- Item Condition -->
 		<div>
 			<label class="block text-sm font-medium mb-1">Item Condition (at intake)</label>
-			<textarea v-model="form.item_condition" rows="1" placeholder="Scratches, worn prongs, loose stones, etc." class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm resize-none"></textarea>
+			<textarea v-model="form.item_condition" rows="1" placeholder="Scratches, worn prongs, loose stones, etc." class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm resize-none"></textarea>
 		</div>
 
 		<!-- Metal Type & Purity -->
 		<div class="grid grid-cols-2 gap-3">
 			<div>
 				<label class="block text-sm font-medium mb-1">Metal Type</label>
-				<select v-model="form.metal_type" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm">
+				<select v-model="form.metal_type" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm">
 					<option value="">None</option>
 					<option v-for="m in metals" :key="m.name" :value="m.name">{{ m.name }}</option>
 				</select>
 			</div>
 			<div>
 				<label class="block text-sm font-medium mb-1">Purity</label>
-				<select v-model="form.purity" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm">
+				<select v-model="form.purity" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm">
 					<option value="">Select...</option>
 					<option>10K</option>
 					<option>14K</option>
@@ -302,9 +302,9 @@
 			</div>
 			<div v-if="form.gemstones.length === 0" class="text-xs text-purple-600 dark:text-purple-400 text-center py-2">No gemstones added</div>
 			<div v-else class="space-y-2 max-h-40 overflow-y-auto">
-				<div v-for="(stone, idx) in form.gemstones" :key="idx" class="bg-white dark:bg-gray-800 rounded p-2 text-xs">
+				<div v-for="(stone, idx) in form.gemstones" :key="idx" class="bg-white dark:bg-warm-dark-900 rounded p-2 text-xs">
 					<div class="grid grid-cols-3 gap-2">
-						<select v-model="stone.type" class="px-2 py-1 border rounded bg-white dark:bg-gray-900">
+						<select v-model="stone.type" class="px-2 py-1 border rounded bg-white dark:bg-warm-dark-900">
 							<option value="">Type</option>
 							<option>Diamond</option>
 							<option>Ruby</option>
@@ -313,16 +313,16 @@
 							<option>Pearl</option>
 							<option>Other</option>
 						</select>
-						<input v-model.number="stone.count" type="number" min="1" placeholder="Qty" class="px-2 py-1 border rounded bg-white dark:bg-gray-900" />
-						<input v-model.number="stone.carat_weight" type="number" step="0.01" placeholder="Carat" class="px-2 py-1 border rounded bg-white dark:bg-gray-900" />
+						<input v-model.number="stone.count" type="number" min="1" placeholder="Qty" class="px-2 py-1 border rounded bg-white dark:bg-warm-dark-900" />
+						<input v-model.number="stone.carat_weight" type="number" step="0.01" placeholder="Carat" class="px-2 py-1 border rounded bg-white dark:bg-warm-dark-900" />
 					</div>
 					<div class="grid grid-cols-3 gap-2 mt-1">
-						<select v-model="stone.color" class="px-2 py-1 border rounded bg-white dark:bg-gray-900">
+						<select v-model="stone.color" class="px-2 py-1 border rounded bg-white dark:bg-warm-dark-900">
 							<option value="">Color</option>
 							<option>D</option><option>E</option><option>F</option><option>G</option>
 							<option>H</option><option>I</option><option>J</option><option>K+</option>
 						</select>
-						<select v-model="stone.clarity" class="px-2 py-1 border rounded bg-white dark:bg-gray-900">
+						<select v-model="stone.clarity" class="px-2 py-1 border rounded bg-white dark:bg-warm-dark-900">
 							<option value="">Clarity</option>
 							<option>FL</option><option>IF</option><option>VVS1</option><option>VVS2</option>
 							<option>VS1</option><option>VS2</option><option>SI1</option><option>SI2</option>
@@ -337,16 +337,16 @@
 		<div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-100 dark:border-orange-800/30">
 			<h4 class="text-sm font-bold text-orange-700 dark:text-orange-400 mb-2">Customer ID Verification (JVC Compliance)</h4>
 			<div class="grid grid-cols-2 gap-2">
-				<select v-model="form.customer_id_type" class="px-2 py-1 border rounded text-sm bg-white dark:bg-gray-800">
+				<select v-model="form.customer_id_type" class="px-2 py-1 border rounded text-sm bg-white dark:bg-warm-dark-900">
 					<option value="">ID Type</option>
 					<option>Driver's License</option>
 					<option>State ID</option>
 					<option>Passport</option>
 					<option>Other</option>
 				</select>
-				<input v-model="form.customer_id_number" type="text" placeholder="ID Number" class="px-2 py-1 border rounded text-sm bg-white dark:bg-gray-800" />
+				<input v-model="form.customer_id_number" type="text" placeholder="ID Number" class="px-2 py-1 border rounded text-sm bg-white dark:bg-warm-dark-900" />
 			</div>
-			<input v-model="form.customer_id_state" type="text" placeholder="Issuing State (if applicable)" class="mt-2 px-2 py-1 border rounded text-sm w-full bg-white dark:bg-gray-800" />
+			<input v-model="form.customer_id_state" type="text" placeholder="Issuing State (if applicable)" class="mt-2 px-2 py-1 border rounded text-sm w-full bg-white dark:bg-warm-dark-900" />
 		</div>
 
 		<!-- Warranty Repair Link -->
@@ -356,8 +356,8 @@
 				<span class="text-sm font-medium text-green-800 dark:text-green-400">Warranty Repair</span>
 			</label>
 			<div v-if="form.is_warranty_repair" class="mt-2">
-				<input v-model="form.original_repair_order" type="text" placeholder="Original Repair # (e.g., RPR-2026-001)" class="w-full px-2 py-1 border rounded text-sm bg-white dark:bg-gray-800" />
-				<select v-model="form.warranty_claim_type" class="mt-2 w-full px-2 py-1 border rounded text-sm bg-white dark:bg-gray-800">
+				<input v-model="form.original_repair_order" type="text" placeholder="Original Repair # (e.g., RPR-2026-001)" class="w-full px-2 py-1 border rounded text-sm bg-white dark:bg-warm-dark-900" />
+				<select v-model="form.warranty_claim_type" class="mt-2 w-full px-2 py-1 border rounded text-sm bg-white dark:bg-warm-dark-900">
 					<option value="">Claim Type</option>
 					<option>Full Warranty</option>
 					<option>Partial</option>
@@ -369,13 +369,13 @@
 		<!-- Promised Date -->
 		<div>
 			<label class="block text-sm font-medium mb-1">Promised Date</label>
-			<input v-model="form.promised_date" type="date" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+			<input v-model="form.promised_date" type="date" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" />
 		</div>
 
 		<!-- Estimated Cost -->
 		<div>
 			<label class="block text-sm font-medium mb-1">Estimated Cost ($)</label>
-			<input v-model.number="form.estimated_cost" type="number" step="0.01" min="0" placeholder="0.00" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+			<input v-model.number="form.estimated_cost" type="number" step="0.01" min="0" placeholder="0.00" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" />
 		</div>
 
 		<!-- Deposit Collection -->
@@ -385,8 +385,8 @@
 				<span class="text-sm font-medium text-blue-800 dark:text-blue-400">Collect Deposit Now</span>
 			</label>
 			<div v-if="form.collect_deposit" class="mt-2 grid grid-cols-2 gap-2">
-				<input v-model.number="form.deposit_amount" type="number" step="0.01" placeholder="Deposit amount" class="px-2 py-1 border rounded text-sm bg-white dark:bg-gray-800" />
-				<select v-model="form.deposit_method" class="px-2 py-1 border rounded text-sm bg-white dark:bg-gray-800">
+				<input v-model.number="form.deposit_amount" type="number" step="0.01" placeholder="Deposit amount" class="px-2 py-1 border rounded text-sm bg-white dark:bg-warm-dark-900" />
+				<select v-model="form.deposit_method" class="px-2 py-1 border rounded text-sm bg-white dark:bg-warm-dark-900">
 					<option value="Cash">Cash</option>
 					<option value="Credit Card">Credit Card</option>
 					<option value="Check">Check</option>

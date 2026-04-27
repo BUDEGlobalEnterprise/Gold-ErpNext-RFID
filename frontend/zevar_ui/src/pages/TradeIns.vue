@@ -5,7 +5,7 @@
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Trade-Ins</h2>
 					<span
-						class="status-label !mb-0 !bg-gray-100 dark:!bg-white/5 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-white/10"
+						class="status-label !mb-0 !bg-gray-100 dark:!bg-warm-dark-700 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-warm-border"
 					>
 						{{ filteredRecords.length }} Records
 					</span>
@@ -123,7 +123,7 @@
 							</span>
 						</div>
 						<div
-							class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-gray-50 dark:bg-white/[0.02] rounded-lg border border-gray-100 dark:border-white/5"
+							class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-gray-50 dark:bg-warm-dark-700 rounded-lg border border-gray-100 dark:border-warm-border/50"
 						>
 							<div>
 								<div class="text-[9px] text-gray-500 uppercase font-bold mb-0.5">
@@ -194,6 +194,7 @@ const statusTabs = [
 ]
 
 import { createResource } from 'frappe-ui'
+	import { formatDate } from '@/utils/dates.js'
 
 const tradeInData = ref([])
 
@@ -207,7 +208,7 @@ const tradeInResource = createResource({
 			id: t.name,
 			description: t.description || t.item_description || t.name,
 			customer: t.customer || t.customer_name || 'Unknown',
-			date: t.creation ? new Date(t.creation).toLocaleDateString() : 'Unknown',
+			date: t.creation ? formatDate(t.creation) : 'Unknown',
 			metal: t.metal || '-',
 			purity: t.purity || '-',
 			weight: t.weight || t.gross_weight || 0,
