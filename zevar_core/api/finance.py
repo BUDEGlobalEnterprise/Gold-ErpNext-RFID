@@ -92,6 +92,7 @@ def process_finance_payment(account_id: str, amount: float, mode_of_payment: str
 		doc.current_balance = running_balance
 		doc.available_credit = flt(doc.credit_limit) - running_balance
 
+		doc.flags.ignore_validate_update_after_submit = True
 		doc.save(ignore_permissions=True)
 
 		from zevar_core.api.audit_log import log_event_safely
@@ -225,6 +226,7 @@ def apply_finance_charges():
 				doc.current_balance = running_balance
 				doc.available_credit = flt(doc.credit_limit) - running_balance
 
+				doc.flags.ignore_validate_update_after_submit = True
 				doc.save(ignore_permissions=True)
 				frappe.db.commit()
 			except Exception:

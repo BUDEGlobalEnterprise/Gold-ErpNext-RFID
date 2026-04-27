@@ -673,6 +673,7 @@ def update_layaway_contract(layaway_id: str, updates: str | dict) -> dict:
 		if fieldname in allowed_fields:
 			setattr(doc, fieldname, value)
 
+		doc.flags.ignore_validate_update_after_submit = True
 		doc.save(ignore_permissions=True)
 
 		send_payment_confirmation(doc.name, amount, flt(doc.balance_amount))
@@ -739,6 +740,7 @@ def process_layaway_payment(
 		else:
 			doc.status = "Active"
 
+		doc.flags.ignore_validate_update_after_submit = True
 		doc.save(ignore_permissions=True)
 
 		return {
@@ -804,6 +806,7 @@ def cancel_layaway(layaway_id: str, cancellation_reason: str | None = None) -> d
 				]
 				if part
 			)
+		doc.flags.ignore_validate_update_after_submit = True
 		doc.save(ignore_permissions=True)
 
 		_release_inventory(doc)
@@ -997,6 +1000,7 @@ def extend_layaway(
 		if doc.status == "Overdue":
 			doc.status = "Active"
 
+		doc.flags.ignore_validate_update_after_submit = True
 		doc.save(ignore_permissions=True)
 
 		return {
@@ -1069,6 +1073,7 @@ def process_split_layaway_payment(
 		else:
 			doc.status = "Active"
 
+		doc.flags.ignore_validate_update_after_submit = True
 		doc.save(ignore_permissions=True)
 
 		return {
@@ -1120,6 +1125,7 @@ def check_overdue_and_forfeit():
 			else:
 				if doc.status != "Overdue":
 					doc.status = "Overdue"
+				doc.flags.ignore_validate_update_after_submit = True
 				doc.save(ignore_permissions=True)
 				_send_overdue_reminder(doc, days_overdue)
 
@@ -1152,6 +1158,7 @@ def _auto_forfeit_layaway(doc):
 		]
 		if part
 	)
+	doc.flags.ignore_validate_update_after_submit = True
 	doc.save(ignore_permissions=True)
 	_release_inventory(doc)
 

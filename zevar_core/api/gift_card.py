@@ -92,6 +92,7 @@ def process_gift_card_payment(gift_card_number: str, amount: float) -> dict:
 
 	if doc.expiry_date and getdate(doc.expiry_date) < getdate(today()):
 		doc.status = "Expired"
+		doc.flags.ignore_validate_update_after_submit = True
 		doc.save(ignore_permissions=True)
 		frappe.throw(_("Gift Card has expired."))
 
@@ -104,6 +105,7 @@ def process_gift_card_payment(gift_card_number: str, amount: float) -> dict:
 		if doc.balance <= 0:
 			doc.status = "Used"
 
+		doc.flags.ignore_validate_update_after_submit = True
 		doc.save(ignore_permissions=True)
 		log_gift_card_used(doc, amount_flt)
 

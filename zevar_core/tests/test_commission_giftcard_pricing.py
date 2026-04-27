@@ -151,6 +151,12 @@ class TestCommissionFlatRate(FrappeTestCase):
 		from zevar_core.api.pos import create_pos_invoice
 
 		emp2 = _create_test_employee("CommFlat2", "Test")
+		_create_commission_rule(
+			rule_name=f"Test Flat Rate {emp2}",
+			calculation_type="Flat Rate",
+			flat_rate=5.0,
+			employee=emp2,
+		)
 		result = create_pos_invoice(
 			items=json.dumps([{"item_code": self.item, "qty": 1, "rate": 1000.0}]),
 			payments=json.dumps([{"mode_of_payment": "Cash", "amount": 1000.0}]),
@@ -398,8 +404,11 @@ class TestCommissionDefaultRule(FrappeTestCase):
 		cls.company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value(
 			"Global Defaults", "default_company"
 		)
+		# Clear existing default rules
+		frappe.db.sql("UPDATE `tabCommission Rule` SET is_default = 0")
+		frappe.db.commit()
 		cls.default_rule = _create_commission_rule(
-			rule_name="Test Default Commission Rule",
+			rule_name=f"Test Default Commission Rule {frappe.generate_hash(length=8)}",
 			calculation_type="Flat Rate",
 			flat_rate=3.0,
 			is_default=True,
@@ -452,6 +461,7 @@ class TestGiftCardLifecycle(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		cls.customer = ensure_customer("GC Lifecycle Customer")
+		frappe.db.commit()
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -535,6 +545,7 @@ class TestGiftCardExpiry(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		cls.customer = ensure_customer("GC Expiry Customer")
+		frappe.db.commit()
 
 	def setUp(self):
 		frappe.set_user("Administrator")

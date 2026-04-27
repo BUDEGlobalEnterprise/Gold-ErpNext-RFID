@@ -17,7 +17,7 @@
 			<div class="flex flex-col md:flex-row gap-6 h-[calc(100vh-200px)]">
 				<!-- Left: New Ticket Form -->
 				<div
-					class="w-full md:w-1/2 bg-white dark:bg-[#1a1c23] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-warm-border/50 overflow-y-auto custom-scrollbar"
+					class="w-full md:w-1/2 bg-white dark:bg-warm-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-warm-border/50 overflow-y-auto custom-scrollbar"
 				>
 					<h3
 						class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6"
@@ -270,7 +270,7 @@
 
 				<!-- Right: My Tickets -->
 				<div
-					class="w-full md:w-1/2 bg-gray-50 dark:bg-[#1a1c23]/50 rounded-2xl p-6 border border-gray-100 dark:border-warm-border/50 overflow-y-auto custom-scrollbar"
+					class="w-full md:w-1/2 bg-gray-50 dark:bg-warm-card/50 rounded-2xl p-6 border border-gray-100 dark:border-warm-border/50 overflow-y-auto custom-scrollbar"
 				>
 					<div class="flex items-center justify-between mb-6">
 						<h3

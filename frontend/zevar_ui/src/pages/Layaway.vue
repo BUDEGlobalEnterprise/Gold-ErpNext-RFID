@@ -300,7 +300,7 @@
 			<Transition name="fade">
 				<div v-if="showSuccessConfirmation" class="fixed inset-0 z-[120] flex items-center justify-center p-4">
 					<div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" @click="dismissSuccess"></div>
-					<div class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl max-w-md w-full p-10 flex flex-col items-center text-center border border-transparent dark:border-warm-border animate-bounce-in">
+					<div class="relative bg-white dark:bg-warm-card rounded-2xl shadow-2xl max-w-md w-full p-10 flex flex-col items-center text-center border border-transparent dark:border-warm-border animate-bounce-in">
 						<div class="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-6">
 							<svg class="w-10 h-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
@@ -309,7 +309,7 @@
 						<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Layaway Created!</h2>
 						<p class="text-gray-500 dark:text-gray-400 mb-6">Contract has been created and deposit payment recorded successfully.</p>
 
-						<div class="bg-gray-50 dark:bg-[#15171e] rounded-xl p-4 w-full mb-6 border border-gray-100 dark:border-warm-border/50 space-y-2">
+						<div class="bg-gray-50 dark:bg-warm-dark-700 rounded-xl p-4 w-full mb-6 border border-gray-100 dark:border-warm-border/50 space-y-2">
 							<div class="flex justify-between text-sm">
 								<span class="text-gray-500 dark:text-gray-400">Contract ID</span>
 								<span class="font-mono font-bold text-gray-900 dark:text-white">{{ successData?.layaway_id || '—' }}</span>

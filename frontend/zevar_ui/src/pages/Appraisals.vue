@@ -5,7 +5,7 @@
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Appraisals</h2>
 					<span
-						class="status-label !mb-0 !bg-gray-100 dark:!bg-white/5 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-white/10"
+						class="status-label !mb-0 !bg-gray-100 dark:!bg-warm-dark-700 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-warm-border"
 					>
 						{{ filteredAppraisals.length }} Records
 					</span>
@@ -111,7 +111,7 @@
 							</div>
 							<div v-if="item.certification" class="absolute top-2 right-2">
 								<span
-									class="text-[9px] font-bold px-2 py-1 rounded-full bg-white/90 dark:bg-black/70 text-gray-800 dark:text-white border border-gray-200 dark:border-warm-border"
+									class="text-[9px] font-bold px-2 py-1 rounded-full bg-white/90 dark:bg-warm-dark-950/80 text-gray-800 dark:text-white border border-gray-200 dark:border-warm-border"
 								>
 									{{ item.certification }}
 								</span>

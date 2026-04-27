@@ -227,14 +227,28 @@ def create_pos_invoice(
 			si.taxes_and_charges = ""
 			si.custom_no_tax_override = 1
 
-		for sp in salesperson_data:
+		for i, sp in enumerate(salesperson_data):
+			emp = sp.get("salesperson") or sp.get("employee")
+			split = flt(sp.get("split"))
 			si.append(
 				"custom_salesperson_splits",
 				{
-					"employee": sp.get("salesperson") or sp.get("employee"),
-					"split_percent": flt(sp.get("split")),
+					"employee": emp,
+					"split_percent": split,
 				},
 			)
+			if i == 0:
+				si.custom_salesperson_1 = emp
+				si.custom_salesperson_1_split = split
+			elif i == 1:
+				si.custom_salesperson_2 = emp
+				si.custom_salesperson_2_split = split
+			elif i == 2:
+				si.custom_salesperson_3 = emp
+				si.custom_salesperson_3_split = split
+			elif i == 3:
+				si.custom_salesperson_4 = emp
+				si.custom_salesperson_4_split = split
 
 		if layaway_reference:
 			si.custom_layaway_reference = layaway_reference

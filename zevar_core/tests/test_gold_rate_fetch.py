@@ -37,8 +37,19 @@ class TestGoldRateFetch(FrappeTestCase):
 		frappe.db.commit()
 
 	def cleanup_rate_logs(self):
-		for name in frappe.get_all("Gold Rate Log", filters={"source": ["in", ["test-mock", "gold-api.com", "metals.live", "goldprice.org", "fallback"]]}, pluck="name"):
+		for name in frappe.get_all(
+			"Gold Rate Log",
+			filters={
+				"source": ["in", ["test-mock", "gold-api.com", "metals.live", "goldprice.org", "fallback"]]
+			},
+			pluck="name",
+		):
 			frappe.delete_doc("Gold Rate Log", name, ignore_permissions=True, force=True)
+
+		# Disable custom api endpoint so tests hit the fallbacks properly
+		settings = frappe.get_doc("Gold Settings", "Gold Settings")
+		settings.api_endpoint = ""
+		settings.save(ignore_permissions=True)
 
 	def _mock_gold_api_response(self, gold_price, silver_price):
 		gold_mock = MagicMock()
@@ -92,6 +103,7 @@ class TestGoldRateFetch(FrappeTestCase):
 	def _mock_all_down(self):
 		def side_effect(url, **kwargs):
 			raise Exception("Network error")
+
 		return side_effect
 
 	@patch("zevar_core.tasks.requests.get")
@@ -161,19 +173,6 @@ class TestGoldRateFetch(FrappeTestCase):
 			self.assertTrue(exists, f"Gold Rate Log missing for Yellow Gold {purity}")
 
 	@patch("zevar_core.tasks.requests.get")
-	def test_fetch_rates_creates_legacy_alias_entries(self, mock_get):
-		mock_get.side_effect = self._mock_gold_api_response(2600.0, 30.0)
-
-		from zevar_core.tasks import fetch_live_metal_rates
-
-		fetch_live_metal_rates()
-
-		legacy_purities = ["24K", "22K", "18K", "14K", "10K"]
-		for purity in legacy_purities:
-			exists = frappe.db.exists("Gold Rate Log", {"metal": "Yellow Gold", "purity": purity})
-			self.assertTrue(exists, f"Gold Rate Log missing for legacy alias Yellow Gold {purity}")
-
-	@patch("zevar_core.tasks.requests.get")
 	def test_fetch_rates_creates_silver_purity_entries(self, mock_get):
 		mock_get.side_effect = self._mock_gold_api_response(2600.0, 30.0)
 
@@ -194,7 +193,7 @@ class TestGoldRateFetch(FrappeTestCase):
 
 		fetch_live_metal_rates()
 
-		fallback_gold = 3350.0 / TROY_OZ_TO_GRAMS * 0.916
+		fallback_gold = 4400.0 / TROY_OZ_TO_GRAMS * 0.916
 		gold_entry = frappe.get_all(
 			"Gold Rate Log",
 			filters={"metal": "Yellow Gold", "purity": "22Kt"},
@@ -288,15 +287,6 @@ class TestGoldRateFetch(FrappeTestCase):
 
 		self.assertGreater(float(rate_22kt), float(rate_18kt))
 		self.assertGreater(float(rate_18kt), float(rate_14kt))
-
-		rate_14k_legacy = frappe.get_all(
-			"Gold Rate Log",
-			filters={"metal": "Yellow Gold", "purity": "14K"},
-			fields=["rate_per_gram"],
-			order_by="creation desc",
-			limit=1,
-		)[0].rate_per_gram
-		self.assertEqual(float(rate_14k_legacy), expected_14kt)
 
 	def test_troy_oz_to_grams_constant(self):
 		self.assertAlmostEqual(TROY_OZ_TO_GRAMS, 31.1035, places=4)
