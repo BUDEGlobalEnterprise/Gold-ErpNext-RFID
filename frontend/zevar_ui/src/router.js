@@ -32,6 +32,12 @@ const routes = [
 		meta: { requiresAuth: true },
 	},
 	{
+		path: '/inventory-audit',
+		name: 'InventoryAudit',
+		component: () => import('./pages/ComingSoon.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
 		path: '/customers',
 		name: 'Customers',
 		component: () => import('./pages/Customers.vue'),
@@ -100,7 +106,7 @@ const routes = [
 	{
 		path: '/reports',
 		name: 'Reports',
-		component: () => import('./pages/Reports.vue'),
+		component: () => import('./pages/ReportsHub.vue'),
 		meta: { requiresAuth: true, requiresManagement: true },
 	},
 	{
@@ -127,7 +133,7 @@ const router = createRouter({
 	routes,
 })
 
-// Check if user has management role (for Reports page access)
+// Check if user has any role that can open the Reports hub.
 async function checkUserRole() {
 	try {
 		const res = await fetch('/api/method/zevar_core.api.user_info.get_user_info', {
@@ -135,10 +141,24 @@ async function checkUserRole() {
 		})
 		if (!res.ok) return false
 		const data = await res.json()
-		if (!data || !data.roles) return false
+		const userInfo = data?.message || data
+		if (!userInfo || userInfo === 'Guest' || !Array.isArray(userInfo.roles)) return false
 
-		const managementRoles = ['System Manager', 'Administrator', 'Store Manager', 'Accounts Manager']
-		return data.roles.some(role => managementRoles.includes(role))
+		const reportRoles = [
+			'System Manager',
+			'Administrator',
+			'Store Manager',
+			'Sales Manager',
+			'Accounts Manager',
+			'Sales User',
+			'Stock Manager',
+			'Inventory Manager',
+			'HR User',
+			'HR Manager',
+			'Employee',
+			'Employee Self Service',
+		]
+		return userInfo.roles.some(role => reportRoles.includes(role))
 	} catch {
 		return false
 	}

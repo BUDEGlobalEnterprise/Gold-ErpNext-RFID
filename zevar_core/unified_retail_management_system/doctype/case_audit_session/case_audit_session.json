@@ -1,0 +1,195 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "CASE-AUDIT-.YYYY.-.#####",
+ "creation": "2026-04-28 04:49:25.625409",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "store_location",
+  "auditor",
+  "audit_type",
+  "started_at",
+  "completed_at",
+  "cancelled_at",
+  "status",
+  "expected_count",
+  "scanned_count",
+  "section_break_values",
+  "total_value_expected",
+  "total_value_scanned",
+  "total_value_discrepancy",
+  "notes",
+  "scans",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "store_location",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Store/Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "auditor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Auditor",
+   "options": "User"
+  },
+  {
+   "fieldname": "audit_type",
+   "fieldtype": "Select",
+   "label": "Audit Type",
+   "options": "Barcode\nRFID\nMixed",
+   "default": "Barcode"
+  },
+  {
+   "fieldname": "started_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Started At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "completed_at",
+   "fieldtype": "Datetime",
+   "label": "Completed At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cancelled_at",
+   "fieldtype": "Datetime",
+   "label": "Cancelled At",
+   "read_only": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Draft\nIn Progress\nReconciled\nDiscrepancy\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expected_count",
+   "fieldtype": "Int",
+   "label": "Expected Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scanned_count",
+   "fieldtype": "Int",
+   "label": "Scanned Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_values",
+   "fieldtype": "Section Break",
+   "label": "Value Tracking"
+  },
+  {
+   "fieldname": "total_value_expected",
+   "fieldtype": "Currency",
+   "label": "Total Value Expected",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_value_scanned",
+   "fieldtype": "Currency",
+   "label": "Total Value Scanned",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_value_discrepancy",
+   "fieldtype": "Currency",
+   "label": "Total Value Discrepancy",
+   "read_only": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "scans",
+   "fieldtype": "Table",
+   "label": "Scans",
+   "options": "Case Audit Scan"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Case Audit Session",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-04-28 04:49:25.625409",
+ "modified_by": "Administrator",
+ "module": "Unified Retail Management System",
+ "name": "Case Audit Session",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -22,7 +22,13 @@
             "role": "Sales Manager"
         },
         {
+            "role": "Store Manager"
+        },
+        {
             "role": "Stock Manager"
+        },
+        {
+            "role": "Inventory Manager"
         }
     ]
 }

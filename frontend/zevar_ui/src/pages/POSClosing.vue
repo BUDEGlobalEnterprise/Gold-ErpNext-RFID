@@ -162,7 +162,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { createResource } from 'frappe-ui'
 
 // State
@@ -170,6 +170,8 @@ const loading = ref(false)
 const sessionStatus = ref({ has_active_session: false })
 const closingResult = ref(null)
 const calculatedTotal = ref(0)
+const previewData = ref(null)
+const overrideRequired = ref(false)
 
 const form = ref({
 	closing_balance: 0,
@@ -192,12 +194,18 @@ const denominations = [
 
 // Computed
 const expectedBalance = computed(() => {
+	if (previewData.value) {
+		return previewData.value.expected_cash + previewData.value.fixed_float
+	}
 	const opening = sessionStatus.value.session?.opening_balance || 0
 	const sales = sessionStatus.value.session?.sales_total || 0
 	return opening + sales
 })
 
 const variance = computed(() => {
+	if (previewData.value) {
+		return previewData.value.variance
+	}
 	return form.value.closing_balance - expectedBalance.value
 })
 
@@ -222,8 +230,13 @@ const sessionStatusResource = createResource({
 	},
 })
 
+const previewCloseResource = createResource({
+	url: 'zevar_core.api.pos_session.preview_close',
+	auto: false,
+})
+
 const closeSessionResource = createResource({
-	url: 'zevar_core.api.pos_session.close_pos_session',
+	url: 'zevar_core.api.pos_session.close_pos_session_v2',
 	auto: false,
 })
 
@@ -246,19 +259,45 @@ function calculateFromBreakdown() {
 	}
 	calculatedTotal.value = total
 	form.value.closing_balance = total
+	calculateVariance()
 }
 
+let timeoutId = null
 function calculateVariance() {
-	// Variance is computed automatically
+	if (!sessionStatus.value.session?.name) return
+
+	clearTimeout(timeoutId)
+	timeoutId = setTimeout(async () => {
+		try {
+			const res = await previewCloseResource.submit({
+				session_name: sessionStatus.value.session?.name,
+				total_cash_counted: form.value.closing_balance
+			})
+			previewData.value = res
+
+			if (Math.abs(res.variance) > res.alert_threshold) {
+				overrideRequired.value = true
+			} else {
+				overrideRequired.value = false
+			}
+		} catch(err) {
+			console.error(err)
+		}
+	}, 500)
 }
 
 async function submitClosing() {
+	if (overrideRequired.value) {
+		const confirmed = confirm(`Variance is over threshold! A manager override is required. Are you a manager?`)
+		if (!confirmed) return
+	}
+
 	loading.value = true
 	try {
 		const result = await closeSessionResource.submit({
 			session_name: sessionStatus.value.session?.name,
-			closing_balance: form.value.closing_balance,
-			cash_breakdown: Object.entries(form.value.cash_breakdown)
+			total_cash_counted: form.value.closing_balance,
+			breakdown: Object.entries(form.value.cash_breakdown)
 				.filter(([_, count]) => count > 0)
 				.map(([denom, count]) => ({
 					mode_of_payment: 'Cash',

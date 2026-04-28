@@ -27,6 +27,19 @@ frappe.query_reports["Payment Method Summary"] = {
 			options: "POS Profile",
 		},
 		{
+			fieldname: "transaction_stream",
+			label: __("Transaction Stream"),
+			fieldtype: "MultiSelectList",
+			get_data: function () {
+				return [
+					{ value: "Jewelry Sale", description: "Jewelry Sale" },
+					{ value: "Repair", description: "Repair" },
+					{ value: "Layaway Deposit", description: "Layaway Deposit" },
+					{ value: "Layaway Final", description: "Layaway Final" },
+				];
+			},
+		},
+		{
 			fieldname: "company",
 			label: __("Company"),
 			fieldtype: "Link",

@@ -8,6 +8,7 @@ from frappe.model.document import Document
 
 class PaymentStatus:
 	"""Payment status constants"""
+
 	UNPAID = "Unpaid"
 	PARTIAL = "Partial"
 	PAID = "Paid"
@@ -15,6 +16,7 @@ class PaymentStatus:
 
 class PaymentMethod:
 	"""Payment method constants"""
+
 	CASH = "Cash"
 	CREDIT_CARD = "Credit Card"
 	CHECK = "Check"
@@ -58,11 +60,10 @@ class RepairOrder(Document):
 
 		# Track status changes
 		if doc_before_save.status != self.status:
-			self._log_audit_event("status_change", {
-				"old_value": doc_before_save.status,
-				"new_value": self.status,
-				"field": "status"
-			})
+			self._log_audit_event(
+				"status_change",
+				{"old_value": doc_before_save.status, "new_value": self.status, "field": "status"},
+			)
 
 		# Track cost changes (total_cost, labor_cost, material_cost)
 		cost_fields = ["total_cost", "labor_cost", "material_cost"]
@@ -70,35 +71,38 @@ class RepairOrder(Document):
 			old_value = getattr(doc_before_save, field, None)
 			new_value = getattr(self, field, None)
 			if old_value != new_value:
-				self._log_audit_event("cost_change", {
-					"field": field,
-					"old_value": old_value,
-					"new_value": new_value
-				})
+				self._log_audit_event(
+					"cost_change", {"field": field, "old_value": old_value, "new_value": new_value}
+				)
 
 		# Track assignment changes
 		if doc_before_save.assigned_to != self.assigned_to:
-			self._log_audit_event("assignment_change", {
-				"old_value": doc_before_save.assigned_to,
-				"new_value": self.assigned_to,
-				"field": "assigned_to"
-			})
+			self._log_audit_event(
+				"assignment_change",
+				{
+					"old_value": doc_before_save.assigned_to,
+					"new_value": self.assigned_to,
+					"field": "assigned_to",
+				},
+			)
 
 		# Track priority changes
 		if doc_before_save.priority != self.priority:
-			self._log_audit_event("priority_change", {
-				"old_value": doc_before_save.priority,
-				"new_value": self.priority,
-				"field": "priority"
-			})
+			self._log_audit_event(
+				"priority_change",
+				{"old_value": doc_before_save.priority, "new_value": self.priority, "field": "priority"},
+			)
 
 		# Track warranty repair status changes
 		if doc_before_save.is_warranty_repair != self.is_warranty_repair:
-			self._log_audit_event("warranty_status_change", {
-				"old_value": doc_before_save.is_warranty_repair,
-				"new_value": self.is_warranty_repair,
-				"field": "is_warranty_repair"
-			})
+			self._log_audit_event(
+				"warranty_status_change",
+				{
+					"old_value": doc_before_save.is_warranty_repair,
+					"new_value": self.is_warranty_repair,
+					"field": "is_warranty_repair",
+				},
+			)
 
 	def track_id_verification(self):
 		"""Track ID verification for compliance"""
@@ -106,15 +110,22 @@ class RepairOrder(Document):
 		if self.customer_id_type and self.customer_id_number and self.id_verified_by:
 			if not self.id_verified_date:
 				from frappe.utils import now
+
 				self.id_verified_date = now()
 
 				# Log the verification
-				self._log_audit_event("id_verification", {
-					"id_type": self.customer_id_type,
-					"id_number": "***" + (self.customer_id_number[-4:] if len(self.customer_id_number) > 4 else "****"),  # Only store last 4 chars
-					"id_state": self.customer_id_state,
-					"verified_by": self.id_verified_by
-				})
+				self._log_audit_event(
+					"id_verification",
+					{
+						"id_type": self.customer_id_type,
+						"id_number": "***"
+						+ (
+							self.customer_id_number[-4:] if len(self.customer_id_number) > 4 else "****"
+						),  # Only store last 4 chars
+						"id_state": self.customer_id_state,
+						"verified_by": self.id_verified_by,
+					},
+				)
 
 	def _log_audit_event(self, event_type, event_data):
 		"""Log an audit event to the version history and communication log"""
@@ -127,13 +138,13 @@ class RepairOrder(Document):
 			"assignment_change": f"Assignment changed from '{event_data.get('old_value')}' to '{event_data.get('new_value')}'",
 			"priority_change": f"Priority changed from '{event_data.get('old_value')}' to '{event_data.get('new_value')}'",
 			"warranty_status_change": f"Warranty repair status changed to {event_data.get('new_value')}",
-			"id_verification": f"ID Verified: {event_data.get('id_type')} from {event_data.get('id_state')} by {event_data.get('verified_by')}"
+			"id_verification": f"ID Verified: {event_data.get('id_type')} from {event_data.get('id_state')} by {event_data.get('verified_by')}",
 		}
 
 		message = audit_messages.get(event_type, f"{event_type}: {event_data}")
 
 		# Add to work notes (appears in timeline)
-		if hasattr(self, 'work_notes'):
+		if hasattr(self, "work_notes"):
 			audit_note = f"[Audit] {message} - {now()}"
 			if not self.work_notes:
 				self.work_notes = audit_note
@@ -142,12 +153,7 @@ class RepairOrder(Document):
 
 		# Add to communication log for structured tracking
 		try:
-			self._log_communication(
-				comm_type="Audit",
-				direction="System",
-				content=message,
-				sent_via="System"
-			)
+			self._log_communication(comm_type="Audit", direction="System", content=message, sent_via="System")
 		except Exception:
 			# If communication log fails, still log to version history
 			pass
@@ -161,44 +167,48 @@ class RepairOrder(Document):
 			"customer": self.customer,
 			"version_history": [],
 			"communication_log": [],
-			"status_timeline": []
+			"status_timeline": [],
 		}
 
 		# Get version history
 		try:
 			versions = get_versions(self.name)
 			for version in versions[:limit]:
-				audit_trail["version_history"].append({
-					"version": version.get("name"),
-					"modified": version.get("modified"),
-					"modified_by": version.get("modified_by"),
-					"creation": version.get("creation")
-				})
+				audit_trail["version_history"].append(
+					{
+						"version": version.get("name"),
+						"modified": version.get("modified"),
+						"modified_by": version.get("modified_by"),
+						"creation": version.get("creation"),
+					}
+				)
 		except Exception as e:
 			frappe.log_error(f"Failed to get version history for {self.name}: {e}")
 
 		# Get communication log (includes audit events)
-		if hasattr(self, 'communications') and self.communications:
+		if hasattr(self, "communications") and self.communications:
 			for comm in self.communications:
 				if comm.communication_type == "Audit":
-					audit_trail["communication_log"].append({
-						"timestamp": comm.timestamp,
-						"user": comm.user,
-						"content": comm.content,
-						"direction": comm.direction
-					})
+					audit_trail["communication_log"].append(
+						{
+							"timestamp": comm.timestamp,
+							"user": comm.user,
+							"content": comm.content,
+							"direction": comm.direction,
+						}
+					)
 
 		# Build status timeline
 		status_transitions = []
-		for comm in (self.communications or []):
+		for comm in self.communications or []:
 			if comm.communication_type == "Audit" and "status changed" in comm.content.lower():
-				status_transitions.append({
-					"timestamp": comm.timestamp,
-					"user": comm.user,
-					"event": comm.content
-				})
+				status_transitions.append(
+					{"timestamp": comm.timestamp, "user": comm.user, "event": comm.content}
+				)
 
-		audit_trail["status_timeline"] = sorted(status_transitions, key=lambda x: x["timestamp"], reverse=True)
+		audit_trail["status_timeline"] = sorted(
+			status_transitions, key=lambda x: x["timestamp"], reverse=True
+		)
 
 		return audit_trail
 
@@ -214,7 +224,7 @@ class RepairOrder(Document):
 			"verified_by": self.id_verified_by,
 			"verified_date": self.id_verified_date,
 			"id_type": self.customer_id_type,
-			"compliance_score": 0
+			"compliance_score": 0,
 		}
 
 		# Calculate compliance score (0-100)
@@ -315,15 +325,23 @@ class RepairOrder(Document):
 		invoice.repair_order = self.name
 
 		# Add repair service item
-		repair_item_code = frappe.db.get_single_value("Repair Settings", "repair_service_item_code") or "REPAIR-SERVICE"
+		repair_item_code = (
+			frappe.db.get_single_value("Repair Settings", "repair_service_item_code") or "REPAIR-SERVICE"
+		)
 
-		invoice.append("items", {
-			"item_code": repair_item_code,
-			"qty": 1,
-			"rate": self.total_cost,
-			"amount": self.total_cost,
-			"description": f"Repair Service: {self.repair_type}\nItem: {self.item_description or 'N/A'}"
-		})
+		invoice.append(
+			"items",
+			{
+				"item_code": repair_item_code,
+				"qty": 1,
+				"rate": self.total_cost,
+				"amount": self.total_cost,
+				"description": f"Repair Service: {self.repair_type}\nItem: {self.item_description or 'N/A'}",
+				"income_account": f"Income — Repair Services - {frappe.get_cached_value('Company', company, 'abbr')}",
+			},
+		)
+
+		invoice.custom_transaction_stream = "Repair"
 
 		# Set warehouse
 		if self.warehouse:
@@ -347,7 +365,7 @@ class RepairOrder(Document):
 		return {
 			"success": True,
 			"invoice": invoice.name,
-			"message": _("Sales Invoice {0} created successfully").format(invoice.name)
+			"message": _("Sales Invoice {0} created successfully").format(invoice.name),
 		}
 
 	def add_payment(self, amount, payment_method, payment_date=None, reference=None, notes=None):
@@ -377,17 +395,14 @@ class RepairOrder(Document):
 
 		# Log the payment as communication
 		self._log_communication(
-			"Payment",
-			"Incoming",
-			f"Payment of ${amount:.2f} received via {payment_method}",
-			"In-Person"
+			"Payment", "Incoming", f"Payment of ${amount:.2f} received via {payment_method}", "In-Person"
 		)
 
 		self.save()
 
 		return {
 			"success": True,
-			"message": _("Payment of {0} recorded successfully").format(f"${amount:.2f}")
+			"message": _("Payment of {0} recorded successfully").format(f"${amount:.2f}"),
 		}
 
 	def get_total_payments(self):
@@ -552,7 +567,6 @@ class RepairOrder(Document):
 		except Exception as e:
 			frappe.log_error(f"Failed to notify receiving store: {e}")
 
-
 	def send_status_notification(self, old_status=None):
 		"""Send notification based on status change"""
 		if not self.customer_phone and not self.get_customer_email():
@@ -575,7 +589,7 @@ class RepairOrder(Document):
 			except Exception as e:
 				frappe.log_error(
 					f"Failed to send notification for {self.name} status {self.status}: {e}",
-					"Repair Notification Error"
+					"Repair Notification Error",
 				)
 
 	def _send_received_notification(self):
@@ -650,7 +664,6 @@ class RepairOrder(Document):
 
 		self._send_sms(message)
 		self._send_email(subject, self._get_overdue_email_body())
-
 
 	def _send_sms(self, message):
 		"""Send SMS notification using Twilio or Frappe SMS Settings"""
@@ -740,7 +753,6 @@ class RepairOrder(Document):
 
 		return True
 
-
 	def _send_email(self, subject, html_body):
 		"""Send email notification"""
 		if not self.enable_email_notifications:
@@ -779,7 +791,6 @@ class RepairOrder(Document):
 		if not self.customer:
 			return None
 		return frappe.db.get_value("Customer", self.customer, "email_id")
-
 
 	def _log_communication(self, comm_type, direction, content, sent_via, subject=None):
 		"""Log a communication entry"""
@@ -832,7 +843,6 @@ class RepairOrder(Document):
 		self.save()
 		return self.communications[-1]
 
-
 	def _get_base_email_context(self):
 		"""Get base context for email templates"""
 		customer_name = self.customer
@@ -858,12 +868,12 @@ class RepairOrder(Document):
 		return f"""
 		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
 			<h2 style="color: #d4af37;">Repair Received - Zevar Jewelers</h2>
-			<p>Dear {ctx['customer_name']},</p>
+			<p>Dear {ctx["customer_name"]},</p>
 			<p>We have received your repair request:</p>
 			<table style="border-collapse: collapse; width: 100%; margin: 20px 0;">
-				<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Repair #:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">{ctx['repair_number']}</td></tr>
-				<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Item:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">{ctx['item_description']}</td></tr>
-				<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Repair Type:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">{ctx['repair_type']}</td></tr>
+				<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Repair #:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">{ctx["repair_number"]}</td></tr>
+				<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Item:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">{ctx["item_description"]}</td></tr>
+				<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Repair Type:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">{ctx["repair_type"]}</td></tr>
 			</table>
 			<p>We will review your item and send you an estimate shortly.</p>
 			<p>Thank you for choosing Zevar Jewelers!</p>
@@ -876,12 +886,12 @@ class RepairOrder(Document):
 		return f"""
 		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
 			<h2 style="color: #d4af37;">Repair Estimate Ready - Zevar Jewelers</h2>
-			<p>Dear {ctx['customer_name']},</p>
+			<p>Dear {ctx["customer_name"]},</p>
 			<p>We have completed our assessment of your repair:</p>
 			<table style="border-collapse: collapse; width: 100%; margin: 20px 0;">
-				<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Repair #:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">{ctx['repair_number']}</td></tr>
-				<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Estimated Cost:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">{ctx['estimated_cost']}</td></tr>
-				<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Promised Date:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">{ctx['promised_date']}</td></tr>
+				<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Repair #:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">{ctx["repair_number"]}</td></tr>
+				<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Estimated Cost:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">{ctx["estimated_cost"]}</td></tr>
+				<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Promised Date:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">{ctx["promised_date"]}</td></tr>
 			</table>
 			<p>Please reply to this email or call us to approve the estimate so we can begin work.</p>
 			<p>Thank you,<br>Zevar Jewelers</p>
@@ -894,8 +904,8 @@ class RepairOrder(Document):
 		return f"""
 		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
 			<h2 style="color: #d4af37;">Repair Approved - Zevar Jewelers</h2>
-			<p>Dear {ctx['customer_name']},</p>
-			<p>Great news! Your estimate for repair #{ctx['repair_number']} has been approved.</p>
+			<p>Dear {ctx["customer_name"]},</p>
+			<p>Great news! Your estimate for repair #{ctx["repair_number"]} has been approved.</p>
 			<p>We will begin work on your item shortly and keep you updated on our progress.</p>
 			<p>Thank you for your patience!</p>
 		</div>
@@ -907,9 +917,9 @@ class RepairOrder(Document):
 		return f"""
 		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
 			<h2 style="color: #d4af37;">Repair In Progress - Zevar Jewelers</h2>
-			<p>Dear {ctx['customer_name']},</p>
-			<p>Work has begun on your repair #{ctx['repair_number']}.</p>
-			<p>We are working on your {ctx['item_description']} and will notify you when it's ready.</p>
+			<p>Dear {ctx["customer_name"]},</p>
+			<p>Work has begun on your repair #{ctx["repair_number"]}.</p>
+			<p>We are working on your {ctx["item_description"]} and will notify you when it's ready.</p>
 			<p>Thank you for choosing Zevar Jewelers!</p>
 		</div>
 		"""
@@ -920,8 +930,8 @@ class RepairOrder(Document):
 		return f"""
 		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
 			<h2 style="color: #d4af37;">Repair Update - Zevar Jewelers</h2>
-			<p>Dear {ctx['customer_name']},</p>
-			<p>Your repair #{ctx['repair_number']} is currently waiting for parts to arrive.</p>
+			<p>Dear {ctx["customer_name"]},</p>
+			<p>Your repair #{ctx["repair_number"]} is currently waiting for parts to arrive.</p>
 			<p>We have ordered the necessary components and will notify you as soon as they arrive.</p>
 			<p>Thank you for your understanding!</p>
 		</div>
@@ -938,10 +948,10 @@ class RepairOrder(Document):
 		return f"""
 		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
 			<h2 style="color: #d4af37;">Repair Ready for Pickup! - Zevar Jewelers</h2>
-			<p>Dear {ctx['customer_name']},</p>
-			<p>Great news! Your repair #{ctx['repair_number']} is complete and ready for pickup!</p>
+			<p>Dear {ctx["customer_name"]},</p>
+			<p>Great news! Your repair #{ctx["repair_number"]} is complete and ready for pickup!</p>
 			<p>Please visit us during store hours to collect your item.</p>
-			{f'<p><strong>Store:</strong> {store_address}</p>' if store_address else ''}
+			{f"<p><strong>Store:</strong> {store_address}</p>" if store_address else ""}
 			<p>Don't forget to bring your claim ticket!</p>
 			<p>Thank you for choosing Zevar Jewelers!</p>
 		</div>
@@ -953,8 +963,8 @@ class RepairOrder(Document):
 		return f"""
 		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
 			<h2 style="color: #d4af37;">Repair Completed - Zevar Jewelers</h2>
-			<p>Dear {ctx['customer_name']},</p>
-			<p>Your repair #{ctx['repair_number']} has been delivered to you.</p>
+			<p>Dear {ctx["customer_name"]},</p>
+			<p>Your repair #{ctx["repair_number"]} has been delivered to you.</p>
 			<p>We hope you are satisfied with our work. If you have any questions or concerns, please don't hesitate to contact us.</p>
 			<p>Thank you for your business!</p>
 		</div>
@@ -966,13 +976,12 @@ class RepairOrder(Document):
 		return f"""
 		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
 			<h2 style="color: #d4af37;">Repair Update - Zevar Jewelers</h2>
-			<p>Dear {ctx['customer_name']},</p>
-			<p>We apologize, but your repair #{ctx['repair_number']} is taking longer than expected.</p>
+			<p>Dear {ctx["customer_name"]},</p>
+			<p>We apologize, but your repair #{ctx["repair_number"]} is taking longer than expected.</p>
 			<p>We are working diligently to complete your repair and will notify you as soon as it is ready.</p>
 			<p>Thank you for your patience and understanding.</p>
 		</div>
 		"""
-
 
 	def approve_estimate(self, customer_name, approval_notes=None):
 		"""Approve the estimate and move to Approved status"""
@@ -990,24 +999,28 @@ class RepairOrder(Document):
 			self.estimate_notes += f"\n\nApproval Notes: {approval_notes}"
 
 		self.save()
-		self.db_set({
-			"estimate_status": "Approved",
-			"estimate_approved_date": self.estimate_approved_date,
-			"estimate_approved_by": self.estimate_approved_by,
-			"status": "Approved"
-		})
+		self.db_set(
+			{
+				"estimate_status": "Approved",
+				"estimate_approved_date": self.estimate_approved_date,
+				"estimate_approved_by": self.estimate_approved_by,
+				"status": "Approved",
+			}
+		)
 
 		# Log the approval
-		self._log_communication("Email", "Incoming", f"Estimate approved by {customer_name}", "Customer Portal", "Estimate Approved")
+		self._log_communication(
+			"Email",
+			"Incoming",
+			f"Estimate approved by {customer_name}",
+			"Customer Portal",
+			"Estimate Approved",
+		)
 
 		# Send notification
 		self._send_approved_notification()
 
-		return {
-			"success": True,
-			"message": "Estimate approved successfully",
-			"repair_order": self.name
-		}
+		return {"success": True, "message": "Estimate approved successfully", "repair_order": self.name}
 
 	def reject_estimate(self, customer_name, rejection_reason):
 		"""Reject the estimate and record reason"""
@@ -1022,14 +1035,18 @@ class RepairOrder(Document):
 		self.status = "Estimated"  # Keep in Estimated status for revision
 
 		self.save()
-		self.db_set({
-			"estimate_status": "Rejected",
-			"estimate_notes": self.estimate_notes,
-			"status": "Estimated"
-		})
+		self.db_set(
+			{"estimate_status": "Rejected", "estimate_notes": self.estimate_notes, "status": "Estimated"}
+		)
 
 		# Log the rejection
-		self._log_communication("Email", "Incoming", f"Estimate rejected by {customer_name}. Reason: {rejection_reason}", "Customer Portal", "Estimate Rejected")
+		self._log_communication(
+			"Email",
+			"Incoming",
+			f"Estimate rejected by {customer_name}. Reason: {rejection_reason}",
+			"Customer Portal",
+			"Estimate Rejected",
+		)
 
 		# Notify store staff
 		self._notify_estimate_rejection(customer_name, rejection_reason)
@@ -1037,7 +1054,7 @@ class RepairOrder(Document):
 		return {
 			"success": True,
 			"message": "Estimate rejection recorded. Store staff will contact you.",
-			"repair_order": self.name
+			"repair_order": self.name,
 		}
 
 	def revise_estimate(self, new_total_cost, revision_notes=None):
@@ -1054,16 +1071,9 @@ class RepairOrder(Document):
 			self.estimate_notes += f"\n\nRevision Notes ({frappe.utils.now()}): {revision_notes}"
 
 		self.save()
-		self.db_set({
-			"estimate_status": "Revised",
-			"total_cost": new_total_cost
-		})
+		self.db_set({"estimate_status": "Revised", "total_cost": new_total_cost})
 
-		return {
-			"success": True,
-			"message": "Estimate revised successfully",
-			"repair_order": self.name
-		}
+		return {"success": True, "message": "Estimate revised successfully", "repair_order": self.name}
 
 	def send_for_approval(self):
 		"""Send estimate to customer for approval"""
@@ -1076,15 +1086,18 @@ class RepairOrder(Document):
 
 		# Set valid until date (30 days from now)
 		from frappe.utils import add_to_date
+
 		self.estimate_valid_until = add_to_date(frappe.utils.now(), days=30)
 
 		self.save()
-		self.db_set({
-			"status": "Estimated",
-			"estimate_status": "Sent",
-			"estimate_sent_date": self.estimate_sent_date,
-			"estimate_valid_until": self.estimate_valid_until
-		})
+		self.db_set(
+			{
+				"status": "Estimated",
+				"estimate_status": "Sent",
+				"estimate_sent_date": self.estimate_sent_date,
+				"estimate_valid_until": self.estimate_valid_until,
+			}
+		)
 
 		# Send notifications
 		self._send_estimate_notification()
@@ -1092,7 +1105,7 @@ class RepairOrder(Document):
 		return {
 			"success": True,
 			"message": "Estimate sent to customer for approval",
-			"repair_order": self.name
+			"repair_order": self.name,
 		}
 
 	def generate_estimate_pdf(self):
@@ -1101,15 +1114,17 @@ class RepairOrder(Document):
 
 		# Get base context
 		ctx = self._get_base_email_context()
-		ctx.update({
-			"estimate_sent_date": self.estimate_sent_date,
-			"estimate_valid_until": self.estimate_valid_until,
-			"labor_cost": f"${self.labor_cost:.2f}" if self.labor_cost else "$0.00",
-			"material_cost": f"${self.material_cost:.2f}" if self.material_cost else "$0.00",
-			"total_cost": f"${self.total_cost:.2f}" if self.total_cost else "$0.00",
-			"item_description": self.item_description or "N/A",
-			"customer_notes": self.customer_notes or "None",
-		})
+		ctx.update(
+			{
+				"estimate_sent_date": self.estimate_sent_date,
+				"estimate_valid_until": self.estimate_valid_until,
+				"labor_cost": f"${self.labor_cost:.2f}" if self.labor_cost else "$0.00",
+				"material_cost": f"${self.material_cost:.2f}" if self.material_cost else "$0.00",
+				"total_cost": f"${self.total_cost:.2f}" if self.total_cost else "$0.00",
+				"item_description": self.item_description or "N/A",
+				"customer_notes": self.customer_notes or "None",
+			}
+		)
 
 		# Get store address
 		if self.warehouse:
@@ -1124,20 +1139,18 @@ class RepairOrder(Document):
 
 		# Save as attached file
 		filename = f"estimate_{self.name.replace(' ', '_')}.pdf"
-		frappe.get_doc({
-			"doctype": "File",
-			"attached_to_doctype": "Repair Order",
-			"attached_to_name": self.name,
-			"file_name": filename,
-			"content": pdf_data,
-			"is_private": 1
-		}).insert()
+		frappe.get_doc(
+			{
+				"doctype": "File",
+				"attached_to_doctype": "Repair Order",
+				"attached_to_name": self.name,
+				"file_name": filename,
+				"content": pdf_data,
+				"is_private": 1,
+			}
+		).insert()
 
-		return {
-			"success": True,
-			"filename": filename,
-			"message": "Estimate PDF generated successfully"
-		}
+		return {"success": True, "filename": filename, "message": "Estimate PDF generated successfully"}
 
 	def get_estimate_approval_link(self):
 		"""Generate public link for estimate approval"""
@@ -1146,14 +1159,16 @@ class RepairOrder(Document):
 		import secrets
 
 		from frappe.utils import get_url
+
 		token = secrets.token_urlsafe(32)
 
 		# Store token in cache for 30 days
 		cache_key = f"estimate_approval_{self.name}_{token}"
-		frappe.cache().set_value(cache_key, {
-			"repair_order": self.name,
-			"created": frappe.utils.now()
-		}, expires_in_sec=30*24*60*60)
+		frappe.cache().set_value(
+			cache_key,
+			{"repair_order": self.name, "created": frappe.utils.now()},
+			expires_in_sec=30 * 24 * 60 * 60,
+		)
 
 		# Return public URL
 		return f"{get_url()}/api/method/zevar_core.api.public_estimate_approval?token={token}"
@@ -1167,14 +1182,16 @@ class RepairOrder(Document):
 			users = frappe.get_all("Has Role", filters={"role": "Sales User"}, pluck="parent")
 
 			for user in users:
-				add_notification_log({
-					"subject": f"Estimate Rejected - {self.name}",
-					"for_user": user,
-					"type": "Alert",
-					"document_type": "Repair Order",
-					"document_name": self.name,
-					"message": f"Customer {customer_name} rejected the estimate. Reason: {reason}"
-				})
+				add_notification_log(
+					{
+						"subject": f"Estimate Rejected - {self.name}",
+						"for_user": user,
+						"type": "Alert",
+						"document_type": "Repair Order",
+						"document_name": self.name,
+						"message": f"Customer {customer_name} rejected the estimate. Reason: {reason}",
+					}
+				)
 		except Exception as e:
 			frappe.log_error(f"Failed to notify estimate rejection: {e}")
 
@@ -1184,6 +1201,7 @@ class RepairOrder(Document):
 			return {"valid": True, "message": "No validity date set"}
 
 		from frappe.utils import getdate
+
 		today = getdate()
 		valid_until = getdate(self.estimate_valid_until)
 
@@ -1206,7 +1224,9 @@ class RepairOrder(Document):
 	def set_warranty_defaults(self):
 		"""Auto-set warranty_months from Repair Type if not set"""
 		if self.repair_type and not self.warranty_months:
-			self.warranty_months = frappe.db.get_value("Repair Type", self.repair_type, "warranty_months") or 0
+			self.warranty_months = (
+				frappe.db.get_value("Repair Type", self.repair_type, "warranty_months") or 0
+			)
 
 	def validate_warranty_repair(self):
 		"""Validate warranty repair settings"""
@@ -1234,6 +1254,7 @@ class RepairOrder(Document):
 		"""Calculate warranty expiry date when delivered"""
 		if self.delivered_date and self.warranty_months and self.warranty_months > 0:
 			from frappe.utils import add_to_date, getdate
+
 			delivery_date = getdate(self.delivered_date)
 			self.warranty_expiry_date = add_to_date(delivery_date, months=self.warranty_months)
 		elif not self.delivered_date:
@@ -1251,6 +1272,7 @@ class RepairOrder(Document):
 			return {"valid": False, "message": "Original repair has no warranty"}
 
 		from frappe.utils import getdate
+
 		today = getdate()
 		expiry_date = getdate(original_repair.warranty_expiry_date)
 
@@ -1270,15 +1292,19 @@ class RepairOrder(Document):
 		self.customer_id_state = id_state
 		self.id_verified_by = frappe.session.user
 		from frappe.utils import now
+
 		self.id_verified_date = now()
 
 		# Log the verification
-		self._log_audit_event("id_verification", {
-			"id_type": id_type,
-			"id_number": "***" + (id_number[-4:] if len(id_number) > 4 else "****"),
-			"id_state": id_state,
-			"verified_by": self.id_verified_by
-		})
+		self._log_audit_event(
+			"id_verification",
+			{
+				"id_type": id_type,
+				"id_number": "***" + (id_number[-4:] if len(id_number) > 4 else "****"),
+				"id_state": id_state,
+				"verified_by": self.id_verified_by,
+			},
+		)
 
 		self.save()
 
@@ -1286,7 +1312,7 @@ class RepairOrder(Document):
 			"success": True,
 			"message": "Customer ID verified successfully",
 			"verified_by": self.id_verified_by,
-			"verified_date": self.id_verified_date
+			"verified_date": self.id_verified_date,
 		}
 
 	def sign_intake_checklist(self, signature_data):
@@ -1313,6 +1339,7 @@ class RepairOrder(Document):
 
 			# Save file doc
 			from frappe.utils.file_manager import save_file
+
 			file_doc = save_file(filename, file_path, self.doctype, self.name, is_private=1)
 
 			# Update field
@@ -1320,17 +1347,16 @@ class RepairOrder(Document):
 			self.intake_checklist_signed = 1
 
 			# Log the signature
-			self._log_audit_event("intake_signed", {
-				"signature_file": file_doc.file_url,
-				"signed_by": frappe.session.user
-			})
+			self._log_audit_event(
+				"intake_signed", {"signature_file": file_doc.file_url, "signed_by": frappe.session.user}
+			)
 
 			self.save()
 
 			return {
 				"success": True,
 				"message": "Intake checklist signed successfully",
-				"signature_url": file_doc.file_url
+				"signature_url": file_doc.file_url,
 			}
 
 		except Exception as e:
@@ -1347,28 +1373,30 @@ class RepairOrder(Document):
 			"compliance": self.get_compliance_summary(),
 			"audit_trail": {
 				"versions": len(self.get_audit_trail().get("version_history", [])),
-				"audit_events": len([c for c in (self.communications or []) if c.communication_type == "Audit"])
+				"audit_events": len(
+					[c for c in (self.communications or []) if c.communication_type == "Audit"]
+				),
 			},
 			"item_details": {
 				"has_gemstones": bool(self.gemstones),
 				"gemstone_count": len(self.gemstones) if self.gemstones else 0,
 				"has_metal": bool(self.metal_type),
 				"metal_type": self.metal_type,
-				"metal_purity": self.purity
+				"metal_purity": self.purity,
 			},
 			"financial_compliance": {
 				"has_deposit": bool(self.deposit_amount and self.deposit_amount > 0),
 				"deposit_amount": self.deposit_amount,
 				"total_payments": self.get_total_paid(),
 				"balance_due": self.balance_due,
-				"payment_status": self.payment_status
+				"payment_status": self.payment_status,
 			},
 			"warranty_compliance": {
 				"is_warranty_repair": self.is_warranty_repair,
 				"has_warranty": bool(self.warranty_months and self.warranty_months > 0),
 				"warranty_months": self.warranty_months,
-				"warranty_expiry": self.warranty_expiry_date
-			}
+				"warranty_expiry": self.warranty_expiry_date,
+			},
 		}
 
 		return report

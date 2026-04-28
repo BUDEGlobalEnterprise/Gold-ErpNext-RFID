@@ -10,11 +10,14 @@
 						{{ filteredAppraisals.length }} Records
 					</span>
 				</div>
-				<button
-					class="px-4 py-2 bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black text-xs font-bold rounded-lg hover:bg-gray-800 dark:hover:bg-[#b5952f] transition-all shadow-sm"
-				>
-					+ New Appraisal
-				</button>
+				<div class="flex items-center gap-2">
+					<ViewToggle v-model="viewMode" storage-key="zevar_appraisals_view" />
+					<button
+						class="px-4 py-2 bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black text-xs font-bold rounded-lg hover:bg-gray-800 dark:hover:bg-[#b5952f] transition-all shadow-sm"
+					>
+						+ New Appraisal
+					</button>
+				</div>
 			</div>
 
 			<div
@@ -70,8 +73,8 @@
 				</div>
 			</div>
 
-			<div class="flex-1 overflow-auto min-h-0">
-				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+			<div class="flex-1 overflow-auto min-h-0 pr-2 custom-scrollbar">
+				<div v-if="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 					<div
 						v-for="item in filteredAppraisals"
 						:key="item.id"
@@ -164,6 +167,39 @@
 						</div>
 					</div>
 				</div>
+				<div v-if="viewMode === 'list'" class="space-y-2">
+					<div
+						v-for="item in filteredAppraisals"
+						:key="item.id"
+						class="flex items-center justify-between bg-white dark:bg-warm-dark-900/50 rounded-lg px-4 py-3 border border-gray-100 dark:border-warm-border/50 hover:border-[#D4AF37]/30 transition cursor-pointer"
+					>
+						<div class="flex items-center gap-3 min-w-0">
+							<div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+								{{ getInitials(item.customer) }}
+							</div>
+							<div class="min-w-0">
+								<div class="font-bold text-gray-900 dark:text-white text-sm truncate">{{ item.description }}</div>
+								<div class="text-[10px] text-gray-500">{{ item.customer }} &middot; {{ item.date }}</div>
+							</div>
+						</div>
+						<div class="flex items-center gap-4 shrink-0">
+							<div class="hidden sm:block">
+								<div class="text-[9px] text-gray-500 uppercase font-bold">Metal</div>
+								<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400">{{ item.metal }}</span>
+							</div>
+							<div class="text-right">
+								<div class="text-[9px] text-gray-500 uppercase font-bold">Value</div>
+								<div class="text-sm font-bold text-[#D4AF37] font-mono">{{ formatCurrency(item.estimatedValue) }}</div>
+							</div>
+							<span
+								class="text-[9px] font-bold px-2 py-1 rounded-full"
+								:class="item.status === 'Pending' ? 'bg-amber-100 text-amber-700' : item.status === 'In Progress' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'"
+							>
+								{{ item.status }}
+							</span>
+						</div>
+					</div>
+				</div>
 				<div v-if="filteredAppraisals.length === 0" class="py-20 text-center">
 					<p class="text-gray-400 text-sm">No appraisals found.</p>
 				</div>
@@ -174,10 +210,12 @@
 
 <script setup>
 import AppLayout from '@/components/AppLayout.vue'
+import ViewToggle from '@/components/ViewToggle.vue'
 import { useUIStore } from '@/stores/ui.js'
 import { ref, computed } from 'vue'
 
 const ui = useUIStore()
+const viewMode = ref(localStorage.getItem('zevar_appraisals_view') || 'grid')
 const activeTab = ref('all')
 const statusTabs = [
 	{ value: 'all', label: 'All' },
@@ -237,6 +275,11 @@ const filteredAppraisals = computed(() => {
 	}
 	return items
 })
+
+function getInitials(name) {
+	if (!name) return '?'
+	return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+}
 
 function formatCurrency(val) {
 	return val

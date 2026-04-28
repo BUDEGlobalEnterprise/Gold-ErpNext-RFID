@@ -49,6 +49,7 @@ doc_events = {
 			"zevar_core.tax_events.apply_store_tax",
 			"zevar_core.trade_in_events.validate_trade_in_2x_rule",
 		],
+		"before_submit": ["zevar_core.api.repair_accounting.validate_sales_invoice_stream"],
 		"on_submit": "zevar_core.api.commission.calculate_commissions",
 	},
 }

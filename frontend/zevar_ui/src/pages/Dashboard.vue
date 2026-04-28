@@ -32,9 +32,6 @@
 		<div class="dashboard-container" style="padding-top: 0;">
 			<div v-if="session.user" class="welcome-text" style="width: 100%; margin-bottom: 1.25rem;">
 				Welcome back, <strong>{{ session.user?.full_name?.split(' ')[0] || 'User' }}</strong>
-				<span v-if="visibility.ownSalesOnly" class="text-xs text-gray-500 ml-2">
-					(Limited access - your sales only)
-				</span>
 			</div>
 			
 			<div class="dashboard-layout">
@@ -56,8 +53,8 @@
 			</router-link>
 <br>
 
-			<!-- Section: Employee Portal (for Employee/ESS roles) -->
-			<div class="admin-section" v-if="session.hasAnyRole(['Employee', 'Employee Self Service']) && !session.isAdmin">
+			<!-- Section: Employee Portal (for Employee/ESS/Sales Associate roles) -->
+			<div class="admin-section" v-if="session.hasAnyRole(['Employee', 'Employee Self Service', 'Sales Associate']) && !session.isAdmin">
 				<h4 class="section-label">Employee Portal</h4>
 				<div class="tile-row-4">
 					<a href="/employee-portal/#/" class="tile-secondary">
@@ -441,10 +438,12 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* ===== CSS Custom Properties — Light (default) ===== */
 .dashboard-wrapper {
 	min-height: 100vh;
 	display: flex;
 	flex-direction: column;
+	background: #F9FAFB;
 }
 
 /* Header */
@@ -454,6 +453,8 @@ onUnmounted(() => {
 	justify-content: space-between;
 	padding: 1.25rem 2rem;
 	flex-shrink: 0;
+	background: white;
+	border-bottom: 1px solid #F3F4F6;
 }
 
 .header-left { display: flex; align-items: center; }
@@ -469,11 +470,11 @@ onUnmounted(() => {
 	box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
 }
 .logo-icon svg { width: 26px; height: 26px; }
-.logo-title { font-size: 1.35rem; font-weight: 800; color: #1F2937; line-height: 1.2; }
+.logo-title { font-size: 1.35rem; font-weight: 800; color: #111827; line-height: 1.2; }
 .logo-subtitle { font-size: 0.75rem; color: #9CA3AF; font-weight: 500; }
 
 .clock-block { text-align: right; }
-.clock-time { font-size: 1.25rem; font-weight: 700; color: #1F2937; font-variant-numeric: tabular-nums; }
+.clock-time { font-size: 1.25rem; font-weight: 700; color: #111827; font-variant-numeric: tabular-nums; }
 .clock-date { font-size: 0.7rem; color: #9CA3AF; font-weight: 500; }
 
 .logout-btn {
@@ -515,7 +516,7 @@ onUnmounted(() => {
 	color: #6B7280;
 	margin-bottom: 1.25rem;
 }
-.welcome-text strong { color: #1F2937; }
+.welcome-text strong { color: #111827; }
 
 /* Tiles */
 .tile-hero {
@@ -529,12 +530,12 @@ onUnmounted(() => {
 	box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
 	text-decoration: none;
 	transition: all 0.25s cubic-bezier(.4,0,.2,1);
-	border: 1.5px solid transparent;
+	border: 1.5px solid #F3F4F6;
 }
 .tile-hero:hover {
 	transform: translateY(-2px);
-	box-shadow: 0 8px 30px rgba(249,115,22,0.12);
-	border-color: #FDBA74;
+	box-shadow: 0 8px 30px rgba(212,175,55,0.15);
+	border-color: #D4AF37;
 }
 .tile-hero-icon {
 	width: 64px; height: 64px;
@@ -543,7 +544,7 @@ onUnmounted(() => {
 	flex-shrink: 0;
 }
 .tile-hero-icon svg { width: 32px; height: 32px; }
-.tile-hero-title { font-size: 1.75rem; font-weight: 800; color: #1F2937; }
+.tile-hero-title { font-size: 1.75rem; font-weight: 800; color: #111827; }
 .tile-hero-sub { font-size: 0.85rem; color: #9CA3AF; font-weight: 500; }
 
 .tile-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
@@ -560,9 +561,9 @@ onUnmounted(() => {
 	text-decoration: none;
 	box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
 	transition: all 0.25s cubic-bezier(.4,0,.2,1);
-	border: 1.5px solid transparent;
+	border: 1.5px solid #F3F4F6;
 }
-.tile-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); border-color: #E5E7EB; }
+.tile-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,175,55,0.12); border-color: #D4AF37; }
 
 .tile-icon {
 	width: 48px; height: 48px;
@@ -571,7 +572,7 @@ onUnmounted(() => {
 	flex-shrink: 0;
 }
 .tile-icon svg { width: 24px; height: 24px; }
-.tile-title { font-size: 1.1rem; font-weight: 700; color: #1F2937; }
+.tile-title { font-size: 1.1rem; font-weight: 700; color: #111827; }
 .tile-sub { font-size: 0.75rem; color: #9CA3AF; font-weight: 500; }
 
 .tile-secondary {
@@ -586,9 +587,9 @@ onUnmounted(() => {
 	text-decoration: none;
 	box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
 	transition: all 0.25s cubic-bezier(.4,0,.2,1);
-	border: 1.5px solid transparent;
+	border: 1.5px solid #F3F4F6;
 }
-.tile-secondary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); border-color: #E5E7EB; }
+.tile-secondary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,175,55,0.12); border-color: #D4AF37; }
 
 .tile-icon-sm {
 	width: 40px; height: 40px;
@@ -596,7 +597,7 @@ onUnmounted(() => {
 	display: flex; align-items: center; justify-content: center;
 }
 .tile-icon-sm svg { width: 20px; height: 20px; }
-.tile-title-sm { font-size: 0.85rem; font-weight: 700; color: #1F2937; }
+.tile-title-sm { font-size: 0.85rem; font-weight: 700; color: #111827; }
 .tile-sub-sm { font-size: 0.65rem; color: #9CA3AF; font-weight: 500; }
 
 /* Admin Section */
@@ -624,6 +625,7 @@ onUnmounted(() => {
 	border-radius: 18px;
 	padding: 1.25rem;
 	box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+	border: 1px solid #F3F4F6;
 }
 .sidebar-label {
 	font-size: 0.7rem;
@@ -660,7 +662,7 @@ onUnmounted(() => {
 	flex-shrink: 0;
 }
 .quick-action-icon svg { width: 20px; height: 20px; }
-.quick-action-text h5 { font-size: 0.9rem; font-weight: 700; color: #1F2937; margin: 0 0 0.15rem 0; }
+.quick-action-text h5 { font-size: 0.9rem; font-weight: 700; color: #111827; margin: 0 0 0.15rem 0; }
 .quick-action-text p { font-size: 0.7rem; color: #6B7280; margin: 0; }
 
 /* Market Prices */
@@ -678,7 +680,7 @@ onUnmounted(() => {
 	background: transparent;
 }
 .market-name { font-size: 0.6rem; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.03em; }
-.market-price { font-size: 0.95rem; font-weight: 800; color: #1F2937; margin-top: 0.1rem; font-variant-numeric: tabular-nums; }
+.market-price { font-size: 0.95rem; font-weight: 800; color: #111827; margin-top: 0.1rem; font-variant-numeric: tabular-nums; }
 
 /* Responsive */
 @media (max-width: 1024px) {
@@ -701,4 +703,42 @@ onUnmounted(() => {
 	.market-grid { grid-template-columns: 1fr; }
 	.clock-block { display: none; }
 }
+
+/* ===== DARK MODE (orange/gold themed) ===== */
+</style>
+
+<style>
+/* Dark mode — uses higher specificity to win over scoped light styles */
+html.dark .dashboard-wrapper { background: #0A0A0C !important; }
+html.dark .dashboard-header { background: #0A0A0C !important; border-bottom: 1px solid rgba(212,175,55,0.12) !important; }
+html.dark .logo-title { color: #F5F0E8 !important; }
+html.dark .logo-subtitle { color: #A09484 !important; }
+html.dark .clock-time { color: #F5F0E8 !important; }
+html.dark .clock-date { color: #A09484 !important; }
+html.dark .logout-btn { border-color: rgba(212,175,55,0.25) !important; background: #141312 !important; color: #D4C4A8 !important; }
+html.dark .logout-btn:hover { border-color: #D4AF37 !important; color: #D4AF37 !important; box-shadow: 0 2px 8px rgba(212,175,55,0.2) !important; }
+html.dark .welcome-text { color: #A09484 !important; }
+html.dark .welcome-text strong { color: #F5F0E8 !important; }
+html.dark .tile-hero { background: #181614 !important; border-color: rgba(212,175,55,0.15) !important; }
+html.dark .tile-hero:hover { box-shadow: 0 8px 30px rgba(212,175,55,0.18) !important; border-color: #D4AF37 !important; }
+html.dark .tile-hero-title { color: #F5F0E8 !important; }
+html.dark .tile-hero-sub { color: #A09484 !important; }
+html.dark .tile-primary { background: #181614 !important; border-color: rgba(212,175,55,0.1) !important; }
+html.dark .tile-primary:hover { box-shadow: 0 8px 24px rgba(212,175,55,0.15) !important; border-color: rgba(212,175,55,0.35) !important; }
+html.dark .tile-title { color: #F5F0E8 !important; }
+html.dark .tile-sub { color: #A09484 !important; }
+html.dark .tile-secondary { background: #181614 !important; border-color: rgba(212,175,55,0.1) !important; }
+html.dark .tile-secondary:hover { box-shadow: 0 8px 24px rgba(212,175,55,0.15) !important; border-color: rgba(212,175,55,0.35) !important; }
+html.dark .tile-title-sm { color: #F5F0E8 !important; }
+html.dark .tile-sub-sm { color: #A09484 !important; }
+html.dark .section-label { color: #A09484 !important; }
+html.dark .sidebar-section { background: #181614 !important; border-color: rgba(212,175,55,0.1) !important; }
+html.dark .sidebar-label { color: #A09484 !important; }
+html.dark .quick-action-btn { background: rgba(212,175,55,0.06) !important; border-color: rgba(212,175,55,0.15) !important; }
+html.dark .quick-action-btn:hover { background: rgba(212,175,55,0.12) !important; border-color: #D4AF37 !important; }
+html.dark .quick-action-text h5 { color: #F5F0E8 !important; }
+html.dark .quick-action-text p { color: #A09484 !important; }
+html.dark .market-card { border-bottom-color: rgba(212,175,55,0.08) !important; }
+html.dark .market-name { color: #8A7D6C !important; }
+html.dark .market-price { color: #F5F0E8 !important; }
 </style>

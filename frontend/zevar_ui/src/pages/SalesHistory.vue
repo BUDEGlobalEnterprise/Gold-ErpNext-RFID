@@ -2,19 +2,22 @@
 	<AppLayout>
 		<div class="h-full flex flex-col">
 			<!-- Page Header -->
-			<div class="mb-6">
-				<h1 class="premium-title !text-2xl">Sales History</h1>
-				<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
-					View and manage past transactions
-					<span v-if="isOwnSalesOnly" class="text-xs text-amber-600 dark:text-amber-400 ml-2">
-						(Showing your sales only)
-					</span>
-				</p>
+			<div class="flex items-center justify-between mb-6 flex-shrink-0">
+				<div>
+					<h1 class="premium-title !text-2xl">Sales History</h1>
+					<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
+						View and manage past transactions
+						<span v-if="isOwnSalesOnly" class="text-xs text-amber-600 dark:text-amber-400 ml-2">
+							(Showing your sales only)
+						</span>
+					</p>
+				</div>
+				<ViewToggle v-model="viewMode" storage-key="zevar_sales_view" />
 			</div>
 
 			<!-- Filters -->
 			<div
-				class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 mb-6 border border-gray-100 dark:border-warm-border/50"
+				class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 mb-6 border border-gray-100 dark:border-warm-border/50 flex-shrink-0"
 			>
 				<div class="flex flex-wrap gap-3 items-end">
 					<div class="flex flex-col gap-1">
@@ -82,9 +85,9 @@
 			</div>
 
 			<!-- Summary Cards -->
-			<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" v-if="summary">
+			<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 flex-shrink-0" v-if="summary">
 				<div
-					class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
+					class="premium-card !p-4"
 				>
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
@@ -105,7 +108,7 @@
 					</p>
 				</div>
 				<div
-					class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
+					class="premium-card !p-4"
 				>
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
@@ -116,7 +119,7 @@
 					</p>
 				</div>
 				<div
-					class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
+					class="premium-card !p-4"
 				>
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
@@ -128,8 +131,63 @@
 				</div>
 			</div>
 
+			<!-- Grid View -->
+			<div v-if="viewMode === 'grid'" class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
+				<div v-if="loading" class="flex items-center justify-center py-20">
+					<div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-[#D4AF37]"></div>
+				</div>
+				<div v-else-if="sales.length === 0" class="flex items-center justify-center py-20">
+					<p class="text-gray-400 text-sm">No transactions found</p>
+				</div>
+				<div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+					<div
+						v-for="sale in sales"
+						:key="sale.name"
+						class="bg-white dark:bg-warm-dark-800 rounded-2xl border border-gray-100 dark:border-warm-border/50 p-4 hover:shadow-md hover:border-gray-300 dark:hover:border-warm-border transition cursor-pointer"
+						@click="viewDetails(sale.name)"
+					>
+						<div class="flex items-start justify-between mb-3">
+							<div>
+								<span class="font-mono text-xs font-bold text-[#D4AF37]">{{ sale.name }}</span>
+								<p class="text-sm font-bold text-gray-900 dark:text-white mt-0.5">{{ sale.customer || 'Walk-In' }}</p>
+							</div>
+							<span
+								class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold shrink-0"
+								:class="getStatusClass(sale.status)"
+							>
+								{{ sale.status }}
+							</span>
+						</div>
+						<div class="grid grid-cols-2 gap-3 mb-3">
+							<div>
+								<span class="text-[10px] text-gray-500 uppercase font-bold">Date</span>
+								<p class="text-xs text-gray-700 dark:text-gray-300">{{ formatDate(sale.posting_date) }}</p>
+							</div>
+							<div>
+								<span class="text-[10px] text-gray-500 uppercase font-bold">Items</span>
+								<p class="text-xs text-gray-700 dark:text-gray-300">{{ sale.item_count || 1 }}</p>
+							</div>
+						</div>
+						<div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-warm-border/50">
+							<span class="text-lg font-bold text-green-600 dark:text-green-400">${{ formatAmount(sale.grand_total) }}</span>
+							<button class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition">
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+							</button>
+						</div>
+					</div>
+				</div>
+				<div
+					v-if="pagination.page < pagination.total_pages"
+					class="flex items-center justify-center pt-6 pb-4"
+				>
+					<button @click="loadMore" :disabled="loading" class="px-6 py-2.5 text-sm font-bold rounded-lg border-2 border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black disabled:opacity-50 transition">
+						{{ loading ? 'Loading...' : 'Load More' }}
+					</button>
+				</div>
+			</div>
+
 			<!-- Sales Table -->
-			<div class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar flex flex-col">
+			<div v-if="viewMode === 'list'" class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar flex flex-col">
 				<div
 					class="bg-white dark:bg-warm-dark-900/50 rounded-xl border border-gray-100 dark:border-warm-border/50 mb-6"
 				>
@@ -554,6 +612,7 @@
 </template>
 
 <script setup>
+import ViewToggle from '@/components/ViewToggle.vue'
 import { ref, onMounted, computed } from 'vue'
 import { createResource } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
@@ -563,7 +622,8 @@ import { canViewAllSalesHistory } from '@/utils/permissions.js'
 const session = useSessionStore()
 const isOwnSalesOnly = computed(() => !canViewAllSalesHistory())
 
-const loading = ref(false)
+const viewMode = ref(localStorage.getItem('zevar_sales_view') || 'list')
+	const loading = ref(false)
 const sales = ref([])
 const summary = ref(null)
 const selectedTransaction = ref(null)

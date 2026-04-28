@@ -14,78 +14,7 @@
 				</div>
 				<div class="flex items-center gap-2">
 					<!-- View Toggle -->
-					<div class="flex bg-gray-100 dark:bg-warm-dark-900 rounded-lg p-1">
-						<button
-							@click="viewMode = 'grid'"
-							class="px-3 py-1.5 rounded-md text-sm font-medium transition"
-							:class="
-								viewMode === 'grid'
-									? 'bg-white dark:bg-warm-dark-800 shadow text-gray-900 dark:text-white'
-									: 'text-gray-500 hover:text-gray-700'
-							"
-						>
-							<svg
-								class="w-4 h-4"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-								/>
-							</svg>
-						</button>
-						<button
-							@click="viewMode = 'kanban'"
-							class="px-3 py-1.5 rounded-md text-sm font-medium transition"
-							:class="
-								viewMode === 'kanban'
-									? 'bg-white dark:bg-warm-dark-800 shadow text-gray-900 dark:text-white'
-									: 'text-gray-500 hover:text-gray-700'
-							"
-						>
-							<svg
-								class="w-4 h-4"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
-								/>
-							</svg>
-						</button>
-						<button
-							v-if="isDesktop"
-							@click="viewMode = 'split'"
-							class="px-3 py-1.5 rounded-md text-sm font-medium transition"
-							:class="
-								viewMode === 'split'
-									? 'bg-white dark:bg-warm-dark-800 shadow text-gray-900 dark:text-white'
-									: 'text-gray-500 hover:text-gray-700'
-							"
-						>
-							<svg
-								class="w-4 h-4"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 16a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"
-								/>
-							</svg>
-						</button>
-					</div>
+					<ViewToggle v-model="viewMode" storage-key="zevar_repairs_view" />
 					<button
 						@click="showNewModal = true"
 						class="px-4 py-2 bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black rounded-lg text-xs font-bold hover:bg-gray-800 dark:hover:bg-[#c9a432] transition flex items-center gap-2"
@@ -349,6 +278,42 @@
 					</div>
 				</div>
 
+				<!-- List View -->
+				<div v-else-if="viewMode === 'list'" class="flex-1 overflow-y-auto pb-20">
+					<div v-if="ordersResource.loading && !orders.length" class="py-20 text-center">
+						<div
+							class="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-[#D4AF37] mx-auto mb-4"
+						></div>
+						<p class="text-gray-500">Loading repairs...</p>
+					</div>
+					<div
+						v-else-if="!orders.length"
+						class="py-20 text-center bg-white dark:bg-warm-dark-900 rounded-2xl border border-dashed border-gray-200 dark:border-warm-border"
+					>
+						<p class="text-gray-500 text-sm">No repair orders found</p>
+					</div>
+					<div v-else class="space-y-2">
+						<div
+							v-for="order in filteredOrders"
+							:key="order.name"
+							@click="selectOrder(order)"
+							class="flex items-center justify-between bg-white dark:bg-warm-dark-900/50 rounded-lg px-4 py-3 border border-gray-100 dark:border-warm-border/50 hover:border-[#D4AF37]/30 transition cursor-pointer"
+							:class="{ 'ring-2 ring-[#D4AF37]/30': selectedOrder?.name === order.name }"
+						>
+							<div class="flex items-center gap-4 min-w-0">
+								<span class="font-mono text-xs text-[#D4AF37] w-36 shrink-0">{{ order.name }}</span>
+								<span class="text-sm font-bold text-gray-900 dark:text-white truncate w-32">{{ order.customer_name }}</span>
+								<span class="text-xs text-gray-500 truncate">{{ order.repair_type_name }}</span>
+							</div>
+							<div class="flex items-center gap-4">
+								<span v-if="order.priority === 'Urgent'" class="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">Urgent</span>
+								<span class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold" :class="getStatusBadgeClass(order.status)">{{ order.status }}</span>
+								<span class="text-sm font-bold text-gray-900 dark:text-white">${{ formatNum(order.total_cost || order.estimated_cost) }}</span>
+							</div>
+						</div>
+					</div>
+				</div>
+
 				<!-- Kanban View -->
 				<div v-else-if="viewMode === 'kanban'" class="flex-1 overflow-x-auto pb-4">
 					<div class="flex gap-3 min-w-max h-full">
@@ -573,11 +538,14 @@
 		/>
 
 		<!-- Payment Modal -->
-		<PaymentModal
+		<CheckoutModal
 			v-if="showPaymentModal"
-			:order="paymentOrder"
+			:show="showPaymentModal"
+			mode="repair"
+			:referenceId="paymentOrder?.name"
+			:balanceAmount="paymentOrder?.balance_due || 0"
 			@close="showPaymentModal = false"
-			@payment-recorded="onRepairCreated"
+			@success="onRepairCreated"
 		/>
 	</AppLayout>
 </template>
@@ -594,11 +562,12 @@ import NewRepairModal from '@/components/NewRepairModal.vue'
 import QRCodeModal from '@/components/QRCodeModal.vue'
 import CameraModal from '@/components/CameraModal.vue'
 import StoreTransferModal from '@/components/StoreTransferModal.vue'
-import PaymentModal from '@/components/PaymentModal.vue'
+import CheckoutModal from '@/components/CheckoutModal.vue'
+import ViewToggle from '@/components/ViewToggle.vue'
 	import { formatDate } from '@/utils/dates.js'
 
 const session = useSessionStore()
-const viewMode = ref('grid') // grid, kanban, split
+const viewMode = ref('grid') // grid, list, split (hidden)
 const statusFilter = ref('')
 const searchTerm = ref('')
 // Use global warehouse from session
@@ -616,6 +585,7 @@ const dashboardStats = ref(null)
 const multiStoreStats = ref([])
 const detailOrder = ref(null)
 const selectedSplitOrder = ref(null)
+const selectedOrder = ref(null)
 const qrOrder = ref(null)
 const showCameraModal = ref(false)
 const showTransferModal = ref(false)
@@ -671,6 +641,15 @@ const isDesktop = computed(() => window.innerWidth >= 1024)
 const hasActiveFilters = computed(() => {
 	return Object.values(advancedFilters.value).some((v) => v !== '')
 })
+
+// Filtered orders for list view (same as orders, alias for template clarity)
+const filteredOrders = computed(() => orders.value)
+
+function selectOrder(order) {
+	selectedOrder.value = order
+	openDetail(order)
+}
+
 
 // Kanban columns
 const kanbanColumns = computed(() => {

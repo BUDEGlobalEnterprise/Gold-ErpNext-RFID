@@ -132,7 +132,7 @@
 			<!-- Summary Cards -->
 			<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" v-if="summary">
 				<div
-					class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
+					class="premium-card !p-4"
 				>
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
@@ -153,7 +153,7 @@
 					</p>
 				</div>
 				<div
-					class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
+					class="premium-card !p-4"
 				>
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
@@ -164,7 +164,7 @@
 					</p>
 				</div>
 				<div
-					class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
+					class="premium-card !p-4"
 				>
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"

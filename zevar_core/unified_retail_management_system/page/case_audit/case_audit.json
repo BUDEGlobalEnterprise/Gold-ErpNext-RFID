@@ -1,0 +1,29 @@
+{
+ "content": null,
+ "creation": "2026-04-28 04:51:11.514759",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-04-28 04:51:11.514759",
+ "modified_by": "Administrator",
+ "module": "Unified Retail Management System",
+ "name": "case-audit",
+ "owner": "Administrator",
+ "page_name": "case-audit",
+ "roles": [
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Case Audit"
+}

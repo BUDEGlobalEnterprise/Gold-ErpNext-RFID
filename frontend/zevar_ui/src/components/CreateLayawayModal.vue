@@ -1299,6 +1299,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch, nextTick } from 'vue'
 import { createResource, createDocumentResource } from 'frappe-ui'
 import { useSessionStore } from '@/stores/session.js'
 import { useCartStore } from '@/stores/cart.js'
+import { useRoute } from 'vue-router'
 
 const props = defineProps({
 	show: { type: Boolean, default: false },
@@ -1308,6 +1309,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'created', 'proceedToPayment'])
 const session = useSessionStore()
 const cartStore = useCartStore()
+const route = useRoute()
 
 // UI State
 const submitting = ref(false)
@@ -1373,23 +1375,78 @@ watch(() => props.show, (newVal) => {
 				has_serial: item.has_serial || false,
 				serial_numbers: ''
 			}))
-
-			// Try to set customer from cart if selected
-			if (cartStore.customer) {
-				selectedCustomer.value = cartStore.customer
-				isNewCustomerMode.value = false
-			}
-
-			// Auto-apply 10% deposit and fetch tax details
-			nextTick(() => {
-				form.value.deposit = minDeposit.value
-				fetchStoreTaxDetails()
-			})
 		}
+
+		// Try to set customer from cart if selected
+		if (cartStore.customer) {
+			selectedCustomer.value = cartStore.customer
+			isNewCustomerMode.value = false
+			autoFillCustomerFromCart(cartStore.customer)
+		}
+
+		// Auto-apply 10% deposit and fetch tax details
+		nextTick(() => {
+			form.value.deposit = minDeposit.value
+			fetchStoreTaxDetails()
+		})
 	} else {
 		// Reset logic... but we already have a close method for reset
 	}
 }, { immediate: true })
+
+// Handle inline mode initialization (Layaway page with ?action=new&customer=...)
+watch(() => route.query, (query) => {
+	if (!props.inlineMode) return
+	if (query.action === 'new' && cartStore.customer) {
+		selectedCustomer.value = cartStore.customer
+		isNewCustomerMode.value = false
+		autoFillCustomerFromCart(cartStore.customer)
+		nextTick(() => {
+			form.value.deposit = minDeposit.value
+			fetchStoreTaxDetails()
+		})
+	}
+}, { immediate: true })
+
+async function autoFillCustomerFromCart(cust) {
+	if (!cust) return
+
+	selectedCustomer.value = cust
+	customerSearch.value = cust.display_name || cust.customer_name || cust.name
+	isNewCustomerMode.value = false
+
+	form.value.phone = cust.mobile_no || ''
+	form.value.email = cust.email_id || ''
+
+	try {
+		const customerName = cust.name || cust.customer_name
+		const result = await customerDetailsResource.submit({ customer_name: customerName })
+		const details = result?.message ?? result
+		if (details) {
+			form.value.phone = details.mobile_no || form.value.phone
+			form.value.email = details.email_id || form.value.email
+			form.value.address = details.address || ''
+			form.value.city = details.city || ''
+			form.value.state = details.state || ''
+			form.value.zip = details.zip || ''
+			form.value.country = details.country || ''
+
+			if (details.nominee_name) {
+				hasNominee.value = true
+				nominee.value.name = details.nominee_name || ''
+				nominee.value.relationship = details.nominee_relationship || ''
+				nominee.value.phone = details.nominee_phone || ''
+				nominee.value.email = ''
+			}
+		}
+	} catch (e) {
+		if (cust.address) form.value.address = cust.address
+		if (cust.city) form.value.city = cust.city
+		if (cust.state) form.value.state = cust.state
+		if (cust.zip || cust.pincode) form.value.zip = cust.zip || cust.pincode
+		if (cust.country) form.value.country = cust.country
+	}
+}
 
 // Helper to get today's date
 const getTodayDate = () => {
@@ -1613,36 +1670,8 @@ async function searchCustomers() {
 }
 
 async function selectCustomer(customer) {
-	selectedCustomer.value = customer
-	customerSearch.value = customer.customer_name
+	await autoFillCustomerFromCart(customer)
 	showCustomerDropdown.value = false
-
-	form.value.phone = customer.mobile_no || ''
-	form.value.email = customer.email_id || ''
-
-	try {
-		const result = await customerDetailsResource.submit({ customer_name: customer.customer_name })
-		const details = result?.message ?? result
-		if (details) {
-			form.value.phone = details.mobile_no || form.value.phone
-			form.value.email = details.email_id || form.value.email
-			form.value.address = details.address || ''
-			form.value.city = details.city || ''
-			form.value.state = details.state || ''
-			form.value.zip = details.zip || ''
-			form.value.country = details.country || ''
-
-			if (details.nominee_name) {
-				hasNominee.value = true
-				nominee.value.name = details.nominee_name || ''
-				nominee.value.relationship = details.nominee_relationship || ''
-				nominee.value.phone = details.nominee_phone || ''
-				nominee.value.email = ''
-			}
-		}
-	} catch (e) {
-		console.error('Failed to fetch customer details:', e)
-	}
 }
 
 let itemSearchTimer

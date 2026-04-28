@@ -12,3 +12,9 @@ zevar_core.patches.cleanup_desktop_folder_state
 zevar_core.patches.repair_desktop_layout_and_shortcuts
 zevar_core.patches.migrate_salespersons
 zevar_core.patches.rename_purity_k_to_kt
+zevar_core.patches.create_customer_enhanced_fields
+zevar_core.patches.v1_0.setup_eod_accounts
+zevar_core.patches.v1_0.map_financier_payment_accounts
+zevar_core.patches.v1_0.add_transaction_stream_field
+zevar_core.patches.v1_0.add_rfid_field
+zevar_core.patches.v1_0.enhance_case_audit_fields

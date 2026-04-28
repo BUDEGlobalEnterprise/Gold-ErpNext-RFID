@@ -13,8 +13,16 @@ export const useUIStore = defineStore('ui', () => {
 	const sidebarCollapsed = ref(false)
 	const sortBy = ref('')
 
+	// Migrate legacy 'zevar-theme' key to 'theme'
+	const legacy = localStorage.getItem('zevar-theme')
+	if (legacy && !localStorage.getItem('theme')) {
+		localStorage.setItem('theme', legacy)
+		localStorage.removeItem('zevar-theme')
+	}
+
 	const isDark = ref(localStorage.getItem('theme') === 'dark')
 
+	// Apply dark class synchronously — before any component mounts
 	if (isDark.value) {
 		document.documentElement.classList.add('dark')
 	} else {

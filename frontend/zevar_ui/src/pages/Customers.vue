@@ -13,6 +13,7 @@
 				</div>
 				
 				<div class="flex items-center gap-2">
+					<ViewToggle v-model="viewMode" storage-key="zevar_customers_view" />
 					<div class="relative">
 						<svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
 						<input
@@ -24,6 +25,7 @@
 						/>
 					</div>
 					<button
+						@click="createNewClient"
 						class="px-4 py-2 bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black text-xs font-bold rounded-lg hover:bg-gray-800 dark:hover:bg-[#b5952f] transition-all shadow-sm"
 					>
 						+ New Client
@@ -52,7 +54,7 @@
 			</div>
 
 			<!-- Table View Wrapper with Outside Scrollbar -->
-			<div class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
+			<div v-if="viewMode === 'list'" class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
 				<div class="bg-white dark:bg-warm-dark-900/50 rounded-xl border border-gray-100 dark:border-warm-border/50 flex flex-col shadow-sm relative min-h-min">
 					<div class="overflow-x-auto">
 						<table class="w-full text-sm">
@@ -111,9 +113,19 @@
 									{{ customer.territory || '-' }}
 								</td>
 								<td class="px-4 py-3 text-right">
-									<button class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition">
-										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-									</button>
+									<div class="flex items-center justify-end gap-1">
+										<button @click.stop="openCustomer(customer.name)" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition" title="View Customer">
+											<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+										</button>
+										<button 
+											v-if="sessionStore.isManager"
+											@click.stop="editCustomer(customer.name)"
+											class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition"
+											title="Edit Customer"
+										>
+											<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+										</button>
+									</div>
 								</td>
 							</tr>
 						</tbody>
@@ -159,18 +171,72 @@
 						</button>
 					</div>
 				</div>
+				</div>
 			</div>
-		</div>
+
+			<div v-if="viewMode === 'grid'" class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
+				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 pb-4">
+					<div
+						v-for="customer in customers"
+						:key="customer.name"
+						class="bg-white dark:bg-[#15171e] rounded-2xl border border-gray-100 dark:border-warm-border/50 p-4 hover:shadow-md hover:border-gray-300 dark:hover:border-warm-border transition cursor-pointer flex flex-col"
+						:class="customer.customer_group === 'VIP' ? '!border-[#D4AF37]/30' : ''"
+					>
+						<div class="flex items-center gap-3 mb-3">
+							<div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+								:class="customer.customer_group === 'VIP' ? 'bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] text-[#0F1115]' : 'bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-300'">
+								{{ getInitials(customer.customer_name || customer.name) }}
+							</div>
+							<div class="min-w-0">
+								<div class="font-bold text-gray-900 dark:text-white text-sm truncate">{{ customer.customer_name || customer.name }}</div>
+								<span class="px-2 py-0.5 rounded-full text-[9px] font-bold"
+									:class="customer.customer_group === 'VIP' ? 'bg-[#D4AF37]/15 text-[#D4AF37]' : 'bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-400'">
+									{{ customer.customer_group || 'Standard' }}
+								</span>
+							</div>
+						</div>
+						<div class="space-y-1.5 pt-3 border-t border-gray-100 dark:border-warm-border/50">
+							<div class="flex items-center justify-between">
+								<div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+									<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+									{{ customer.mobile_no || 'No Phone' }}
+								</div>
+								<div class="flex items-center gap-1">
+									<button @click.stop="openCustomer(customer.name)" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition" title="View Customer">
+										<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+									</button>
+									<button 
+										v-if="sessionStore.isManager"
+										@click.stop="editCustomer(customer.name)"
+										class="p-1 rounded hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition"
+										title="Edit Customer"
+									>
+										<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+									</button>
+								</div>
+							</div>
+							<div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+								<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+								{{ customer.email_id || 'No Email' }}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</AppLayout>
 </template>
 
 <script setup>
 import AppLayout from '@/components/AppLayout.vue'
+import ViewToggle from '@/components/ViewToggle.vue'
 import { ref, onMounted } from 'vue'
 import { createResource } from 'frappe-ui'
-	import { formatDate } from '@/utils/dates.js'
+import { formatDate } from '@/utils/dates.js'
+import { useSessionStore } from '@/stores/session'
 
+const sessionStore = useSessionStore()
+const viewMode = ref(localStorage.getItem('zevar_customers_view') || 'list')
 const customers = ref([])
 const loading = ref(true)
 const searchQuery = ref('')
@@ -242,18 +308,44 @@ const vipCountResource = createResource({
 	}
 })
 
+const recentCountResource = createResource({
+	url: 'frappe.client.get_count',
+	makeParams() {
+		const thirtyDaysAgo = new Date()
+		thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+		const formattedDate = thirtyDaysAgo.toISOString().split('T')[0]
+		return {
+			doctype: 'Customer',
+			filters: [
+				['creation', '>=', formattedDate]
+			]
+		}
+	}
+})
+
+async function fetchGlobalStats() {
+	try {
+		const [vipResult, recentResult] = await Promise.all([
+			vipCountResource.submit(),
+			recentCountResource.submit()
+		])
+		vipCount.value = vipResult?.message || vipResult || 0
+		recentCount.value = recentResult?.message || recentResult || 0
+	} catch (err) {
+		console.error(err)
+	}
+}
+
 async function fetchCustomers() {
 	loading.value = true
 	try {
-		const [countResult, listResult, vipResult] = await Promise.all([
+		const [countResult, listResult] = await Promise.all([
 			countResource.submit(),
-			getListResource.submit(),
-			vipCountResource.submit()
+			getListResource.submit()
 		])
 		
 		pagination.value.total_count = countResult?.message || countResult || 0
 		customers.value = listResult?.message || listResult || []
-		vipCount.value = vipResult?.message || vipResult || 0
 	} catch (err) {
 		console.error(err)
 	} finally {
@@ -299,8 +391,21 @@ function getInitials(name) {
 	return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
 }
 
+function openCustomer(name) {
+	window.open(`/app/customer/${name}`, '_blank')
+}
+
+function editCustomer(name) {
+	if (!sessionStore.isManager) return
+	window.open(`/app/customer/${name}`, '_blank')
+}
+
+function createNewClient() {
+	window.open(`/app/customer/new-customer-1`, '_blank')
+}
 
 onMounted(() => {
+	fetchGlobalStats()
 	fetchCustomers()
 })
 </script>

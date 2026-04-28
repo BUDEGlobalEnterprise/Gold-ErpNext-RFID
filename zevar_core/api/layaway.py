@@ -15,7 +15,7 @@ from zevar_core.constants import (
 	MAX_EXTENSIONS_ALLOWED,
 )
 
-LAYAWAY_ALLOWED_ROLES = ["Sales User", "Sales Manager", "System Manager"]
+LAYAWAY_ALLOWED_ROLES = ["Sales User", "Sales Manager", "Store Manager", "POS Manager", "Employee", "Employee Self Service", "System Manager"]
 
 
 def _enforce_layaway_access() -> None:
@@ -535,6 +535,7 @@ def create_layaway(
 		doc.submit()
 
 		_reserve_inventory(doc)
+		_create_layaway_payment_entry(doc, deposit, deposit_mode)
 
 		payment_results = [
 			{"mode": deposit_mode, "amount": deposit},
@@ -673,16 +674,14 @@ def update_layaway_contract(layaway_id: str, updates: str | dict) -> dict:
 		if fieldname in allowed_fields:
 			setattr(doc, fieldname, value)
 
-		doc.flags.ignore_validate_update_after_submit = True
-		doc.save(ignore_permissions=True)
+	doc.flags.ignore_validate_update_after_submit = True
+	doc.save(ignore_permissions=True)
 
-		send_payment_confirmation(doc.name, amount, flt(doc.balance_amount))
-
-		return {
-			"success": True,
-			"layaway_id": doc.name,
-			"message": _("Layaway updated successfully."),
-		}
+	return {
+		"success": True,
+		"layaway_id": doc.name,
+		"message": _("Layaway updated successfully."),
+	}
 
 
 @frappe.whitelist(methods=["POST"])
@@ -742,6 +741,10 @@ def process_layaway_payment(
 
 		doc.flags.ignore_validate_update_after_submit = True
 		doc.save(ignore_permissions=True)
+
+		_create_layaway_payment_entry(doc, amount, mode_of_payment, reference_number)
+		if doc.status == "Completed":
+			_create_layaway_final_invoice(doc)
 
 		return {
 			"success": True,
@@ -1076,6 +1079,14 @@ def process_split_layaway_payment(
 		doc.flags.ignore_validate_update_after_submit = True
 		doc.save(ignore_permissions=True)
 
+		for p in payments_list:
+			_create_layaway_payment_entry(
+				doc, flt(p.get("amount", 0)), p.get("mode_of_payment", "Cash"), p.get("reference_number", "")
+			)
+
+		if doc.status == "Completed":
+			_create_layaway_final_invoice(doc)
+
 		return {
 			"success": True,
 			"layaway_id": doc.name,
@@ -1295,3 +1306,79 @@ def send_payment_confirmation(layaway_id: str, amount: float, new_balance: float
 			)
 	except Exception:
 		frappe.log_error(f"Payment Confirmation Failed for {layaway_id}", frappe.get_traceback())
+
+
+def _create_layaway_payment_entry(doc, amount, mode_of_payment, reference=None):
+	company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value(
+		"Global Defaults", "default_company"
+	)
+	if not company:
+		company = "Zevar Jewelers"
+
+	paid_to = None
+	mop = frappe.get_doc("Mode of Payment", mode_of_payment)
+	for row in mop.accounts:
+		if row.company == company:
+			paid_to = row.default_account
+			break
+
+	if not paid_to:
+		paid_to = frappe.db.get_value("Account", {"account_type": "Cash", "company": company})
+
+	liability_account = (
+		f"Liability — Layaway Deposits Held - {frappe.get_cached_value('Company', company, 'abbr')}"
+	)
+
+	pe = frappe.new_doc("Payment Entry")
+	pe.payment_type = "Receive"
+	pe.company = company
+	pe.party_type = "Customer"
+	pe.party = doc.customer
+	pe.paid_from = liability_account
+	pe.paid_to = paid_to
+	pe.paid_amount = amount
+	pe.received_amount = amount
+	pe.reference_no = reference or doc.name
+	pe.reference_date = nowdate()
+	pe.remarks = f"Layaway Payment for {doc.name}"
+
+	pe.flags.ignore_permissions = True
+	pe.insert()
+	pe.submit()
+	return pe.name
+
+
+def _create_layaway_final_invoice(doc):
+	company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value(
+		"Global Defaults", "default_company"
+	)
+	if not company:
+		company = "Zevar Jewelers"
+
+	liability_account = (
+		f"Liability — Layaway Deposits Held - {frappe.get_cached_value('Company', company, 'abbr')}"
+	)
+
+	invoice = frappe.new_doc("Sales Invoice")
+	invoice.customer = doc.customer
+	invoice.company = company
+	invoice.due_date = nowdate()
+	invoice.custom_transaction_stream = "Layaway Final"
+	invoice.debit_to = liability_account
+
+	for item in doc.items:
+		invoice.append(
+			"items",
+			{
+				"item_code": item.item_code,
+				"qty": item.qty,
+				"rate": item.rate,
+				"amount": item.amount,
+				"warehouse": item.warehouse,
+			},
+		)
+
+	invoice.flags.ignore_permissions = True
+	invoice.insert()
+	invoice.submit()
+	return invoice.name

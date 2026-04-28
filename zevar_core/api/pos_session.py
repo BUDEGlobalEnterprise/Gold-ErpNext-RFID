@@ -177,6 +177,12 @@ def open_pos_session(
 	# Get POS Profile details
 	profile = frappe.get_doc("POS Profile", pos_profile)
 
+	if profile.get("custom_enforce_fixed_float"):
+		fixed_float = flt(profile.get("custom_fixed_opening_float", 300.0))
+		if flt(opening_balance) != fixed_float:
+			frappe.throw(_("Opening balance must be exactly ${0} per store policy.").format(fixed_float))
+		opening_balance = fixed_float
+
 	try:
 		# Create POS Opening Entry
 		opening_entry = frappe.new_doc("POS Opening Entry")
@@ -241,6 +247,224 @@ def open_pos_session(
 		if isinstance(e, frappe.ValidationError):
 			raise
 		frappe.throw(_("Failed to open POS session: {0}").format(str(e)))
+
+
+@frappe.whitelist()
+def preview_close(session_name: str, total_cash_counted: float) -> dict:
+	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
+	user = frappe.session.user
+
+	if not session_name or not frappe.db.exists("POS Opening Entry", session_name):
+		frappe.throw(_("POS Session '{0}' not found.").format(session_name or ""))
+
+	session = frappe.get_doc("POS Opening Entry", session_name)
+	profile = frappe.get_doc("POS Profile", session.pos_profile)
+
+	fixed_float = (
+		flt(profile.get("custom_fixed_opening_float", 300.0))
+		if profile.get("custom_enforce_fixed_float")
+		else sum(flt(row.opening_amount) for row in session.balance_details)
+	)
+
+	expected_cash_data = frappe.db.sql(
+		"""
+		SELECT SUM(sip.amount) as expected_cash
+		FROM `tabSales Invoice Payment` sip
+		JOIN `tabSales Invoice` si ON sip.parent = si.name
+		WHERE si.owner = %s
+		AND si.docstatus = 1
+		AND si.is_pos = 1
+		AND si.posting_date >= DATE(%s)
+		AND sip.mode_of_payment = 'Cash'
+	""",
+		(
+			session.user,
+			session.period_start_date.date()
+			if hasattr(session.period_start_date, "date")
+			else session.period_start_date,
+		),
+		as_dict=1,
+	)
+
+	expected_cash = flt(expected_cash_data[0].expected_cash) if expected_cash_data else 0.0
+	cash_taken_in = flt(total_cash_counted) - fixed_float
+	variance = cash_taken_in - expected_cash
+
+	return {
+		"fixed_float": fixed_float,
+		"total_cash_counted": flt(total_cash_counted),
+		"cash_taken_in": cash_taken_in,
+		"expected_cash": expected_cash,
+		"variance": variance,
+		"alert_threshold": flt(profile.get("custom_variance_alert_threshold", 5.0)),
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def close_pos_session_v2(
+	session_name: str,
+	total_cash_counted: float,
+	breakdown: str | list | None = None,
+	notes: str | None = None,
+) -> dict:
+	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
+
+	user = frappe.session.user
+
+	if not session_name or not frappe.db.exists("POS Opening Entry", session_name):
+		frappe.throw(_("POS Session '{0}' not found.").format(session_name or ""))
+
+	session = frappe.get_doc("POS Opening Entry", session_name)
+
+	if session.user != user:
+		if "Sales Manager" not in frappe.get_roles(user) and "System Manager" not in frappe.get_roles(user):
+			frappe.throw(_("You can only close your own sessions."))
+
+	if session.docstatus != 1:
+		frappe.throw(_("Session must be submitted before closing."))
+
+	if session.status != "Open":
+		frappe.throw(_("Session is already closed."))
+
+	profile = frappe.get_doc("POS Profile", session.pos_profile)
+
+	# If fixed float is not enforced, delegate to old logic
+	if not profile.get("custom_enforce_fixed_float"):
+		return close_pos_session(session_name, total_cash_counted, breakdown, notes)
+
+	preview = preview_close(session_name, total_cash_counted)
+
+	fixed_float = preview["fixed_float"]
+	cash_taken_in = preview["cash_taken_in"]
+	expected_cash = preview["expected_cash"]
+	variance = preview["variance"]
+	alert_threshold = preview["alert_threshold"]
+
+	if abs(variance) > alert_threshold:
+		if "Sales Manager" not in frappe.get_roles(user) and "System Manager" not in frappe.get_roles(user):
+			frappe.throw(
+				_("Variance of ${0} exceeds threshold of ${1}. Manager override required.").format(
+					abs(variance), alert_threshold
+				)
+			)
+
+	breakdown_list = _normalize_cash_breakdown(breakdown)
+
+	# We also need total sales for closing entry
+	sales_data = frappe.db.sql(
+		"""
+		SELECT COALESCE(SUM(grand_total), 0) as total
+		FROM `tabSales Invoice`
+		WHERE owner = %s
+		AND posting_date >= DATE(%s)
+		AND docstatus = 1
+		AND is_pos = 1
+	""",
+		(
+			session.user,
+			session.period_start_date.date()
+			if hasattr(session.period_start_date, "date")
+			else session.period_start_date,
+		),
+		as_dict=1,
+	)
+
+	total_sales = flt(sales_data[0].get("total", 0)) if sales_data else 0
+
+	try:
+		from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
+			make_closing_entry_from_opening,
+		)
+
+		closing_entry = make_closing_entry_from_opening(session)
+		closing_entry.period_end_date = now_datetime()
+
+		if notes:
+			closing_entry.remarks = notes
+
+		closing_entry.set("payment_reconciliation", [])
+
+		# Add cash breakdown details
+		for item in breakdown_list:
+			if flt(item.get("amount", 0)) > 0:
+				closing_entry.append(
+					"payment_reconciliation",
+					{
+						"mode_of_payment": item.get("mode_of_payment", "Cash"),
+						"opening_amount": flt(item.get("opening_amount", 0)),
+						"closing_amount": flt(item.get("amount", 0)),
+						"expected_amount": flt(item.get("expected_amount", item.get("amount", 0))),
+					},
+				)
+
+		# If no breakdown provided, add default cash entry
+		if not breakdown_list and flt(total_cash_counted) > 0:
+			closing_entry.append(
+				"payment_reconciliation",
+				{
+					"mode_of_payment": "Cash",
+					"opening_amount": fixed_float,
+					"closing_amount": flt(total_cash_counted),
+					"expected_amount": fixed_float + expected_cash,
+				},
+			)
+
+		closing_entry.insert(ignore_permissions=True)
+
+		def _safe_update_opening_entry(for_cancel: bool = False) -> None:
+			if for_cancel:
+				return
+			_mark_opening_entry_closed(session_name, closing_entry.name)
+
+		closing_entry.update_opening_entry = _safe_update_opening_entry
+		closing_entry.submit()
+
+		# Write to POS Audit Log
+		frappe.get_doc(
+			{
+				"doctype": "POS Audit Log",
+				"user": user,
+				"event_type": "fixed_float_enforced",
+				"description": f"Session closed with fixed float {fixed_float}. Total counted: {total_cash_counted}. Variance: {variance}",
+				"reference_document": closing_entry.name,
+				"reference_type": "POS Closing Entry",
+				"payload": frappe.as_json(
+					{
+						"fixed_float": fixed_float,
+						"total_counted": total_cash_counted,
+						"cash_taken_in": cash_taken_in,
+						"expected": expected_cash,
+						"variance": variance,
+					}
+				),
+			}
+		).insert(ignore_permissions=True)
+
+		variance_status = "balanced"
+		if variance > 0:
+			variance_status = "excess"
+		elif variance < 0:
+			variance_status = "shortage"
+
+		return {
+			"success": True,
+			"closing_entry": closing_entry.name,
+			"message": _("POS Session closed successfully"),
+			"opening_balance": fixed_float,
+			"total_sales": total_sales,
+			"closing_balance": flt(total_cash_counted),
+			"cash_taken_in": cash_taken_in,
+			"expected_balance": fixed_float + expected_cash,
+			"variance": variance,
+			"variance_status": variance_status,
+			"breakdown_by_mode": breakdown_list,
+		}
+
+	except Exception as e:
+		frappe.log_error("POS Session Closing Failed", frappe.get_traceback())
+		if isinstance(e, frappe.ValidationError):
+			raise
+		frappe.throw(_("Failed to close POS session: {0}").format(str(e)))
 
 
 @frappe.whitelist(methods=["POST"])

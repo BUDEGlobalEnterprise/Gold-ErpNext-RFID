@@ -408,14 +408,21 @@ const showCheckout = ref(false)
 
 function startLayaway() {
 	emit('close')
-	router.push({ name: 'Layaway', query: { action: 'new' } })
+	const query = { action: 'new' }
+	if (cart.customer) {
+		query.customer = cart.customer.name || cart.customer.customer_name
+	}
+	router.push({ name: 'Layaway', query })
 }
 
 const isCheckoutReady = computed(() => {
-	return true
+	if (cart.customerType === 'Walkin') return true
+	return !!cart.customer
 })
 
 const checkoutButtonText = computed(() => {
+	if (cart.customerType === 'Walkin') return 'Checkout'
+	if (!cart.customer) return 'Select Customer to Checkout'
 	return 'Checkout'
 })
 

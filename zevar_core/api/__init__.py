@@ -63,6 +63,7 @@ from zevar_core.api.repair import (
 	public_estimate_approval,
 	update_repair_status,
 )
+from zevar_core.api.reports import get_report_catalog, get_report_defaults, get_report_summary
 from zevar_core.api.tasks import (
 	create_personal_todo,
 	delete_todo,
@@ -116,6 +117,9 @@ __all__ = [
 	"get_repair_receipt_html",
 	"get_repair_stats",
 	"get_repair_types",
+	"get_report_catalog",
+	"get_report_defaults",
+	"get_report_summary",
 	"get_salary_slip_details",
 	"get_salary_slips",
 	"get_task_stats",

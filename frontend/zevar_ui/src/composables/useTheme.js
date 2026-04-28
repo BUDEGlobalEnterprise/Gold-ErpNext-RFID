@@ -1,28 +1,32 @@
 /**
  * Theme Composable
  *
- * Shared theme management
+ * Shared theme management — syncs with the UI store's 'theme' key
+ * so Dashboard and Terminal/AppLayout share a single toggle.
  */
 import { ref, onMounted } from 'vue'
 
+const THEME_KEY = 'theme'
+
 export function useTheme() {
-	const isDark = ref(true)
+	const isDark = ref(false)
 	const themeKey = ref(0)
 
 	const loadTheme = () => {
-		const stored = localStorage.getItem('zevar-theme')
-		if (stored) {
-			isDark.value = stored === 'dark'
-		} else {
+		const stored = localStorage.getItem(THEME_KEY)
+		// Default to dark only on first visit (no stored preference)
+		if (stored === null) {
 			isDark.value = true
-			localStorage.setItem('zevar-theme', 'dark')
+			localStorage.setItem(THEME_KEY, 'dark')
+		} else {
+			isDark.value = stored === 'dark'
 		}
 		updateDocumentClass()
 	}
 
 	const toggleTheme = () => {
 		isDark.value = !isDark.value
-		localStorage.setItem('zevar-theme', isDark.value ? 'dark' : 'light')
+		localStorage.setItem(THEME_KEY, isDark.value ? 'dark' : 'light')
 		updateDocumentClass()
 		themeKey.value++
 	}

@@ -4,8 +4,8 @@
  * Caches assets and API responses for offline functionality
  */
 
-const CACHE_NAME = 'zevar-pos-v2'
-const API_CACHE = 'zevar-api-v2'
+const CACHE_NAME = 'zevar-pos-v3'
+const API_CACHE = 'zevar-api-v3'
 
 // Assets to cache immediately on install
 const STATIC_ASSETS = ['/pos/', '/pos/index.html', '/pos/manifest.json']

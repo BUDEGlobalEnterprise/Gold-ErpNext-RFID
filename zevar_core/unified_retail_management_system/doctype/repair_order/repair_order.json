@@ -1,693 +1,693 @@
 {
-  "actions": [],
-  "allow_rename": 0,
-  "autoname": "naming_series:",
-  "creation": "2026-02-09 00:00:00.000000",
-  "doctype": "DocType",
-  "engine": "InnoDB",
-  "is_submittable": 1,
-  "track_changes": 1,
-  "track_seen": 1,
-  "track_views": 1,
-  "field_order": [
-    "naming_series",
-    "status",
-    "priority",
-    "column_break_1",
-    "warehouse",
-    "receiving_store",
-    "repair_store",
-    "store_transfer_status",
-    "received_date",
-    "section_customer",
-    "customer",
-    "customer_phone",
-    "handled_by",
-    "section_compliance",
-    "customer_id_type",
-    "customer_id_number",
-    "customer_id_state",
-    "id_verified_by",
-    "id_verified_date",
-    "intake_checklist_signed",
-    "intake_checklist_signature",
-    "gemstone_disclosure",
-    "precious_metals_disclosure",
-    "section_item",
-    "repair_type",
-    "item_type",
-    "item_brand",
-    "item_description",
-    "serial_number",
-    "item_condition",
-    "item_weight",
-    "estimated_weight_before",
-    "estimated_weight_after",
-    "column_break_metal",
-    "metal_type",
-    "purity",
-    "metal_weight_in",
-    "metal_weight_out",
-    "metal_scrap",
-    "metal_weight_difference",
-    "stone_weight",
-    "section_photos",
-    "item_photo",
-    "before_photos",
-    "after_photos",
-    "section_gemstones",
-    "gemstones",
-    "customer_notes",
-    "section_estimate",
-    "estimated_cost",
-    "material_cost",
-    "labor_cost",
-    "total_cost",
-    "payment_status",
-    "section_parts",
-    "parts",
-    "section_dates",
-    "promised_date",
-    "completed_date",
-    "delivered_date",
-    "section_assign",
-    "assigned_to",
-    "work_notes",
-    "parts_stock_created",
-    "section_communications",
-    "communications",
-    "enable_sms_notifications",
-    "enable_email_notifications",
-    "notification_preferences",
-    "estimate_status",
-    "estimate_sent_date",
-    "estimate_approved_date",
-    "estimate_approved_by",
-    "estimate_notes",
-    "estimate_valid_until",
-    "deposit_amount",
-    "deposit_date",
-    "deposit_payment_method",
-    "balance_due",
-    "sales_invoice",
-    "section_payments",
-    "payments",
-    "section_warranty",
-    "warranty_months",
-    "warranty_expiry_date",
-    "warranty_terms",
-    "original_repair_order",
-    "is_warranty_repair",
-    "warranty_claim_type"
-  ],
-  "fields": [
-    {
-      "default": "RPR-.YYYY.-",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "RPR-.YYYY.-"
-    },
-    {
-      "fieldname": "status",
-      "fieldtype": "Select",
-      "in_list_view": 1,
-      "in_standard_filter": 1,
-      "label": "Status",
-      "options": "Received\nEstimated\nApproved\nIn Progress\nWaiting for Parts\nQuality Check\nReady for Pickup\nDelivered\nCancelled",
-      "reqd": 1
-    },
-    {
-      "fieldname": "priority",
-      "fieldtype": "Select",
-      "in_list_view": 1,
-      "label": "Priority",
-      "options": "Low\nMedium\nHigh\nUrgent"
-    },
-    {
-      "fieldname": "column_break_1",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "warehouse",
-      "fieldtype": "Link",
-      "in_standard_filter": 1,
-      "label": "Warehouse",
-      "options": "Warehouse"
-    },
-    {
-      "fieldname": "receiving_store",
-      "fieldtype": "Link",
-      "label": "Receiving Store",
-      "options": "Warehouse",
-      "description": "Store/Warehouse where item was received from customer"
-    },
-    {
-      "fieldname": "repair_store",
-      "fieldtype": "Link",
-      "label": "Repair Store",
-      "options": "Warehouse",
-      "description": "Store/Warehouse where repair work is performed (may differ from receiving store)"
-    },
-    {
-      "fieldname": "store_transfer_status",
-      "fieldtype": "Select",
-      "label": "Store Transfer Status",
-      "options": "Not Required\nPending\nIn Transit\nReceived",
-      "default": "Not Required",
-      "description": "Status of transfer between stores"
-    },
-    {
-      "fieldname": "received_date",
-      "fieldtype": "Datetime",
-      "label": "Received Date"
-    },
-    {
-      "fieldname": "section_customer",
-      "fieldtype": "Section Break",
-      "label": "Customer"
-    },
-    {
-      "fieldname": "customer",
-      "fieldtype": "Link",
-      "in_list_view": 1,
-      "in_standard_filter": 1,
-      "label": "Customer",
-      "options": "Customer",
-      "reqd": 1
-    },
-    {
-      "fieldname": "customer_phone",
-      "fieldtype": "Data",
-      "label": "Customer Phone"
-    },
-    {
-      "description": "Person who handles the customer (sales person)",
-      "fieldname": "handled_by",
-      "fieldtype": "Link",
-      "in_list_view": 1,
-      "in_standard_filter": 1,
-      "label": "Handled By",
-      "options": "User"
-    },
-    {
-      "fieldname": "section_compliance",
-      "fieldtype": "Section Break",
-      "label": "Compliance & Security",
-      "collapsible": 1
-    },
-    {
-      "fieldname": "customer_id_type",
-      "fieldtype": "Select",
-      "label": "Customer ID Type",
-      "options": "Driver's License\nState ID\nPassport\nMilitary ID\nOther",
-      "description": "Type of identification presented by customer (JVC Compliance)"
-    },
-    {
-      "fieldname": "customer_id_number",
-      "fieldtype": "Data",
-      "label": "Customer ID Number",
-      "description": "Identification number (encrypted for security)"
-    },
-    {
-      "fieldname": "customer_id_state",
-      "fieldtype": "Data",
-      "label": "ID Issuing State",
-      "description": "State/region that issued the identification"
-    },
-    {
-      "fieldname": "id_verified_by",
-      "fieldtype": "Link",
-      "label": "ID Verified By",
-      "options": "User",
-      "description": "User who verified the customer identification"
-    },
-    {
-      "fieldname": "id_verified_date",
-      "fieldtype": "Datetime",
-      "label": "ID Verified Date",
-      "read_only": 1,
-      "description": "Date/time when ID was verified"
-    },
-    {
-      "fieldname": "intake_checklist_signed",
-      "fieldtype": "Check",
-      "label": "Intake Checklist Signed",
-      "default": 0,
-      "description": "Customer has signed the item intake checklist"
-    },
-    {
-      "fieldname": "intake_checklist_signature",
-      "fieldtype": "Attach Image",
-      "label": "Intake Checklist Signature",
-      "description": "Customer signature on intake checklist"
-    },
-    {
-      "fieldname": "gemstone_disclosure",
-      "fieldtype": "Text",
-      "label": "Gemstone Disclosure",
-      "description": "Disclosure of gemstone treatments, enhancements, or synthetic stones"
-    },
-    {
-      "fieldname": "precious_metals_disclosure",
-      "fieldtype": "Text",
-      "label": "Precious Metals Disclosure",
-      "description": "Disclosure of metal purity, hallmarks, and plating"
-    },
-    {
-      "fieldname": "section_item",
-      "fieldtype": "Section Break",
-      "label": "Item Details"
-    },
-    {
-      "fieldname": "repair_type",
-      "fieldtype": "Link",
-      "in_list_view": 1,
-      "label": "Repair Type",
-      "options": "Repair Type",
-      "reqd": 1
-    },
-    {
-      "fieldname": "item_type",
-      "fieldtype": "Select",
-      "label": "Item Type",
-      "options": "Ring\nNecklace\nBracelet\nEarring\nWatch\nChain\nPendant\nBrooch\nAnklet\nCufflinks\nOther",
-      "description": "Type of jewelry item"
-    },
-    {
-      "fieldname": "item_brand",
-      "fieldtype": "Data",
-      "label": "Brand/Designer"
-    },
-    {
-      "fieldname": "item_description",
-      "fieldtype": "Small Text",
-      "label": "Item Description"
-    },
-    {
-      "fieldname": "serial_number",
-      "fieldtype": "Data",
-      "label": "Serial Number",
-      "description": "For watches or items with serial numbers"
-    },
-    {
-      "fieldname": "item_condition",
-      "fieldtype": "Small Text",
-      "label": "Item Condition",
-      "description": "Condition of item at intake (scratches, damage, etc.)"
-    },
-    {
-      "fieldname": "item_weight",
-      "fieldtype": "Float",
-      "label": "Item Weight (g)",
-      "description": "Total weight of the item"
-    },
-    {
-      "fieldname": "estimated_weight_before",
-      "fieldtype": "Float",
-      "label": "Weight Before Repair (g)",
-      "description": "Metal weight before repair work"
-    },
-    {
-      "fieldname": "estimated_weight_after",
-      "fieldtype": "Float",
-      "label": "Weight After Repair (g)",
-      "description": "Metal weight after repair work"
-    },
-    {
-      "fieldname": "column_break_metal",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "metal_type",
-      "fieldtype": "Link",
-      "label": "Metal Type",
-      "options": "Zevar Metal"
-    },
-    {
-      "fieldname": "purity",
-      "fieldtype": "Link",
-      "label": "Purity",
-      "options": "Zevar Purity"
-    },
-    {
-      "fieldname": "metal_weight_in",
-      "fieldtype": "Float",
-      "label": "Metal Weight In (g)",
-      "description": "Weight of metal received from customer"
-    },
-    {
-      "fieldname": "metal_weight_out",
-      "fieldtype": "Float",
-      "label": "Metal Weight Out (g)",
-      "description": "Weight of metal returned to customer"
-    },
-    {
-      "fieldname": "metal_scrap",
-      "fieldtype": "Float",
-      "label": "Metal Scrap (g)",
-      "description": "Scrap metal removed during repair"
-    },
-    {
-      "fieldname": "metal_weight_difference",
-      "fieldtype": "Float",
-      "label": "Net Metal Difference (g)",
-      "read_only": 1,
-      "description": "Auto-calculated: (Weight Out + Scrap) - Weight In"
-    },
-    {
-      "fieldname": "stone_weight",
-      "fieldtype": "Float",
-      "label": "Total Stone Weight (ct)",
-      "description": "Total carat weight of all gemstones"
-    },
-    {
-      "fieldname": "section_photos",
-      "fieldtype": "Section Break",
-      "label": "Photos"
-    },
-    {
-      "fieldname": "item_photo",
-      "fieldtype": "Attach Image",
-      "label": "Primary Item Photo"
-    },
-    {
-      "fieldname": "before_photos",
-      "fieldtype": "Table",
-      "label": "Before Repair Photos",
-      "options": "File",
-      "description": "Photos showing item condition before repair"
-    },
-    {
-      "fieldname": "after_photos",
-      "fieldtype": "Table",
-      "label": "After Repair Photos",
-      "options": "File",
-      "description": "Photos showing item after repair completion"
-    },
-    {
-      "fieldname": "section_gemstones",
-      "fieldtype": "Section Break",
-      "label": "Gemstone Details",
-      "collapsible": 1
-    },
-    {
-      "fieldname": "gemstones",
-      "fieldtype": "Table",
-      "label": "Gemstones",
-      "options": "Repair Gemstone"
-    },
-    {
-      "fieldname": "customer_notes",
-      "fieldtype": "Text",
-      "label": "Customer Notes"
-    },
-    {
-      "fieldname": "section_estimate",
-      "fieldtype": "Section Break",
-      "label": "Estimate & Billing"
-    },
-    {
-      "fieldname": "estimated_cost",
-      "fieldtype": "Currency",
-      "label": "Estimated Cost"
-    },
-    {
-      "fieldname": "material_cost",
-      "fieldtype": "Currency",
-      "label": "Material Cost"
-    },
-    {
-      "fieldname": "labor_cost",
-      "fieldtype": "Currency",
-      "label": "Labor Cost"
-    },
-    {
-      "fieldname": "total_cost",
-      "fieldtype": "Currency",
-      "label": "Total Cost",
-      "read_only": 1
-    },
-    {
-      "fieldname": "payment_status",
-      "fieldtype": "Select",
-      "label": "Payment Status",
-      "options": "Unpaid\nPartial\nPaid"
-    },
-    {
-      "fieldname": "section_parts",
-      "fieldtype": "Section Break",
-      "label": "Parts / Materials Consumed"
-    },
-    {
-      "fieldname": "parts",
-      "fieldtype": "Table",
-      "label": "Parts",
-      "options": "Repair Order Item"
-    },
-    {
-      "fieldname": "section_dates",
-      "fieldtype": "Section Break",
-      "label": "Dates"
-    },
-    {
-      "fieldname": "promised_date",
-      "fieldtype": "Date",
-      "label": "Promised Date"
-    },
-    {
-      "fieldname": "completed_date",
-      "fieldtype": "Datetime",
-      "label": "Completed Date"
-    },
-    {
-      "fieldname": "delivered_date",
-      "fieldtype": "Datetime",
-      "label": "Delivered Date"
-    },
-    {
-      "fieldname": "section_assign",
-      "fieldtype": "Section Break",
-      "label": "Assignment"
-    },
-    {
-      "fieldname": "assigned_to",
-      "fieldtype": "Link",
-      "label": "Assigned To",
-      "options": "User"
-    },
-    {
-      "fieldname": "work_notes",
-      "fieldtype": "Text",
-      "label": "Work Notes"
-    },
-    {
-      "default": "0",
-      "fieldname": "parts_stock_created",
-      "fieldtype": "Check",
-      "hidden": 1,
-      "label": "Parts Stock Created",
-      "read_only": 1
-    },
-    {
-      "fieldname": "section_communications",
-      "fieldtype": "Section Break",
-      "label": "Communications",
-      "collapsible": 1
-    },
-    {
-      "fieldname": "communications",
-      "fieldtype": "Table",
-      "label": "Communication Log",
-      "options": "Repair Communication",
-      "description": "Log of all customer communications (SMS, Email, Phone, In-Person)"
-    },
-    {
-      "fieldname": "enable_sms_notifications",
-      "fieldtype": "Check",
-      "label": "Enable SMS Notifications",
-      "default": "1"
-    },
-    {
-      "fieldname": "enable_email_notifications",
-      "fieldtype": "Check",
-      "label": "Enable Email Notifications",
-      "default": "1"
-    },
-    {
-      "fieldname": "notification_preferences",
-      "fieldtype": "Text",
-      "label": "Notification Preferences",
-      "description": "Additional notification preferences (JSON)"
-    },
-    {
-      "fieldname": "estimate_status",
-      "fieldtype": "Select",
-      "label": "Estimate Status",
-      "options": "Pending\nSent\nApproved\nRejected\nRevised",
-      "default": "Pending",
-      "read_only": 1
-    },
-    {
-      "fieldname": "estimate_sent_date",
-      "fieldtype": "Datetime",
-      "label": "Estimate Sent Date",
-      "read_only": 1
-    },
-    {
-      "fieldname": "estimate_approved_date",
-      "fieldtype": "Datetime",
-      "label": "Estimate Approved Date",
-      "read_only": 1
-    },
-    {
-      "fieldname": "estimate_approved_by",
-      "fieldtype": "Data",
-      "label": "Estimate Approved By",
-      "description": "Customer name who approved the estimate",
-      "read_only": 1
-    },
-    {
-      "fieldname": "estimate_notes",
-      "fieldtype": "Text",
-      "label": "Estimate Notes",
-      "description": "Reason for rejection/revision or additional estimate details"
-    },
-    {
-      "fieldname": "estimate_valid_until",
-      "fieldtype": "Date",
-      "label": "Estimate Valid Until",
-      "description": "Date until which this estimate is valid"
-    },
-    {
-      "fieldname": "deposit_amount",
-      "fieldtype": "Currency",
-      "label": "Deposit Amount",
-      "description": "Upfront deposit paid by customer"
-    },
-    {
-      "fieldname": "deposit_date",
-      "fieldtype": "Datetime",
-      "label": "Deposit Date"
-    },
-    {
-      "fieldname": "deposit_payment_method",
-      "fieldtype": "Select",
-      "label": "Deposit Payment Method",
-      "options": "Cash\nCredit Card\nCheck\nOther"
-    },
-    {
-      "fieldname": "balance_due",
-      "fieldtype": "Currency",
-      "label": "Balance Due",
-      "read_only": 1,
-      "description": "Total cost minus deposit amount"
-    },
-    {
-      "fieldname": "sales_invoice",
-      "fieldtype": "Link",
-      "label": "Sales Invoice",
-      "options": "Sales Invoice",
-      "description": "Linked sales invoice for this repair"
-    },
-    {
-      "fieldname": "section_payments",
-      "fieldtype": "Section Break",
-      "label": "Payments"
-    },
-    {
-      "fieldname": "payments",
-      "fieldtype": "Table",
-      "label": "Payments",
-      "options": "Repair Payment",
-      "description": "Track all payments for this repair"
-    },
-    {
-      "fieldname": "section_warranty",
-      "fieldtype": "Section Break",
-      "label": "Warranty & Re-repair",
-      "collapsible": 1
-    },
-    {
-      "fieldname": "warranty_months",
-      "fieldtype": "Int",
-      "label": "Warranty Months",
-      "description": "Warranty period in months (default from Repair Type)",
-      "default": "0"
-    },
-    {
-      "fieldname": "warranty_expiry_date",
-      "fieldtype": "Date",
-      "label": "Warranty Expiry Date",
-      "read_only": 1,
-      "description": "Auto-calculated from delivered date + warranty months"
-    },
-    {
-      "fieldname": "warranty_terms",
-      "fieldtype": "Small Text",
-      "label": "Warranty Terms",
-      "description": "Specific warranty terms for this repair"
-    },
-    {
-      "fieldname": "original_repair_order",
-      "fieldtype": "Link",
-      "label": "Original Repair Order",
-      "options": "Repair Order",
-      "description": "Links this re-repair to the original repair order"
-    },
-    {
-      "fieldname": "is_warranty_repair",
-      "fieldtype": "Check",
-      "label": "Is Warranty Repair",
-      "description": "Check if this is a warranty claim repair"
-    },
-    {
-      "fieldname": "warranty_claim_type",
-      "fieldtype": "Select",
-      "label": "Warranty Claim Type",
-      "options": "Full Warranty\nPartial\nNot Covered",
-      "description": "Type of warranty claim",
-      "depends_on": "is_warranty_repair"
-    }
-  ],
-  "index_web_pages_for_search": 0,
-  "links": [],
-  "modified": "2026-04-10 00:00:00.000000",
-  "modified_by": "Administrator",
-  "module": "Unified Retail Management System",
-  "name": "Repair Order",
-  "naming_rule": "By \"Naming Series\" field",
-  "owner": "Administrator",
-  "permissions": [
-    {
-      "create": 1,
-      "delete": 1,
-      "email": 1,
-      "export": 1,
-      "print": 1,
-      "read": 1,
-      "report": 1,
-      "role": "System Manager",
-      "share": 1,
-      "write": 1
-    },
-    {
-      "amend": 1,
-      "cancel": 1,
-      "create": 1,
-      "delete": 0,
-      "email": 1,
-      "export": 1,
-      "print": 1,
-      "read": 1,
-      "report": 1,
-      "role": "Sales User",
-      "share": 1,
-      "submit": 1,
-      "write": 1
-    }
-  ],
-  "sort_field": "modified",
-  "sort_order": "DESC",
-  "states": []
+    "actions": [],
+    "allow_rename": 0,
+    "autoname": "naming_series:",
+    "creation": "2026-02-09 00:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "is_submittable": 1,
+    "track_changes": 1,
+    "track_seen": 1,
+    "track_views": 1,
+    "field_order": [
+        "naming_series",
+        "status",
+        "priority",
+        "column_break_1",
+        "warehouse",
+        "receiving_store",
+        "repair_store",
+        "store_transfer_status",
+        "received_date",
+        "section_customer",
+        "customer",
+        "customer_phone",
+        "handled_by",
+        "section_compliance",
+        "customer_id_type",
+        "customer_id_number",
+        "customer_id_state",
+        "id_verified_by",
+        "id_verified_date",
+        "intake_checklist_signed",
+        "intake_checklist_signature",
+        "gemstone_disclosure",
+        "precious_metals_disclosure",
+        "section_item",
+        "repair_type",
+        "item_type",
+        "item_brand",
+        "item_description",
+        "serial_number",
+        "item_condition",
+        "item_weight",
+        "estimated_weight_before",
+        "estimated_weight_after",
+        "column_break_metal",
+        "metal_type",
+        "purity",
+        "metal_weight_in",
+        "metal_weight_out",
+        "metal_scrap",
+        "metal_weight_difference",
+        "stone_weight",
+        "section_photos",
+        "item_photo",
+        "before_photos",
+        "after_photos",
+        "section_gemstones",
+        "gemstones",
+        "customer_notes",
+        "section_estimate",
+        "estimated_cost",
+        "material_cost",
+        "labor_cost",
+        "total_cost",
+        "payment_status",
+        "section_parts",
+        "parts",
+        "section_dates",
+        "promised_date",
+        "completed_date",
+        "delivered_date",
+        "section_assign",
+        "assigned_to",
+        "work_notes",
+        "parts_stock_created",
+        "section_communications",
+        "communications",
+        "enable_sms_notifications",
+        "enable_email_notifications",
+        "notification_preferences",
+        "estimate_status",
+        "estimate_sent_date",
+        "estimate_approved_date",
+        "estimate_approved_by",
+        "estimate_notes",
+        "estimate_valid_until",
+        "deposit_amount",
+        "deposit_date",
+        "deposit_payment_method",
+        "balance_due",
+        "sales_invoice",
+        "section_payments",
+        "payments",
+        "section_warranty",
+        "warranty_months",
+        "warranty_expiry_date",
+        "warranty_terms",
+        "original_repair_order",
+        "is_warranty_repair",
+        "warranty_claim_type"
+    ],
+    "fields": [
+        {
+            "default": "REP-.YYYY.-.####",
+            "fieldname": "naming_series",
+            "fieldtype": "Select",
+            "label": "Series",
+            "options": "REP-.YYYY.-.####\nRPR-.YYYY.-"
+        },
+        {
+            "fieldname": "status",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Status",
+            "options": "Received\nEstimated\nApproved\nIn Progress\nWaiting for Parts\nQuality Check\nReady for Pickup\nDelivered\nCancelled",
+            "reqd": 1
+        },
+        {
+            "fieldname": "priority",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "label": "Priority",
+            "options": "Low\nMedium\nHigh\nUrgent"
+        },
+        {
+            "fieldname": "column_break_1",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "warehouse",
+            "fieldtype": "Link",
+            "in_standard_filter": 1,
+            "label": "Warehouse",
+            "options": "Warehouse"
+        },
+        {
+            "fieldname": "receiving_store",
+            "fieldtype": "Link",
+            "label": "Receiving Store",
+            "options": "Warehouse",
+            "description": "Store/Warehouse where item was received from customer"
+        },
+        {
+            "fieldname": "repair_store",
+            "fieldtype": "Link",
+            "label": "Repair Store",
+            "options": "Warehouse",
+            "description": "Store/Warehouse where repair work is performed (may differ from receiving store)"
+        },
+        {
+            "fieldname": "store_transfer_status",
+            "fieldtype": "Select",
+            "label": "Store Transfer Status",
+            "options": "Not Required\nPending\nIn Transit\nReceived",
+            "default": "Not Required",
+            "description": "Status of transfer between stores"
+        },
+        {
+            "fieldname": "received_date",
+            "fieldtype": "Datetime",
+            "label": "Received Date"
+        },
+        {
+            "fieldname": "section_customer",
+            "fieldtype": "Section Break",
+            "label": "Customer"
+        },
+        {
+            "fieldname": "customer",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Customer",
+            "options": "Customer",
+            "reqd": 1
+        },
+        {
+            "fieldname": "customer_phone",
+            "fieldtype": "Data",
+            "label": "Customer Phone"
+        },
+        {
+            "description": "Person who handles the customer (sales person)",
+            "fieldname": "handled_by",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Handled By",
+            "options": "User"
+        },
+        {
+            "fieldname": "section_compliance",
+            "fieldtype": "Section Break",
+            "label": "Compliance & Security",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "customer_id_type",
+            "fieldtype": "Select",
+            "label": "Customer ID Type",
+            "options": "Driver's License\nState ID\nPassport\nMilitary ID\nOther",
+            "description": "Type of identification presented by customer (JVC Compliance)"
+        },
+        {
+            "fieldname": "customer_id_number",
+            "fieldtype": "Data",
+            "label": "Customer ID Number",
+            "description": "Identification number (encrypted for security)"
+        },
+        {
+            "fieldname": "customer_id_state",
+            "fieldtype": "Data",
+            "label": "ID Issuing State",
+            "description": "State/region that issued the identification"
+        },
+        {
+            "fieldname": "id_verified_by",
+            "fieldtype": "Link",
+            "label": "ID Verified By",
+            "options": "User",
+            "description": "User who verified the customer identification"
+        },
+        {
+            "fieldname": "id_verified_date",
+            "fieldtype": "Datetime",
+            "label": "ID Verified Date",
+            "read_only": 1,
+            "description": "Date/time when ID was verified"
+        },
+        {
+            "fieldname": "intake_checklist_signed",
+            "fieldtype": "Check",
+            "label": "Intake Checklist Signed",
+            "default": 0,
+            "description": "Customer has signed the item intake checklist"
+        },
+        {
+            "fieldname": "intake_checklist_signature",
+            "fieldtype": "Attach Image",
+            "label": "Intake Checklist Signature",
+            "description": "Customer signature on intake checklist"
+        },
+        {
+            "fieldname": "gemstone_disclosure",
+            "fieldtype": "Text",
+            "label": "Gemstone Disclosure",
+            "description": "Disclosure of gemstone treatments, enhancements, or synthetic stones"
+        },
+        {
+            "fieldname": "precious_metals_disclosure",
+            "fieldtype": "Text",
+            "label": "Precious Metals Disclosure",
+            "description": "Disclosure of metal purity, hallmarks, and plating"
+        },
+        {
+            "fieldname": "section_item",
+            "fieldtype": "Section Break",
+            "label": "Item Details"
+        },
+        {
+            "fieldname": "repair_type",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Repair Type",
+            "options": "Repair Type",
+            "reqd": 1
+        },
+        {
+            "fieldname": "item_type",
+            "fieldtype": "Select",
+            "label": "Item Type",
+            "options": "Ring\nNecklace\nBracelet\nEarring\nWatch\nChain\nPendant\nBrooch\nAnklet\nCufflinks\nOther",
+            "description": "Type of jewelry item"
+        },
+        {
+            "fieldname": "item_brand",
+            "fieldtype": "Data",
+            "label": "Brand/Designer"
+        },
+        {
+            "fieldname": "item_description",
+            "fieldtype": "Small Text",
+            "label": "Item Description"
+        },
+        {
+            "fieldname": "serial_number",
+            "fieldtype": "Data",
+            "label": "Serial Number",
+            "description": "For watches or items with serial numbers"
+        },
+        {
+            "fieldname": "item_condition",
+            "fieldtype": "Small Text",
+            "label": "Item Condition",
+            "description": "Condition of item at intake (scratches, damage, etc.)"
+        },
+        {
+            "fieldname": "item_weight",
+            "fieldtype": "Float",
+            "label": "Item Weight (g)",
+            "description": "Total weight of the item"
+        },
+        {
+            "fieldname": "estimated_weight_before",
+            "fieldtype": "Float",
+            "label": "Weight Before Repair (g)",
+            "description": "Metal weight before repair work"
+        },
+        {
+            "fieldname": "estimated_weight_after",
+            "fieldtype": "Float",
+            "label": "Weight After Repair (g)",
+            "description": "Metal weight after repair work"
+        },
+        {
+            "fieldname": "column_break_metal",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "metal_type",
+            "fieldtype": "Link",
+            "label": "Metal Type",
+            "options": "Zevar Metal"
+        },
+        {
+            "fieldname": "purity",
+            "fieldtype": "Link",
+            "label": "Purity",
+            "options": "Zevar Purity"
+        },
+        {
+            "fieldname": "metal_weight_in",
+            "fieldtype": "Float",
+            "label": "Metal Weight In (g)",
+            "description": "Weight of metal received from customer"
+        },
+        {
+            "fieldname": "metal_weight_out",
+            "fieldtype": "Float",
+            "label": "Metal Weight Out (g)",
+            "description": "Weight of metal returned to customer"
+        },
+        {
+            "fieldname": "metal_scrap",
+            "fieldtype": "Float",
+            "label": "Metal Scrap (g)",
+            "description": "Scrap metal removed during repair"
+        },
+        {
+            "fieldname": "metal_weight_difference",
+            "fieldtype": "Float",
+            "label": "Net Metal Difference (g)",
+            "read_only": 1,
+            "description": "Auto-calculated: (Weight Out + Scrap) - Weight In"
+        },
+        {
+            "fieldname": "stone_weight",
+            "fieldtype": "Float",
+            "label": "Total Stone Weight (ct)",
+            "description": "Total carat weight of all gemstones"
+        },
+        {
+            "fieldname": "section_photos",
+            "fieldtype": "Section Break",
+            "label": "Photos"
+        },
+        {
+            "fieldname": "item_photo",
+            "fieldtype": "Attach Image",
+            "label": "Primary Item Photo"
+        },
+        {
+            "fieldname": "before_photos",
+            "fieldtype": "Table",
+            "label": "Before Repair Photos",
+            "options": "File",
+            "description": "Photos showing item condition before repair"
+        },
+        {
+            "fieldname": "after_photos",
+            "fieldtype": "Table",
+            "label": "After Repair Photos",
+            "options": "File",
+            "description": "Photos showing item after repair completion"
+        },
+        {
+            "fieldname": "section_gemstones",
+            "fieldtype": "Section Break",
+            "label": "Gemstone Details",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "gemstones",
+            "fieldtype": "Table",
+            "label": "Gemstones",
+            "options": "Repair Gemstone"
+        },
+        {
+            "fieldname": "customer_notes",
+            "fieldtype": "Text",
+            "label": "Customer Notes"
+        },
+        {
+            "fieldname": "section_estimate",
+            "fieldtype": "Section Break",
+            "label": "Estimate & Billing"
+        },
+        {
+            "fieldname": "estimated_cost",
+            "fieldtype": "Currency",
+            "label": "Estimated Cost"
+        },
+        {
+            "fieldname": "material_cost",
+            "fieldtype": "Currency",
+            "label": "Material Cost"
+        },
+        {
+            "fieldname": "labor_cost",
+            "fieldtype": "Currency",
+            "label": "Labor Cost"
+        },
+        {
+            "fieldname": "total_cost",
+            "fieldtype": "Currency",
+            "label": "Total Cost",
+            "read_only": 1
+        },
+        {
+            "fieldname": "payment_status",
+            "fieldtype": "Select",
+            "label": "Payment Status",
+            "options": "Unpaid\nPartial\nPaid"
+        },
+        {
+            "fieldname": "section_parts",
+            "fieldtype": "Section Break",
+            "label": "Parts / Materials Consumed"
+        },
+        {
+            "fieldname": "parts",
+            "fieldtype": "Table",
+            "label": "Parts",
+            "options": "Repair Order Item"
+        },
+        {
+            "fieldname": "section_dates",
+            "fieldtype": "Section Break",
+            "label": "Dates"
+        },
+        {
+            "fieldname": "promised_date",
+            "fieldtype": "Date",
+            "label": "Promised Date"
+        },
+        {
+            "fieldname": "completed_date",
+            "fieldtype": "Datetime",
+            "label": "Completed Date"
+        },
+        {
+            "fieldname": "delivered_date",
+            "fieldtype": "Datetime",
+            "label": "Delivered Date"
+        },
+        {
+            "fieldname": "section_assign",
+            "fieldtype": "Section Break",
+            "label": "Assignment"
+        },
+        {
+            "fieldname": "assigned_to",
+            "fieldtype": "Link",
+            "label": "Assigned To",
+            "options": "User"
+        },
+        {
+            "fieldname": "work_notes",
+            "fieldtype": "Text",
+            "label": "Work Notes"
+        },
+        {
+            "default": "0",
+            "fieldname": "parts_stock_created",
+            "fieldtype": "Check",
+            "hidden": 1,
+            "label": "Parts Stock Created",
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_communications",
+            "fieldtype": "Section Break",
+            "label": "Communications",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "communications",
+            "fieldtype": "Table",
+            "label": "Communication Log",
+            "options": "Repair Communication",
+            "description": "Log of all customer communications (SMS, Email, Phone, In-Person)"
+        },
+        {
+            "fieldname": "enable_sms_notifications",
+            "fieldtype": "Check",
+            "label": "Enable SMS Notifications",
+            "default": "1"
+        },
+        {
+            "fieldname": "enable_email_notifications",
+            "fieldtype": "Check",
+            "label": "Enable Email Notifications",
+            "default": "1"
+        },
+        {
+            "fieldname": "notification_preferences",
+            "fieldtype": "Text",
+            "label": "Notification Preferences",
+            "description": "Additional notification preferences (JSON)"
+        },
+        {
+            "fieldname": "estimate_status",
+            "fieldtype": "Select",
+            "label": "Estimate Status",
+            "options": "Pending\nSent\nApproved\nRejected\nRevised",
+            "default": "Pending",
+            "read_only": 1
+        },
+        {
+            "fieldname": "estimate_sent_date",
+            "fieldtype": "Datetime",
+            "label": "Estimate Sent Date",
+            "read_only": 1
+        },
+        {
+            "fieldname": "estimate_approved_date",
+            "fieldtype": "Datetime",
+            "label": "Estimate Approved Date",
+            "read_only": 1
+        },
+        {
+            "fieldname": "estimate_approved_by",
+            "fieldtype": "Data",
+            "label": "Estimate Approved By",
+            "description": "Customer name who approved the estimate",
+            "read_only": 1
+        },
+        {
+            "fieldname": "estimate_notes",
+            "fieldtype": "Text",
+            "label": "Estimate Notes",
+            "description": "Reason for rejection/revision or additional estimate details"
+        },
+        {
+            "fieldname": "estimate_valid_until",
+            "fieldtype": "Date",
+            "label": "Estimate Valid Until",
+            "description": "Date until which this estimate is valid"
+        },
+        {
+            "fieldname": "deposit_amount",
+            "fieldtype": "Currency",
+            "label": "Deposit Amount",
+            "description": "Upfront deposit paid by customer"
+        },
+        {
+            "fieldname": "deposit_date",
+            "fieldtype": "Datetime",
+            "label": "Deposit Date"
+        },
+        {
+            "fieldname": "deposit_payment_method",
+            "fieldtype": "Select",
+            "label": "Deposit Payment Method",
+            "options": "Cash\nCredit Card\nCheck\nOther"
+        },
+        {
+            "fieldname": "balance_due",
+            "fieldtype": "Currency",
+            "label": "Balance Due",
+            "read_only": 1,
+            "description": "Total cost minus deposit amount"
+        },
+        {
+            "fieldname": "sales_invoice",
+            "fieldtype": "Link",
+            "label": "Sales Invoice",
+            "options": "Sales Invoice",
+            "description": "Linked sales invoice for this repair"
+        },
+        {
+            "fieldname": "section_payments",
+            "fieldtype": "Section Break",
+            "label": "Payments"
+        },
+        {
+            "fieldname": "payments",
+            "fieldtype": "Table",
+            "label": "Payments",
+            "options": "Repair Payment",
+            "description": "Track all payments for this repair"
+        },
+        {
+            "fieldname": "section_warranty",
+            "fieldtype": "Section Break",
+            "label": "Warranty & Re-repair",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "warranty_months",
+            "fieldtype": "Int",
+            "label": "Warranty Months",
+            "description": "Warranty period in months (default from Repair Type)",
+            "default": "0"
+        },
+        {
+            "fieldname": "warranty_expiry_date",
+            "fieldtype": "Date",
+            "label": "Warranty Expiry Date",
+            "read_only": 1,
+            "description": "Auto-calculated from delivered date + warranty months"
+        },
+        {
+            "fieldname": "warranty_terms",
+            "fieldtype": "Small Text",
+            "label": "Warranty Terms",
+            "description": "Specific warranty terms for this repair"
+        },
+        {
+            "fieldname": "original_repair_order",
+            "fieldtype": "Link",
+            "label": "Original Repair Order",
+            "options": "Repair Order",
+            "description": "Links this re-repair to the original repair order"
+        },
+        {
+            "fieldname": "is_warranty_repair",
+            "fieldtype": "Check",
+            "label": "Is Warranty Repair",
+            "description": "Check if this is a warranty claim repair"
+        },
+        {
+            "fieldname": "warranty_claim_type",
+            "fieldtype": "Select",
+            "label": "Warranty Claim Type",
+            "options": "Full Warranty\nPartial\nNot Covered",
+            "description": "Type of warranty claim",
+            "depends_on": "is_warranty_repair"
+        }
+    ],
+    "index_web_pages_for_search": 0,
+    "links": [],
+    "modified": "2026-04-10 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Unified Retail Management System",
+    "name": "Repair Order",
+    "naming_rule": "By \"Naming Series\" field",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        },
+        {
+            "amend": 1,
+            "cancel": 1,
+            "create": 1,
+            "delete": 0,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Sales User",
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
 }

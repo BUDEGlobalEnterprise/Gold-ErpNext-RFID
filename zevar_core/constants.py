@@ -92,6 +92,11 @@ PAYMENT_MODES = [
 	"Google Pay",
 	"Venmo",
 	"Cash App",
+	"Synchrony",
+	"AFF",
+	"CIMA",
+	"Progressive",
+	"Snap",
 ]
 
 LAYAWAY_DURATION_OPTIONS = [1, 2, 3, 6, 9, 12]

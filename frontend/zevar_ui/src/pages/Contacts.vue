@@ -10,6 +10,7 @@
 				</div>
 				
 				<div class="flex items-center gap-2">
+					<ViewToggle v-model="viewMode" storage-key="zevar_contacts_view" />
 					<div class="relative">
 						<svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
 						<input type="text" v-model="searchQuery" @input="onSearchInput" placeholder="Search by name, phone, email..." class="pl-9 pr-4 py-2 bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-64" />
@@ -36,7 +37,7 @@
 				</div>
 			</div>
 
-			<div class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
+			<div v-if="viewMode === 'list'" class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
 				<div class="bg-white dark:bg-warm-dark-900/50 rounded-xl border border-gray-100 dark:border-warm-border/50 flex flex-col shadow-sm relative min-h-min">
 					<div class="overflow-x-auto">
 						<table class="w-full text-sm">
@@ -140,6 +141,42 @@
 					</div>
 				</div>
 			</div>
+
+			<div v-if="viewMode === 'grid'" class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
+				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+					<div
+						v-for="supplier in suppliers"
+						:key="supplier.name"
+						class="bg-white dark:bg-warm-dark-800 rounded-2xl border border-gray-100 dark:border-warm-border/50 p-4 hover:shadow-md hover:border-gray-300 dark:hover:border-warm-border transition cursor-pointer"
+					>
+						<div class="flex items-center gap-3 mb-3">
+							<div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] text-[#0F1115]">
+								{{ getInitials(supplier.supplier_name || supplier.name) }}
+							</div>
+							<div class="min-w-0">
+								<div class="font-bold text-gray-900 dark:text-white text-sm truncate">{{ supplier.supplier_name || supplier.name }}</div>
+								<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#D4AF37]/15 text-[#D4AF37]">
+									{{ supplier.supplier_group || 'All Groups' }}
+								</span>
+							</div>
+						</div>
+						<div class="space-y-1.5 pt-3 border-t border-gray-100 dark:border-warm-border/50">
+							<div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+								<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+								{{ supplier.mobile_no || 'No Phone' }}
+							</div>
+							<div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+								<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+								{{ supplier.email_id || 'No Email' }}
+							</div>
+							<div v-if="supplier.supplier_type" class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+								<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+								{{ supplier.supplier_type }}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 			</div>
 		</div>
 	</AppLayout>
@@ -147,9 +184,11 @@
 
 <script setup>
 import AppLayout from '@/components/AppLayout.vue'
+import ViewToggle from '@/components/ViewToggle.vue'
 import { ref, onMounted } from 'vue'
 import { createResource } from 'frappe-ui'
 
+const viewMode = ref(localStorage.getItem('zevar_contacts_view') || 'list')
 const suppliers = ref([])
 const loading = ref(true)
 const searchQuery = ref('')

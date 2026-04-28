@@ -9,20 +9,23 @@
 						Manage layaway contracts and payments
 					</p>
 				</div>
-				<button
-					@click="showCreateModal = true"
-					class="px-4 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] transition flex items-center gap-2"
-				>
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 4v16m8-8H4"
-						/>
-					</svg>
-					New Layaway
-				</button>
+				<div class="flex items-center gap-4">
+					<ViewToggle v-model="viewMode" storage-key="zevar_layaway_view" />
+					<button
+						@click="showCreateModal = true"
+						class="px-4 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] transition flex items-center gap-2"
+					>
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 4v16m8-8H4"
+							/>
+						</svg>
+						New Layaway
+					</button>
+				</div>
 			</div>
 
 			<!-- Filters Bar -->
@@ -157,12 +160,12 @@
 					</p>
 				</div>
 
-				<div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+				<div v-else v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 					<div
 						v-for="layaway in layaways"
 						:key="layaway.name"
 						@click="viewDetails(layaway.name)"
-						class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50 hover:border-[#D4AF37]/30 transition cursor-pointer"
+						class="bg-white dark:bg-warm-dark-800 rounded-2xl border border-gray-100 dark:border-warm-border/50 p-4 hover:shadow-md hover:border-gray-300 dark:hover:border-warm-border transition cursor-pointer"
 					>
 						<!-- Header -->
 						<div class="flex items-start justify-between mb-3">
@@ -237,6 +240,34 @@
 								Next: {{ formatDate(layaway.next_payment_date) }}
 							</span>
 							<span v-else> {{ layaway.maximum_duration_months }} months </span>
+						</div>
+					</div>
+				</div>
+
+				<!-- List View -->
+				<div v-if="viewMode === 'list'" class="space-y-2">
+					<div
+						v-for="layaway in layaways"
+						:key="layaway.name"
+						@click="viewDetails(layaway.name)"
+						class="flex items-center justify-between bg-white dark:bg-warm-dark-900/50 rounded-lg px-4 py-3 border border-gray-100 dark:border-warm-border/50 hover:border-[#D4AF37]/30 transition cursor-pointer"
+					>
+						<div class="flex items-center gap-4 min-w-0">
+							<span class="font-mono text-xs text-[#D4AF37] w-32 shrink-0">{{ layaway.name }}</span>
+							<span class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ layaway.customer_name || layaway.customer }}</span>
+						</div>
+						<div class="flex items-center gap-6">
+							<div class="text-right">
+								<span class="text-xs text-gray-500">Total</span>
+								<span class="text-sm font-bold text-gray-900 dark:text-white ml-2">{{ formatCurrency(layaway.total_amount) }}</span>
+							</div>
+							<div class="text-right">
+								<span class="text-xs text-gray-500">Balance</span>
+								<span class="text-sm font-bold text-orange-600 dark:text-orange-400 ml-2">{{ formatCurrency(layaway.balance_amount) }}</span>
+							</div>
+							<span class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold" :class="getStatusClass(layaway.status, layaway.is_overdue)">
+								{{ layaway.is_overdue ? 'Overdue' : layaway.status }}
+							</span>
 						</div>
 					</div>
 				</div>
@@ -354,6 +385,7 @@ import { useCartStore } from '@/stores/cart.js'
 import AppLayout from '@/components/AppLayout.vue'
 import LayawayDetailModal from '@/components/LayawayDetailModal.vue'
 import CreateLayawayModal from '@/components/CreateLayawayModal.vue'
+import ViewToggle from '@/components/ViewToggle.vue'
 	import { formatDate as formatDateUtil } from '@/utils/dates.js'
 
 // Routing
@@ -371,6 +403,8 @@ const selectedLayaway = ref(null)
 const showCreateModal = ref(false)
 const successData = ref(null)
 const pagination = ref({ page: 1, total_pages: 1, total_count: 0 })
+
+const viewMode = ref(localStorage.getItem('zevar_layaway_view') || 'grid')
 
 const filters = ref({
 	status: '',

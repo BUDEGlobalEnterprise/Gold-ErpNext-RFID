@@ -17,6 +17,12 @@
         },
         {
             "role": "Sales Manager"
+        },
+        {
+            "role": "Store Manager"
+        },
+        {
+            "role": "Accounts Manager"
         }
     ]
 }

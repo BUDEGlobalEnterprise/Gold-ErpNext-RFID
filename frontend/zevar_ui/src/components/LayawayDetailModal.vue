@@ -495,10 +495,11 @@
 	</BaseModal>
 
 	<!-- Payment Modal (rendered outside BaseModal, as its own independent modal) -->
-	<LayawayPaymentModal
+	<CheckoutModal
 		v-if="showPaymentModal"
 		:show="showPaymentModal"
-		:layawayId="layawayId"
+		mode="layaway"
+		:referenceId="layawayId"
 		:balanceAmount="layaway?.balance_amount || 0"
 		@close="showPaymentModal = false"
 		@success="handlePaymentSuccess"
@@ -510,7 +511,7 @@ import { ref, computed, watch } from 'vue'
 import { createResource } from 'frappe-ui'
 import { formatDate, formatDateTime } from '@/utils/dates.js'
 import BaseModal from './BaseModal.vue'
-import LayawayPaymentModal from '@/components/LayawayPaymentModal.vue'
+import CheckoutModal from '@/components/CheckoutModal.vue'
 
 const props = defineProps({
 	show: { type: Boolean, default: false },

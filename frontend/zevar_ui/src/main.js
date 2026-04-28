@@ -13,6 +13,10 @@ const pinia = createPinia()
 setConfig('resourceFetcher', frappeRequest)
 
 app.use(pinia)
+// Ensure the theme store runs on boot so .dark class is applied before first paint
+import { useUIStore } from '@/stores/ui.js'
+// Call once to initialize (sets .dark class on <html> if stored preference is dark)
+useUIStore()
 app.use(router)
 app.use(resourcesPlugin)
 

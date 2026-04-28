@@ -67,6 +67,17 @@ def execute(filters=None):
 		warehouse_filter = "AND EXISTS (SELECT 1 FROM `tabSales Invoice Item` sii WHERE sii.parent = si.name AND sii.warehouse = %(warehouse)s)"
 		warehouse_params["warehouse"] = warehouse
 
+	# Stream filter
+	stream_filter = ""
+	transaction_stream = filters.get("transaction_stream")
+	if transaction_stream:
+		if isinstance(transaction_stream, str):
+			transaction_stream = [transaction_stream]
+
+		if transaction_stream:
+			stream_filter = "AND si.custom_transaction_stream IN %(transaction_stream)s"
+			warehouse_params["transaction_stream"] = tuple(transaction_stream)
+
 	# Get payment method breakdown
 	payment_data = frappe.db.sql(  # nosemgrep
 		f"""
@@ -81,6 +92,7 @@ def execute(filters=None):
 			AND si.docstatus = 1
 			AND si.posting_date BETWEEN %(from_date)s AND %(to_date)s
 			{warehouse_filter}
+			{stream_filter}
 		GROUP BY sip.mode_of_payment
 		ORDER BY total_amount DESC
 	""",
@@ -119,6 +131,16 @@ def get_chart_data(filters=None):
 		warehouse_filter = "AND EXISTS (SELECT 1 FROM `tabSales Invoice Item` sii WHERE sii.parent = si.name AND sii.warehouse = %(warehouse)s)"
 		warehouse_params["warehouse"] = warehouse
 
+	stream_filter = ""
+	transaction_stream = filters.get("transaction_stream")
+	if transaction_stream:
+		if isinstance(transaction_stream, str):
+			transaction_stream = [transaction_stream]
+
+		if transaction_stream:
+			stream_filter = "AND si.custom_transaction_stream IN %(transaction_stream)s"
+			warehouse_params["transaction_stream"] = tuple(transaction_stream)
+
 	chart_data = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT
@@ -130,6 +152,7 @@ def get_chart_data(filters=None):
 			AND si.docstatus = 1
 			AND si.posting_date BETWEEN %(from_date)s AND %(to_date)s
 			{warehouse_filter}
+			{stream_filter}
 		GROUP BY sip.mode_of_payment
 		ORDER BY value DESC
 	""",
