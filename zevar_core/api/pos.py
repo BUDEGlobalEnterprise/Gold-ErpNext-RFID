@@ -37,11 +37,21 @@ def create_pos_invoice(
 	trade_in_list = frappe.parse_json(trade_ins) if trade_ins else []
 
 	# Validate the user has an allowed role for POS invoicing
-	allowed_roles = {"Sales User", "Sales Manager", "Store Manager", "POS Manager", "Employee", "Employee Self Service", "System Manager"}
+	allowed_roles = {
+		"Sales User",
+		"Sales Manager",
+		"Store Manager",
+		"POS Manager",
+		"Employee",
+		"Employee Self Service",
+		"System Manager",
+	}
 	user_roles = set(frappe.get_roles())
 	if not user_roles & allowed_roles:
 		frappe.throw(
-			_("You do not have permission to create POS Invoices. Required role: Sales User, Employee, or equivalent."),
+			_(
+				"You do not have permission to create POS Invoices. Required role: Sales User, Employee, or equivalent."
+			),
 			frappe.PermissionError,
 		)
 

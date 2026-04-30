@@ -167,7 +167,7 @@
 								<tr
 									v-for="record in dailyRecords"
 									:key="record.date"
-									class=" transition-colors"
+									class="transition-colors"
 								>
 									<td class="px-10 py-6">
 										<p class="text-sm font-black text-gray-900 tracking-tight">

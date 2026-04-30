@@ -92,6 +92,16 @@ def create_required_modes_of_payment():
 		{"mode_of_payment": "Zelle", "type": "General"},
 		{"mode_of_payment": "Gift Card", "type": "General"},
 		{"mode_of_payment": "Trade-In", "type": "General"},
+		{"mode_of_payment": "Apple Pay", "type": "Bank"},
+		{"mode_of_payment": "Google Pay", "type": "Bank"},
+		{"mode_of_payment": "Venmo", "type": "General"},
+		{"mode_of_payment": "Cash App", "type": "General"},
+		{"mode_of_payment": "Synchrony", "type": "General"},
+		{"mode_of_payment": "AFF", "type": "General"},
+		{"mode_of_payment": "CIMA", "type": "General"},
+		{"mode_of_payment": "Progressive", "type": "General"},
+		{"mode_of_payment": "Snap", "type": "General"},
+		{"mode_of_payment": "In-House Finance", "type": "General"},
 	]
 
 	for mode in modes:

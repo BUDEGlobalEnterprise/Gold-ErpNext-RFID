@@ -55,36 +55,43 @@ def get_repair_dashboard_stats(warehouse=None):
 	)[0].count
 
 	# 3. Revenue this week
-	weekly_revenue = frappe.db.sql(
-		f"""
+	weekly_revenue = (
+		frappe.db.sql(
+			f"""
 		SELECT SUM(total_cost) as revenue
 		FROM `tabRepair Order`
 		WHERE received_date >= %(week_start)s
 			AND received_date <= %(today)s
 			{conditions}
 		""",
-		values={**values, "week_start": week_start, "today": today_date},
-		as_dict=True,
-	)[0].revenue or 0
+			values={**values, "week_start": week_start, "today": today_date},
+			as_dict=True,
+		)[0].revenue
+		or 0
+	)
 	stats["weekly_revenue"] = flt(weekly_revenue, 2)
 
 	# 4. Revenue this month
-	monthly_revenue = frappe.db.sql(
-		f"""
+	monthly_revenue = (
+		frappe.db.sql(
+			f"""
 		SELECT SUM(total_cost) as revenue
 		FROM `tabRepair Order`
 		WHERE received_date >= %(month_start)s
 			AND received_date <= %(today)s
 			{conditions}
 		""",
-		values={**values, "month_start": month_start, "today": today_date},
-		as_dict=True,
-	)[0].revenue or 0
+			values={**values, "month_start": month_start, "today": today_date},
+			as_dict=True,
+		)[0].revenue
+		or 0
+	)
 	stats["monthly_revenue"] = flt(monthly_revenue, 2)
 
 	# 5. Average turnaround time (for delivered repairs in last 30 days)
-	avg_turnaround = frappe.db.sql(
-		f"""
+	avg_turnaround = (
+		frappe.db.sql(
+			f"""
 		SELECT AVG(TIMESTAMPDIFF(HOUR, received_date, delivered_date) / 24) as avg_days
 		FROM `tabRepair Order`
 		WHERE status = 'Delivered'
@@ -92,9 +99,11 @@ def get_repair_dashboard_stats(warehouse=None):
 			AND received_date >= DATE_SUB(%(today)s, INTERVAL 30 DAY)
 			{conditions}
 		""",
-		values={**values, "today": today_date},
-		as_dict=True,
-	)[0].avg_days or 0
+			values={**values, "today": today_date},
+			as_dict=True,
+		)[0].avg_days
+		or 0
+	)
 	stats["avg_turnaround_days"] = flt(avg_turnaround, 1) if avg_turnaround else 0
 
 	# 6. Active repairs by status

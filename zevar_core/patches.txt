@@ -18,3 +18,8 @@ zevar_core.patches.v1_0.map_financier_payment_accounts
 zevar_core.patches.v1_0.add_transaction_stream_field
 zevar_core.patches.v1_0.add_rfid_field
 zevar_core.patches.v1_0.enhance_case_audit_fields
+zevar_core.patches.v1_0.add_zevar_eod_settings
+zevar_core.patches.v1_0.backfill_transaction_stream
+zevar_core.patches.v1_1.seed_warehouse_zones
+zevar_core.patches.v1_1.seed_custom_fields_item_serial
+zevar_core.patches.v1_1.backfill_serial_last_seen

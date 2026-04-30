@@ -1,9 +1,9 @@
 /**
  * Audit Store
  *
- * Manages state for the Rapid Inventory Auditing system.
+ * Manages state for the Inventory Auditing system.
  * Handles barcode/RFID scanning sessions, progress tracking,
- * and audit history.
+ * audit history, dashboard KPIs, and policy-driven workflows.
  */
 
 import { defineStore } from 'pinia'
@@ -20,12 +20,13 @@ export const useAuditStore = defineStore('audit', () => {
 	const scanMode = ref('barcode') // 'barcode' or 'rfid'
 	const lastScanResult = ref(null)
 	const isPolling = ref(false)
+	const dashboard = ref(null)
+	const auditPlans = ref([])
 	let pollTimer = null
 
 	// --- Computed ---
 	const isActive = computed(() => {
-		return activeSession.value &&
-			['Draft', 'In Progress'].includes(activeSession.value.status)
+		return activeSession.value && ['Draft', 'In Progress'].includes(activeSession.value.status)
 	})
 
 	const progressPercent = computed(() => {
@@ -52,6 +53,7 @@ export const useAuditStore = defineStore('audit', () => {
 				status: 'Draft',
 				expected_count: data.expected_count,
 				total_value_expected: data.total_value_expected,
+				scope: data.scope,
 			}
 		},
 	})
@@ -71,7 +73,7 @@ export const useAuditStore = defineStore('audit', () => {
 		onSuccess(data) {
 			lastScanResult.value = { match_status: 'Batch', ...data }
 			if (data.results) {
-				data.results.forEach(r => addToScanFeed(r))
+				data.results.forEach((r) => addToScanFeed(r))
 			}
 		},
 	})
@@ -93,6 +95,7 @@ export const useAuditStore = defineStore('audit', () => {
 			stopPolling()
 			if (activeSession.value) {
 				activeSession.value.status = data.status
+				activeSession.value.variance_dollar_total = data.variance_dollar_total
 			}
 		},
 	})
@@ -121,13 +124,36 @@ export const useAuditStore = defineStore('audit', () => {
 		},
 	})
 
+	const dashboardResource = createResource({
+		url: 'zevar_core.api.inventory_audit.get_audit_dashboard',
+		onSuccess(data) {
+			dashboard.value = data
+		},
+	})
+
+	const auditPlansResource = createResource({
+		url: 'zevar_core.api.inventory_audit.get_audit_plans',
+		onSuccess(data) {
+			auditPlans.value = data.plans || []
+		},
+	})
+
+	const approveVarianceResource = createResource({
+		url: 'zevar_core.api.inventory_audit.approve_variance',
+	})
+
 	// --- Actions ---
-	function startAudit(warehouse, notes) {
-		return startAuditResource.submit({ store_location: warehouse, notes })
+	function startAudit(warehouse, notes, scope, auditPlan) {
+		return startAuditResource.submit({
+			display_case: warehouse,
+			store_location: warehouse,
+			scope: scope || 'Spot',
+			audit_plan: auditPlan || undefined,
+		})
 	}
 
 	function resumeAudit(sessionName) {
-		return progressResource.submit({ session_name: sessionName }).then(() => {
+		return progressResource.submit({ session: sessionName }).then(() => {
 			startPolling()
 		})
 	}
@@ -135,7 +161,7 @@ export const useAuditStore = defineStore('audit', () => {
 	function scanBarcode(code) {
 		if (!activeSession.value) return
 		return submitScanResource.submit({
-			session_name: activeSession.value.name,
+			session: activeSession.value.name,
 			barcode_or_epc: code,
 		})
 	}
@@ -143,33 +169,54 @@ export const useAuditStore = defineStore('audit', () => {
 	function scanBatch(codes) {
 		if (!activeSession.value) return
 		return batchScanResource.submit({
-			session_name: activeSession.value.name,
-			barcodes_or_epcs: JSON.stringify(codes),
+			session: activeSession.value.name,
+			epcs_json: JSON.stringify(codes),
 		})
 	}
 
 	function refreshProgress() {
 		if (!activeSession.value) return
-		return progressResource.submit({ session_name: activeSession.value.name })
+		return progressResource.submit({ session: activeSession.value.name })
 	}
 
-	function finalize() {
+	function finalize(twoPersonSignoffBy) {
 		if (!activeSession.value) return
-		return finalizeResource.submit({ session_name: activeSession.value.name })
+		return finalizeResource.submit({
+			session: activeSession.value.name,
+			two_person_signoff_by: twoPersonSignoffBy || undefined,
+		})
+	}
+
+	function approveVariance(session, reason) {
+		return approveVarianceResource.submit({
+			session: session,
+			approve_reason: reason,
+		})
 	}
 
 	function cancel() {
 		if (!activeSession.value) return
-		return cancelResource.submit({ session_name: activeSession.value.name })
+		return cancelResource.submit({ session: activeSession.value.name })
 	}
 
 	function exportResults() {
 		if (!activeSession.value) return
-		return exportResource.submit({ session_name: activeSession.value.name })
+		return exportResource.submit({ session: activeSession.value.name })
 	}
 
 	function loadHistory(params = {}) {
 		return historyResource.submit(params)
+	}
+
+	function loadDashboard(store) {
+		return dashboardResource.submit({ store: store || undefined })
+	}
+
+	function loadAuditPlans(store, status) {
+		return auditPlansResource.submit({
+			store: store || undefined,
+			status: status || 'Scheduled',
+		})
 	}
 
 	function addToScanFeed(result) {
@@ -223,6 +270,8 @@ export const useAuditStore = defineStore('audit', () => {
 		scanMode,
 		lastScanResult,
 		isPolling,
+		dashboard,
+		auditPlans,
 
 		// Computed
 		isActive,
@@ -240,6 +289,9 @@ export const useAuditStore = defineStore('audit', () => {
 		cancelResource,
 		historyResource,
 		exportResource,
+		dashboardResource,
+		auditPlansResource,
+		approveVarianceResource,
 
 		// Actions
 		startAudit,
@@ -248,9 +300,12 @@ export const useAuditStore = defineStore('audit', () => {
 		scanBatch,
 		refreshProgress,
 		finalize,
+		approveVariance,
 		cancel,
 		exportResults,
 		loadHistory,
+		loadDashboard,
+		loadAuditPlans,
 		addToScanFeed,
 		clearSession,
 		startPolling,

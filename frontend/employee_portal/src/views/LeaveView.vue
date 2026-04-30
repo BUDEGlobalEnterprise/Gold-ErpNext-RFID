@@ -205,7 +205,7 @@
 								<tr
 									v-for="app in filteredApplications"
 									:key="app.name"
-									class=" transition-colors"
+									class="transition-colors"
 								>
 									<td class="px-10 py-6">
 										<div class="flex items-center gap-3">
@@ -247,9 +247,7 @@
 										</span>
 									</td>
 									<td class="px-10 py-6 text-right">
-										<button
-											class="text-gray-400 transition-colors"
-										>
+										<button class="text-gray-400 transition-colors">
 											<span class="material-symbols-outlined text-lg"
 												>more_horiz</span
 											>
@@ -432,7 +430,7 @@
 						<div class="flex gap-4 mt-12">
 							<button
 								@click="showLeaveModal = false"
-								class="flex-1 py-4 text-gray-400 font-black text-xs uppercase tracking-widest "
+								class="flex-1 py-4 text-gray-400 font-black text-xs uppercase tracking-widest"
 							>
 								Dismiss
 							</button>

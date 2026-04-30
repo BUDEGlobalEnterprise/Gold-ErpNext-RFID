@@ -232,9 +232,7 @@ class TestInventoryAudit(FrappeTestCase):
 		self.assertIsNone(final_res["shrinkage_entry"])
 
 		# Values should match since all items were scanned
-		self.assertEqual(
-			final_res["total_value_expected"], final_res["total_value_scanned"]
-		)
+		self.assertEqual(final_res["total_value_expected"], final_res["total_value_scanned"])
 		self.assertEqual(final_res["total_value_discrepancy"], 0)
 
 	def test_reconciled_with_shrinkage(self):

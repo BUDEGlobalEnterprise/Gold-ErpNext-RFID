@@ -1,6 +1,6 @@
 <template>
 	<div
-		class="min-h-screen"
+		class="min-h-[100dvh]"
 		:class="isDark ? 'bg-[#1e1e24] text-white' : 'bg-white text-gray-900'"
 	>
 		<Header
@@ -22,7 +22,9 @@
 					class="flex items-center gap-2 text-sm"
 					:class="isDark ? 'text-gray-400' : 'text-gray-600'"
 				>
-					<router-link to="/catalogues" class="hover:text-[#C9A962]">Home</router-link>
+					<router-link to="/pos-catalogue" class="hover:text-[#C9A962]"
+						>Home</router-link
+					>
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
@@ -53,9 +55,7 @@
 				<img :src="categoryBanner" class="w-full h-full object-cover" />
 			</div>
 			<div class="relative max-w-7xl mx-auto px-6 h-full flex flex-col justify-center">
-				<h1
-					class="premium-title !text-4xl md:!text-5xl mb-2 capitalize"
-				>
+				<h1 class="premium-title !text-4xl md:!text-5xl mb-2 capitalize">
 					{{ categoryTitle }}
 				</h1>
 				<p class="text-lg font-light" :class="isDark ? 'text-gray-400' : 'text-gray-600'">
@@ -308,8 +308,15 @@ import ProductModal from '@/components/ProductModal.vue'
 const route = useRoute()
 const router = useRouter()
 
+const props = defineProps({
+	isEmbedded: {
+		type: Boolean,
+		default: false,
+	},
+})
+
 // Check if embedded inside AppLayout
-const isEmbedded = computed(() => route.meta?.fullPage === true)
+const isEmbedded = computed(() => props.isEmbedded || route.meta?.fullPage === true)
 
 // Dark mode
 import { useUIStore } from '@/stores/ui'
@@ -448,7 +455,7 @@ function applyFilters() {
 }
 
 function handleCategorySelect(cat) {
-	router.push(`/catalogues/${cat}`)
+	router.push(`/pos-catalogue/${cat}`)
 }
 
 function openProduct(product) {

@@ -15,7 +15,15 @@ from zevar_core.constants import (
 	MAX_EXTENSIONS_ALLOWED,
 )
 
-LAYAWAY_ALLOWED_ROLES = ["Sales User", "Sales Manager", "Store Manager", "POS Manager", "Employee", "Employee Self Service", "System Manager"]
+LAYAWAY_ALLOWED_ROLES = [
+	"Sales User",
+	"Sales Manager",
+	"Store Manager",
+	"POS Manager",
+	"Employee",
+	"Employee Self Service",
+	"System Manager",
+]
 
 
 def _enforce_layaway_access() -> None:
@@ -27,7 +35,7 @@ def _coerce_statuses(statuses: str | list | tuple | None) -> list[str]:
 		return []
 
 	status_values = frappe.parse_json(statuses) if isinstance(statuses, str) else statuses
-	if not isinstance(status_values, (list, tuple)):
+	if not isinstance(status_values, list | tuple):
 		status_values = [status_values]
 
 	return [str(status).strip() for status in status_values if str(status).strip()]
@@ -531,7 +539,9 @@ def create_layaway(
 				)
 
 		doc.status = "Active"
+		doc.flags.ignore_permissions = True
 		doc.insert(ignore_permissions=True)
+		doc.flags.ignore_permissions = True
 		doc.submit()
 
 		_reserve_inventory(doc)
@@ -818,7 +828,7 @@ def cancel_layaway(layaway_id: str, cancellation_reason: str | None = None) -> d
 			"success": True,
 			"amount_refunded": refund_amount,
 			"cancellation_fee": cancellation_fee,
-			"message": f"Layaway cancelled.",
+			"message": "Layaway cancelled.",
 		}
 		if gc_name:
 			result["store_credit_id"] = gc_name
@@ -1329,23 +1339,29 @@ def _create_layaway_payment_entry(doc, amount, mode_of_payment, reference=None):
 		f"Liability — Layaway Deposits Held - {frappe.get_cached_value('Company', company, 'abbr')}"
 	)
 
-	pe = frappe.new_doc("Payment Entry")
-	pe.payment_type = "Receive"
-	pe.company = company
-	pe.party_type = "Customer"
-	pe.party = doc.customer
-	pe.paid_from = liability_account
-	pe.paid_to = paid_to
-	pe.paid_amount = amount
-	pe.received_amount = amount
-	pe.reference_no = reference or doc.name
-	pe.reference_date = nowdate()
-	pe.remarks = f"Layaway Payment for {doc.name}"
-
-	pe.flags.ignore_permissions = True
-	pe.insert()
-	pe.submit()
-	return pe.name
+	# Elevate to Administrator: ERPNext Payment Entry validate() internally calls
+	# the global frappe.has_permission() which ignores document-level ignore_permissions.
+	session_user = frappe.session.user
+	frappe.set_user("Administrator")
+	try:
+		pe = frappe.new_doc("Payment Entry")
+		pe.payment_type = "Receive"
+		pe.company = company
+		pe.party_type = "Customer"
+		pe.party = doc.customer
+		pe.paid_from = liability_account
+		pe.paid_to = paid_to
+		pe.paid_amount = amount
+		pe.received_amount = amount
+		pe.reference_no = reference or doc.name
+		pe.reference_date = nowdate()
+		pe.remarks = f"Layaway Payment for {doc.name}"
+		pe.flags.ignore_permissions = True
+		pe.insert()
+		pe.submit()
+		return pe.name
+	finally:
+		frappe.set_user(session_user)
 
 
 def _create_layaway_final_invoice(doc):
@@ -1359,26 +1375,31 @@ def _create_layaway_final_invoice(doc):
 		f"Liability — Layaway Deposits Held - {frappe.get_cached_value('Company', company, 'abbr')}"
 	)
 
-	invoice = frappe.new_doc("Sales Invoice")
-	invoice.customer = doc.customer
-	invoice.company = company
-	invoice.due_date = nowdate()
-	invoice.custom_transaction_stream = "Layaway Final"
-	invoice.debit_to = liability_account
+	session_user = frappe.session.user
+	frappe.set_user("Administrator")
+	try:
+		invoice = frappe.new_doc("Sales Invoice")
+		invoice.customer = doc.customer
+		invoice.company = company
+		invoice.due_date = nowdate()
+		invoice.custom_transaction_stream = "Layaway Final"
+		invoice.debit_to = liability_account
 
-	for item in doc.items:
-		invoice.append(
-			"items",
-			{
-				"item_code": item.item_code,
-				"qty": item.qty,
-				"rate": item.rate,
-				"amount": item.amount,
-				"warehouse": item.warehouse,
-			},
-		)
+		for item in doc.items:
+			invoice.append(
+				"items",
+				{
+					"item_code": item.item_code,
+					"qty": item.qty,
+					"rate": item.rate,
+					"amount": item.amount,
+					"warehouse": item.warehouse,
+				},
+			)
 
-	invoice.flags.ignore_permissions = True
-	invoice.insert()
-	invoice.submit()
-	return invoice.name
+		invoice.flags.ignore_permissions = True
+		invoice.insert()
+		invoice.submit()
+		return invoice.name
+	finally:
+		frappe.set_user(session_user)

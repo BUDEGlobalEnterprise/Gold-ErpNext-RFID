@@ -1,13 +1,16 @@
 <template>
 	<AppLayout>
-		<div class="h-full flex flex-col">
+		<div class="flex flex-col">
 			<!-- Page Header -->
 			<div class="flex items-center justify-between mb-6 flex-shrink-0">
 				<div>
 					<h1 class="premium-title !text-2xl">Sales History</h1>
 					<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
 						View and manage past transactions
-						<span v-if="isOwnSalesOnly" class="text-xs text-amber-600 dark:text-amber-400 ml-2">
+						<span
+							v-if="isOwnSalesOnly"
+							class="text-xs text-amber-600 dark:text-amber-400 ml-2"
+						>
 							(Showing your sales only)
 						</span>
 					</p>
@@ -86,9 +89,7 @@
 
 			<!-- Summary Cards -->
 			<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 flex-shrink-0" v-if="summary">
-				<div
-					class="premium-card !p-4"
-				>
+				<div class="premium-card !p-4">
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
 						>Transactions</span
@@ -107,9 +108,7 @@
 						${{ formatAmount(summary.total_sales) }}
 					</p>
 				</div>
-				<div
-					class="premium-card !p-4"
-				>
+				<div class="premium-card !p-4">
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
 						>Average Sale</span
@@ -118,9 +117,7 @@
 						${{ formatAmount(summary.average_sale) }}
 					</p>
 				</div>
-				<div
-					class="premium-card !p-4"
-				>
+				<div class="premium-card !p-4">
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
 						>Customers</span
@@ -132,9 +129,14 @@
 			</div>
 
 			<!-- Grid View -->
-			<div v-if="viewMode === 'grid'" class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
+			<div
+				v-if="viewMode === 'grid'"
+				class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar"
+			>
 				<div v-if="loading" class="flex items-center justify-center py-20">
-					<div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-[#D4AF37]"></div>
+					<div
+						class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-[#D4AF37]"
+					></div>
 				</div>
 				<div v-else-if="sales.length === 0" class="flex items-center justify-center py-20">
 					<p class="text-gray-400 text-sm">No transactions found</p>
@@ -148,8 +150,12 @@
 					>
 						<div class="flex items-start justify-between mb-3">
 							<div>
-								<span class="font-mono text-xs font-bold text-[#D4AF37]">{{ sale.name }}</span>
-								<p class="text-sm font-bold text-gray-900 dark:text-white mt-0.5">{{ sale.customer || 'Walk-In' }}</p>
+								<span class="font-mono text-xs font-bold text-[#D4AF37]">{{
+									sale.name
+								}}</span>
+								<p class="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
+									{{ sale.customer || 'Walk-In' }}
+								</p>
 							</div>
 							<span
 								class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold shrink-0"
@@ -160,18 +166,50 @@
 						</div>
 						<div class="grid grid-cols-2 gap-3 mb-3">
 							<div>
-								<span class="text-[10px] text-gray-500 uppercase font-bold">Date</span>
-								<p class="text-xs text-gray-700 dark:text-gray-300">{{ formatDate(sale.posting_date) }}</p>
+								<span class="text-[10px] text-gray-500 uppercase font-bold"
+									>Date</span
+								>
+								<p class="text-xs text-gray-700 dark:text-gray-300">
+									{{ formatDate(sale.posting_date) }}
+								</p>
 							</div>
 							<div>
-								<span class="text-[10px] text-gray-500 uppercase font-bold">Items</span>
-								<p class="text-xs text-gray-700 dark:text-gray-300">{{ sale.item_count || 1 }}</p>
+								<span class="text-[10px] text-gray-500 uppercase font-bold"
+									>Items</span
+								>
+								<p class="text-xs text-gray-700 dark:text-gray-300">
+									{{ sale.item_count || 1 }}
+								</p>
 							</div>
 						</div>
-						<div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-warm-border/50">
-							<span class="text-lg font-bold text-green-600 dark:text-green-400">${{ formatAmount(sale.grand_total) }}</span>
-							<button class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition">
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+						<div
+							class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-warm-border/50"
+						>
+							<span class="text-lg font-bold text-green-600 dark:text-green-400"
+								>${{ formatAmount(sale.grand_total) }}</span
+							>
+							<button
+								class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition"
+							>
+								<svg
+									class="w-4 h-4"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+									/>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+									/>
+								</svg>
 							</button>
 						</div>
 					</div>
@@ -180,163 +218,170 @@
 					v-if="pagination.page < pagination.total_pages"
 					class="flex items-center justify-center pt-6 pb-4"
 				>
-					<button @click="loadMore" :disabled="loading" class="px-6 py-2.5 text-sm font-bold rounded-lg border-2 border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black disabled:opacity-50 transition">
+					<button
+						@click="loadMore"
+						:disabled="loading"
+						class="px-6 py-2.5 text-sm font-bold rounded-lg border-2 border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black disabled:opacity-50 transition"
+					>
 						{{ loading ? 'Loading...' : 'Load More' }}
 					</button>
 				</div>
 			</div>
 
 			<!-- Sales Table -->
-			<div v-if="viewMode === 'list'" class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar flex flex-col">
+			<div
+				v-if="viewMode === 'list'"
+				class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar flex flex-col"
+			>
 				<div
 					class="bg-white dark:bg-warm-dark-900/50 rounded-xl border border-gray-100 dark:border-warm-border/50 mb-6"
 				>
-				<div class="overflow-x-auto">
-					<table class="w-full">
-						<thead>
-							<tr
-								class="bg-gray-50 dark:bg-warm-dark-900/50 border-b border-gray-100 dark:border-warm-border/50"
-							>
-								<th
-									class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+					<div class="overflow-x-auto">
+						<table class="w-full">
+							<thead>
+								<tr
+									class="bg-gray-50 dark:bg-warm-dark-900/50 border-b border-gray-100 dark:border-warm-border/50"
 								>
-									Invoice #
-								</th>
-								<th
-									class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-								>
-									Date
-								</th>
-								<th
-									class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-								>
-									Customer
-								</th>
-								<th
-									class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-								>
-									Items
-								</th>
-								<th
-									class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-								>
-									Total
-								</th>
-								<th
-									class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-								>
-									Status
-								</th>
-								<th
-									class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-								>
-									Actions
-								</th>
-							</tr>
-						</thead>
-						<tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
-							<tr v-if="loading">
-								<td
-									colspan="7"
-									class="px-4 py-12 text-center text-gray-500 dark:text-gray-400"
-								>
-									<div
-										class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-[#D4AF37] mx-auto mb-3"
-									></div>
-									Loading transactions...
-								</td>
-							</tr>
-							<tr v-else-if="sales.length === 0">
-								<td
-									colspan="7"
-									class="px-4 py-12 text-center text-gray-500 dark:text-gray-400"
-								>
-									No transactions found
-								</td>
-							</tr>
-							<tr
-								v-for="sale in sales"
-								:key="sale.name"
-								@click="viewDetails(sale.name)"
-								class="hover:bg-gray-50 dark:hover:bg-warm-dark-700 cursor-pointer transition"
-							>
-								<td class="px-4 py-3 text-sm font-semibold text-[#D4AF37]">
-									{{ sale.name }}
-								</td>
-								<td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-									{{ formatDate(sale.posting_date) }}
-								</td>
-								<td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
-									{{ sale.customer }}
-								</td>
-								<td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-									{{ sale.item_count || 1 }}
-								</td>
-								<td
-									class="px-4 py-3 text-sm font-semibold text-green-600 dark:text-green-400"
-								>
-									${{ formatAmount(sale.grand_total) }}
-								</td>
-								<td class="px-4 py-3">
-									<span
-										class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold"
-										:class="getStatusClass(sale.status)"
+									<th
+										class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
 									>
-										{{ sale.status }}
-									</span>
-								</td>
-								<td class="px-4 py-3">
-									<div class="flex items-center gap-1">
-										<button
-											class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 transition text-gray-400 hover:text-gray-600 dark:hover:text-white"
-											@click.stop="viewDetails(sale.name)"
-											title="View Details"
+										Invoice #
+									</th>
+									<th
+										class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+									>
+										Date
+									</th>
+									<th
+										class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+									>
+										Customer
+									</th>
+									<th
+										class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+									>
+										Items
+									</th>
+									<th
+										class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+									>
+										Total
+									</th>
+									<th
+										class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+									>
+										Status
+									</th>
+									<th
+										class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+									>
+										Actions
+									</th>
+								</tr>
+							</thead>
+							<tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
+								<tr v-if="loading">
+									<td
+										colspan="7"
+										class="px-4 py-12 text-center text-gray-500 dark:text-gray-400"
+									>
+										<div
+											class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-[#D4AF37] mx-auto mb-3"
+										></div>
+										Loading transactions...
+									</td>
+								</tr>
+								<tr v-else-if="sales.length === 0">
+									<td
+										colspan="7"
+										class="px-4 py-12 text-center text-gray-500 dark:text-gray-400"
+									>
+										No transactions found
+									</td>
+								</tr>
+								<tr
+									v-for="sale in sales"
+									:key="sale.name"
+									@click="viewDetails(sale.name)"
+									class="hover:bg-gray-50 dark:hover:bg-warm-dark-700 cursor-pointer transition"
+								>
+									<td class="px-4 py-3 text-sm font-semibold text-[#D4AF37]">
+										{{ sale.name }}
+									</td>
+									<td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+										{{ formatDate(sale.posting_date) }}
+									</td>
+									<td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+										{{ sale.customer }}
+									</td>
+									<td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+										{{ sale.item_count || 1 }}
+									</td>
+									<td
+										class="px-4 py-3 text-sm font-semibold text-green-600 dark:text-green-400"
+									>
+										${{ formatAmount(sale.grand_total) }}
+									</td>
+									<td class="px-4 py-3">
+										<span
+											class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold"
+											:class="getStatusClass(sale.status)"
 										>
-											<svg
-												class="w-4 h-4"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
+											{{ sale.status }}
+										</span>
+									</td>
+									<td class="px-4 py-3">
+										<div class="flex items-center gap-1">
+											<button
+												class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 transition text-gray-400 hover:text-gray-600 dark:hover:text-white"
+												@click.stop="viewDetails(sale.name)"
+												title="View Details"
 											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-												/>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-												/>
-											</svg>
-										</button>
-										<button
-											class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 transition text-gray-400 hover:text-gray-600 dark:hover:text-white"
-											@click.stop="printInvoice(sale.name)"
-											title="Print"
-										>
-											<svg
-												class="w-4 h-4"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
+												<svg
+													class="w-4 h-4"
+													fill="none"
+													stroke="currentColor"
+													viewBox="0 0 24 24"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+													/>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+													/>
+												</svg>
+											</button>
+											<button
+												class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 transition text-gray-400 hover:text-gray-600 dark:hover:text-white"
+												@click.stop="printInvoice(sale.name)"
+												title="Print"
 											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-												/>
-											</svg>
-										</button>
-									</div>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
+												<svg
+													class="w-4 h-4"
+													fill="none"
+													stroke="currentColor"
+													viewBox="0 0 24 24"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+													/>
+												</svg>
+											</button>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
 				</div>
 
 				<!-- Load More Pagination -->
@@ -467,7 +512,9 @@
 						>
 							<table class="w-full text-sm">
 								<thead>
-									<tr class="border-b border-gray-200 dark:border-warm-border/50">
+									<tr
+										class="border-b border-gray-200 dark:border-warm-border/50"
+									>
 										<th
 											class="px-3 py-2 text-left text-xs text-gray-500 dark:text-gray-400"
 										>
@@ -515,7 +562,9 @@
 							</table>
 						</div>
 
-						<div class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-xl p-4 mb-6 space-y-2">
+						<div
+							class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-xl p-4 mb-6 space-y-2"
+						>
 							<div
 								class="flex justify-between text-sm text-gray-600 dark:text-gray-400"
 							>
@@ -623,7 +672,7 @@ const session = useSessionStore()
 const isOwnSalesOnly = computed(() => !canViewAllSalesHistory())
 
 const viewMode = ref(localStorage.getItem('zevar_sales_view') || 'list')
-	const loading = ref(false)
+const loading = ref(false)
 const sales = ref([])
 const summary = ref(null)
 const selectedTransaction = ref(null)

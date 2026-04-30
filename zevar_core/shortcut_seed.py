@@ -342,6 +342,17 @@ def get_default_shortcuts() -> list[dict]:
 			"roles": report_roles,
 		},
 		{
+			"shortcut_name": "EOD Calendar",
+			"section_name": "Reports",
+			"link_type": "Page",
+			"link_to": "eod-calendar",
+			"icon_name": "calendar",
+			"color": "#0ea5e9",
+			"description": "View interactive daily analytics and YoY heatmap.",
+			"sequence": 515,
+			"roles": report_roles,
+		},
+		{
 			"shortcut_name": "Payment Summary",
 			"section_name": "Reports",
 			"link_type": "Report",

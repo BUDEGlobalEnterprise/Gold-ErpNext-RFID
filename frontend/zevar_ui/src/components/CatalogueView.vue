@@ -936,7 +936,12 @@ const partnerBrands = [
 		desc: 'Diamond Specialists',
 		url: 'https://www.bluenile.com',
 	},
-	{ name: 'Zevar In-House', initial: 'Z', desc: 'Our Exclusive Collection', url: '/catalogues' },
+	{
+		name: 'Zevar In-House',
+		initial: 'Z',
+		desc: 'Our Exclusive Collection',
+		url: '/pos-catalogue',
+	},
 ]
 
 // ---- CAROUSEL LOGIC ----
@@ -959,9 +964,9 @@ function stopAutoSlide() {
 // ---- ACTIONS ----
 function handleCategorySelect(id) {
 	if (id === 'all') {
-		router.push('/catalogues')
+		router.push('/pos-catalogue')
 	} else {
-		router.push(`/catalogues/${id}`)
+		router.push(`/pos-catalogue/${id}`)
 	}
 }
 

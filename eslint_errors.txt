@@ -1,0 +1,125 @@
+eslint...................................................................Failed
+- hook id: eslint
+- exit code: 1
+
+/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/page/cancel_layaway/cancel_layaway.js
+    2:6   error  'zevar' is not defined  no-undef
+    5:1   error  'zevar' is not defined  no-undef
+   11:16  error  'zevar' is not defined  no-undef
+   12:59  error  'zevar' is not defined  no-undef
+   57:18  error  'zevar' is not defined  no-undef
+   59:25  error  'zevar' is not defined  no-undef
+   72:4   error  'zevar' is not defined  no-undef
+   73:28  error  'zevar' is not defined  no-undef
+   74:4   error  'zevar' is not defined  no-undef
+   76:4   error  'zevar' is not defined  no-undef
+   83:32  error  'zevar' is not defined  no-undef
+   87:61  error  'zevar' is not defined  no-undef
+  102:29  error  'zevar' is not defined  no-undef
+  111:25  error  'zevar' is not defined  no-undef
+  115:95  error  'zevar' is not defined  no-undef
+
+/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/page/new_layaway/new_layaway.js
+    2:6   error  'zevar' is not defined  no-undef
+    5:1   error  'zevar' is not defined  no-undef
+   14:16  error  'zevar' is not defined  no-undef
+   15:59  error  'zevar' is not defined  no-undef
+   67:14  error  'zevar' is not defined  no-undef
+   70:14  error  'zevar' is not defined  no-undef
+   73:20  error  'zevar' is not defined  no-undef
+   76:18  error  'zevar' is not defined  no-undef
+   79:17  error  'zevar' is not defined  no-undef
+   82:20  error  'zevar' is not defined  no-undef
+   85:11  error  'zevar' is not defined  no-undef
+   88:20  error  'zevar' is not defined  no-undef
+   91:15  error  'zevar' is not defined  no-undef
+   94:9   error  'zevar' is not defined  no-undef
+   97:10  error  'zevar' is not defined  no-undef
+  145:14  error  'zevar' is not defined  no-undef
+  146:14  error  'zevar' is not defined  no-undef
+  147:14  error  'zevar' is not defined  no-undef
+  148:14  error  'zevar' is not defined  no-undef
+  157:80  error  'zevar' is not defined  no-undef
+  158:82  error  'zevar' is not defined  no-undef
+  159:82  error  'zevar' is not defined  no-undef
+  160:92  error  'zevar' is not defined  no-undef
+  175:25  error  'zevar' is not defined  no-undef
+
+✖ 39 problems (39 errors, 0 warnings)
+
+
+/workspace/development/frappe-bench/apps/zevar_core/zevar_core/public/js/pages/eod_calendar/index.js
+    3:1  error  'zevar_core' is not defined  no-undef
+  246:6  error  'zevar_core' is not defined  no-undef
+
+/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/page/edit_layaway/edit_layaway.js
+    2:6   error  'zevar' is not defined  no-undef
+    5:1   error  'zevar' is not defined  no-undef
+   11:16  error  'zevar' is not defined  no-undef
+   12:59  error  'zevar' is not defined  no-undef
+   57:18  error  'zevar' is not defined  no-undef
+   59:22  error  'zevar' is not defined  no-undef
+   61:24  error  'zevar' is not defined  no-undef
+   63:20  error  'zevar' is not defined  no-undef
+   65:18  error  'zevar' is not defined  no-undef
+   67:17  error  'zevar' is not defined  no-undef
+   69:11  error  'zevar' is not defined  no-undef
+   71:20  error  'zevar' is not defined  no-undef
+   84:4   error  'zevar' is not defined  no-undef
+   85:28  error  'zevar' is not defined  no-undef
+   86:4   error  'zevar' is not defined  no-undef
+   88:4   error  'zevar' is not defined  no-undef
+   95:32  error  'zevar' is not defined  no-undef
+   99:61  error  'zevar' is not defined  no-undef
+  128:25  error  'zevar' is not defined  no-undef
+  132:32  error  'zevar' is not defined  no-undef
+  133:61  error  'zevar' is not defined  no-undef
+
+✖ 23 problems (23 errors, 0 warnings)
+
+
+/workspace/development/frappe-bench/apps/zevar_core/zevar_core/public/js/layaway_desk.js
+  4:6   error  'zevar' is not defined  no-undef
+  8:13  error  'zevar' is not defined  no-undef
+
+✖ 2 problems (2 errors, 0 warnings)
+
+
+/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/page/layaway/layaway.js
+    2:6   error  'zevar' is not defined  no-undef
+    5:1   error  'zevar' is not defined  no-undef
+  157:24  error  'zevar' is not defined  no-undef
+  167:28  error  'zevar' is not defined  no-undef
+
+✖ 4 problems (4 errors, 0 warnings)
+
+
+/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/page/layaway_payment/layaway_payment.js
+    2:6   error  'zevar' is not defined  no-undef
+    5:1   error  'zevar' is not defined  no-undef
+   11:16  error  'zevar' is not defined  no-undef
+   12:59  error  'zevar' is not defined  no-undef
+   53:18  error  'zevar' is not defined  no-undef
+   55:20  error  'zevar' is not defined  no-undef
+   57:21  error  'zevar' is not defined  no-undef
+   59:22  error  'zevar' is not defined  no-undef
+   72:4   error  'zevar' is not defined  no-undef
+   73:28  error  'zevar' is not defined  no-undef
+   74:4   error  'zevar' is not defined  no-undef
+   76:4   error  'zevar' is not defined  no-undef
+   83:32  error  'zevar' is not defined  no-undef
+   84:61  error  'zevar' is not defined  no-undef
+  104:25  error  'zevar' is not defined  no-undef
+  107:77  error  'zevar' is not defined  no-undef
+  108:32  error  'zevar' is not defined  no-undef
+  109:61  error  'zevar' is not defined  no-undef
+
+✖ 18 problems (18 errors, 0 warnings)
+
+
+/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/page/eod_calendar/eod_calendar.js
+    3:1  error  'zevar_core' is not defined  no-undef
+  246:6  error  'zevar_core' is not defined  no-undef
+
+✖ 2 problems (2 errors, 0 warnings)
+

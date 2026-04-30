@@ -100,7 +100,7 @@ def get_data(filters):
 			ro.balance_due,
 			ro.payment_status
 		FROM `tabRepair Order` ro
-		WHERE {' AND '.join(conditions)}
+		WHERE {" AND ".join(conditions)}
 		ORDER BY ro.received_date
 	"""
 
@@ -129,14 +129,16 @@ def get_data(filters):
 	data = []
 	for period in sorted(period_data.keys()):
 		pd = period_data[period]
-		data.append({
-			"period": period,
-			"repair_count": pd["repair_count"],
-			"total_revenue": flt(pd["total_revenue"], 2),
-			"avg_revenue": flt(pd["total_revenue"] / pd["repair_count"], 2) if pd["repair_count"] else 0,
-			"total_deposit": flt(pd["total_deposit"], 2),
-			"pending_balance": flt(pd["pending_balance"], 2),
-		})
+		data.append(
+			{
+				"period": period,
+				"repair_count": pd["repair_count"],
+				"total_revenue": flt(pd["total_revenue"], 2),
+				"avg_revenue": flt(pd["total_revenue"] / pd["repair_count"], 2) if pd["repair_count"] else 0,
+				"total_deposit": flt(pd["total_deposit"], 2),
+				"pending_balance": flt(pd["pending_balance"], 2),
+			}
+		)
 
 	return data
 

@@ -18,9 +18,7 @@
 				<div
 					class="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-[#D4AF37] mx-auto mb-4"
 				></div>
-				<span class="text-gray-500 dark:text-gray-400 text-sm"
-					>Loading details...</span
-				>
+				<span class="text-gray-500 dark:text-gray-400 text-sm">Loading details...</span>
 			</div>
 
 			<template v-else-if="transaction">
@@ -68,9 +66,7 @@
 					<div class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-xl overflow-hidden">
 						<table class="w-full">
 							<thead>
-								<tr
-									class="border-b border-gray-100 dark:border-warm-border/50"
-								>
+								<tr class="border-b border-gray-100 dark:border-warm-border/50">
 									<th
 										class="px-4 py-2 text-left text-xs font-bold text-gray-500 dark:text-gray-400"
 									>
@@ -93,16 +89,9 @@
 									</th>
 								</tr>
 							</thead>
-							<tbody
-								class="divide-y divide-gray-100 dark:divide-gray-700/50"
-							>
-								<tr
-									v-for="item in transaction.items"
-									:key="item.item_code"
-								>
-									<td
-										class="px-4 py-2 text-sm text-gray-900 dark:text-white"
-									>
+							<tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
+								<tr v-for="item in transaction.items" :key="item.item_code">
+									<td class="px-4 py-2 text-sm text-gray-900 dark:text-white">
 										{{ item.item_name || item.item_code }}
 									</td>
 									<td
@@ -179,10 +168,9 @@
 							<span class="text-sm text-gray-700 dark:text-gray-300">{{
 								payment.mode_of_payment
 							}}</span>
-							<span
-								class="text-sm font-bold text-gray-900 dark:text-white"
-								>{{ formatCurrency(payment.amount) }}</span
-							>
+							<span class="text-sm font-bold text-gray-900 dark:text-white">{{
+								formatCurrency(payment.amount)
+							}}</span>
 						</div>
 					</div>
 				</div>

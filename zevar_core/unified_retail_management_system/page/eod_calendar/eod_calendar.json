@@ -1,0 +1,19 @@
+{
+ "content": null,
+ "creation": "2026-04-28 23:23:35.418743",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-04-28 23:23:35.418743",
+ "modified_by": "Administrator",
+ "module": "Unified Retail Management System",
+ "name": "eod-calendar",
+ "owner": "Administrator",
+ "page_name": "eod-calendar",
+ "roles": [],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "EOD Analytics Calendar"
+}

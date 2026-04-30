@@ -5,9 +5,10 @@ This patch ensures all repair system components are properly set up in Frappe.
 Run this via: bench execute zevar_core.patches.setup_repair_system.execute
 """
 
+import os
+
 import frappe
 from frappe.modules.import_file import import_file_by_path
-import os
 
 
 def execute():
@@ -107,7 +108,7 @@ def create_repairs_workspace():
 		doc.icon = "tools"
 		doc.is_standard = 1
 		doc.public = 1
-	_doc.description = "Repair management workspace"
+		doc.description = "Repair management workspace"
 
 		# Add links
 		links_data = [
@@ -124,17 +125,20 @@ def create_repairs_workspace():
 			doc.append("links", link)
 
 		# Add shortcut
-		doc.append("shortcuts", {
-			"link_to": "Repair Order",
-			"link_type": "DocType",
-			"label": "New Repair Order",
-			"icon": "plus",
-			"color": "#f59e0b",
-			"format": "{}",
-		})
+		doc.append(
+			"shortcuts",
+			{
+				"link_to": "Repair Order",
+				"link_type": "DocType",
+				"label": "New Repair Order",
+				"icon": "plus",
+				"color": "#f59e0b",
+				"format": "{}",
+			},
+		)
 
 		doc.insert(ignore_permissions=True)
-		print(f"   ✓ Created: Repairs workspace")
+		print("   ✓ Created: Repairs workspace")
 	except Exception as e:
 		print(f"   ✗ Failed to create workspace: {e}")
 

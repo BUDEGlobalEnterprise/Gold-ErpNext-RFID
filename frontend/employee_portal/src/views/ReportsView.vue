@@ -3,14 +3,13 @@
 		class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800"
 	>
 		<div class="max-w-7xl mx-auto p-6 space-y-6">
-			<!-- Header -->
 			<div
 				class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
 			>
 				<div>
 					<h1 class="text-3xl font-bold text-gray-900 dark:text-white">Reports</h1>
 					<p class="text-gray-600 dark:text-gray-400 mt-1">
-						Generate and view detailed reports
+						Your attendance, leave, payroll, expenses, and tasks
 					</p>
 				</div>
 				<div class="flex gap-3">
@@ -21,10 +20,6 @@
 							>refresh</span
 						>
 						Refresh
-					</button>
-					<button @click="exportData('csv')" class="btn btn-primary">
-						<span class="material-symbols-outlined">download</span>
-						Export CSV
 					</button>
 				</div>
 			</div>
@@ -40,184 +35,92 @@
 				>
 					<span class="material-symbols-outlined">{{ tab.icon }}</span>
 					{{ tab.label }}
-					<span v-if="tab.count" class="tab-count">{{ tab.count }}</span>
 				</button>
 			</div>
 
-			<!-- Filters -->
-			<div
-				class="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-slate-700"
-			>
-				<div class="flex justify-between items-center mb-4">
-					<h3 class="font-semibold text-gray-900 dark:text-white">Filters</h3>
-					<button @click="clearFilters" class="text-sm text-primary ">
-						Clear All
-					</button>
-				</div>
-				<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-					<div>
-						<label
-							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-							>Date From</label
-						>
-						<input type="date" v-model="filters.dateFrom" class="form-input" />
-					</div>
-					<div>
-						<label
-							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-							>Date To</label
-						>
-						<input type="date" v-model="filters.dateTo" class="form-input" />
-					</div>
-					<div>
-						<label
-							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-							>Status</label
-						>
-						<select v-model="filters.status" class="form-input">
-							<option value="">All Statuses</option>
-							<option v-for="status in statusOptions" :key="status" :value="status">
-								{{ status }}
-							</option>
-						</select>
-					</div>
-					<div>
-						<label
-							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-							>Department</label
-						>
-						<select v-model="filters.department" class="form-input">
-							<option value="">All Departments</option>
-							<option v-for="dept in departments" :key="dept" :value="dept">
-								{{ dept }}
-							</option>
-						</select>
-					</div>
-				</div>
-				<div class="mt-4">
-					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-						>Search</label
+			<!-- Loading -->
+			<div v-if="loading" class="flex items-center justify-center py-20">
+				<div
+					class="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-emerald-600"
+				></div>
+			</div>
+
+			<template v-else>
+				<!-- Summary Cards -->
+				<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+					<div
+						v-for="card in currentSummary"
+						:key="card.id"
+						class="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-slate-700"
 					>
-					<input
-						type="text"
-						v-model="filters.search"
-						placeholder="Search..."
-						class="form-input"
-					/>
-				</div>
-			</div>
-
-			<!-- Summary Cards -->
-			<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-				<div
-					v-for="summary in summaryData"
-					:key="summary.id"
-					class="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-slate-700"
-				>
-					<div class="flex items-center justify-between">
-						<div>
-							<p class="text-sm text-gray-600 dark:text-gray-400">
-								{{ summary.label }}
-							</p>
-							<p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-								{{ summary.value }}
-							</p>
-						</div>
-						<div :class="`summary-icon summary-icon--${summary.variant}`">
-							<span class="material-symbols-outlined">{{ summary.icon }}</span>
+						<div class="flex items-center justify-between">
+							<div>
+								<p class="text-sm text-gray-600 dark:text-gray-400">
+									{{ card.label }}
+								</p>
+								<p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+									{{ card.value }}
+								</p>
+							</div>
+							<div :class="`summary-icon summary-icon--${card.variant}`">
+								<span class="material-symbols-outlined">{{ card.icon }}</span>
+							</div>
 						</div>
 					</div>
-					<p class="text-sm mt-2" :class="summary.changeClass">
-						{{ summary.change }}
-					</p>
-				</div>
-			</div>
-
-			<!-- Data Table -->
-			<div
-				class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden"
-			>
-				<div class="overflow-x-auto">
-					<table class="w-full">
-						<thead class="bg-gray-50 dark:bg-slate-700">
-							<tr>
-								<th
-									v-for="column in columns"
-									:key="column.key"
-									class="table-header"
-								>
-									{{ column.label }}
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr v-if="loading">
-								<td
-									:colspan="columns.length"
-									class="text-center py-12 text-gray-500"
-								>
-									Loading...
-								</td>
-							</tr>
-							<tr v-else-if="filteredData.length === 0">
-								<td
-									:colspan="columns.length"
-									class="text-center py-12 text-gray-500"
-								>
-									No data found
-								</td>
-							</tr>
-							<tr
-								v-else
-								v-for="row in paginatedData"
-								:key="row.id"
-								class="table-row"
-							>
-								<td v-for="column in columns" :key="column.key" class="table-cell">
-									{{ row[column.key] }}
-								</td>
-							</tr>
-						</tbody>
-					</table>
 				</div>
 
-				<!-- Pagination -->
+				<!-- Data Table -->
 				<div
-					v-if="totalPages > 1"
-					class="flex justify-between items-center p-4 border-t border-gray-200 dark:border-slate-700"
+					class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden"
 				>
-					<p class="text-sm text-gray-600 dark:text-gray-400">
-						Showing {{ startIndex + 1 }} to
-						{{ Math.min(endIndex, filteredData.length) }} of
-						{{ filteredData.length }} entries
-					</p>
-					<div class="flex gap-2">
-						<button
-							@click="currentPage--"
-							:disabled="currentPage === 1"
-							class="pagination-btn"
-						>
-							Previous
-						</button>
-						<button
-							v-for="page in visiblePages"
-							:key="page"
-							@click="currentPage = page"
-							class="pagination-btn"
-							:class="{ 'pagination-btn--active': page === currentPage }"
-						>
-							{{ page }}
-						</button>
-						<button
-							@click="currentPage++"
-							:disabled="currentPage === totalPages"
-							class="pagination-btn"
-						>
-							Next
-						</button>
+					<div class="overflow-x-auto">
+						<table class="w-full">
+							<thead class="bg-gray-50 dark:bg-slate-700">
+								<tr>
+									<th
+										v-for="column in currentColumns"
+										:key="column.key"
+										class="table-header"
+									>
+										{{ column.label }}
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr v-if="tableData.length === 0">
+									<td
+										:colspan="currentColumns.length"
+										class="text-center py-12 text-gray-500"
+									>
+										No data found for this period
+									</td>
+								</tr>
+								<tr
+									v-else
+									v-for="row in tableData"
+									:key="row.id"
+									class="table-row"
+								>
+									<td
+										v-for="column in currentColumns"
+										:key="column.key"
+										class="table-cell"
+									>
+										<span
+											v-if="column.key === 'status'"
+											class="px-2 py-0.5 rounded-full text-xs font-bold"
+											:class="statusBadgeClass(row[column.key])"
+										>
+											{{ row[column.key] }}
+										</span>
+										<span v-else>{{ row[column.key] }}</span>
+									</td>
+								</tr>
+							</tbody>
+						</table>
 					</div>
 				</div>
-			</div>
+			</template>
 		</div>
 	</div>
 </template>
@@ -225,245 +128,40 @@
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
 
-// State
 const activeTab = ref("attendance");
 const loading = ref(false);
-const currentPage = ref(1);
-const pageSize = ref(25);
+const tableData = ref([]);
+const attendanceSummary = ref({});
+const leaveSummary = ref({});
+const expenseSummary = ref({});
+const taskSummary = ref({});
+const payrollSummary = ref({});
 
-const filters = ref({
-	dateFrom: "",
-	dateTo: "",
-	status: "",
-	department: "",
-	search: "",
-});
-
-// Report tabs
 const reportTabs = [
-	{ id: "attendance", label: "Attendance", icon: "present_to_all", count: 156 },
-	{ id: "leave", label: "Leave", icon: "event_available", count: 24 },
-	{ id: "payroll", label: "Payroll", icon: "payments", count: 12 },
-	{ id: "expenses", label: "Expenses", icon: "receipt_long", count: 45 },
-	{ id: "tasks", label: "Tasks", icon: "assignment", count: 89 },
+	{ id: "attendance", label: "Attendance", icon: "present_to_all" },
+	{ id: "leave", label: "Leave", icon: "event_available" },
+	{ id: "payroll", label: "Payroll", icon: "payments" },
+	{ id: "expenses", label: "Expenses", icon: "receipt_long" },
+	{ id: "tasks", label: "Tasks", icon: "assignment" },
 ];
 
-// Status options based on active tab
-const statusOptions = computed(() => {
-	const options = {
-		attendance: ["Present", "Absent", "Late", "Half Day"],
-		leave: ["Approved", "Pending", "Rejected"],
-		payroll: ["Paid", "Pending", "Failed"],
-		expenses: ["Approved", "Pending", "Rejected"],
-		tasks: ["Open", "In Progress", "Completed", "Closed"],
-	};
-	return options[activeTab.value] || [];
-});
+async function frappeCall(method, args = {}) {
+	const response = await fetch("/api/method/" + method, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			"X-Frappe-CSRF-Token": window.csrf_token || "",
+		},
+		body: JSON.stringify(args),
+	});
+	const data = await response.json();
+	if (data.exc) throw new Error(data.exc);
+	return data.message;
+}
 
-const departments = ["Engineering", "Sales", "HR", "Finance", "Marketing"];
-
-// Summary data
-const summaryData = computed(() => {
-	const data = {
-		attendance: [
-			{
-				id: "total",
-				label: "Total Days",
-				value: "22",
-				icon: "calendar_month",
-				variant: "primary",
-				change: "+2 days",
-				changeClass: "text-green-600",
-			},
-			{
-				id: "present",
-				label: "Present",
-				value: "20",
-				icon: "check_circle",
-				variant: "success",
-				change: "+5%",
-				changeClass: "text-green-600",
-			},
-			{
-				id: "absent",
-				label: "Absent",
-				value: "2",
-				icon: "cancel",
-				variant: "danger",
-				change: "-1 day",
-				changeClass: "text-green-600",
-			},
-			{
-				id: "rate",
-				label: "Rate",
-				value: "91%",
-				icon: "trending_up",
-				variant: "info",
-				change: "+3%",
-				changeClass: "text-green-600",
-			},
-		],
-		leave: [
-			{
-				id: "total",
-				label: "Total Requests",
-				value: "24",
-				icon: "mail",
-				variant: "primary",
-				change: "+4",
-				changeClass: "text-amber-600",
-			},
-			{
-				id: "approved",
-				label: "Approved",
-				value: "18",
-				icon: "check_circle",
-				variant: "success",
-				change: "+2",
-				changeClass: "text-green-600",
-			},
-			{
-				id: "pending",
-				label: "Pending",
-				value: "4",
-				icon: "schedule",
-				variant: "warning",
-				change: "+1",
-				changeClass: "text-red-600",
-			},
-			{
-				id: "rejected",
-				label: "Rejected",
-				value: "2",
-				icon: "cancel",
-				variant: "danger",
-				change: "0",
-				changeClass: "text-gray-600",
-			},
-		],
-		payroll: [
-			{
-				id: "total",
-				label: "Total Paid",
-				value: "₹12.5L",
-				icon: "payments",
-				variant: "success",
-				change: "+₹1.2L",
-				changeClass: "text-green-600",
-			},
-			{
-				id: "pending",
-				label: "Pending",
-				value: "₹2.1L",
-				icon: "schedule",
-				variant: "warning",
-				change: "-₹50K",
-				changeClass: "text-green-600",
-			},
-			{
-				id: "avg",
-				label: "Avg Salary",
-				value: "₹52K",
-				icon: "account_balance_wallet",
-				variant: "info",
-				change: "+₹3K",
-				changeClass: "text-green-600",
-			},
-			{
-				id: "employees",
-				label: "Employees",
-				value: "24",
-				icon: "people",
-				variant: "primary",
-				change: "+2",
-				changeClass: "text-green-600",
-			},
-		],
-		expenses: [
-			{
-				id: "total",
-				label: "Total",
-				value: "₹1.8L",
-				icon: "receipt_long",
-				variant: "primary",
-				change: "+₹45K",
-				changeClass: "text-red-600",
-			},
-			{
-				id: "approved",
-				label: "Approved",
-				value: "₹1.5L",
-				icon: "check_circle",
-				variant: "success",
-				change: "+₹30K",
-				changeClass: "text-green-600",
-			},
-			{
-				id: "pending",
-				label: "Pending",
-				value: "₹25K",
-				icon: "schedule",
-				variant: "warning",
-				change: "-₹10K",
-				changeClass: "text-green-600",
-			},
-			{
-				id: "rejected",
-				label: "Rejected",
-				value: "₹5K",
-				icon: "cancel",
-				variant: "danger",
-				change: "-₹2K",
-				changeClass: "text-green-600",
-			},
-		],
-		tasks: [
-			{
-				id: "total",
-				label: "Total Tasks",
-				value: "89",
-				icon: "assignment",
-				variant: "primary",
-				change: "+12",
-				changeClass: "text-green-600",
-			},
-			{
-				id: "completed",
-				label: "Completed",
-				value: "65",
-				icon: "check_circle",
-				variant: "success",
-				change: "+8",
-				changeClass: "text-green-600",
-			},
-			{
-				id: "progress",
-				label: "In Progress",
-				value: "18",
-				icon: "pending",
-				variant: "warning",
-				change: "+3",
-				changeClass: "text-red-600",
-			},
-			{
-				id: "overdue",
-				label: "Overdue",
-				value: "6",
-				icon: "alarm",
-				variant: "danger",
-				change: "-2",
-				changeClass: "text-green-600",
-			},
-		],
-	};
-	return data[activeTab.value] || [];
-});
-
-// Table columns
-const columns = computed(() => {
+const currentColumns = computed(() => {
 	const cols = {
 		attendance: [
-			{ key: "employee", label: "Employee" },
 			{ key: "date", label: "Date" },
 			{ key: "checkIn", label: "Check In" },
 			{ key: "checkOut", label: "Check Out" },
@@ -471,7 +169,6 @@ const columns = computed(() => {
 			{ key: "status", label: "Status" },
 		],
 		leave: [
-			{ key: "employee", label: "Employee" },
 			{ key: "type", label: "Leave Type" },
 			{ key: "fromDate", label: "From" },
 			{ key: "toDate", label: "To" },
@@ -479,16 +176,13 @@ const columns = computed(() => {
 			{ key: "status", label: "Status" },
 		],
 		payroll: [
-			{ key: "employee", label: "Employee" },
 			{ key: "month", label: "Month" },
-			{ key: "basic", label: "Basic" },
-			{ key: "allowances", label: "Allowances" },
+			{ key: "grossPay", label: "Gross Pay" },
 			{ key: "deductions", label: "Deductions" },
-			{ key: "netSalary", label: "Net Salary" },
+			{ key: "netPay", label: "Net Pay" },
 			{ key: "status", label: "Status" },
 		],
 		expenses: [
-			{ key: "employee", label: "Employee" },
 			{ key: "type", label: "Expense Type" },
 			{ key: "date", label: "Date" },
 			{ key: "amount", label: "Amount" },
@@ -496,7 +190,6 @@ const columns = computed(() => {
 		],
 		tasks: [
 			{ key: "title", label: "Task" },
-			{ key: "assignedTo", label: "Assigned To" },
 			{ key: "dueDate", label: "Due Date" },
 			{ key: "priority", label: "Priority" },
 			{ key: "status", label: "Status" },
@@ -505,267 +198,382 @@ const columns = computed(() => {
 	return cols[activeTab.value] || [];
 });
 
-// Mock data
-const tableData = ref([]);
-
-// Filtered and paginated data
-const filteredData = computed(() => {
-	let data = [...tableData.value];
-
-	if (filters.value.search) {
-		const search = filters.value.search.toLowerCase();
-		data = data.filter((row) =>
-			Object.values(row).some((val) => String(val).toLowerCase().includes(search))
-		);
-	}
-
-	if (filters.value.status) {
-		data = data.filter((row) => row.status === filters.value.status);
-	}
-
-	if (filters.value.department) {
-		data = data.filter((row) => row.department === filters.value.department);
-	}
-
-	return data;
-});
-
-const totalPages = computed(() => Math.ceil(filteredData.value.length / pageSize.value));
-const startIndex = computed(() => (currentPage.value - 1) * pageSize.value);
-const endIndex = computed(() => startIndex.value + pageSize.value);
-
-const paginatedData = computed(() => {
-	return filteredData.value.slice(startIndex.value, endIndex.value);
-});
-
-const visiblePages = computed(() => {
-	const pages = [];
-	let start = Math.max(1, currentPage.value - 2);
-	let end = Math.min(totalPages.value, start + 4);
-	if (end - start < 4) start = Math.max(1, end - 4);
-	for (let i = start; i <= end; i++) {
-		pages.push(i);
-	}
-	return pages;
-});
-
-// Methods
-function clearFilters() {
-	filters.value = {
-		dateFrom: "",
-		dateTo: "",
-		status: "",
-		department: "",
-		search: "",
-	};
-	currentPage.value = 1;
-}
-
-async function refreshData() {
-	loading.value = true;
-	// Simulate API call
-	setTimeout(() => {
-		loadMockData();
-		loading.value = false;
-	}, 1000);
-}
-
-function loadMockData() {
-	const mockData = {
+const currentSummary = computed(() => {
+	const s = {
 		attendance: [
 			{
-				id: 1,
-				employee: "John Doe",
-				date: "2026-04-11",
-				checkIn: "09:00",
-				checkOut: "18:00",
-				hours: "9h",
-				status: "Present",
-				department: "Engineering",
+				id: "total",
+				label: "Total Days",
+				value: attendanceSummary.value.total_days || 0,
+				icon: "calendar_month",
+				variant: "primary",
 			},
 			{
-				id: 2,
-				employee: "Jane Smith",
-				date: "2026-04-11",
-				checkIn: "09:15",
-				checkOut: "18:00",
-				hours: "8.75h",
-				status: "Late",
-				department: "Sales",
+				id: "present",
+				label: "Present",
+				value: attendanceSummary.value.present_days || 0,
+				icon: "check_circle",
+				variant: "success",
 			},
 			{
-				id: 3,
-				employee: "Bob Johnson",
-				date: "2026-04-11",
-				checkIn: "--",
-				checkOut: "--",
-				hours: "0h",
-				status: "Absent",
-				department: "Engineering",
+				id: "absent",
+				label: "Absent",
+				value: attendanceSummary.value.absent_days || 0,
+				icon: "cancel",
+				variant: "danger",
 			},
 			{
-				id: 4,
-				employee: "Alice Williams",
-				date: "2026-04-11",
-				checkIn: "09:00",
-				checkOut: "14:00",
-				hours: "5h",
-				status: "Half Day",
-				department: "HR",
+				id: "rate",
+				label: "Attendance Rate",
+				value: (attendanceSummary.value.rate || "0") + "%",
+				icon: "trending_up",
+				variant: "info",
 			},
 		],
 		leave: [
 			{
-				id: 1,
-				employee: "John Doe",
-				type: "Annual Leave",
-				fromDate: "2026-04-15",
-				toDate: "2026-04-17",
-				days: 3,
-				status: "Approved",
-				department: "Engineering",
+				id: "total",
+				label: "Total Requests",
+				value: leaveSummary.value.total || 0,
+				icon: "mail",
+				variant: "primary",
 			},
 			{
-				id: 2,
-				employee: "Jane Smith",
-				type: "Sick Leave",
-				fromDate: "2026-04-12",
-				toDate: "2026-04-12",
-				days: 1,
-				status: "Pending",
-				department: "Sales",
+				id: "approved",
+				label: "Approved",
+				value: leaveSummary.value.approved || 0,
+				icon: "check_circle",
+				variant: "success",
 			},
 			{
-				id: 3,
-				employee: "Bob Johnson",
-				type: "Casual Leave",
-				fromDate: "2026-04-10",
-				toDate: "2026-04-11",
-				days: 2,
-				status: "Approved",
-				department: "Engineering",
+				id: "pending",
+				label: "Pending",
+				value: leaveSummary.value.pending || 0,
+				icon: "schedule",
+				variant: "warning",
+			},
+			{
+				id: "rejected",
+				label: "Rejected",
+				value: leaveSummary.value.rejected || 0,
+				icon: "cancel",
+				variant: "danger",
 			},
 		],
 		payroll: [
 			{
-				id: 1,
-				employee: "John Doe",
-				month: "March 2026",
-				basic: "₹45,000",
-				allowances: "₹15,000",
-				deductions: "₹8,000",
-				netSalary: "₹52,000",
-				status: "Paid",
-				department: "Engineering",
+				id: "total",
+				label: "Total Paid",
+				value: "$" + (payrollSummary.value.total_paid || "0.00"),
+				icon: "payments",
+				variant: "success",
 			},
 			{
-				id: 2,
-				employee: "Jane Smith",
-				month: "March 2026",
-				basic: "₹42,000",
-				allowances: "₹12,000",
-				deductions: "₹6,500",
-				netSalary: "₹47,500",
-				status: "Paid",
-				department: "Sales",
+				id: "pending",
+				label: "Pending",
+				value: payrollSummary.value.pending_count || 0,
+				icon: "schedule",
+				variant: "warning",
 			},
 			{
-				id: 3,
-				employee: "Bob Johnson",
-				month: "March 2026",
-				basic: "₹48,000",
-				allowances: "₹18,000",
-				deductions: "₹9,500",
-				netSalary: "₹56,500",
-				status: "Pending",
-				department: "Engineering",
+				id: "avg",
+				label: "Avg Net Pay",
+				value: "$" + (payrollSummary.value.avg_net || "0.00"),
+				icon: "account_balance_wallet",
+				variant: "info",
+			},
+			{
+				id: "slips",
+				label: "Total Slips",
+				value: payrollSummary.value.total_slips || 0,
+				icon: "receipt",
+				variant: "primary",
 			},
 		],
 		expenses: [
 			{
-				id: 1,
-				employee: "John Doe",
-				type: "Travel",
-				date: "2026-04-10",
-				amount: "₹3,500",
-				status: "Approved",
-				department: "Engineering",
+				id: "total",
+				label: "Total Claimed",
+				value: "$" + (expenseSummary.value.total || "0.00"),
+				icon: "receipt_long",
+				variant: "primary",
 			},
 			{
-				id: 2,
-				employee: "Jane Smith",
-				type: "Meals",
-				date: "2026-04-09",
-				amount: "₹850",
-				status: "Pending",
-				department: "Sales",
+				id: "approved",
+				label: "Approved",
+				value: "$" + (expenseSummary.value.approved || "0.00"),
+				icon: "check_circle",
+				variant: "success",
 			},
 			{
-				id: 3,
-				employee: "Bob Johnson",
-				type: "Office Supplies",
-				date: "2026-04-08",
-				amount: "₹2,300",
-				status: "Approved",
-				department: "Engineering",
+				id: "pending",
+				label: "Pending",
+				value: "$" + (expenseSummary.value.pending || "0.00"),
+				icon: "schedule",
+				variant: "warning",
+			},
+			{
+				id: "rejected",
+				label: "Rejected",
+				value: "$" + (expenseSummary.value.rejected || "0.00"),
+				icon: "cancel",
+				variant: "danger",
 			},
 		],
 		tasks: [
 			{
-				id: 1,
-				title: "Complete project report",
-				assignedTo: "John Doe",
-				dueDate: "2026-04-15",
-				priority: "High",
-				status: "In Progress",
-				department: "Engineering",
+				id: "total",
+				label: "Total Tasks",
+				value: taskSummary.value.total || 0,
+				icon: "assignment",
+				variant: "primary",
 			},
 			{
-				id: 2,
-				title: "Review documentation",
-				assignedTo: "Jane Smith",
-				dueDate: "2026-04-14",
-				priority: "Medium",
-				status: "Open",
-				department: "Sales",
+				id: "completed",
+				label: "Completed",
+				value: taskSummary.value.completed || 0,
+				icon: "check_circle",
+				variant: "success",
 			},
 			{
-				id: 3,
-				title: "Update presentation",
-				assignedTo: "Bob Johnson",
-				dueDate: "2026-04-13",
-				priority: "High",
-				status: "Completed",
-				department: "Engineering",
+				id: "progress",
+				label: "In Progress",
+				value: taskSummary.value.in_progress || 0,
+				icon: "pending",
+				variant: "warning",
 			},
 			{
-				id: 4,
-				title: "Fix bug in module",
-				assignedTo: "Alice Williams",
-				dueDate: "2026-04-12",
-				priority: "High",
-				status: "Overdue",
-				department: "HR",
+				id: "overdue",
+				label: "Overdue",
+				value: taskSummary.value.overdue || 0,
+				icon: "alarm",
+				variant: "danger",
 			},
 		],
 	};
-	tableData.value = mockData[activeTab.value] || [];
-}
-
-function exportData(format) {
-	console.log("Exporting as", format);
-	// Implement export logic
-}
-
-// Watch for tab changes
-watch(activeTab, () => {
-	currentPage.value = 1;
-	loadMockData();
+	return s[activeTab.value] || [];
 });
 
-// Lifecycle
+function statusBadgeClass(status) {
+	const map = {
+		Present: "bg-green-100 text-green-700",
+		Absent: "bg-red-100 text-red-700",
+		Late: "bg-yellow-100 text-yellow-700",
+		"Half Day": "bg-orange-100 text-orange-700",
+		Approved: "bg-green-100 text-green-700",
+		Pending: "bg-yellow-100 text-yellow-700",
+		Rejected: "bg-red-100 text-red-700",
+		Paid: "bg-green-100 text-green-700",
+		Open: "bg-blue-100 text-blue-700",
+		"In Progress": "bg-yellow-100 text-yellow-700",
+		Completed: "bg-green-100 text-green-700",
+		Overdue: "bg-red-100 text-red-700",
+		Closed: "bg-gray-100 text-gray-700",
+		Submitted: "bg-blue-100 text-blue-700",
+		Cancelled: "bg-red-100 text-red-700",
+		Draft: "bg-gray-100 text-gray-700",
+	};
+	return map[status] || "bg-gray-100 text-gray-600";
+}
+
+async function loadAttendance() {
+	try {
+		const data = await frappeCall("zevar_core.api.attendance.get_attendance_history");
+		const records = data || [];
+		const present = records.filter((r) => r.status === "Present").length;
+		const absent = records.filter((r) => r.status === "Absent").length;
+		const total = records.length;
+		attendanceSummary.value = {
+			total_days: total,
+			present_days: present,
+			absent_days: absent,
+			rate: total ? Math.round((present / total) * 100) : 0,
+		};
+		tableData.value = records.map((r) => ({
+			id: r.name,
+			date: r.attendance_date || r.date,
+			checkIn: r.in_time ? r.in_time.substring(0, 5) : "--",
+			checkOut: r.out_time ? r.out_time.substring(0, 5) : "--",
+			hours: r.working_hours ? r.working_hours + "h" : "--",
+			status: r.status || "Absent",
+		}));
+	} catch {
+		attendanceSummary.value = { total_days: 0, present_days: 0, absent_days: 0, rate: 0 };
+		tableData.value = [];
+	}
+}
+
+async function loadLeave() {
+	try {
+		const records = await frappeCall("frappe.client.get_list", {
+			doctype: "Leave Application",
+			fields: ["name", "leave_type", "from_date", "to_date", "total_half_days", "status"],
+			limit_page_length: 50,
+			order_by: "creation desc",
+		});
+		const data = records || [];
+		leaveSummary.value = {
+			total: data.length,
+			approved: data.filter((r) => r.status === "Approved").length,
+			pending: data.filter((r) => r.status === "Open").length,
+			rejected: data.filter((r) => r.status === "Rejected").length,
+		};
+		tableData.value = data.map((r) => ({
+			id: r.name,
+			type: r.leave_type,
+			fromDate: r.from_date,
+			toDate: r.to_date,
+			days: r.total_half_days ? (r.total_half_days / 2).toFixed(1) : "--",
+			status: r.status === "Open" ? "Pending" : r.status,
+		}));
+	} catch {
+		leaveSummary.value = { total: 0, approved: 0, pending: 0, rejected: 0 };
+		tableData.value = [];
+	}
+}
+
+async function loadPayroll() {
+	try {
+		const data = await frappeCall("zevar_core.api.payroll.get_salary_slips");
+		const records = data || [];
+		const paid = records.filter((r) => r.status === "Submitted" || r.docstatus === 1);
+		const totalNet = paid.reduce((sum, r) => sum + (parseFloat(r.net_pay) || 0), 0);
+		const pendingCount = records.filter((r) => r.docstatus === 0).length;
+		payrollSummary.value = {
+			total_paid: totalNet.toFixed(2),
+			pending_count: pendingCount,
+			avg_net: paid.length ? (totalNet / paid.length).toFixed(2) : "0.00",
+			total_slips: records.length,
+		};
+		tableData.value = records.map((r) => ({
+			id: r.name,
+			month: r.month || r.start_date,
+			grossPay: "$" + parseFloat(r.gross_pay || 0).toFixed(2),
+			deductions: "$" + parseFloat(r.total_deduction || 0).toFixed(2),
+			netPay: "$" + parseFloat(r.net_pay || 0).toFixed(2),
+			status: r.docstatus === 0 ? "Draft" : r.docstatus === 1 ? "Paid" : "Cancelled",
+		}));
+	} catch {
+		payrollSummary.value = {
+			total_paid: "0.00",
+			pending_count: 0,
+			avg_net: "0.00",
+			total_slips: 0,
+		};
+		tableData.value = [];
+	}
+}
+
+async function loadExpenses() {
+	try {
+		const data = await frappeCall("zevar_core.api.expense.get_expense_claims");
+		const records = data || [];
+		const total = records.reduce(
+			(s, r) => s + parseFloat(r.total_claimed_amount || r.amount || 0),
+			0
+		);
+		const approved = records
+			.filter((r) => r.status === "Approved" || r.docstatus === 1)
+			.reduce((s, r) => s + parseFloat(r.total_claimed_amount || r.amount || 0), 0);
+		const pending = records
+			.filter((r) => r.status === "Draft" || r.docstatus === 0)
+			.reduce((s, r) => s + parseFloat(r.total_claimed_amount || r.amount || 0), 0);
+		const rejected = records
+			.filter((r) => r.status === "Rejected")
+			.reduce((s, r) => s + parseFloat(r.total_claimed_amount || r.amount || 0), 0);
+		expenseSummary.value = {
+			total: total.toFixed(2),
+			approved: approved.toFixed(2),
+			pending: pending.toFixed(2),
+			rejected: rejected.toFixed(2),
+		};
+		tableData.value = records.map((r) => ({
+			id: r.name,
+			type: r.expense_type || r.remark || "General",
+			date: r.posting_date || r.expense_date,
+			amount: "$" + parseFloat(r.total_claimed_amount || r.amount || 0).toFixed(2),
+			status: r.docstatus === 0 ? "Pending" : r.docstatus === 1 ? "Approved" : "Cancelled",
+		}));
+	} catch {
+		expenseSummary.value = {
+			total: "0.00",
+			approved: "0.00",
+			pending: "0.00",
+			rejected: "0.00",
+		};
+		tableData.value = [];
+	}
+}
+
+async function loadTasks() {
+	try {
+		const data = await frappeCall("zevar_core.api.tasks.get_employee_tasks");
+		const records = (data && data.tasks) || data || [];
+		const total = records.length;
+		const completed = records.filter(
+			(r) => r.status === "Completed" || r.status === "Closed"
+		).length;
+		const inProgress = records.filter(
+			(r) => r.status === "In Progress" || r.status === "Open"
+		).length;
+		const overdue = records.filter((r) => r.status === "Overdue" || r.is_overdue).length;
+		taskSummary.value = { total, completed, in_progress: inProgress, overdue };
+		tableData.value = records.map((r) => ({
+			id: r.name,
+			title: r.subject || r.description || r.title || r.name,
+			dueDate: r.due_date || r.date || "--",
+			priority: r.priority || r.type || "Normal",
+			status:
+				r.status === "Completed"
+					? "Completed"
+					: r.status === "Open"
+					? "Open"
+					: r.status || "Open",
+		}));
+	} catch {
+		taskSummary.value = { total: 0, completed: 0, in_progress: 0, overdue: 0 };
+		tableData.value = [];
+	}
+}
+
+async function loadTab() {
+	loading.value = true;
+	tableData.value = [];
+	try {
+		switch (activeTab.value) {
+			case "attendance":
+				await loadAttendance();
+				break;
+			case "leave":
+				await loadLeave();
+				break;
+			case "payroll":
+				await loadPayroll();
+				break;
+			case "expenses":
+				await loadExpenses();
+				break;
+			case "tasks":
+				await loadTasks();
+				break;
+		}
+	} catch (e) {
+		console.error("Failed to load report:", e);
+	} finally {
+		loading.value = false;
+	}
+}
+
+async function refreshData() {
+	await loadTab();
+}
+
+watch(activeTab, () => {
+	loadTab();
+});
+
 onMounted(() => {
-	loadMockData();
+	loadTab();
 });
 </script>
 
@@ -783,39 +591,14 @@ onMounted(() => {
 	color: #6b7280;
 	border: 1px solid #e5e7eb;
 }
-
 .tab-btn:hover {
 	background: #f9fafb;
 }
-
 .tab-btn--active {
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	background: linear-gradient(135deg, #04403a 0%, #065f46 100%);
 	color: white;
 	border-color: transparent;
 }
-
-.tab-count {
-	background: rgba(0, 0, 0, 0.2);
-	padding: 0.125rem 0.5rem;
-	border-radius: 99px;
-	font-size: 0.75rem;
-}
-
-.form-input {
-	width: 100%;
-	padding: 0.625rem 0.875rem;
-	border: 1px solid #e5e7eb;
-	border-radius: 0.5rem;
-	font-size: 0.875rem;
-	transition: all 0.2s;
-}
-
-.form-input:focus {
-	outline: none;
-	border-color: #667eea;
-	box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
 .summary-icon {
 	width: 48px;
 	height: 48px;
@@ -825,32 +608,26 @@ onMounted(() => {
 	justify-content: center;
 	font-size: 24px;
 }
-
 .summary-icon--primary {
-	background: rgba(102, 126, 234, 0.1);
-	color: #667eea;
+	background: rgba(4, 64, 58, 0.1);
+	color: #04403a;
 }
-
 .summary-icon--success {
 	background: rgba(16, 185, 129, 0.1);
 	color: #10b981;
 }
-
 .summary-icon--danger {
 	background: rgba(239, 68, 68, 0.1);
 	color: #ef4444;
 }
-
 .summary-icon--warning {
 	background: rgba(245, 158, 11, 0.1);
 	color: #f59e0b;
 }
-
 .summary-icon--info {
 	background: rgba(59, 130, 246, 0.1);
 	color: #3b82f6;
 }
-
 .table-header {
 	padding: 0.75rem 1.5rem;
 	text-align: left;
@@ -860,47 +637,18 @@ onMounted(() => {
 	letter-spacing: 0.05em;
 	color: #6b7280;
 }
-
 .table-row {
 	border-bottom: 1px solid #f3f4f6;
 	transition: background 0.15s;
 }
-
 .table-row:hover {
 	background: #f9fafb;
 }
-
 .table-cell {
 	padding: 0.75rem 1.5rem;
 	font-size: 0.875rem;
 	color: #374151;
 }
-
-.pagination-btn {
-	padding: 0.5rem 0.75rem;
-	border: 1px solid #e5e7eb;
-	border-radius: 0.5rem;
-	font-size: 0.875rem;
-	font-weight: 500;
-	transition: all 0.2s;
-	background: white;
-}
-
-.pagination-btn:hover {
-	background: #f9fafb;
-}
-
-.pagination-btn:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
-}
-
-.pagination-btn--active {
-	background: #667eea;
-	color: white;
-	border-color: #667eea;
-}
-
 .btn {
 	display: inline-flex;
 	align-items: center;
@@ -911,32 +659,17 @@ onMounted(() => {
 	font-weight: 600;
 	transition: all 0.2s;
 }
-
-.btn-primary {
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	color: white;
-	border: none;
-}
-
-.btn-primary:hover {
-	transform: translateY(-1px);
-	box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
 .btn-secondary {
 	background: white;
 	color: #374151;
 	border: 1px solid #e5e7eb;
 }
-
 .btn-secondary:hover {
 	background: #f9fafb;
 }
-
 .animate-spin {
 	animation: spin 1s linear infinite;
 }
-
 @keyframes spin {
 	to {
 		transform: rotate(360deg);

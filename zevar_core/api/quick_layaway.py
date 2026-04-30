@@ -22,10 +22,12 @@ from zevar_core.api.layaway import (
 	create_quick_layaway as _create_quick_layaway,
 )
 from zevar_core.api.layaway import (
-	get_layaway_preview as _get_layaway_preview,
-	suggest_layaway_plan,
 	extend_layaway,
 	process_split_layaway_payment,
+	suggest_layaway_plan,
+)
+from zevar_core.api.layaway import (
+	get_layaway_preview as _get_layaway_preview,
 )
 from zevar_core.constants import LAYAWAY_DURATION_OPTIONS
 

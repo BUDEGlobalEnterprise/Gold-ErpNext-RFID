@@ -172,7 +172,7 @@ def get_live_rate_history(metal="Yellow Gold", days=7):
 @frappe.whitelist()
 def refresh_gold_rates():
 	"""Manually trigger gold rate refresh and clean up stale entries."""
-	from zevar_core.tasks import fetch_live_metal_rates, _cleanup_legacy_k_entries
+	from zevar_core.tasks import _cleanup_legacy_k_entries, fetch_live_metal_rates
 
 	try:
 		result = fetch_live_metal_rates()

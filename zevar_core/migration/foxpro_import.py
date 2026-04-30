@@ -738,7 +738,10 @@ def import_suppliers(backup_path: str, dry_run: bool = False) -> dict:
 			fax = clean_str(record.get("fax"))
 
 			if any([address, city, state]):
-				if not frappe.db.exists("Address", {"address_title": supplier_name, "link_doctype": "Supplier", "link_name": doc.name}):
+				if not frappe.db.exists(
+					"Address",
+					{"address_title": supplier_name, "link_doctype": "Supplier", "link_name": doc.name},
+				):
 					addr = frappe.new_doc("Address")
 					addr.address_title = supplier_name[:140]
 					addr.address_type = "Billing"
@@ -755,7 +758,14 @@ def import_suppliers(backup_path: str, dry_run: bool = False) -> dict:
 					addr.insert(ignore_permissions=True, ignore_mandatory=True)
 
 			if contact or email or phone:
-				if not frappe.db.exists("Contact", {"first_name": contact or supplier_name, "link_doctype": "Supplier", "link_name": doc.name}):
+				if not frappe.db.exists(
+					"Contact",
+					{
+						"first_name": contact or supplier_name,
+						"link_doctype": "Supplier",
+						"link_name": doc.name,
+					},
+				):
 					try:
 						contact_doc = frappe.new_doc("Contact")
 						contact_doc.first_name = contact or supplier_name
@@ -821,31 +831,110 @@ def ensure_supplier_custom_fields():
 	from frappe import _
 
 	supplier_fields = [
-		{"fieldname": "custom_legacy_abbrev", "label": "Legacy Abbreviation", "fieldtype": "Data", "insert_after": "supplier_name"},
-		{"fieldname": "custom_legacy_account", "label": "Legacy Account No", "fieldtype": "Data", "insert_after": "custom_legacy_abbrev"},
-		{"fieldname": "custom_budget", "label": "Budget", "fieldtype": "Currency", "insert_after": "custom_legacy_account"},
-		{"fieldname": "custom_markup", "label": "Markup (%)", "fieldtype": "Percent", "insert_after": "custom_budget"},
-		{"fieldname": "custom_discount", "label": "Discount (%)", "fieldtype": "Percent", "insert_after": "custom_markup"},
+		{
+			"fieldname": "custom_legacy_abbrev",
+			"label": "Legacy Abbreviation",
+			"fieldtype": "Data",
+			"insert_after": "supplier_name",
+		},
+		{
+			"fieldname": "custom_legacy_account",
+			"label": "Legacy Account No",
+			"fieldtype": "Data",
+			"insert_after": "custom_legacy_abbrev",
+		},
+		{
+			"fieldname": "custom_budget",
+			"label": "Budget",
+			"fieldtype": "Currency",
+			"insert_after": "custom_legacy_account",
+		},
+		{
+			"fieldname": "custom_markup",
+			"label": "Markup (%)",
+			"fieldtype": "Percent",
+			"insert_after": "custom_budget",
+		},
+		{
+			"fieldname": "custom_discount",
+			"label": "Discount (%)",
+			"fieldtype": "Percent",
+			"insert_after": "custom_markup",
+		},
 		{"fieldname": "custom_fax", "label": "Fax", "fieldtype": "Data", "insert_after": "custom_discount"},
 		{"fieldname": "custom_phone2", "label": "Phone 2", "fieldtype": "Data", "insert_after": "custom_fax"},
-		{"fieldname": "custom_total_purchases", "label": "Total Purchases", "fieldtype": "Currency", "insert_after": "custom_phone2"},
-		{"fieldname": "custom_mtd_purchases", "label": "MTD Purchases", "fieldtype": "Currency", "insert_after": "custom_total_purchases"},
-		{"fieldname": "custom_ptd_purchases", "label": "PTD Purchases", "fieldtype": "Currency", "insert_after": "custom_mtd_purchases"},
-		{"fieldname": "custom_consigned", "label": "Consigned", "fieldtype": "Check", "insert_after": "custom_ptd_purchases"},
-		{"fieldname": "custom_use_commission", "label": "Use Commission", "fieldtype": "Int", "insert_after": "custom_consigned"},
-		{"fieldname": "custom_stock_turnover", "label": "Stock Turnover", "fieldtype": "Float", "insert_after": "custom_use_commission"},
-		{"fieldname": "custom_product_line", "label": "Product Line", "fieldtype": "Small Text", "insert_after": "custom_stock_turnover"},
-		{"fieldname": "custom_inactive", "label": "Inactive (Legacy)", "fieldtype": "Check", "insert_after": "custom_product_line"},
-		{"fieldname": "custom_legacy_export", "label": "Legacy Export Ref", "fieldtype": "Data", "insert_after": "custom_inactive"},
+		{
+			"fieldname": "custom_total_purchases",
+			"label": "Total Purchases",
+			"fieldtype": "Currency",
+			"insert_after": "custom_phone2",
+		},
+		{
+			"fieldname": "custom_mtd_purchases",
+			"label": "MTD Purchases",
+			"fieldtype": "Currency",
+			"insert_after": "custom_total_purchases",
+		},
+		{
+			"fieldname": "custom_ptd_purchases",
+			"label": "PTD Purchases",
+			"fieldtype": "Currency",
+			"insert_after": "custom_mtd_purchases",
+		},
+		{
+			"fieldname": "custom_consigned",
+			"label": "Consigned",
+			"fieldtype": "Check",
+			"insert_after": "custom_ptd_purchases",
+		},
+		{
+			"fieldname": "custom_use_commission",
+			"label": "Use Commission",
+			"fieldtype": "Int",
+			"insert_after": "custom_consigned",
+		},
+		{
+			"fieldname": "custom_stock_turnover",
+			"label": "Stock Turnover",
+			"fieldtype": "Float",
+			"insert_after": "custom_use_commission",
+		},
+		{
+			"fieldname": "custom_product_line",
+			"label": "Product Line",
+			"fieldtype": "Small Text",
+			"insert_after": "custom_stock_turnover",
+		},
+		{
+			"fieldname": "custom_inactive",
+			"label": "Inactive (Legacy)",
+			"fieldtype": "Check",
+			"insert_after": "custom_product_line",
+		},
+		{
+			"fieldname": "custom_legacy_export",
+			"label": "Legacy Export Ref",
+			"fieldtype": "Data",
+			"insert_after": "custom_inactive",
+		},
 	]
 
 	for cf in supplier_fields:
 		if not frappe.db.exists("Custom Field", {"dt": "Supplier", "fieldname": cf["fieldname"]}):
 			try:
-				doc = frappe.get_doc({"doctype": "Custom Field", "dt": "Supplier", "module": "Unified Retail Management System", **cf})
+				doc = frappe.get_doc(
+					{
+						"doctype": "Custom Field",
+						"dt": "Supplier",
+						"module": "Unified Retail Management System",
+						**cf,
+					}
+				)
 				doc.insert(ignore_permissions=True)
 			except Exception as e:
-				frappe.log_error(f"Failed to create Supplier.{cf['fieldname']}: {e}", "Supplier Custom Fields")
+				frappe.log_error(
+					f"Failed to create Supplier.{cf['fieldname']}: {e}", "Supplier Custom Fields"
+				)
 	frappe.db.commit()  # nosemgrep
 
 

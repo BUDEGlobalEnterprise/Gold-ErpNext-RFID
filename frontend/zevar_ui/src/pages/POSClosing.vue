@@ -271,7 +271,7 @@ function calculateVariance() {
 		try {
 			const res = await previewCloseResource.submit({
 				session_name: sessionStatus.value.session?.name,
-				total_cash_counted: form.value.closing_balance
+				total_cash_counted: form.value.closing_balance,
 			})
 			previewData.value = res
 
@@ -280,7 +280,7 @@ function calculateVariance() {
 			} else {
 				overrideRequired.value = false
 			}
-		} catch(err) {
+		} catch (err) {
 			console.error(err)
 		}
 	}, 500)
@@ -288,7 +288,9 @@ function calculateVariance() {
 
 async function submitClosing() {
 	if (overrideRequired.value) {
-		const confirmed = confirm(`Variance is over threshold! A manager override is required. Are you a manager?`)
+		const confirmed = confirm(
+			`Variance is over threshold! A manager override is required. Are you a manager?`
+		)
 		if (!confirmed) return
 	}
 

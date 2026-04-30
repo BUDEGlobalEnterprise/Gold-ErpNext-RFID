@@ -15,7 +15,7 @@
 				</div>
 				<div class="flex items-center gap-4">
 					<button
-						class="px-6 py-3 bg-white border border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 transition-all flex items-center gap-3 shadow-sm "
+						class="px-6 py-3 bg-white border border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 transition-all flex items-center gap-3 shadow-sm"
 					>
 						<span class="material-symbols-outlined text-lg">contact_support</span>
 						Documentation

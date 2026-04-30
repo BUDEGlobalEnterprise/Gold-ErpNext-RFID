@@ -1,684 +1,555 @@
 import json
 
 import frappe
-from frappe import _
-from frappe.utils import now_datetime, get_url, cint
+from frappe.utils import add_days, flt, now_datetime, today
+
+from zevar_core.services.inventory_audit_utils import (
+	_log_audit_event,
+	execute_batch_scan,
+	execute_submit_scan,
+)
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
+@frappe.whitelist(allow_guest=False)
+def start_audit(display_case=None, store_location=None, scope="Spot", audit_plan=None):
+	"""Start a new audit session. Supports scope-based audits beyond display cases.
 
-def _resolve_item_code(barcode_or_epc):
-	"""Try to resolve a barcode/EPC string to an item_code. Returns (item_code, item_data) or (None, None)."""
-	item_code = frappe.db.get_value("Item", {"custom_rfid_epc": barcode_or_epc}, "name")
-	if not item_code:
-		item_code = frappe.db.get_value("Item Barcode", {"barcode": barcode_or_epc}, "parent")
-	if not item_code:
-		item_code = frappe.db.get_value("Item", barcode_or_epc, "name")
-	if not item_code:
-		return None, None
-	item_data = frappe.db.get_value(
-		"Item", item_code, ["item_name", "image", "valuation_rate"], as_dict=True
-	)
-	return item_code, item_data
+	Args:
+		display_case: Display Case name (for Spot/Showcase audits)
+		store_location: Warehouse name (for Backstock/Full Store audits)
+		scope: One of Spot, Showcase, Backstock, Full Store
+		audit_plan: Optional Audit Plan to link
+	"""
+	frappe.has_permission("Case Audit Session", ptype="write", throw=True)
 
+	scope = scope or "Spot"
+	warehouse = None
 
-def _check_permission(session_name):
-	"""Check if user has permission to modify this audit session."""
-	frappe.has_permission("Case Audit Session", "write", doc=session_name, throw=True)
+	if scope in ("Spot", "Showcase"):
+		if not display_case:
+			frappe.throw("Display Case is required for Spot/Showcase audits")
+		case_doc = (
+			frappe.get_doc("Display Case", display_case)
+			if frappe.db.exists("Display Case", display_case)
+			else None
+		)
+		warehouse = case_doc.warehouse if case_doc else display_case
+		if not store_location:
+			store_location = warehouse
+	elif scope in ("Backstock", "Full Store"):
+		if not store_location:
+			frappe.throw("Store Location is required for Backstock/Full Store audits")
+		# For backstock, query back-stock and safe warehouses under the store
+		# For full store, query all warehouses under the store
+		warehouse = store_location
 
+	if not warehouse:
+		frappe.throw("Could not determine warehouse for audit")
 
-def _get_expected_items(store_location: str) -> list[dict]:
-	"""Get expected items and valuation from Bin and Item tables."""
-	return frappe.db.sql(
-		"""
-		SELECT b.item_code, sum(b.actual_qty) as actual_qty,
-		       COALESCE(i.valuation_rate, i.standard_rate, 0) as valuation_rate,
-		       i.item_name, i.image
-		FROM `tabBin` b
-		JOIN `tabItem` i ON i.name = b.item_code
-		WHERE b.warehouse = %s AND b.actual_qty > 0
-		GROUP BY b.item_code, i.valuation_rate, i.standard_rate, i.item_name, i.image
-	""",
-		store_location,
-		as_dict=1,
-	)
+	# Get expected items based on scope
+	expected_items = _get_expected_items(warehouse, scope, display_case)
 
+	expected_count = 0
+	total_value_expected = 0.0
+	for item in expected_items:
+		expected_count += flt(item.actual_qty)
+		rate = flt(item.standard_rate) or flt(item.valuation_rate)
+		total_value_expected += flt(item.actual_qty) * rate
 
-def _log_audit_event(event_type, reference_name, details="", category="Inventory"):
-	"""Safely log a POS Audit Log entry."""
-	if not frappe.db.exists("DocType", "POS Audit Log"):
-		return
-	frappe.get_doc(
-		{
-			"doctype": "POS Audit Log",
-			"user": frappe.session.user,
-			"event_type": event_type,
-			"category": category,
-			"severity": "Info",
-			"timestamp": now_datetime(),
-			"reference_type": "Case Audit Session",
-			"reference_document": reference_name,
-			"details": details,
-		}
-	).insert(ignore_permissions=True)
-
-
-# ---------------------------------------------------------------------------
-# Start Audit
-# ---------------------------------------------------------------------------
-
-@frappe.whitelist()
-def start_audit(store_location: str, auditor: str | None = None, notes: str | None = None) -> dict:
-	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
-
-	if not store_location:
-		frappe.throw(_("Store Location is required."))
-
+	# Create the audit session
 	session = frappe.new_doc("Case Audit Session")
-	session.store_location = store_location
-	session.auditor = auditor or frappe.session.user
-	session.notes = notes
+	session.store_location = store_location or warehouse
+	session.display_case = display_case or ""
+	session.scope = scope
+	session.audit_plan = audit_plan or ""
 	session.started_at = now_datetime()
-	session.status = "Draft"
-	session.audit_type = "Barcode"
-
-	# Get expected items with valuation
-	expected_items_data = _get_expected_items(store_location)
-
-	total_expected = sum(item.actual_qty for item in expected_items_data)
-	total_value_expected = sum(
-		item.actual_qty * (item.valuation_rate or 0) for item in expected_items_data
-	)
-
-	session.expected_count = total_expected
+	session.status = "In Progress"
+	session.expected_count = expected_count
 	session.scanned_count = 0
 	session.total_value_expected = total_value_expected
 	session.insert(ignore_permissions=True)
 
+	# Update linked Audit Plan
+	if audit_plan and frappe.db.exists("Audit Plan", audit_plan):
+		frappe.db.set_value("Audit Plan", audit_plan, "status", "In Progress")
+
 	_log_audit_event(
 		"audit_started",
+		"Inventory",
 		session.name,
-		details=f"Audit started for {store_location}, expected {total_expected} items (${total_value_expected:,.2f})",
+		f"Started {scope} audit for {display_case or store_location} with {expected_count} expected items.",
 	)
 
 	return {
 		"success": True,
 		"session_name": session.name,
-		"expected_count": total_expected,
+		"session": session.name,
+		"expected_items": expected_items,
+		"expected_count": expected_count,
 		"total_value_expected": total_value_expected,
-		"expected_items": expected_items_data,
+		"scope": scope,
 	}
 
 
-# ---------------------------------------------------------------------------
-# Single Scan (with deduplication and enrichment)
-# ---------------------------------------------------------------------------
+def _get_expected_items(warehouse, scope, display_case=None):
+	"""Get expected items based on audit scope."""
+	filters = {"actual_qty": [">", 0]}
 
-@frappe.whitelist()
-def submit_scan(session_name: str, barcode_or_epc: str) -> dict:
-	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
-
-	session = frappe.get_doc("Case Audit Session", session_name)
-	_check_permission(session_name)
-
-	if session.status not in ("Draft", "In Progress"):
-		frappe.throw(_("Can only scan into Draft or In Progress sessions."))
-
-	if session.status == "Draft":
-		session.status = "In Progress"
-
-	# --- Deduplication check ---
-	existing = frappe.get_all(
-		"Case Audit Scan",
-		filters={"parent": session_name, "barcode_or_epc": barcode_or_epc, "is_duplicate": 0},
-		fields=["name", "item_code"],
-		limit=1,
-	)
-	if existing:
-		item_data = frappe.db.get_value(
-			"Item", existing[0].item_code, ["item_name", "image", "valuation_rate"], as_dict=True
-		) if existing[0].item_code else None
-		return {
-			"success": True,
-			"match_status": "Duplicate",
-			"item_code": existing[0].item_code,
-			"item_name": item_data.item_name if item_data else None,
-			"item_image": item_data.image if item_data else None,
-			"valuation_rate": item_data.valuation_rate if item_data else 0,
-			"message": "This barcode/EPC was already scanned in this session.",
-		}
-
-	# --- Resolve item ---
-	item_code, item_data = _resolve_item_code(barcode_or_epc)
-
-	if not item_code:
-		session.append(
-			"scans",
-			{
-				"barcode_or_epc": barcode_or_epc,
-				"scanned_at": now_datetime(),
-				"match_status": "Unexpected",
-			},
-		)
-		session.scanned_count += 1
-		session.save(ignore_permissions=True)
-		return {
-			"success": True,
-			"match_status": "Unexpected",
-			"barcode_or_epc": barcode_or_epc,
-		}
-
-	# --- Determine match status ---
-	expected_qty = (
-		frappe.db.get_value(
-			"Bin", {"item_code": item_code, "warehouse": session.store_location}, "actual_qty"
-		)
-		or 0
-	)
-	already_scanned = frappe.db.count(
-		"Case Audit Scan",
-		{"parent": session_name, "item_code": item_code, "match_status": "Matched"}
-	)
-	match_status = "Matched" if (expected_qty > 0 and already_scanned < expected_qty) else "Unexpected"
-
-	session.append(
-		"scans",
-		{
-			"item_code": item_code,
-			"barcode_or_epc": barcode_or_epc,
-			"scanned_at": now_datetime(),
-			"match_status": match_status,
-			"item_name": item_data.item_name,
-			"item_image": item_data.image,
-			"valuation_rate": item_data.valuation_rate,
-		},
-	)
-	session.scanned_count += 1
-	session.save(ignore_permissions=True)
-
-	return {
-		"success": True,
-		"match_status": match_status,
-		"item_code": item_code,
-		"item_name": item_data.item_name,
-		"item_image": item_data.image,
-		"valuation_rate": item_data.valuation_rate,
-	}
-
-
-# ---------------------------------------------------------------------------
-# Batch Scan (RFID burst support)
-# ---------------------------------------------------------------------------
-
-@frappe.whitelist()
-def batch_scan(session_name: str, barcodes_or_epcs: str) -> dict:
-	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
-
-	codes = json.loads(barcodes_or_epcs)
-	if not isinstance(codes, list):
-		frappe.throw(_("barcodes_or_epcs must be a JSON array of strings."))
-	if len(codes) > 500:
-		frappe.throw(_("Maximum 500 codes per batch."))
-
-	session = frappe.get_doc("Case Audit Session", session_name)
-	_check_permission(session_name)
-	if session.status not in ("Draft", "In Progress"):
-		frappe.throw(_("Can only scan into Draft or In Progress sessions."))
-
-	if session.status == "Draft":
-		session.status = "In Progress"
-
-	# Update audit type
-	if session.audit_type == "Barcode":
-		session.audit_type = "RFID"
-
-	# Get already-scanned codes in this session (single query)
-	existing_scans = frappe.get_all(
-		"Case Audit Scan",
-		filters={"parent": session_name, "is_duplicate": 0},
-		fields=["barcode_or_epc"],
-	)
-	existing_codes = {s.barcode_or_epc for s in existing_scans}
-
-	# Filter to only new codes
-	new_codes = [c for c in codes if c and c not in existing_codes]
-	duplicates_skipped = len(codes) - len(new_codes)
-
-	# Bulk resolve RFID EPCs
-	epc_to_item = {}
-	if new_codes:
-		records = frappe.db.sql(
-			"SELECT name, custom_rfid_epc FROM `tabItem` WHERE custom_rfid_epc IN %s",
-			[tuple(new_codes)],
-			as_dict=True,
-		)
-		for r in records:
-			epc_to_item[r.custom_rfid_epc] = r.name
-
-		# Bulk resolve barcodes
-		barcode_records = frappe.db.sql(
-			"SELECT barcode, parent FROM `tabItem Barcode` WHERE barcode IN %s",
-			[tuple(new_codes)],
-			as_dict=True,
-		)
-		for r in barcode_records:
-			if r.barcode not in epc_to_item:
-				epc_to_item[r.barcode] = r.parent
-
-	# Bulk fetch item data for resolved item_codes
-	resolved_item_codes = set(epc_to_item.values())
-	item_data_map = {}
-	if resolved_item_codes:
-		items = frappe.db.sql(
-			"SELECT name, item_name, image, valuation_rate FROM `tabItem` WHERE name IN %s",
-			[tuple(resolved_item_codes)],
-			as_dict=True,
-		)
-		for i in items:
-			item_data_map[i.name] = i
-
-	# Get expected qty map
-	expected_qty_map = {}
-	if resolved_item_codes:
-		bins = frappe.db.sql(
-			"SELECT item_code, actual_qty FROM `tabBin` WHERE warehouse = %s AND actual_qty > 0",
-			session.store_location,
-			as_dict=True,
-		)
-		for b in bins:
-			expected_qty_map[b.item_code] = (expected_qty_map.get(b.item_code, 0) or 0) + b.actual_qty
-
-	# Count already-scanned per item in this session
-	scanned_per_item = {}
-	for s in session.scans:
-		if s.match_status == "Matched" and s.item_code:
-			scanned_per_item[s.item_code] = scanned_per_item.get(s.item_code, 0) + 1
-
-	results = []
-	for code in new_codes:
-		item_code = epc_to_item.get(code)
-		if not item_code:
-			# Check if it's a direct item_code
-			if code in item_data_map:
-				item_code = code
-			else:
-				session.append("scans", {
-					"barcode_or_epc": code,
-					"scanned_at": now_datetime(),
-					"match_status": "Unexpected",
-				})
-				session.scanned_count += 1
-				results.append({"barcode_or_epc": code, "match_status": "Unexpected"})
-				continue
-
-		info = item_data_map.get(item_code, {})
-		exp_qty = expected_qty_map.get(item_code, 0)
-		already = scanned_per_item.get(item_code, 0)
-		match_status = "Matched" if (exp_qty > 0 and already < exp_qty) else "Unexpected"
-
-		session.append("scans", {
-			"item_code": item_code,
-			"barcode_or_epc": code,
-			"scanned_at": now_datetime(),
-			"match_status": match_status,
-			"item_name": info.get("item_name"),
-			"item_image": info.get("image"),
-			"valuation_rate": info.get("valuation_rate"),
-		})
-		session.scanned_count += 1
-
-		if match_status == "Matched":
-			scanned_per_item[item_code] = already + 1
-
-		results.append({
-			"item_code": item_code,
-			"item_name": info.get("item_name"),
-			"barcode_or_epc": code,
-			"match_status": match_status,
-		})
-
-	session.save(ignore_permissions=True)
-
-	_log_audit_event(
-		"audit_scan_batch",
-		session_name,
-		details=f"Batch scan: {len(new_codes)} new, {duplicates_skipped} duplicates skipped",
-	)
-
-	return {
-		"success": True,
-		"total_submitted": len(new_codes),
-		"duplicates_skipped": duplicates_skipped,
-		"results": results,
-	}
-
-
-# ---------------------------------------------------------------------------
-# Get Audit Progress (real-time polling endpoint)
-# ---------------------------------------------------------------------------
-
-@frappe.whitelist()
-def get_audit_progress(session_name: str) -> dict:
-	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
-
-	session = frappe.get_doc("Case Audit Session", session_name)
-	_check_permission(session_name)
-
-	# Count by status
-	counts = {"matched": 0, "unexpected": 0, "missing": 0, "duplicates": 0}
-	for s in session.scans:
-		if s.match_status == "Matched":
-			counts["matched"] += 1
-		elif s.match_status == "Unexpected":
-			counts["unexpected"] += 1
-		elif s.match_status == "Missing":
-			counts["missing"] += 1
-		if s.is_duplicate:
-			counts["duplicates"] += 1
-
-	# Recent scans (last 20)
-	recent_scans = frappe.get_all(
-		"Case Audit Scan",
-		filters={"parent": session_name},
-		fields=["item_code", "item_name", "barcode_or_epc", "match_status", "scanned_at",
-		        "item_image", "valuation_rate", "is_duplicate"],
-		order_by="scanned_at desc",
-		limit=20,
-	)
-
-	# Missing items (expected but not fully scanned)
-	expected_items_data = _get_expected_items(session.store_location)
-
-	scanned_per_item = {}
-	for s in session.scans:
-		if s.match_status == "Matched" and s.item_code:
-			scanned_per_item[s.item_code] = scanned_per_item.get(s.item_code, 0) + 1
-
-	missing_items = []
-	for expected in expected_items_data:
-		scanned = scanned_per_item.get(expected.item_code, 0)
-		if scanned < expected.actual_qty:
-			missing_items.append({
-				"item_code": expected.item_code,
-				"item_name": expected.item_name,
-				"image": expected.image,
-				"expected_qty": expected.actual_qty,
-				"scanned_qty": scanned,
-				"short_qty": expected.actual_qty - scanned,
-				"valuation_rate": expected.valuation_rate,
-			})
-
-	# Unexpected items (scanned but not expected in warehouse)
-	unexpected_items = []
-	for s in session.scans:
-		if s.match_status == "Unexpected" and s.item_code:
-			unexpected_items.append({
-				"item_code": s.item_code,
-				"item_name": s.item_name,
-				"barcode_or_epc": s.barcode_or_epc,
-				"valuation_rate": s.valuation_rate,
-			})
-
-	# Value tracking
-	total_value_scanned = sum(
-		(s.valuation_rate or 0) for s in session.scans if s.match_status == "Matched"
-	)
-
-	return {
-		"session": {
-			"name": session.name,
-			"status": session.status,
-			"store_location": session.store_location,
-			"auditor": session.auditor,
-			"audit_type": session.audit_type,
-			"expected_count": session.expected_count,
-			"scanned_count": session.scanned_count,
-			"total_value_expected": session.total_value_expected,
-			"total_value_scanned": total_value_scanned,
-			"total_value_discrepancy": (session.total_value_expected or 0) - total_value_scanned,
-			"started_at": str(session.started_at) if session.started_at else None,
-			"completed_at": str(session.completed_at) if session.completed_at else None,
-		},
-		"counts": counts,
-		"recent_scans": recent_scans,
-		"missing_items": missing_items,
-		"unexpected_items": unexpected_items,
-	}
-
-
-# ---------------------------------------------------------------------------
-# Get Audit History
-# ---------------------------------------------------------------------------
-
-@frappe.whitelist()
-def get_audit_history(
-	warehouse: str | None = None,
-	status: str | None = None,
-	from_date: str | None = None,
-	to_date: str | None = None,
-	page: int = 1,
-	page_size: int = 20,
-) -> dict:
-	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
-
-	filters = {}
-	if warehouse:
-		filters["store_location"] = warehouse
-	if status:
-		filters["status"] = status
-	if from_date:
-		filters["started_at"] = [">=", from_date]
-	if to_date:
-		if "started_at" in filters:
-			filters["started_at"] = ["between", [from_date, to_date]]
+	if scope == "Spot":
+		# Just the display case warehouse
+		filters["warehouse"] = warehouse
+	elif scope == "Showcase":
+		# All showcase sub-warehouses
+		filters["warehouse"] = ["like", "%Showcase%"]
+		if display_case:
+			case_wh = frappe.db.get_value("Display Case", display_case, "warehouse")
+			if case_wh:
+				filters["warehouse"] = case_wh
 		else:
-			filters["started_at"] = ["<=", to_date]
+			# All showcases under the store
+			filters["warehouse"] = ["like", f"%{warehouse}%Showcase%"]
+			del filters["warehouse"]
+			showcase_whs = frappe.get_all("Warehouse", filters={"name": ["like", "%Showcase%"]}, pluck="name")
+			if not showcase_whs:
+				filters["warehouse"] = warehouse
+			else:
+				return frappe.db.sql(
+					"""
+					select b.item_code, sum(b.actual_qty) as actual_qty,
+						i.custom_rfid_epc, i.standard_rate, i.valuation_rate,
+						(select barcode from `tabItem Barcode` ib where ib.parent = i.name limit 1) as barcode
+					from `tabBin` b
+					join `tabItem` i on b.item_code = i.name
+					where b.warehouse in %s and b.actual_qty > 0
+					group by b.item_code, i.custom_rfid_epc, i.standard_rate, i.valuation_rate
+					""",
+					(showcase_whs,),
+					as_dict=True,
+				)
+	elif scope == "Backstock":
+		# Back Stock + Safe zones under the store
+		return frappe.db.sql(
+			"""
+			select b.item_code, b.actual_qty, i.custom_rfid_epc, i.standard_rate, i.valuation_rate,
+				(select barcode from `tabItem Barcode` ib where ib.parent = i.name limit 1) as barcode,
+				b.warehouse
+			from `tabBin` b
+			join `tabItem` i on b.item_code = i.name
+			where (b.warehouse like %s or b.warehouse like %s) and b.actual_qty > 0
+			""",
+			(f"%{warehouse}%Back Stock%", f"%{warehouse}%Safe%"),
+			as_dict=True,
+		)
+	elif scope == "Full Store":
+		# All zones under the store root warehouse
+		return frappe.db.sql(
+			"""
+			select b.item_code, b.actual_qty, i.custom_rfid_epc, i.standard_rate, i.valuation_rate,
+				(select barcode from `tabItem Barcode` ib where ib.parent = i.name limit 1) as barcode,
+				b.warehouse
+			from `tabBin` b
+			join `tabItem` i on b.item_code = i.name
+			where b.warehouse like %s and b.actual_qty > 0
+			""",
+			(f"%{warehouse}%",),
+			as_dict=True,
+		)
 
-	total = frappe.db.count("Case Audit Session", filters=filters)
-	sessions = frappe.get_all(
-		"Case Audit Session",
-		filters=filters,
-		fields=[
-			"name", "store_location", "auditor", "audit_type", "status",
-			"expected_count", "scanned_count", "started_at", "completed_at",
-			"total_value_expected", "total_value_scanned", "total_value_discrepancy",
-		],
-		order_by="started_at desc",
-		start=(cint(page) - 1) * cint(page_size),
-		limit=cint(page_size),
+	return frappe.db.sql(
+		"""
+		select b.item_code, b.actual_qty, i.custom_rfid_epc, i.standard_rate, i.valuation_rate,
+			(select barcode from `tabItem Barcode` ib where ib.parent = i.name limit 1) as barcode
+		from `tabBin` b
+		join `tabItem` i on b.item_code = i.name
+		where b.warehouse = %s and b.actual_qty > 0
+		""",
+		(filters.get("warehouse", warehouse),),
+		as_dict=True,
 	)
 
-	return {
+
+@frappe.whitelist(allow_guest=False)
+def submit_scan(session, barcode_or_epc):
+	session_doc = frappe.get_doc("Case Audit Session", session)
+	frappe.has_permission("Case Audit Session", ptype="write", doc=session_doc, throw=True)
+
+	if session_doc.status != "In Progress":
+		frappe.throw("Audit session is not in progress.")
+
+	return execute_submit_scan(session_doc, barcode_or_epc)
+
+
+@frappe.whitelist(allow_guest=False)
+def finalize_audit(session, two_person_signoff_by=None, freeze_override_reason=None):
+	"""Finalize an audit session with optional two-person sign-off and freeze override.
+
+	Args:
+		session: Case Audit Session name
+		two_person_signoff_by: User who provides the second sign-off (manager)
+		freeze_override_reason: If session is Pending Manager Review, reason to unfreeze
+	"""
+	session_doc = frappe.get_doc("Case Audit Session", session)
+	frappe.has_permission("Case Audit Session", ptype="write", doc=session_doc, throw=True)
+	frappe.has_permission("Stock Entry", ptype="submit", throw=True)
+
+	if session_doc.status != "In Progress":
+		frappe.throw("Audit session is not in progress.")
+
+	# Two-person sign-off
+	from zevar_core.unified_retail_management_system.doctype.case_audit_session.case_audit_session import (
+		_get_audit_policy,
+	)
+
+	policy = _get_audit_policy()
+	if policy.get("require_two_person_rule") and two_person_signoff_by:
+		session_doc.two_person_signoff_by = two_person_signoff_by
+
+	session_doc.submit()
+
+	result = {
 		"success": True,
-		"total": total,
-		"page": cint(page),
-		"page_size": cint(page_size),
-		"sessions": sessions,
+		"status": session_doc.status,
+		"missing_count": len(getattr(session_doc, "_missing_items", [])),
+		"variance_dollar_total": flt(session_doc.variance_dollar_total),
+		"shrinkage_processing_queued": session_doc.status
+		in ("Discrepancy", "Reconciled with Shrinkage", "Pending Manager Review"),
 	}
 
-
-# ---------------------------------------------------------------------------
-# Export Audit Results as CSV
-# ---------------------------------------------------------------------------
-
-@frappe.whitelist()
-def export_audit_results(session_name: str) -> dict:
-	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
-
-	session = frappe.get_doc("Case Audit Session", session_name)
-	_check_permission(session_name)
-
-	import csv
-	import os
-
-	filename = f"audit_results_{session.name.replace(' ', '_')}.csv"
-	filepath = frappe.get_site_path("private", "files", filename)
-
-	with open(filepath, "w", newline="") as f:
-		writer = csv.writer(f)
-		writer.writerow(["Item Code", "Item Name", "Barcode/EPC", "Match Status",
-		                  "Scanned At", "Valuation Rate", "Is Duplicate"])
-
-		for s in session.scans:
-			writer.writerow([
-				s.item_code or "",
-				s.item_name or "",
-				s.barcode_or_epc or "",
-				s.match_status,
-				str(s.scanned_at) if s.scanned_at else "",
-				s.valuation_rate or 0,
-				"Yes" if s.is_duplicate else "No",
-			])
-
-		# Summary rows
-		writer.writerow([])
-		writer.writerow(["Summary"])
-		writer.writerow(["Expected Count", session.expected_count])
-		writer.writerow(["Scanned Count", session.scanned_count])
-		writer.writerow(["Total Value Expected", session.total_value_expected or 0])
-		writer.writerow(["Total Value Scanned", session.total_value_scanned or 0])
-		writer.writerow(["Total Value Discrepancy", session.total_value_discrepancy or 0])
-		writer.writerow(["Status", session.status])
-
-	file_doc = frappe.new_doc("File")
-	file_doc.file_name = filename
-	file_doc.file_url = f"/private/files/{filename}"
-	file_doc.is_private = 1
-	file_doc.attached_to_doctype = "Case Audit Session"
-	file_doc.attached_to_name = session.name
-	file_doc.insert(ignore_permissions=True)
-
-	return {"success": True, "file_url": file_doc.file_url, "filename": filename}
+	return result
 
 
-# ---------------------------------------------------------------------------
-# Cancel Audit
-# ---------------------------------------------------------------------------
+@frappe.whitelist(allow_guest=False)
+def approve_variance(session, approve_reason):
+	"""Manager approves a Pending Manager Review audit, unfreezing the store."""
+	frappe.only_for("Sales Manager", "System Manager")
 
-@frappe.whitelist()
-def cancel_audit(session_name: str) -> dict:
-	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
+	session_doc = frappe.get_doc("Case Audit Session", session)
+	if session_doc.docstatus != 1:
+		frappe.throw("Session must be submitted first")
 
-	session = frappe.get_doc("Case Audit Session", session_name)
-	_check_permission(session_name)
+	if session_doc.status != "Pending Manager Review":
+		frappe.throw("Session is not pending manager review")
 
-	if session.status not in ("Draft", "In Progress"):
-		frappe.throw(_("Can only cancel Draft or In Progress sessions."))
+	from zevar_core.unified_retail_management_system.doctype.case_audit_session.case_audit_session import (
+		unfreeze_store,
+	)
 
-	session.status = "Cancelled"
-	session.cancelled_at = now_datetime()
-	session.save(ignore_permissions=True)
+	unfreeze_store(session_doc.store_location, frappe.session.user)
+
+	# If shrinkage wasn't auto-posted, do it now
+	if session_doc.variance_dollar_total and not session_doc.total_value_discrepancy:
+		missing_items = _get_missing_items_for_session(session_doc)
+		if missing_items:
+			frappe.enqueue(
+				"zevar_core.services.inventory_audit_utils.process_shrinkage_async",
+				session=session_doc.name,
+				missing_items_json=json.dumps(missing_items),
+				store_location=session_doc.store_location,
+				queue="long",
+				now=frappe.flags.in_test,
+			)
+
+	# Update status
+	frappe.db.set_value("Case Audit Session", session, "status", "Reconciled with Shrinkage")
+	frappe.db.set_value("Case Audit Session", session, "freeze_reason", f"Approved: {approve_reason}")
 
 	_log_audit_event(
-		"audit_cancelled",
-		session_name,
-		details=f"Audit {session_name} cancelled by {frappe.session.user}",
+		"variance_approved",
+		"Inventory",
+		session,
+		f"Variance for {session} approved by {frappe.session.user}: {approve_reason}",
 	)
+
+	return {"success": True, "status": "Reconciled with Shrinkage"}
+
+
+def _get_missing_items_for_session(session_doc):
+	"""Re-derive missing items from a submitted session."""
+	scanned_items = set()
+	for scan in session_doc.scans:
+		if scan.match_status == "Matched" and scan.item_code:
+			scanned_items.add(scan.item_code)
+
+	expected = frappe.db.sql(
+		"select item_code, actual_qty from `tabBin` where warehouse = %s and actual_qty > 0",
+		(session_doc.store_location,),
+		as_dict=True,
+	)
+	missing = []
+	for exp in expected:
+		if exp.item_code not in scanned_items:
+			missing.append({"item_code": exp.item_code, "qty": flt(exp.actual_qty)})
+	return missing
+
+
+@frappe.whitelist(allow_guest=False)
+def batch_scan(session, epcs_json):
+	session_doc = frappe.get_doc("Case Audit Session", session)
+	frappe.has_permission("Case Audit Session", ptype="write", doc=session_doc, throw=True)
+
+	if len(epcs_json) > 50000:
+		frappe.throw("Payload too large. Please send smaller batches.")
+
+	epcs = json.loads(epcs_json)
+	if len(epcs) > 500:
+		frappe.throw("Cannot process more than 500 EPCs in a single batch.")
+
+	return execute_batch_scan(session_doc, epcs)
+
+
+@frappe.whitelist(allow_guest=False)
+def cancel_audit(session):
+	session_doc = frappe.get_doc("Case Audit Session", session)
+	frappe.has_permission("Case Audit Session", ptype="write", doc=session_doc, throw=True)
+	session_doc.status = "Cancelled"
+	session_doc.cancelled_at = now_datetime()
+	session_doc.save(ignore_permissions=True)
+
+	# Update linked Audit Plan
+	if session_doc.audit_plan and frappe.db.exists("Audit Plan", session_doc.audit_plan):
+		frappe.db.set_value("Audit Plan", session_doc.audit_plan, "status", "Scheduled")
 
 	return {"success": True, "status": "Cancelled"}
 
 
-# ---------------------------------------------------------------------------
-# Finalize Audit
-# ---------------------------------------------------------------------------
+@frappe.whitelist(allow_guest=False)
+def get_audit_progress(session):
+	session_doc = frappe.get_doc("Case Audit Session", session)
+	frappe.has_permission("Case Audit Session", ptype="read", doc=session_doc, throw=True)
 
-@frappe.whitelist()
-def finalize_audit(session_name: str) -> dict:
-	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
+	matched = 0
+	unexpected = 0
+	duplicates = 0
+	scanned_items = set()
 
-	session = frappe.get_doc("Case Audit Session", session_name)
-	_check_permission(session_name)
+	for scan in session_doc.scans:
+		if scan.match_status == "Matched":
+			matched += 1
+			if scan.item_code:
+				scanned_items.add(scan.item_code)
+		elif scan.match_status == "Unexpected":
+			unexpected += 1
+		elif scan.match_status == "Duplicate":
+			duplicates += 1
 
-	if session.status not in ("Draft", "In Progress"):
-		frappe.throw(_("Can only finalize Draft or In Progress sessions."))
-
-	expected_items_data = _get_expected_items(session.store_location)
+	expected_items = frappe.db.sql(
+		"""
+		select item_code, actual_qty
+		from `tabBin`
+		where warehouse = %s and actual_qty > 0
+	""",
+		(session_doc.store_location,),
+		as_dict=True,
+	)
 
 	missing_items = []
-	for expected in expected_items_data:
-		item_code = expected.item_code
-		expected_qty = expected.actual_qty
-
-		scanned_qty = len(
-			[s for s in session.scans if s.item_code == item_code and s.match_status == "Matched"]
-		)
-		if scanned_qty < expected_qty:
-			missing_qty = expected_qty - scanned_qty
-			item_name = expected.item_name
-			missing_items.append({"item_code": item_code, "qty": missing_qty})
-			for _ in range(int(missing_qty)):
-				session.append(
-					"scans",
-					{
-						"item_code": item_code,
-						"item_name": item_name,
-						"match_status": "Missing",
-						"scanned_at": now_datetime(),
-					},
-				)
-
-	# Compute value tracking
-	total_value_scanned = sum(
-		(s.valuation_rate or 0) for s in session.scans if s.match_status == "Matched"
-	)
-	session.total_value_scanned = total_value_scanned
-	session.total_value_discrepancy = (session.total_value_expected or 0) - total_value_scanned
-
-	session.completed_at = now_datetime()
-
-	if missing_items or any(s.match_status == "Unexpected" for s in session.scans):
-		session.status = "Discrepancy"
-	else:
-		session.status = "Reconciled"
-
-	session.submit()
-
-	# Process shrinkage
-	shrinkage_entry = None
-	if missing_items:
-		company = (
-			frappe.defaults.get_user_default("Company")
-			or frappe.db.get_single_value("Global Defaults", "default_company")
-			or "Zevar Jewelers"
-		)
-
-		se = frappe.new_doc("Stock Entry")
-		se.stock_entry_type = "Material Issue"
-		se.company = company
-		se.purpose = "Material Issue"
-		se.remarks = f"Shrinkage detected in Case Audit {session.name}"
-
-		for item in missing_items:
-			se.append(
-				"items",
-				{"item_code": item["item_code"], "qty": item["qty"], "s_warehouse": session.store_location},
+	for exp in expected_items:
+		if exp.item_code not in scanned_items:
+			item_name = frappe.db.get_value("Item", exp.item_code, "item_name")
+			rate = flt(frappe.db.get_value("Item", exp.item_code, "standard_rate") or 0)
+			missing_items.append(
+				{
+					"item_code": exp.item_code,
+					"item_name": item_name,
+					"expected_qty": flt(exp.actual_qty),
+					"scanned_qty": 0,
+					"valuation_rate": rate,
+				}
 			)
-
-		se.flags.ignore_permissions = True
-		se.insert()
-		se.submit()
-		shrinkage_entry = se.name
-
-	event_type = "shrinkage_detected" if missing_items else "audit_reconciled"
-	_log_audit_event(
-		event_type,
-		session.name,
-		details=(
-			f"Audit {session.name} finalized: {session.status}, "
-			f"expected={session.expected_count}, scanned={session.scanned_count}, "
-			f"discrepancy=${session.total_value_discrepancy:,.2f}, "
-			f"shrinkage_entry={shrinkage_entry}"
-		),
-	)
 
 	return {
 		"success": True,
-		"status": session.status,
-		"missing_count": len(missing_items),
-		"shrinkage_entry": shrinkage_entry,
-		"total_value_expected": session.total_value_expected,
-		"total_value_scanned": session.total_value_scanned,
-		"total_value_discrepancy": session.total_value_discrepancy,
+		"counts": {"matched": matched, "unexpected": unexpected, "duplicates": duplicates},
+		"recent_scans": [s.as_dict() for s in session_doc.scans[-10:]] if session_doc.scans else [],
+		"missing_items": missing_items,
+		"unexpected_items": [
+			{"item_code": s.item_code, "item_name": s.item_name, "barcode_or_epc": s.barcode_or_epc}
+			for s in session_doc.scans
+			if s.match_status == "Unexpected"
+		][-20:],
+		"session": {
+			"name": session_doc.name,
+			"status": session_doc.status,
+			"scope": session_doc.scope,
+			"expected_count": session_doc.expected_count,
+			"scanned_count": session_doc.scanned_count,
+			"total_value_expected": flt(session_doc.total_value_expected),
+			"total_value_scanned": flt(session_doc.total_value_scanned),
+			"total_value_discrepancy": flt(session_doc.total_value_discrepancy),
+			"variance_dollar_total": flt(session_doc.variance_dollar_total),
+			"store_location": session_doc.store_location,
+			"display_case": session_doc.display_case,
+		},
 	}
+
+
+@frappe.whitelist(allow_guest=False)
+def get_audit_history(limit_start=0, page_size=10, status=None, scope=None):
+	frappe.has_permission("Case Audit Session", ptype="read", throw=True)
+
+	filters = {}
+	if status:
+		filters["status"] = status
+	if scope:
+		filters["scope"] = scope
+
+	sessions = frappe.get_all(
+		"Case Audit Session",
+		filters=filters,
+		fields=[
+			"name",
+			"status",
+			"started_at",
+			"store_location",
+			"scope",
+			"expected_count",
+			"scanned_count",
+			"total_value_discrepancy",
+			"variance_dollar_total",
+		],
+		limit_start=limit_start,
+		limit=page_size,
+		order_by="started_at desc",
+	)
+	total = frappe.db.count("Case Audit Session", filters)
+	return {"success": True, "sessions": sessions, "total": total}
+
+
+@frappe.whitelist(allow_guest=False)
+def get_audit_dashboard(store=None):
+	"""Get audit dashboard KPIs: next audit due, overdue, shrinkage, hit-rate."""
+	frappe.has_permission("Case Audit Session", ptype="read", throw=True)
+
+	from frappe.utils import add_months, getdate
+
+	# Overdue audit plans
+	overdue_plans = frappe.get_all(
+		"Audit Plan",
+		filters={
+			"status": "Scheduled",
+			"scheduled_for": ["<", today()],
+		},
+		fields=["name", "store_location", "scope", "scheduled_for"],
+	)
+
+	# Next audit due
+	next_plan = frappe.get_all(
+		"Audit Plan",
+		filters={
+			"status": "Scheduled",
+			"scheduled_for": [">=", today()],
+		},
+		fields=["name", "store_location", "scope", "scheduled_for"],
+		order_by="scheduled_for asc",
+		limit=1,
+	)
+
+	# Shrinkage last 30 days
+	thirty_days_ago = add_days(today(), -30)
+	shrinkage_sessions = frappe.get_all(
+		"Case Audit Session",
+		filters={
+			"status": ["in", ["Discrepancy", "Reconciled with Shrinkage", "Pending Manager Review"]],
+			"started_at": [">=", thirty_days_ago],
+		},
+		fields=["sum(variance_dollar_total) as total_shrinkage", "count(*) as count"],
+	)
+
+	total_shrinkage = flt((shrinkage_sessions[0] or {}).get("total_shrinkage", 0))
+	shrinkage_count = (shrinkage_sessions[0] or {}).get("count", 0)
+
+	# Audit hit rate (last 30 days)
+	total_audits = frappe.db.count(
+		"Case Audit Session",
+		filters={
+			"started_at": [">=", thirty_days_ago],
+			"docstatus": 1,
+		},
+	)
+	reconciled_audits = frappe.db.count(
+		"Case Audit Session",
+		filters={
+			"status": "Reconciled",
+			"started_at": [">=", thirty_days_ago],
+			"docstatus": 1,
+		},
+	)
+	hit_rate = (reconciled_audits / total_audits * 100) if total_audits > 0 else 100
+
+	# Store frozen status
+	frozen_stores = []
+	if store:
+		from zevar_core.unified_retail_management_system.doctype.case_audit_session.case_audit_session import (
+			is_store_frozen,
+		)
+
+		reason = is_store_frozen(store)
+		if reason:
+			frozen_stores.append({"store": store, "reason": reason})
+
+	return {
+		"success": True,
+		"overdue_audits": len(overdue_plans),
+		"overdue_plans": overdue_plans[:5],
+		"next_audit": next_plan[0] if next_plan else None,
+		"shrinkage_last_30_days": total_shrinkage,
+		"shrinkage_session_count": shrinkage_count,
+		"audit_hit_rate": round(hit_rate, 1),
+		"total_audits_last_30_days": total_audits,
+		"frozen_stores": frozen_stores,
+	}
+
+
+@frappe.whitelist(allow_guest=False)
+def get_audit_plans(store=None, status="Scheduled"):
+	"""Get audit plans for the plan picker in the UI."""
+	frappe.has_permission("Audit Plan", ptype="read", throw=True)
+
+	filters = {}
+	if store:
+		filters["store_location"] = store
+	if status:
+		filters["status"] = status
+
+	plans = frappe.get_all(
+		"Audit Plan",
+		filters=filters,
+		fields=["name", "store_location", "scope", "scheduled_for", "assigned_to", "status"],
+		order_by="scheduled_for asc",
+		limit=50,
+	)
+
+	return {"success": True, "plans": plans}
+
+
+@frappe.whitelist(allow_guest=False)
+def export_audit_results(session):
+	import csv
+	import uuid
+	from io import StringIO
+
+	session_doc = frappe.get_doc("Case Audit Session", session)
+	frappe.has_permission("Case Audit Session", ptype="read", doc=session_doc, throw=True)
+	f = StringIO()
+	writer = csv.writer(f)
+	writer.writerow(["Item Code", "Item Name", "Barcode/EPC", "Match Status", "Scanned At", "Valuation Rate"])
+
+	for scan in session_doc.scans:
+		writer.writerow(
+			[
+				scan.item_code,
+				scan.item_name,
+				scan.barcode_or_epc,
+				scan.match_status,
+				scan.scanned_at,
+				scan.valuation_rate,
+			]
+		)
+
+	file_doc = frappe.new_doc("File")
+	file_doc.file_name = f"audit_export_{session}_{uuid.uuid4().hex[:8]}.csv"
+	file_doc.content = f.getvalue().encode("utf-8")
+	file_doc.is_private = 1
+	file_doc.insert()
+
+	return {"success": True, "file_url": file_doc.file_url}

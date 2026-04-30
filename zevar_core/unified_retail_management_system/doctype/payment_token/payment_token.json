@@ -1,0 +1,145 @@
+{
+ "actions": [],
+ "autoname": "format:PTK-{#####}",
+ "creation": "2026-04-29 06:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "customer",
+  "provider",
+  "token_type",
+  "column_break_1",
+  "token_id",
+  "last_four",
+  "card_brand",
+  "expiry_month",
+  "expiry_year",
+  "section_status",
+  "is_active",
+  "label",
+  "column_break_status",
+  "created_at",
+  "last_used_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "provider",
+   "fieldtype": "Select",
+   "label": "Payment Provider",
+   "options": "Stripe\nSquare\nSynchrony",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "token_type",
+   "fieldtype": "Select",
+   "label": "Token Type",
+   "options": "Card\nBank Account\nDigital Wallet\nFinancing Account",
+   "default": "Card",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "token_id",
+   "fieldtype": "Data",
+   "label": "Token ID",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "last_four",
+   "fieldtype": "Data",
+   "label": "Last 4 Digits",
+   "length": 4
+  },
+  {
+   "fieldname": "card_brand",
+   "fieldtype": "Select",
+   "label": "Card Brand",
+   "options": "\nVisa\nMastercard\nAmerican Express\nDiscover\nOther"
+  },
+  {
+   "fieldname": "expiry_month",
+   "fieldtype": "Int",
+   "label": "Expiry Month"
+  },
+  {
+   "fieldname": "expiry_year",
+   "fieldtype": "Int",
+   "label": "Expiry Year"
+  },
+  {
+   "fieldname": "section_status",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "label",
+   "fieldtype": "Data",
+   "label": "Label (e.g. 'Visa ending 4242')"
+  },
+  {
+   "fieldname": "column_break_status",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "created_at",
+   "fieldtype": "Datetime",
+   "label": "Created At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_used_at",
+   "fieldtype": "Datetime",
+   "label": "Last Used At",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-04-29 06:00:00.000000",
+ "module": "Unified Retail Management System",
+ "name": "Payment Token",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Sales User"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

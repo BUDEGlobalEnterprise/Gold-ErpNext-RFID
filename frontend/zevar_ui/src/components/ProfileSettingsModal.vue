@@ -6,12 +6,18 @@
 
 		<div class="p-6">
 			<!-- User Info -->
-			<div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-warm-dark-700 rounded-xl mb-6">
-				<div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+			<div
+				class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-warm-dark-700 rounded-xl mb-6"
+			>
+				<div
+					class="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg"
+				>
 					{{ userInitials }}
 				</div>
 				<div>
-					<h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ user?.full_name || user?.email || 'User' }}</h3>
+					<h3 class="text-sm font-semibold text-gray-900 dark:text-white">
+						{{ user?.full_name || user?.email || 'User' }}
+					</h3>
 					<p class="text-xs text-gray-500 dark:text-gray-400">{{ user?.email }}</p>
 				</div>
 			</div>
@@ -19,13 +25,24 @@
 			<!-- Settings Sections -->
 			<div class="space-y-6">
 				<div>
-					<h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Display Settings</h4>
+					<h4
+						class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3"
+					>
+						Display Settings
+					</h4>
 
 					<div class="space-y-3">
-						<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+						<div
+							class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50"
+						>
 							<div class="flex-1">
-								<span class="block text-sm font-medium text-gray-900 dark:text-white">Dark Mode</span>
-								<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Use dark theme throughout the app</span>
+								<span
+									class="block text-sm font-medium text-gray-900 dark:text-white"
+									>Dark Mode</span
+								>
+								<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5"
+									>Use dark theme throughout the app</span
+								>
 							</div>
 							<label class="relative inline-flex items-center cursor-pointer">
 								<input
@@ -34,14 +51,23 @@
 									@change="saveSettings"
 									class="sr-only peer"
 								/>
-								<div class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+								<div
+									class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+								></div>
 							</label>
 						</div>
 
-						<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+						<div
+							class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50"
+						>
 							<div class="flex-1">
-								<span class="block text-sm font-medium text-gray-900 dark:text-white">Compact View</span>
-								<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Reduce spacing in lists and cards</span>
+								<span
+									class="block text-sm font-medium text-gray-900 dark:text-white"
+									>Compact View</span
+								>
+								<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5"
+									>Reduce spacing in lists and cards</span
+								>
 							</div>
 							<label class="relative inline-flex items-center cursor-pointer">
 								<input
@@ -50,16 +76,27 @@
 									@change="saveSettings"
 									class="sr-only peer"
 								/>
-								<div class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+								<div
+									class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+								></div>
 							</label>
 						</div>
 
-						<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+						<div
+							class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50"
+						>
 							<div class="flex-1">
-								<span class="block text-sm font-medium text-gray-900 dark:text-white">Currency Display</span>
-								<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">How to show prices</span>
+								<span
+									class="block text-sm font-medium text-gray-900 dark:text-white"
+									>Currency Display</span
+								>
+								<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5"
+									>How to show prices</span
+								>
 							</div>
-							<select v-model="settings.currency_display" @change="saveSettings"
+							<select
+								v-model="settings.currency_display"
+								@change="saveSettings"
 								class="px-3 py-1.5 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white min-w-[120px]"
 							>
 								<option value="symbol">$ Symbol</option>
@@ -71,13 +108,24 @@
 				</div>
 
 				<div>
-					<h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Notification Settings</h4>
+					<h4
+						class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3"
+					>
+						Notification Settings
+					</h4>
 
 					<div class="space-y-3">
-						<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+						<div
+							class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50"
+						>
 							<div class="flex-1">
-								<span class="block text-sm font-medium text-gray-900 dark:text-white">Sound Alerts</span>
-								<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Play sound on order completion</span>
+								<span
+									class="block text-sm font-medium text-gray-900 dark:text-white"
+									>Sound Alerts</span
+								>
+								<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5"
+									>Play sound on order completion</span
+								>
 							</div>
 							<label class="relative inline-flex items-center cursor-pointer">
 								<input
@@ -86,14 +134,23 @@
 									@change="saveSettings"
 									class="sr-only peer"
 								/>
-								<div class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+								<div
+									class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+								></div>
 							</label>
 						</div>
 
-						<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+						<div
+							class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50"
+						>
 							<div class="flex-1">
-								<span class="block text-sm font-medium text-gray-900 dark:text-white">Low Stock Alerts</span>
-								<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Alert when items are low in stock</span>
+								<span
+									class="block text-sm font-medium text-gray-900 dark:text-white"
+									>Low Stock Alerts</span
+								>
+								<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5"
+									>Alert when items are low in stock</span
+								>
 							</div>
 							<label class="relative inline-flex items-center cursor-pointer">
 								<input
@@ -102,21 +159,34 @@
 									@change="saveSettings"
 									class="sr-only peer"
 								/>
-								<div class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+								<div
+									class="w-11 h-6 bg-gray-200 dark:bg-warm-dark-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+								></div>
 							</label>
 						</div>
 					</div>
 				</div>
 
 				<div>
-					<h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Language & Region</h4>
+					<h4
+						class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3"
+					>
+						Language & Region
+					</h4>
 
 					<div class="space-y-3">
-						<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+						<div
+							class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50"
+						>
 							<div class="flex-1">
-								<span class="block text-sm font-medium text-gray-900 dark:text-white">Language</span>
+								<span
+									class="block text-sm font-medium text-gray-900 dark:text-white"
+									>Language</span
+								>
 							</div>
-							<select v-model="settings.language" @change="saveSettings"
+							<select
+								v-model="settings.language"
+								@change="saveSettings"
 								class="px-3 py-1.5 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white min-w-[120px]"
 							>
 								<option value="en">English</option>
@@ -125,11 +195,18 @@
 							</select>
 						</div>
 
-						<div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50">
+						<div
+							class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-warm-border/50"
+						>
 							<div class="flex-1">
-								<span class="block text-sm font-medium text-gray-900 dark:text-white">Timezone</span>
+								<span
+									class="block text-sm font-medium text-gray-900 dark:text-white"
+									>Timezone</span
+								>
 							</div>
-							<select v-model="settings.timezone" @change="saveSettings"
+							<select
+								v-model="settings.timezone"
+								@change="saveSettings"
 								class="px-3 py-1.5 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white min-w-[120px]"
 							>
 								<option value="America/New_York">Eastern Time</option>

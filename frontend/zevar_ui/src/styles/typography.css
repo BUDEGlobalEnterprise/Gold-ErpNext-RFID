@@ -1,0 +1,202 @@
+/**
+ * Zevar POS — Semantic Typography Scale
+ *
+ * Mobile-first: sizes are authored at xs, then breakpoints ADD size.
+ * Replace ad-hoc `text-2xl sm:text-3xl` with semantic classes.
+ */
+
+/* ===== Headings ===== */
+
+.text-heading-xl {
+	font-size: 1.5rem;
+	line-height: 1.2;
+	font-weight: 800;
+	letter-spacing: -0.025em;
+}
+
+@media (min-width: 768px) {
+	.text-heading-xl {
+		font-size: 1.875rem;
+	}
+}
+
+@media (min-width: 1024px) {
+	.text-heading-xl {
+		font-size: 2.25rem;
+	}
+}
+
+@media (min-width: 1280px) {
+	.text-heading-xl {
+		font-size: 3rem;
+	}
+}
+
+.text-heading-lg {
+	font-size: 1.25rem;
+	line-height: 1.3;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+}
+
+@media (min-width: 768px) {
+	.text-heading-lg {
+		font-size: 1.5rem;
+	}
+}
+
+@media (min-width: 1024px) {
+	.text-heading-lg {
+		font-size: 1.75rem;
+	}
+}
+
+.text-heading-md {
+	font-size: 1.125rem;
+	line-height: 1.35;
+	font-weight: 700;
+	letter-spacing: -0.015em;
+}
+
+@media (min-width: 768px) {
+	.text-heading-md {
+		font-size: 1.25rem;
+	}
+}
+
+.text-heading-sm {
+	font-size: 1rem;
+	line-height: 1.4;
+	font-weight: 600;
+}
+
+@media (min-width: 768px) {
+	.text-heading-sm {
+		font-size: 1.125rem;
+	}
+}
+
+/* ===== Body Text ===== */
+
+.text-body {
+	font-size: 0.875rem;
+	line-height: 1.5;
+	font-weight: 400;
+}
+
+@media (min-width: 1024px) {
+	.text-body {
+		font-size: 0.9375rem;
+	}
+}
+
+.text-body-sm {
+	font-size: 0.8125rem;
+	line-height: 1.45;
+	font-weight: 400;
+}
+
+@media (min-width: 1024px) {
+	.text-body-sm {
+		font-size: 0.875rem;
+	}
+}
+
+/* ===== Captions & Labels ===== */
+
+.text-caption {
+	font-size: 0.75rem;
+	line-height: 1.4;
+	font-weight: 500;
+	letter-spacing: 0.01em;
+}
+
+.text-overline {
+	font-size: 0.625rem;
+	line-height: 1.3;
+	font-weight: 800;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+/* ===== Numeric / Data Display ===== */
+
+.text-mono-lg {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	font-size: 1.5rem;
+	line-height: 1.1;
+	font-weight: 800;
+	letter-spacing: -0.03em;
+}
+
+@media (min-width: 768px) {
+	.text-mono-lg {
+		font-size: 1.875rem;
+	}
+}
+
+@media (min-width: 1024px) {
+	.text-mono-lg {
+		font-size: 2.25rem;
+	}
+}
+
+.text-mono {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+
+/* ===== Price Display ===== */
+
+.text-price {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	font-size: 1.125rem;
+	line-height: 1.2;
+	font-weight: 800;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -0.02em;
+}
+
+@media (min-width: 768px) {
+	.text-price {
+		font-size: 1.25rem;
+	}
+}
+
+@media (min-width: 1024px) {
+	.text-price {
+		font-size: 1.5rem;
+	}
+}
+
+/* ===== Responsive Truncation ===== */
+
+.truncate-mobile {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+	.truncate-mobile {
+		overflow: visible;
+		text-overflow: unset;
+		white-space: normal;
+	}
+}
+
+/* ===== Gold Accent Text ===== */
+
+.text-gold {
+	color: #D4AF37;
+}
+
+.text-gold-gradient {
+	background: linear-gradient(135deg, #D4AF37, #F2E6A0);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}

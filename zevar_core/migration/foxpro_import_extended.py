@@ -1,3 +1,192 @@
+"""
+FoxPro to Frappe Data Migration (Extended) for Zevar Jewelers
+
+Includes additional migration functions for stone cuts, types, departments, etc.
+"""
+
+import json
+import os
+from datetime import date, datetime
+from typing import Any
+
+import frappe
+from frappe import _
+
+try:
+	from dbfread import DBF
+
+	HAS_DBFREAD = True
+except ImportError:
+	HAS_DBFREAD = False
+
+
+# ──────────────────────────────────────────────────
+# Helpers
+# ──────────────────────────────────────────────────
+
+
+def check_dbfread():
+	"""Verify dbfread is installed."""
+	if not HAS_DBFREAD:
+		frappe.throw(
+			_("dbfread library not installed. Run: pip install dbfread"),
+			title=_("Missing Dependency"),
+		)
+
+
+def find_dbf(backup_path: str, filename: str) -> str | None:
+	"""Find a DBF file (case-insensitive) in the backup directory."""
+	if not os.path.isdir(backup_path):
+		return None
+	for fname in os.listdir(backup_path):
+		if fname.upper() == filename.upper():
+			return os.path.join(backup_path, fname)
+	return None
+
+
+def read_dbf(file_path: str, encoding: str = "cp1252") -> list[dict]:
+	"""
+	Read a DBF file and return list of clean records.
+
+	Lowercases keys, strips whitespace from strings, handles None/empty.
+	"""
+	check_dbfread()
+	table = DBF(file_path, encoding=encoding, ignore_missing_memofile=True)
+	records = []
+	for record in table:
+		clean = {}
+		for key, value in record.items():
+			if isinstance(value, str):
+				value = value.strip()
+			elif isinstance(value, bytes):
+				try:
+					value = value.decode(encoding).strip()
+				except Exception:
+					value = str(value)
+			if value is not None and value != "":
+				clean[key.lower()] = value
+		records.append(clean)
+	return records
+
+
+def clean_str(value) -> str:
+	"""Safely convert to stripped string."""
+	if value is None:
+		return ""
+	return str(value).strip()
+
+
+def clean_float(value) -> float:
+	"""Safely convert to float."""
+	if value is None:
+		return 0.0
+	try:
+		return float(value)
+	except (ValueError, TypeError):
+		return 0.0
+
+
+def clean_int(value) -> int:
+	"""Safely convert to int."""
+	if value is None:
+		return 0
+	try:
+		return int(float(value))
+	except (ValueError, TypeError):
+		return 0
+
+
+def format_date(value) -> str | None:
+	"""Convert a date value to YYYY-MM-DD string."""
+	if value is None:
+		return None
+	if isinstance(value, date):
+		return value.strftime("%Y-%m-%d")
+	# Try parsing common FoxPro date strings
+	val = str(value).strip()
+	if not val:
+		return None
+	for fmt in ("%Y%m%d", "%m/%d/%Y", "%m-%d-%Y", "%Y-%m-%d", "%m%d%y"):
+		try:
+			return datetime.strptime(val, fmt).strftime("%Y-%m-%d")
+		except ValueError:
+			continue
+	return None
+
+
+def _set_custom_field(doc, fieldname: str, value):
+	"""Set a custom field on a document if the field exists and value is non-empty."""
+	if value and frappe.get_meta(doc.doctype).has_field(fieldname):
+		doc.set(fieldname, value)
+
+
+def _ensure_designation(name: str):
+	"""Create a Designation record if it doesn't exist."""
+	if name and not frappe.db.exists("Designation", name):
+		try:
+			doc = frappe.new_doc("Designation")
+			doc.designation_name = name
+			doc.insert(ignore_permissions=True)
+		except frappe.DuplicateEntryError:
+			pass
+
+
+def _get_or_create_item_group(category: str) -> str:
+	"""Get or create an Item Group by name."""
+	if frappe.db.exists("Item Group", category):
+		return category
+	try:
+		doc = frappe.new_doc("Item Group")
+		doc.item_group_name = category
+		doc.parent_item_group = "All Item Groups"
+		doc.is_group = 0
+		doc.insert(ignore_permissions=True)
+	except frappe.DuplicateEntryError:
+		pass
+	return category
+
+
+def _get_or_create_brand(mfrid: str) -> str:
+	"""Get or create a Brand by manufacturer ID."""
+	if frappe.db.exists("Brand", mfrid):
+		return mfrid
+	try:
+		doc = frappe.new_doc("Brand")
+		doc.brand = mfrid
+		doc.insert(ignore_permissions=True)
+	except frappe.DuplicateEntryError:
+		pass
+	return mfrid
+
+
+def _get_default_customer() -> str:
+	"""Get or create a default 'Walk-in Customer'."""
+	name = "Walk-in Customer"
+	if frappe.db.exists("Customer", name):
+		return name
+	doc = frappe.new_doc("Customer")
+	doc.customer_name = name
+	doc.customer_type = "Individual"
+	doc.customer_group = "Individual"
+	doc.territory = "All Territories"
+	doc.insert(ignore_permissions=True)
+	return name
+
+
+def _get_default_item() -> str:
+	"""Get or create a default item for legacy transaction lines."""
+	item_code = "LEGACY-ITEM"
+	if frappe.db.exists("Item", item_code):
+		return item_code
+	doc = frappe.new_doc("Item")
+	doc.item_code = item_code
+	doc.item_name = "Legacy Imported Item"
+	doc.item_group = "All Item Groups"
+	doc.stock_uom = "Nos"
+	doc.is_stock_item = 1
+	doc.insert(ignore_permissions=True)
+	return item_code
+
 
 # ──────────────────────────────────────────────────
 # Stone Cuts (from CUTS.DBF)
@@ -325,7 +514,9 @@ def import_slush_items(backup_path: str, dry_run: bool = False) -> dict:
 				stats["skipped"] += 1
 				continue
 
-			item_code = barcode if barcode else f"SLUSH-{abr}-{stockno}" if abr and stockno else f"SLUSH-{stockno}"
+			item_code = (
+				barcode if barcode else f"SLUSH-{abr}-{stockno}" if abr and stockno else f"SLUSH-{stockno}"
+			)
 			item_name = descript if descript else item_code
 
 			if frappe.db.exists("Item", item_code):
@@ -623,7 +814,11 @@ def import_receipt_lines(backup_path: str, dry_run: bool = False) -> dict:
 
 	# Build cache: receiptno -> Sales Invoice name
 	si_cache = {}
-	for si in frappe.get_all("Sales Invoice", filters={"custom_legacy_trans_no": ["!=", ""]}, fields=["name", "custom_legacy_trans_no"]):
+	for si in frappe.get_all(
+		"Sales Invoice",
+		filters={"custom_legacy_trans_no": ["!=", ""]},
+		fields=["name", "custom_legacy_trans_no"],
+	):
 		si_cache[si.custom_legacy_trans_no] = si.name
 
 	# Also build a transno->receiptno mapping from trans.dbf
@@ -747,7 +942,11 @@ def import_payment_tenders(backup_path: str, dry_run: bool = False) -> dict:
 
 	# Build SI cache for linking
 	si_cache = {}
-	for si in frappe.get_all("Sales Invoice", filters={"custom_legacy_trans_no": ["!=", ""]}, fields=["name", "custom_legacy_trans_no", "customer", "grand_total"]):
+	for si in frappe.get_all(
+		"Sales Invoice",
+		filters={"custom_legacy_trans_no": ["!=", ""]},
+		fields=["name", "custom_legacy_trans_no", "customer", "grand_total"],
+	):
 		si_cache[si.custom_legacy_trans_no] = si
 
 	for idx, record in enumerate(records):
@@ -1076,7 +1275,9 @@ def import_layaway_contracts(backup_path: str, dry_run: bool = False) -> dict:
 							"payment_schedule",
 							{
 								"payment_date": pay_date,
-								"expected_amount": amt_paid if amt_paid > 0 else clean_float(entry.get("invtot")),
+								"expected_amount": amt_paid
+								if amt_paid > 0
+								else clean_float(entry.get("invtot")),
 							},
 						)
 			else:
@@ -1296,7 +1497,9 @@ def import_commission_rules(backup_path: str, dry_run: bool = False) -> dict:
 				continue
 
 			# Resolve employee
-			emp_name = frappe.db.get_value("Employee", {"employee_number": str(int(float(emplnum))).zfill(5)}, "name")
+			emp_name = frappe.db.get_value(
+				"Employee", {"employee_number": str(int(float(emplnum))).zfill(5)}, "name"
+			)
 			if not emp_name:
 				stats["skipped"] += len(bonus_records)
 				continue
@@ -1311,7 +1514,10 @@ def import_commission_rules(backup_path: str, dry_run: bool = False) -> dict:
 				continue
 
 			# Determine calculation type
-			has_amount_tiers = any(clean_float(r.get("amt_from")) > 0 or clean_float(r.get("amt_upto")) > 0 for r in bonus_records)
+			has_amount_tiers = any(
+				clean_float(r.get("amt_from")) > 0 or clean_float(r.get("amt_upto")) > 0
+				for r in bonus_records
+			)
 			calc_type = "By Sale Amount" if has_amount_tiers else "By Discount Range"
 
 			doc = frappe.new_doc("Commission Rule")
@@ -1645,7 +1851,9 @@ def import_watch_details(backup_path: str, dry_run: bool = False) -> dict:
 			item_code = None
 			# Try by barcode pattern
 			if frappe.db.exists("Item", {"custom_legacy_abr": abr, "custom_legacy_stockno": stockno}):
-				item_code = frappe.db.get_value("Item", {"custom_legacy_abr": abr, "custom_legacy_stockno": stockno}, "name")
+				item_code = frappe.db.get_value(
+					"Item", {"custom_legacy_abr": abr, "custom_legacy_stockno": stockno}, "name"
+				)
 
 			if not item_code:
 				stats["skipped"] += 1

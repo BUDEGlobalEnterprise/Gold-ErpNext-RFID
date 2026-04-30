@@ -18,25 +18,25 @@ import { useSessionStore } from '@/stores/session'
  * @returns {boolean}
  */
 export function canAccessReports() {
-  const session = useSessionStore()
-  return (
-    session.isAdmin ||
-    session.isManager ||
-    session.hasAnyRole([
-      'System Manager',
-      'Administrator',
-      'Store Manager',
-      'Sales Manager',
-      'Accounts Manager',
-      'Sales User',
-      'Stock Manager',
-      'Inventory Manager',
-      'HR User',
-      'HR Manager',
-      'Employee',
-      'Employee Self Service',
-    ])
-  )
+	const session = useSessionStore()
+	return (
+		session.isAdmin ||
+		session.isManager ||
+		session.hasAnyRole([
+			'System Manager',
+			'Administrator',
+			'Store Manager',
+			'Sales Manager',
+			'Accounts Manager',
+			'Sales User',
+			'Stock Manager',
+			'Inventory Manager',
+			'HR User',
+			'HR Manager',
+			'Employee',
+			'Employee Self Service',
+		])
+	)
 }
 
 /**
@@ -44,17 +44,17 @@ export function canAccessReports() {
  * @returns {boolean}
  */
 export function canViewAllSalesHistory() {
-  const session = useSessionStore()
-  return (
-    session.isAdmin ||
-    session.isManager ||
-    session.hasAnyRole([
-      'System Manager',
-      'Administrator',
-      'Store Manager',
-      'Accounts Manager',
-    ])
-  )
+	const session = useSessionStore()
+	return (
+		session.isAdmin ||
+		session.isManager ||
+		session.hasAnyRole([
+			'System Manager',
+			'Administrator',
+			'Store Manager',
+			'Accounts Manager',
+		])
+	)
 }
 
 /**
@@ -62,17 +62,17 @@ export function canViewAllSalesHistory() {
  * @returns {boolean}
  */
 export function canViewInventoryAnalytics() {
-  const session = useSessionStore()
-  return (
-    session.isAdmin ||
-    session.isManager ||
-    session.hasAnyRole([
-      'System Manager',
-      'Administrator',
-      'Store Manager',
-      'Inventory Manager',
-    ])
-  )
+	const session = useSessionStore()
+	return (
+		session.isAdmin ||
+		session.isManager ||
+		session.hasAnyRole([
+			'System Manager',
+			'Administrator',
+			'Store Manager',
+			'Inventory Manager',
+		])
+	)
 }
 
 /**
@@ -80,9 +80,9 @@ export function canViewInventoryAnalytics() {
  * @returns {boolean}
  */
 export function canAccessPOSTerminal() {
-  const session = useSessionStore()
-  // All authenticated users can access POS
-  return session.isLoggedIn
+	const session = useSessionStore()
+	// All authenticated users can access POS
+	return session.isLoggedIn
 }
 
 /**
@@ -90,20 +90,20 @@ export function canAccessPOSTerminal() {
  * @returns {boolean}
  */
 export function canAccessPOSDashboard() {
-  const session = useSessionStore()
-  // Employee, ESS, Sales User, and all management roles
-  return (
-    session.isLoggedIn &&
-    session.hasAnyRole([
-      'System Manager',
-      'Administrator',
-      'Store Manager',
-      'Accounts Manager',
-      'Sales User',
-      'Employee',
-      'Employee Self Service',
-    ])
-  )
+	const session = useSessionStore()
+	// Employee, ESS, Sales User, and all management roles
+	return (
+		session.isLoggedIn &&
+		session.hasAnyRole([
+			'System Manager',
+			'Administrator',
+			'Store Manager',
+			'Accounts Manager',
+			'Sales User',
+			'Employee',
+			'Employee Self Service',
+		])
+	)
 }
 
 /**
@@ -111,8 +111,8 @@ export function canAccessPOSDashboard() {
  * @returns {boolean}
  */
 export function canAccessManagementSection() {
-  const session = useSessionStore()
-  return session.isAdmin || session.isManager
+	const session = useSessionStore()
+	return session.isAdmin || session.isManager
 }
 
 /**
@@ -120,12 +120,12 @@ export function canAccessManagementSection() {
  * @returns {boolean}
  */
 export function canAccessInventoryManagement() {
-  const session = useSessionStore()
-  return (
-    session.isAdmin ||
-    session.isManager ||
-    session.hasAnyRole(['Store Manager', 'Inventory Manager'])
-  )
+	const session = useSessionStore()
+	return (
+		session.isAdmin ||
+		session.isManager ||
+		session.hasAnyRole(['Store Manager', 'Inventory Manager'])
+	)
 }
 
 /**
@@ -133,12 +133,12 @@ export function canAccessInventoryManagement() {
  * @returns {object|null} Filter object or null if no restriction
  */
 export function getSalesOwnerFilter() {
-  if (!canViewAllSalesHistory()) {
-    const session = useSessionStore()
-    // Filter by logged-in user's email
-    return { owner: session.user?.email }
-  }
-  return null
+	if (!canViewAllSalesHistory()) {
+		const session = useSessionStore()
+		// Filter by logged-in user's email
+		return { owner: session.user?.email }
+	}
+	return null
 }
 
 /**
@@ -146,31 +146,29 @@ export function getSalesOwnerFilter() {
  * Returns an object with boolean flags for each section/tile
  */
 export function getDashboardVisibility() {
-  const session = useSessionStore()
-  const isStandardUser =
-    session.hasAnyRole(['Employee', 'Employee Self Service', 'Sales User']) &&
-    !session.isAdmin &&
-    !session.isManager
+	const session = useSessionStore()
+	const isStandardUser =
+		session.hasAnyRole(['Employee', 'Employee Self Service', 'Sales User']) &&
+		!session.isAdmin &&
+		!session.isManager
 
-  return {
-    // Reports tile - server-side catalog still controls the visible reports
-    reportsTile: canAccessReports(),
+	return {
+		// Reports tile - server-side catalog still controls the visible reports
+		reportsTile: canAccessReports(),
 
-    // Full analytics section - Admin/Manager only
-    fullAnalytics: !isStandardUser,
+		// Full analytics section - Admin/Manager only
+		fullAnalytics: !isStandardUser,
 
-    // Own sales only indicator
-    ownSalesOnly: isStandardUser,
+		// Own sales only indicator
+		ownSalesOnly: isStandardUser,
 
-    // Inventory analytics - Admin/Manager/Inventory Manager
-    inventoryAnalytics: canViewInventoryAnalytics(),
+		// Inventory analytics - Admin/Manager/Inventory Manager
+		inventoryAnalytics: canViewInventoryAnalytics(),
 
-    // Accounting section - Admin/Manager/Accounts Manager
-    accountingSection:
-      session.isAdmin ||
-      session.isManager ||
-      session.hasRole('Accounts Manager'),
-  }
+		// Accounting section - Admin/Manager/Accounts Manager
+		accountingSection:
+			session.isAdmin || session.isManager || session.hasRole('Accounts Manager'),
+	}
 }
 
 /**
@@ -178,12 +176,12 @@ export function getDashboardVisibility() {
  * @returns {boolean}
  */
 export function canAccessDailyCloseout() {
-  const session = useSessionStore()
-  return (
-    session.isAdmin ||
-    session.isManager ||
-    session.hasAnyRole(['Store Manager', 'Sales Manager', 'Accounts Manager'])
-  )
+	const session = useSessionStore()
+	return (
+		session.isAdmin ||
+		session.isManager ||
+		session.hasAnyRole(['Store Manager', 'Sales Manager', 'Accounts Manager'])
+	)
 }
 
 /**
@@ -191,14 +189,14 @@ export function canAccessDailyCloseout() {
  * @returns {boolean}
  */
 export function canAccessSalesPerformance() {
-  const session = useSessionStore()
-  return session.hasAnyRole([
-    'System Manager',
-    'Administrator',
-    'Store Manager',
-    'Sales Manager',
-    'Sales User',
-  ])
+	const session = useSessionStore()
+	return session.hasAnyRole([
+		'System Manager',
+		'Administrator',
+		'Store Manager',
+		'Sales Manager',
+		'Sales User',
+	])
 }
 
 /**
@@ -206,17 +204,17 @@ export function canAccessSalesPerformance() {
  * @returns {boolean}
  */
 export function canAccessInventoryReports() {
-  const session = useSessionStore()
-  return (
-    session.isAdmin ||
-    session.isManager ||
-    session.hasAnyRole([
-      'Stock Manager',
-      'Inventory Manager',
-      'Store Manager',
-      'Sales Manager',
-    ])
-  )
+	const session = useSessionStore()
+	return (
+		session.isAdmin ||
+		session.isManager ||
+		session.hasAnyRole([
+			'Stock Manager',
+			'Inventory Manager',
+			'Store Manager',
+			'Sales Manager',
+		])
+	)
 }
 
 /**
@@ -224,10 +222,8 @@ export function canAccessInventoryReports() {
  * @returns {boolean}
  */
 export function canAccessAccountingReports() {
-  const session = useSessionStore()
-  return (
-    session.isAdmin || session.isManager || session.hasRole('Accounts Manager')
-  )
+	const session = useSessionStore()
+	return session.isAdmin || session.isManager || session.hasRole('Accounts Manager')
 }
 
 /**
@@ -235,16 +231,11 @@ export function canAccessAccountingReports() {
  * @returns {boolean}
  */
 export function canAccessHRReports() {
-  const session = useSessionStore()
-  return (
-    session.isAdmin ||
-    session.hasAnyRole([
-      'HR User',
-      'HR Manager',
-      'Employee',
-      'Employee Self Service',
-    ])
-  )
+	const session = useSessionStore()
+	return (
+		session.isAdmin ||
+		session.hasAnyRole(['HR User', 'HR Manager', 'Employee', 'Employee Self Service'])
+	)
 }
 
 /**
@@ -252,20 +243,20 @@ export function canAccessHRReports() {
  * @returns {boolean}
  */
 export function isOwnSalesOnly() {
-  const session = useSessionStore()
-  const isSalesUser = session.hasRole('Sales User')
-  const isEmployee = session.hasAnyRole(['Employee', 'Employee Self Service'])
-  const hasElevatedRoles =
-    session.isAdmin ||
-    session.isManager ||
-    session.hasAnyRole([
-      'Accounts Manager',
-      'Stock Manager',
-      'Inventory Manager',
-      'HR User',
-      'HR Manager',
-    ])
-  return (isSalesUser || isEmployee) && !hasElevatedRoles
+	const session = useSessionStore()
+	const isSalesUser = session.hasRole('Sales User')
+	const isEmployee = session.hasAnyRole(['Employee', 'Employee Self Service'])
+	const hasElevatedRoles =
+		session.isAdmin ||
+		session.isManager ||
+		session.hasAnyRole([
+			'Accounts Manager',
+			'Stock Manager',
+			'Inventory Manager',
+			'HR User',
+			'HR Manager',
+		])
+	return (isSalesUser || isEmployee) && !hasElevatedRoles
 }
 
 /**
@@ -273,21 +264,21 @@ export function isOwnSalesOnly() {
  * @returns {string}
  */
 export function getReportScopeLabel() {
-  if (isOwnSalesOnly()) return 'Own Sales'
-  const session = useSessionStore()
-  if (session.isAdmin) return 'All Stores'
-  if (
-    session.isManager ||
-    session.hasAnyRole([
-      'Accounts Manager',
-      'Stock Manager',
-      'Inventory Manager',
-      'HR User',
-      'HR Manager',
-    ])
-  )
-    return 'Current Store'
-  return 'Own Sales'
+	if (isOwnSalesOnly()) return 'Own Sales'
+	const session = useSessionStore()
+	if (session.isAdmin) return 'All Stores'
+	if (
+		session.isManager ||
+		session.hasAnyRole([
+			'Accounts Manager',
+			'Stock Manager',
+			'Inventory Manager',
+			'HR User',
+			'HR Manager',
+		])
+	)
+		return 'Current Store'
+	return 'Own Sales'
 }
 
 /**
@@ -295,17 +286,16 @@ export function getReportScopeLabel() {
  * @returns {string}
  */
 export function getPrimaryRoleLabel() {
-  const session = useSessionStore()
-  if (session.hasRole('System Manager')) return 'System Manager'
-  if (session.hasRole('Store Manager')) return 'Store Manager'
-  if (session.hasRole('Accounts Manager')) return 'Accounts Manager'
-  if (session.hasRole('Sales Manager')) return 'Sales Manager'
-  if (session.hasRole('Stock Manager') || session.hasRole('Inventory Manager'))
-    return 'Stock Manager'
-  if (session.hasRole('HR Manager')) return 'HR Manager'
-  if (session.hasRole('HR User')) return 'HR User'
-  if (session.hasRole('Sales User')) return 'Sales User'
-  if (session.hasAnyRole(['Employee', 'Employee Self Service']))
-    return 'Employee'
-  return 'User'
+	const session = useSessionStore()
+	if (session.hasRole('System Manager')) return 'System Manager'
+	if (session.hasRole('Store Manager')) return 'Store Manager'
+	if (session.hasRole('Accounts Manager')) return 'Accounts Manager'
+	if (session.hasRole('Sales Manager')) return 'Sales Manager'
+	if (session.hasRole('Stock Manager') || session.hasRole('Inventory Manager'))
+		return 'Stock Manager'
+	if (session.hasRole('HR Manager')) return 'HR Manager'
+	if (session.hasRole('HR User')) return 'HR User'
+	if (session.hasRole('Sales User')) return 'Sales User'
+	if (session.hasAnyRole(['Employee', 'Employee Self Service'])) return 'Employee'
+	return 'User'
 }

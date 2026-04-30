@@ -1,9 +1,7 @@
 <template>
 	<BaseModal :show="true" max-width="max-w-sm" @close="$emit('close')">
 		<template #header>
-			<h3 class="text-lg font-bold text-gray-900 dark:text-white">
-				Repair Claim Ticket
-			</h3>
+			<h3 class="text-lg font-bold text-gray-900 dark:text-white">Repair Claim Ticket</h3>
 		</template>
 
 		<div class="p-6">
@@ -27,9 +25,7 @@
 				</div>
 
 				<div class="rounded-lg bg-gray-50 dark:bg-warm-dark-900 p-3 text-left mb-4">
-					<p class="text-xs uppercase tracking-wide text-gray-500 mb-1">
-						Lookup Link
-					</p>
+					<p class="text-xs uppercase tracking-wide text-gray-500 mb-1">Lookup Link</p>
 					<p class="text-xs break-all text-gray-700 dark:text-gray-300">
 						{{ lookupUrl }}
 					</p>

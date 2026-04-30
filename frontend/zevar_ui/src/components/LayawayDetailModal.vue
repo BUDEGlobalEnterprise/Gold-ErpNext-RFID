@@ -57,26 +57,38 @@
 						class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-xl p-4 border border-gray-100 dark:border-warm-border/50"
 					>
 						<div class="flex items-center justify-between mb-3">
-							<span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Payment Progress</span>
+							<span
+								class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+								>Payment Progress</span
+							>
 							<span class="text-xs font-medium text-gray-500 dark:text-gray-400">
-								{{ paidPaymentsCount }} / {{ layaway.payment_schedule.length }} payments
+								{{ paidPaymentsCount }} /
+								{{ layaway.payment_schedule.length }} payments
 							</span>
 						</div>
-						<div class="flex gap-1 h-3 rounded-full overflow-hidden bg-gray-200 dark:bg-warm-dark-800">
+						<div
+							class="flex gap-1 h-3 rounded-full overflow-hidden bg-gray-200 dark:bg-warm-dark-800"
+						>
 							<div
 								v-for="(payment, idx) in layaway.payment_schedule"
 								:key="idx"
 								class="h-full transition-all duration-300"
-								:style="{ width: (100 / layaway.payment_schedule.length) + '%' }"
+								:style="{ width: 100 / layaway.payment_schedule.length + '%' }"
 								:class="{
 									'bg-green-500': payment.status === 'Paid',
 									'bg-yellow-400': payment.status === 'Pending',
 									'bg-red-500': payment.status === 'Overdue',
-									'bg-gray-300 dark:bg-gray-600': !['Paid', 'Pending', 'Overdue'].includes(payment.status),
+									'bg-gray-300 dark:bg-gray-600': ![
+										'Paid',
+										'Pending',
+										'Overdue',
+									].includes(payment.status),
 								}"
 							></div>
 						</div>
-						<div class="flex items-center gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
+						<div
+							class="flex items-center gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400"
+						>
 							<span class="flex items-center gap-1">
 								<span class="w-2 h-2 rounded-full bg-green-500"></span> Paid
 							</span>
@@ -136,7 +148,9 @@
 						>
 							Items
 						</h3>
-						<div class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-xl overflow-hidden">
+						<div
+							class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-xl overflow-hidden"
+						>
 							<table class="w-full">
 								<thead>
 									<tr
@@ -164,9 +178,7 @@
 										</th>
 									</tr>
 								</thead>
-								<tbody
-									class="divide-y divide-gray-100 dark:divide-gray-700/50"
-								>
+								<tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
 									<tr v-for="item in layaway.items" :key="item.item_code">
 										<td
 											class="px-4 py-2 text-sm text-gray-900 dark:text-white"
@@ -200,9 +212,7 @@
 					>
 						<div class="space-y-2">
 							<div class="flex justify-between text-sm">
-								<span class="text-gray-500 dark:text-gray-400"
-									>Total Amount</span
-								>
+								<span class="text-gray-500 dark:text-gray-400">Total Amount</span>
 								<span class="text-gray-900 dark:text-white font-bold">{{
 									formatCurrency(layaway.total_amount)
 								}}</span>
@@ -225,15 +235,15 @@
 					</div>
 
 					<!-- Payment Schedule -->
-					<div
-						v-if="layaway.payment_schedule && layaway.payment_schedule.length > 0"
-					>
+					<div v-if="layaway.payment_schedule && layaway.payment_schedule.length > 0">
 						<h3
 							class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3"
 						>
 							Payment Schedule
 						</h3>
-						<div class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-xl overflow-hidden">
+						<div
+							class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-xl overflow-hidden"
+						>
 							<table class="w-full">
 								<thead>
 									<tr
@@ -261,9 +271,7 @@
 										</th>
 									</tr>
 								</thead>
-								<tbody
-									class="divide-y divide-gray-100 dark:divide-gray-700/50"
-								>
+								<tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
 									<tr
 										v-for="(payment, index) in layaway.payment_schedule"
 										:key="index"
@@ -310,20 +318,37 @@
 					</h3>
 					<div class="space-y-2 mb-4">
 						<p class="text-sm text-gray-500 dark:text-gray-400">
-							This will cancel the layaway contract. A cancellation fee will be deducted before issuing store credit.
+							This will cancel the layaway contract. A cancellation fee will be
+							deducted before issuing store credit.
 						</p>
-						<div class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-lg p-3 space-y-1.5">
+						<div
+							class="bg-gray-50 dark:bg-warm-dark-900/50 rounded-lg p-3 space-y-1.5"
+						>
 							<div class="flex justify-between text-sm">
 								<span class="text-gray-500 dark:text-gray-400">Paid Amount</span>
-								<span class="text-gray-900 dark:text-white font-bold">{{ formatCurrency(layaway?.deposit_amount) }}</span>
+								<span class="text-gray-900 dark:text-white font-bold">{{
+									formatCurrency(layaway?.deposit_amount)
+								}}</span>
 							</div>
 							<div class="flex justify-between text-sm">
-								<span class="text-gray-500 dark:text-gray-400">Cancellation Fee ({{ layaway?.cancellation_fee_percent || 10 }}%)</span>
-								<span class="text-red-600 dark:text-red-400 font-bold">-{{ formatCurrency(cancellationFee) }}</span>
+								<span class="text-gray-500 dark:text-gray-400"
+									>Cancellation Fee ({{
+										layaway?.cancellation_fee_percent || 10
+									}}%)</span
+								>
+								<span class="text-red-600 dark:text-red-400 font-bold"
+									>-{{ formatCurrency(cancellationFee) }}</span
+								>
 							</div>
-							<div class="flex justify-between text-sm pt-1.5 border-t border-gray-200 dark:border-warm-border">
-								<span class="text-gray-900 dark:text-white font-medium">Store Credit Issued</span>
-								<span class="text-[#D4AF37] font-bold">{{ formatCurrency(netRefund) }}</span>
+							<div
+								class="flex justify-between text-sm pt-1.5 border-t border-gray-200 dark:border-warm-border"
+							>
+								<span class="text-gray-900 dark:text-white font-medium"
+									>Store Credit Issued</span
+								>
+								<span class="text-[#D4AF37] font-bold">{{
+									formatCurrency(netRefund)
+								}}</span>
 							</div>
 						</div>
 					</div>
@@ -359,27 +384,41 @@
 					</p>
 
 					<div class="space-y-4">
-						<div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-800/30">
+						<div
+							class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-800/30"
+						>
 							<div class="flex justify-between text-sm">
-								<span class="text-purple-700 dark:text-purple-300">Extensions Used</span>
-								<span class="font-bold text-purple-700 dark:text-purple-300">{{ layaway?.extension_count || 0 }} / 2</span>
+								<span class="text-purple-700 dark:text-purple-300"
+									>Extensions Used</span
+								>
+								<span class="font-bold text-purple-700 dark:text-purple-300"
+									>{{ layaway?.extension_count || 0 }} / 2</span
+								>
 							</div>
-							<div v-if="extensionsRemaining <= 0" class="text-xs text-red-500 dark:text-red-400 mt-1">
+							<div
+								v-if="extensionsRemaining <= 0"
+								class="text-xs text-red-500 dark:text-red-400 mt-1"
+							>
 								No extensions remaining.
 							</div>
 						</div>
 
 						<div v-if="extensionsRemaining > 0">
-							<label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Additional Months</label>
+							<label
+								class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+								>Additional Months</label
+							>
 							<div class="grid grid-cols-3 gap-2">
 								<button
 									v-for="m in [1, 2, 3]"
 									:key="m"
 									@click="extendForm.months = m"
 									class="py-3 rounded-xl text-sm font-bold border transition"
-									:class="extendForm.months === m
-										? 'border-purple-400 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-										: 'border-gray-200 dark:border-warm-border text-gray-600 dark:text-gray-400 hover:border-gray-300'"
+									:class="
+										extendForm.months === m
+											? 'border-purple-400 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+											: 'border-gray-200 dark:border-warm-border text-gray-600 dark:text-gray-400 hover:border-gray-300'
+									"
 								>
 									{{ m }} Month{{ m > 1 ? 's' : '' }}
 								</button>
@@ -387,7 +426,10 @@
 						</div>
 
 						<div v-if="extensionsRemaining > 0">
-							<label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Reason</label>
+							<label
+								class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+								>Reason</label
+							>
 							<textarea
 								v-model="extendForm.reason"
 								rows="2"
@@ -425,7 +467,12 @@
 					class="px-4 py-2 bg-white dark:bg-warm-dark-900 border border-purple-200 dark:border-purple-800/30 rounded-lg text-sm font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition flex items-center gap-2"
 				>
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
 					</svg>
 					Extend Plan
 				</button>
@@ -434,12 +481,7 @@
 					@click="showCancelConfirm = true"
 					class="px-4 py-2 bg-white dark:bg-warm-dark-900 border border-red-200 dark:border-red-800/30 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition flex items-center gap-2"
 				>
-					<svg
-						class="w-4 h-4"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -455,12 +497,7 @@
 					@click="printContract"
 					class="px-4 py-2 bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-warm-dark-800 transition flex items-center gap-2"
 				>
-					<svg
-						class="w-4 h-4"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -475,12 +512,7 @@
 					@click="showPaymentModal = true"
 					class="px-4 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] transition flex items-center gap-2"
 				>
-					<svg
-						class="w-4 h-4"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -609,7 +641,9 @@ async function cancelLayaway() {
 			alert(
 				`Layaway cancelled. Store Credit ${
 					result.store_credit_id
-				} generated for ${formatCurrency(result.amount_refunded)}. Cancellation fee: ${formatCurrency(result.cancellation_fee)}`
+				} generated for ${formatCurrency(
+					result.amount_refunded
+				)}. Cancellation fee: ${formatCurrency(result.cancellation_fee)}`
 			)
 			showCancelConfirm.value = false
 			emit('refresh')

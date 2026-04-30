@@ -34,7 +34,7 @@ const routes = [
 	{
 		path: '/inventory-audit',
 		name: 'InventoryAudit',
-		component: () => import('./pages/ComingSoon.vue'),
+		component: () => import('./pages/InventoryAudit.vue'),
 		meta: { requiresAuth: true },
 	},
 	{
@@ -53,6 +53,12 @@ const routes = [
 		path: '/pos-catalogue',
 		name: 'POSCatalogue',
 		component: () => import('./pages/POSCatalogue.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/pos-catalogue/:category',
+		name: 'POSCategoryListing',
+		component: () => import('./pages/POSCategoryListing.vue'),
 		meta: { requiresAuth: true },
 	},
 	{
@@ -110,6 +116,30 @@ const routes = [
 		meta: { requiresAuth: true, requiresManagement: true },
 	},
 	{
+		path: '/reports/viewer/:reportId',
+		name: 'ReportViewer',
+		component: () => import('./pages/ReportViewer.vue'),
+		meta: { requiresAuth: true, requiresManagement: true },
+	},
+	{
+		path: '/reports/dashboards/revenue',
+		name: 'RevenueDashboard',
+		component: () => import('./pages/dashboards/Revenue.vue'),
+		meta: { requiresAuth: true, requiresManagement: true },
+	},
+	{
+		path: '/reports/dashboards/inventory',
+		name: 'InventoryDashboard',
+		component: () => import('./pages/dashboards/Inventory.vue'),
+		meta: { requiresAuth: true, requiresManagement: true },
+	},
+	{
+		path: '/reports/dashboards/customer',
+		name: 'CustomerDashboard',
+		component: () => import('./pages/dashboards/Customer.vue'),
+		meta: { requiresAuth: true, requiresManagement: true },
+	},
+	{
 		path: '/contacts',
 		name: 'Contacts',
 		component: () => import('./pages/Contacts.vue'),
@@ -158,7 +188,7 @@ async function checkUserRole() {
 			'Employee',
 			'Employee Self Service',
 		]
-		return userInfo.roles.some(role => reportRoles.includes(role))
+		return userInfo.roles.some((role) => reportRoles.includes(role))
 	} catch {
 		return false
 	}

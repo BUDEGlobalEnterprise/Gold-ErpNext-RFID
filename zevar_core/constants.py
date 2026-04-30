@@ -97,7 +97,14 @@ PAYMENT_MODES = [
 	"CIMA",
 	"Progressive",
 	"Snap",
+	"In-House Finance",
 ]
+
+# Financing Provider Waterfall (prime -> subprime)
+FINANCING_WATERFALL = ["Synchrony", "AFF", "Progressive", "Snap", "Acima"]
+
+# IRS Form 8300 threshold
+CASH_REPORTING_THRESHOLD = 10000.00
 
 LAYAWAY_DURATION_OPTIONS = [1, 2, 3, 6, 9, 12]
 
@@ -122,3 +129,62 @@ LAYAWAY_PLAN_SUGGESTIONS = [
 DEFAULT_CANCELLATION_FEE_PERCENT = 10
 DEFAULT_AUTO_FORFEIT_DAYS = 15
 MAX_EXTENSIONS_ALLOWED = 2
+
+# Inventory Zones (per store warehouse tree)
+INVENTORY_ZONES = [
+	"Showcase",
+	"Back Stock",
+	"Safe",
+	"Repair Bench",
+	"Layaway Hold",
+	"Reserved",
+	"Transit Out",
+	"Transit In",
+	"Quarantine",
+	"Shrinkage",
+]
+
+# Store codes and names
+STORE_LOCATIONS = {
+	"NY-01": "New York",
+	"Miami-01": "Miami",
+	"LA-01": "Los Angeles",
+	"Houston-01": "Houston",
+	"Chicago-01": "Chicago",
+}
+
+# Zones that are valid for selling (before_submit check)
+SELLABLE_ZONES = ["Showcase", "Reserved"]
+
+# Audit cadence by theft risk class (in days)
+AUDIT_CADENCE_DAYS = {
+	"High": 7,
+	"Medium": 30,
+	"Low": 90,
+}
+
+# Default reservation hold hours
+DEFAULT_RESERVATION_HOURS = 48
+
+# Reorder safety stock days
+REORDER_SAFETY_DAYS = 14
+
+# Inventory event types for POS Audit Log
+INVENTORY_EVENT_TYPES = [
+	"piece_reserved",
+	"reservation_expired",
+	"transfer_dispatched",
+	"transfer_received",
+	"damage_written_off",
+	"gift_out",
+	"consignment_out",
+	"consignment_back",
+	"piece_recovered",
+	"bulk_push_completed",
+	"repair_in",
+	"repair_out",
+	"trade_in_accepted",
+	"shrinkage_detected",
+	"vendor_return",
+	"consignment_overdue",
+]

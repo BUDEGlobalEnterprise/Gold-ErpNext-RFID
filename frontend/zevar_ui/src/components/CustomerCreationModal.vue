@@ -104,11 +104,21 @@ const submitting = ref(false)
 
 async function submit() {
 	if (!form.value.customer_name) {
-		toast({ title: 'Required', message: 'Please enter customer name', icon: 'alert-circle', intent: 'error' })
+		toast({
+			title: 'Required',
+			message: 'Please enter customer name',
+			icon: 'alert-circle',
+			intent: 'error',
+		})
 		return
 	}
 	if (!form.value.phone) {
-		toast({ title: 'Required', message: 'Please enter phone number', icon: 'alert-circle', intent: 'error' })
+		toast({
+			title: 'Required',
+			message: 'Please enter phone number',
+			icon: 'alert-circle',
+			intent: 'error',
+		})
 		return
 	}
 
@@ -124,9 +134,19 @@ async function submit() {
 			notes: form.value.notes || undefined,
 		})
 		emit('created', customer)
-		toast({ title: 'Success', message: 'Customer created successfully', icon: 'check', intent: 'success' })
+		toast({
+			title: 'Success',
+			message: 'Customer created successfully',
+			icon: 'check',
+			intent: 'success',
+		})
 	} catch (e) {
-		toast({ title: 'Error', message: e.messages?.[0] || e.message, icon: 'alert-triangle', intent: 'error' })
+		toast({
+			title: 'Error',
+			message: e.messages?.[0] || e.message,
+			icon: 'alert-triangle',
+			intent: 'error',
+		})
 	} finally {
 		submitting.value = false
 	}

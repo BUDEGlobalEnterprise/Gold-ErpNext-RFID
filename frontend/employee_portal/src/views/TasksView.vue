@@ -12,13 +12,13 @@
 			</div>
 			<div class="flex items-center gap-4">
 				<button
-					class="px-6 py-3 bg-white border border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 transition-all flex items-center gap-2 shadow-sm "
+					class="px-6 py-3 bg-white border border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 transition-all flex items-center gap-2 shadow-sm"
 				>
 					<span class="material-symbols-outlined text-lg">filter_list</span>
 					Filters
 				</button>
 				<button
-					class="px-6 py-3 bg-white border border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 transition-all flex items-center gap-2 shadow-sm "
+					class="px-6 py-3 bg-white border border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 transition-all flex items-center gap-2 shadow-sm"
 				>
 					<span class="material-symbols-outlined text-lg">sort</span>
 					Sort
@@ -90,7 +90,7 @@
 							class="bg-gray-100 text-gray-500 px-2 py-0.5 rounded text-[10px] font-black"
 							>{{ assignedTasks.length }}</span
 						>
-						<button class="ml-auto text-gray-300 ">
+						<button class="ml-auto text-gray-300">
 							<span class="material-symbols-outlined">more_horiz</span>
 						</button>
 					</div>
@@ -171,7 +171,7 @@
 							class="bg-amber-100 text-amber-900 px-2 py-0.5 rounded text-[10px] font-black"
 							>{{ inProgressTasks.length }}</span
 						>
-						<button class="ml-auto text-gray-300 ">
+						<button class="ml-auto text-gray-300">
 							<span class="material-symbols-outlined">more_horiz</span>
 						</button>
 					</div>
@@ -264,7 +264,7 @@
 							class="bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded text-[10px] font-black"
 							>{{ sortedOpenTodos.length }}</span
 						>
-						<button class="ml-auto text-gray-300 ">
+						<button class="ml-auto text-gray-300">
 							<span class="material-symbols-outlined">more_horiz</span>
 						</button>
 					</div>

@@ -1,14 +1,22 @@
 <template>
-	<component :is="inlineMode ? 'div' : 'Transition'" name="fade" :class="inlineMode ? 'h-full' : ''">
+	<component
+		:is="inlineMode ? 'div' : 'Transition'"
+		name="fade"
+		:class="inlineMode ? 'h-full' : ''"
+	>
 		<div
 			v-if="inlineMode || show"
 			:class="[
 				inlineMode
 					? 'h-full flex flex-col bg-white dark:bg-[#1a1c23] w-full rounded-3xl overflow-hidden'
-					: 'fixed inset-0 z-[100] flex items-center justify-center p-4'
+					: 'fixed inset-0 z-[100] flex items-center justify-center p-4',
 			]"
 		>
-			<div v-if="!inlineMode" class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" @click="close"></div>
+			<div
+				v-if="!inlineMode"
+				class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
+				@click="close"
+			></div>
 
 			<div
 				class="relative bg-white dark:bg-[#1a1c23] w-full overflow-hidden flex flex-col"
@@ -123,113 +131,16 @@
 				<!-- Two Column Layout -->
 				<div class="flex flex-col lg:flex-row flex-1 overflow-hidden">
 					<!-- Left Column - Customer & Details -->
-					<div class="flex-1 p-5 overflow-y-auto custom-scrollbar rounded-bl-3xl" :style="inlineMode ? '' : 'max-height: calc(95vh - 140px)'">
-						<!-- ID Scanner Panel -->
-						<Transition name="slide-down">
-							<div
-								v-if="showIdScanner"
-								class="mb-5 p-4 bg-gradient-to-r from-[#D4AF37]/10 to-[#D4AF37]/5 border border-[#D4AF37]/30 rounded-xl"
-							>
-								<div class="flex items-center justify-between mb-3">
-									<h4
-										class="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2"
-									>
-										<svg
-											class="w-4 h-4 text-[#D4AF37]"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-											/>
-										</svg>
-										ID Document Scanner
-									</h4>
-									<button
-										@click="showIdScanner = false"
-										class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-									>
-										<svg
-											class="w-4 h-4"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M6 18L18 6M6 6l12 12"
-											/>
-										</svg>
-									</button>
-								</div>
-								<div class="grid grid-cols-2 gap-3">
-									<div>
-										<label
-											class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-											>ID Type</label
-										>
-										<select
-											v-model="idScan.type"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
-										>
-											<option value="">Select Type</option>
-											<option value="drivers_license">
-												Driver's License
-											</option>
-											<option value="passport">Passport</option>
-											<option value="national_id">National ID</option>
-											<option value="state_id">State ID</option>
-										</select>
-									</div>
-									<div>
-										<label
-											class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-											>ID Number</label
-										>
-										<input
-											v-model="idScan.number"
-											type="text"
-											placeholder="Scan or enter ID number"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
-										/>
-									</div>
-								</div>
-								<div class="mt-3 flex gap-2">
-									<button
-										@click="simulateIdScan"
-										class="flex-1 px-3 py-2 text-xs font-medium bg-[#D4AF37] text-black rounded-lg hover:bg-[#c9a432] transition flex items-center justify-center gap-1.5"
-									>
-										<svg
-											class="w-3.5 h-3.5"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-											/>
-										</svg>
-										Scan Document
-									</button>
-									<button
-										@click="applyIdData"
-										:disabled="!idScan.number"
-										class="flex-1 px-3 py-2 text-xs font-medium bg-gray-900 dark:bg-warm-dark-800 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 transition"
-									>
-										Apply Data
-									</button>
-								</div>
-							</div>
-						</Transition>
+					<div
+						class="flex-1 p-5 overflow-y-auto custom-scrollbar rounded-bl-3xl"
+						:style="inlineMode ? '' : 'max-height: calc(95vh - 140px)'"
+					>
+						<IDScannerPanel
+							v-model="idScan"
+							:show="showIdScanner"
+							@close="showIdScanner = false"
+							@apply-data="applyIdData"
+						/>
 
 						<!-- Customer Selection Section -->
 						<div class="mb-5">
@@ -487,7 +398,11 @@
 									>
 									<p class="font-medium text-[#D4AF37]">
 										{{ nominee.name }}
-										<span v-if="nominee.relationship" class="text-xs text-gray-400">({{ nominee.relationship }})</span>
+										<span
+											v-if="nominee.relationship"
+											class="text-xs text-gray-400"
+											>({{ nominee.relationship }})</span
+										>
 									</p>
 								</div>
 								<div v-if="hasNominee && nominee.phone">
@@ -756,7 +671,11 @@
 								<div>
 									<label
 										class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-										>Duration ({{ form.paymentSchedule === 'Monthly' ? 'Months' : 'Weeks' }}) *</label
+										>Duration ({{
+											form.paymentSchedule === 'Monthly'
+												? 'Months'
+												: 'Weeks'
+										}}) *</label
 									>
 									<select
 										v-model.number="form.durationWeeks"
@@ -1041,7 +960,10 @@
 							<!-- Quick Add Item Buttons -->
 							<div v-if="selectedItems.length > 0" class="mt-3 flex gap-2">
 								<button
-									@click="itemSearch = ''; $refs.itemSearchInput?.focus()"
+									@click="
+										itemSearch = ''
+										$refs.itemSearchInput?.focus()
+									"
 									class="px-3 py-2 text-xs font-medium text-[#D4AF37] border border-[#D4AF37]/30 rounded-lg hover:bg-[#D4AF37]/10 transition flex items-center gap-1"
 								>
 									<svg
@@ -1236,9 +1158,10 @@
 							<span class="text-xs text-gray-700 dark:text-gray-300">
 								<span class="font-bold">Terms Agreement:</span> I confirm the
 								customer has agreed to the layaway terms including the payment
-								schedule ({{ paymentFrequencyText }} for
-								{{ form.durationWeeks }} {{ form.paymentSchedule === 'Monthly' ? 'months' : 'weeks' }}), cancellation policy, and that all
-								items will be reserved until full payment is received.
+								schedule ({{ paymentFrequencyText }} for {{ form.durationWeeks }}
+								{{ form.paymentSchedule === 'Monthly' ? 'months' : 'weeks' }}),
+								cancellation policy, and that all items will be reserved until full
+								payment is received.
 							</span>
 						</label>
 					</div>
@@ -1300,6 +1223,7 @@ import { createResource, createDocumentResource } from 'frappe-ui'
 import { useSessionStore } from '@/stores/session.js'
 import { useCartStore } from '@/stores/cart.js'
 import { useRoute } from 'vue-router'
+import IDScannerPanel from './IDScannerPanel.vue'
 
 const props = defineProps({
 	show: { type: Boolean, default: false },
@@ -1364,49 +1288,57 @@ const nominee = ref({
 })
 
 // Handle initialization from cart
-watch(() => props.show, (newVal) => {
-	if (newVal) {
-		if (cartStore.items && cartStore.items.length > 0) {
-			selectedItems.value = cartStore.items.map(item => ({
-				item_code: item.item_code,
-				item_name: item.item_name,
-				qty: item.qty,
-				price: item.amount,
-				has_serial: item.has_serial || false,
-				serial_numbers: ''
-			}))
-		}
+watch(
+	() => props.show,
+	(newVal) => {
+		if (newVal) {
+			if (cartStore.items && cartStore.items.length > 0) {
+				selectedItems.value = cartStore.items.map((item) => ({
+					item_code: item.item_code,
+					item_name: item.item_name,
+					qty: item.qty,
+					price: item.amount,
+					has_serial: item.has_serial || false,
+					serial_numbers: '',
+				}))
+			}
 
-		// Try to set customer from cart if selected
-		if (cartStore.customer) {
+			// Try to set customer from cart if selected
+			if (cartStore.customer) {
+				selectedCustomer.value = cartStore.customer
+				isNewCustomerMode.value = false
+				autoFillCustomerFromCart(cartStore.customer)
+			}
+
+			// Auto-apply 10% deposit and fetch tax details
+			nextTick(() => {
+				form.value.deposit = minDeposit.value
+				fetchStoreTaxDetails()
+			})
+		} else {
+			// Reset logic... but we already have a close method for reset
+		}
+	},
+	{ immediate: true }
+)
+
+// Handle inline mode initialization (Layaway page with ?action=new&customer=...)
+watch(
+	() => route.query,
+	(query) => {
+		if (!props.inlineMode) return
+		if (query.action === 'new' && cartStore.customer) {
 			selectedCustomer.value = cartStore.customer
 			isNewCustomerMode.value = false
 			autoFillCustomerFromCart(cartStore.customer)
+			nextTick(() => {
+				form.value.deposit = minDeposit.value
+				fetchStoreTaxDetails()
+			})
 		}
-
-		// Auto-apply 10% deposit and fetch tax details
-		nextTick(() => {
-			form.value.deposit = minDeposit.value
-			fetchStoreTaxDetails()
-		})
-	} else {
-		// Reset logic... but we already have a close method for reset
-	}
-}, { immediate: true })
-
-// Handle inline mode initialization (Layaway page with ?action=new&customer=...)
-watch(() => route.query, (query) => {
-	if (!props.inlineMode) return
-	if (query.action === 'new' && cartStore.customer) {
-		selectedCustomer.value = cartStore.customer
-		isNewCustomerMode.value = false
-		autoFillCustomerFromCart(cartStore.customer)
-		nextTick(() => {
-			form.value.deposit = minDeposit.value
-			fetchStoreTaxDetails()
-		})
-	}
-}, { immediate: true })
+	},
+	{ immediate: true }
+)
 
 async function autoFillCustomerFromCart(cust) {
 	if (!cust) return
@@ -1440,11 +1372,12 @@ async function autoFillCustomerFromCart(cust) {
 			}
 		}
 	} catch (e) {
-		if (cust.address) form.value.address = cust.address
-		if (cust.city) form.value.city = cust.city
-		if (cust.state) form.value.state = cust.state
-		if (cust.zip || cust.pincode) form.value.zip = cust.zip || cust.pincode
-		if (cust.country) form.value.country = cust.country
+		if ('address' in cust && cust.address) form.value.address = cust.address
+		if ('city' in cust && cust.city) form.value.city = cust.city
+		if ('state' in cust && cust.state) form.value.state = cust.state
+		if ('zip' in cust && cust.zip) form.value.zip = cust.zip
+		else if ('pincode' in cust && cust.pincode) form.value.zip = cust.pincode
+		if ('country' in cust && cust.country) form.value.country = cust.country
 	}
 }
 
@@ -1461,7 +1394,7 @@ const form = ref({
 	startDate: getTodayDate(),
 	status: 'Active',
 	paymentSchedule: 'Monthly',
-	durationWeeks: 4,
+	durationWeeks: 3,
 	deposit: 0,
 	taxRate: 0,
 	notes: '',
@@ -1565,12 +1498,21 @@ const canSubmit = computed(() => {
 		? newCustomer.value.name && newCustomer.value.phone
 		: selectedCustomer.value
 
+	// Validate duration is a valid option for the selected schedule
+	const validMonthlyDurations = [1, 2, 3, 6, 9, 12]
+	const validWeeklyDurations = [2, 4, 6, 8, 10, 12]
+	const duration = form.value.durationWeeks
+	const validDuration =
+		form.value.paymentSchedule === 'Monthly'
+			? validMonthlyDurations.includes(duration)
+			: validWeeklyDurations.includes(duration)
+
 	return (
 		hasCustomer &&
 		selectedItems.value.length > 0 &&
 		form.value.deposit >= minDeposit.value &&
 		form.value.deposit < totalAmount.value &&
-		form.value.durationWeeks > 0 &&
+		validDuration &&
 		form.value.startDate &&
 		form.value.agreedToTerms
 	)
@@ -1584,7 +1526,8 @@ watch(
 		} else {
 			form.value.durationWeeks = 4 // 4 weeks default
 		}
-	}
+	},
+	{ immediate: true }
 )
 
 // Watchers
@@ -1622,7 +1565,10 @@ const storeTaxResource = createResource({
 // Functions
 function formatPrice(price) {
 	if (price == null) return '0.00'
-	return Number(price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+	return Number(price).toLocaleString('en-US', {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	})
 }
 
 async function fetchStoreTaxDetails() {
@@ -1658,7 +1604,7 @@ async function searchCustomers() {
 				query: customerSearch.value,
 			})
 			const list = customers || []
-			customerResults.value = list.map(c => ({
+			customerResults.value = list.map((c) => ({
 				...c,
 				name: c.name || c.customer_name,
 				customer_name: c.display_name || c.customer_name,
@@ -1730,7 +1676,7 @@ function removeItem(index) {
 	}
 }
 
-// Watch duration to update deposit if changed significantly? 
+// Watch duration to update deposit if changed significantly?
 // Actually 10% should be dynamic but let user override.
 watch([subtotal, () => form.value.taxRate], () => {
 	if (form.value.deposit === 0 || form.value.deposit < minDeposit.value) {
@@ -1766,30 +1712,6 @@ function handleItemBarcodeScan(event) {
 }
 
 // ID Scanner Functions
-function simulateIdScan() {
-	// Simulate OCR scanning - in real implementation, this would use a camera
-	const mockData = {
-		drivers_license: {
-			name: 'John Doe',
-			address: '123 Main St, Springfield, IL 62701',
-			number: 'D123456789',
-			dob: '1990-01-15',
-		},
-		passport: {
-			name: 'Jane Smith',
-			address: '456 Oak Ave, Chicago, IL 60601',
-			number: 'P987654321',
-			dob: '1985-05-20',
-		},
-	}
-
-	const data = mockData[idScan.value.type] || mockData.drivers_license
-	idScan.value.number = data.number
-	idScan.value.name = data.name
-	idScan.value.address = data.address
-	idScan.value.dob = data.dob
-}
-
 function applyIdData() {
 	if (isNewCustomerMode.value) {
 		newCustomer.value.name = idScan.value.name
@@ -1939,7 +1861,7 @@ function close() {
 		startDate: getTodayDate(),
 		status: 'Active',
 		paymentSchedule: 'Weekly',
-		durationWeeks: 4,
+		durationWeeks: 3,
 		deposit: 0,
 		taxRate: 0,
 		notes: '',

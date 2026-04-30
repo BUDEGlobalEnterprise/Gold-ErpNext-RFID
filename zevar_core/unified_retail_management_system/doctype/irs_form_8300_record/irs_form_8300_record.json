@@ -1,0 +1,194 @@
+{
+ "actions": [],
+ "autoname": "format:8300-{MM}{YY}-{#####}",
+ "creation": "2026-04-29 06:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "customer",
+  "status",
+  "trigger_date",
+  "column_break_1",
+  "total_cash_amount",
+  "related_transactions",
+  "section_transactions",
+  "transaction_details",
+  "section_recipient",
+  "recipient_name",
+  "recipient_tin",
+  "recipient_address",
+  "column_break_recipient",
+  "recipient_dob",
+  "recipient_id_type",
+  "recipient_id_number",
+  "section_filing",
+  "filing_status",
+  "filing_date",
+  "fincen_confirmation",
+  "column_break_filing",
+  "filed_by",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Triggered\nPending Review\nFiled\nExempt",
+   "default": "Triggered",
+   "in_list_view": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "trigger_date",
+   "fieldtype": "Datetime",
+   "label": "Trigger Date",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_cash_amount",
+   "fieldtype": "Currency",
+   "label": "Total Cash Amount",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "related_transactions",
+   "fieldtype": "Int",
+   "label": "Number of Related Transactions"
+  },
+  {
+   "fieldname": "section_transactions",
+   "fieldtype": "Section Break",
+   "label": "Related Transactions"
+  },
+  {
+   "fieldname": "transaction_details",
+   "fieldtype": "Code",
+   "label": "Transaction Details (JSON)",
+   "options": "JSON"
+  },
+  {
+   "fieldname": "section_recipient",
+   "fieldtype": "Section Break",
+   "label": "Cash Recipient / Payer Information"
+  },
+  {
+   "fieldname": "recipient_name",
+   "fieldtype": "Data",
+   "label": "Full Legal Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "recipient_tin",
+   "fieldtype": "Data",
+   "label": "TIN / SSN",
+   "length": 32
+  },
+  {
+   "fieldname": "recipient_address",
+   "fieldtype": "Small Text",
+   "label": "Address"
+  },
+  {
+   "fieldname": "column_break_recipient",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "recipient_dob",
+   "fieldtype": "Date",
+   "label": "Date of Birth"
+  },
+  {
+   "fieldname": "recipient_id_type",
+   "fieldtype": "Select",
+   "label": "ID Type",
+   "options": "\nDriver's License\nPassport\nState ID\nMilitary ID"
+  },
+  {
+   "fieldname": "recipient_id_number",
+   "fieldtype": "Data",
+   "label": "ID Number"
+  },
+  {
+   "fieldname": "section_filing",
+   "fieldtype": "Section Break",
+   "label": "Filing Information"
+  },
+  {
+   "fieldname": "filing_status",
+   "fieldtype": "Select",
+   "label": "Filing Status",
+   "options": "\nPending\nFiled Electronically\nFiled by Mail\nNot Required"
+  },
+  {
+   "fieldname": "filing_date",
+   "fieldtype": "Date",
+   "label": "Filing Date"
+  },
+  {
+   "fieldname": "fincen_confirmation",
+   "fieldtype": "Data",
+   "label": "FinCEN Confirmation Number"
+  },
+  {
+   "fieldname": "column_break_filing",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "filed_by",
+   "fieldtype": "Link",
+   "label": "Filed By",
+   "options": "User"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-04-29 06:00:00.000000",
+ "module": "Unified Retail Management System",
+ "name": "IRS Form 8300 Record",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Store Manager",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

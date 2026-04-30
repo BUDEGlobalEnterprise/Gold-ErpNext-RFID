@@ -1,6 +1,6 @@
 <template>
 	<AppLayout>
-		<div class="h-full flex flex-col">
+		<div class="flex flex-col">
 			<!-- Page Header -->
 			<div class="flex items-center justify-between mb-6">
 				<div>
@@ -131,9 +131,7 @@
 
 			<!-- Summary Cards -->
 			<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" v-if="summary">
-				<div
-					class="premium-card !p-4"
-				>
+				<div class="premium-card !p-4">
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
 						>Transactions</span
@@ -152,9 +150,7 @@
 						{{ formatCurrency(summary.total_sales) }}
 					</p>
 				</div>
-				<div
-					class="premium-card !p-4"
-				>
+				<div class="premium-card !p-4">
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
 						>Average Sale</span
@@ -163,9 +159,7 @@
 						{{ formatCurrency(summary.average_sale) }}
 					</p>
 				</div>
-				<div
-					class="premium-card !p-4"
-				>
+				<div class="premium-card !p-4">
 					<span
 						class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium"
 						>Customers</span
@@ -389,7 +383,7 @@ import { ref, onMounted } from 'vue'
 import { createResource } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
 import TransactionDetailModal from '@/components/TransactionDetailModal.vue'
-	import { formatDate } from '@/utils/dates.js'
+import { formatDate } from '@/utils/dates.js'
 
 // State
 const loading = ref(false)

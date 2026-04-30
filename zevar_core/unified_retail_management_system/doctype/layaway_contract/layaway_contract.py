@@ -34,7 +34,7 @@ class LayawayContract(Document):
 			customer_doc = frappe.get_doc("Customer", self.customer)
 			self.customer_name = customer_doc.customer_name
 			if not self.customer_contact:
-				self.customer_contact = customer_doc.mobile_no or getattr(customer_doc, 'phone', '') or ''
+				self.customer_contact = customer_doc.mobile_no or getattr(customer_doc, "phone", "") or ""
 			if not self.customer_email:
 				self.customer_email = customer_doc.email_id or ""
 

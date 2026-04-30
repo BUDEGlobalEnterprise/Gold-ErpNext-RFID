@@ -13,7 +13,18 @@
 				<div class="field-group">
 					<label class="field-label">Employee ID / Username</label>
 					<div class="input-wrapper">
-						<svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+						<svg
+							class="input-icon"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+							<circle cx="12" cy="7" r="4"></circle>
+						</svg>
 						<input
 							v-model="email"
 							type="text"
@@ -29,7 +40,18 @@
 				<div class="field-group">
 					<label class="field-label">PIN / Password</label>
 					<div class="input-wrapper">
-						<svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg>
+						<svg
+							class="input-icon"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+							<path d="M7 11V7a5 5 0 0110 0v4"></path>
+						</svg>
 						<input
 							v-model="password"
 							:type="showPassword ? 'text' : 'password'"
@@ -38,29 +60,91 @@
 							autocomplete="current-password"
 							class="login-input"
 						/>
-						<button type="button" @click="showPassword = !showPassword" class="toggle-pw" tabindex="-1">
-							<svg v-if="!showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-							<svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+						<button
+							type="button"
+							@click="showPassword = !showPassword"
+							class="toggle-pw"
+							tabindex="-1"
+						>
+							<svg
+								v-if="!showPassword"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								class="w-4 h-4"
+							>
+								<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+								<circle cx="12" cy="12" r="3"></circle>
+							</svg>
+							<svg
+								v-else
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								class="w-4 h-4"
+							>
+								<path
+									d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"
+								></path>
+								<line x1="1" y1="1" x2="23" y2="23"></line>
+							</svg>
 						</button>
 					</div>
 				</div>
 
 				<!-- Remember me -->
 				<label class="remember-row" for="login-remember">
-					<input type="checkbox" v-model="rememberMe" id="login-remember" class="remember-check" />
+					<input
+						type="checkbox"
+						v-model="rememberMe"
+						id="login-remember"
+						class="remember-check"
+					/>
 					<span class="remember-text">Remember me</span>
 				</label>
 
 				<!-- Submit -->
 				<button type="submit" class="login-btn" :disabled="auth.loading" id="login-submit">
-					<svg v-if="!auth.loading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"></path><polyline points="10,17 15,12 10,7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+					<svg
+						v-if="!auth.loading"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2.5"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						class="w-5 h-5"
+					>
+						<path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"></path>
+						<polyline points="10,17 15,12 10,7"></polyline>
+						<line x1="15" y1="12" x2="3" y2="12"></line>
+					</svg>
 					<span v-if="auth.loading" class="spinner"></span>
 					{{ auth.loading ? 'Signing in...' : 'Login' }}
 				</button>
 
 				<!-- Switch User -->
 				<button type="button" class="switch-btn" @click="switchUser" id="login-switch">
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 00-3-3.87"></path><path d="M16 3.13a4 4 0 010 7.75"></path></svg>
+					<svg
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						class="w-4 h-4"
+					>
+						<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+						<circle cx="9" cy="7" r="4"></circle>
+						<path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+						<path d="M16 3.13a4 4 0 010 7.75"></path>
+					</svg>
 					Switch User
 				</button>
 
@@ -126,14 +210,18 @@ function switchUser() {
 	background: white;
 	border-radius: 24px;
 	padding: 2.5rem 2.25rem 2rem;
-	box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 /* Logo */
-.login-logo { text-align: center; margin-bottom: 2rem; }
+.login-logo {
+	text-align: center;
+	margin-bottom: 2rem;
+}
 .logo-circle {
-	width: 56px; height: 56px;
-	background: #F97316;
+	width: 56px;
+	height: 56px;
+	background: #f97316;
 	border-radius: 50%;
 	display: inline-flex;
 	align-items: center;
@@ -144,14 +232,35 @@ function switchUser() {
 	margin-bottom: 0.75rem;
 	box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
 }
-.login-heading { font-size: 1.5rem; font-weight: 800; color: #1F2937; margin: 0; }
-.login-subheading { font-size: 0.85rem; color: #9CA3AF; margin-top: 0.25rem; }
+.login-heading {
+	font-size: 1.5rem;
+	font-weight: 800;
+	color: #1f2937;
+	margin: 0;
+}
+.login-subheading {
+	font-size: 0.85rem;
+	color: #9ca3af;
+	margin-top: 0.25rem;
+}
 
 /* Form */
-.login-form { display: flex; flex-direction: column; gap: 1.25rem; }
+.login-form {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
 
-.field-group { display: flex; flex-direction: column; gap: 0.4rem; }
-.field-label { font-size: 0.8rem; font-weight: 600; color: #374151; }
+.field-group {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+}
+.field-label {
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: #374151;
+}
 
 .input-wrapper {
 	position: relative;
@@ -161,29 +270,32 @@ function switchUser() {
 .input-icon {
 	position: absolute;
 	left: 14px;
-	width: 18px; height: 18px;
-	color: #9CA3AF;
+	width: 18px;
+	height: 18px;
+	color: #9ca3af;
 	pointer-events: none;
 }
 .login-input {
 	width: 100%;
 	height: 48px;
 	padding: 0 14px 0 44px;
-	border: 1.5px solid #E5E7EB;
+	border: 1.5px solid #e5e7eb;
 	border-radius: 12px;
 	font-size: 0.9rem;
-	color: #1F2937;
-	background: #FAFAFA;
+	color: #1f2937;
+	background: #fafafa;
 	transition: all 0.2s;
 	outline: none;
 	font-family: inherit;
 }
 .login-input:focus {
-	border-color: #F97316;
-	box-shadow: 0 0 0 3px rgba(249,115,22,0.1);
+	border-color: #f97316;
+	box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
 	background: white;
 }
-.login-input::placeholder { color: #D1D5DB; }
+.login-input::placeholder {
+	color: #d1d5db;
+}
 
 .toggle-pw {
 	position: absolute;
@@ -191,12 +303,17 @@ function switchUser() {
 	background: none;
 	border: none;
 	cursor: pointer;
-	color: #9CA3AF;
+	color: #9ca3af;
 	padding: 4px;
 	display: flex;
 }
-.toggle-pw:hover { color: #6B7280; }
-.toggle-pw svg { width: 18px; height: 18px; }
+.toggle-pw:hover {
+	color: #6b7280;
+}
+.toggle-pw svg {
+	width: 18px;
+	height: 18px;
+}
 
 /* Remember */
 .remember-row {
@@ -207,17 +324,21 @@ function switchUser() {
 	margin-top: -0.25rem;
 }
 .remember-check {
-	width: 16px; height: 16px;
-	accent-color: #F97316;
+	width: 16px;
+	height: 16px;
+	accent-color: #f97316;
 	cursor: pointer;
 }
-.remember-text { font-size: 0.8rem; color: #6B7280; }
+.remember-text {
+	font-size: 0.8rem;
+	color: #6b7280;
+}
 
 /* Buttons */
 .login-btn {
 	width: 100%;
 	height: 48px;
-	background: linear-gradient(135deg, #F97316, #EA580C);
+	background: linear-gradient(135deg, #f97316, #ea580c);
 	color: white;
 	border: none;
 	border-radius: 12px;
@@ -231,15 +352,25 @@ function switchUser() {
 	transition: all 0.2s;
 	font-family: inherit;
 }
-.login-btn:hover:not(:disabled) { background: linear-gradient(135deg, #EA580C, #C2410C); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(249,115,22,0.35); }
-.login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.login-btn svg { width: 20px; height: 20px; }
+.login-btn:hover:not(:disabled) {
+	background: linear-gradient(135deg, #ea580c, #c2410c);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 16px rgba(249, 115, 22, 0.35);
+}
+.login-btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+.login-btn svg {
+	width: 20px;
+	height: 20px;
+}
 
 .switch-btn {
 	width: 100%;
 	height: 44px;
 	background: white;
-	border: 1.5px solid #E5E7EB;
+	border: 1.5px solid #e5e7eb;
 	border-radius: 12px;
 	font-size: 0.85rem;
 	font-weight: 600;
@@ -252,38 +383,49 @@ function switchUser() {
 	transition: all 0.2s;
 	font-family: inherit;
 }
-.switch-btn:hover { border-color: #D1D5DB; background: #F9FAFB; }
-.switch-btn svg { width: 16px; height: 16px; }
+.switch-btn:hover {
+	border-color: #d1d5db;
+	background: #f9fafb;
+}
+.switch-btn svg {
+	width: 16px;
+	height: 16px;
+}
 
 /* Error */
 .login-error {
 	text-align: center;
 	font-size: 0.8rem;
-	color: #DC2626;
-	background: #FEF2F2;
+	color: #dc2626;
+	background: #fef2f2;
 	padding: 0.6rem 1rem;
 	border-radius: 10px;
-	border: 1px solid #FECACA;
+	border: 1px solid #fecaca;
 	margin: 0;
 }
 
 /* Spinner */
 .spinner {
-	width: 18px; height: 18px;
-	border: 2.5px solid rgba(255,255,255,0.3);
+	width: 18px;
+	height: 18px;
+	border: 2.5px solid rgba(255, 255, 255, 0.3);
 	border-top-color: white;
 	border-radius: 50%;
 	animation: spin 0.6s linear infinite;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
 
 /* Footer */
 .login-footer {
 	text-align: center;
 	font-size: 0.7rem;
-	color: #9CA3AF;
+	color: #9ca3af;
 	margin-top: 1.5rem;
 	padding-top: 1rem;
-	border-top: 1px solid #F3F4F6;
+	border-top: 1px solid #f3f4f6;
 }
 </style>

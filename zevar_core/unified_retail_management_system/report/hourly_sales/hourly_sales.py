@@ -83,7 +83,7 @@ def execute(filters=None):
 
 	for row in hourly_data:
 		hour = row.get("hour", 0)
-		row["hour"] = f"{hour:02d}:00 - {hour+1:02d}:00"
+		row["hour"] = f"{hour:02d}:00 - {hour + 1:02d}:00"
 		row["total_sales"] = flt(row.get("total_sales", 0))
 		row["avg_transaction"] = flt(row.get("avg_transaction", 0))
 		row["peak_indicator"] = "★ PEAK" if row["total_sales"] == max_sales else ""

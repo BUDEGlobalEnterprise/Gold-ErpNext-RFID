@@ -181,7 +181,7 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
-	import { formatDate } from '@/utils/dates.js'
+import { formatDate } from '@/utils/dates.js'
 
 const props = defineProps({
 	order: { type: Object, required: true },
@@ -224,7 +224,10 @@ function getStatusBadgeClass(status) {
 		Delivered: 'bg-gray-100 text-gray-700 dark:bg-warm-dark-700 dark:text-warm-dark-600',
 		Cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
 	}
-	return classes[status] || 'bg-gray-100 text-gray-600 dark:bg-warm-dark-700 dark:text-warm-dark-600'
+	return (
+		classes[status] ||
+		'bg-gray-100 text-gray-600 dark:bg-warm-dark-700 dark:text-warm-dark-600'
+	)
 }
 
 function getNextStatus(currentStatus) {

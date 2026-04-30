@@ -6,5 +6,5 @@ from frappe.model.document import Document
 
 
 class RepairCommissionSettings(Document):
-    def __before_save(self):
-        pass
+	def __before_save(self):
+		pass

@@ -1,6 +1,6 @@
 <template>
 	<AppLayout>
-		<div class="h-full flex flex-col max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+		<div class="flex flex-col max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
 			<!-- Header -->
 			<div class="mb-6 flex items-center justify-between">
 				<div>
@@ -399,7 +399,7 @@
 import { ref, watch, onMounted, computed, onUnmounted } from 'vue'
 import { createResource } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
-	import { formatDate } from '@/utils/dates.js'
+import { formatDate } from '@/utils/dates.js'
 
 // State
 const submitting = ref(false)

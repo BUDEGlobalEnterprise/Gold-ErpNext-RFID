@@ -1,6 +1,6 @@
 <template>
 	<div
-		class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800"
+		class="min-h-[100dvh] bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800"
 	>
 		<!-- Header -->
 		<header class="bg-white dark:bg-warm-dark-900 shadow-sm">
@@ -93,7 +93,9 @@
 							{{ step.label }}
 						</span>
 					</div>
-					<div class="h-2 bg-gray-200 dark:bg-warm-dark-800 rounded-full overflow-hidden">
+					<div
+						class="h-2 bg-gray-200 dark:bg-warm-dark-800 rounded-full overflow-hidden"
+					>
 						<div
 							class="h-full bg-[#D4AF37] transition-all duration-500"
 							:style="{ width: progressPercent + '%' }"

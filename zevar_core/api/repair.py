@@ -141,7 +141,6 @@ def get_repair_orders(
 def get_repair_stats(warehouse: str | None = None) -> dict[str, int]:
 	frappe.has_permission("Repair Order", ptype="read", throw=True)
 
-	base_filter_conditions = {}
 	warehouse_filter = None
 	if warehouse:
 		warehouse_filter = [["warehouse", "in", [warehouse, "", None]]]
@@ -196,8 +195,29 @@ def create_repair_order(
 	doc.estimated_cost = estimated_cost
 	doc.priority = priority
 
+	# Handle gemstones JSON payload
+	gemstones_json = kwargs.pop("gemstones_json", None)
+	if gemstones_json:
+		try:
+			import json
+
+			gemstones = json.loads(gemstones_json) if isinstance(gemstones_json, str) else gemstones_json
+			for stone in gemstones:
+				doc.append(
+					"gemstones",
+					{
+						"gemstone_type": stone.get("type", ""),
+						"quantity": stone.get("count", 1),
+						"carat_weight": stone.get("carat_weight") or 0,
+						"color": stone.get("color", ""),
+						"clarity": stone.get("clarity", ""),
+					},
+				)
+		except Exception as e:
+			frappe.log_error(f"Failed to parse gemstones for repair order: {e}")
+
 	for key, value in kwargs.items():
-		if hasattr(doc, key):
+		if hasattr(doc, key) and value is not None:
 			setattr(doc, key, value)
 
 	doc.insert()
@@ -557,7 +577,9 @@ def send_manual_notification(
 
 
 @frappe.whitelist()
-def approve_estimate(repair_order: str, approved_by: str | None = None, approval_notes: str | None = None) -> dict[str, Any]:
+def approve_estimate(
+	repair_order: str, approved_by: str | None = None, approval_notes: str | None = None
+) -> dict[str, Any]:
 	"""Approve a repair estimate"""
 	if not frappe.has_permission("Repair Order", "write", doc=repair_order):
 		frappe.throw(_("Insufficient permissions to update Repair Order"), frappe.PermissionError)
@@ -593,7 +615,9 @@ def send_for_approval(repair_order: str) -> dict[str, Any]:
 
 
 @frappe.whitelist()
-def revise_estimate(repair_order: str, new_total_cost: float, revision_notes: str | None = None) -> dict[str, Any]:
+def revise_estimate(
+	repair_order: str, new_total_cost: float, revision_notes: str | None = None
+) -> dict[str, Any]:
 	"""Revise an estimate with new cost"""
 	if not frappe.has_permission("Repair Order", "write", doc=repair_order):
 		frappe.throw(_("Insufficient permissions to update Repair Order"), frappe.PermissionError)
@@ -617,7 +641,9 @@ def get_estimate_pdf(repair_order: str) -> dict[str, Any]:
 
 
 @frappe.whitelist(allow_guest=True)
-def public_estimate_approval(token: str, action: str, customer_name: str, notes: str | None = None) -> dict[str, Any]:
+def public_estimate_approval(
+	token: str, action: str, customer_name: str, notes: str | None = None
+) -> dict[str, Any]:
 	"""Public endpoint for customers to approve/reject estimates via email link"""
 
 	# Verify token from cache
@@ -681,9 +707,13 @@ def get_estimate_details_for_approval(token: str) -> dict[str, Any]:
 			"success": True,
 			"repair_number": doc.name,
 			"customer": doc.customer,
-			"customer_name": frappe.db.get_value("Customer", doc.customer, "customer_name") if doc.customer else "",
+			"customer_name": frappe.db.get_value("Customer", doc.customer, "customer_name")
+			if doc.customer
+			else "",
 			"repair_type": doc.repair_type,
-			"repair_type_name": frappe.db.get_value("Repair Type", doc.repair_type, "repair_name") if doc.repair_type else "",
+			"repair_type_name": frappe.db.get_value("Repair Type", doc.repair_type, "repair_name")
+			if doc.repair_type
+			else "",
 			"item_description": doc.item_description,
 			"labor_cost": float(doc.labor_cost or 0),
 			"material_cost": float(doc.material_cost or 0),
@@ -806,7 +836,9 @@ def check_warranty_status(repair_order: str) -> dict[str, Any]:
 	else:
 		result["is_valid"] = True
 		result["days_remaining"] = (expiry_date - today_date).days
-		result["message"] = f"Warranty valid until {doc.warranty_expiry_date} ({result['days_remaining']} days remaining)"
+		result["message"] = (
+			f"Warranty valid until {doc.warranty_expiry_date} ({result['days_remaining']} days remaining)"
+		)
 
 	return result
 
@@ -885,6 +917,7 @@ def get_customer_warranties(customer: str, active_only: bool = True) -> list[dic
 def get_dashboard_stats(warehouse: str | None = None) -> dict[str, Any]:
 	"""Get repair dashboard statistics for POS terminal"""
 	from .repair_dashboard import get_repair_dashboard_stats
+
 	return get_repair_dashboard_stats(warehouse)
 
 
@@ -892,6 +925,7 @@ def get_dashboard_stats(warehouse: str | None = None) -> dict[str, Any]:
 def get_chart_data(warehouse: str | None = None, period: int = 30) -> dict[str, Any]:
 	"""Get repair chart data for dashboard visualization"""
 	from .repair_dashboard import get_repair_chart_data
+
 	return get_repair_chart_data(warehouse, period)
 
 
@@ -905,9 +939,15 @@ def get_thermal_receipt_html(name: str) -> str:
 	d = doc.as_dict()
 
 	# Get customer details
-	d["customer_name"] = frappe.db.get_value("Customer", doc.customer, "customer_name") if doc.customer else ""
-	d["repair_type_name"] = frappe.db.get_value("Repair Type", doc.repair_type, "repair_name") if doc.repair_type else ""
-	d["warehouse_name"] = frappe.db.get_value("Warehouse", doc.warehouse, "warehouse_name") if doc.warehouse else ""
+	d["customer_name"] = (
+		frappe.db.get_value("Customer", doc.customer, "customer_name") if doc.customer else ""
+	)
+	d["repair_type_name"] = (
+		frappe.db.get_value("Repair Type", doc.repair_type, "repair_name") if doc.repair_type else ""
+	)
+	d["warehouse_name"] = (
+		frappe.db.get_value("Warehouse", doc.warehouse, "warehouse_name") if doc.warehouse else ""
+	)
 
 	# Escape user-provided fields
 	safe = {k: escape_html(str(v)) if v else "" for k, v in d.items()}
@@ -1062,7 +1102,9 @@ def lookup_repair_by_number(repair_number: str) -> dict[str, Any] | None:
 		"name": doc.name,
 		"status": doc.status,
 		"repair_type": doc.repair_type,
-		"repair_type_name": frappe.db.get_value("Repair Type", doc.repair_type, "repair_name") if doc.repair_type else "",
+		"repair_type_name": frappe.db.get_value("Repair Type", doc.repair_type, "repair_name")
+		if doc.repair_type
+		else "",
 		"item_type": doc.item_type,
 		"item_description": doc.item_description,
 		"estimated_cost": float(doc.estimated_cost or 0),
@@ -1089,9 +1131,19 @@ def lookup_repair_by_phone(phone: str) -> list[dict[str, Any]] | None:
 	repairs = frappe.get_all(
 		"Repair Order",
 		filters={"customer_phone": ("like", f"%{phone}%")},
-		fields=["name", "status", "customer", "received_date", "promised_date", "repair_type", "estimated_cost", "balance_due", "estimate_status"],
+		fields=[
+			"name",
+			"status",
+			"customer",
+			"received_date",
+			"promised_date",
+			"repair_type",
+			"estimated_cost",
+			"balance_due",
+			"estimate_status",
+		],
 		order_by="received_date desc",
-		limit=5
+		limit=5,
 	)
 
 	if not repairs:
@@ -1100,8 +1152,14 @@ def lookup_repair_by_phone(phone: str) -> list[dict[str, Any]] | None:
 	# Enrich with details
 	result = []
 	for r in repairs:
-		r["customer_name"] = frappe.db.get_value("Customer", r["customer"], "customer_name") if r.get("customer") else ""
-		r["repair_type_name"] = frappe.db.get_value("Repair Type", r["repair_type"], "repair_name") if r.get("repair_type") else ""
+		r["customer_name"] = (
+			frappe.db.get_value("Customer", r["customer"], "customer_name") if r.get("customer") else ""
+		)
+		r["repair_type_name"] = (
+			frappe.db.get_value("Repair Type", r["repair_type"], "repair_name")
+			if r.get("repair_type")
+			else ""
+		)
 		result.append(r)
 
 	return result
@@ -1110,6 +1168,7 @@ def lookup_repair_by_phone(phone: str) -> list[dict[str, Any]] | None:
 # ====================
 # Compliance & Security API (Phase 10)
 # ====================
+
 
 @frappe.whitelist()
 def verify_customer_id(
@@ -1201,7 +1260,16 @@ def get_compliance_dashboard(
 	repairs = frappe.get_all(
 		"Repair Order",
 		filters=filters,
-		fields=["name", "customer_id_verified", "intake_checklist_signed", "gemstone_disclosure", "precious_metals_disclosure", "received_date", "status", "warranty_months"],
+		fields=[
+			"name",
+			"customer_id_verified",
+			"intake_checklist_signed",
+			"gemstone_disclosure",
+			"precious_metals_disclosure",
+			"received_date",
+			"status",
+			"warranty_months",
+		],
 	)
 
 	# Calculate compliance metrics
@@ -1217,9 +1285,13 @@ def get_compliance_dashboard(
 	audit_summary = {
 		"total_repairs": total_repairs,
 		"id_verified_count": id_verified_count,
-		"id_verified_percentage": round((id_verified_count / total_repairs * 100) if total_repairs > 0 else 0, 2),
+		"id_verified_percentage": round(
+			(id_verified_count / total_repairs * 100) if total_repairs > 0 else 0, 2
+		),
 		"intake_signed_count": intake_signed_count,
-		"intake_signed_percentage": round((intake_signed_count / total_repairs * 100) if total_repairs > 0 else 0, 2),
+		"intake_signed_percentage": round(
+			(intake_signed_count / total_repairs * 100) if total_repairs > 0 else 0, 2
+		),
 		"gemstone_disclosure_count": has_gemstone_disclosure,
 		"metals_disclosure_count": has_metals_disclosure,
 		"compliance_score": 0,

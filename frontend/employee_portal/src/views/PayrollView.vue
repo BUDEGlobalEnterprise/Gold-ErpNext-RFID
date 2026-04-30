@@ -155,7 +155,7 @@
 					<tr
 						v-for="slip in payrollStore.salarySlips"
 						:key="slip.id"
-						class=" transition-colors"
+						class="transition-colors"
 					>
 						<td class="px-10 py-6">
 							<div class="flex items-center gap-3">

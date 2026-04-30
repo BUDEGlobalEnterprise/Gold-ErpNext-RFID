@@ -57,6 +57,9 @@ import ProductModal from '@/components/POSProductModal.vue'
 import { useCartStore } from '@/stores/cart.js'
 import { createResource } from 'frappe-ui'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const cart = useCartStore()
 const categories = ref([])
@@ -101,7 +104,7 @@ function openItemDetails(itemCode) {
 }
 
 function viewCategory(cat) {
-	window.location.href = `/pos/catalogues/${encodeURIComponent(cat.name)}`
+	router.push(`/pos-catalogue/${encodeURIComponent(cat.name)}`)
 }
 
 defineExpose({ loadCatalog })

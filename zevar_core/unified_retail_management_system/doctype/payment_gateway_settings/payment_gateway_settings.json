@@ -1,0 +1,304 @@
+{
+ "actions": [],
+ "creation": "2026-04-29 06:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "gateway_section",
+  "active_gateway",
+  "column_break_gateway",
+  "sandbox_mode",
+  "stripe_section",
+  "stripe_api_key",
+  "stripe_publishable_key",
+  "stripe_webhook_secret",
+  "column_break_stripe",
+  "stripe_terminal_location",
+  "stripe_enabled",
+  "square_section",
+  "square_access_token",
+  "square_application_id",
+  "square_webhook_signature_key",
+  "column_break_square",
+  "square_environment",
+  "square_enabled",
+  "section_financing",
+  "financing_waterfall_order",
+  "synchrony_enabled",
+  "aff_enabled",
+  "aff_webhook_secret",
+  "progressive_enabled",
+  "snap_enabled",
+  "snap_webhook_secret",
+  "acima_enabled",
+  "zelle_section",
+  "zelle_merchant_alias",
+  "zelle_banking_provider",
+  "column_break_zelle",
+  "zelle_webhook_secret",
+  "zelle_enabled",
+  "section_compliance",
+  "irs_8300_tracking_enabled",
+  "aml_kyc_enabled",
+  "cash_threshold_8300",
+  "column_break_compliance",
+  "auto_populate_8300",
+  "aml_officer_email"
+ ],
+ "fields": [
+  {
+   "fieldname": "gateway_section",
+   "fieldtype": "Section Break",
+   "label": "Active Payment Gateway"
+  },
+  {
+   "fieldname": "active_gateway",
+   "fieldtype": "Select",
+   "label": "Primary Card Terminal Gateway",
+   "options": "\nStripe Terminal\nSquare Terminal",
+   "default": "Stripe Terminal"
+  },
+  {
+   "fieldname": "column_break_gateway",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "sandbox_mode",
+   "fieldtype": "Check",
+   "label": "Sandbox / Test Mode"
+  },
+  {
+   "fieldname": "stripe_section",
+   "fieldtype": "Section Break",
+   "label": "Stripe Terminal Configuration"
+  },
+  {
+   "fieldname": "stripe_api_key",
+   "fieldtype": "Password",
+   "label": "Stripe Secret Key",
+   "length": 256
+  },
+  {
+   "fieldname": "stripe_publishable_key",
+   "fieldtype": "Data",
+   "label": "Stripe Publishable Key",
+   "length": 256
+  },
+  {
+   "fieldname": "stripe_webhook_secret",
+   "fieldtype": "Password",
+   "label": "Stripe Webhook Signing Secret",
+   "length": 256
+  },
+  {
+   "fieldname": "column_break_stripe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stripe_terminal_location",
+   "fieldtype": "Data",
+   "label": "Stripe Terminal Location ID",
+   "length": 64
+  },
+  {
+   "default": "0",
+   "fieldname": "stripe_enabled",
+   "fieldtype": "Check",
+   "label": "Stripe Terminal Enabled"
+  },
+  {
+   "fieldname": "square_section",
+   "fieldtype": "Section Break",
+   "label": "Square Terminal Configuration"
+  },
+  {
+   "fieldname": "square_access_token",
+   "fieldtype": "Password",
+   "label": "Square Access Token",
+   "length": 256
+  },
+  {
+   "fieldname": "square_application_id",
+   "fieldtype": "Data",
+   "label": "Square Application ID",
+   "length": 128
+  },
+  {
+   "fieldname": "square_webhook_signature_key",
+   "fieldtype": "Password",
+   "label": "Square Webhook Signature Key",
+   "length": 256
+  },
+  {
+   "fieldname": "column_break_square",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "square_environment",
+   "fieldtype": "Select",
+   "label": "Square Environment",
+   "options": "sandbox\nproduction",
+   "default": "sandbox"
+  },
+  {
+   "default": "0",
+   "fieldname": "square_enabled",
+   "fieldtype": "Check",
+   "label": "Square Terminal Enabled"
+  },
+  {
+   "fieldname": "section_financing",
+   "fieldtype": "Section Break",
+   "label": "Consumer Financing Configuration"
+  },
+  {
+   "fieldname": "financing_waterfall_order",
+   "fieldtype": "Small Text",
+   "label": "Financing Waterfall Order (JSON)",
+   "default": "[\"Synchrony\", \"AFF\", \"Progressive\", \"Snap\", \"Acima\"]"
+  },
+  {
+   "default": "0",
+   "fieldname": "synchrony_enabled",
+   "fieldtype": "Check",
+   "label": "Synchrony Financial Enabled"
+  },
+  {
+   "default": "0",
+   "fieldname": "aff_enabled",
+   "fieldtype": "Check",
+   "label": "American First Finance (AFF) Enabled"
+  },
+  {
+   "fieldname": "aff_webhook_secret",
+   "fieldtype": "Password",
+   "label": "AFF Webhook Secret",
+   "length": 256
+  },
+  {
+   "default": "0",
+   "fieldname": "progressive_enabled",
+   "fieldtype": "Check",
+   "label": "Progressive Leasing Enabled"
+  },
+  {
+   "default": "0",
+   "fieldname": "snap_enabled",
+   "fieldtype": "Check",
+   "label": "Snap Finance Enabled"
+  },
+  {
+   "fieldname": "snap_webhook_secret",
+   "fieldtype": "Password",
+   "label": "Snap Webhook Secret",
+   "length": 256
+  },
+  {
+   "default": "0",
+   "fieldname": "acima_enabled",
+   "fieldtype": "Check",
+   "label": "Acima Enabled"
+  },
+  {
+   "fieldname": "zelle_section",
+   "fieldtype": "Section Break",
+   "label": "Zelle Configuration"
+  },
+  {
+   "fieldname": "zelle_merchant_alias",
+   "fieldtype": "Data",
+   "label": "Zelle Merchant Alias (Email or Phone)",
+   "length": 128
+  },
+  {
+   "fieldname": "zelle_banking_provider",
+   "fieldtype": "Select",
+   "label": "Banking API Provider",
+   "options": "\nVersori\nApiture\nFIS Global"
+  },
+  {
+   "fieldname": "column_break_zelle",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "zelle_webhook_secret",
+   "fieldtype": "Password",
+   "label": "Zelle Webhook Secret",
+   "length": 256
+  },
+  {
+   "default": "0",
+   "fieldname": "zelle_enabled",
+   "fieldtype": "Check",
+   "label": "Zelle Enabled"
+  },
+  {
+   "fieldname": "section_compliance",
+   "fieldtype": "Section Break",
+   "label": "Compliance & Regulatory"
+  },
+  {
+   "default": "1",
+   "fieldname": "irs_8300_tracking_enabled",
+   "fieldtype": "Check",
+   "label": "IRS Form 8300 Tracking Enabled"
+  },
+  {
+   "default": "1",
+   "fieldname": "aml_kyc_enabled",
+   "fieldtype": "Check",
+   "label": "AML/KYC Verification Enabled"
+  },
+  {
+   "fieldname": "cash_threshold_8300",
+   "fieldtype": "Currency",
+   "label": "Cash Reporting Threshold ($)",
+   "default": "10000.00"
+  },
+  {
+   "fieldname": "column_break_compliance",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto_populate_8300",
+   "fieldtype": "Check",
+   "label": "Auto-Populate Form 8300"
+  },
+  {
+   "fieldname": "aml_officer_email",
+   "fieldtype": "Data",
+   "label": "AML Compliance Officer Email",
+   "options": "Email"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-04-29 06:00:00.000000",
+ "module": "Unified Retail Management System",
+ "name": "Payment Gateway Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Sales Manager"
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

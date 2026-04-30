@@ -6,20 +6,27 @@
 
 		<!-- Today's Summary -->
 		<div class="p-6 space-y-6">
-			<div v-if="summary"
+			<div
+				v-if="summary"
 				class="bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl p-5"
 			>
 				<div class="flex justify-around">
 					<div class="text-center">
-						<span class="block text-2xl font-bold text-white">{{ summary.transaction_count }}</span>
+						<span class="block text-2xl font-bold text-white">{{
+							summary.transaction_count
+						}}</span>
 						<span class="block text-xs text-white/60 mt-1">Transactions</span>
 					</div>
 					<div class="text-center">
-						<span class="block text-2xl font-bold text-white">${{ formatAmount(summary.total_sales) }}</span>
+						<span class="block text-2xl font-bold text-white"
+							>${{ formatAmount(summary.total_sales) }}</span
+						>
 						<span class="block text-xs text-white/60 mt-1">Total Sales</span>
 					</div>
 					<div class="text-center">
-						<span class="block text-2xl font-bold text-white">${{ formatAmount(summary.average_sale) }}</span>
+						<span class="block text-2xl font-bold text-white"
+							>${{ formatAmount(summary.average_sale) }}</span
+						>
 						<span class="block text-xs text-white/60 mt-1">Avg Sale</span>
 					</div>
 				</div>
@@ -27,7 +34,9 @@
 
 			<!-- Activity List -->
 			<div>
-				<h4 class="text-xs text-white/60 uppercase tracking-wider mb-3">Recent Transactions</h4>
+				<h4 class="text-xs text-white/60 uppercase tracking-wider mb-3">
+					Recent Transactions
+				</h4>
 				<div v-if="transactions.length" class="flex flex-col gap-2">
 					<div
 						v-for="tx in transactions"
@@ -35,7 +44,9 @@
 						class="flex items-center gap-3 p-3 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
 						@click="viewTransaction(tx.name)"
 					>
-						<div class="w-9 h-9 rounded-full flex items-center justify-center text-base bg-white/10">
+						<div
+							class="w-9 h-9 rounded-full flex items-center justify-center text-base bg-white/10"
+						>
 							{{ tx.type === 'sale' ? '💰' : tx.type === 'return' ? '↩️' : '📋' }}
 						</div>
 						<div class="flex-1">
@@ -65,7 +76,9 @@
 
 			<!-- Session Info -->
 			<div v-if="session" class="bg-white/5 rounded-lg p-4">
-				<h4 class="text-xs text-white/60 uppercase tracking-wider mb-3">Current Session</h4>
+				<h4 class="text-xs text-white/60 uppercase tracking-wider mb-3">
+					Current Session
+				</h4>
 				<div class="flex flex-col gap-2">
 					<div class="flex justify-between text-sm text-white/80">
 						<span>Started</span>
@@ -88,10 +101,19 @@
 		</div>
 
 		<template #footer>
-			<router-link to="/history" class="px-5 py-2.5 rounded-lg font-semibold transition-colors bg-transparent text-white/80 border border-white/20 hover:bg-white/10" @click="close">
+			<router-link
+				to="/history"
+				class="px-5 py-2.5 rounded-lg font-semibold transition-colors bg-transparent text-white/80 border border-white/20 hover:bg-white/10"
+				@click="close"
+			>
 				View Full History
 			</router-link>
-			<button class="px-5 py-2.5 rounded-lg font-semibold transition-colors bg-blue-500 text-white hover:bg-blue-600" @click="close">Close</button>
+			<button
+				class="px-5 py-2.5 rounded-lg font-semibold transition-colors bg-blue-500 text-white hover:bg-blue-600"
+				@click="close"
+			>
+				Close
+			</button>
 		</template>
 	</BaseModal>
 </template>

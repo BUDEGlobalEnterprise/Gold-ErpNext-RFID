@@ -44,6 +44,13 @@ def execute(filters=None):
 			"fieldtype": "Currency",
 			"width": 120,
 		},
+		{
+			"fieldname": "receivable_account",
+			"label": _("Receivable Account"),
+			"fieldtype": "Link",
+			"options": "Account",
+			"width": 200,
+		},
 	]
 
 	data = []
@@ -103,10 +110,18 @@ def execute(filters=None):
 	# Calculate grand total
 	grand_total = sum(flt(row.get("total_amount", 0)) for row in payment_data)
 
+	financiers = ["AFF", "CIMA", "Synchrony", "Progressive", "Snap"]
+
 	for row in payment_data:
 		row["total_amount"] = flt(row.get("total_amount", 0))
 		row["avg_transaction"] = flt(row.get("avg_transaction", 0))
 		row["percentage"] = (row["total_amount"] / grand_total * 100) if grand_total > 0 else 0
+
+		if row["mode_of_payment"] in financiers:
+			row["receivable_account"] = f"Asset — A/R {row['mode_of_payment']} - ZJ"
+		else:
+			row["receivable_account"] = ""
+
 		data.append(row)
 
 	return columns, data

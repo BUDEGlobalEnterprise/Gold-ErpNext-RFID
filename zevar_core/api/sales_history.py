@@ -435,3 +435,200 @@ def export_sales_history(
 		return output.getvalue()
 
 	frappe.throw(_("Unsupported export format: {0}").format(format))
+
+
+@frappe.whitelist()
+def get_daily_sales_heatmap(year: int, month: int, stream: str = "Jewelry Sale") -> list:
+	"""
+	Get daily sales metrics for a heatmap calendar.
+	"""
+	frappe.has_permission("Sales Invoice", "read", throw=True)
+
+	# Fetch grouped by date
+	data = frappe.db.sql(
+		"""
+		SELECT
+			posting_date as date,
+			SUM(grand_total) as gross,
+			SUM(total_taxes_and_charges) as tax,
+			SUM(base_net_total) as net,
+			COUNT(name) as transaction_count,
+			SUM(CASE WHEN custom_transaction_stream = 'Repair' THEN 1 ELSE 0 END) as repairs_count
+		FROM `tabSales Invoice`
+		WHERE docstatus = 1 AND is_pos = 1
+		AND YEAR(posting_date) = %s AND MONTH(posting_date) = %s
+		AND custom_transaction_stream = %s
+		GROUP BY posting_date
+	""",
+		(year, month, stream),
+		as_dict=True,
+	)
+
+	# Also need layaway deposits. Layaway deposits are just Payment Entries where account is liability
+	layaway_data = frappe.db.sql(
+		"""
+		SELECT
+			posting_date as date,
+			SUM(paid_amount) as layaway_deposits
+		FROM `tabPayment Entry`
+		WHERE docstatus = 1
+		AND paid_to = 'Liability — Layaway Deposits Held - ZJ'
+		AND YEAR(posting_date) = %s AND MONTH(posting_date) = %s
+		GROUP BY posting_date
+	""",
+		(year, month),
+		as_dict=True,
+	)
+
+	layaway_map = {str(d.date): d.layaway_deposits for d in layaway_data}
+
+	for row in data:
+		date_str = str(row.date)
+		row["layaway_deposits"] = layaway_map.get(date_str, 0.0)
+		# ensure floats
+		row["gross"] = flt(row.get("gross", 0))
+		row["tax"] = flt(row.get("tax", 0))
+		row["net"] = flt(row.get("net", 0))
+
+	return data
+
+
+@frappe.whitelist()
+def get_day_drilldown(date: str) -> dict:
+	"""
+	Get detailed drilldown for a specific day.
+	"""
+	frappe.has_permission("Sales Invoice", "read", throw=True)
+
+	# Net sales
+	net_sales = frappe.db.sql(
+		"""
+		SELECT SUM(base_net_total)
+		FROM `tabSales Invoice`
+		WHERE docstatus = 1 AND is_pos = 1 AND posting_date = %s AND custom_transaction_stream = 'Jewelry Sale'
+	""",
+		(date,),
+	)
+	net_sales = flt(net_sales[0][0]) if net_sales and net_sales[0][0] else 0.0
+
+	# Repairs
+	repairs = frappe.db.sql(
+		"""
+		SELECT SUM(base_net_total)
+		FROM `tabSales Invoice`
+		WHERE docstatus = 1 AND is_pos = 1 AND posting_date = %s AND custom_transaction_stream = 'Repair'
+	""",
+		(date,),
+	)
+	repairs = flt(repairs[0][0]) if repairs and repairs[0][0] else 0.0
+
+	# Layaway Deposits
+	layaways = frappe.db.sql(
+		"""
+		SELECT SUM(paid_amount)
+		FROM `tabPayment Entry`
+		WHERE docstatus = 1 AND posting_date = %s AND paid_to = 'Liability — Layaway Deposits Held - ZJ'
+	""",
+		(date,),
+	)
+	layaways = flt(layaways[0][0]) if layaways and layaways[0][0] else 0.0
+
+	# Top items
+	top_items = frappe.db.sql(
+		"""
+		SELECT i.item_code, i.item_name, SUM(i.qty) as qty, SUM(i.amount) as amount
+		FROM `tabSales Invoice Item` i
+		JOIN `tabSales Invoice` s ON i.parent = s.name
+		WHERE s.docstatus = 1 AND s.is_pos = 1 AND s.posting_date = %s AND s.custom_transaction_stream = 'Jewelry Sale'
+		GROUP BY i.item_code, i.item_name
+		ORDER BY amount DESC
+		LIMIT 5
+	""",
+		(date,),
+		as_dict=True,
+	)
+
+	# Hourly curve
+	hourly = frappe.db.sql(
+		"""
+		SELECT HOUR(posting_time) as hour, SUM(base_net_total) as amount
+		FROM `tabSales Invoice`
+		WHERE docstatus = 1 AND is_pos = 1 AND posting_date = %s AND custom_transaction_stream = 'Jewelry Sale'
+		GROUP BY HOUR(posting_time)
+		ORDER BY hour ASC
+	""",
+		(date,),
+		as_dict=True,
+	)
+
+	# Tender breakdown
+	tender = frappe.db.sql(
+		"""
+		SELECT p.mode_of_payment as name, SUM(p.amount) as value
+		FROM `tabSales Invoice Payment` p
+		JOIN `tabSales Invoice` s ON p.parent = s.name
+		WHERE s.docstatus = 1 AND s.is_pos = 1 AND s.posting_date = %s
+		GROUP BY p.mode_of_payment
+		ORDER BY value DESC
+	""",
+		(date,),
+		as_dict=True,
+	)
+
+	return {
+		"net_sales": net_sales,
+		"repairs": repairs,
+		"layaway_deposits": layaways,
+		"top_items": top_items,
+		"hourly_curve": hourly,
+		"tender_breakdown": tender,
+	}
+
+
+@frappe.whitelist()
+def get_yoy_delta(date: str) -> dict:
+	"""
+	Get YoY delta for a specific date.
+	"""
+	frappe.has_permission("Sales Invoice", "read", throw=True)
+	from frappe.utils import add_days, getdate
+
+	compare_mode = frappe.db.get_single_value("POS Settings", "custom_yoy_compare_mode") or "Exact Date"
+
+	if compare_mode == "ISO Weekday Matched":
+		last_year_date = add_days(date, -364)  # 52 weeks * 7 days = 364 days, matches weekday
+	else:
+		last_year_date = add_days(date, -365)
+
+	# This year net sales
+	this_year = frappe.db.sql(
+		"""
+		SELECT SUM(base_net_total)
+		FROM `tabSales Invoice`
+		WHERE docstatus = 1 AND is_pos = 1 AND posting_date = %s AND custom_transaction_stream = 'Jewelry Sale'
+	""",
+		(date,),
+	)
+	this_year = flt(this_year[0][0]) if this_year and this_year[0][0] else 0.0
+
+	# Last year net sales
+	last_year = frappe.db.sql(
+		"""
+		SELECT SUM(base_net_total)
+		FROM `tabSales Invoice`
+		WHERE docstatus = 1 AND is_pos = 1 AND posting_date = %s AND custom_transaction_stream = 'Jewelry Sale'
+	""",
+		(last_year_date,),
+	)
+	last_year = flt(last_year[0][0]) if last_year and last_year[0][0] else 0.0
+
+	delta_abs = this_year - last_year
+	delta_pct = (delta_abs / last_year * 100) if last_year > 0 else (100 if this_year > 0 else 0)
+
+	return {
+		"this_year": this_year,
+		"last_year": last_year,
+		"delta_abs": delta_abs,
+		"delta_pct": delta_pct,
+		"last_year_date": str(last_year_date),
+	}

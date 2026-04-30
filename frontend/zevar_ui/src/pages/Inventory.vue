@@ -1,27 +1,127 @@
 <template>
 	<AppLayout>
-		<div class="h-full flex flex-col min-h-0">
-			<!-- Header -->
-			<div class="flex items-center justify-between gap-4 mb-6 flex-shrink-0">
+		<div class="flex flex-col h-full">
+			<div class="flex items-center justify-between gap-4 mb-4 flex-shrink-0">
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Inventory</h2>
 					<span
 						class="status-label !mb-0 !bg-gray-100 dark:!bg-warm-dark-700 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-warm-border"
 					>
-						{{ filteredItems.length }} Items
+						{{ totalItems }} Items
 					</span>
 				</div>
 
-				<!-- Inline Filter Bar - Occupies the central "blank space" -->
-				<div class="flex-1 hidden md:flex justify-center px-4">
-					<FilterBar />
-				</div>
+				<div class="flex items-center gap-2">
+					<button
+						@click="showQuickAdd = true"
+						class="hidden sm:flex items-center gap-1.5 px-3 py-2 bg-[#D4AF37] text-white rounded-lg text-xs font-bold hover:bg-[#C4A030] transition"
+					>
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+							/>
+						</svg>
+						Quick Add
+					</button>
+					<button
+						@click="showPushToStores = true"
+						class="hidden sm:flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition"
+					>
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+							/>
+						</svg>
+						Push to Stores
+					</button>
+					<button
+						@click="showTransferModal = true"
+						class="hidden sm:flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-lg text-xs font-bold hover:bg-gray-50 transition"
+					>
+						New Transfer
+					</button>
+					<button
+						@click="showConsignment = true"
+						class="hidden sm:flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-lg text-xs font-bold hover:bg-gray-50 transition"
+					>
+						Consignment
+					</button>
 
-				<ViewToggle v-model="viewMode" storage-key="zevar_inventory_view" />
+					<div class="md:hidden">
+						<button
+							@click="mobileMenuOpen = !mobileMenuOpen"
+							class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700"
+						>
+							<svg
+								class="w-5 h-5 text-gray-600 dark:text-gray-300"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+								/>
+							</svg>
+						</button>
+					</div>
+
+					<ViewToggle v-model="viewMode" storage-key="zevar_inventory_view" />
+				</div>
 			</div>
 
-			<!-- Stats Cards -->
-			<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6 flex-shrink-0">
+			<div v-if="mobileMenuOpen" class="md:hidden grid grid-cols-2 gap-2 mb-4">
+				<button
+					@click="
+						showQuickAdd = true
+						mobileMenuOpen = false
+					"
+					class="py-2 bg-[#D4AF37] text-white rounded-lg text-xs font-bold"
+				>
+					Quick Add
+				</button>
+				<button
+					@click="
+						showPushToStores = true
+						mobileMenuOpen = false
+					"
+					class="py-2 bg-blue-600 text-white rounded-lg text-xs font-bold"
+				>
+					Push to Stores
+				</button>
+				<button
+					@click="
+						showTransferModal = true
+						mobileMenuOpen = false
+					"
+					class="py-2 border rounded-lg text-xs font-bold"
+				>
+					Transfer
+				</button>
+				<button
+					@click="
+						showConsignment = true
+						mobileMenuOpen = false
+					"
+					class="py-2 border rounded-lg text-xs font-bold"
+				>
+					Consignment
+				</button>
+			</div>
+
+			<div class="hidden md:flex justify-center px-4 mb-4">
+				<FilterBar />
+			</div>
+
+			<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4 flex-shrink-0">
 				<div class="premium-card !p-4">
 					<div
 						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
@@ -29,9 +129,8 @@
 						Total Items
 					</div>
 					<div class="text-2xl font-bold text-gray-900 dark:text-white">
-						{{ inventoryData.length }}
+						{{ totalItems }}
 					</div>
-					<div class="text-[10px] text-green-600 font-bold mt-1">+12 this week</div>
 				</div>
 				<div class="premium-card !p-4">
 					<div
@@ -64,7 +163,6 @@
 				</div>
 			</div>
 
-			<!-- Table View -->
 			<div class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
 				<div v-if="viewMode === 'list'" class="premium-card !p-0 overflow-hidden">
 					<table class="w-full text-sm">
@@ -107,13 +205,19 @@
 								>
 									Status
 								</th>
+								<th
+									class="text-center px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider hidden lg:table-cell"
+								>
+									Actions
+								</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr
 								v-for="item in filteredItems"
 								:key="item.code"
-								class="border-b border-gray-100 dark:border-warm-border/50 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors"
+								class="border-b border-gray-100 dark:border-warm-border/50 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors cursor-pointer"
+								@click="selectedItem = item"
 							>
 								<td class="px-4 py-3">
 									<div class="flex items-center gap-3">
@@ -141,9 +245,8 @@
 								<td class="px-4 py-3 hidden sm:table-cell">
 									<span
 										class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400"
+										>{{ item.metal }}</span
 									>
-										{{ item.metal }}
-									</span>
 								</td>
 								<td
 									class="px-4 py-3 text-xs text-gray-600 dark:text-gray-400 hidden md:table-cell"
@@ -165,9 +268,8 @@
 												? 'text-amber-500'
 												: 'text-green-600'
 										"
+										>{{ item.stock }}</span
 									>
-										{{ item.stock }}
-									</span>
 								</td>
 								<td
 									class="px-4 py-3 text-right text-xs font-bold font-mono text-gray-900 dark:text-white"
@@ -194,12 +296,72 @@
 										}}
 									</span>
 								</td>
+								<td class="px-4 py-3 text-center hidden lg:table-cell">
+									<div class="flex items-center justify-center gap-1">
+										<button
+											@click.stop="openLifecycle(item)"
+											class="p-1 hover:bg-gray-100 dark:hover:bg-warm-dark-700 rounded"
+											title="Lifecycle"
+										>
+											<svg
+												class="w-4 h-4 text-gray-400"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+										</button>
+										<button
+											@click.stop="openReserve(item)"
+											class="p-1 hover:bg-gray-100 dark:hover:bg-warm-dark-700 rounded"
+											title="Reserve"
+										>
+											<svg
+												class="w-4 h-4 text-gray-400"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+										</button>
+										<button
+											@click.stop="openDamage(item)"
+											class="p-1 hover:bg-gray-100 dark:hover:bg-warm-dark-700 rounded"
+											title="Damage"
+										>
+											<svg
+												class="w-4 h-4 text-gray-400"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+												/>
+											</svg>
+										</button>
+									</div>
+								</td>
 							</tr>
 						</tbody>
 					</table>
 				</div>
 
-				<!-- Grid View -->
 				<div
 					v-else
 					class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3"
@@ -208,6 +370,7 @@
 						v-for="item in filteredItems"
 						:key="item.code"
 						class="premium-card !p-0 overflow-hidden group cursor-pointer"
+						@click="selectedItem = item"
 					>
 						<div class="aspect-square bg-gray-100 dark:bg-warm-dark-900 relative">
 							<div
@@ -237,9 +400,8 @@
 											? 'bg-amber-100 text-amber-700'
 											: 'bg-green-100 text-green-700'
 									"
+									>{{ item.stock }} pcs</span
 								>
-									{{ item.stock }} pcs
-								</span>
 							</div>
 						</div>
 						<div class="p-3">
@@ -269,36 +431,104 @@
 					</div>
 				</div>
 			</div>
+
+			<ItemActionDrawer
+				v-if="selectedItem"
+				:item="selectedItem"
+				@close="selectedItem = null"
+				@reserve="openReserve(selectedItem)"
+				@damage="openDamage(selectedItem)"
+				@lifecycle="openLifecycle(selectedItem)"
+			/>
 		</div>
+
+		<QuickAddItemModal
+			v-if="showQuickAdd"
+			@close="showQuickAdd = false"
+			@created="onDataChanged"
+		/>
+		<PushToStoresModal
+			v-if="showPushToStores"
+			:item-code="pushItemCode"
+			@close="showPushToStores = false"
+			@pushed="onDataChanged"
+		/>
+		<StoreTransferModal
+			v-if="showTransferModal"
+			:order="{}"
+			mode="dispatch"
+			@close="showTransferModal = false"
+			@completed="onDataChanged"
+		/>
+		<ConsignmentModal
+			v-if="showConsignment"
+			mode="out"
+			@close="showConsignment = false"
+			@completed="onDataChanged"
+		/>
+		<ReservePieceModal
+			v-if="showReserve && reserveSerialNo"
+			:serial-no="reserveSerialNo"
+			@close="showReserve = false"
+			@reserved="onDataChanged"
+		/>
+		<DamageReportModal
+			v-if="showDamage && damageSerialNo"
+			:serial-no="damageSerialNo"
+			@close="showDamage = false"
+			@completed="onDataChanged"
+		/>
+		<PieceLifecyclePanel
+			v-if="showLifecycle && lifecycleSerialNo"
+			:serial-no="lifecycleSerialNo"
+			@close="showLifecycle = false"
+		/>
 	</AppLayout>
 </template>
 
 <script setup>
+import { ref, computed } from 'vue'
+import { createResource } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
 import FilterBar from '@/components/FilterBar.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
 import { useUIStore } from '@/stores/ui.js'
-import { ref, computed } from 'vue'
-
-import { createResource } from 'frappe-ui'
 import { useSessionStore } from '@/stores/session.js'
+import QuickAddItemModal from '@/components/QuickAddItemModal.vue'
+import PushToStoresModal from '@/components/PushToStoresModal.vue'
+import StoreTransferModal from '@/components/StoreTransferModal.vue'
+import ConsignmentModal from '@/components/ConsignmentModal.vue'
+import ReservePieceModal from '@/components/ReservePieceModal.vue'
+import DamageReportModal from '@/components/DamageReportModal.vue'
+import PieceLifecyclePanel from '@/components/PieceLifecyclePanel.vue'
 
 const ui = useUIStore()
 const session = useSessionStore()
 const viewMode = ref(localStorage.getItem('zevar_inventory_view') || 'list')
 
 const inventoryData = ref([])
+const selectedItem = ref(null)
+const mobileMenuOpen = ref(false)
+
+const showQuickAdd = ref(false)
+const showPushToStores = ref(false)
+const showTransferModal = ref(false)
+const showConsignment = ref(false)
+const showReserve = ref(false)
+const showDamage = ref(false)
+const showLifecycle = ref(false)
+const reserveSerialNo = ref('')
+const damageSerialNo = ref('')
+const lifecycleSerialNo = ref('')
+const pushItemCode = ref('')
 
 const inventoryResource = createResource({
 	url: 'zevar_core.api.catalog.get_pos_items',
 	makeParams() {
-		return { 
-			warehouse: session.currentWarehouse,
-			page_length: 500, // Fetch up to 500 for local grid filtering, alternatively implement server-side pagination
-		}
+		return { warehouse: session.currentWarehouse, page_length: 500 }
 	},
 	onSuccess(data) {
-		inventoryData.value = data.map(i => ({
+		inventoryData.value = data.map((i) => ({
 			code: i.item_code,
 			name: i.item_name,
 			metal: i.metal || '-',
@@ -306,15 +536,15 @@ const inventoryResource = createResource({
 			weight: i.gross_weight || 0,
 			stock: i.stock_qty || 0,
 			price: i.price || i.msrp || 0,
-			category: i.jewelry_type || i.item_group || 'Other'
+			category: i.jewelry_type || i.item_group || 'Other',
+			serialNo: i.serial_no || '',
 		}))
-	}
+	},
 })
 
-// Fetch on mount
 inventoryResource.fetch()
 
-
+const totalItems = computed(() => inventoryData.value.length)
 const totalValue = computed(() =>
 	inventoryData.value.reduce((sum, i) => sum + i.price * Math.max(i.stock, 0), 0)
 )
@@ -324,47 +554,50 @@ const outOfStockItems = computed(() => inventoryData.value.filter((i) => i.stock
 const filteredItems = computed(() => {
 	let items = [...inventoryData.value]
 	const f = ui.activeFilters
-
-	if (f.custom_metal_type) {
-		items = items.filter((i) => i.metal === f.custom_metal_type)
-	}
-	if (f.custom_jewelry_type) {
-		items = items.filter((i) => i.category === f.custom_jewelry_type)
-	}
-	if (f.in_stock_only) {
-		items = items.filter((i) => i.stock > 0)
-	}
-	if (f.out_of_stock_only) {
-		items = items.filter((i) => i.stock <= 0)
-	}
-	if (f.low_stock_only) {
-		items = items.filter((i) => i.stock > 0 && i.stock < 5)
-	}
-	if (f.price_min) {
-		items = items.filter((i) => i.price >= f.price_min)
-	}
-	if (f.price_max) {
-		items = items.filter((i) => i.price <= f.price_max)
-	}
-	if (f.custom_purity) {
-		items = items.filter((i) => i.purity === f.custom_purity)
-	}
+	if (f.custom_metal_type) items = items.filter((i) => i.metal === f.custom_metal_type)
+	if (f.custom_jewelry_type) items = items.filter((i) => i.category === f.custom_jewelry_type)
+	if (f.in_stock_only) items = items.filter((i) => i.stock > 0)
+	if (f.out_of_stock_only) items = items.filter((i) => i.stock <= 0)
+	if (f.low_stock_only) items = items.filter((i) => i.stock > 0 && i.stock < 5)
+	if (f.price_min) items = items.filter((i) => i.price >= f.price_min)
+	if (f.price_max) items = items.filter((i) => i.price <= f.price_max)
+	if (f.custom_purity) items = items.filter((i) => i.purity === f.custom_purity)
 	if (ui.searchQuery) {
 		const q = ui.searchQuery.toLowerCase()
 		items = items.filter(
 			(i) => i.name.toLowerCase().includes(q) || i.code.toLowerCase().includes(q)
 		)
 	}
-
-	// Sorting
 	if (ui.sortBy === 'price_asc') items.sort((a, b) => a.price - b.price)
 	else if (ui.sortBy === 'price_desc') items.sort((a, b) => b.price - a.price)
 	else if (ui.sortBy === 'weight_asc') items.sort((a, b) => a.weight - b.weight)
 	else if (ui.sortBy === 'weight_desc') items.sort((a, b) => b.weight - a.weight)
 	else if (ui.sortBy === 'name_asc') items.sort((a, b) => a.name.localeCompare(b.name))
-
 	return items
 })
+
+function openLifecycle(item) {
+	lifecycleSerialNo.value = item.serialNo || item.code
+	showLifecycle.value = true
+}
+function openReserve(item) {
+	reserveSerialNo.value = item.serialNo || item.code
+	showReserve.value = true
+}
+function openDamage(item) {
+	damageSerialNo.value = item.serialNo || item.code
+	showDamage.value = true
+}
+function onDataChanged() {
+	inventoryResource.fetch()
+	showQuickAdd.value = false
+	showPushToStores.value = false
+	showTransferModal.value = false
+	showConsignment.value = false
+	showReserve.value = false
+	showDamage.value = false
+	selectedItem.value = null
+}
 
 function formatCurrency(val) {
 	if (!val) return '$0.00'

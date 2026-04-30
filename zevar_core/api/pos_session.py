@@ -252,7 +252,6 @@ def open_pos_session(
 @frappe.whitelist()
 def preview_close(session_name: str, total_cash_counted: float) -> dict:
 	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
-	user = frappe.session.user
 
 	if not session_name or not frappe.db.exists("POS Opening Entry", session_name):
 		frappe.throw(_("POS Session '{0}' not found.").format(session_name or ""))

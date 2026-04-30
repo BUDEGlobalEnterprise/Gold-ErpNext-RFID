@@ -9,6 +9,7 @@ class RepairPayment(Document):
 	def validate(self):
 		if not self.payment_date:
 			from frappe.utils import now
+
 			self.payment_date = now()
 
 		if not self.received_by:

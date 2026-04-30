@@ -61,7 +61,7 @@
 		>
 			<div class="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between gap-8">
 				<!-- Logo - Fixed alignment -->
-				<router-link to="/catalogues" class="flex items-center gap-3 flex-shrink-0">
+				<router-link to="/pos-catalogue" class="flex items-center gap-3 flex-shrink-0">
 					<img src="/logo.svg" alt="Zevar POS" class="w-9 h-9 rounded-lg" />
 					<div class="flex flex-col justify-center leading-none">
 						<span
@@ -215,7 +215,7 @@
 						@focusout="openDropdown = null"
 					>
 						<a
-							:href="router.resolve({ path: `/catalogues/${cat.id}` }).href"
+							:href="router.resolve({ path: `/pos-catalogue/${cat.id}` }).href"
 							@click.prevent="navigateTo(cat.id)"
 							:aria-haspopup="!!cat.subcategories"
 							:aria-expanded="openDropdown === cat.id"
@@ -266,7 +266,7 @@
 									:key="sub.name"
 									:href="
 										router.resolve({
-											path: `/catalogues/${cat.id}`,
+											path: `/pos-catalogue/${cat.id}`,
 											query: { sub: sub.name },
 										}).href
 									"
@@ -310,7 +310,10 @@ const goldPrice = computed(() => {
 	const rate22kt = goldStore.rates['Yellow Gold-22Kt']
 	if (!rate22kt) return '---'
 	const perOz = (rate22kt * 31.1035).toFixed(2)
-	return Number(perOz).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+	return Number(perOz).toLocaleString('en-US', {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	})
 })
 
 const priceChange = ref(0.0)
@@ -419,10 +422,10 @@ const navCategories = [
 ]
 
 function navigateTo(category, subcategory = null) {
-	if (category === 'all') router.push('/catalogues')
+	if (category === 'all') router.push('/pos-catalogue')
 	else if (subcategory)
-		router.push({ path: `/catalogues/${category}`, query: { sub: subcategory } })
-	else router.push(`/catalogues/${category}`)
+		router.push({ path: `/pos-catalogue/${category}`, query: { sub: subcategory } })
+	else router.push(`/pos-catalogue/${category}`)
 }
 
 onMounted(async () => {

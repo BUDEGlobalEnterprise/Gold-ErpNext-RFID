@@ -2,7 +2,7 @@
 	<AppLayout>
 		<div
 			v-if="!session.currentWarehouse"
-			class="h-full flex flex-col items-center justify-center text-center opacity-50"
+			class="min-h-[50vh] flex flex-col items-center justify-center text-center opacity-50"
 		>
 			<div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mb-4">
 				<svg
@@ -29,7 +29,7 @@
 			<p class="premium-subtitle">Choose a location from the top menu to view inventory.</p>
 		</div>
 
-		<div v-else class="h-full flex flex-col min-h-0">
+		<div v-else class="flex flex-col">
 			<div
 				class="flex items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-8 flex-shrink-0"
 			>
@@ -183,12 +183,17 @@ import ProductModal from '@/components/POSProductModal.vue'
 import { useSessionStore } from '@/stores/session.js'
 import { useUIStore } from '@/stores/ui.js'
 import { useCartStore } from '@/stores/cart.js'
+import { useBreakpoint } from '@/composables/useBreakpoint.js'
 import { createResource } from 'frappe-ui'
 import { watch, ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const session = useSessionStore()
 const ui = useUIStore()
 const cart = useCartStore()
+const { isMobile: isMobileBP, productGridCols } = useBreakpoint()
 
 // View mode toggle
 const viewMode = ref('pos')
@@ -199,11 +204,8 @@ const catalogLoading = ref(false)
 const showModal = ref(false)
 const selectedItemCode = ref(null)
 
-// Detect mobile/tablet viewport
-const isMobile = computed(() => {
-	if (typeof window === 'undefined') return false
-	return window.innerWidth < 1024
-})
+// Detect mobile/tablet viewport via shared composable
+const isMobile = computed(() => isMobileBP.value)
 
 // Data State
 const catalog = ref([])
@@ -318,7 +320,7 @@ function handleQuickAdd(item) {
 }
 
 function viewCategory(cat) {
-	window.location.href = `/pos/catalogues/${encodeURIComponent(cat.name)}`
+	router.push(`/pos-catalogue/${encodeURIComponent(cat.name)}`)
 }
 
 // Watchers

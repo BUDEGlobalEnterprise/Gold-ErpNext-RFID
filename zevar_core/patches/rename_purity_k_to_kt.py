@@ -22,11 +22,13 @@ def execute():
 		if not frappe.db.exists("Zevar Purity", new_purity):
 			old_doc = frappe.db.get_value("Zevar Purity", old_purity, ["fine_metal_content"], as_dict=True)
 			if old_doc:
-				frappe.get_doc({
-					"doctype": "Zevar Purity",
-					"__newname": new_purity,
-					"fine_metal_content": old_doc.fine_metal_content,
-				}).insert(ignore_permissions=True)
+				frappe.get_doc(
+					{
+						"doctype": "Zevar Purity",
+						"__newname": new_purity,
+						"fine_metal_content": old_doc.fine_metal_content,
+					}
+				).insert(ignore_permissions=True)
 
 		frappe.db.sql(
 			"UPDATE `tabGold Rate Log` SET purity = %s WHERE purity = %s",

@@ -1,0 +1,145 @@
+{
+ "actions": [],
+ "autoname": "prompt",
+ "creation": "2026-04-30 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "enable_audit_schedule",
+  "section_break_cadence",
+  "showcase_cadence_days",
+  "backstock_cadence_days",
+  "full_store_cadence_days",
+  "daily_spot_case",
+  "section_break_thresholds",
+  "variance_threshold_dollars",
+  "variance_pieces_hard_stop",
+  "section_break_behavior",
+  "auto_create_shrinkage_entry",
+  "require_two_person_rule",
+  "ai_double_count"
+ ],
+ "fields": [
+  {
+   "default": "1",
+   "fieldname": "enable_audit_schedule",
+   "fieldtype": "Check",
+   "label": "Enable Audit Schedule"
+  },
+  {
+   "fieldname": "section_break_cadence",
+   "fieldtype": "Section Break",
+   "label": "Audit Cadence"
+  },
+  {
+   "default": "7",
+   "fieldname": "showcase_cadence_days",
+   "fieldtype": "Int",
+   "label": "Showcase Audit Cadence (Days)",
+   "description": "How often each display case should be audited. Default: 7 (weekly)"
+  },
+  {
+   "default": "30",
+   "fieldname": "backstock_cadence_days",
+   "fieldtype": "Int",
+   "label": "Backstock/Safe Audit Cadence (Days)",
+   "description": "How often back-stock and safe zones should be audited. Default: 30 (monthly)"
+  },
+  {
+   "default": "90",
+   "fieldname": "full_store_cadence_days",
+   "fieldtype": "Int",
+   "label": "Full Store Reconciliation Cadence (Days)",
+   "description": "How often a full store reconciliation should occur. Default: 90 (quarterly)"
+  },
+  {
+   "fieldname": "daily_spot_case",
+   "fieldtype": "Link",
+   "label": "Daily Spot-Check Case",
+   "options": "Display Case",
+   "description": "High-value display case to be spot-checked daily at close-of-business"
+  },
+  {
+   "fieldname": "section_break_thresholds",
+   "fieldtype": "Section Break",
+   "label": "Variance Thresholds"
+  },
+  {
+   "default": "500",
+   "fieldname": "variance_threshold_dollars",
+   "fieldtype": "Currency",
+   "label": "Viance Threshold ($)",
+   "description": "Above this dollar value, the audit session freezes pending manager approval"
+  },
+  {
+   "default": "3",
+   "fieldname": "variance_pieces_hard_stop",
+   "fieldtype": "Int",
+   "label": "Variance Pieces Hard Stop",
+   "description": "More than this many missing pieces freezes reservations and transfers until cleared"
+  },
+  {
+   "fieldname": "section_break_behavior",
+   "fieldtype": "Section Break",
+   "label": "Behavior"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto_create_shrinkage_entry",
+   "fieldtype": "Check",
+   "label": "Auto-Create Shrinkage Entry on Finalize",
+   "description": "Automatically post Material Issue to Shrinkage warehouse for missing items below threshold"
+  },
+  {
+   "default": "1",
+   "fieldname": "require_two_person_rule",
+   "fieldtype": "Check",
+   "label": "Require Two-Person Sign-Off",
+   "description": "Manager + associate must both sign off on audits with variances"
+  },
+  {
+   "default": "0",
+   "fieldname": "ai_double_count",
+   "fieldtype": "Check",
+   "label": "AI Double-Count Verification (Future)",
+   "description": "If enabled, camera takes photos every N scans for ML verification"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-04-30 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Unified Retail Management System",
+ "name": "Audit Policy",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
