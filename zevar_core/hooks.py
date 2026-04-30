@@ -38,6 +38,12 @@ website_route_rules = [
 	{"from_route": "/catalogues/<path:app_path>", "to_route": "catalogues"},
 ]
 
+# Override whitelisted methods for payment gateway webhooks
+override_whitelisted_methods = {
+	"zevar_core.api.payment_webhooks.stripe_webhook": "zevar_core.api.payment_webhooks.stripe_webhook",
+	"zevar_core.api.payment_webhooks.square_webhook": "zevar_core.api.payment_webhooks.square_webhook",
+}
+
 # Fixtures
 fixtures = ["Item Attribute", "Custom Field", "Property Setter"]
 
@@ -48,6 +54,7 @@ doc_events = {
 		"validate": [
 			"zevar_core.tax_events.apply_store_tax",
 			"zevar_core.trade_in_events.validate_trade_in_2x_rule",
+			"zevar_core.api.inventory.validate_serial_sellable_zones",
 		],
 		"before_submit": ["zevar_core.api.repair_accounting.validate_sales_invoice_stream"],
 		"on_submit": "zevar_core.api.commission.calculate_commissions",
@@ -63,6 +70,16 @@ scheduler_events = {
 			"zevar_core.api.layaway.check_overdue_and_forfeit",
 			"zevar_core.api.layaway.send_payment_reminders",
 		],
+		"0 23 * * *": ["zevar_core.tasks.email_eod_brief"],
+		"0 6 * * *": [
+			"zevar_core.api.compliance.scan_cash_transactions",
+			"zevar_core.tasks.reorder_suggestion_job",
+			"zevar_core.tasks.audit_cadence_heartbeat",
+			"zevar_core.tasks.serial_last_seen_backfill",
+			"zevar_core.tasks.consignment_overdue_alert",
+		],
+		"0 * * * *": ["zevar_core.tasks.expire_stale_reservations"],
+		"0 */2 * * *": ["zevar_core.tasks.run_report_subscriptions"],
 	},
 }
 

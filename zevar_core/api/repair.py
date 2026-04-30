@@ -196,8 +196,25 @@ def create_repair_order(
 	doc.estimated_cost = estimated_cost
 	doc.priority = priority
 
+	# Handle gemstones JSON payload
+	gemstones_json = kwargs.pop("gemstones_json", None)
+	if gemstones_json:
+		try:
+			import json
+			gemstones = json.loads(gemstones_json) if isinstance(gemstones_json, str) else gemstones_json
+			for stone in gemstones:
+				doc.append("gemstones", {
+					"gemstone_type": stone.get("type", ""),
+					"quantity": stone.get("count", 1),
+					"carat_weight": stone.get("carat_weight") or 0,
+					"color": stone.get("color", ""),
+					"clarity": stone.get("clarity", ""),
+				})
+		except Exception as e:
+			frappe.log_error(f"Failed to parse gemstones for repair order: {e}")
+
 	for key, value in kwargs.items():
-		if hasattr(doc, key):
+		if hasattr(doc, key) and value is not None:
 			setattr(doc, key, value)
 
 	doc.insert()

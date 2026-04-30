@@ -6,11 +6,12 @@
 					New Repair Order
 				</h3>
 				<button
-					@click="showRepairTypeManager = true"
-					class="px-3 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
-				>
-					Manage Repair Types
-				</button>
+						type="button"
+						@click="showRepairTypeManager = true"
+						class="px-3 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
+					>
+						Manage Repair Types
+					</button>
 			</div>
 		</template>
 
@@ -565,25 +566,36 @@
 					</div>
 				</div>
 
-				<!-- Actions -->
-				<div class="flex gap-3 pt-2">
-					<button
-						type="button"
-						@click="$emit('close')"
-						class="flex-1 py-2 border rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800"
-					>
-						Cancel
-					</button>
-					<button
-						type="submit"
-						:disabled="submitting"
-						class="flex-1 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] disabled:opacity-50"
-					>
-						{{ submitting ? 'Creating...' : 'Create Repair' }}
-					</button>
-				</div>
+
 			</form>
 		</div>
+
+		<template #footer>
+			<div v-if="errorMsg" class="w-full mb-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-lg text-sm text-red-700 dark:text-red-400">
+				{{ errorMsg }}
+			</div>
+			<div class="flex gap-3 w-full">
+				<button
+					type="button"
+					@click="$emit('close')"
+					class="flex-1 py-2.5 border rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800"
+				>
+					Cancel
+				</button>
+				<button
+					type="button"
+					:disabled="submitting"
+					@click="submit"
+					class="flex-1 py-2.5 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] disabled:opacity-50 flex items-center justify-center gap-2"
+				>
+					<svg v-if="submitting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+					</svg>
+					{{ submitting ? 'Creating...' : 'Create Repair Order' }}
+				</button>
+			</div>
+		</template>
 	</BaseModal>
 
 	<!-- New Customer Modal -->
@@ -857,17 +869,20 @@ async function submit() {
 			purity: form.value.purity || undefined,
 			metal_weight_in: form.value.metal_weight_in || undefined,
 			metal_weight_out: form.value.metal_weight_out || undefined,
-			gemstones: form.value.gemstones.length > 0 ? form.value.gemstones : undefined,
+			gemstones_json: form.value.gemstones.length > 0 ? JSON.stringify(form.value.gemstones) : undefined,
 			customer_id_type: form.value.customer_id_type || undefined,
 			customer_id_number: form.value.customer_id_number || undefined,
 			customer_id_state: form.value.customer_id_state || undefined,
-			is_warranty_repair: form.value.is_warranty_repair || undefined,
+			is_warranty_repair: form.value.is_warranty_repair ? 1 : undefined,
 			original_repair_order: form.value.original_repair_order || undefined,
 			warranty_claim_type: form.value.warranty_claim_type || undefined,
 			promised_date: form.value.promised_date || undefined,
 			warehouse: session.currentWarehouse || undefined,
 			handled_by: session.user?.email || undefined,
 		}
+
+		// Remove undefined values to avoid sending them as 'undefined' strings
+		Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key])
 
 		await call('zevar_core.api.create_repair_order', payload)
 

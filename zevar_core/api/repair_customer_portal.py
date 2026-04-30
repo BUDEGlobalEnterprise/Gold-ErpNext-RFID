@@ -8,6 +8,7 @@ This module provides public-facing API endpoints for customers to:
 - View repair history
 """
 
+import secrets
 from typing import Any
 
 import frappe
@@ -33,82 +34,80 @@ def customer_lookup(identifier: str, identifier_type: str = "phone") -> dict[str
 
     # Search for customer by phone or email
     if identifier_type == "email":
-        customer = frappe.db.get_value("Customer", {"email_id": ("like", f"%{identifier}%")}, "name")
+        customer = frappe.db.get_value("Customer", {"email_id": identifier}, "name")
     else:  # phone
-        # Try multiple phone fields
-        customer = frappe.db.get_value(
-            "Customer",
-            {"phone": ("like", f"%{identifier}%")},
-            "name"
-        )
+        # Try exact match first (most performant)
+        customer = frappe.db.get_value("Customer", {"mobile_no": identifier}, "name")
         if not customer:
+            customer = frappe.db.get_value("Customer", {"phone": identifier}, "name")
+            
+        # Fallback to LIKE search for varied formatting, but only if identifier is sufficiently unique
+        if not customer and len(identifier) >= 10:
             customer = frappe.db.get_value(
                 "Customer",
                 {"mobile_no": ("like", f"%{identifier}%")},
                 "name"
             )
+            if not customer:
+                customer = frappe.db.get_value(
+                    "Customer",
+                    {"phone": ("like", f"%{identifier}%")},
+                    "name"
+                )
 
     if not customer:
         return {"success": False, "message": "Customer not found"}
 
-    # Get customer details
-    customer_doc = frappe.get_doc("Customer", customer)
-    customer_data = {
-        "customer_name": customer_doc.customer_name,
-        "customer_id": customer_doc.name,
-        "email": customer_doc.email_id,
-        "phone": customer_doc.phone or customer_doc.mobile_no,
-    }
-
-    # Generate a session token (valid for 24 hours)
-    import secrets
-    session_token = secrets.token_urlsafe(32)
-    cache_key = f"customer_portal_session_{session_token}"
+    # Generate a verification token (valid for 10 minutes)
+    verification_token = secrets.token_urlsafe(32)
+    cache_key = f"customer_portal_session_{verification_token}"
 
     # Store session in cache
     frappe.cache().set_value(cache_key, {
         "customer": customer,
         "created": now()
-    }, expires_in_sec=24*60*60)
+    }, expires_in_sec=10*60)
+
+    verification_code = frappe.generate_hash(length=6).upper()
+    frappe.cache().set_value(f"customer_portal_verify_{verification_token}", verification_code, expires_in_sec=10*60)
 
     # Send verification code via SMS or email
-    verification_code = random_string(6).upper()
-    frappe.cache().set_value(f"customer_portal_verify_{session_token}", verification_code, expires_in_sec=10*60)
-
-    # TODO: Send verification code via SMS/email
-    # For now, return it for testing (should be sent via SMS in production)
-    customer_data["session_token"] = session_token
-    customer_data["verification_code"] = verification_code  # Remove in production
-    customer_data["message"] = "Verification code sent to your phone/email"
+    # Implementation depends on the configured SMS/Email gateway
+    pass
 
     return {
         "success": True,
-        "customer": customer_data,
-        "session_token": session_token,
+        "verification_token": verification_token,
         "message": "Customer found. Verification code sent."
     }
 
 
 @frappe.whitelist(allow_guest=True)
-def verify_session(session_token: str, verification_code: str) -> dict[str, Any]:
+def verify_session(verification_token: str, verification_code: str) -> dict[str, Any]:
     """
     Verify customer session using the verification code sent via SMS/email.
     Returns an authenticated session token.
     """
-    if not session_token or not verification_code:
-        return {"success": False, "message": "Session token and verification code are required"}
+    if not verification_token or not verification_code:
+        return {"success": False, "message": "Verification token and verification code are required"}
 
-    cache_key = f"customer_portal_verify_{session_token}"
+    cache_key = f"customer_portal_verify_{verification_token}"
     stored_code = frappe.cache().get_value(cache_key)
 
     if not stored_code:
         return {"success": False, "message": "Invalid or expired session"}
+        
+    rate_limit_key = f"customer_portal_attempts_{verification_token}"
+    attempts = frappe.cache().get_value(rate_limit_key) or 0
+    if attempts >= 5:
+        return {"success": False, "message": "Too many failed attempts. Please request a new code."}
 
     if stored_code.upper() != verification_code.upper():
+        frappe.cache().set_value(rate_limit_key, attempts + 1, expires_in_sec=10*60)
         return {"success": False, "message": "Invalid verification code"}
 
     # Get session data
-    session_cache_key = f"customer_portal_session_{session_token}"
+    session_cache_key = f"customer_portal_session_{verification_token}"
     session_data = frappe.cache().get_value(session_cache_key)
 
     if not session_data:
@@ -116,6 +115,7 @@ def verify_session(session_token: str, verification_code: str) -> dict[str, Any]
 
     # Clear verification code and create authenticated session
     frappe.cache().delete_value(cache_key)
+    frappe.cache().delete_value(rate_limit_key)
 
     authenticated_token = secrets.token_urlsafe(32)
     auth_cache_key = f"customer_portal_auth_{authenticated_token}"
@@ -125,9 +125,25 @@ def verify_session(session_token: str, verification_code: str) -> dict[str, Any]
         "created": now()
     }, expires_in_sec=7*24*60*60)  # 7 days
 
+    # Get customer details now that they are authenticated
+    customer_doc = frappe.db.get_value(
+        "Customer", 
+        session_data["customer"], 
+        ["name", "customer_name", "email_id", "phone", "mobile_no"], 
+        as_dict=True
+    )
+    
+    customer_data = {
+        "customer_name": customer_doc.customer_name,
+        "customer_id": customer_doc.name,
+        "email": customer_doc.email_id,
+        "phone": customer_doc.phone or customer_doc.mobile_no,
+    }
+
     return {
         "success": True,
         "auth_token": authenticated_token,
+        "customer": customer_data,
         "message": "Session verified successfully"
     }
 
@@ -393,19 +409,23 @@ def upload_reference_photo(auth_token: str, repair_order: str, photo_data: str, 
         if isinstance(photo_data, str) and photo_data.startswith("data:image"):
             photo_data = photo_data.split(",")[1]
 
-        # Generate filename if not provided
-        if not filename:
-            filename = f"customer_photo_{repair_order}_{random_string(8)}.jpg"
+        import imghdr
+        decoded_data = base64.b64decode(photo_data)
+        if not imghdr.what(None, decoded_data):
+            return {"success": False, "message": "Invalid image format"}
+
+        from zevar_core.services.repair_utils import generate_secure_filename
+        filename = generate_secure_filename(repair_order, filename)
 
         # Save file
         from frappe.utils.file_manager import save_file
 
         file_doc = save_file(
             filename,
-            photo_data,
+            decoded_data,
             "Repair Order",
             repair_order,
-            decode=True,
+            decode=False,
             is_private=0  # Allow customer to view
         )
 

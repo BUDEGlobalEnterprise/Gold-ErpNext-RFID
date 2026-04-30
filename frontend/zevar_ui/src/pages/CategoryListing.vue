@@ -1,6 +1,6 @@
 <template>
 	<div
-		class="min-h-screen"
+		class="min-h-[100dvh]"
 		:class="isDark ? 'bg-[#1e1e24] text-white' : 'bg-white text-gray-900'"
 	>
 		<Header
@@ -22,7 +22,7 @@
 					class="flex items-center gap-2 text-sm"
 					:class="isDark ? 'text-gray-400' : 'text-gray-600'"
 				>
-					<router-link to="/catalogues" class="hover:text-[#C9A962]">Home</router-link>
+					<router-link to="/pos-catalogue" class="hover:text-[#C9A962]">Home</router-link>
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
@@ -308,8 +308,15 @@ import ProductModal from '@/components/ProductModal.vue'
 const route = useRoute()
 const router = useRouter()
 
+const props = defineProps({
+	isEmbedded: {
+		type: Boolean,
+		default: false,
+	},
+})
+
 // Check if embedded inside AppLayout
-const isEmbedded = computed(() => route.meta?.fullPage === true)
+const isEmbedded = computed(() => props.isEmbedded || route.meta?.fullPage === true)
 
 // Dark mode
 import { useUIStore } from '@/stores/ui'
@@ -448,7 +455,7 @@ function applyFilters() {
 }
 
 function handleCategorySelect(cat) {
-	router.push(`/catalogues/${cat}`)
+	router.push(`/pos-catalogue/${cat}`)
 }
 
 function openProduct(product) {

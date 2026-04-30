@@ -1,0 +1,92 @@
+<style>
+	.eod-brief { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+	.eod-header { text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-bottom: 20px; }
+	.eod-grid { display: table; width: 100%; border-collapse: separate; border-spacing: 15px; }
+	.eod-row { display: table-row; }
+	.eod-col { display: table-cell; padding: 15px; border: 1px solid #eee; border-radius: 8px; text-align: center; background: #fafafa; }
+	.eod-val { font-size: 24px; font-weight: bold; margin: 10px 0; color: #333; }
+	.eod-label { font-size: 14px; color: #777; text-transform: uppercase; letter-spacing: 1px; }
+	.eod-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+	.eod-table th, .eod-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+	.eod-table th { background: #f5f5f5; }
+</style>
+
+{% set date = frappe.utils.today() %}
+{% set data = frappe.call("zevar_core.api.sales_history.get_day_drilldown", date=date) %}
+{% set yoy = frappe.call("zevar_core.api.sales_history.get_yoy_delta", date=date) %}
+
+<div class="eod-brief">
+	<div class="eod-header">
+		<h2>End of Day Brief</h2>
+		<p class="text-muted">{{ frappe.utils.formatdate(date) }}</p>
+	</div>
+
+	<div class="eod-grid">
+		<div class="eod-row">
+			<div class="eod-col">
+				<div class="eod-label">Net Sales (Jewelry)</div>
+				<div class="eod-val">{{ frappe.format_value(data.net_sales, dict(fieldtype='Currency')) }}</div>
+			</div>
+			<div class="eod-col">
+				<div class="eod-label">YoY Delta</div>
+				{% set color = 'green' if yoy.delta_pct >= 0 else 'red' %}
+				<div class="eod-val" style="color: {{ color }};">{{ "%.1f"|format(yoy.delta_pct|abs) }}%</div>
+				<div style="font-size: 12px; color: #777;">vs {{ frappe.format_value(yoy.last_year, dict(fieldtype='Currency')) }}</div>
+			</div>
+		</div>
+		<div class="eod-row">
+			<div class="eod-col">
+				<div class="eod-label">Repairs Revenue</div>
+				<div class="eod-val">{{ frappe.format_value(data.repairs, dict(fieldtype='Currency')) }}</div>
+			</div>
+			<div class="eod-col">
+				<div class="eod-label">Layaway Deposits</div>
+				<div class="eod-val">{{ frappe.format_value(data.layaway_deposits, dict(fieldtype='Currency')) }}</div>
+			</div>
+		</div>
+	</div>
+
+	<h3 style="margin-top: 30px;">Tender Breakdown</h3>
+	<table class="eod-table">
+		<thead>
+			<tr>
+				<th>Payment Method</th>
+				<th style="text-align: right;">Amount</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for t in data.tender_breakdown %}
+			<tr>
+				<td>{{ t.name }}</td>
+				<td style="text-align: right;">{{ frappe.format_value(t.value, dict(fieldtype='Currency')) }}</td>
+			</tr>
+			{% else %}
+			<tr><td colspan="2" style="text-align: center;">No transactions</td></tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	<h3 style="margin-top: 30px;">Top Items Sold</h3>
+	<table class="eod-table">
+		<thead>
+			<tr>
+				<th>Item Code</th>
+				<th>Item Name</th>
+				<th style="text-align: center;">Qty</th>
+				<th style="text-align: right;">Amount</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for i in data.top_items %}
+			<tr>
+				<td>{{ i.item_code }}</td>
+				<td>{{ i.item_name }}</td>
+				<td style="text-align: center;">{{ i.qty }}</td>
+				<td style="text-align: right;">{{ frappe.format_value(i.amount, dict(fieldtype='Currency')) }}</td>
+			</tr>
+			{% else %}
+			<tr><td colspan="4" style="text-align: center;">No items sold</td></tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>

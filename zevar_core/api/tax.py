@@ -12,19 +12,18 @@ def get_tax_details_by_store(store_code: str) -> dict:
 	if not frappe.db.exists("Store Location", store_code):
 		frappe.throw(_("Store Location {0} not found").format(store_code))
 
-	doc = frappe.get_doc("Store Location", store_code)
-	return {
-		"store_code": doc.store_code,
-		"county": doc.county,
-		"county_tax_rate": doc.county_tax_rate,
-		"tax_template": doc.tax_template,
-	}
+	# Use db.get_value to bypass role permission checks for Employee users
+	fields = ["store_code", "county", "county_tax_rate", "tax_template"]
+	details = frappe.db.get_value("Store Location", store_code, fields, as_dict=True)
+	return details or {}
 
 
 @frappe.whitelist()
 def get_tax_details_by_warehouse(warehouse: str) -> dict:
 	"""Resolve Store Location from a warehouse and return its tax details."""
-	store = frappe.get_all(
+	# Use db.get_all instead of get_all to bypass role permission checks
+	# so Employee / POS users can fetch tax rates without Store Location read perm.
+	store = frappe.db.get_all(
 		"Store Location",
 		filters={"default_warehouse": warehouse, "is_active": 1},
 		fields=["name", "county", "county_tax_rate", "tax_template"],

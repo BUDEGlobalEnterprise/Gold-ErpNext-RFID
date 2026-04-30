@@ -1,6 +1,6 @@
 <template>
 	<AppLayout @layaway-created="onLayawayCreated">
-		<div v-if="!showCreateModal" class="h-full flex flex-col">
+		<div v-if="!showCreateModal" class="flex flex-col">
 			<!-- Page Header -->
 			<div class="flex items-center justify-between mb-6">
 				<div>
@@ -299,7 +299,7 @@
 		</div>
 
 		<!-- Create Layaway Inline View -->
-		<div v-else class="h-full flex flex-col p-2">
+		<div v-else class="flex flex-col p-2">
 			<div class="mb-4">
 				<button @click="closeCreateMode" class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center gap-1">
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>

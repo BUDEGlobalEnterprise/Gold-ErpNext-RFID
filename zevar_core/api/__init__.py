@@ -63,7 +63,12 @@ from zevar_core.api.repair import (
 	public_estimate_approval,
 	update_repair_status,
 )
-from zevar_core.api.reports import get_report_catalog, get_report_defaults, get_report_summary
+from zevar_core.api.reports import (
+	get_eod_summary,
+	get_report_catalog,
+	get_report_defaults,
+	get_report_summary,
+)
 from zevar_core.api.tasks import (
 	create_personal_todo,
 	delete_todo,
@@ -93,6 +98,7 @@ __all__ = [
 	"get_customer_details",
 	"get_customer_repair_history",
 	"get_dashboard_stats",
+	"get_eod_summary",
 	"get_employee_roster",
 	"get_employee_tasks",
 	"get_employee_tickets",

@@ -1,6 +1,6 @@
 <template>
 	<AppLayout>
-		<div class="h-full flex flex-col min-h-0">
+		<div class="flex flex-col">
 			<!-- Header -->
 			<div class="flex items-center justify-between gap-4 mb-6 flex-shrink-0">
 				<div class="flex items-center gap-3">
@@ -53,13 +53,13 @@
 				</div>
 			</div>
 
-			<!-- Table View Wrapper with Outside Scrollbar -->
-			<div v-if="viewMode === 'list'" class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
-				<div class="bg-white dark:bg-warm-dark-900/50 rounded-xl border border-gray-100 dark:border-warm-border/50 flex flex-col shadow-sm relative min-h-min">
-					<div class="overflow-x-auto">
-						<table class="w-full text-sm">
-							<thead>
-								<tr class="bg-gray-50 dark:bg-warm-dark-900/90 border-b border-gray-100 dark:border-warm-border/50 sticky top-0 z-10 backdrop-blur-sm">
+			<!-- Table / Grid Wrapper -->
+			<div class="flex-1 min-h-0 flex flex-col bg-white dark:bg-warm-dark-900/50 rounded-xl border border-gray-100 dark:border-warm-border/50 shadow-sm overflow-hidden">
+				<!-- List View -->
+				<div v-if="viewMode === 'list'" class="flex-1 overflow-y-auto custom-scrollbar">
+					<table class="w-full text-sm">
+						<thead class="bg-gray-50 dark:bg-warm-dark-900/90 border-b border-gray-100 dark:border-warm-border/50 sticky top-0 z-10 backdrop-blur-sm">
+							<tr>
 								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Name</th>
 								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Contact</th>
 								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Group</th>
@@ -132,8 +132,71 @@
 					</table>
 				</div>
 
-				<!-- Pagination Controls -->
-				<div class="px-4 py-3 border-t border-gray-100 dark:border-warm-border/50 bg-gray-50 dark:bg-warm-dark-700 flex items-center justify-between mt-auto shrink-0 sticky bottom-0 z-10">
+				<!-- Grid View -->
+				<div v-else-if="viewMode === 'grid'" class="flex-1 overflow-y-auto custom-scrollbar p-4">
+					<!-- Loading State -->
+					<div v-if="loading" class="py-20 text-center text-gray-500 dark:text-gray-400">
+						<div class="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-[#D4AF37] mx-auto mb-4"></div>
+						Loading customers...
+					</div>
+
+					<!-- Empty State -->
+					<div v-else-if="customers.length === 0" class="py-20 text-center text-gray-500 dark:text-gray-400">
+						No customers found.
+					</div>
+
+					<div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+						<div
+							v-for="customer in customers"
+							:key="customer.name"
+							class="bg-white dark:bg-[#15171e] rounded-2xl border border-gray-100 dark:border-warm-border/50 p-4 hover:shadow-md hover:border-gray-300 dark:hover:border-warm-border transition cursor-pointer flex flex-col"
+							:class="customer.customer_group === 'VIP' ? '!border-[#D4AF37]/30' : ''"
+							@click="openCustomer(customer.name)"
+						>
+							<div class="flex items-center gap-3 mb-3">
+								<div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+									:class="customer.customer_group === 'VIP' ? 'bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] text-[#0F1115]' : 'bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-300'">
+									{{ getInitials(customer.customer_name || customer.name) }}
+								</div>
+								<div class="min-w-0">
+									<div class="font-bold text-gray-900 dark:text-white text-sm truncate">{{ customer.customer_name || customer.name }}</div>
+									<span class="px-2 py-0.5 rounded-full text-[9px] font-bold"
+										:class="customer.customer_group === 'VIP' ? 'bg-[#D4AF37]/15 text-[#D4AF37]' : 'bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-400'">
+										{{ customer.customer_group || 'Standard' }}
+									</span>
+								</div>
+							</div>
+							<div class="space-y-1.5 pt-3 border-t border-gray-100 dark:border-warm-border/50">
+								<div class="flex items-center justify-between">
+									<div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+										<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+										{{ customer.mobile_no || 'No Phone' }}
+									</div>
+									<div class="flex items-center gap-1">
+										<button @click.stop="openCustomer(customer.name)" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition" title="View Customer">
+											<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+										</button>
+										<button 
+											v-if="sessionStore.isManager"
+											@click.stop="editCustomer(customer.name)"
+											class="p-1 rounded hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition"
+											title="Edit Customer"
+										>
+											<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+										</button>
+									</div>
+								</div>
+								<div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+									<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+									{{ customer.email_id || 'No Email' }}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Shared Pagination Footer -->
+				<div class="px-4 py-3 border-t border-gray-100 dark:border-warm-border/50 bg-gray-50 dark:bg-warm-dark-700 flex items-center justify-between shrink-0 z-10">
 					<div class="flex items-center gap-3">
 						<div class="text-xs text-gray-500 dark:text-gray-400">
 							Showing {{ (pagination.page - 1) * pagination.page_length + 1 }} to {{ Math.min(pagination.page * pagination.page_length, pagination.total_count) }} of {{ pagination.total_count }} entries
@@ -171,58 +234,8 @@
 						</button>
 					</div>
 				</div>
-				</div>
 			</div>
 
-			<div v-if="viewMode === 'grid'" class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
-				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 pb-4">
-					<div
-						v-for="customer in customers"
-						:key="customer.name"
-						class="bg-white dark:bg-[#15171e] rounded-2xl border border-gray-100 dark:border-warm-border/50 p-4 hover:shadow-md hover:border-gray-300 dark:hover:border-warm-border transition cursor-pointer flex flex-col"
-						:class="customer.customer_group === 'VIP' ? '!border-[#D4AF37]/30' : ''"
-					>
-						<div class="flex items-center gap-3 mb-3">
-							<div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-								:class="customer.customer_group === 'VIP' ? 'bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] text-[#0F1115]' : 'bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-300'">
-								{{ getInitials(customer.customer_name || customer.name) }}
-							</div>
-							<div class="min-w-0">
-								<div class="font-bold text-gray-900 dark:text-white text-sm truncate">{{ customer.customer_name || customer.name }}</div>
-								<span class="px-2 py-0.5 rounded-full text-[9px] font-bold"
-									:class="customer.customer_group === 'VIP' ? 'bg-[#D4AF37]/15 text-[#D4AF37]' : 'bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-400'">
-									{{ customer.customer_group || 'Standard' }}
-								</span>
-							</div>
-						</div>
-						<div class="space-y-1.5 pt-3 border-t border-gray-100 dark:border-warm-border/50">
-							<div class="flex items-center justify-between">
-								<div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-									<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-									{{ customer.mobile_no || 'No Phone' }}
-								</div>
-								<div class="flex items-center gap-1">
-									<button @click.stop="openCustomer(customer.name)" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition" title="View Customer">
-										<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-									</button>
-									<button 
-										v-if="sessionStore.isManager"
-										@click.stop="editCustomer(customer.name)"
-										class="p-1 rounded hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition"
-										title="Edit Customer"
-									>
-										<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-									</button>
-								</div>
-							</div>
-							<div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-								<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-								{{ customer.email_id || 'No Email' }}
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
 		</div>
 	</AppLayout>
 </template>

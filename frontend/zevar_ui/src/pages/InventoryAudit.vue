@@ -1,8 +1,8 @@
 <template>
 	<AppLayout>
-		<div class="h-full flex flex-col min-h-0">
+		<div class="flex flex-col h-full">
 			<!-- Header -->
-			<div class="flex items-center justify-between gap-4 mb-6 flex-shrink-0">
+			<div class="flex items-center justify-between gap-4 mb-4 flex-shrink-0">
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Inventory Audit</h2>
 					<span
@@ -33,21 +33,97 @@
 
 			<!-- Launcher View -->
 			<div v-if="currentView === 'launcher'" class="flex-1 overflow-y-auto min-h-0">
-				<div class="max-w-2xl mx-auto space-y-6">
+				<div class="max-w-3xl mx-auto space-y-6">
+
+					<!-- Dashboard Cards -->
+					<div v-if="auditStore.dashboard" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+						<div class="premium-card !p-4 text-center">
+							<div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Next Audit</div>
+							<div class="text-sm font-bold text-gray-900 dark:text-white">
+								{{ auditStore.dashboard.next_audit ? formatDate(auditStore.dashboard.next_audit.scheduled_for) : 'None scheduled' }}
+							</div>
+							<div v-if="auditStore.dashboard.next_audit" class="text-[10px] text-gray-400">{{ auditStore.dashboard.next_audit.scope }}</div>
+						</div>
+						<div class="premium-card !p-4 text-center" :class="auditStore.dashboard.overdue_audits > 0 ? '!border-red-300 dark:!border-red-800' : ''">
+							<div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Overdue</div>
+							<div class="text-xl font-bold" :class="auditStore.dashboard.overdue_audits > 0 ? 'text-red-500' : 'text-green-600'">
+								{{ auditStore.dashboard.overdue_audits }}
+							</div>
+						</div>
+						<div class="premium-card !p-4 text-center">
+							<div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">30-Day Shrinkage</div>
+							<div class="text-sm font-bold" :class="auditStore.dashboard.shrinkage_last_30_days > 0 ? 'text-red-500' : 'text-green-600'">
+								{{ formatCurrency(auditStore.dashboard.shrinkage_last_30_days) }}
+							</div>
+						</div>
+						<div class="premium-card !p-4 text-center">
+							<div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Audit Hit Rate</div>
+							<div class="text-xl font-bold text-[#D4AF37]">{{ auditStore.dashboard.audit_hit_rate }}%</div>
+						</div>
+					</div>
+
+					<!-- Frozen Store Warning -->
+					<div v-if="auditStore.dashboard?.frozen_stores?.length" class="premium-card !p-4 !border-red-300 bg-red-50 dark:bg-red-900/20">
+						<div class="flex items-center gap-3">
+							<div class="text-red-500 text-xl font-bold">!</div>
+							<div>
+								<div class="text-sm font-bold text-red-700 dark:text-red-400">Store Frozen</div>
+								<div class="text-xs text-red-600 dark:text-red-400">
+									{{ auditStore.dashboard.frozen_stores[0].reason }} &mdash; Reservations and transfers are blocked.
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Start from Audit Plan -->
+					<div v-if="auditStore.auditPlans.length" class="premium-card !p-6">
+						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Scheduled Audits</h3>
+						<div class="space-y-2">
+							<div
+								v-for="plan in auditStore.auditPlans"
+								:key="plan.name"
+								class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-warm-border/50 hover:bg-gray-50 dark:hover:bg-warm-dark-700 cursor-pointer transition-colors"
+								@click="startFromPlan(plan)"
+							>
+								<div>
+									<div class="text-sm font-semibold text-gray-900 dark:text-white">{{ plan.scope }}</div>
+									<div class="text-xs text-gray-500">{{ plan.store_location }} &middot; {{ formatDate(plan.scheduled_for) }}</div>
+								</div>
+								<button class="px-3 py-1.5 text-xs font-bold rounded-lg bg-gradient-to-r from-[#D4AF37] to-[#F2E6A0] text-gray-900">
+									Start
+								</button>
+							</div>
+						</div>
+					</div>
+
 					<!-- Start New Audit -->
 					<div class="premium-card !p-6">
 						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Start New Audit</h3>
 						<div class="space-y-4">
 							<div>
 								<label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-									Warehouse / Store
+									Audit Scope
+								</label>
+								<select
+									v-model="selectedScope"
+									class="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-warm-border bg-white dark:bg-warm-dark-700 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+								>
+									<option value="Spot">Spot Check (Single Case)</option>
+									<option value="Showcase">Showcase Audit (Full Case)</option>
+									<option value="Backstock">Backstock / Safe Audit</option>
+									<option value="Full Store">Full Store Reconciliation</option>
+								</select>
+							</div>
+							<div>
+								<label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+									{{ selectedScope === 'Spot' || selectedScope === 'Showcase' ? 'Display Case' : 'Store / Warehouse' }}
 								</label>
 								<select
 									v-model="selectedWarehouse"
 									class="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-warm-border bg-white dark:bg-warm-dark-700 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 								>
-									<option value="">Select warehouse...</option>
-									<option v-for="wh in warehouses" :key="wh.name" :value="wh.name">
+									<option value="">Select...</option>
+									<option v-for="wh in scopeWarehouses" :key="wh.name" :value="wh.name">
 										{{ wh.name }}
 									</option>
 								</select>
@@ -60,7 +136,7 @@
 									v-model="auditNotes"
 									rows="2"
 									class="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-warm-border bg-white dark:bg-warm-dark-700 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 resize-none"
-									placeholder="e.g. Annual Q2 count, Display case 3..."
+									placeholder="e.g. Annual Q2 count, After theft incident..."
 								></textarea>
 							</div>
 							<button
@@ -68,7 +144,7 @@
 								class="w-full py-3 rounded-lg bg-gradient-to-r from-[#D4AF37] to-[#F2E6A0] text-gray-900 font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all"
 								@click="handleStartAudit"
 							>
-								{{ auditStore.startAuditResource.loading ? 'Starting...' : 'Start Audit' }}
+								{{ auditStore.startAuditResource.loading ? 'Starting...' : `Start ${selectedScope} Audit` }}
 							</button>
 						</div>
 					</div>
@@ -108,8 +184,8 @@
 			</div>
 
 			<!-- Scanning View -->
-			<div v-else-if="currentView === 'scanning'" class="flex-1 overflow-hidden min-h-0">
-				<div class="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 h-full">
+			<div v-else-if="currentView === 'scanning'" class="flex-1 min-h-0">
+				<div class="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
 					<!-- Left Column: Scan Interface -->
 					<div class="flex flex-col min-h-0 overflow-y-auto">
 						<!-- Scan Mode Toggle -->
@@ -133,7 +209,6 @@
 								RFID Batch
 							</button>
 							<div class="flex-1"></div>
-							<!-- Audio toggle -->
 							<button
 								class="p-2 rounded-lg border border-gray-200 dark:border-warm-border text-xs"
 								:class="audioEnabled ? 'text-green-600' : 'text-gray-400'"
@@ -147,7 +222,7 @@
 							</button>
 						</div>
 
-						<!-- Barcode Input (hidden keyboard-wedge) -->
+						<!-- Barcode Input -->
 						<div v-if="auditStore.scanMode === 'barcode'" class="mb-4 flex-shrink-0">
 							<input
 								ref="barcodeInput"
@@ -332,8 +407,8 @@
 								</div>
 								<hr class="border-gray-200 dark:border-warm-border/50" />
 								<div class="flex justify-between text-xs">
-									<span class="text-gray-500">Discrepancy</span>
-									<span class="font-bold" :class="valueDiscrepancyColor">{{ formatCurrency(Math.abs(auditStore.progress?.session?.total_value_discrepancy || 0)) }}</span>
+									<span class="text-gray-500">Variance ($)</span>
+									<span class="font-bold" :class="valueDiscrepancyColor">{{ formatCurrency(Math.abs(auditStore.progress?.session?.variance_dollar_total || auditStore.progress?.session?.total_value_discrepancy || 0)) }}</span>
 								</div>
 							</div>
 						</div>
@@ -357,8 +432,17 @@
 
 						<!-- Action Buttons -->
 						<div class="space-y-2 mt-auto pt-4 flex-shrink-0">
+							<!-- Two-Person Sign-Off -->
+							<div v-if="showSignOffField" class="mb-2">
+								<label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Manager Sign-Off</label>
+								<select v-model="signOffUser" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-warm-border bg-white dark:bg-warm-dark-700 text-xs">
+									<option value="">Select manager...</option>
+									<option v-for="u in managerUsers" :key="u.name" :value="u.name">{{ u.full_name || u.name }}</option>
+								</select>
+							</div>
+
 							<button
-								:disabled="!auditStore.isActive || auditStore.finalizeResource.loading"
+								:disabled="!auditStore.isActive || auditStore.finalizeResource.loading || (showSignOffField && !signOffUser)"
 								class="w-full py-2.5 rounded-lg bg-gradient-to-r from-[#D4AF37] to-[#F2E6A0] text-gray-900 font-bold text-sm disabled:opacity-50"
 								@click="handleFinalize"
 							>
@@ -373,11 +457,10 @@
 									Cancel
 								</button>
 								<button
-									:disabled="auditStore.isActive"
 									class="flex-1 py-2 rounded-lg border border-gray-200 dark:border-warm-border text-gray-600 font-semibold text-xs disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition-colors"
-									@click="auditStore.exportResults()"
+									@click="exportPDF"
 								>
-									Export CSV
+									PDF Report
 								</button>
 							</div>
 						</div>
@@ -392,11 +475,12 @@
 						<thead>
 							<tr class="bg-gray-50 dark:bg-warm-dark-700 border-b border-gray-200 dark:border-warm-border/50">
 								<th class="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Session</th>
-								<th class="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Warehouse</th>
+								<th class="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Store</th>
+								<th class="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Scope</th>
 								<th class="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Status</th>
 								<th class="text-center px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Expected</th>
 								<th class="text-center px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Scanned</th>
-								<th class="text-right px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Discrepancy</th>
+								<th class="text-right px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Variance</th>
 								<th class="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Started</th>
 							</tr>
 						</thead>
@@ -408,22 +492,46 @@
 								<td class="px-4 py-3 font-semibold text-gray-900 dark:text-white">{{ session.name }}</td>
 								<td class="px-4 py-3 text-gray-500">{{ session.store_location }}</td>
 								<td class="px-4 py-3">
+									<span class="text-xs font-semibold px-2 py-0.5 rounded bg-gray-100 dark:bg-warm-dark-700">{{ session.scope || 'Spot' }}</span>
+								</td>
+								<td class="px-4 py-3">
 									<span class="text-xs font-bold px-2 py-0.5 rounded" :class="historyStatusClass(session.status)">
 										{{ session.status }}
 									</span>
 								</td>
 								<td class="px-4 py-3 text-center">{{ session.expected_count }}</td>
 								<td class="px-4 py-3 text-center">{{ session.scanned_count }}</td>
-								<td class="px-4 py-3 text-right font-semibold" :class="session.total_value_discrepancy > 0 ? 'text-red-500' : 'text-green-600'">
-									{{ formatCurrency(Math.abs(session.total_value_discrepancy || 0)) }}
+								<td class="px-4 py-3 text-right font-semibold" :class="(session.variance_dollar_total || session.total_value_discrepancy || 0) > 0 ? 'text-red-500' : 'text-green-600'">
+									{{ formatCurrency(Math.abs(session.variance_dollar_total || session.total_value_discrepancy || 0)) }}
 								</td>
 								<td class="px-4 py-3 text-xs text-gray-500">{{ formatDate(session.started_at) }}</td>
 							</tr>
 							<tr v-if="!historySessions.length">
-								<td colspan="7" class="px-4 py-12 text-center text-gray-400 text-sm">No audit history found.</td>
+								<td colspan="8" class="px-4 py-12 text-center text-gray-400 text-sm">No audit history found.</td>
 							</tr>
 						</tbody>
 					</table>
+				</div>
+			</div>
+
+			<!-- Approve Variance Dialog -->
+			<div v-if="showApproveDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+				<div class="bg-white dark:bg-warm-dark-800 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+					<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Approve Variance</h3>
+					<p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+						This store is frozen due to audit variance exceeding thresholds. Approving will unfreeze the store and process shrinkage.
+					</p>
+					<div class="mb-4">
+						<label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Approval Reason</label>
+						<textarea v-model="approveReason" rows="3"
+							class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-warm-border bg-white dark:bg-warm-dark-700 text-sm resize-none"
+							placeholder="e.g. Verified missing items are at repair bench..."
+						></textarea>
+					</div>
+					<div class="flex gap-2">
+						<button @click="showApproveDialog = false" class="flex-1 py-2 rounded-lg border border-gray-200 text-gray-600 text-sm font-semibold">Cancel</button>
+						<button @click="handleApproveVariance" :disabled="!approveReason.trim()" class="flex-1 py-2 rounded-lg bg-gradient-to-r from-[#D4AF37] to-[#F2E6A0] text-gray-900 text-sm font-bold disabled:opacity-50">Approve & Unfreeze</button>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -443,6 +551,7 @@ const { formatCurrency } = useFormatters()
 
 // --- Local State ---
 const currentView = ref('launcher') // 'launcher', 'scanning', 'history'
+const selectedScope = ref('Spot')
 const selectedWarehouse = ref('')
 const auditNotes = ref('')
 const barcodeBuffer = ref('')
@@ -451,10 +560,30 @@ const audioEnabled = ref(false)
 const discrepancyTab = ref('missing')
 const barcodeInput = ref(null)
 const warehouses = ref([])
+const displayCases = ref([])
 const draftSessions = ref([])
 const historySessions = ref([])
+const signOffUser = ref('')
+const managerUsers = ref([])
+const showApproveDialog = ref(false)
+const approveReason = ref('')
+const pendingApproveSession = ref(null)
 
 // --- Computed ---
+const showSignOffField = computed(() => {
+	// Show sign-off when there are discrepancies
+	return auditStore.isActive && (
+		auditStore.missingItems.length > 0 || auditStore.unexpectedItems.length > 0
+	)
+})
+
+const scopeWarehouses = computed(() => {
+	if (selectedScope.value === 'Spot' || selectedScope.value === 'Showcase') {
+		return displayCases.value
+	}
+	return warehouses.value
+})
+
 const lastScanDetail = computed(() => {
 	const r = auditStore.lastScanResult
 	if (!r || r.match_status === 'Batch') return null
@@ -493,7 +622,9 @@ const scanResultMessage = computed(() => {
 const statusClasses = computed(() => {
 	const s = auditStore.activeSession?.status
 	if (s === 'Reconciled') return '!bg-green-50 !text-green-700 !border-green-200'
+	if (s === 'Reconciled with Shrinkage') return '!bg-amber-50 !text-amber-700 !border-amber-200'
 	if (s === 'Discrepancy') return '!bg-red-50 !text-red-700 !border-red-200'
+	if (s === 'Pending Manager Review') return '!bg-red-100 !text-red-800 !border-red-300'
 	if (s === 'In Progress') return '!bg-blue-50 !text-blue-700 !border-blue-200'
 	if (s === 'Draft') return '!bg-gray-50 !text-gray-600 !border-gray-200'
 	if (s === 'Cancelled') return '!bg-gray-100 !text-gray-400 !border-gray-200'
@@ -501,7 +632,7 @@ const statusClasses = computed(() => {
 })
 
 const valueDiscrepancyColor = computed(() => {
-	const d = auditStore.progress?.session?.total_value_discrepancy || 0
+	const d = auditStore.progress?.session?.variance_dollar_total || auditStore.progress?.session?.total_value_discrepancy || 0
 	if (d > 0) return 'text-red-500'
 	if (d < 0) return 'text-green-600'
 	return 'text-gray-500'
@@ -549,7 +680,9 @@ function scanBadgeClass(status) {
 
 function historyStatusClass(status) {
 	if (status === 'Reconciled') return 'bg-green-100 text-green-700'
+	if (status === 'Reconciled with Shrinkage') return 'bg-amber-100 text-amber-700'
 	if (status === 'Discrepancy') return 'bg-red-100 text-red-700'
+	if (status === 'Pending Manager Review') return 'bg-red-200 text-red-800'
 	if (status === 'Cancelled') return 'bg-gray-100 text-gray-500'
 	return 'bg-amber-100 text-amber-700'
 }
@@ -573,7 +706,17 @@ function playBeep(type) {
 // --- Actions ---
 async function handleStartAudit() {
 	if (!selectedWarehouse.value) return
-	await auditStore.startAudit(selectedWarehouse.value, auditNotes.value || undefined)
+	await auditStore.startAudit(selectedWarehouse.value, auditNotes.value || undefined, selectedScope.value)
+	currentView.value = 'scanning'
+	auditStore.startPolling()
+	await nextTick()
+	refocusInput()
+}
+
+async function startFromPlan(plan) {
+	selectedScope.value = plan.scope === 'Daily Spot' ? 'Spot' : plan.scope === 'Weekly Showcase' ? 'Showcase' : plan.scope === 'Monthly Backstock' ? 'Backstock' : 'Full Store'
+	selectedWarehouse.value = plan.store_location
+	await auditStore.startAudit(plan.store_location, undefined, selectedScope.value, plan.name)
 	currentView.value = 'scanning'
 	auditStore.startPolling()
 	await nextTick()
@@ -591,6 +734,8 @@ function goToLauncher() {
 	auditStore.clearSession()
 	currentView.value = 'launcher'
 	loadDrafts()
+	auditStore.loadDashboard()
+	auditStore.loadAuditPlans()
 }
 
 function handleBarcodeSubmit() {
@@ -619,8 +764,8 @@ function refocusInput() {
 }
 
 function handleFinalize() {
-	if (!confirm('Finalize this audit? This will submit the session and create shrinkage entries for any missing items.')) return
-	auditStore.finalize()
+	if (!confirm('Finalize this audit? Missing items will trigger shrinkage entries or store freeze.')) return
+	auditStore.finalize(signOffUser.value || undefined)
 }
 
 function handleCancel() {
@@ -628,7 +773,22 @@ function handleCancel() {
 	auditStore.cancel()
 }
 
+function handleApproveVariance() {
+	if (!approveReason.value.trim() || !pendingApproveSession.value) return
+	auditStore.approveVariance(pendingApproveSession.value, approveReason.value).then(() => {
+		showApproveDialog.value = false
+		approveReason.value = ''
+		pendingApproveSession.value = null
+		goToLauncher()
+	})
+}
+
 function viewSessionResults(session) {
+	if (session.status === 'Pending Manager Review') {
+		pendingApproveSession.value = session.name
+		showApproveDialog.value = true
+		return
+	}
 	if (['Draft', 'In Progress'].includes(session.status)) {
 		handleResume(session.name)
 	} else {
@@ -638,16 +798,51 @@ function viewSessionResults(session) {
 	}
 }
 
+function exportPDF() {
+	const sessionName = auditStore.activeSession?.name
+	if (!sessionName) return
+	window.open(`/api/method/frappe.utils.print_format.download_pdf?doctype=Case+Audit+Session&name=${sessionName}&format=Audit+Report`, '_blank')
+}
+
 async function loadWarehouses() {
 	try {
 		const res = await fetch('/api/method/frappe.client.get_list', {
 			method: 'POST',
 			headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '', 'Content-Type': 'application/json' },
-			body: JSON.stringify({ doctype: 'Warehouse', fields: ['name'], limit_page_length: 100 }),
+			body: JSON.stringify({ doctype: 'Warehouse', fields: ['name'], filters: { is_group: 0 }, limit_page_length: 200 }),
 		})
 		const data = await res.json()
 		warehouses.value = data.message || []
 	} catch { warehouses.value = [] }
+}
+
+async function loadDisplayCases() {
+	try {
+		const res = await fetch('/api/method/frappe.client.get_list', {
+			method: 'POST',
+			headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '', 'Content-Type': 'application/json' },
+			body: JSON.stringify({ doctype: 'Display Case', fields: ['name', 'case_name', 'warehouse'], limit_page_length: 100 }),
+		})
+		const data = await res.json()
+		displayCases.value = (data.message || []).map(dc => ({ name: dc.warehouse || dc.name, label: dc.case_name || dc.name }))
+	} catch { displayCases.value = [] }
+}
+
+async function loadManagers() {
+	try {
+		const res = await fetch('/api/method/frappe.client.get_list', {
+			method: 'POST',
+			headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '', 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				doctype: 'User',
+				fields: ['name', 'full_name'],
+				filters: { user_type: 'System User', enabled: 1 },
+				limit_page_length: 100,
+			}),
+		})
+		const data = await res.json()
+		managerUsers.value = (data.message || []).filter(u => u.name !== 'Administrator' && u.name !== 'Guest')
+	} catch { managerUsers.value = [] }
 }
 
 async function loadDrafts() {
@@ -667,17 +862,32 @@ async function loadHistory() {
 	historySessions.value = auditStore.historyResource.data?.sessions || []
 }
 
+// Watch scope change to reset warehouse selection
+watch(selectedScope, () => {
+	selectedWarehouse.value = ''
+})
+
 // Watch view changes
 watch(currentView, (v) => {
 	if (v === 'history') loadHistory()
-	if (v === 'launcher') { loadDrafts(); loadWarehouses() }
+	if (v === 'launcher') {
+		loadDrafts()
+		loadWarehouses()
+		loadDisplayCases()
+		auditStore.loadDashboard()
+		auditStore.loadAuditPlans()
+	}
 })
 
 // --- Lifecycle ---
 onMounted(() => {
 	selectedWarehouse.value = session.currentWarehouse || ''
 	loadWarehouses()
+	loadDisplayCases()
+	loadManagers()
 	loadDrafts()
+	auditStore.loadDashboard()
+	auditStore.loadAuditPlans()
 })
 
 onBeforeUnmount(() => {

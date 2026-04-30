@@ -1,6 +1,6 @@
 <template>
 	<AppLayout>
-		<div class="h-full flex flex-col">
+		<div class="flex flex-col">
 			<!-- Page Header -->
 			<div class="flex items-center justify-between mb-6 flex-shrink-0">
 				<div>

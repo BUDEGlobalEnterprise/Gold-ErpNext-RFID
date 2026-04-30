@@ -18,7 +18,7 @@
 				<div
 					:class="[
 						maxWidthClass,
-						'relative bg-white dark:bg-warm-card rounded-2xl shadow-2xl w-full overflow-hidden border border-transparent dark:border-warm-border',
+						'relative bg-white dark:bg-warm-card rounded-2xl shadow-2xl w-full overflow-hidden border border-transparent dark:border-warm-border flex flex-col',
 						noMaxHeight ? '' : 'max-h-[90vh]',
 						fixedHeight ? '' : '',
 					]"
@@ -72,7 +72,7 @@
 					</button>
 
 					<!-- Default Slot (Body) -->
-					<div :class="[scrollable ? 'overflow-y-auto' : '', noMaxHeight ? '' : 'max-h-[calc(90vh-2px)]']">
+					<div :class="[scrollable ? 'overflow-y-auto' : '', 'flex-1 min-h-0']">
 						<slot></slot>
 					</div>
 

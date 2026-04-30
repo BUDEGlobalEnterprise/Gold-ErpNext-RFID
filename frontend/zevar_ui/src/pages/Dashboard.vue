@@ -165,12 +165,11 @@
 						</div>
 						<h3 class="tile-title-sm">Quotes</h3>
 					</router-link>
-					<!-- Cash Drawer -->
 					<router-link to="/layaway" class="tile-secondary" v-if="session.hasAnyRole(['Sales User','Store Manager','System Manager','Administrator', 'Employee', 'Employee Self Service'])">
 						<div class="tile-icon-sm" style="background: #F59E0B">
 							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"></path></svg>
 						</div>
-						<h3 class="tile-title-sm">Cash Drawer</h3>
+						<h3 class="tile-title-sm">Layaways</h3>
 					</router-link>
 					<!-- Repairs -->
 					<router-link to="/repairs" class="tile-secondary" v-if="session.hasAnyRole(['Sales User','Technician','Store Manager','System Manager','Administrator', 'Employee', 'Employee Self Service'])">
@@ -179,12 +178,12 @@
 						</div>
 						<h3 class="tile-title-sm">Repairs</h3>
 					</router-link>
-					<!-- Contacts -->
-					<router-link to="/customers" class="tile-secondary">
+					<!-- Suppliers -->
+					<router-link to="/contacts" class="tile-secondary">
 						<div class="tile-icon-sm" style="background: #10B981">
 							<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 00-3-3.87"></path><path d="M16 3.13a4 4 0 010 7.75"></path></svg>
 						</div>
-						<h3 class="tile-title-sm">Contacts</h3>
+						<h3 class="tile-title-sm">Suppliers</h3>
 					</router-link>
 					<!-- Products -->
 					<router-link to="/catalogues" class="tile-secondary">

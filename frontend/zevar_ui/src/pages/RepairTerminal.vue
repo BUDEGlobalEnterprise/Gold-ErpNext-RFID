@@ -1,6 +1,6 @@
 <template>
 	<AppLayout>
-		<div class="h-full flex flex-col min-h-0">
+		<div class="flex flex-col">
 			<!-- Page Header - consistent with other pages -->
 			<!-- Page Header - consistent with other pages -->
 			<div class="flex items-center justify-between gap-4 mb-6 flex-shrink-0">
@@ -247,7 +247,7 @@
 			</div>
 
 			<!-- Main Content Area -->
-			<div class="flex-1 flex min-h-0 overflow-hidden">
+			<div class="flex-1 flex min-h-0">
 				<!-- Grid View -->
 				<div v-if="viewMode === 'grid'" class="flex-1 overflow-y-auto pb-20">
 					<div v-if="ordersResource.loading && !orders.length" class="py-20 text-center">
@@ -467,9 +467,9 @@
 										>
 									</div>
 									<span class="text-sm font-bold"
-										>${
+										>${{
 											formatNum(order.estimated_cost || order.total_cost)
-										}</span
+										}}</span
 									>
 								</div>
 								<p class="text-sm font-medium mt-1 truncate">
@@ -564,6 +564,7 @@ import CameraModal from '@/components/CameraModal.vue'
 import StoreTransferModal from '@/components/StoreTransferModal.vue'
 import CheckoutModal from '@/components/CheckoutModal.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
+import { useBreakpoint } from '@/composables/useBreakpoint.js'
 	import { formatDate } from '@/utils/dates.js'
 
 const session = useSessionStore()
@@ -636,7 +637,8 @@ const statusTabs = computed(() => {
 	return tabs
 })
 
-const isDesktop = computed(() => window.innerWidth >= 1024)
+const { isDesktop: isDesktopBP } = useBreakpoint()
+const isDesktop = computed(() => isDesktopBP.value)
 
 const hasActiveFilters = computed(() => {
 	return Object.values(advancedFilters.value).some((v) => v !== '')
@@ -697,8 +699,12 @@ const kanbanColumns = computed(() => {
 			orders: [],
 		},
 	]
+	const colMap = columns.reduce((acc, col) => {
+		acc[col.status] = col
+		return acc
+	}, {})
 	orders.value.forEach((order) => {
-		const col = columns.find((c) => c.status === order.status)
+		const col = colMap[order.status]
 		if (col) col.orders.push(order)
 	})
 	columns.forEach((c) => (c.count = c.orders.length))

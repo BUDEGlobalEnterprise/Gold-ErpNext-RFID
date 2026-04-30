@@ -1,0 +1,322 @@
+{
+ "actions": [],
+ "autoname": "format:FINAPP-{MM}{YY}-{#####}",
+ "creation": "2026-04-29 06:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "customer",
+  "provider",
+  "status",
+  "column_break_1",
+  "application_id",
+  "reference_invoice",
+  "section_applicant",
+  "applicant_first_name",
+  "applicant_last_name",
+  "applicant_email",
+  "column_break_applicant",
+  "applicant_phone",
+  "applicant_ssn_last4",
+  "applicant_dob",
+  "section_amounts",
+  "requested_amount",
+  "approved_amount",
+  "financed_amount",
+  "column_break_amounts",
+  "initial_payment",
+  "remaining_balance",
+  "section_promo",
+  "promo_code",
+  "promo_description",
+  "term_months",
+  "column_break_promo",
+  "apr",
+  "early_purchase_option",
+  "section_result",
+  "provider_response",
+  "approval_date",
+  "column_break_result",
+  "expiration_date",
+  "delivery_confirmed",
+  "delivery_date",
+  "section_audit",
+  "created_by_associate",
+  "waterfall_attempt",
+  "previous_provider",
+  "column_break_audit",
+  " denial_reason"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "provider",
+   "fieldtype": "Select",
+   "label": "Financing Provider",
+   "options": "Synchrony\nAFF\nProgressive\nSnap\nAcima",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nSubmitted\nPending\nPrequalified\nApproved\nDenied\nExpired\nCancelled\nCompleted",
+   "default": "Draft",
+   "in_list_view": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "application_id",
+   "fieldtype": "Data",
+   "label": "Provider Application ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_invoice",
+   "fieldtype": "Link",
+   "label": "Reference Sales Invoice",
+   "options": "Sales Invoice"
+  },
+  {
+   "fieldname": "section_applicant",
+   "fieldtype": "Section Break",
+   "label": "Applicant Information"
+  },
+  {
+   "fieldname": "applicant_first_name",
+   "fieldtype": "Data",
+   "label": "First Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "applicant_last_name",
+   "fieldtype": "Data",
+   "label": "Last Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "applicant_email",
+   "fieldtype": "Data",
+   "label": "Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "column_break_applicant",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "applicant_phone",
+   "fieldtype": "Data",
+   "label": "Phone",
+   "length": 20
+  },
+  {
+   "fieldname": "applicant_ssn_last4",
+   "fieldtype": "Data",
+   "label": "SSN Last 4",
+   "length": 4
+  },
+  {
+   "fieldname": "applicant_dob",
+   "fieldtype": "Date",
+   "label": "Date of Birth"
+  },
+  {
+   "fieldname": "section_amounts",
+   "fieldtype": "Section Break",
+   "label": "Amounts"
+  },
+  {
+   "fieldname": "requested_amount",
+   "fieldtype": "Currency",
+   "label": "Requested Amount",
+   "reqd": 1
+  },
+  {
+   "fieldname": "approved_amount",
+   "fieldtype": "Currency",
+   "label": "Approved Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "financed_amount",
+   "fieldtype": "Currency",
+   "label": "Financed Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_amounts",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "initial_payment",
+   "fieldtype": "Currency",
+   "label": "Initial Payment Collected",
+   "default": "0"
+  },
+  {
+   "fieldname": "remaining_balance",
+   "fieldtype": "Currency",
+   "label": "Remaining Balance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_promo",
+   "fieldtype": "Section Break",
+   "label": "Promotional Terms"
+  },
+  {
+   "fieldname": "promo_code",
+   "fieldtype": "Data",
+   "label": "Promotional Code",
+   "length": 32
+  },
+  {
+   "fieldname": "promo_description",
+   "fieldtype": "Small Text",
+   "label": "Promo Description"
+  },
+  {
+   "fieldname": "term_months",
+   "fieldtype": "Int",
+   "label": "Term (Months)"
+  },
+  {
+   "fieldname": "column_break_promo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "apr",
+   "fieldtype": "Percent",
+   "label": "APR (%)"
+  },
+  {
+   "fieldname": "early_purchase_option",
+   "fieldtype": "Check",
+   "label": "90-Day Early Purchase Option",
+   "default": "0"
+  },
+  {
+   "fieldname": "section_result",
+   "fieldtype": "Section Break",
+   "label": "Provider Response"
+  },
+  {
+   "fieldname": "provider_response",
+   "fieldtype": "Code",
+   "label": "Provider Response (JSON)",
+   "options": "JSON"
+  },
+  {
+   "fieldname": "approval_date",
+   "fieldtype": "Datetime",
+   "label": "Approval Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_result",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expiration_date",
+   "fieldtype": "Datetime",
+   "label": "Application Expiration"
+  },
+  {
+   "default": "0",
+   "fieldname": "delivery_confirmed",
+   "fieldtype": "Check",
+   "label": "Delivery Confirmed"
+  },
+  {
+   "fieldname": "delivery_date",
+   "fieldtype": "Datetime",
+   "label": "Delivery Confirmation Date"
+  },
+  {
+   "fieldname": "section_audit",
+   "fieldtype": "Section Break",
+   "label": "Audit Trail"
+  },
+  {
+   "fieldname": "created_by_associate",
+   "fieldtype": "Link",
+   "label": "Created By Associate",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "waterfall_attempt",
+   "fieldtype": "Int",
+   "label": "Waterfall Attempt #",
+   "default": "1"
+  },
+  {
+   "fieldname": "previous_provider",
+   "fieldtype": "Select",
+   "label": "Previous Provider (Waterfall)",
+   "options": "\nSynchrony\nAFF\nProgressive\nSnap\nAcima"
+  },
+  {
+   "fieldname": "column_break_audit",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "denial_reason",
+   "fieldtype": "Small Text",
+   "label": "Denial Reason",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-04-29 06:00:00.000000",
+ "module": "Unified Retail Management System",
+ "name": "Financing Application",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Sales Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

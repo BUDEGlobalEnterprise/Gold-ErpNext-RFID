@@ -1,0 +1,131 @@
+{
+ "actions": [],
+ "autoname": "AUDIT-PLAN-.YYYY.-.#####",
+ "creation": "2026-04-30 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "store_location",
+  "scope",
+  "scheduled_for",
+  "assigned_to",
+  "status",
+  "audit_session",
+  "completed_at",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "store_location",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Store Location",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "scope",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Audit Scope",
+   "options": "Daily Spot\nWeekly Showcase\nMonthly Backstock\nQuarterly Full",
+   "reqd": 1
+  },
+  {
+   "fieldname": "scheduled_for",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Scheduled For",
+   "reqd": 1
+  },
+  {
+   "fieldname": "assigned_to",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Assigned To",
+   "options": "User"
+  },
+  {
+   "default": "Scheduled",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Scheduled\nIn Progress\nCompleted\nMissed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "audit_session",
+   "fieldtype": "Link",
+   "label": "Audit Session",
+   "options": "Case Audit Session",
+   "read_only": 1
+  },
+  {
+   "fieldname": "completed_at",
+   "fieldtype": "Datetime",
+   "label": "Completed At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "link_doctype": "Case Audit Session",
+   "link_fieldname": "audit_plan"
+  }
+ ],
+ "modified": "2026-04-30 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Unified Retail Management System",
+ "name": "Audit Plan",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "scheduled_for",
+ "sort_order": "ASC",
+ "states": []
+}

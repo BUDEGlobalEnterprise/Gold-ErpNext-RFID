@@ -1,22 +1,42 @@
 <template>
-	<div class="h-full">
-		<div
-			v-if="isOpen && !persistent"
-			@click="close"
-			class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 transition-opacity"
-		></div>
+	<div :class="persistent ? 'flex flex-col flex-1 h-full min-h-0 overflow-hidden' : ''">
+		<!-- Backdrop -->
+		<Teleport to="body" :disabled="persistent">
+			<Transition
+				enter-active-class="transition-opacity duration-300"
+				enter-from-class="opacity-0"
+				enter-to-class="opacity-100"
+				leave-active-class="transition-opacity duration-200"
+				leave-from-class="opacity-100"
+				leave-to-class="opacity-0"
+			>
+				<div
+					v-if="isOpen && !persistent"
+					@click="close"
+					class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40"
+				></div>
+			</Transition>
 
-		<div
-			class="h-full bg-white dark:bg-warm-card transform transition-transform duration-300 ease-in-out flex flex-col border-l border-transparent dark:border-warm-border"
-			:class="[
-				persistent
-					? 'relative translate-x-0 w-[380px] border-l border-gray-200 dark:border-warm-border'
-					: 'fixed top-0 right-0 h-full w-full sm:w-[400px] shadow-2xl z-50',
-				!persistent && (isOpen ? 'translate-x-0' : 'translate-x-full'),
-			]"
-		>
+			<!-- Bottom Sheet (non-persistent mobile/tablet) -->
+			<Transition
+				enter-active-class="transition-transform duration-300 ease-out"
+				enter-from-class="translate-y-full"
+				enter-to-class="translate-y-0"
+				leave-active-class="transition-transform duration-200 ease-in"
+				leave-from-class="translate-y-0"
+				leave-to-class="translate-y-full"
+			>
+				<div
+					v-if="isOpen || persistent"
+					:class="[
+						persistent
+							? 'flex flex-col flex-1 h-full min-h-0 overflow-hidden bg-transparent'
+							: 'fixed bottom-0 left-0 right-0 z-50 max-h-[85vh] bg-white dark:bg-warm-card rounded-t-2xl shadow-2xl flex flex-col border-t border-gray-200 dark:border-warm-border min-h-0'
+					]"
+				>
+			<!-- Cart Header -->
 			<div
-				class="p-4 border-b border-gray-100 dark:border-warm-border/50 flex items-center justify-between"
+				class="p-4 border-b border-gray-100 dark:border-warm-border/50 flex items-center justify-between shrink-0"
 			>
 				<h2
 					class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2"
@@ -83,7 +103,7 @@
 				</button>
 			</div>
 
-			<div v-else class="flex-1 flex flex-col overflow-hidden">
+			<div v-else class="flex-1 flex flex-col min-h-0 overflow-hidden">
 				<!-- Customer Selector -->
 				<div
 					class="p-4 border-b border-gray-100 dark:border-warm-border/50 bg-white dark:bg-warm-card flex-shrink-0 z-10"
@@ -132,7 +152,7 @@
 					<CustomerSelector v-if="cart.customerType !== 'Walkin'" />
 				</div>
 
-				<div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+				<div class="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 custom-scrollbar">
 					<div
 						v-for="(item, index) in cart.items"
 						:key="index"
@@ -219,7 +239,7 @@
 			</div>
 
 			<!-- Trade-Ins Section -->
-			<div v-if="cart.items.length > 0" class="px-4 pb-2">
+			<div v-if="cart.items.length > 0" class="px-4 pb-2 shrink-0">
 				<div class="border-t border-gray-100 dark:border-warm-border/50 pt-3">
 					<button
 						@click="showTradeInForm = !showTradeInForm"
@@ -338,7 +358,7 @@
 
 			<div
 				v-if="cart.items.length > 0"
-				class="p-6 bg-gray-50 dark:bg-warm-dark-700 border-t border-gray-200 dark:border-warm-border"
+				class="p-6 bg-gray-50 dark:bg-warm-dark-700 border-t border-gray-200 dark:border-warm-border shrink-0"
 			>
 				<div class="space-y-2 mb-4 text-sm">
 					<div class="flex justify-between text-gray-600 dark:text-gray-400">
@@ -385,7 +405,10 @@
 					</button>
 				</div>
 			</div>
-		</div>
+			</div>
+		</Transition>
+		</Teleport>
+
 		<CheckoutModal :show="showCheckout" @close="showCheckout = false" />
 	</div>
 </template>
@@ -460,4 +483,44 @@ function formatCurrency(val) {
 	if (!val) return '$0.00'
 	return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val)
 }
+// --- Persistent panel duplicates the same content, so we use a shared template approach ---
+// The persistent panel content is identical to the bottom-sheet content.
+// Both render the same cart items, customer selector, trade-ins, and checkout button.
+// Vue re-uses the CartSidebar component in both modes via the v-if/persistent prop.
+
+import { onMounted, onUnmounted } from 'vue'
+
+// Body scroll lock for overlay mode
+function lockBodyScroll() {
+	document.body.style.overflow = 'hidden'
+}
+function unlockBodyScroll() {
+	document.body.style.overflow = ''
+}
+
+// Watch open state for scroll lock
+import { watchEffect } from 'vue'
+watchEffect(() => {
+	if (props.isOpen && !props.persistent) {
+		lockBodyScroll()
+	} else if (!props.persistent) {
+		unlockBodyScroll()
+	}
+})
+
+// Close on Escape
+function handleEscape(e) {
+	if (e.key === 'Escape' && props.isOpen && !props.persistent) {
+		close()
+	}
+}
+
+onMounted(() => {
+	document.addEventListener('keydown', handleEscape)
+})
+
+onUnmounted(() => {
+	document.removeEventListener('keydown', handleEscape)
+	unlockBodyScroll()
+})
 </script>

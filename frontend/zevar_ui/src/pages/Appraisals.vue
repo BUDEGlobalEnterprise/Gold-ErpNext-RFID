@@ -1,6 +1,6 @@
 <template>
 	<AppLayout>
-		<div class="h-full flex flex-col min-h-0">
+		<div class="flex flex-col">
 			<div class="flex items-center justify-between gap-4 mb-6 flex-shrink-0">
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Appraisals</h2>

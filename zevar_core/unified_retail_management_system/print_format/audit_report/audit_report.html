@@ -1,0 +1,184 @@
+<style>
+	.audit-report { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1a1a1a; }
+	.audit-header { text-align: center; border-bottom: 3px solid #D4AF37; padding-bottom: 15px; margin-bottom: 20px; }
+	.audit-header h1 { color: #1a1a1a; margin: 0 0 5px 0; font-size: 22px; }
+	.audit-header .subtitle { color: #666; font-size: 14px; }
+	.audit-meta { display: table; width: 100%; border-collapse: separate; border-spacing: 10px; margin-bottom: 20px; }
+	.audit-meta-row { display: table-row; }
+	.audit-meta-cell { display: table-cell; padding: 8px 12px; background: #f8f8f8; border-radius: 4px; font-size: 13px; }
+	.audit-meta-cell strong { display: block; color: #999; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+	.audit-section { margin-bottom: 25px; }
+	.audit-section h2 { font-size: 16px; color: #D4AF37; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
+	.audit-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+	.audit-table th { background: #f5f5f5; padding: 8px 10px; text-align: left; font-weight: 600; border: 1px solid #ddd; }
+	.audit-table td { padding: 6px 10px; border: 1px solid #eee; }
+	.audit-table tr:nth-child(even) { background: #fafafa; }
+	.audit-table .text-right { text-align: right; }
+	.audit-table .text-center { text-align: center; }
+	.status-matched { color: #16a34a; font-weight: bold; }
+	.status-missing { color: #dc2626; font-weight: bold; }
+	.status-unexpected { color: #ea580c; font-weight: bold; }
+	.summary-grid { display: table; width: 100%; border-collapse: separate; border-spacing: 10px; margin-bottom: 20px; }
+	.summary-cell { display: table-cell; padding: 15px; text-align: center; border: 1px solid #eee; border-radius: 8px; background: #fafafa; }
+	.summary-cell .value { font-size: 28px; font-weight: bold; margin: 5px 0; }
+	.summary-cell .label { font-size: 10px; color: #777; text-transform: uppercase; letter-spacing: 1px; }
+	.signoff-section { margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee; }
+	.signoff-grid { display: table; width: 100%; border-spacing: 20px; }
+	.signoff-box { display: table-cell; width: 45%; border: 1px solid #ddd; padding: 20px; text-align: center; }
+	.signoff-box .line { border-bottom: 1px solid #333; width: 80%; margin: 30px auto 5px auto; }
+	.signoff-box .role { font-size: 11px; color: #666; }
+	.confidential { text-align: center; font-size: 10px; color: #999; margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px; }
+</style>
+
+{% set session = doc %}
+{% set scans = doc.scans %}
+
+<div class="audit-report">
+	<div class="audit-header">
+		<h1>INVENTORY AUDIT REPORT</h1>
+		<div class="subtitle">Confidential &mdash; For Insurance and Accounting Records</div>
+		<div class="subtitle">{{ frappe.utils.formatdate(session.started_at, "MMMM d, yyyy") }}</div>
+	</div>
+
+	<!-- Audit Metadata -->
+	<div class="audit-meta">
+		<div class="audit-meta-row">
+			<div class="audit-meta-cell">
+				<strong>Session ID</strong>
+				{{ session.name }}
+			</div>
+			<div class="audit-meta-cell">
+				<strong>Scope</strong>
+				{{ session.scope or "Spot" }}
+			</div>
+			<div class="audit-meta-cell">
+				<strong>Store / Warehouse</strong>
+				{{ session.store_location }}
+			</div>
+			<div class="audit-meta-cell">
+				<strong>Status</strong>
+				{{ session.status }}
+			</div>
+		</div>
+		<div class="audit-meta-row">
+			<div class="audit-meta-cell">
+				<strong>Auditor</strong>
+				{{ session.auditor or "System" }}
+			</div>
+			<div class="audit-meta-cell">
+				<strong>Started</strong>
+				{{ frappe.utils.format_datetime(session.started_at) if session.started_at else "-" }}
+			</div>
+			<div class="audit-meta-cell">
+				<strong>Completed</strong>
+				{{ frappe.utils.format_datetime(session.completed_at) if session.completed_at else "-" }}
+			</div>
+			<div class="audit-meta-cell">
+				<strong>Display Case</strong>
+				{{ session.display_case or "N/A" }}
+			</div>
+		</div>
+	</div>
+
+	<!-- Summary -->
+	<div class="audit-section">
+		<h2>Audit Summary</h2>
+		<div class="summary-grid">
+			<div class="summary-cell">
+				<div class="label">Expected Items</div>
+				<div class="value">{{ session.expected_count or 0 }}</div>
+			</div>
+			<div class="summary-cell">
+				<div class="label">Scanned Items</div>
+				<div class="value">{{ session.scanned_count or 0 }}</div>
+			</div>
+			<div class="summary-cell">
+				<div class="label">Value Expected</div>
+				<div class="value">{{ frappe.format_value(session.total_value_expected or 0, dict(fieldtype='Currency')) }}</div>
+			</div>
+			<div class="summary-cell">
+				<div class="label">Variance ($)</div>
+				<div class="value" {% if session.variance_dollar_total %}style="color: #dc2626;"{% endif %}>
+					{{ frappe.format_value(session.variance_dollar_total or 0, dict(fieldtype='Currency')) }}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Scan Results -->
+	<div class="audit-section">
+		<h2>Scan Results</h2>
+		<table class="audit-table">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Item Code</th>
+					<th>Item Name</th>
+					<th>Barcode / EPC</th>
+					<th class="text-center">Status</th>
+					<th class="text-right">Valuation</th>
+					<th>Scanned At</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for scan in scans %}
+				<tr>
+					<td>{{ loop.index }}</td>
+					<td>{{ scan.item_code or "-" }}</td>
+					<td>{{ scan.item_name or "-" }}</td>
+					<td style="font-family: monospace; font-size: 10px;">{{ scan.barcode_or_epc or "-" }}</td>
+					<td class="text-center">
+						<span class="status-{{ scan.match_status|lower }}">{{ scan.match_status }}</span>
+					</td>
+					<td class="text-right">{{ frappe.format_value(scan.valuation_rate or 0, dict(fieldtype='Currency')) }}</td>
+					<td>{{ frappe.utils.format_datetime(scan.scanned_at) if scan.scanned_at else "-" }}</td>
+				</tr>
+				{% endfor %}
+				{% if not scans %}
+				<tr><td colspan="7" style="text-align: center; padding: 20px; color: #999;">No scan records</td></tr>
+				{% endif %}
+			</tbody>
+		</table>
+	</div>
+
+	<!-- Notes -->
+	{% if session.notes %}
+	<div class="audit-section">
+		<h2>Notes</h2>
+		<p style="font-size: 13px;">{{ session.notes }}</p>
+	</div>
+	{% endif %}
+
+	{% if session.freeze_reason %}
+	<div class="audit-section">
+		<h2>Variance Escalation</h2>
+		<p style="font-size: 13px; color: #dc2626;"><strong>Reason:</strong> {{ session.freeze_reason }}</p>
+	</div>
+	{% endif %}
+
+	<!-- Sign-off -->
+	<div class="signoff-section">
+		<h2>Two-Person Sign-Off</h2>
+		<div class="signoff-grid">
+			<div class="signoff-box">
+				<div class="role">Auditor</div>
+				<div><strong>{{ session.auditor or "" }}</strong></div>
+				<div class="line"></div>
+				<div class="role">Signature &amp; Date</div>
+			</div>
+			<div class="signoff-box">
+				<div class="role">Manager Approval</div>
+				<div><strong>{{ session.two_person_signoff_by or "" }}</strong></div>
+				<div class="line"></div>
+				<div class="role">Signature &amp; Date</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Footer -->
+	<div class="confidential">
+		Generated by Zevar POS on {{ frappe.utils.now_datetime() }} &mdash;
+		Document {{ session.name }} &mdash;
+		CONFIDENTIAL: This document is intended for insurance claims, CPA review, and internal audit purposes only.
+	</div>
+</div>

@@ -8,7 +8,11 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:visual": "npx playwright test --config playwright.config.js",
+    "test:visual:update": "npx playwright test --config playwright.config.js --update-snapshots",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "engine.io-client": "^6.6.4",
@@ -20,12 +24,20 @@
     "vue-router": "^4.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.42.0",
+    "@storybook/addon-a11y": "^8.0.0",
+    "@storybook/addon-viewport": "^8.0.0",
+    "@storybook/vue3": "^8.0.0",
+    "@storybook/vue3-vite": "^8.0.0",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/test-utils": "^2.4.5",
     "autoprefixer": "^10.4.19",
     "happy-dom": "^14.7.1",
     "jsdom": "^24.0.0",
     "postcss": "^8.4.38",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "storybook": "^8.0.0",
     "tailwindcss": "^3.4.3",
     "vite": "^5.2.8",
     "vitest": "^1.6.0"

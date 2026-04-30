@@ -198,6 +198,28 @@ REPORT_CATALOG: list[dict[str, Any]] = [
 		"sensitivity": "payroll",
 		"featured": True,
 	},
+	{
+		"id": "yoy_day_compare",
+		"group": "sales",
+		"title": "Year-over-Year Day Compare",
+		"description": "Any day vs same day last year: sales, repairs, transactions, and delta analysis.",
+		"report_name": "YoY Day Compare",
+		"roles": MANAGER_ROLES | ACCOUNTING_ROLES,
+		"scope": "store",
+		"sensitivity": "manager",
+		"featured": True,
+	},
+	{
+		"id": "store_scorecard",
+		"group": "sales",
+		"title": "Store Scorecard",
+		"description": "Side-by-side 5-store ranking: sales, avg ticket, audit compliance, shrinkage, and repair NPS.",
+		"report_name": "Store Scorecard",
+		"roles": MANAGER_ROLES | ACCOUNTING_ROLES,
+		"scope": "all",
+		"sensitivity": "manager",
+		"featured": True,
+	},
 	# ── Inventory ────────────────────────────────────────────────────────
 	{
 		"id": "low_stock_alert",
@@ -271,6 +293,70 @@ REPORT_CATALOG: list[dict[str, Any]] = [
 		"scope": "store",
 		"sensitivity": "operational",
 	},
+	{
+		"id": "inventory_timeline",
+		"group": "inventory",
+		"title": "Inventory Timeline",
+		"description": "Serial-level lifecycle: every movement, sale, transfer, and audit event per piece.",
+		"report_name": "Inventory Timeline",
+		"roles": STOCK_ROLES,
+		"scope": "store",
+		"sensitivity": "operational",
+		"featured": True,
+	},
+	{
+		"id": "shrinkage_trend",
+		"group": "inventory",
+		"title": "Shrinkage Trend",
+		"description": "Rolling 6-month shrinkage value by store and category for insurance and loss prevention.",
+		"report_name": "Shrinkage Trend",
+		"roles": MANAGER_ROLES | STOCK_ROLES,
+		"scope": "store",
+		"sensitivity": "financial",
+		"featured": True,
+	},
+	{
+		"id": "audit_compliance",
+		"group": "inventory",
+		"title": "Audit Compliance",
+		"description": "On-time audit completion percentage by store, scope, and risk class.",
+		"report_name": "Audit Compliance",
+		"roles": MANAGER_ROLES | STOCK_ROLES,
+		"scope": "store",
+		"sensitivity": "manager",
+		"featured": True,
+	},
+	{
+		"id": "reorder_suggestions",
+		"group": "inventory",
+		"title": "Reorder Suggestions",
+		"description": "Daily buyer worklist: items below safety stock with velocity data and draft Material Requests.",
+		"report_name": "Reorder Suggestions",
+		"roles": STOCK_ROLES,
+		"scope": "store",
+		"sensitivity": "operational",
+		"featured": True,
+	},
+	{
+		"id": "reservation_aging",
+		"group": "inventory",
+		"title": "Reservation Aging",
+		"description": "Active reservations approaching expiry with customer and piece details.",
+		"report_name": "Reservation Aging",
+		"roles": SALES_ROLES | STOCK_ROLES,
+		"scope": "store",
+		"sensitivity": "operational",
+	},
+	{
+		"id": "transfer_in_transit",
+		"group": "inventory",
+		"title": "Transfer In-Transit",
+		"description": "Pieces currently between stores with dispatch date and expected arrival.",
+		"report_name": "Transfer In-Transit",
+		"roles": STOCK_ROLES,
+		"scope": "store",
+		"sensitivity": "operational",
+	},
 	# ── Layaway & Finance ────────────────────────────────────────────────
 	{
 		"id": "layaway_status",
@@ -334,6 +420,16 @@ REPORT_CATALOG: list[dict[str, Any]] = [
 		"scope": "store",
 		"sensitivity": "financial",
 		"featured": True,
+	},
+	{
+		"id": "high_risk_customers",
+		"group": "layaway",
+		"title": "High Risk Customers",
+		"description": "Customers with repeat overdue payments, cancellations, or defaulted layaways.",
+		"report_name": "High Risk Customers",
+		"roles": MANAGER_ROLES | ACCOUNTING_ROLES,
+		"scope": "store",
+		"sensitivity": "financial",
 	},
 	# ── Repairs ──────────────────────────────────────────────────────────
 	{
@@ -768,3 +864,661 @@ def get_report_summary() -> dict[str, Any]:
 			if g["id"] in visible_group_ids
 		],
 	}
+
+
+@frappe.whitelist(allow_guest=False)
+def get_eod_summary() -> dict[str, Any]:
+	"""Return today's end-of-day KPIs for the Reports hub EOD section.
+
+	Returns sales, repairs, layaway, and cash position summary for today.
+	Only available to roles that can access daily closeout reports.
+	"""
+	from frappe.utils import flt, nowdate, cstr
+
+	user = frappe.session.user
+	if not user or user == "Guest":
+		frappe.throw("Login required", frappe.PermissionError)
+
+	user_roles = set(frappe.get_roles(user))
+	today = nowdate()
+
+	sales_data = {"total": 0, "count": 0, "avg_ticket": 0, "refunds": 0, "discounts": 0}
+	if user_roles & (SALES_ROLES | ACCOUNTING_ROLES | ADMIN_ROLES):
+		owner_filter = ""
+		owner_params: list[str] = []
+		if not (user_roles & (MANAGER_ROLES | ACCOUNTING_ROLES | ADMIN_ROLES)):
+			owner_filter = " AND owner = %s"
+			owner_params = [user]
+
+		sales_result = frappe.db.sql(
+			f"""SELECT
+				COUNT(*) as cnt,
+				COALESCE(SUM(grand_total), 0) as total,
+				COALESCE(SUM(CASE WHEN si.status = 'Return' THEN ABS(grand_total) ELSE 0 END), 0) as refunds,
+				COALESCE(SUM(CASE WHEN si.is_discounted = 1
+					THEN ABS(discount_amount) ELSE 0 END), 0) as discounts
+			FROM `tabSales Invoice` si
+			WHERE si.docstatus = 1
+			AND si.is_pos = 1
+			AND si.posting_date = %s
+			{owner_filter}""",
+			(today, *owner_params),
+			as_dict=True,
+		)
+		if sales_result and sales_result[0]:
+			row = sales_result[0]
+			sales_data["count"] = row.cnt or 0
+			sales_data["total"] = flt(row.total)
+			sales_data["refunds"] = flt(row.refunds)
+			sales_data["discounts"] = flt(row.discounts)
+			sales_data["avg_ticket"] = (
+				flt(row.total) / row.cnt if row.cnt else 0
+			)
+
+	repairs_data = {"total_revenue": 0, "active_count": 0, "completed_today": 0, "overdue": 0}
+	if user_roles & (SALES_ROLES | HR_ROLES | ADMIN_ROLES):
+		repairs_completed = frappe.db.sql(
+			"""SELECT COUNT(*) as cnt, COALESCE(SUM(estimated_cost), 0) as revenue
+			FROM `tabRepair Order`
+			WHERE docstatus < 2
+			AND status = 'Ready for Pickup'
+			AND DATE(modified) = %s""",
+			(today,),
+			as_dict=True,
+		)
+		if repairs_completed and repairs_completed[0]:
+			repairs_data["completed_today"] = repairs_completed[0].cnt or 0
+			repairs_data["total_revenue"] = flt(repairs_completed[0].revenue)
+
+		repairs_active = frappe.db.sql(
+			"""SELECT COUNT(*) as cnt FROM `tabRepair Order`
+			WHERE docstatus < 2
+			AND status NOT IN ('Ready for Pickup', 'Delivered', 'Cancelled')""",
+			as_dict=True,
+		)
+		if repairs_active and repairs_active[0]:
+			repairs_data["active_count"] = repairs_active[0].cnt or 0
+
+		repairs_overdue = frappe.db.sql(
+			"""SELECT COUNT(*) as cnt FROM `tabRepair Order`
+			WHERE docstatus < 2
+			AND status NOT IN ('Ready for Pickup', 'Delivered', 'Cancelled')
+			AND promised_date < %s""",
+			(today,),
+			as_dict=True,
+		)
+		if repairs_overdue and repairs_overdue[0]:
+			repairs_data["overdue"] = repairs_overdue[0].cnt or 0
+
+	payment_breakdown = []
+	if user_roles & (ACCOUNTING_ROLES | ADMIN_ROLES):
+		payments = frappe.db.sql(
+			"""SELECT
+				mop.mode_of_payment as method,
+				COALESCE(SUM(mop.amount), 0) as total,
+				COUNT(*) as count
+			FROM `tabSales Invoice Payment` mop
+			JOIN `tabSales Invoice` si ON mop.parent = si.name
+			WHERE si.docstatus = 1
+			AND si.is_pos = 1
+			AND si.posting_date = %s
+			GROUP BY mop.mode_of_payment
+			ORDER BY total DESC""",
+			(today,),
+			as_dict=True,
+		)
+		payment_breakdown = [
+			{"method": p.method, "total": flt(p.total), "count": p.count}
+			for p in (payments or [])
+		]
+
+	layaway_data = {"payments_due": 0, "overdue_count": 0}
+	if user_roles & (SALES_ROLES | ACCOUNTING_ROLES | ADMIN_ROLES):
+		layaway_due = frappe.db.sql(
+			"""SELECT COUNT(*) as cnt, COALESCE(SUM(balance_amount), 0) as total
+			FROM `tabLayaway Contract`
+			WHERE docstatus = 1
+			AND status = 'Active'
+			AND next_payment_date = %s""",
+			(today,),
+			as_dict=True,
+		)
+		if layaway_due and layaway_due[0]:
+			layaway_data["payments_due"] = layaway_due[0].cnt or 0
+
+		layaway_overdue = frappe.db.sql(
+			"""SELECT COUNT(*) as cnt FROM `tabLayaway Contract`
+			WHERE docstatus = 1
+			AND status = 'Active'
+			AND next_payment_date < %s""",
+			(today,),
+			as_dict=True,
+		)
+		if layaway_overdue and layaway_overdue[0]:
+			layaway_data["overdue_count"] = layaway_overdue[0].cnt or 0
+
+	return {
+		"date": today,
+		"sales": sales_data,
+		"repairs": repairs_data,
+		"payments": payment_breakdown,
+		"layaway": layaway_data,
+		"can_view_financials": bool(user_roles & (ACCOUNTING_ROLES | ADMIN_ROLES)),
+		"can_closeout": bool(user_roles & (MANAGER_ROLES | ACCOUNTING_ROLES | ADMIN_ROLES)),
+	}
+
+
+# ---------------------------------------------------------------------------
+# Daily Brief – single aggregated endpoint for the Daily Brief tab
+# ---------------------------------------------------------------------------
+
+ROW_ACTION_MAP = {
+	"reorder_suggestions": [
+		{"action": "raise_mr", "label": "Raise MR", "icon": "add_shopping_cart"},
+	],
+	"overdue_layaway_payments": [
+		{"action": "call_customer", "label": "Call Customer", "icon": "call"},
+		{"action": "send_reminder", "label": "Send Reminder", "icon": "notifications"},
+	],
+	"overdue_repairs": [
+		{"action": "sms_customer", "label": "SMS Customer", "icon": "sms"},
+		{"action": "mark_delayed", "label": "Mark as Delayed", "icon": "schedule"},
+	],
+	"low_stock_alert": [
+		{"action": "request_transfer", "label": "Request Transfer", "icon": "local_shipping"},
+	],
+	"reservation_aging": [
+		{"action": "extend_hold", "label": "Extend Hold", "icon": "timelapse"},
+		{"action": "convert_to_layaway", "label": "Convert to Layaway", "icon": "event_repeat"},
+	],
+}
+
+
+@frappe.whitelist(allow_guest=False)
+def get_daily_brief(store: str | None = None) -> dict[str, Any]:
+	"""Return all KPI tiles + live feed for the Daily Brief in one round-trip."""
+	from frappe.utils import flt, add_days, now_datetime, getdate
+
+	user = frappe.session.user
+	if not user or user == "Guest":
+		frappe.throw("Login required", frappe.PermissionError)
+
+	user_roles = set(frappe.get_roles(user))
+	today = nowdate()
+	today_dt = getdate(today)
+	last_year_today = add_days(today_dt, -365)
+
+	sales = _brief_sales(today, user_roles, user)
+	repairs_rev = _brief_repair_revenue(today, user_roles)
+	layaway_dep = _brief_layaway_deposits(today, user_roles)
+	cash_var = _brief_cash_variance(today, user_roles)
+	low_stock = _brief_low_stock_count(store, user_roles)
+	overdue_rep = _brief_overdue_repairs(user_roles)
+	fin_ar = _brief_financier_ar(today, user_roles)
+	next_audit = _brief_next_audit(store, user_roles)
+	pending = _brief_pending_approvals(user_roles)
+	feed = _brief_live_feed(store, user_roles)
+	yoy = _brief_yoy_deltas(today, last_year_today, user_roles, user)
+
+	return {
+		"date": today,
+		"sales": sales,
+		"repair_revenue": repairs_rev,
+		"layaway_deposits": layaway_dep,
+		"cash_variance_today": cash_var,
+		"low_stock_count": low_stock,
+		"overdue_repairs": overdue_rep,
+		"financier_ar": fin_ar,
+		"next_audit": next_audit,
+		"pending_approvals": pending,
+		"live_feed": feed,
+		"yoy_deltas": yoy,
+		"can_view_financials": bool(user_roles & (ACCOUNTING_ROLES | ADMIN_ROLES)),
+	}
+
+
+def _brief_sales(today, user_roles, user):
+	from frappe.utils import flt
+
+	if not (user_roles & (SALES_ROLES | ACCOUNTING_ROLES | ADMIN_ROLES)):
+		return {"total": 0, "count": 0}
+	owner_filter = ""
+	params: list = [today]
+	if not (user_roles & (MANAGER_ROLES | ACCOUNTING_ROLES | ADMIN_ROLES)):
+		owner_filter = " AND si.owner = %s"
+		params.append(user)
+	row = frappe.db.sql(
+		f"""SELECT COUNT(*) as cnt, COALESCE(SUM(grand_total), 0) as total
+		FROM `tabSales Invoice` si
+		WHERE si.docstatus = 1 AND si.is_pos = 1 AND si.posting_date = %s{owner_filter}""",
+		params,
+		as_dict=True,
+	)
+	r = row[0] if row else {}
+	return {"total": flt(r.get("total", 0)), "count": r.get("cnt", 0)}
+
+
+def _brief_repair_revenue(today, user_roles):
+	from frappe.utils import flt
+
+	if not (user_roles & (SALES_ROLES | ACCOUNTING_ROLES | ADMIN_ROLES)):
+		return {"total": 0, "count": 0}
+	row = frappe.db.sql(
+		"""SELECT COUNT(*) as cnt, COALESCE(SUM(estimated_cost), 0) as total
+		FROM `tabRepair Order` WHERE docstatus < 2 AND status = 'Ready for Pickup' AND DATE(modified) = %s""",
+		(today,),
+		as_dict=True,
+	)
+	r = row[0] if row else {}
+	return {"total": flt(r.get("total", 0)), "count": r.get("cnt", 0)}
+
+
+def _brief_layaway_deposits(today, user_roles):
+	from frappe.utils import flt
+
+	if not (user_roles & (SALES_ROLES | ACCOUNTING_ROLES | ADMIN_ROLES)):
+		return {"total": 0}
+	row = frappe.db.sql(
+		"""SELECT COALESCE(SUM(sip.amount), 0) as total
+		FROM `tabSales Invoice Payment` sip
+		JOIN `tabSales Invoice` si ON sip.parent = si.name
+		WHERE si.docstatus = 1 AND si.custom_transaction_stream = 'Layaway Deposit'
+		AND si.posting_date = %s""",
+		(today,),
+		as_dict=True,
+	)
+	return {"total": flt(row[0].total) if row else 0}
+
+
+def _brief_cash_variance(today, user_roles):
+	from frappe.utils import flt
+
+	if not (user_roles & (ACCOUNTING_ROLES | ADMIN_ROLES)):
+		return 0.0
+	row = frappe.db.sql(
+		"""SELECT COALESCE(SUM(
+			CASE WHEN sip.mode_of_payment = 'Cash' THEN sip.amount ELSE 0 END
+		), 0) as expected
+		FROM `tabSales Invoice Payment` sip
+		JOIN `tabSales Invoice` si ON sip.parent = si.name
+		WHERE si.docstatus = 1 AND si.is_pos = 1 AND si.posting_date = %s""",
+		(today,),
+		as_dict=True,
+	)
+	return 0.0
+
+
+def _brief_low_stock_count(store, user_roles):
+	if not (user_roles & (STOCK_ROLES | MANAGER_ROLES | ADMIN_ROLES)):
+		return 0
+	filters = {"actual_qty": ["<=", 2]}
+	if store:
+		filters["warehouse"] = ["like", f"%{store}%"]
+	return frappe.db.count("Bin", filters)
+
+
+def _brief_overdue_repairs(user_roles):
+	if not (user_roles & (SALES_ROLES | MANAGER_ROLES | ADMIN_ROLES)):
+		return {"count": 0, "max_days_overdue": 0}
+	from frappe.utils import nowdate
+
+	today = nowdate()
+	rows = frappe.db.sql(
+		"""SELECT COUNT(*) as cnt,
+			COALESCE(MAX(DATEDIFF(%s, promised_date)), 0) as max_days
+		FROM `tabRepair Order`
+		WHERE docstatus < 2
+		AND status NOT IN ('Ready for Pickup', 'Delivered', 'Cancelled')
+		AND promised_date < %s""",
+		(today, today),
+		as_dict=True,
+	)
+	r = rows[0] if rows else {}
+	return {"count": r.get("cnt", 0), "max_days_overdue": r.get("max_days", 0)}
+
+
+def _brief_financier_ar(today, user_roles):
+	from frappe.utils import flt
+	from zevar_core.constants import FINANCING_WATERFALL
+
+	if not (user_roles & (ACCOUNTING_ROLES | ADMIN_ROLES)):
+		return []
+	result = []
+	for financier in FINANCING_WATERFALL:
+		row = frappe.db.sql(
+			"""SELECT COALESCE(SUM(sip.amount), 0) as today_total
+			FROM `tabSales Invoice Payment` sip
+			JOIN `tabSales Invoice` si ON sip.parent = si.name
+			WHERE si.docstatus = 1 AND si.is_pos = 1
+			AND sip.mode_of_payment = %s AND si.posting_date = %s""",
+			(financier, today),
+			as_dict=True,
+		)
+		result.append({
+			"financier": financier,
+			"today_ar": flt(row[0].today_total) if row else 0,
+		})
+	return result
+
+
+def _brief_next_audit(store, user_roles):
+	if not (user_roles & (STOCK_ROLES | MANAGER_ROLES | ADMIN_ROLES)):
+		return {"scope": None, "due_in_hours": None}
+	filters = {"status": "Scheduled"}
+	if store:
+		filters["store_location"] = ["like", f"%{store}%"]
+	plans = frappe.get_all(
+		"Audit Plan",
+		filters=filters,
+		fields=["scope", "scheduled_for"],
+		order_by="scheduled_for asc",
+		limit=1,
+	)
+	if not plans:
+		return {"scope": None, "due_in_hours": None}
+	from frappe.utils import now_datetime
+
+	scheduled = plans[0]
+	delta = (scheduled.scheduled_for - now_datetime()).total_seconds() / 3600
+	return {"scope": scheduled.scope, "due_in_hours": max(0, round(delta))}
+
+
+def _brief_pending_approvals(user_roles):
+	if not (user_roles & (MANAGER_ROLES | ADMIN_ROLES)):
+		return {"variance_overrides": 0, "transfer_receives": 0}
+	variance = frappe.db.count("POS Audit Log", {
+		"event_type": "variance_override",
+		"timestamp": [">=", frappe.utils.nowdate()],
+	})
+	transfers = frappe.db.count("Stock Entry", {
+		"stock_entry_type": "Material Transfer",
+		"docstatus": 0,
+	})
+	return {"variance_overrides": variance, "transfer_receives": transfers}
+
+
+def _brief_live_feed(store, user_roles, limit=50):
+	if not (user_roles & (MANAGER_ROLES | ACCOUNTING_ROLES | ADMIN_ROLES)):
+		return []
+	filters = {}
+	if store:
+		filters["reference_document"] = ["like", f"%{store}%"]
+	logs = frappe.get_all(
+		"POS Audit Log",
+		filters=filters,
+		fields=["timestamp", "user", "event_type", "details"],
+		order_by="timestamp desc",
+		limit=limit,
+	)
+	return logs
+
+
+def _brief_yoy_deltas(today, last_year_today, user_roles, user):
+	from frappe.utils import flt
+
+	result = {}
+	if not (user_roles & (SALES_ROLES | ACCOUNTING_ROLES | ADMIN_ROLES)):
+		return result
+	owner_filter = ""
+	params_this: list = [today]
+	params_last: list = [last_year_today]
+	if not (user_roles & (MANAGER_ROLES | ACCOUNTING_ROLES | ADMIN_ROLES)):
+		owner_filter = " AND owner = %s"
+		params_this.append(user)
+		params_last.append(user)
+
+	for label, dt, params in [("this", today, params_this), ("last", last_year_today, params_last)]:
+		row = frappe.db.sql(
+			f"""SELECT COALESCE(SUM(grand_total), 0) as total
+			FROM `tabSales Invoice`
+			WHERE docstatus = 1 AND is_pos = 1 AND posting_date = %s{owner_filter}""",
+			params,
+			as_dict=True,
+		)
+		result[label] = flt(row[0].total) if row else 0
+
+	this_val = result.get("this", 0)
+	last_val = result.get("last", 0)
+	pct = round(((this_val - last_val) / last_val) * 100, 1) if last_val else 0
+	result["pct"] = pct
+	return {"sales_total": result}
+
+
+# ---------------------------------------------------------------------------
+# Row-level actions
+# ---------------------------------------------------------------------------
+
+
+@frappe.whitelist(allow_guest=False)
+def get_row_actions(report_id: str) -> list[dict]:
+	"""Return available row actions for a given report."""
+	user = frappe.session.user
+	user_roles = set(frappe.get_roles(user))
+	for r in REPORT_CATALOG:
+		if r["id"] == report_id:
+			if not _has_access(r, user_roles):
+				return []
+			return ROW_ACTION_MAP.get(report_id, [])
+	return []
+
+
+@frappe.whitelist(allow_guest=False)
+def execute_row_action(report_id: str, action: str, row_data: dict | str = "{}"):
+	"""Execute a row-level action from within a report."""
+	import json
+	from frappe.utils import flt
+
+	user = frappe.session.user
+	user_roles = set(frappe.get_roles(user))
+	if isinstance(row_data, str):
+		row_data = json.loads(row_data)
+
+	report_def = None
+	for r in REPORT_CATALOG:
+		if r["id"] == report_id:
+			report_def = r
+			break
+	if not report_def or not _has_access(report_def, user_roles):
+		frappe.throw("No access", frappe.PermissionError)
+
+	if action == "raise_mr" and report_id == "reorder_suggestions":
+		return _action_raise_mr(row_data)
+	if action == "call_customer" and report_id == "overdue_layaway_payments":
+		return _action_call_customer(row_data)
+	if action == "send_reminder" and report_id == "overdue_layaway_payments":
+		return _action_send_layaway_reminder(row_data)
+	if action == "sms_customer" and report_id == "overdue_repairs":
+		return _action_sms_customer(row_data)
+	if action == "mark_delayed" and report_id == "overdue_repairs":
+		return _action_mark_repair_delayed(row_data)
+	if action == "request_transfer" and report_id == "low_stock_alert":
+		return _action_request_transfer(row_data)
+	if action == "extend_hold" and report_id == "reservation_aging":
+		return _action_extend_reservation(row_data)
+	if action == "convert_to_layaway" and report_id == "reservation_aging":
+		return _action_convert_reservation(row_data)
+
+	frappe.throw(f"Unknown action: {action} for report: {report_id}", frappe.ValidationError)
+
+
+def _action_raise_mr(row):
+	from frappe.utils import add_days, today
+
+	item_code = row.get("item_code") or row.get("Item Code")
+	if not item_code:
+		frappe.throw("Item code required", frappe.ValidationError)
+	company = frappe.defaults.get_global_default("company")
+	cost_center = frappe.get_cached_value("Company", company, "cost_center")
+	qty = flt(row.get("suggested_qty") or row.get("qty") or 1)
+
+	mr = frappe.new_doc("Material Request")
+	mr.material_request_type = "Purchase"
+	mr.company = company
+	mr.cost_center = cost_center
+	mr.schedule_date = add_days(today(), 7)
+	mr.append("items", {
+		"item_code": item_code,
+		"qty": qty,
+		"schedule_date": add_days(today(), 7),
+		"cost_center": cost_center,
+	})
+	mr.insert(ignore_permissions=True)
+	return {"status": "created", "name": mr.name}
+
+
+def _action_call_customer(row):
+	customer = row.get("customer") or row.get("Customer")
+	if not customer:
+		frappe.throw("Customer required", frappe.ValidationError)
+	phone = frappe.db.get_value("Customer", customer, "mobile_no") or frappe.db.get_value("Contact", {"links": {"link_doctype": "Customer", "link_name": customer}}, "phone")
+	return {"action": "call", "customer": customer, "phone": phone or ""}
+
+
+def _action_send_layaway_reminder(row):
+	customer = row.get("customer") or row.get("Customer")
+	contract = row.get("contract") or row.get("Contract")
+	if not customer:
+		frappe.throw("Customer required", frappe.ValidationError)
+	email = frappe.db.get_value("Customer", customer, "email_id")
+	if email:
+		frappe.sendmail(
+			recipients=[email],
+			subject="Layaway Payment Reminder",
+			message=f"This is a reminder that your layaway payment is overdue. Please contact the store.",
+		)
+	return {"status": "sent", "customer": customer}
+
+
+def _action_sms_customer(row):
+	customer = row.get("customer") or row.get("Customer")
+	if not customer:
+		frappe.throw("Customer required", frappe.ValidationError)
+	phone = frappe.db.get_value("Customer", customer, "mobile_no")
+	return {"action": "sms", "customer": customer, "phone": phone or ""}
+
+
+def _action_mark_repair_delayed(row):
+	repair = row.get("name") or row.get("Repair Order")
+	if not repair:
+		frappe.throw("Repair Order required", frappe.ValidationError)
+	if frappe.db.exists("Repair Order", repair):
+		frappe.db.set_value("Repair Order", repair, "status", "Delayed")
+	return {"status": "updated", "repair": repair}
+
+
+def _action_request_transfer(row):
+	item_code = row.get("item_code") or row.get("Item Code")
+	if not item_code:
+		frappe.throw("Item code required", frappe.ValidationError)
+	return {"action": "open_transfer_modal", "item_code": item_code}
+
+
+def _action_extend_reservation(row):
+	reservation = row.get("name") or row.get("Reservation")
+	days = int(row.get("extend_days") or 2)
+	if not reservation:
+		frappe.throw("Reservation name required", frappe.ValidationError)
+	if frappe.db.exists("Stock Reservation", reservation):
+		from frappe.utils import add_days, now_datetime
+
+		current = frappe.db.get_value("Stock Reservation", reservation, "hold_until")
+		new_date = add_days(current, days) if current else add_days(now_datetime(), days)
+		frappe.db.set_value("Stock Reservation", reservation, "hold_until", new_date)
+	return {"status": "extended", "reservation": reservation, "days": days}
+
+
+def _action_convert_reservation(row):
+	reservation = row.get("name") or row.get("Reservation")
+	customer = row.get("customer") or row.get("Customer")
+	serial_no = row.get("serial_no") or row.get("Serial No")
+	if not reservation or not customer:
+		frappe.throw("Reservation and Customer required", frappe.ValidationError)
+	return {"action": "open_layaway_modal", "reservation": reservation, "customer": customer, "serial_no": serial_no}
+
+
+# ---------------------------------------------------------------------------
+# Report Subscription CRUD
+# ---------------------------------------------------------------------------
+
+
+@frappe.whitelist(allow_guest=False)
+def get_report_subscriptions() -> list[dict]:
+	"""Return all subscriptions for the current user."""
+	user = frappe.session.user
+	subs = frappe.get_all(
+		"Report Subscription",
+		filters={"user": user},
+		fields=["name", "report_id", "report_title", "enabled", "delivery_method",
+				"export_format", "cron_expression", "schedule_label", "next_run", "last_run"],
+		order_by="next_run asc",
+	)
+	return subs
+
+
+@frappe.whitelist(allow_guest=False)
+def create_report_subscription(
+	report_id: str,
+	cron_expression: str = "0 22 * * *",
+	delivery_method: str = "Email",
+	export_format: str = "PDF",
+	filters_json: str = "{}",
+	recipient_email: str | None = None,
+	recipient_phone: str | None = None,
+) -> dict:
+	"""Create a new report subscription for the current user."""
+	user = frappe.session.user
+	user_roles = set(frappe.get_roles(user))
+
+	report_def = None
+	for r in REPORT_CATALOG:
+		if r["id"] == report_id:
+			report_def = r
+			break
+	if not report_def:
+		frappe.throw(f"Unknown report: {report_id}", frappe.ValidationError)
+	if not _has_access(report_def, user_roles):
+		frappe.throw("No access to this report", frappe.PermissionError)
+
+	existing = frappe.db.exists("Report Subscription", {
+		"user": user,
+		"report_id": report_id,
+		"cron_expression": cron_expression,
+	})
+	if existing:
+		frappe.throw("Subscription already exists for this report and schedule", frappe.DuplicateEntryError)
+
+	doc = frappe.new_doc("Report Subscription")
+	doc.user = user
+	doc.report_id = report_id
+	doc.cron_expression = cron_expression
+	doc.delivery_method = delivery_method
+	doc.export_format = export_format
+	doc.filters_json = filters_json
+	doc.recipient_email = recipient_email or frappe.db.get_value("User", user, "email")
+	doc.recipient_phone = recipient_phone or ""
+	doc.insert(ignore_permissions=True)
+	return {"status": "created", "name": doc.name, "report_title": doc.report_title}
+
+
+@frappe.whitelist(allow_guest=False)
+def delete_report_subscription(name: str) -> dict:
+	"""Delete a report subscription owned by the current user."""
+	user = frappe.session.user
+	sub_user = frappe.db.get_value("Report Subscription", name, "user")
+	if sub_user != user and "System Manager" not in frappe.get_roles(user):
+		frappe.throw("Not authorized", frappe.PermissionError)
+	frappe.delete_doc("Report Subscription", name, ignore_permissions=True)
+	return {"status": "deleted"}
+
+
+@frappe.whitelist(allow_guest=False)
+def toggle_report_subscription(name: str) -> dict:
+	"""Toggle enabled/disabled on a subscription."""
+	user = frappe.session.user
+	sub_user = frappe.db.get_value("Report Subscription", name, "user")
+	if sub_user != user and "System Manager" not in frappe.get_roles(user):
+		frappe.throw("Not authorized", frappe.PermissionError)
+	current = frappe.db.get_value("Report Subscription", name, "enabled")
+	new_val = 0 if current else 1
+	frappe.db.set_value("Report Subscription", name, "enabled", new_val)
+	return {"status": "toggled", "enabled": bool(new_val)}

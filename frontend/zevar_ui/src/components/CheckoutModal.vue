@@ -167,21 +167,81 @@
 						</div>
 					</div>
 
-					<!-- Payment Methods (filtered per mode) -->
-					<div class="flex-1 overflow-y-auto space-y-2 mb-5 pr-1">
-						<button v-for="pm in activePaymentModes" :key="pm.value" @click="togglePaymentMode(pm.value)"
-							class="w-full flex items-center justify-between p-3.5 border rounded-xl transition-all"
-							:class="isPaymentSelected(pm.value) ? 'border-[#D4AF37] bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]' : 'border-gray-200 hover:border-gray-400 dark:border-warm-border dark:hover:border-white/30'">
-							<div class="flex items-center gap-3">
-								<div class="w-8 h-8 rounded-full flex items-center justify-center"
-									:class="pm.value === 'Cash' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'">
-									<svg v-if="pm.value === 'Cash'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-									<svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+					<!-- Payment Methods (filtered per mode, grouped by category) -->
+					<div class="flex-1 overflow-y-auto mb-5 pr-1">
+						<!-- Standard Payment Methods -->
+						<h4 v-if="mode === 'sale'" class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Standard</h4>
+						<div class="space-y-2 mb-4">
+							<button v-for="pm in standardModes" :key="pm.value" @click="togglePaymentMode(pm.value)"
+								class="w-full flex items-center justify-between p-3.5 border rounded-xl transition-all"
+								:class="isPaymentSelected(pm.value) ? 'border-[#D4AF37] bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]' : 'border-gray-200 hover:border-gray-400 dark:border-warm-border dark:hover:border-white/30'">
+								<div class="flex items-center gap-3">
+									<div class="w-8 h-8 rounded-full flex items-center justify-center"
+										:class="pm.value === 'Cash' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'">
+										<svg v-if="pm.value === 'Cash'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+										<svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+									</div>
+									<span class="font-medium text-gray-900 dark:text-white text-sm">{{ pm.label }}</span>
 								</div>
-								<span class="font-medium text-gray-900 dark:text-white text-sm">{{ pm.label }}</span>
-							</div>
-							<div v-if="isPaymentSelected(pm.value)" class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-						</button>
+								<div v-if="isPaymentSelected(pm.value)" class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+							</button>
+						</div>
+
+						<!-- Digital Wallets -->
+						<h4 v-if="mode === 'sale'" class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Digital Wallets</h4>
+						<div class="space-y-2 mb-4">
+							<button v-for="pm in digitalWalletModes" :key="pm.value" @click="togglePaymentMode(pm.value)"
+								class="w-full flex items-center justify-between p-3.5 border rounded-xl transition-all"
+								:class="isPaymentSelected(pm.value) ? 'border-[#D4AF37] bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]' : 'border-gray-200 hover:border-gray-400 dark:border-warm-border dark:hover:border-white/30'">
+								<div class="flex items-center gap-3">
+									<div class="w-8 h-8 rounded-full flex items-center justify-center bg-purple-100 text-purple-600">
+										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+									</div>
+									<span class="font-medium text-gray-900 dark:text-white text-sm">{{ pm.label }}</span>
+								</div>
+								<div v-if="isPaymentSelected(pm.value)" class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+							</button>
+						</div>
+
+						<!-- Stored Value (Gift Card, Trade-In) -->
+						<h4 v-if="mode === 'sale'" class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Stored Value</h4>
+						<div class="space-y-2 mb-4">
+							<button v-for="pm in storedValueModes" :key="pm.value" @click="togglePaymentMode(pm.value)"
+								class="w-full flex items-center justify-between p-3.5 border rounded-xl transition-all"
+								:class="isPaymentSelected(pm.value) ? 'border-[#D4AF37] bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]' : 'border-gray-200 hover:border-gray-400 dark:border-warm-border dark:hover:border-white/30'">
+								<div class="flex items-center gap-3">
+									<div class="w-8 h-8 rounded-full flex items-center justify-center bg-orange-100 text-orange-600">
+										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+									</div>
+									<span class="font-medium text-gray-900 dark:text-white text-sm">{{ pm.label }}</span>
+								</div>
+								<div v-if="isPaymentSelected(pm.value)" class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+							</button>
+						</div>
+
+						<!-- Financing Options -->
+						<h4 v-if="mode === 'sale'" class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Financing</h4>
+						<div class="space-y-2 mb-4">
+							<button v-for="pm in financingModes" :key="pm.value" @click="togglePaymentMode(pm.value)"
+								class="w-full flex items-center justify-between p-3.5 border rounded-xl transition-all"
+								:class="isPaymentSelected(pm.value) ? 'border-[#D4AF37] bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]' : 'border-gray-200 hover:border-gray-400 dark:border-warm-border dark:hover:border-white/30'">
+								<div class="flex items-center gap-3">
+									<div class="w-8 h-8 rounded-full flex items-center justify-center bg-indigo-100 text-indigo-600">
+										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+									</div>
+									<div class="text-left">
+										<span class="font-medium text-gray-900 dark:text-white text-sm">{{ pm.label }}</span>
+										<span v-if="pm.value !== 'In-House Finance'" class="text-xs text-gray-400 block">Apply for financing</span>
+									</div>
+								</div>
+								<div v-if="isPaymentSelected(pm.value)" class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+							</button>
+							<button @click="showFinancingWaterfall = true"
+								class="w-full flex items-center justify-center gap-2 p-3 border-2 border-dashed border-indigo-300 dark:border-indigo-700 rounded-xl text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all">
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+								<span class="font-medium text-sm">Quick Apply (Waterfall)</span>
+							</button>
+						</div>
 					</div>
 
 					<!-- Gift Card Number Input (sale mode only) -->
@@ -310,6 +370,7 @@ const successInvoiceId = ref(null)
 const giftCardNumber = ref('')
 const giftCardInfo = ref(null)
 const giftCardLoading = ref(false)
+const showFinancingWaterfall = ref(false)
 
 const salesAssociates = createResource({
 	url: 'zevar_core.api.sales_associates.get_sales_associates',
@@ -329,20 +390,31 @@ const totalAmount = computed(() => {
 })
 
 const allPaymentModes = [
-	{ value: 'Cash', label: 'Cash' },
-	{ value: 'Credit Card', label: 'Credit Card' },
-	{ value: 'Debit Card', label: 'Debit Card' },
-	{ value: 'Check', label: 'Check' },
-	{ value: 'Apple Pay', label: 'Apple Pay' },
-	{ value: 'Google Pay', label: 'Google Pay' },
-	{ value: 'Venmo', label: 'Venmo' },
-	{ value: 'Zelle', label: 'Zelle' },
-	{ value: 'Cash App', label: 'Cash App' },
-	{ value: 'Gift Card', label: 'Gift Card' },
-	{ value: 'Wire Transfer', label: 'Wire Transfer' },
+	{ value: 'Cash', label: 'Cash', category: 'standard' },
+	{ value: 'Credit Card', label: 'Credit Card', category: 'standard' },
+	{ value: 'Debit Card', label: 'Debit Card', category: 'standard' },
+	{ value: 'Check', label: 'Check', category: 'standard' },
+	{ value: 'Apple Pay', label: 'Apple Pay', category: 'digital' },
+	{ value: 'Google Pay', label: 'Google Pay', category: 'digital' },
+	{ value: 'Venmo', label: 'Venmo', category: 'digital' },
+	{ value: 'Zelle', label: 'Zelle', category: 'digital' },
+	{ value: 'Cash App', label: 'Cash App', category: 'digital' },
+	{ value: 'Gift Card', label: 'Gift Card', category: 'stored_value' },
+	{ value: 'Wire Transfer', label: 'Wire Transfer', category: 'standard' },
+	{ value: 'Synchrony', label: 'Synchrony', category: 'financing' },
+	{ value: 'AFF', label: 'American First Finance', category: 'financing' },
+	{ value: 'Progressive', label: 'Progressive Leasing', category: 'financing' },
+	{ value: 'Snap', label: 'Snap Finance', category: 'financing' },
+	{ value: 'CIMA', label: 'Acima', category: 'financing' },
+	{ value: 'Trade-In', label: 'Trade-In Credit', category: 'stored_value' },
+	{ value: 'In-House Finance', label: 'In-House Finance', category: 'financing' },
 ]
 
 const activePaymentModes = computed(() => allPaymentModes)
+const standardModes = computed(() => allPaymentModes.filter(m => m.category === 'standard'))
+const digitalWalletModes = computed(() => allPaymentModes.filter(m => m.category === 'digital'))
+const storedValueModes = computed(() => allPaymentModes.filter(m => m.category === 'stored_value'))
+const financingModes = computed(() => allPaymentModes.filter(m => m.category === 'financing'))
 
 const remainingAmount = computed(() => {
 	const totalPaid = selectedPayments.value.reduce((sum, p) => sum + (Number(p.amount) || 0), 0)

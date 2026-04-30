@@ -13,6 +13,16 @@ module.exports = {
 			serif: ['Cinzel', 'ui-serif', 'Georgia', 'serif'],
 			display: ['Spline Sans', 'sans-serif'],
 			portal: ['Plus Jakarta Sans', 'sans-serif'],
+			mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+		},
+		// Breakpoint bands aligned with plan DEC-UI-001
+		screens: {
+			xs: '375px',
+			sm: '640px',
+			md: '768px',
+			lg: '1024px',
+			xl: '1280px',
+			'2xl': '1536px',
 		},
 		extend: {
 			colors: {
@@ -31,8 +41,55 @@ module.exports = {
 				'warm-card': '#1c1810',
 				'warm-border': '#3a3225',
 				'warm-border-subtle': '#2a2518',
+				// Gold palette
+				gold: {
+					DEFAULT: '#D4AF37',
+					light: '#F2E6A0',
+					dark: '#B8941E',
+				},
+			},
+			spacing: {
+				'safe-top': 'env(safe-area-inset-top, 0px)',
+				'safe-bottom': 'env(safe-area-inset-bottom, 0px)',
+				'safe-left': 'env(safe-area-inset-left, 0px)',
+				'safe-right': 'env(safe-area-inset-right, 0px)',
+			},
+			minHeight: {
+				touch: '44px',
+			},
+			minWidth: {
+				touch: '44px',
 			},
 		},
 	},
-	plugins: [],
+	plugins: [
+		// Touch target plugin — adds .touch-target utility
+		function ({ addUtilities }) {
+			addUtilities({
+				'.touch-target': {
+					'min-width': '44px',
+					'min-height': '44px',
+					'display': 'inline-flex',
+					'align-items': 'center',
+					'justify-content': 'center',
+				},
+				'.dvh-full': {
+					height: '100dvh',
+				},
+				'.dvh-screen': {
+					'min-height': '100dvh',
+				},
+				'.no-scrollbar': {
+					'-ms-overflow-style': 'none',
+					'scrollbar-width': 'none',
+				},
+				'.no-scrollbar::-webkit-scrollbar': {
+					display: 'none',
+				},
+				'.bottom-sheet-radius': {
+					'border-radius': '16px 16px 0 0',
+				},
+			})
+		},
+	],
 }

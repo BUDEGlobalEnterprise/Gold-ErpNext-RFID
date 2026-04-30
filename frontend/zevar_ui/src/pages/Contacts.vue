@@ -143,37 +143,135 @@
 			</div>
 
 			<div v-if="viewMode === 'grid'" class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
-				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+				<!-- Loading state -->
+				<div v-if="loading" class="flex items-center justify-center py-20">
+					<div class="text-center">
+						<div class="animate-spin rounded-full h-10 w-10 border-2 border-gray-300 border-t-[#D4AF37] mx-auto mb-4"></div>
+						<div class="text-sm text-gray-500 dark:text-gray-400">Loading contacts...</div>
+					</div>
+				</div>
+
+				<!-- Empty state -->
+				<div v-else-if="suppliers.length === 0" class="flex items-center justify-center py-20">
+					<div class="text-center">
+						<div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-warm-dark-800 flex items-center justify-center mx-auto mb-4">
+							<svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+						</div>
+						<div class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">No contacts found</div>
+						<div class="text-xs text-gray-500 dark:text-gray-400">Try adjusting your search or add a new vendor</div>
+					</div>
+				</div>
+
+				<!-- Grid cards -->
+				<div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-6">
 					<div
 						v-for="supplier in suppliers"
 						:key="supplier.name"
-						class="bg-white dark:bg-warm-dark-800 rounded-2xl border border-gray-100 dark:border-warm-border/50 p-4 hover:shadow-md hover:border-gray-300 dark:hover:border-warm-border transition cursor-pointer"
+						class="group bg-white dark:bg-warm-dark-800 rounded-2xl border border-gray-100 dark:border-warm-border/50 overflow-hidden hover:border-[#D4AF37]/40 dark:hover:border-[#D4AF37]/30 transition-all duration-200 cursor-pointer hover:shadow-lg hover:shadow-[#D4AF37]/5 dark:hover:shadow-none hover:-translate-y-0.5"
 					>
-						<div class="flex items-center gap-3 mb-3">
-							<div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] text-[#0F1115]">
-								{{ getInitials(supplier.supplier_name || supplier.name) }}
+						<!-- Card accent bar -->
+						<div class="h-1 bg-gradient-to-r from-[#D4AF37] via-[#F2E6A0] to-[#D4AF37] opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+
+						<div class="p-4">
+							<!-- Header: avatar + name + group badge -->
+							<div class="flex items-start gap-3 mb-3">
+								<div class="w-11 h-11 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] text-[#0F1115] shadow-sm">
+									{{ getInitials(supplier.supplier_name || supplier.name) }}
+								</div>
+								<div class="min-w-0 flex-1">
+									<div class="font-bold text-gray-900 dark:text-white text-sm truncate leading-tight">{{ supplier.supplier_name || supplier.name }}</div>
+									<div class="text-[10px] text-gray-400 dark:text-gray-500 font-mono mt-0.5">{{ supplier.name }}</div>
+								</div>
 							</div>
-							<div class="min-w-0">
-								<div class="font-bold text-gray-900 dark:text-white text-sm truncate">{{ supplier.supplier_name || supplier.name }}</div>
-								<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#D4AF37]/15 text-[#D4AF37]">
+
+							<!-- Supplier group badge -->
+							<div class="mb-3">
+								<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#D4AF37]/10 text-[#B8960C] dark:bg-[#D4AF37]/15 dark:text-[#F2E6A0]">
+									<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" /></svg>
 									{{ supplier.supplier_group || 'All Groups' }}
 								</span>
 							</div>
+
+							<!-- Divider -->
+							<div class="border-t border-gray-100 dark:border-warm-border/50 mb-3"></div>
+
+							<!-- Contact details -->
+							<div class="space-y-2">
+								<!-- Phone -->
+								<div class="flex items-center gap-2 text-xs">
+									<div class="w-6 h-6 rounded-md bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+										<svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+									</div>
+									<span class="text-gray-700 dark:text-gray-300 truncate">{{ supplier.mobile_no || 'No Phone' }}</span>
+								</div>
+
+								<!-- Email -->
+								<div class="flex items-center gap-2 text-xs">
+									<div class="w-6 h-6 rounded-md bg-green-50 dark:bg-green-900/30 flex items-center justify-center shrink-0">
+										<svg class="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+									</div>
+									<span class="text-gray-700 dark:text-gray-300 truncate">{{ supplier.email_id || 'No Email' }}</span>
+								</div>
+
+								<!-- Supplier type -->
+								<div v-if="supplier.supplier_type" class="flex items-center gap-2 text-xs">
+									<div class="w-6 h-6 rounded-md bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center shrink-0">
+										<svg class="w-3.5 h-3.5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+									</div>
+									<span class="text-gray-600 dark:text-gray-400">{{ supplier.supplier_type }}</span>
+								</div>
+
+								<!-- Country -->
+								<div v-if="supplier.country" class="flex items-center gap-2 text-xs">
+									<div class="w-6 h-6 rounded-md bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center shrink-0">
+										<svg class="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+									</div>
+									<span class="text-gray-600 dark:text-gray-400">{{ supplier.country }}</span>
+								</div>
+							</div>
+
+							<!-- Quick action (shown on hover) -->
+							<div class="mt-3 pt-3 border-t border-gray-50 dark:border-warm-border/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+								<button class="w-full flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-bold text-[#D4AF37] hover:bg-[#D4AF37]/10 transition">
+									<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+									View Details
+								</button>
+							</div>
 						</div>
-						<div class="space-y-1.5 pt-3 border-t border-gray-100 dark:border-warm-border/50">
-							<div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-								<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-								{{ supplier.mobile_no || 'No Phone' }}
-							</div>
-							<div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-								<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-								{{ supplier.email_id || 'No Email' }}
-							</div>
-							<div v-if="supplier.supplier_type" class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-								<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-								{{ supplier.supplier_type }}
-							</div>
+					</div>
+				</div>
+
+				<!-- Grid Pagination -->
+				<div class="px-4 py-3 border-t border-gray-100 dark:border-warm-border/50 bg-gray-50/50 dark:bg-warm-dark-700/50 flex items-center justify-between mt-auto shrink-0 sticky bottom-0 z-10 backdrop-blur-sm">
+					<div class="flex items-center gap-3">
+						<div class="text-xs text-gray-500 dark:text-gray-400">
+							Showing {{ (pagination.page - 1) * pagination.page_length + 1 }} to {{ Math.min(pagination.page * pagination.page_length, pagination.total_count) }} of {{ pagination.total_count }}
 						</div>
+						<div class="flex items-center gap-2 border-l border-gray-200 dark:border-warm-border pl-3">
+							<label class="text-xs text-gray-500 dark:text-gray-400">Per page:</label>
+							<select v-model="pagination.page_length" @change="changePageSize" class="text-xs bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded p-1 focus:ring-1 focus:ring-[#D4AF37] outline-none">
+								<option :value="20">20</option>
+								<option :value="50">50</option>
+								<option :value="100">100</option>
+							</select>
+						</div>
+					</div>
+					<div class="flex items-center gap-2">
+						<button
+							@click="prevPage"
+							:disabled="pagination.page === 1 || loading"
+							class="px-3 py-1.5 text-xs font-bold rounded-lg border border-gray-200 dark:border-warm-border hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
+						>
+							<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+						</button>
+						<span class="text-xs font-medium text-gray-700 dark:text-gray-300 px-2">Page {{ pagination.page }}</span>
+						<button
+							@click="nextPage"
+							:disabled="(pagination.page * pagination.page_length) >= pagination.total_count || loading"
+							class="px-3 py-1.5 text-xs font-bold rounded-lg border border-gray-200 dark:border-warm-border hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
+						>
+							<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+						</button>
 					</div>
 				</div>
 			</div>
@@ -185,10 +283,18 @@
 <script setup>
 import AppLayout from '@/components/AppLayout.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { createResource } from 'frappe-ui'
 
-const viewMode = ref(localStorage.getItem('zevar_contacts_view') || 'list')
+const STORAGE_KEY = 'zevar_contacts_view'
+const storedView = localStorage.getItem(STORAGE_KEY)
+const viewMode = ref(storedView === 'grid' ? 'grid' : 'list')
+
+// Watch for view mode changes and persist to localStorage
+watch(viewMode, (mode) => {
+	localStorage.setItem(STORAGE_KEY, mode)
+})
+
 const suppliers = ref([])
 const loading = ref(true)
 const searchQuery = ref('')

@@ -8,19 +8,27 @@
  "engine": "InnoDB",
  "field_order": [
   "store_location",
+  "scope",
+  "display_case",
   "auditor",
   "audit_type",
+  "audit_plan",
   "started_at",
   "completed_at",
   "cancelled_at",
   "status",
   "expected_count",
   "scanned_count",
+  "concurrent_scanners",
   "section_break_values",
   "total_value_expected",
   "total_value_scanned",
   "total_value_discrepancy",
+  "variance_dollar_total",
   "notes",
+  "two_person_signoff_by",
+  "photo_evidence",
+  "freeze_reason",
   "scans",
   "amended_from"
  ],
@@ -72,7 +80,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Draft\nIn Progress\nReconciled\nDiscrepancy\nCancelled",
+   "options": "Draft\nIn Progress\nReconciled\nDiscrepancy\nPending Manager Review\nReconciled with Shrinkage\nCancelled",
    "read_only": 1
   },
   {
@@ -114,6 +122,58 @@
    "fieldname": "notes",
    "fieldtype": "Small Text",
    "label": "Notes"
+  },
+  {
+   "default": "Spot",
+   "fieldname": "scope",
+   "fieldtype": "Select",
+   "label": "Audit Scope",
+   "options": "Spot\nShowcase\nBackstock\nFull Store",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "display_case",
+   "fieldtype": "Link",
+   "label": "Display Case",
+   "options": "Display Case"
+  },
+  {
+   "fieldname": "audit_plan",
+   "fieldtype": "Link",
+   "label": "Audit Plan",
+   "options": "Audit Plan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "concurrent_scanners",
+   "fieldtype": "Int",
+   "label": "Concurrent Scanners",
+   "default": "1",
+   "description": "Number of staff scanning simultaneously for this session"
+  },
+  {
+   "fieldname": "variance_dollar_total",
+   "fieldtype": "Currency",
+   "label": "Variance Dollar Total",
+   "read_only": 1,
+   "description": "Computed: total dollar value of missing pieces"
+  },
+  {
+   "fieldname": "two_person_signoff_by",
+   "fieldtype": "Link",
+   "label": "Two-Person Sign-Off By",
+   "options": "User"
+  },
+  {
+   "fieldname": "photo_evidence",
+   "fieldtype": "Attach",
+   "label": "Photo Evidence"
+  },
+  {
+   "fieldname": "freeze_reason",
+   "fieldtype": "Small Text",
+   "label": "Freeze Reason",
+   "read_only": 1
   },
   {
    "fieldname": "scans",
