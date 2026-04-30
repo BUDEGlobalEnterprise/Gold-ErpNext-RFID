@@ -107,7 +107,7 @@ def create_repairs_workspace():
 		doc.icon = "tools"
 		doc.is_standard = 1
 		doc.public = 1
-	_doc.description = "Repair management workspace"
+		doc.description = "Repair management workspace"
 
 		# Add links
 		links_data = [

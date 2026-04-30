@@ -34,15 +34,15 @@ def verify_webhook_token(provider):
 	settings = frappe.get_single("Payment Gateway Settings")
 	secret_field = f"{provider.lower()}_webhook_secret"
 	expected = settings.get(secret_field)
-	
+
 	if not expected:
 		# If no secret is configured, we assume it's not yet secured in settings
 		return
-		
+
 	received = frappe.get_request_header("X-Zevar-Webhook-Secret") or frappe.get_request_header("Authorization")
 	if received and received.startswith("Bearer "):
 		received = received[7:]
-		
+
 	if received != expected:
 		frappe.throw(_("Invalid webhook secret for {0}").format(provider), frappe.PermissionError)
 
@@ -117,7 +117,7 @@ def zelle_webhook():
 	amount = data.get("amount", 0)
 	sender = data.get("sender", {})
 	reference = data.get("reference", "")
-	
+
 	# Sanitize sender details for logging
 	safe_sender = {}
 	if isinstance(sender, dict):
@@ -128,7 +128,7 @@ def zelle_webhook():
 				safe_sender[k] = v
 	else:
 		safe_sender = "********"
-		
+
 	frappe.logger().info(f"Zelle payment received: ${amount} from {safe_sender}")
 	from zevar_core.api.audit_log import log_event_safely
 	log_event_safely(

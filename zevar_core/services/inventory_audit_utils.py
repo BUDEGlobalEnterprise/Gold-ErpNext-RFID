@@ -17,7 +17,7 @@ def _reconcile_audit(session_doc):
 			elif scan.match_status == "Unexpected":
 				has_unexpected = True
 				unexpected_items.append(scan.item_code)
-	
+
 	expected_items = frappe.db.sql(
 		"""
 		select item_code, actual_qty
@@ -27,7 +27,7 @@ def _reconcile_audit(session_doc):
 		(session_doc.store_location,),
 		as_dict=True,
 	)
-	
+
 	for exp in expected_items:
 		item_codes.add(exp.item_code)
 
@@ -77,7 +77,7 @@ def process_shrinkage_async(session, missing_items_json, store_location):
 	try:
 		raw_missing = json.loads(missing_items_json)
 		missing_items = []
-		
+
 		# Bulk fetch Bin quantities
 		item_codes = [m["item_code"] for m in raw_missing]
 		bin_qtys = {}
@@ -92,7 +92,7 @@ def process_shrinkage_async(session, missing_items_json, store_location):
 				valid_qty = flt(m["qty"])
 			else:
 				valid_qty = min(flt(m["qty"]), actual_qty_val)
-			
+
 			if valid_qty > 0:
 				missing_items.append({"item_code": m["item_code"], "qty": valid_qty})
 
@@ -269,9 +269,9 @@ def execute_submit_scan(session_doc, barcode_or_epc):
 
 	if item_code:
 		item_data = frappe.db.get_value(
-			"Item", 
-			item_code, 
-			["item_name", "standard_rate", "valuation_rate"], 
+			"Item",
+			item_code,
+			["item_name", "standard_rate", "valuation_rate"],
 			as_dict=True
 		)
 		item_name = item_data.item_name
@@ -281,7 +281,7 @@ def execute_submit_scan(session_doc, barcode_or_epc):
 		actual_qty = frappe.db.get_value(
 			"Bin", {"item_code": item_code, "warehouse": session_doc.store_location}, "actual_qty"
 		)
-			
+
 		if actual_qty and flt(actual_qty) > 0:
 			match_status = "Matched"
 
@@ -324,7 +324,7 @@ def execute_batch_scan(session_doc, epcs):
 			duplicates_skipped += 1
 		elif epc not in unique_new_epcs:
 			unique_new_epcs.append(epc)
-	
+
 	if not unique_new_epcs:
 		return {
 			"success": True,
@@ -332,11 +332,11 @@ def execute_batch_scan(session_doc, epcs):
 			"duplicates_skipped": duplicates_skipped,
 			"results": [],
 		}
-		
+
 	# Bulk fetch Items
 	items = frappe.get_all("Item", filters={"custom_rfid_epc": ["in", unique_new_epcs]}, fields=["name", "custom_rfid_epc"])
 	epc_to_item = {itm.custom_rfid_epc: itm.name for itm in items}
-	
+
 	# Bulk fetch Bins
 	item_codes = list(epc_to_item.values())
 	bin_qtys = {}
@@ -348,14 +348,14 @@ def execute_batch_scan(session_doc, epcs):
 	for epc in unique_new_epcs:
 		item_code = epc_to_item.get(epc)
 		match_status = "Matched" if item_code and bin_qtys.get(item_code, 0) > 0 else "Unexpected"
-		
+
 		session_doc.append("scans", {
 			"item_code": item_code,
 			"barcode_or_epc": epc,
 			"match_status": match_status,
 			"scanned_at": now_datetime()
 		})
-		
+
 		results.append({"epc": epc, "match_status": match_status, "item_code": item_code})
 
 	if unique_new_epcs:

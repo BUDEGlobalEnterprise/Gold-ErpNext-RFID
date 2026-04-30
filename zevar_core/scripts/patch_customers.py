@@ -13,19 +13,19 @@ def run():
             first = next((v for k, v in row.items() if k and k.startswith("FIRST")), "").strip()
             last = next((v for k, v in row.items() if k and k.startswith("LAST")), "").strip()
             customer_name = f"{first} {last}".strip()
-            
+
             if not customer_name:
                 continue
-                
+
             dateadd = next((v for k, v in row.items() if k and k.startswith("DATEADD")), "").strip()
             spend = next((v for k, v in row.items() if k and k.startswith("SPEND")), "0").strip()
-            
+
             if not spend: spend = 0
             try:
                 spend_val = float(spend)
             except ValueError:
                 spend_val = 0
-                
+
             creation_str = None
             if dateadd:
                 try:
@@ -37,7 +37,7 @@ def run():
                         creation_str = dt.strftime("%Y-%m-%d %H:%M:%S")
                     except Exception:
                         pass
-                
+
             cust = frappe.db.get_value("Customer", {"customer_name": customer_name}, "name")
             if cust:
                 updates = {}
@@ -47,7 +47,7 @@ def run():
                 if spend_val > 1000:
                     updates["customer_group"] = "VIP"
                     vip_assigned += 1
-                    
+
                 if updates:
                     set_clause = ", ".join(f"`{k}`=%s" for k in updates.keys())
                     values = list(updates.values()) + [cust]

@@ -1,9 +1,8 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import now_datetime, add_to_date
 
 
-class TestInventoryEvents(FraspeTestCase):
+class TestInventoryEvents(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
@@ -146,7 +145,7 @@ class TestInventoryEvents(FraspeTestCase):
 		self.assertTrue(se.name)
 
 	def test_08_repair_in_out(self):
-		from zevar_core.services.inventory_events import repair_in, repair_out
+		from zevar_core.services.inventory_events import repair_in
 
 		item_code = self._create_test_item()
 		repair_bench = f"Repair Bench NY-01 - {self.abbr}"

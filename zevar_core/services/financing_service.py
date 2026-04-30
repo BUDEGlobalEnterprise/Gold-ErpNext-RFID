@@ -72,7 +72,7 @@ class FinancingWaterfallManager:
 					"error": error_msg,
 				})
 				frappe.log_error(
-					f"Waterfall error with {provider_name}: {error_msg}", 
+					f"Waterfall error with {provider_name}: {error_msg}",
 					"Financing Waterfall",
 					reference_doctype="Customer",
 					reference_name=self.app_data.get("customer")
@@ -83,12 +83,12 @@ class FinancingWaterfallManager:
 	def _submit_to_provider(self, provider_name, provider_config, attempt):
 		# Include all relevant PII
 		params = self.app_data.copy()
-		
+
 		module = frappe.get_module(provider_config["module"])
 		method = getattr(module, provider_config["submit_method"])
-		
+
 		result = method(**params)
-		
+
 		decision = result.get("decision", result.get("status", "")).lower()
 		is_approved = result.get("success") and decision in ("approved", "accepted", "approved_with_conditions")
 		is_pending = not is_approved and decision in ("pending", "under_review", "wait")
@@ -139,11 +139,11 @@ def run_waterfall_async(app_data, user_email):
 	frappe.set_user(user_email)
 	manager = FinancingWaterfallManager(app_data)
 	result = manager.run()
-	
+
 	# Notify user via Socket.io or Email if needed
 	frappe.publish_realtime(
-		"financing_waterfall_complete", 
-		result, 
+		"financing_waterfall_complete",
+		result,
 		user=user_email
 	)
 	return result

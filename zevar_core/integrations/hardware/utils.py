@@ -96,7 +96,7 @@ def generate_barcode_commands(data, barcode_type="CODE39", width=2, height=100):
 	commands.append(b"\x1Dw" + bytes([width]))
 	# GS h n - Set barcode height
 	commands.append(b"\x1Dh" + bytes([height]))
-	
+
 	barcode_map = {
 		"CODE39": 69,
 		"EAN13": 67,
@@ -105,10 +105,10 @@ def generate_barcode_commands(data, barcode_type="CODE39", width=2, height=100):
 	barcode_num = barcode_map.get(barcode_type, 69)
 	data_bytes = data.encode("ascii")
 	data_len = len(data_bytes)
-	
+
 	# GS k m n d1...dn - Print barcode (Function B)
 	commands.append(b"\x1Dk" + bytes([barcode_num, data_len]) + data_bytes)
-	
+
 	return b"".join(commands)
 
 

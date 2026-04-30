@@ -40,7 +40,7 @@ def customer_lookup(identifier: str, identifier_type: str = "phone") -> dict[str
         customer = frappe.db.get_value("Customer", {"mobile_no": identifier}, "name")
         if not customer:
             customer = frappe.db.get_value("Customer", {"phone": identifier}, "name")
-            
+
         # Fallback to LIKE search for varied formatting, but only if identifier is sufficiently unique
         if not customer and len(identifier) >= 10:
             customer = frappe.db.get_value(
@@ -96,7 +96,7 @@ def verify_session(verification_token: str, verification_code: str) -> dict[str,
 
     if not stored_code:
         return {"success": False, "message": "Invalid or expired session"}
-        
+
     rate_limit_key = f"customer_portal_attempts_{verification_token}"
     attempts = frappe.cache().get_value(rate_limit_key) or 0
     if attempts >= 5:
@@ -127,12 +127,12 @@ def verify_session(verification_token: str, verification_code: str) -> dict[str,
 
     # Get customer details now that they are authenticated
     customer_doc = frappe.db.get_value(
-        "Customer", 
-        session_data["customer"], 
-        ["name", "customer_name", "email_id", "phone", "mobile_no"], 
+        "Customer",
+        session_data["customer"],
+        ["name", "customer_name", "email_id", "phone", "mobile_no"],
         as_dict=True
     )
-    
+
     customer_data = {
         "customer_name": customer_doc.customer_name,
         "customer_id": customer_doc.name,

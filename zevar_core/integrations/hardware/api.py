@@ -15,7 +15,7 @@ def generate_receipt_content(invoice_name):
 	if not frappe.db.exists("Sales Invoice", invoice_name):
 		frappe.throw(_("Invoice {0} not found.").format(invoice_name))
 	si = frappe.get_doc("Sales Invoice", invoice_name)
-	
+
 	warehouse = si.items[0].warehouse if si.items else None
 	store_info = {}
 	if warehouse:
