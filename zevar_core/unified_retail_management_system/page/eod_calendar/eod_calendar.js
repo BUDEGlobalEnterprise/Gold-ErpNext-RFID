@@ -33,11 +33,11 @@ zevar_core.pages.eod_calendar = class EODCalendar {
 			fieldtype: "Select",
 			options: [this.current_year, this.current_year - 1, this.current_year - 2],
 			default: this.current_year,
-			change: function() {
+			change: function () {
 				me.current_year = this.get_value();
 				me.page.set_title(`EOD Calendar - ${me.current_year}`);
 				me.fetch_and_render_heatmap();
-			}
+			},
 		});
 
 		this.page.add_field({
@@ -45,18 +45,24 @@ zevar_core.pages.eod_calendar = class EODCalendar {
 			label: "Month",
 			fieldtype: "Select",
 			options: [
-				{label: "January", value: "01"}, {label: "February", value: "02"},
-				{label: "March", value: "03"}, {label: "April", value: "04"},
-				{label: "May", value: "05"}, {label: "June", value: "06"},
-				{label: "July", value: "07"}, {label: "August", value: "08"},
-				{label: "September", value: "09"}, {label: "October", value: "10"},
-				{label: "November", value: "11"}, {label: "December", value: "12"}
+				{ label: "January", value: "01" },
+				{ label: "February", value: "02" },
+				{ label: "March", value: "03" },
+				{ label: "April", value: "04" },
+				{ label: "May", value: "05" },
+				{ label: "June", value: "06" },
+				{ label: "July", value: "07" },
+				{ label: "August", value: "08" },
+				{ label: "September", value: "09" },
+				{ label: "October", value: "10" },
+				{ label: "November", value: "11" },
+				{ label: "December", value: "12" },
 			],
 			default: this.current_month,
-			change: function() {
+			change: function () {
 				me.current_month = this.get_value();
 				me.fetch_and_render_heatmap();
-			}
+			},
 		});
 
 		this.page.add_field({
@@ -65,10 +71,10 @@ zevar_core.pages.eod_calendar = class EODCalendar {
 			fieldtype: "Select",
 			options: ["Jewelry Sale", "Repair"],
 			default: "Jewelry Sale",
-			change: function() {
+			change: function () {
 				me.stream = this.get_value();
 				me.fetch_and_render_heatmap();
-			}
+			},
 		});
 	}
 
@@ -108,13 +114,13 @@ zevar_core.pages.eod_calendar = class EODCalendar {
 			args: {
 				year: this.current_year,
 				month: this.current_month,
-				stream: this.stream
+				stream: this.stream,
 			},
-			callback: function(r) {
+			callback: function (r) {
 				if (r.message) {
 					me.render_heatmap(r.message);
 				}
-			}
+			},
 		});
 	}
 
@@ -124,7 +130,7 @@ zevar_core.pages.eod_calendar = class EODCalendar {
 		$(container).empty();
 
 		let datapoints = {};
-		data.forEach(d => {
+		data.forEach((d) => {
 			// frappe charts heatmap needs unix timestamps in seconds as keys
 			let ts = Math.floor(new Date(d.date).getTime() / 1000);
 			datapoints[ts] = d.net;
@@ -137,44 +143,48 @@ zevar_core.pages.eod_calendar = class EODCalendar {
 			data: {
 				dataPoints: datapoints,
 				start: startDate,
-				end: new Date(this.current_year, parseInt(this.current_month), 0)
+				end: new Date(this.current_year, parseInt(this.current_month), 0),
 			},
-			type: 'heatmap',
-			colors: ['#ebedf0', '#c6e48b', '#7bc96f', '#239a3b', '#196127'],
+			type: "heatmap",
+			colors: ["#ebedf0", "#c6e48b", "#7bc96f", "#239a3b", "#196127"],
 			discreteDomains: 0,
 			radius: 3,
 		});
 
 		// Listen to chart click
 		setTimeout(() => {
-			$(container).find('.day').on('click', function() {
-				let dateStr = $(this).attr('data-date');
-				if (dateStr) {
-					me.load_day_drilldown(dateStr);
-				}
-			});
+			$(container)
+				.find(".day")
+				.on("click", function () {
+					let dateStr = $(this).attr("data-date");
+					if (dateStr) {
+						me.load_day_drilldown(dateStr);
+					}
+				});
 		}, 500);
 	}
 
 	load_day_drilldown(date) {
 		let me = this;
 		this.page.body.find("#drilldown-title").text(`Metrics for ${date}`);
-		this.page.body.find("#drilldown-body").html('<p class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</p>');
+		this.page.body
+			.find("#drilldown-body")
+			.html('<p class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</p>');
 
 		frappe.call({
 			method: "zevar_core.api.sales_history.get_day_drilldown",
 			args: { date: date },
-			callback: function(r) {
+			callback: function (r) {
 				if (r.message) {
 					frappe.call({
 						method: "zevar_core.api.sales_history.get_yoy_delta",
 						args: { date: date },
-						callback: function(yoy_res) {
+						callback: function (yoy_res) {
 							me.render_drilldown(date, r.message, yoy_res.message);
-						}
+						},
 					});
 				}
-			}
+			},
 		});
 	}
 
@@ -182,8 +192,8 @@ zevar_core.pages.eod_calendar = class EODCalendar {
 		let container = this.page.body.find("#drilldown-body");
 		container.empty();
 
-		let yoy_color = yoy.delta_pct >= 0 ? 'text-success' : 'text-danger';
-		let yoy_icon = yoy.delta_pct >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+		let yoy_color = yoy.delta_pct >= 0 ? "text-success" : "text-danger";
+		let yoy_icon = yoy.delta_pct >= 0 ? "fa-arrow-up" : "fa-arrow-down";
 
 		let html = `
 			<div class="row text-center mb-4">
@@ -222,7 +232,7 @@ zevar_core.pages.eod_calendar = class EODCalendar {
 		// Render donut
 		let labels = [];
 		let values = [];
-		data.tender_breakdown.forEach(t => {
+		data.tender_breakdown.forEach((t) => {
 			labels.push(t.name);
 			values.push(flt(t.value));
 		});
@@ -231,17 +241,19 @@ zevar_core.pages.eod_calendar = class EODCalendar {
 			new frappe.Chart(container.find("#tender-donut-chart")[0], {
 				data: {
 					labels: labels,
-					datasets: [{ values: values }]
+					datasets: [{ values: values }],
 				},
-				type: 'donut',
-				colors: ['#28a745', '#17a2b8', '#ffc107', '#fd7e14', '#6f42c1', '#007bff'],
+				type: "donut",
+				colors: ["#28a745", "#17a2b8", "#ffc107", "#fd7e14", "#6f42c1", "#007bff"],
 			});
 		} else {
-			container.find("#tender-donut-chart").html('<p class="text-muted text-center mt-4">No payments recorded</p>');
+			container
+				.find("#tender-donut-chart")
+				.html('<p class="text-muted text-center mt-4">No payments recorded</p>');
 		}
 	}
 };
 
-frappe.pages["eod-calendar"].on_page_load = function(wrapper) {
+frappe.pages["eod-calendar"].on_page_load = function (wrapper) {
 	new zevar_core.pages.eod_calendar(wrapper);
 };

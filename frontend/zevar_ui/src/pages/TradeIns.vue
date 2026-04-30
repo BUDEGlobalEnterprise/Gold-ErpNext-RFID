@@ -74,7 +74,10 @@
 			</div>
 
 			<div class="flex-1 overflow-auto min-h-0">
-				<div v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+				<div
+					v-if="viewMode === 'grid'"
+					class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
+				>
 					<div
 						v-for="record in filteredRecords"
 						:key="record.id"
@@ -180,33 +183,70 @@
 						class="flex items-center justify-between bg-white dark:bg-warm-dark-900/50 rounded-lg px-4 py-3 border border-gray-100 dark:border-warm-border/50 hover:border-[#D4AF37]/30 transition cursor-pointer"
 					>
 						<div class="flex items-center gap-3 min-w-0">
-							<div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400">
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+							<div
+								class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
+							>
+								<svg
+									class="w-4 h-4"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+									></path>
+								</svg>
 							</div>
 							<div class="min-w-0">
-								<div class="font-bold text-gray-900 dark:text-white text-sm truncate">{{ record.description }}</div>
-								<div class="text-[10px] text-gray-500">{{ record.customer }} &middot; {{ record.date }}</div>
+								<div
+									class="font-bold text-gray-900 dark:text-white text-sm truncate"
+								>
+									{{ record.description }}
+								</div>
+								<div class="text-[10px] text-gray-500">
+									{{ record.customer }} &middot; {{ record.date }}
+								</div>
 							</div>
 						</div>
 						<div class="flex items-center gap-4 shrink-0">
 							<div class="hidden sm:flex items-center gap-1.5">
-								<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400">{{ record.metal }}</span>
-								<span class="text-[10px] font-mono text-gray-500">{{ record.weight }}g</span>
+								<span
+									class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400"
+									>{{ record.metal }}</span
+								>
+								<span class="text-[10px] font-mono text-gray-500"
+									>{{ record.weight }}g</span
+								>
 							</div>
 							<div class="text-right">
-								<div class="text-[9px] text-gray-500 uppercase font-bold">Value</div>
-								<div class="text-sm font-bold text-[#D4AF37] font-mono">{{ formatCurrency(record.appraisedValue) }}</div>
+								<div class="text-[9px] text-gray-500 uppercase font-bold">
+									Value
+								</div>
+								<div class="text-sm font-bold text-[#D4AF37] font-mono">
+									{{ formatCurrency(record.appraisedValue) }}
+								</div>
 							</div>
 							<span
 								class="text-[9px] font-bold px-2 py-1 rounded-full shrink-0"
-								:class="record.status === 'Pending Review' ? 'bg-amber-100 text-amber-700' : record.status === 'Accepted' ? 'bg-green-100 text-green-700' : record.status === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'"
+								:class="
+									record.status === 'Pending Review'
+										? 'bg-amber-100 text-amber-700'
+										: record.status === 'Accepted'
+										? 'bg-green-100 text-green-700'
+										: record.status === 'Rejected'
+										? 'bg-red-100 text-red-700'
+										: 'bg-blue-100 text-blue-700'
+								"
 							>
 								{{ record.status }}
 							</span>
 						</div>
 					</div>
 				</div>
-								<div v-if="filteredRecords.length === 0" class="py-20 text-center">
+				<div v-if="filteredRecords.length === 0" class="py-20 text-center">
 					<p class="text-gray-400 text-sm">No trade-in records found.</p>
 				</div>
 			</div>
@@ -232,7 +272,7 @@ const statusTabs = [
 ]
 
 import { createResource } from 'frappe-ui'
-	import { formatDate } from '@/utils/dates.js'
+import { formatDate } from '@/utils/dates.js'
 
 const tradeInData = ref([])
 
@@ -242,7 +282,7 @@ const tradeInResource = createResource({
 	fields: ['*'],
 	limit: 100,
 	onSuccess(data) {
-		tradeInData.value = data.map(t => ({
+		tradeInData.value = data.map((t) => ({
 			id: t.name,
 			description: t.description || t.item_description || t.name,
 			customer: t.customer || t.customer_name || 'Unknown',
@@ -252,13 +292,12 @@ const tradeInResource = createResource({
 			weight: t.weight || t.gross_weight || 0,
 			appraisedValue: t.appraised_value || t.total_offer_amount || 0,
 			newPurchase: t.new_purchase_amount || 0, // Fallback, could be matched to Sales Invoice
-			status: t.status || 'Pending Review'
+			status: t.status || 'Pending Review',
 		}))
-	}
+	},
 })
 
 tradeInResource.fetch()
-
 
 const totalCredit = computed(() =>
 	tradeInData.value

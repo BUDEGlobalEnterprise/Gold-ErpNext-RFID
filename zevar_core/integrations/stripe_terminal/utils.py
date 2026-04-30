@@ -5,14 +5,14 @@ Handles API communication with Stripe Terminal for card-present payments.
 Supports connection tokens, PaymentIntents, and device management.
 """
 
-import frappe
-from frappe import _
-from frappe.utils import flt, cint
-
 import hashlib
 import hmac
 import json
 import time
+
+import frappe
+from frappe import _
+from frappe.utils import cint, flt
 
 try:
 	import requests

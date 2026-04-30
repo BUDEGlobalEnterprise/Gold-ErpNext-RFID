@@ -59,13 +59,15 @@ def add_cart_to_application(application_id, items):
 	items_list = frappe.parse_json(items) if isinstance(items, str) else items
 	cart_items = {"items": []}
 	for item in items_list:
-		cart_items["items"].append({
-			"sku": item.get("item_code", ""),
-			"description": item.get("item_name", ""),
-			"quantity": item.get("qty", 1),
-			"price": flt(item.get("rate", 0)),
-			"serialNumber": item.get("serial_number", ""),
-		})
+		cart_items["items"].append(
+			{
+				"sku": item.get("item_code", ""),
+				"description": item.get("item_name", ""),
+				"quantity": item.get("qty", 1),
+				"price": flt(item.get("rate", 0)),
+				"serialNumber": item.get("serial_number", ""),
+			}
+		)
 	result = prog_utils.add_cart_items(application_id, cart_items)
 	if not result.get("success"):
 		return {"success": False, "error": result.get("error")}

@@ -1,14 +1,22 @@
 <template>
-	<component :is="inlineMode ? 'div' : 'Transition'" name="fade" :class="inlineMode ? 'h-full' : ''">
+	<component
+		:is="inlineMode ? 'div' : 'Transition'"
+		name="fade"
+		:class="inlineMode ? 'h-full' : ''"
+	>
 		<div
 			v-if="inlineMode || show"
 			:class="[
 				inlineMode
 					? 'h-full flex flex-col bg-white dark:bg-[#1a1c23] w-full rounded-3xl overflow-hidden'
-					: 'fixed inset-0 z-[100] flex items-center justify-center p-4'
+					: 'fixed inset-0 z-[100] flex items-center justify-center p-4',
 			]"
 		>
-			<div v-if="!inlineMode" class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" @click="close"></div>
+			<div
+				v-if="!inlineMode"
+				class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
+				@click="close"
+			></div>
 
 			<div
 				class="relative bg-white dark:bg-[#1a1c23] w-full overflow-hidden flex flex-col"
@@ -123,7 +131,10 @@
 				<!-- Two Column Layout -->
 				<div class="flex flex-col lg:flex-row flex-1 overflow-hidden">
 					<!-- Left Column - Customer & Details -->
-					<div class="flex-1 p-5 overflow-y-auto custom-scrollbar rounded-bl-3xl" :style="inlineMode ? '' : 'max-height: calc(95vh - 140px)'">
+					<div
+						class="flex-1 p-5 overflow-y-auto custom-scrollbar rounded-bl-3xl"
+						:style="inlineMode ? '' : 'max-height: calc(95vh - 140px)'"
+					>
 						<IDScannerPanel
 							v-model="idScan"
 							:show="showIdScanner"
@@ -387,7 +398,11 @@
 									>
 									<p class="font-medium text-[#D4AF37]">
 										{{ nominee.name }}
-										<span v-if="nominee.relationship" class="text-xs text-gray-400">({{ nominee.relationship }})</span>
+										<span
+											v-if="nominee.relationship"
+											class="text-xs text-gray-400"
+											>({{ nominee.relationship }})</span
+										>
 									</p>
 								</div>
 								<div v-if="hasNominee && nominee.phone">
@@ -656,7 +671,11 @@
 								<div>
 									<label
 										class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-										>Duration ({{ form.paymentSchedule === 'Monthly' ? 'Months' : 'Weeks' }}) *</label
+										>Duration ({{
+											form.paymentSchedule === 'Monthly'
+												? 'Months'
+												: 'Weeks'
+										}}) *</label
 									>
 									<select
 										v-model.number="form.durationWeeks"
@@ -941,7 +960,10 @@
 							<!-- Quick Add Item Buttons -->
 							<div v-if="selectedItems.length > 0" class="mt-3 flex gap-2">
 								<button
-									@click="itemSearch = ''; $refs.itemSearchInput?.focus()"
+									@click="
+										itemSearch = ''
+										$refs.itemSearchInput?.focus()
+									"
 									class="px-3 py-2 text-xs font-medium text-[#D4AF37] border border-[#D4AF37]/30 rounded-lg hover:bg-[#D4AF37]/10 transition flex items-center gap-1"
 								>
 									<svg
@@ -1136,9 +1158,10 @@
 							<span class="text-xs text-gray-700 dark:text-gray-300">
 								<span class="font-bold">Terms Agreement:</span> I confirm the
 								customer has agreed to the layaway terms including the payment
-								schedule ({{ paymentFrequencyText }} for
-								{{ form.durationWeeks }} {{ form.paymentSchedule === 'Monthly' ? 'months' : 'weeks' }}), cancellation policy, and that all
-								items will be reserved until full payment is received.
+								schedule ({{ paymentFrequencyText }} for {{ form.durationWeeks }}
+								{{ form.paymentSchedule === 'Monthly' ? 'months' : 'weeks' }}),
+								cancellation policy, and that all items will be reserved until full
+								payment is received.
 							</span>
 						</label>
 					</div>
@@ -1265,49 +1288,57 @@ const nominee = ref({
 })
 
 // Handle initialization from cart
-watch(() => props.show, (newVal) => {
-	if (newVal) {
-		if (cartStore.items && cartStore.items.length > 0) {
-			selectedItems.value = cartStore.items.map(item => ({
-				item_code: item.item_code,
-				item_name: item.item_name,
-				qty: item.qty,
-				price: item.amount,
-				has_serial: item.has_serial || false,
-				serial_numbers: ''
-			}))
-		}
+watch(
+	() => props.show,
+	(newVal) => {
+		if (newVal) {
+			if (cartStore.items && cartStore.items.length > 0) {
+				selectedItems.value = cartStore.items.map((item) => ({
+					item_code: item.item_code,
+					item_name: item.item_name,
+					qty: item.qty,
+					price: item.amount,
+					has_serial: item.has_serial || false,
+					serial_numbers: '',
+				}))
+			}
 
-		// Try to set customer from cart if selected
-		if (cartStore.customer) {
+			// Try to set customer from cart if selected
+			if (cartStore.customer) {
+				selectedCustomer.value = cartStore.customer
+				isNewCustomerMode.value = false
+				autoFillCustomerFromCart(cartStore.customer)
+			}
+
+			// Auto-apply 10% deposit and fetch tax details
+			nextTick(() => {
+				form.value.deposit = minDeposit.value
+				fetchStoreTaxDetails()
+			})
+		} else {
+			// Reset logic... but we already have a close method for reset
+		}
+	},
+	{ immediate: true }
+)
+
+// Handle inline mode initialization (Layaway page with ?action=new&customer=...)
+watch(
+	() => route.query,
+	(query) => {
+		if (!props.inlineMode) return
+		if (query.action === 'new' && cartStore.customer) {
 			selectedCustomer.value = cartStore.customer
 			isNewCustomerMode.value = false
 			autoFillCustomerFromCart(cartStore.customer)
+			nextTick(() => {
+				form.value.deposit = minDeposit.value
+				fetchStoreTaxDetails()
+			})
 		}
-
-		// Auto-apply 10% deposit and fetch tax details
-		nextTick(() => {
-			form.value.deposit = minDeposit.value
-			fetchStoreTaxDetails()
-		})
-	} else {
-		// Reset logic... but we already have a close method for reset
-	}
-}, { immediate: true })
-
-// Handle inline mode initialization (Layaway page with ?action=new&customer=...)
-watch(() => route.query, (query) => {
-	if (!props.inlineMode) return
-	if (query.action === 'new' && cartStore.customer) {
-		selectedCustomer.value = cartStore.customer
-		isNewCustomerMode.value = false
-		autoFillCustomerFromCart(cartStore.customer)
-		nextTick(() => {
-			form.value.deposit = minDeposit.value
-			fetchStoreTaxDetails()
-		})
-	}
-}, { immediate: true })
+	},
+	{ immediate: true }
+)
 
 async function autoFillCustomerFromCart(cust) {
 	if (!cust) return
@@ -1471,9 +1502,10 @@ const canSubmit = computed(() => {
 	const validMonthlyDurations = [1, 2, 3, 6, 9, 12]
 	const validWeeklyDurations = [2, 4, 6, 8, 10, 12]
 	const duration = form.value.durationWeeks
-	const validDuration = form.value.paymentSchedule === "Monthly"
-		? validMonthlyDurations.includes(duration)
-		: validWeeklyDurations.includes(duration)
+	const validDuration =
+		form.value.paymentSchedule === 'Monthly'
+			? validMonthlyDurations.includes(duration)
+			: validWeeklyDurations.includes(duration)
 
 	return (
 		hasCustomer &&
@@ -1486,17 +1518,17 @@ const canSubmit = computed(() => {
 	)
 })
 
-	watch(
-		() => form.value.paymentSchedule,
-		(newVal) => {
-			if (newVal === 'Monthly') {
-				form.value.durationWeeks = 3 // 3 months default
-			} else {
-				form.value.durationWeeks = 4 // 4 weeks default
-			}
-		},
-		{ immediate: true }
-	)
+watch(
+	() => form.value.paymentSchedule,
+	(newVal) => {
+		if (newVal === 'Monthly') {
+			form.value.durationWeeks = 3 // 3 months default
+		} else {
+			form.value.durationWeeks = 4 // 4 weeks default
+		}
+	},
+	{ immediate: true }
+)
 
 // Watchers
 // Resources
@@ -1533,7 +1565,10 @@ const storeTaxResource = createResource({
 // Functions
 function formatPrice(price) {
 	if (price == null) return '0.00'
-	return Number(price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+	return Number(price).toLocaleString('en-US', {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	})
 }
 
 async function fetchStoreTaxDetails() {
@@ -1569,7 +1604,7 @@ async function searchCustomers() {
 				query: customerSearch.value,
 			})
 			const list = customers || []
-			customerResults.value = list.map(c => ({
+			customerResults.value = list.map((c) => ({
 				...c,
 				name: c.name || c.customer_name,
 				customer_name: c.display_name || c.customer_name,
@@ -1641,7 +1676,7 @@ function removeItem(index) {
 	}
 }
 
-// Watch duration to update deposit if changed significantly? 
+// Watch duration to update deposit if changed significantly?
 // Actually 10% should be dynamic but let user override.
 watch([subtotal, () => form.value.taxRate], () => {
 	if (form.value.deposit === 0 || form.value.deposit < minDeposit.value) {

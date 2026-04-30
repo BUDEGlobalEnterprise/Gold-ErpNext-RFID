@@ -15,11 +15,15 @@ export const useSessionStore = defineStore('session', () => {
 
 	// State
 	const user = ref(
-		localStorage.getItem('session_user') ? JSON.parse(localStorage.getItem('session_user')) : null
+		localStorage.getItem('session_user')
+			? JSON.parse(localStorage.getItem('session_user'))
+			: null
 	)
 	const isLoggedIn = ref(!!localStorage.getItem('session_user'))
 	const userRoles = ref(
-		localStorage.getItem('session_roles') ? JSON.parse(localStorage.getItem('session_roles')) : []
+		localStorage.getItem('session_roles')
+			? JSON.parse(localStorage.getItem('session_roles'))
+			: []
 	)
 	const currentWarehouse = ref(
 		localStorage.getItem('active_warehouse') &&
@@ -64,7 +68,7 @@ export const useSessionStore = defineStore('session', () => {
 				userRoles.value = []
 				localStorage.removeItem('session_user')
 				localStorage.removeItem('session_roles')
-				
+
 				// Only redirect if not already on login page
 				if (window.location.pathname !== '/pos/login') {
 					router.push('/login')
@@ -150,12 +154,12 @@ export const useSessionStore = defineStore('session', () => {
 	function startActivityTracking() {
 		if (activityInterval) clearInterval(activityInterval)
 		updateActivity()
-		
+
 		window.addEventListener('mousemove', updateActivity, { passive: true })
 		window.addEventListener('keydown', updateActivity, { passive: true })
 		window.addEventListener('click', updateActivity, { passive: true })
 		window.addEventListener('scroll', updateActivity, { passive: true })
-		
+
 		activityInterval = setInterval(() => {
 			const lastActivity = parseInt(localStorage.getItem('last_activity') || '0')
 			if (Date.now() - lastActivity > AUTO_LOGOUT_MS && isLoggedIn.value) {

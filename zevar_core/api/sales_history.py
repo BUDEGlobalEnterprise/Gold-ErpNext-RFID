@@ -444,9 +444,6 @@ def get_daily_sales_heatmap(year: int, month: int, stream: str = "Jewelry Sale")
 	"""
 	frappe.has_permission("Sales Invoice", "read", throw=True)
 
-	start_date = f"{year}-{month:02d}-01"
-	# simple logic for end date (next month 1st minus 1 day), doing it via SQL
-
 	# Fetch grouped by date
 	data = frappe.db.sql(
 		"""

@@ -16,7 +16,9 @@ export default {
 
 const Template = (args) => ({
 	components: { ResponsiveTable },
-	setup() { return { args } },
+	setup() {
+		return { args }
+	},
 	template: '<ResponsiveTable v-bind="args" />',
 })
 
@@ -30,11 +32,46 @@ const sampleColumns = [
 ]
 
 const sampleRows = [
-	{ name: 'Diamond Ring 14K', code: 'DR-001', metal: 'Gold 14K', stock: 3, price: 2450, status: 'In Stock' },
-	{ name: 'Gold Chain 22K', code: 'GC-042', metal: 'Gold 22K', stock: 1, price: 890, status: 'Low Stock' },
-	{ name: 'Silver Bracelet', code: 'SB-015', metal: 'Silver 925', stock: 12, price: 185, status: 'In Stock' },
-	{ name: 'Pearl Earrings', code: 'PE-008', metal: 'Pearl', stock: 0, price: 320, status: 'Out of Stock' },
-	{ name: 'Platinum Band', code: 'PB-003', metal: 'Platinum', stock: 2, price: 3200, status: 'In Stock' },
+	{
+		name: 'Diamond Ring 14K',
+		code: 'DR-001',
+		metal: 'Gold 14K',
+		stock: 3,
+		price: 2450,
+		status: 'In Stock',
+	},
+	{
+		name: 'Gold Chain 22K',
+		code: 'GC-042',
+		metal: 'Gold 22K',
+		stock: 1,
+		price: 890,
+		status: 'Low Stock',
+	},
+	{
+		name: 'Silver Bracelet',
+		code: 'SB-015',
+		metal: 'Silver 925',
+		stock: 12,
+		price: 185,
+		status: 'In Stock',
+	},
+	{
+		name: 'Pearl Earrings',
+		code: 'PE-008',
+		metal: 'Pearl',
+		stock: 0,
+		price: 320,
+		status: 'Out of Stock',
+	},
+	{
+		name: 'Platinum Band',
+		code: 'PB-003',
+		metal: 'Platinum',
+		stock: 2,
+		price: 3200,
+		status: 'In Stock',
+	},
 ]
 
 export const Default = Template.bind({})

@@ -21,7 +21,7 @@
 		"no-unused-vars": "off",
 		"no-console": ["warn"],
 		"no-extra-boolean-cast": ["off"],
-		"no-control-regex": ["off"],
+		"no-control-regex": ["off"]
 	},
 	"root": true,
 	"globals": {
@@ -119,6 +119,8 @@
 		"after": true,
 		"qz": true,
 		"localforage": true,
-		"extend_cscript": true
+		"extend_cscript": true,
+		"zevar": true,
+		"zevar_core": true
 	}
 }

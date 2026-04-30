@@ -399,7 +399,7 @@
 import { ref, watch, onMounted, computed, onUnmounted } from 'vue'
 import { createResource } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
-	import { formatDate } from '@/utils/dates.js'
+import { formatDate } from '@/utils/dates.js'
 
 // State
 const submitting = ref(false)

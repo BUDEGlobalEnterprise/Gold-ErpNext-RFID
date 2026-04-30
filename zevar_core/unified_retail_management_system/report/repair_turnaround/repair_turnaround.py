@@ -158,9 +158,9 @@ def get_data(filters):
 	if data and filters.get("include_summary"):
 		avg_days = flt(total_hours / processed_count / 24) if processed_count else 0
 		summary = {
-			"repair_order": '<b>SUMMARY</b>',
-			"turnaround_days": f'<b>Avg: {avg_days:.1f}d</b>',
-			"vs_promised": f'<b>On Time: {on_time_count} | Late: {late_count}</b>',
+			"repair_order": "<b>SUMMARY</b>",
+			"turnaround_days": f"<b>Avg: {avg_days:.1f}d</b>",
+			"vs_promised": f"<b>On Time: {on_time_count} | Late: {late_count}</b>",
 		}
 		data.append(summary)
 

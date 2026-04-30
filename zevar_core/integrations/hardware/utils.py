@@ -6,11 +6,11 @@ ESC/POS encoding and WebSocket-based printing for thermal printers
 via keyboard wedge emulation.
 """
 
+import json
+
 import frappe
 from frappe import _
 from frappe.utils import cstr
-
-import json
 
 
 def generate_escpos_receipt(invoice_data, settings=None):
@@ -93,9 +93,9 @@ def generate_escpos_tag(tag_data):
 def generate_barcode_commands(data, barcode_type="CODE39", width=2, height=100):
 	commands = []
 	# GS w n - Set barcode width
-	commands.append(b"\x1Dw" + bytes([width]))
+	commands.append(b"\x1dw" + bytes([width]))
 	# GS h n - Set barcode height
-	commands.append(b"\x1Dh" + bytes([height]))
+	commands.append(b"\x1dh" + bytes([height]))
 
 	barcode_map = {
 		"CODE39": 69,
@@ -107,17 +107,17 @@ def generate_barcode_commands(data, barcode_type="CODE39", width=2, height=100):
 	data_len = len(data_bytes)
 
 	# GS k m n d1...dn - Print barcode (Function B)
-	commands.append(b"\x1Dk" + bytes([barcode_num, data_len]) + data_bytes)
+	commands.append(b"\x1dk" + bytes([barcode_num, data_len]) + data_bytes)
 
 	return b"".join(commands)
 
 
 def _esc_center(text):
-	return f"\x1B\x61\x01{text}"
+	return f"\x1b\x61\x01{text}"
 
 
 def _esc_bold(text):
-	return f"\x1B\x45\x01{text}\x1B\x45\x00"
+	return f"\x1b\x45\x01{text}\x1b\x45\x00"
 
 
 def format_print_payload(content, printer_type="receipt"):

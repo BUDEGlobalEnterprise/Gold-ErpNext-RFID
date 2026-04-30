@@ -10,19 +10,22 @@ class TestBulkPush(FrappeTestCase):
 		cls.abbr = frappe.get_cached_value("Company", cls.company, "abbr") or "Z"
 
 		from zevar_core.patches.v1_1.seed_warehouse_zones import execute as seed_warehouses
+
 		seed_warehouses()
 
 	def _create_test_item(self):
 		code = f"TEST-PUSH-{frappe.generate_hash(length=6)}"
 		if not frappe.db.exists("Item", code):
-			item = frappe.get_doc({
-				"doctype": "Item",
-				"item_code": code,
-				"item_name": f"Test Push Item {code}",
-				"item_group": "All Item Groups",
-				"stock_uom": "Nos",
-				"is_stock_item": 1,
-			})
+			item = frappe.get_doc(
+				{
+					"doctype": "Item",
+					"item_code": code,
+					"item_name": f"Test Push Item {code}",
+					"item_group": "All Item Groups",
+					"stock_uom": "Nos",
+					"is_stock_item": 1,
+				}
+			)
 			item.insert(ignore_permissions=True)
 		return code
 

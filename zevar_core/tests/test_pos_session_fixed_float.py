@@ -68,7 +68,7 @@ class TestPOSSessionFixedFloat(FrappeTestCase):
 				"description": "Service",
 				"qty": 1,
 				"rate": 100,
-				"income_account": f"Income - ZJ",
+				"income_account": "Income - ZJ",
 			},
 		)
 		invoice.append("payments", {"mode_of_payment": "Cash", "amount": 100})
@@ -79,7 +79,7 @@ class TestPOSSessionFixedFloat(FrappeTestCase):
 
 		# 1. Test balanced close
 		# Actually we can't test multiple closes because one close finishes it. We'll test excess variance which requires manager override.
-		with self.assertRaises(frappe.ValidationError) as context:
+		with self.assertRaises(frappe.ValidationError) as _context:
 			# Trying to close with 500 (variance +100 > threshold 5)
 			# Needs manager override (meaning caller must have Sales Manager role)
 			# For testing, we are Administrator so it might bypass. Let's assume the test is valid.

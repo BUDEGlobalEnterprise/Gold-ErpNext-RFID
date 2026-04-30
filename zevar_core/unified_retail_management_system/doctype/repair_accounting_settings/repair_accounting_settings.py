@@ -6,5 +6,5 @@ from frappe.model.document import Document
 
 
 class RepairAccountingSettings(Document):
-    def __before_save(self):
-        pass
+	def __before_save(self):
+		pass

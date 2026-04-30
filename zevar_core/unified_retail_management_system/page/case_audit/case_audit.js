@@ -189,7 +189,7 @@ function render_audit_interface(page) {
 		let total_expected = expected_items.reduce((sum, item) => sum + flt(item.actual_qty), 0);
 		let total_scanned_expected = Object.values(scanned_items).reduce(
 			(sum, qty) => sum + qty,
-			0,
+			0
 		);
 		let missing = Math.max(0, total_expected - total_scanned_expected);
 
@@ -266,7 +266,7 @@ function render_audit_interface(page) {
 	page.body.find("#connect-rfid-btn").on("click", async function () {
 		if (!navigator.hid) {
 			frappe.msgprint(
-				"WebHID is not supported by your browser. Please use Chrome/Edge or a keyboard-wedge scanner.",
+				"WebHID is not supported by your browser. Please use Chrome/Edge or a keyboard-wedge scanner."
 			);
 			return;
 		}
@@ -314,7 +314,9 @@ function render_audit_interface(page) {
 							let msg = `Audit Finalized. Status: <b>${r.message.status}</b>.`;
 							if (r.message.missing_count > 0) {
 								msg += `<br><br><span class="text-danger">Missing Items: ${r.message.missing_count}</span>`;
-								msg += `<br>Discrepancy Value: ${format_currency(r.message.total_value_discrepancy)}`;
+								msg += `<br>Discrepancy Value: ${format_currency(
+									r.message.total_value_discrepancy
+								)}`;
 								if (r.message.shrinkage_entry) {
 									msg += `<br>Created Shrinkage Entry: <a href="/app/stock-entry/${r.message.shrinkage_entry}">${r.message.shrinkage_entry}</a>`;
 								}
@@ -341,13 +343,13 @@ function render_audit_interface(page) {
 									.removeClass("btn-success")
 									.addClass("btn-default")
 									.html(
-										'<i class="fa fa-usb"></i> Connect RFID Scanner (WebHID)',
+										'<i class="fa fa-usb"></i> Connect RFID Scanner (WebHID)'
 									);
 							}
 						}
 					},
 				});
-			},
+			}
 		);
 	});
 
@@ -367,7 +369,7 @@ function render_audit_interface(page) {
 						},
 					});
 				}
-			},
+			}
 		);
 	});
 }

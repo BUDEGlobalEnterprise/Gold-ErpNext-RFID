@@ -1,4 +1,3 @@
-
 import frappe
 from frappe import _
 from frappe.utils import flt
@@ -31,6 +30,7 @@ WATERFALL_PROVIDERS = {
 	},
 }
 
+
 class FinancingWaterfallManager:
 	def __init__(self, app_data):
 		self.app_data = app_data
@@ -45,12 +45,14 @@ class FinancingWaterfallManager:
 				continue
 
 			if not self.settings.get(provider_config["enabled_field"]):
-				self.results.append({
-					"provider": provider_name,
-					"attempt": attempt,
-					"status": "skipped",
-					"reason": "Provider not enabled",
-				})
+				self.results.append(
+					{
+						"provider": provider_name,
+						"attempt": attempt,
+						"status": "skipped",
+						"reason": "Provider not enabled",
+					}
+				)
 				continue
 
 			try:
@@ -65,17 +67,19 @@ class FinancingWaterfallManager:
 
 			except Exception as e:
 				error_msg = self._sanitize_error(str(e))
-				self.results.append({
-					"provider": provider_name,
-					"attempt": attempt,
-					"status": "error",
-					"error": error_msg,
-				})
+				self.results.append(
+					{
+						"provider": provider_name,
+						"attempt": attempt,
+						"status": "error",
+						"error": error_msg,
+					}
+				)
 				frappe.log_error(
 					f"Waterfall error with {provider_name}: {error_msg}",
 					"Financing Waterfall",
 					reference_doctype="Customer",
-					reference_name=self.app_data.get("customer")
+					reference_name=self.app_data.get("customer"),
 				)
 
 		return self._complete("all_denied")
@@ -90,7 +94,11 @@ class FinancingWaterfallManager:
 		result = method(**params)
 
 		decision = result.get("decision", result.get("status", "")).lower()
-		is_approved = result.get("success") and decision in ("approved", "accepted", "approved_with_conditions")
+		is_approved = result.get("success") and decision in (
+			"approved",
+			"accepted",
+			"approved_with_conditions",
+		)
 		is_pending = not is_approved and decision in ("pending", "under_review", "wait")
 
 		status = "denied"
@@ -104,7 +112,13 @@ class FinancingWaterfallManager:
 			"attempt": attempt,
 			"status": status,
 			"application_id": result.get("application_id"),
-			"approval_amount": flt(result.get("approval_amount") or result.get("credit_limit") or result.get("financed_amount") or result.get("approval_limit") or 0),
+			"approval_amount": flt(
+				result.get("approval_amount")
+				or result.get("credit_limit")
+				or result.get("financed_amount")
+				or result.get("approval_limit")
+				or 0
+			),
 			"initial_payment": flt(result.get("initial_payment", 0)),
 			"error": result.get("error"),
 			"checkout_url": result.get("checkout_url"),
@@ -134,6 +148,7 @@ class FinancingWaterfallManager:
 		}
 		return messages.get(status, "")
 
+
 def run_waterfall_async(app_data, user_email):
 	# Set user context for background job
 	frappe.set_user(user_email)
@@ -141,9 +156,5 @@ def run_waterfall_async(app_data, user_email):
 	result = manager.run()
 
 	# Notify user via Socket.io or Email if needed
-	frappe.publish_realtime(
-		"financing_waterfall_complete",
-		result,
-		user=user_email
-	)
+	frappe.publish_realtime("financing_waterfall_complete", result, user=user_email)
 	return result

@@ -46,7 +46,12 @@
 					title="Edit Customer"
 				>
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+						/>
 					</svg>
 				</button>
 				<button
@@ -71,7 +76,10 @@
 			<!-- Recent Customers Section (Admin/Manager only) -->
 			<div v-if="isAdmin && recentCustomers.length > 0 && !searchQuery" class="space-y-2">
 				<div class="flex items-center justify-between">
-					<span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Recent Customers</span>
+					<span
+						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+						>Recent Customers</span
+					>
 					<button
 						v-if="recentCustomers.length >= 10"
 						@click="loadMoreRecent"
@@ -87,12 +95,20 @@
 						@click="selectCustomer(rc)"
 						class="flex-shrink-0 flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-xl hover:border-[#D4AF37]/50 hover:bg-[#D4AF37]/5 transition min-w-[140px] max-w-[200px]"
 					>
-						<div class="w-7 h-7 rounded-full bg-[#D4AF37]/20 flex items-center justify-center text-[#D4AF37] text-xs font-bold flex-shrink-0">
+						<div
+							class="w-7 h-7 rounded-full bg-[#D4AF37]/20 flex items-center justify-center text-[#D4AF37] text-xs font-bold flex-shrink-0"
+						>
 							{{ getInitials(rc.customer_name) }}
 						</div>
 						<div class="min-w-0 flex-1 text-left">
-							<div class="text-xs font-medium text-gray-900 dark:text-white truncate">{{ rc.customer_name }}</div>
-							<div class="text-[10px] text-gray-500 truncate">{{ rc.mobile_no || rc.email_id || 'No contact' }}</div>
+							<div
+								class="text-xs font-medium text-gray-900 dark:text-white truncate"
+							>
+								{{ rc.customer_name }}
+							</div>
+							<div class="text-[10px] text-gray-500 truncate">
+								{{ rc.mobile_no || rc.email_id || 'No contact' }}
+							</div>
 						</div>
 					</button>
 				</div>
@@ -123,22 +139,36 @@
 									@click="closeEditModal"
 									class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition"
 								>
-									<svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+									<svg
+										class="w-5 h-5 text-gray-400"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M6 18L18 6M6 6l12 12"
+										/>
 									</svg>
 								</button>
 							</div>
 
 							<!-- Tabs -->
-							<div class="flex border-b border-gray-100 dark:border-warm-border px-6 flex-shrink-0">
+							<div
+								class="flex border-b border-gray-100 dark:border-warm-border px-6 flex-shrink-0"
+							>
 								<button
 									v-for="tab in tabs"
 									:key="tab.key"
 									@click="editTab = tab.key"
 									class="px-4 py-3 text-sm font-medium transition-colors relative"
-									:class="editTab === tab.key
-										? 'text-blue-600 dark:text-blue-400'
-										: 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'"
+									:class="
+										editTab === tab.key
+											? 'text-blue-600 dark:text-blue-400'
+											: 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+									"
 								>
 									{{ tab.label }}
 									<div
@@ -149,8 +179,13 @@
 							</div>
 
 							<!-- Loading State -->
-							<div v-if="editLoading" class="flex-1 flex items-center justify-center py-12">
-								<div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-[#D4AF37]"></div>
+							<div
+								v-if="editLoading"
+								class="flex-1 flex items-center justify-center py-12"
+							>
+								<div
+									class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-[#D4AF37]"
+								></div>
 							</div>
 
 							<!-- Form Content - Scrollable -->
@@ -159,7 +194,10 @@
 								<div v-if="editTab === 'contact'" class="space-y-4">
 									<div class="grid grid-cols-2 gap-3">
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Contact type</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Contact type</label
+											>
 											<select
 												v-model="editForm.customer_type"
 												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
@@ -169,7 +207,10 @@
 											</select>
 										</div>
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Customer group</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Customer group</label
+											>
 											<input
 												v-model="editForm.customer_group"
 												type="text"
@@ -181,7 +222,10 @@
 
 									<div class="grid grid-cols-2 gap-3">
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Mobile</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Mobile</label
+											>
 											<input
 												v-model="editForm.mobile_no"
 												type="tel"
@@ -190,7 +234,10 @@
 											/>
 										</div>
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Email</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Email</label
+											>
 											<input
 												v-model="editForm.email_id"
 												type="email"
@@ -202,7 +249,10 @@
 
 									<div class="grid grid-cols-3 gap-3">
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Gender</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Gender</label
+											>
 											<select
 												v-model="editForm.gender"
 												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
@@ -214,7 +264,10 @@
 											</select>
 										</div>
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Birth date</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Birth date</label
+											>
 											<input
 												v-model="editForm.birth_date"
 												type="date"
@@ -222,7 +275,10 @@
 											/>
 										</div>
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Phone 2</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Phone 2</label
+											>
 											<input
 												v-model="editForm.phone2"
 												type="tel"
@@ -233,7 +289,10 @@
 									</div>
 
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Profession</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Profession</label
+										>
 										<input
 											v-model="editForm.profession"
 											type="text"
@@ -247,7 +306,10 @@
 								<div v-if="editTab === 'extra'" class="space-y-4">
 									<div class="grid grid-cols-2 gap-3">
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Partner name</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Partner name</label
+											>
 											<input
 												v-model="editForm.partner_name"
 												type="text"
@@ -256,7 +318,10 @@
 											/>
 										</div>
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Partner phone</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Partner phone</label
+											>
 											<input
 												v-model="editForm.partner_phone"
 												type="tel"
@@ -268,7 +333,10 @@
 
 									<div class="grid grid-cols-2 gap-3">
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Partner email</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Partner email</label
+											>
 											<input
 												v-model="editForm.partner_email"
 												type="email"
@@ -277,7 +345,10 @@
 											/>
 										</div>
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Tags</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Tags</label
+											>
 											<input
 												v-model="editForm.tags"
 												type="text"
@@ -289,7 +360,10 @@
 
 									<div class="grid grid-cols-2 gap-3">
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Birth date</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Birth date</label
+											>
 											<input
 												v-model="editForm.birth_date"
 												type="date"
@@ -297,7 +371,10 @@
 											/>
 										</div>
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Marriage date</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Marriage date</label
+											>
 											<input
 												v-model="editForm.marriage_date"
 												type="date"
@@ -306,24 +383,36 @@
 										</div>
 									</div>
 
-									<label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#0F1115] rounded-lg cursor-pointer">
+									<label
+										class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#0F1115] rounded-lg cursor-pointer"
+									>
 										<input
 											v-model="editForm.accepts_marketing"
 											type="checkbox"
 											class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
 										/>
-										<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Accepts email marketing</span>
+										<span
+											class="text-sm font-medium text-gray-700 dark:text-gray-300"
+											>Accepts email marketing</span
+										>
 									</label>
 
-									<label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#0F1115] rounded-lg cursor-pointer">
+									<label
+										class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#0F1115] rounded-lg cursor-pointer"
+									>
 										<input
 											v-model="editForm.tax_exempt"
 											type="checkbox"
 											class="w-4 h-4 rounded border-gray-300 text-[#D4AF37] focus:ring-[#D4AF37]"
 										/>
 										<div>
-											<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Tax Exempt</span>
-											<p class="text-xs text-gray-500">Customer is exempt from sales tax</p>
+											<span
+												class="text-sm font-medium text-gray-700 dark:text-gray-300"
+												>Tax Exempt</span
+											>
+											<p class="text-xs text-gray-500">
+												Customer is exempt from sales tax
+											</p>
 										</div>
 									</label>
 								</div>
@@ -332,7 +421,10 @@
 								<div v-if="editTab === 'sizes'" class="space-y-4">
 									<div class="grid grid-cols-2 gap-3">
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Ring left size</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Ring left size</label
+											>
 											<input
 												v-model="editForm.ring_left_size"
 												type="text"
@@ -341,7 +433,10 @@
 											/>
 										</div>
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Ring right size</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Ring right size</label
+											>
 											<input
 												v-model="editForm.ring_right_size"
 												type="text"
@@ -352,7 +447,10 @@
 									</div>
 									<div class="grid grid-cols-2 gap-3">
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Wrist size</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Wrist size</label
+											>
 											<input
 												v-model="editForm.wrist_size"
 												type="text"
@@ -361,7 +459,10 @@
 											/>
 										</div>
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Neck size</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Neck size</label
+											>
 											<input
 												v-model="editForm.neck_size"
 												type="text"
@@ -373,7 +474,10 @@
 
 									<div class="grid grid-cols-2 gap-3">
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Ring size (single hand)</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Ring size (single hand)</label
+											>
 											<input
 												v-model="editForm.ring_size"
 												type="text"
@@ -382,7 +486,10 @@
 											/>
 										</div>
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Preferred metal</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Preferred metal</label
+											>
 											<input
 												v-model="editForm.preferred_metal"
 												type="text"
@@ -655,22 +762,36 @@
 								@click="handleCancelCreate"
 								class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition"
 							>
-								<svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+								<svg
+									class="w-5 h-5 text-gray-400"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M6 18L18 6M6 6l12 12"
+									/>
 								</svg>
 							</button>
 						</div>
 
 						<!-- Tabs -->
-						<div class="flex border-b border-gray-100 dark:border-warm-border px-6 flex-shrink-0">
+						<div
+							class="flex border-b border-gray-100 dark:border-warm-border px-6 flex-shrink-0"
+						>
 							<button
 								v-for="tab in tabs"
 								:key="tab.key"
 								@click="activeTab = tab.key"
 								class="px-4 py-3 text-sm font-medium transition-colors relative"
-								:class="activeTab === tab.key
-									? 'text-blue-600 dark:text-blue-400'
-									: 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'"
+								:class="
+									activeTab === tab.key
+										? 'text-blue-600 dark:text-blue-400'
+										: 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+								"
 							>
 								{{ tab.label }}
 								<div
@@ -682,11 +803,12 @@
 
 						<!-- Form Content - Scrollable -->
 						<div class="flex-1 overflow-y-auto p-6 space-y-5">
-
 							<!-- Tab 1: Contact Details -->
 							<div v-if="activeTab === 'contact'" class="space-y-4">
 								<div>
-									<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">
+									<label
+										class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+									>
 										Contact type <span class="text-red-500">*</span>
 									</label>
 									<select
@@ -700,7 +822,10 @@
 
 								<div class="grid grid-cols-2 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Name</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Name</label
+										>
 										<input
 											v-model="newCustomer.name"
 											type="text"
@@ -709,20 +834,29 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Internal name</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Internal name</label
+										>
 										<input
 											v-model="newCustomer.internal_name"
 											type="text"
 											placeholder="Internal calling name"
 											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 										/>
-										<p class="text-[10px] text-gray-400 mt-1">Internal calling name for this client, used in dashboards and day-to-day communication.</p>
+										<p class="text-[10px] text-gray-400 mt-1">
+											Internal calling name for this client, used in
+											dashboards and day-to-day communication.
+										</p>
 									</div>
 								</div>
 
 								<div class="grid grid-cols-2 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Title</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Title</label
+										>
 										<input
 											v-model="newCustomer.title"
 											type="text"
@@ -731,7 +865,10 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Title choices</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Title choices</label
+										>
 										<select
 											v-model="newCustomer.title_choice"
 											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
@@ -747,7 +884,10 @@
 
 								<div class="grid grid-cols-3 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Email</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Email</label
+										>
 										<input
 											v-model="newCustomer.email"
 											type="email"
@@ -756,13 +896,20 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Phone</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Phone</label
+										>
 										<div class="flex">
 											<select
 												v-model="newCustomer.phone_country"
 												class="px-2 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-r-0 border-gray-200 dark:border-warm-border rounded-l-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 											>
-												<option v-for="c in usPhoneCodes" :key="c.code" :value="c.code">
+												<option
+													v-for="c in usPhoneCodes"
+													:key="c.code"
+													:value="c.code"
+												>
 													{{ c.flag }} {{ c.code }}
 												</option>
 											</select>
@@ -775,7 +922,10 @@
 										</div>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Language</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Language</label
+										>
 										<select
 											v-model="newCustomer.language"
 											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
@@ -793,7 +943,10 @@
 
 								<div class="grid grid-cols-3 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Street number</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Street number</label
+										>
 										<input
 											v-model="newCustomer.street_number"
 											type="text"
@@ -802,7 +955,10 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Street</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Street</label
+										>
 										<input
 											v-model="newCustomer.street"
 											type="text"
@@ -811,7 +967,10 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">City</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>City</label
+										>
 										<input
 											v-model="newCustomer.city"
 											type="text"
@@ -823,7 +982,10 @@
 
 								<div class="grid grid-cols-3 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Postcode</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Postcode</label
+										>
 										<input
 											v-model="newCustomer.pincode"
 											type="text"
@@ -832,17 +994,29 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">State/Region</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>State/Region</label
+										>
 										<select
 											v-model="newCustomer.state"
 											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 										>
 											<option value="">Select state</option>
-											<option v-for="s in usStates" :key="s.code" :value="s.code">{{ s.name }}</option>
+											<option
+												v-for="s in usStates"
+												:key="s.code"
+												:value="s.code"
+											>
+												{{ s.name }}
+											</option>
 										</select>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Country</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Country</label
+										>
 										<select
 											v-model="newCustomer.country"
 											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
@@ -861,7 +1035,10 @@
 							<div v-if="activeTab === 'extra'" class="space-y-4">
 								<div class="grid grid-cols-3 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Bank account number</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Bank account number</label
+										>
 										<input
 											v-model="newCustomer.bank_account"
 											type="text"
@@ -870,7 +1047,10 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">SWIFT/BIC code</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>SWIFT/BIC code</label
+										>
 										<input
 											v-model="newCustomer.swift_bic"
 											type="text"
@@ -879,7 +1059,10 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Bank name</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Bank name</label
+										>
 										<input
 											v-model="newCustomer.bank_name"
 											type="text"
@@ -891,7 +1074,10 @@
 
 								<div class="grid grid-cols-2 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Phone 2</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Phone 2</label
+										>
 										<input
 											v-model="newCustomer.phone2"
 											type="tel"
@@ -900,7 +1086,10 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Client number</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Client number</label
+										>
 										<input
 											v-model="newCustomer.client_number"
 											type="text"
@@ -912,7 +1101,10 @@
 
 								<div class="grid grid-cols-2 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Internal notes</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Internal notes</label
+										>
 										<textarea
 											v-model="newCustomer.internal_notes"
 											rows="3"
@@ -924,7 +1116,10 @@
 
 								<div class="grid grid-cols-2 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Birth date</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Birth date</label
+										>
 										<input
 											v-model="newCustomer.birth_date"
 											type="date"
@@ -932,7 +1127,10 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Marriage date</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Marriage date</label
+										>
 										<input
 											v-model="newCustomer.marriage_date"
 											type="date"
@@ -943,7 +1141,10 @@
 
 								<div class="grid grid-cols-2 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Partner name</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Partner name</label
+										>
 										<input
 											v-model="newCustomer.partner_name"
 											type="text"
@@ -952,7 +1153,10 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Partner phone</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Partner phone</label
+										>
 										<input
 											v-model="newCustomer.partner_phone"
 											type="tel"
@@ -964,7 +1168,10 @@
 
 								<div class="grid grid-cols-2 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Partner email</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Partner email</label
+										>
 										<input
 											v-model="newCustomer.partner_email"
 											type="email"
@@ -973,7 +1180,10 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Discount (%)</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Discount (%)</label
+										>
 										<input
 											v-model.number="newCustomer.discount"
 											type="number"
@@ -986,16 +1196,24 @@
 								</div>
 
 								<div class="grid grid-cols-2 gap-3">
-									<label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#0F1115] rounded-lg cursor-pointer">
+									<label
+										class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#0F1115] rounded-lg cursor-pointer"
+									>
 										<input
 											v-model="newCustomer.accepts_marketing"
 											type="checkbox"
 											class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
 										/>
-										<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Accepts email marketing</span>
+										<span
+											class="text-sm font-medium text-gray-700 dark:text-gray-300"
+											>Accepts email marketing</span
+										>
 									</label>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Gender</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Gender</label
+										>
 										<select
 											v-model="newCustomer.gender"
 											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
@@ -1010,7 +1228,10 @@
 
 								<div class="grid grid-cols-2 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Profession</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Profession</label
+										>
 										<input
 											v-model="newCustomer.profession"
 											type="text"
@@ -1019,20 +1240,28 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Tags</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Tags</label
+										>
 										<input
 											v-model="newCustomer.tags"
 											type="text"
 											placeholder="VIP, Wholesale, etc."
 											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 										/>
-										<p class="text-[10px] text-gray-400 mt-1">A comma-separated list of tags.</p>
+										<p class="text-[10px] text-gray-400 mt-1">
+											A comma-separated list of tags.
+										</p>
 									</div>
 								</div>
 
 								<div class="grid grid-cols-2 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Works at</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Works at</label
+										>
 										<input
 											v-model="newCustomer.works_at"
 											type="text"
@@ -1041,7 +1270,10 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Assigned to</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Assigned to</label
+										>
 										<input
 											v-model="newCustomer.assigned_to"
 											type="text"
@@ -1051,15 +1283,22 @@
 									</div>
 								</div>
 
-								<label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#0F1115] rounded-lg cursor-pointer">
+								<label
+									class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#0F1115] rounded-lg cursor-pointer"
+								>
 									<input
 										v-model="newCustomer.tax_exempt"
 										type="checkbox"
 										class="w-4 h-4 rounded border-gray-300 text-[#D4AF37] focus:ring-[#D4AF37]"
 									/>
 									<div>
-										<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Tax Exempt</span>
-										<p class="text-xs text-gray-500">Customer is exempt from sales tax</p>
+										<span
+											class="text-sm font-medium text-gray-700 dark:text-gray-300"
+											>Tax Exempt</span
+										>
+										<p class="text-xs text-gray-500">
+											Customer is exempt from sales tax
+										</p>
 									</div>
 								</label>
 							</div>
@@ -1073,14 +1312,20 @@
 											type="checkbox"
 											class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
 										/>
-										<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Same as billing address</span>
+										<span
+											class="text-sm font-medium text-gray-700 dark:text-gray-300"
+											>Same as billing address</span
+										>
 									</label>
 								</div>
 
 								<template v-if="!newCustomer.same_as_billing">
 									<div class="grid grid-cols-2 gap-3">
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Street number</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Street number</label
+											>
 											<input
 												v-model="newCustomer.ship_street_number"
 												type="text"
@@ -1089,7 +1334,10 @@
 											/>
 										</div>
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Street</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Street</label
+											>
 											<input
 												v-model="newCustomer.ship_street"
 												type="text"
@@ -1101,7 +1349,10 @@
 
 									<div class="grid grid-cols-3 gap-3">
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">City</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>City</label
+											>
 											<input
 												v-model="newCustomer.ship_city"
 												type="text"
@@ -1110,7 +1361,10 @@
 											/>
 										</div>
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Postcode</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>Postcode</label
+											>
 											<input
 												v-model="newCustomer.ship_pincode"
 												type="text"
@@ -1119,19 +1373,31 @@
 											/>
 										</div>
 										<div>
-											<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">State/Region</label>
+											<label
+												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+												>State/Region</label
+											>
 											<select
 												v-model="newCustomer.ship_state"
 												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
 											>
 												<option value="">Select state</option>
-												<option v-for="s in usStates" :key="s.code" :value="s.code">{{ s.name }}</option>
+												<option
+													v-for="s in usStates"
+													:key="s.code"
+													:value="s.code"
+												>
+													{{ s.name }}
+												</option>
 											</select>
 										</div>
 									</div>
 
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Country</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Country</label
+										>
 										<select
 											v-model="newCustomer.ship_country"
 											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
@@ -1148,7 +1414,10 @@
 							<div v-if="activeTab === 'sizes'" class="space-y-4">
 								<div class="grid grid-cols-2 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Ring left size</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Ring left size</label
+										>
 										<input
 											v-model="newCustomer.ring_left_size"
 											type="text"
@@ -1157,7 +1426,10 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Ring right size</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Ring right size</label
+										>
 										<input
 											v-model="newCustomer.ring_right_size"
 											type="text"
@@ -1168,7 +1440,10 @@
 								</div>
 								<div class="grid grid-cols-2 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Middle left size</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Middle left size</label
+										>
 										<input
 											v-model="newCustomer.middle_left_size"
 											type="text"
@@ -1177,7 +1452,10 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Middle right size</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Middle right size</label
+										>
 										<input
 											v-model="newCustomer.middle_right_size"
 											type="text"
@@ -1188,7 +1466,10 @@
 								</div>
 								<div class="grid grid-cols-2 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Index left size</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Index left size</label
+										>
 										<input
 											v-model="newCustomer.index_left_size"
 											type="text"
@@ -1197,7 +1478,10 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Index right size</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Index right size</label
+										>
 										<input
 											v-model="newCustomer.index_right_size"
 											type="text"
@@ -1208,7 +1492,10 @@
 								</div>
 								<div class="grid grid-cols-2 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Pink left size</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Pink left size</label
+										>
 										<input
 											v-model="newCustomer.pink_left_size"
 											type="text"
@@ -1217,7 +1504,10 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Pink right size</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Pink right size</label
+										>
 										<input
 											v-model="newCustomer.pink_right_size"
 											type="text"
@@ -1228,7 +1518,10 @@
 								</div>
 								<div class="grid grid-cols-2 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Thumb left size</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Thumb left size</label
+										>
 										<input
 											v-model="newCustomer.thumb_left_size"
 											type="text"
@@ -1237,7 +1530,10 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Thumb right size</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Thumb right size</label
+										>
 										<input
 											v-model="newCustomer.thumb_right_size"
 											type="text"
@@ -1248,7 +1544,10 @@
 								</div>
 								<div class="grid grid-cols-2 gap-3">
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Wrist size</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Wrist size</label
+										>
 										<input
 											v-model="newCustomer.wrist_size"
 											type="text"
@@ -1257,7 +1556,10 @@
 										/>
 									</div>
 									<div>
-										<label class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Neck size</label>
+										<label
+											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
+											>Neck size</label
+										>
 										<input
 											v-model="newCustomer.neck_size"
 											type="text"
@@ -1357,23 +1659,57 @@ const tabs = [
 ]
 
 const usStates = [
-	{ code: 'AL', name: 'Alabama' }, { code: 'AK', name: 'Alaska' }, { code: 'AZ', name: 'Arizona' },
-	{ code: 'AR', name: 'Arkansas' }, { code: 'CA', name: 'California' }, { code: 'CO', name: 'Colorado' },
-	{ code: 'CT', name: 'Connecticut' }, { code: 'DE', name: 'Delaware' }, { code: 'FL', name: 'Florida' },
-	{ code: 'GA', name: 'Georgia' }, { code: 'HI', name: 'Hawaii' }, { code: 'ID', name: 'Idaho' },
-	{ code: 'IL', name: 'Illinois' }, { code: 'IN', name: 'Indiana' }, { code: 'IA', name: 'Iowa' },
-	{ code: 'KS', name: 'Kansas' }, { code: 'KY', name: 'Kentucky' }, { code: 'LA', name: 'Louisiana' },
-	{ code: 'ME', name: 'Maine' }, { code: 'MD', name: 'Maryland' }, { code: 'MA', name: 'Massachusetts' },
-	{ code: 'MI', name: 'Michigan' }, { code: 'MN', name: 'Minnesota' }, { code: 'MS', name: 'Mississippi' },
-	{ code: 'MO', name: 'Missouri' }, { code: 'MT', name: 'Montana' }, { code: 'NE', name: 'Nebraska' },
-	{ code: 'NV', name: 'Nevada' }, { code: 'NH', name: 'New Hampshire' }, { code: 'NJ', name: 'New Jersey' },
-	{ code: 'NM', name: 'New Mexico' }, { code: 'NY', name: 'New York' }, { code: 'NC', name: 'North Carolina' },
-	{ code: 'ND', name: 'North Dakota' }, { code: 'OH', name: 'Ohio' }, { code: 'OK', name: 'Oklahoma' },
-	{ code: 'OR', name: 'Oregon' }, { code: 'PA', name: 'Pennsylvania' }, { code: 'RI', name: 'Rhode Island' },
-	{ code: 'SC', name: 'South Carolina' }, { code: 'SD', name: 'South Dakota' }, { code: 'TN', name: 'Tennessee' },
-	{ code: 'TX', name: 'Texas' }, { code: 'UT', name: 'Utah' }, { code: 'VT', name: 'Vermont' },
-	{ code: 'VA', name: 'Virginia' }, { code: 'WA', name: 'Washington' }, { code: 'WV', name: 'West Virginia' },
-	{ code: 'WI', name: 'Wisconsin' }, { code: 'WY', name: 'Wyoming' }, { code: 'DC', name: 'District of Columbia' },
+	{ code: 'AL', name: 'Alabama' },
+	{ code: 'AK', name: 'Alaska' },
+	{ code: 'AZ', name: 'Arizona' },
+	{ code: 'AR', name: 'Arkansas' },
+	{ code: 'CA', name: 'California' },
+	{ code: 'CO', name: 'Colorado' },
+	{ code: 'CT', name: 'Connecticut' },
+	{ code: 'DE', name: 'Delaware' },
+	{ code: 'FL', name: 'Florida' },
+	{ code: 'GA', name: 'Georgia' },
+	{ code: 'HI', name: 'Hawaii' },
+	{ code: 'ID', name: 'Idaho' },
+	{ code: 'IL', name: 'Illinois' },
+	{ code: 'IN', name: 'Indiana' },
+	{ code: 'IA', name: 'Iowa' },
+	{ code: 'KS', name: 'Kansas' },
+	{ code: 'KY', name: 'Kentucky' },
+	{ code: 'LA', name: 'Louisiana' },
+	{ code: 'ME', name: 'Maine' },
+	{ code: 'MD', name: 'Maryland' },
+	{ code: 'MA', name: 'Massachusetts' },
+	{ code: 'MI', name: 'Michigan' },
+	{ code: 'MN', name: 'Minnesota' },
+	{ code: 'MS', name: 'Mississippi' },
+	{ code: 'MO', name: 'Missouri' },
+	{ code: 'MT', name: 'Montana' },
+	{ code: 'NE', name: 'Nebraska' },
+	{ code: 'NV', name: 'Nevada' },
+	{ code: 'NH', name: 'New Hampshire' },
+	{ code: 'NJ', name: 'New Jersey' },
+	{ code: 'NM', name: 'New Mexico' },
+	{ code: 'NY', name: 'New York' },
+	{ code: 'NC', name: 'North Carolina' },
+	{ code: 'ND', name: 'North Dakota' },
+	{ code: 'OH', name: 'Ohio' },
+	{ code: 'OK', name: 'Oklahoma' },
+	{ code: 'OR', name: 'Oregon' },
+	{ code: 'PA', name: 'Pennsylvania' },
+	{ code: 'RI', name: 'Rhode Island' },
+	{ code: 'SC', name: 'South Carolina' },
+	{ code: 'SD', name: 'South Dakota' },
+	{ code: 'TN', name: 'Tennessee' },
+	{ code: 'TX', name: 'Texas' },
+	{ code: 'UT', name: 'Utah' },
+	{ code: 'VT', name: 'Vermont' },
+	{ code: 'VA', name: 'Virginia' },
+	{ code: 'WA', name: 'Washington' },
+	{ code: 'WV', name: 'West Virginia' },
+	{ code: 'WI', name: 'Wisconsin' },
+	{ code: 'WY', name: 'Wyoming' },
+	{ code: 'DC', name: 'District of Columbia' },
 ]
 
 const usPhoneCodes = [
@@ -1545,7 +1881,11 @@ async function saveCustomerEdit() {
 			editSuccess.value = data.message || 'Customer updated successfully'
 
 			// Update cart if this is the currently selected customer
-			if (cart.customer && (cart.customer.name === editCustomerName.value || cart.customer.customer_name === editCustomerName.value)) {
+			if (
+				cart.customer &&
+				(cart.customer.name === editCustomerName.value ||
+					cart.customer.customer_name === editCustomerName.value)
+			) {
 				const updated = { ...cart.customer }
 				if (editForm.value.mobile_no) updated.mobile_no = editForm.value.mobile_no
 				if (editForm.value.email_id) updated.email_id = editForm.value.email_id
@@ -1580,7 +1920,12 @@ function closeEditModal() {
 
 function getInitials(name) {
 	if (!name) return '?'
-	return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+	return name
+		.split(' ')
+		.map((n) => n[0])
+		.join('')
+		.substring(0, 2)
+		.toUpperCase()
 }
 
 onMounted(() => {
@@ -1630,7 +1975,7 @@ async function performSearch() {
 			query: searchQuery.value,
 		})
 		const list = results || []
-		searchResults.value = list.map(c => ({
+		searchResults.value = list.map((c) => ({
 			...c,
 			name: c.name || c.customer_name,
 			customer_name: c.display_name || c.customer_name,
@@ -1650,7 +1995,9 @@ const customerDetailsResource = createResource({
 
 async function selectCustomer(customerData) {
 	try {
-		const r = await customerDetailsResource.submit({ customer_name: customerData.customer_name || customerData.name })
+		const r = await customerDetailsResource.submit({
+			customer_name: customerData.customer_name || customerData.name,
+		})
 		const fullData = r?.data || r
 		if (fullData && fullData.customer_name && !fullData.name) {
 			fullData.name = fullData.customer_name
@@ -1745,10 +2092,10 @@ async function createCustomer() {
 	createError.value = ''
 
 	try {
-		const billingAddress = [
-			newCustomer.value.street_number,
-			newCustomer.value.street,
-		].filter(Boolean).join(' ') || null
+		const billingAddress =
+			[newCustomer.value.street_number, newCustomer.value.street]
+				.filter(Boolean)
+				.join(' ') || null
 
 		const r = await createResource({
 			url: 'zevar_core.api.customer.quick_create_customer',
@@ -1790,7 +2137,9 @@ async function createCustomer() {
 				// Shipping address
 				same_as_billing: newCustomer.value.same_as_billing ? 1 : 0,
 				ship_address_line1: !newCustomer.value.same_as_billing
-					? [newCustomer.value.ship_street_number, newCustomer.value.ship_street].filter(Boolean).join(' ') || null
+					? [newCustomer.value.ship_street_number, newCustomer.value.ship_street]
+							.filter(Boolean)
+							.join(' ') || null
 					: null,
 				ship_city: newCustomer.value.ship_city || null,
 				ship_state: newCustomer.value.ship_state || null,

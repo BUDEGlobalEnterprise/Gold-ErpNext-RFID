@@ -6,18 +6,25 @@ import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit
 
-
 # Roles allowed to search/select customers in POS (broad access)
 POS_CUSTOMER_ROLES = [
-	"Sales User", "Sales Manager", "Sales Master Manager",
-	"System Manager", "Store Manager", "Accounts Manager",
-	"Employee", "ESS",
+	"Sales User",
+	"Sales Manager",
+	"Sales Master Manager",
+	"System Manager",
+	"Store Manager",
+	"Accounts Manager",
+	"Employee",
+	"ESS",
 ]
 
 # Roles allowed to EDIT customer details (admin/manager only)
 CUSTOMER_EDIT_ROLES = [
-	"System Manager", "Store Manager", "Accounts Manager",
-	"Sales Manager", "Sales Master Manager",
+	"System Manager",
+	"Store Manager",
+	"Accounts Manager",
+	"Sales Manager",
+	"Sales Master Manager",
 ]
 
 
@@ -165,12 +172,18 @@ def get_customer_details(customer_name: str) -> dict:
 		result["accepts_marketing"] = safe_get(customer, "custom_accepts_marketing")
 
 	size_fields = [
-		"custom_ring_left_size", "custom_ring_right_size",
-		"custom_middle_left_size", "custom_middle_right_size",
-		"custom_index_left_size", "custom_index_right_size",
-		"custom_pink_left_size", "custom_pink_right_size",
-		"custom_thumb_left_size", "custom_thumb_right_size",
-		"custom_wrist_size", "custom_neck_size",
+		"custom_ring_left_size",
+		"custom_ring_right_size",
+		"custom_middle_left_size",
+		"custom_middle_right_size",
+		"custom_index_left_size",
+		"custom_index_right_size",
+		"custom_pink_left_size",
+		"custom_pink_right_size",
+		"custom_thumb_left_size",
+		"custom_thumb_right_size",
+		"custom_wrist_size",
+		"custom_neck_size",
 	]
 	for sf in size_fields:
 		if customer_meta.has_field(sf):
@@ -259,8 +272,15 @@ def get_recent_customers(limit: int = 10) -> list:
 	customers = frappe.db.get_all(
 		"Customer",
 		filters={"name": ["in", names], "disabled": 0},
-		fields=["name", "customer_name", "mobile_no", "email_id",
-		        "customer_type", "customer_group", "territory"],
+		fields=[
+			"name",
+			"customer_name",
+			"mobile_no",
+			"email_id",
+			"customer_type",
+			"customer_group",
+			"territory",
+		],
 	)
 
 	# Build a lookup for invoice data
@@ -276,18 +296,20 @@ def get_recent_customers(limit: int = 10) -> list:
 	result = []
 	for cust in customers:
 		invoice_info = invoice_map.get(cust.name, {})
-		result.append({
-			"name": cust.name,
-			"customer_name": cust.customer_name,
-			"display_name": cust.customer_name,
-			"mobile_no": cust.mobile_no or "",
-			"email_id": cust.email_id or "",
-			"customer_type": cust.customer_type or "Individual",
-			"customer_group": cust.customer_group or "Standard",
-			"territory": cust.territory or "",
-			"last_sale_date": invoice_info.get("last_sale_date"),
-			"last_sale_total": invoice_info.get("last_sale_total", 0),
-		})
+		result.append(
+			{
+				"name": cust.name,
+				"customer_name": cust.customer_name,
+				"display_name": cust.customer_name,
+				"mobile_no": cust.mobile_no or "",
+				"email_id": cust.email_id or "",
+				"customer_type": cust.customer_type or "Individual",
+				"customer_group": cust.customer_group or "Standard",
+				"territory": cust.territory or "",
+				"last_sale_date": invoice_info.get("last_sale_date"),
+				"last_sale_total": invoice_info.get("last_sale_total", 0),
+			}
+		)
 
 	return result
 
@@ -475,9 +497,7 @@ def quick_create_customer(
 	if not customer_name:
 		frappe.throw(_("Customer name is required"))
 
-	customer_group = frappe.db.get_single_value(
-		"Selling Settings", "customer_group"
-	) or frappe.db.get_value(
+	customer_group = frappe.db.get_single_value("Selling Settings", "customer_group") or frappe.db.get_value(
 		"Customer Group", {"is_group": 0}, "name", order_by="creation asc"
 	)
 	if not customer_group:
@@ -492,9 +512,7 @@ def quick_create_customer(
 			group.insert(ignore_permissions=True)
 		customer_group = "Individual"
 
-	territory = frappe.db.get_single_value(
-		"Selling Settings", "territory"
-	) or frappe.db.get_value(
+	territory = frappe.db.get_single_value("Selling Settings", "territory") or frappe.db.get_value(
 		"Territory", {"is_group": 0}, "name", order_by="creation asc"
 	)
 	if not territory:
@@ -567,9 +585,7 @@ def quick_create_customer(
 					"state": state,
 					"pincode": pincode,
 					"country": country or "United States",
-					"links": [
-						{"link_doctype": "Customer", "link_name": customer.name}
-					],
+					"links": [{"link_doctype": "Customer", "link_name": customer.name}],
 				}
 			)
 			address.insert()
@@ -591,9 +607,7 @@ def quick_create_customer(
 					"state": ship_state,
 					"pincode": ship_pincode,
 					"country": ship_country or "United States",
-					"links": [
-						{"link_doctype": "Customer", "link_name": customer.name}
-					],
+					"links": [{"link_doctype": "Customer", "link_name": customer.name}],
 				}
 			)
 			ship_address.insert()

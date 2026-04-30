@@ -17,7 +17,9 @@ export default {
 
 const Template = (args) => ({
 	components: { ScannerInput },
-	setup() { return { args } },
+	setup() {
+		return { args }
+	},
 	template: `
 		<div class="max-w-md p-4">
 			<ScannerInput v-bind="args" @scan="(v) => $data.lastScan = v" />

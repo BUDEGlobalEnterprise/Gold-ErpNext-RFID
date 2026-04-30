@@ -5,17 +5,19 @@ QR code generation for merchant alias + amount,
 polling for payment confirmation via banking API middleware.
 """
 
+import hashlib
+import json
+
 import frappe
 from frappe import _
 from frappe.utils import flt
 
-import json
-import hashlib
-
 try:
-	import qrcode
-	import io
 	import base64
+	import io
+
+	import qrcode
+
 	HAS_QRCODE = True
 except ImportError:
 	HAS_QRCODE = False

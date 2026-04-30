@@ -65,6 +65,7 @@ class TestAuditScheduler(FrappeTestCase):
 		frappe.db.sql("DELETE FROM `tabAudit Plan`")
 
 		from zevar_core.tasks import audit_cadence_heartbeat
+
 		audit_cadence_heartbeat()
 
 		count = frappe.db.count("Audit Plan")
@@ -84,6 +85,7 @@ class TestAuditScheduler(FrappeTestCase):
 		plan.insert(ignore_permissions=True)
 
 		from zevar_core.tasks import audit_cadence_heartbeat
+
 		audit_cadence_heartbeat()
 
 		plan.reload()
@@ -103,10 +105,14 @@ class TestAuditScheduler(FrappeTestCase):
 		policy.save(ignore_permissions=True)
 
 		from zevar_core.tasks import audit_cadence_heartbeat
+
 		audit_cadence_heartbeat()
 
-		spot_plans = frappe.get_all("Audit Plan", filters={
-			"scope": "Daily Spot",
-			"scheduled_for": today(),
-		})
+		spot_plans = frappe.get_all(
+			"Audit Plan",
+			filters={
+				"scope": "Daily Spot",
+				"scheduled_for": today(),
+			},
+		)
 		self.assertGreater(len(spot_plans), 0)

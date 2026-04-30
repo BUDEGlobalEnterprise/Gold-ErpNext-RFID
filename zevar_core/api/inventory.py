@@ -10,7 +10,7 @@ import json
 
 import frappe
 from frappe import _
-from frappe.utils import flt, now_datetime, add_to_date, cint, cstr
+from frappe.utils import add_to_date, cint, cstr, flt, now_datetime
 
 from zevar_core.constants import (
 	DEFAULT_RESERVATION_HOURS,
@@ -20,12 +20,12 @@ from zevar_core.constants import (
 	STORE_LOCATIONS,
 )
 from zevar_core.services.inventory_events import (
-	_log_inventory_event,
-	_get_company,
 	_get_abbr,
+	_get_company,
 	_get_cost_center,
 	_get_store_warehouse,
 	_get_zone_warehouse,
+	_log_inventory_event,
 	consign_in,
 	consign_out,
 	damage_write_off,
@@ -62,6 +62,7 @@ def _get_store_code_from_warehouse(wh):
 
 # ─── 1. bulk_push_to_stores ────────────────────────────────────────────────
 
+
 @frappe.whitelist(allow_guest=False)
 def bulk_push_to_stores(item_code=None, allocation=None):
 	frappe.has_permission("Stock Entry", ptype="create", throw=True)
@@ -93,26 +94,32 @@ def bulk_push_to_stores(item_code=None, allocation=None):
 		se.company = company
 		se.cost_center = cost_center
 
-		for i in range(qty):
-			se.append("items", {
-				"item_code": item_code,
-				"qty": 1,
-				"t_warehouse": back_stock_wh,
-				"cost_center": cost_center,
-			})
+		for _i in range(qty):
+			se.append(
+				"items",
+				{
+					"item_code": item_code,
+					"qty": 1,
+					"t_warehouse": back_stock_wh,
+					"cost_center": cost_center,
+				},
+			)
 
 		se.insert(ignore_permissions=True)
 		se.submit()
 		results.append({"store": store_code, "stock_entry": se.name, "qty": qty})
 
 	_log_inventory_event(
-		"bulk_push_completed", "Item", item_code,
+		"bulk_push_completed",
+		"Item",
+		item_code,
 		f"Pushed {sum(a.get('qty', 0) for a in allocation)} pieces across {len(results)} stores",
 	)
 	return {"success": True, "results": results}
 
 
 # ─── 2. reserve_for_customer ────────────────────────────────────────────────
+
 
 @frappe.whitelist(allow_guest=False)
 def reserve_for_customer(serial_no=None, customer=None, hold_until=None, deposit_amount=0):
@@ -139,6 +146,7 @@ def reserve_for_customer(serial_no=None, customer=None, hold_until=None, deposit
 
 # ─── 3. release_reservation ─────────────────────────────────────────────────
 
+
 @frappe.whitelist(allow_guest=False)
 def release_reservation(reservation_name=None):
 	frappe.has_permission("Stock Reservation", ptype="cancel", throw=True)
@@ -152,6 +160,7 @@ def release_reservation(reservation_name=None):
 
 
 # ─── 4. create_inter_store_transfer ──────────────────────────────────────────
+
 
 @frappe.whitelist(allow_guest=False)
 def create_inter_store_transfer(items=None, source=None, destination=None, carrier_ref=None):
@@ -200,8 +209,9 @@ def create_inter_store_transfer(items=None, source=None, destination=None, carri
 
 # ─── 5. receive_inter_store_transfer ─────────────────────────────────────────
 
+
 @frappe.whitelist(allow_guest=False)
-def receive_inter_store_transfer(transfer_name=None, scanned_serials=None):
+def do_receive_inter_store_transfer(transfer_name=None, scanned_serials=None):
 	frappe.has_permission("Stock Entry", ptype="create", throw=True)
 	_validate_kwargs(locals(), ["scanned_serials"])
 
@@ -256,6 +266,7 @@ def receive_inter_store_transfer(transfer_name=None, scanned_serials=None):
 
 # ─── 6. damage_write_off ────────────────────────────────────────────────────
 
+
 @frappe.whitelist(allow_guest=False)
 def do_damage_write_off(serial_no=None, reason=None, evidence_file=None):
 	frappe.has_permission("Stock Entry", ptype="create", throw=True)
@@ -269,9 +280,7 @@ def do_damage_write_off(serial_no=None, reason=None, evidence_file=None):
 	abbr = _get_abbr()
 	shrinkage_wh = f"Shrinkage {store_code} - {abbr}" if store_code else None
 	if not shrinkage_wh or not frappe.db.exists("Warehouse", shrinkage_wh):
-		shrinkage_wh = frappe.db.get_value(
-			"Warehouse", {"warehouse_name": ["like", "%Shrinkage%"]}, "name"
-		)
+		shrinkage_wh = frappe.db.get_value("Warehouse", {"warehouse_name": ["like", "%Shrinkage%"]}, "name")
 	if not shrinkage_wh:
 		frappe.throw(_("No Shrinkage warehouse found"))
 
@@ -280,6 +289,7 @@ def do_damage_write_off(serial_no=None, reason=None, evidence_file=None):
 
 
 # ─── 7. gift_out ─────────────────────────────────────────────────────────────
+
 
 @frappe.whitelist(allow_guest=False)
 def do_gift_out(serial_no=None, reason=None):
@@ -295,6 +305,7 @@ def do_gift_out(serial_no=None, reason=None):
 
 
 # ─── 8. consign_out ─────────────────────────────────────────────────────────
+
 
 @frappe.whitelist(allow_guest=False)
 def do_consign_out(items=None, event_name=None, return_by=None):
@@ -316,18 +327,20 @@ def do_consign_out(items=None, event_name=None, return_by=None):
 
 	if not frappe.db.exists("Warehouse", consignment_wh):
 		parent_wh = frappe.db.get_value("Warehouse", back_stock_wh, "parent_warehouse")
-		frappe.get_doc({
-			"doctype": "Warehouse",
-			"warehouse_name": f"Consignment - {event_name}",
-			"parent_warehouse": parent_wh,
-			"company": _get_company(),
-			"is_group": 0,
-		}).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": f"Consignment - {event_name}",
+				"parent_warehouse": parent_wh,
+				"company": _get_company(),
+				"is_group": 0,
+			}
+		).insert(ignore_permissions=True)
 
 	serial_nos = [cstr(i.get("serial_no")) for i in items]
 	item_codes = [
 		frappe.db.get_value("Serial No", sn, "item_code") or cstr(i.get("item_code"))
-		for sn, i in zip(serial_nos, items)
+		for sn, i in zip(serial_nos, items, strict=False)
 	]
 
 	entries = consign_out(serial_nos, item_codes, back_stock_wh, consignment_wh, event_name)
@@ -335,6 +348,7 @@ def do_consign_out(items=None, event_name=None, return_by=None):
 
 
 # ─── 9. consign_in ──────────────────────────────────────────────────────────
+
 
 @frappe.whitelist(allow_guest=False)
 def do_consign_in(event_name=None, scanned_serials=None):
@@ -363,6 +377,7 @@ def do_consign_in(event_name=None, scanned_serials=None):
 
 # ─── 10. recover_found_piece ────────────────────────────────────────────────
 
+
 @frappe.whitelist(allow_guest=False)
 def do_recover_found_piece(serial_no=None, original_shrinkage_ref=None):
 	frappe.has_permission("Stock Entry", ptype="create", throw=True)
@@ -382,15 +397,14 @@ def do_recover_found_piece(serial_no=None, original_shrinkage_ref=None):
 			showcase_wh = f"Showcase {store_code} - {abbr}"
 
 	if not showcase_wh or not frappe.db.exists("Warehouse", showcase_wh):
-		showcase_wh = frappe.db.get_value(
-			"Serial No", serial_no, "warehouse"
-		)
+		showcase_wh = frappe.db.get_value("Serial No", serial_no, "warehouse")
 
 	se = recover_found_piece(serial_no, ic, showcase_wh, original_shrinkage_ref)
 	return {"success": True, "stock_entry": se.name}
 
 
 # ─── 11. get_piece_lifecycle ────────────────────────────────────────────────
+
 
 @frappe.whitelist(allow_guest=False)
 def get_piece_lifecycle(serial_no=None):
@@ -414,9 +428,16 @@ def get_piece_lifecycle(serial_no=None):
 		"Stock Ledger Entry",
 		filters={"serial_no": ["like", f"%{serial_no}%"], "item_code": sn.item_code},
 		fields=[
-			"name", "posting_date", "posting_time", "voucher_type",
-			"voucher_no", "warehouse", "actual_qty", "qty_after_transaction",
-			"incoming_rate", "valuation_rate",
+			"name",
+			"posting_date",
+			"posting_time",
+			"voucher_type",
+			"voucher_no",
+			"warehouse",
+			"actual_qty",
+			"qty_after_transaction",
+			"incoming_rate",
+			"valuation_rate",
 		],
 		order_by="posting_date desc, posting_time desc, creation desc",
 		limit=200,
@@ -425,15 +446,17 @@ def get_piece_lifecycle(serial_no=None):
 	events = []
 	for sle in sles:
 		event_label = _classify_sle_event(sle)
-		events.append({
-			"date": f"{sle.posting_date} {sle.posting_time}",
-			"type": event_label,
-			"voucher_type": sle.voucher_type,
-			"voucher_no": sle.voucher_no,
-			"warehouse": sle.warehouse,
-			"qty_change": sle.actual_qty,
-			"balance": sle.qty_after_transaction,
-		})
+		events.append(
+			{
+				"date": f"{sle.posting_date} {sle.posting_time}",
+				"type": event_label,
+				"voucher_type": sle.voucher_type,
+				"voucher_no": sle.voucher_no,
+				"warehouse": sle.warehouse,
+				"qty_change": sle.actual_qty,
+				"balance": sle.qty_after_transaction,
+			}
+		)
 
 	sn_info["events"] = events
 	return sn_info
@@ -462,6 +485,7 @@ def _classify_sle_event(sle):
 
 
 # ─── 12. get_store_stock_matrix ─────────────────────────────────────────────
+
 
 @frappe.whitelist(allow_guest=False)
 def get_store_stock_matrix(filters=None):
@@ -515,6 +539,7 @@ def get_store_stock_matrix(filters=None):
 
 # ─── 13. get_low_stock ──────────────────────────────────────────────────────
 
+
 @frappe.whitelist(allow_guest=False)
 def get_low_stock(store=None, threshold_strategy="velocity"):
 	frappe.has_permission("Bin", ptype="read", throw=True)
@@ -539,26 +564,29 @@ def get_low_stock(store=None, threshold_strategy="velocity"):
 				pluck="name",
 			)
 			qty = 0
-			for wh in (wh_names or []):
+			for wh in wh_names or []:
 				bin_qty = frappe.db.get_value("Bin", {"item_code": item.name, "warehouse": wh}, "actual_qty")
 				qty += flt(bin_qty)
 			store_qtys[store_code] = qty
 			total_qty += qty
 
 		if total_qty <= 2:
-			low_items.append({
-				"item_code": item.name,
-				"item_name": item.item_name,
-				"item_group": item.item_group,
-				"total_qty": total_qty,
-				"store_qtys": store_qtys,
-				"standard_rate": item.standard_rate,
-			})
+			low_items.append(
+				{
+					"item_code": item.name,
+					"item_name": item.item_name,
+					"item_group": item.item_group,
+					"total_qty": total_qty,
+					"store_qtys": store_qtys,
+					"standard_rate": item.standard_rate,
+				}
+			)
 
 	return {"success": True, "items": low_items}
 
 
 # ─── 14. move_piece ─────────────────────────────────────────────────────────
+
 
 @frappe.whitelist(allow_guest=False)
 def move_piece(serial_no=None, target_warehouse=None):
@@ -574,6 +602,7 @@ def move_piece(serial_no=None, target_warehouse=None):
 
 
 # ─── Sales Invoice validation hook ──────────────────────────────────────────
+
 
 def validate_serial_sellable_zones(doc, method=None):
 	for item in doc.items:

@@ -1,5 +1,6 @@
 import frappe
 from frappe.utils import now_datetime
+
 from zevar_core.constants import INVENTORY_ZONES, STORE_LOCATIONS
 
 

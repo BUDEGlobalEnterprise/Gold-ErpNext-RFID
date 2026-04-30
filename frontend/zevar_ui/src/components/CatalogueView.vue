@@ -936,7 +936,12 @@ const partnerBrands = [
 		desc: 'Diamond Specialists',
 		url: 'https://www.bluenile.com',
 	},
-	{ name: 'Zevar In-House', initial: 'Z', desc: 'Our Exclusive Collection', url: '/pos-catalogue' },
+	{
+		name: 'Zevar In-House',
+		initial: 'Z',
+		desc: 'Our Exclusive Collection',
+		url: '/pos-catalogue',
+	},
 ]
 
 // ---- CAROUSEL LOGIC ----

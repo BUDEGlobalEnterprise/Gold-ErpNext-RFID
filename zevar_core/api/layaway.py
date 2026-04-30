@@ -15,7 +15,15 @@ from zevar_core.constants import (
 	MAX_EXTENSIONS_ALLOWED,
 )
 
-LAYAWAY_ALLOWED_ROLES = ["Sales User", "Sales Manager", "Store Manager", "POS Manager", "Employee", "Employee Self Service", "System Manager"]
+LAYAWAY_ALLOWED_ROLES = [
+	"Sales User",
+	"Sales Manager",
+	"Store Manager",
+	"POS Manager",
+	"Employee",
+	"Employee Self Service",
+	"System Manager",
+]
 
 
 def _enforce_layaway_access() -> None:
@@ -27,7 +35,7 @@ def _coerce_statuses(statuses: str | list | tuple | None) -> list[str]:
 		return []
 
 	status_values = frappe.parse_json(statuses) if isinstance(statuses, str) else statuses
-	if not isinstance(status_values, (list, tuple)):
+	if not isinstance(status_values, list | tuple):
 		status_values = [status_values]
 
 	return [str(status).strip() for status in status_values if str(status).strip()]
@@ -820,7 +828,7 @@ def cancel_layaway(layaway_id: str, cancellation_reason: str | None = None) -> d
 			"success": True,
 			"amount_refunded": refund_amount,
 			"cancellation_fee": cancellation_fee,
-			"message": f"Layaway cancelled.",
+			"message": "Layaway cancelled.",
 		}
 		if gc_name:
 			result["store_credit_id"] = gc_name

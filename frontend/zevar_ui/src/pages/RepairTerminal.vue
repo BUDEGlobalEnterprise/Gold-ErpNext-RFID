@@ -40,7 +40,10 @@
 				<div
 					class="bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2 border border-red-100 dark:border-red-800/30"
 				>
-					<span class="text-[10px] text-red-600 dark:text-red-400 font-bold uppercase tracking-wide">Overdue</span>
+					<span
+						class="text-[10px] text-red-600 dark:text-red-400 font-bold uppercase tracking-wide"
+						>Overdue</span
+					>
 					<p class="text-lg font-bold text-red-700 dark:text-red-300">
 						{{ dashboardStats.overdue_count || 0 }}
 					</p>
@@ -48,7 +51,10 @@
 				<div
 					class="bg-green-50 dark:bg-green-900/20 rounded-lg px-3 py-2 border border-green-100 dark:border-green-800/30"
 				>
-					<span class="text-[10px] text-green-600 dark:text-green-400 font-bold uppercase tracking-wide">Pickup</span>
+					<span
+						class="text-[10px] text-green-600 dark:text-green-400 font-bold uppercase tracking-wide"
+						>Pickup</span
+					>
 					<p class="text-lg font-bold text-green-700 dark:text-green-300">
 						{{ dashboardStats.ready_pickup_count || 0 }}
 					</p>
@@ -56,7 +62,10 @@
 				<div
 					class="bg-blue-50 dark:bg-blue-900/20 rounded-lg px-3 py-2 border border-blue-100 dark:border-blue-800/30"
 				>
-					<span class="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wide">Week Rev</span>
+					<span
+						class="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wide"
+						>Week Rev</span
+					>
 					<p class="text-lg font-bold text-blue-700 dark:text-blue-300">
 						${{ formatNum(dashboardStats.weekly_revenue || 0) }}
 					</p>
@@ -64,7 +73,10 @@
 				<div
 					class="bg-purple-50 dark:bg-purple-900/20 rounded-lg px-3 py-2 border border-purple-100 dark:border-purple-800/30"
 				>
-					<span class="text-[10px] text-purple-600 dark:text-purple-400 font-bold uppercase tracking-wide">Month Rev</span>
+					<span
+						class="text-[10px] text-purple-600 dark:text-purple-400 font-bold uppercase tracking-wide"
+						>Month Rev</span
+					>
 					<p class="text-lg font-bold text-purple-700 dark:text-purple-300">
 						${{ formatNum(dashboardStats.monthly_revenue || 0) }}
 					</p>
@@ -72,7 +84,10 @@
 				<div
 					class="bg-orange-50 dark:bg-orange-900/20 rounded-lg px-3 py-2 border border-orange-100 dark:border-orange-800/30"
 				>
-					<span class="text-[10px] text-orange-600 dark:text-orange-400 font-bold uppercase tracking-wide">Avg Days</span>
+					<span
+						class="text-[10px] text-orange-600 dark:text-orange-400 font-bold uppercase tracking-wide"
+						>Avg Days</span
+					>
 					<p class="text-lg font-bold text-orange-700 dark:text-orange-300">
 						{{ dashboardStats.avg_turnaround_days || 0 }}d
 					</p>
@@ -80,7 +95,10 @@
 				<div
 					class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg px-3 py-2 border border-yellow-100 dark:border-yellow-800/30"
 				>
-					<span class="text-[10px] text-yellow-600 dark:text-yellow-400 font-bold uppercase tracking-wide">Pending</span>
+					<span
+						class="text-[10px] text-yellow-600 dark:text-yellow-400 font-bold uppercase tracking-wide"
+						>Pending</span
+					>
 					<p class="text-lg font-bold text-yellow-700 dark:text-yellow-300">
 						${{ formatNum(dashboardStats.pending_collections_amount || 0) }}
 					</p>
@@ -298,17 +316,38 @@
 							:key="order.name"
 							@click="selectOrder(order)"
 							class="flex items-center justify-between bg-white dark:bg-warm-dark-900/50 rounded-lg px-4 py-3 border border-gray-100 dark:border-warm-border/50 hover:border-[#D4AF37]/30 transition cursor-pointer"
-							:class="{ 'ring-2 ring-[#D4AF37]/30': selectedOrder?.name === order.name }"
+							:class="{
+								'ring-2 ring-[#D4AF37]/30': selectedOrder?.name === order.name,
+							}"
 						>
 							<div class="flex items-center gap-4 min-w-0">
-								<span class="font-mono text-xs text-[#D4AF37] w-36 shrink-0">{{ order.name }}</span>
-								<span class="text-sm font-bold text-gray-900 dark:text-white truncate w-32">{{ order.customer_name }}</span>
-								<span class="text-xs text-gray-500 truncate">{{ order.repair_type_name }}</span>
+								<span class="font-mono text-xs text-[#D4AF37] w-36 shrink-0">{{
+									order.name
+								}}</span>
+								<span
+									class="text-sm font-bold text-gray-900 dark:text-white truncate w-32"
+									>{{ order.customer_name }}</span
+								>
+								<span class="text-xs text-gray-500 truncate">{{
+									order.repair_type_name
+								}}</span>
 							</div>
 							<div class="flex items-center gap-4">
-								<span v-if="order.priority === 'Urgent'" class="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">Urgent</span>
-								<span class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold" :class="getStatusBadgeClass(order.status)">{{ order.status }}</span>
-								<span class="text-sm font-bold text-gray-900 dark:text-white">${{ formatNum(order.total_cost || order.estimated_cost) }}</span>
+								<span
+									v-if="order.priority === 'Urgent'"
+									class="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700"
+									>Urgent</span
+								>
+								<span
+									class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold"
+									:class="getStatusBadgeClass(order.status)"
+									>{{ order.status }}</span
+								>
+								<span class="text-sm font-bold text-gray-900 dark:text-white"
+									>${{
+										formatNum(order.total_cost || order.estimated_cost)
+									}}</span
+								>
 							</div>
 						</div>
 					</div>
@@ -565,7 +604,7 @@ import StoreTransferModal from '@/components/StoreTransferModal.vue'
 import CheckoutModal from '@/components/CheckoutModal.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
 import { useBreakpoint } from '@/composables/useBreakpoint.js'
-	import { formatDate } from '@/utils/dates.js'
+import { formatDate } from '@/utils/dates.js'
 
 const session = useSessionStore()
 const viewMode = ref('grid') // grid, list, split (hidden)
@@ -575,9 +614,12 @@ const searchTerm = ref('')
 const selectedStore = computed(() => session.currentWarehouse || 'all')
 
 // Watch for warehouse changes to reload orders
-watch(() => session.currentWarehouse, () => {
-	loadOrders()
-})
+watch(
+	() => session.currentWarehouse,
+	() => {
+		loadOrders()
+	}
+)
 const showAdvancedSearch = ref(false)
 const refreshInterval = ref(0) // Auto-refresh off by default
 const orders = ref([])
@@ -651,7 +693,6 @@ function selectOrder(order) {
 	selectedOrder.value = order
 	openDetail(order)
 }
-
 
 // Kanban columns
 const kanbanColumns = computed(() => {
@@ -806,7 +847,6 @@ function clearAdvancedFilters() {
 	}
 	loadOrders()
 }
-
 
 function formatNum(n) {
 	if (n == null) return '0.00'

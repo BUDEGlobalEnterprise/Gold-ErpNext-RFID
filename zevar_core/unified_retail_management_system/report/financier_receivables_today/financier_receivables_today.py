@@ -39,7 +39,6 @@ def get_columns():
 
 def get_data(filters):
 	financiers = ["Synchrony", "AFF", "CIMA", "Progressive", "Snap"]
-	company = "Zevar Jewelers"
 	data = []
 
 	for financier in financiers:

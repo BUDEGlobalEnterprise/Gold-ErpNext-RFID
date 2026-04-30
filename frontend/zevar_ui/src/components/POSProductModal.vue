@@ -1,5 +1,11 @@
 <template>
-	<BaseModal :show="show" max-width="max-w-4xl" :no-max-height="true" :show-close="false" @close="close">
+	<BaseModal
+		:show="show"
+		max-width="max-w-4xl"
+		:no-max-height="true"
+		:show-close="false"
+		@close="close"
+	>
 		<div class="flex flex-col md:flex-row">
 			<!-- Left: Image -->
 			<div
@@ -11,12 +17,7 @@
 					class="max-h-[60vh] object-contain drop-shadow-xl transform hover:scale-105 transition-transform duration-500"
 				/>
 				<div v-else class="text-gray-300 dark:text-gray-700">
-					<svg
-						class="h-32 w-32"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
+					<svg class="h-32 w-32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -67,26 +68,20 @@
 					<div
 						class="bg-gray-50 dark:bg-[#15171e] rounded-lg p-5 mb-6 text-sm border border-gray-100 dark:border-warm-border/50"
 					>
-						<div
-							class="flex justify-between mb-2 text-gray-600 dark:text-gray-400"
-						>
+						<div class="flex justify-between mb-2 text-gray-600 dark:text-gray-400">
 							<span>Gross Weight</span>
 							<span class="font-medium text-gray-900 dark:text-gray-200"
 								>{{ formatWeight(details.gross_weight) }} g</span
 							>
 						</div>
-						<div
-							class="flex justify-between mb-2 text-red-400 dark:text-red-400/80"
-						>
+						<div class="flex justify-between mb-2 text-red-400 dark:text-red-400/80">
 							<span>- Stone Weight</span>
 							<span>{{ formatWeight(details.stone_weight) }} g</span>
 						</div>
 						<div
 							class="flex justify-between pt-3 border-t border-gray-200 dark:border-warm-border mt-1"
 						>
-							<span class="font-bold text-gray-700 dark:text-white"
-								>Net Weight</span
-							>
+							<span class="font-bold text-gray-700 dark:text-white">Net Weight</span>
 							<span class="font-bold text-gray-900 dark:text-[#D4AF37] text-base"
 								>{{ formatWeight(calculatedNetWeight) }} g</span
 							>
@@ -104,9 +99,7 @@
 						>
 							<table class="w-full text-sm text-left">
 								<thead class="bg-gray-50 dark:bg-warm-dark-700">
-									<tr
-										class="text-xs text-gray-500 dark:text-gray-400 uppercase"
-									>
+									<tr class="text-xs text-gray-500 dark:text-gray-400 uppercase">
 										<th class="px-4 py-2 font-medium">Stone</th>
 										<th class="px-4 py-2 font-medium text-right">Carat</th>
 									</tr>
@@ -148,9 +141,7 @@
 								>
 							</div>
 							<div class="flex justify-between text-sm">
-								<span class="text-gray-500 dark:text-gray-400"
-									>Gold Value</span
-								>
+								<span class="text-gray-500 dark:text-gray-400">Gold Value</span>
 								<span class="text-gray-900 dark:text-gray-300 font-medium">{{
 									formatCurrency(details.gold_value)
 								}}</span>
@@ -192,12 +183,7 @@
 						@click="addToCart"
 						class="w-full bg-gray-900 text-white dark:bg-[#D4AF37] dark:text-black py-4 rounded-lg font-bold text-lg hover:bg-gray-800 dark:hover:bg-[#b5952f] transition-all shadow-lg hover:shadow-xl transform active:scale-95 flex items-center justify-center gap-2"
 					>
-						<svg
-							class="w-5 h-5"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"

@@ -33,12 +33,7 @@
 					@click="printThermal"
 					class="px-3 py-1.5 bg-gray-100 dark:bg-warm-dark-900 rounded text-sm hover:bg-gray-200 flex items-center gap-1"
 				>
-					<svg
-						class="w-4 h-4"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -52,12 +47,7 @@
 					@click="$emit('open-qr', order)"
 					class="px-3 py-1.5 bg-gray-100 dark:bg-warm-dark-900 rounded text-sm hover:bg-gray-200 flex items-center gap-1"
 				>
-					<svg
-						class="w-4 h-4"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -71,12 +61,7 @@
 					@click="$emit('open-camera')"
 					class="px-3 py-1.5 bg-gray-100 dark:bg-warm-dark-900 rounded text-sm hover:bg-gray-200 flex items-center gap-1"
 				>
-					<svg
-						class="w-4 h-4"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -96,12 +81,7 @@
 					@click="initiateTransfer"
 					class="px-3 py-1.5 bg-gray-100 dark:bg-warm-dark-900 rounded text-sm hover:bg-gray-200 flex items-center gap-1"
 				>
-					<svg
-						class="w-4 h-4"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -118,9 +98,7 @@
 				v-if="order.estimate_status"
 				class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border border-yellow-100 dark:border-yellow-800/30"
 			>
-				<h4
-					class="text-xs font-bold text-yellow-600 dark:text-yellow-400 uppercase mb-2"
-				>
+				<h4 class="text-xs font-bold text-yellow-600 dark:text-yellow-400 uppercase mb-2">
 					Estimate Status
 				</h4>
 				<div class="flex items-center justify-between mb-2">
@@ -153,9 +131,7 @@
 				v-if="order.customer_id_type || order.id_verified_by"
 				class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-100 dark:border-orange-800/30"
 			>
-				<h4
-					class="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase mb-2"
-				>
+				<h4 class="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase mb-2">
 					Compliance Status
 				</h4>
 				<div class="grid grid-cols-2 gap-2 text-xs">
@@ -171,10 +147,7 @@
 						<span class="text-orange-600">Verified By:</span>
 						{{ order.id_verified_by }}
 					</div>
-					<div
-						v-if="order.intake_checklist_signed"
-						class="text-green-600 font-medium"
-					>
+					<div v-if="order.intake_checklist_signed" class="text-green-600 font-medium">
 						✓ Intake Checklist Signed
 					</div>
 				</div>
@@ -220,12 +193,7 @@
 					v-if="order.customer_phone"
 					class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1 mt-1"
 				>
-					<svg
-						class="w-4 h-4"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -267,15 +235,12 @@
 				</div>
 				<div v-if="order.stone_weight" class="flex justify-between">
 					<span class="text-gray-500">Stones:</span
-					><span class="font-medium text-purple-600"
-						>{{ order.stone_weight }} ct</span
-					>
+					><span class="font-medium text-purple-600">{{ order.stone_weight }} ct</span>
 				</div>
 				<div v-if="order.metal_type" class="flex justify-between">
 					<span class="text-gray-500">Metal:</span
 					><span class="font-medium"
-						>{{ order.metal_type
-						}}{{ order.purity ? ' ' + order.purity : '' }}</span
+						>{{ order.metal_type }}{{ order.purity ? ' ' + order.purity : '' }}</span
 					>
 				</div>
 				<div v-if="order.item_condition" class="flex justify-between">
@@ -297,9 +262,7 @@
 				v-if="order.gemstones && order.gemstones.length > 0"
 				class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-100 dark:border-purple-800/30"
 			>
-				<h4
-					class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase mb-2"
-				>
+				<h4 class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase mb-2">
 					Gemstones
 				</h4>
 				<div class="space-y-2">
@@ -330,21 +293,17 @@
 				v-if="order.metal_weight_in || order.metal_weight_out"
 				class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3 border border-amber-100 dark:border-amber-800/30"
 			>
-				<h4
-					class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase mb-2"
-				>
+				<h4 class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase mb-2">
 					Metal Weight
 				</h4>
 				<div class="grid grid-cols-3 gap-2 text-xs text-center">
 					<div>
-						<span class="text-gray-500">Weight In:</span><br /><span
-							class="font-bold"
+						<span class="text-gray-500">Weight In:</span><br /><span class="font-bold"
 							>{{ order.metal_weight_in || 0 }}g</span
 						>
 					</div>
 					<div>
-						<span class="text-gray-500">Weight Out:</span><br /><span
-							class="font-bold"
+						<span class="text-gray-500">Weight Out:</span><br /><span class="font-bold"
 							>{{ order.metal_weight_out || 0 }}g</span
 						>
 					</div>
@@ -366,9 +325,7 @@
 			<div
 				class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-100 dark:border-blue-800/30"
 			>
-				<h4
-					class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase mb-2"
-				>
+				<h4 class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase mb-2">
 					Payment
 				</h4>
 				<div class="space-y-1 text-sm">
@@ -381,14 +338,12 @@
 						><span class="font-bold">${{ formatNum(order.total_cost) }}</span>
 					</div>
 					<div class="flex justify-between">
-						<span>Deposit:</span
-						><span>${{ formatNum(order.deposit_amount) }}</span>
+						<span>Deposit:</span><span>${{ formatNum(order.deposit_amount) }}</span>
 					</div>
 					<div
 						class="flex justify-between font-bold border-t border-blue-200 dark:border-blue-800 pt-1"
 					>
-						<span>Balance Due:</span
-						><span>${{ formatNum(order.balance_due) }}</span>
+						<span>Balance Due:</span><span>${{ formatNum(order.balance_due) }}</span>
 					</div>
 				</div>
 				<div v-if="order.payment_status !== 'Paid'" class="mt-3">
@@ -406,9 +361,7 @@
 				v-if="order.warranty_months > 0 || order.is_warranty_repair"
 				class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-100 dark:border-purple-800/30"
 			>
-				<h4
-					class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase mb-2"
-				>
+				<h4 class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase mb-2">
 					Warranty
 				</h4>
 				<p v-if="order.warranty_months > 0" class="text-sm">
@@ -417,10 +370,7 @@
 				<p v-if="order.warranty_expiry_date" class="text-xs text-purple-600 mt-1">
 					Expires: {{ formatDate(order.warranty_expiry_date) }}
 				</p>
-				<p
-					v-if="order.is_warranty_repair"
-					class="text-sm text-green-600 font-medium"
-				>
+				<p v-if="order.is_warranty_repair" class="text-sm text-green-600 font-medium">
 					✓ Warranty Repair
 				</p>
 				<p v-if="order.original_repair_order" class="text-xs text-gray-500">
@@ -431,9 +381,7 @@
 			<!-- Communication Log -->
 			<div class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-3">
 				<div class="flex items-center justify-between mb-2">
-					<h4 class="text-xs font-bold text-gray-500 uppercase">
-						Communication Log
-					</h4>
+					<h4 class="text-xs font-bold text-gray-500 uppercase">Communication Log</h4>
 					<button
 						@click="showCommunicationForm = !showCommunicationForm"
 						class="text-xs px-2 py-1 bg-gray-200 dark:bg-warm-dark-800 rounded hover:bg-gray-300"
@@ -448,10 +396,7 @@
 					class="mb-3 p-2 bg-white dark:bg-warm-dark-900 rounded border"
 				>
 					<div class="grid grid-cols-2 gap-2 mb-2">
-						<select
-							v-model="newComm.type"
-							class="px-2 py-1 border rounded text-xs"
-						>
+						<select v-model="newComm.type" class="px-2 py-1 border rounded text-xs">
 							<option value="Phone Call">Phone Call</option>
 							<option value="SMS">SMS</option>
 							<option value="Email">Email</option>
@@ -538,7 +483,7 @@
 <script setup>
 import { ref, onMounted, defineProps, defineEmits } from 'vue'
 import { call, toast } from 'frappe-ui'
-	import { formatDate, formatDateTime } from '@/utils/dates.js'
+import { formatDate, formatDateTime } from '@/utils/dates.js'
 import BaseModal from './BaseModal.vue'
 
 const props = defineProps({

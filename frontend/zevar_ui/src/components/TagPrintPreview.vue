@@ -1,8 +1,13 @@
 <template>
 	<div class="tag-print-preview" ref="previewRef">
-		<div class="border border-gray-300 dark:border-warm-border rounded-lg p-4 bg-white dark:bg-warm-card print-area" :style="tagStyle">
+		<div
+			class="border border-gray-300 dark:border-warm-border rounded-lg p-4 bg-white dark:bg-warm-card print-area"
+			:style="tagStyle"
+		>
 			<div class="flex items-center justify-between mb-2">
-				<span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Zevar Jewelers</span>
+				<span class="text-[10px] font-bold uppercase tracking-wider text-gray-500"
+					>Zevar Jewelers</span
+				>
 				<span class="text-[10px] text-gray-400">{{ itemData.storeCode || '' }}</span>
 			</div>
 			<div class="text-center my-3">
@@ -15,8 +20,22 @@
 			</div>
 			<div class="flex items-center justify-center my-3">
 				<svg class="w-full h-10" :viewBox="`0 0 200 40`">
-					<rect x="0" y="0" width="200" height="40" fill="white" stroke="black" stroke-width="0.5" />
-					<text x="100" y="25" text-anchor="middle" font-size="10" font-family="monospace">
+					<rect
+						x="0"
+						y="0"
+						width="200"
+						height="40"
+						fill="white"
+						stroke="black"
+						stroke-width="0.5"
+					/>
+					<text
+						x="100"
+						y="25"
+						text-anchor="middle"
+						font-size="10"
+						font-family="monospace"
+					>
 						{{ itemData.barcode || itemData.serialNo || '***' }}
 					</text>
 				</svg>

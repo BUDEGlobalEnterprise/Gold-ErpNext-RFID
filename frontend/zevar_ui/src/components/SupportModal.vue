@@ -2,9 +2,7 @@
 	<BaseModal :show="show" @close="close" max-width="max-w-4xl" :no-max-height="true">
 		<template #header>
 			<div>
-				<h2 class="text-lg font-bold text-gray-900 dark:text-white">
-					Support Center
-				</h2>
+				<h2 class="text-lg font-bold text-gray-900 dark:text-white">Support Center</h2>
 				<p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
 					Create and manage support tickets
 				</p>
@@ -38,11 +36,7 @@
 							class="w-full px-3 py-2.5 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
 						>
 							<option value="" disabled>Select category...</option>
-							<option
-								v-for="cat in categories"
-								:key="cat.value"
-								:value="cat.value"
-							>
+							<option v-for="cat in categories" :key="cat.value" :value="cat.value">
 								{{ cat.label }}
 							</option>
 						</select>
@@ -101,9 +95,7 @@
 							class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
 						>
 							Responsible Department
-							<span class="text-gray-400 font-normal ml-1"
-								>(auto-assigned)</span
-							>
+							<span class="text-gray-400 font-normal ml-1">(auto-assigned)</span>
 						</label>
 						<select
 							v-model="form.department"
@@ -150,15 +142,12 @@
 									@click="selectReference(item)"
 									class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-warm-dark-800 transition"
 								>
-									<span
-										class="font-medium text-gray-900 dark:text-white"
-										>{{ item.label }}</span
-									>
-									<span
-										v-if="item.detail"
-										class="text-gray-500 text-xs ml-2"
-										>{{ item.detail }}</span
-									>
+									<span class="font-medium text-gray-900 dark:text-white">{{
+										item.label
+									}}</span>
+									<span v-if="item.detail" class="text-gray-500 text-xs ml-2">{{
+										item.detail
+									}}</span>
 								</button>
 							</div>
 						</div>
@@ -206,10 +195,7 @@
 					<button
 						type="submit"
 						:disabled="
-							submitting ||
-							!form.subject ||
-							!form.description ||
-							!form.category
+							submitting || !form.subject || !form.description || !form.category
 						"
 						class="w-full py-3 bg-[#D4AF37] text-black rounded-lg font-bold hover:bg-[#c9a432] disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
 					>
@@ -261,9 +247,7 @@
 							</svg>
 						</div>
 						<div>
-							<p
-								class="font-bold text-green-800 dark:text-green-300 text-sm"
-							>
+							<p class="font-bold text-green-800 dark:text-green-300 text-sm">
 								Ticket Created!
 							</p>
 							<p class="text-xs text-green-600 dark:text-green-400">
@@ -275,9 +259,7 @@
 			</div>
 
 			<!-- Right: My Tickets -->
-			<div
-				class="w-full md:w-1/2 p-6 bg-gray-50/50 dark:bg-warm-dark-700 overflow-y-auto"
-			>
+			<div class="w-full md:w-1/2 p-6 bg-gray-50/50 dark:bg-warm-dark-700 overflow-y-auto">
 				<div class="flex items-center justify-between mb-4">
 					<h3
 						class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
@@ -318,9 +300,7 @@
 							d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
 						/>
 					</svg>
-					<span class="text-gray-500 dark:text-gray-400 text-sm"
-						>No tickets yet</span
-					>
+					<span class="text-gray-500 dark:text-gray-400 text-sm">No tickets yet</span>
 				</div>
 
 				<!-- Tickets List -->
@@ -332,9 +312,7 @@
 						@click="viewTicket(ticket.name)"
 					>
 						<div class="flex items-start justify-between mb-2">
-							<span class="font-mono text-xs text-[#D4AF37]">{{
-								ticket.name
-							}}</span>
+							<span class="font-mono text-xs text-[#D4AF37]">{{ ticket.name }}</span>
 							<span
 								class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold"
 								:class="getStatusClass(ticket.status)"

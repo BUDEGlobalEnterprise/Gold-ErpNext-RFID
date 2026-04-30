@@ -59,10 +59,14 @@ class TestAuditPolicy(FrappeTestCase):
 				doc.standard_rate = (i + 1) * 200.0  # 200, 400, 600, 800, 1000, 1200
 				doc.insert(ignore_permissions=True)
 			else:
-				frappe.db.set_value("Item", item_code, {
-					"custom_rfid_epc": f"POL-EPC-{i}",
-					"standard_rate": (i + 1) * 200.0,
-				})
+				frappe.db.set_value(
+					"Item",
+					item_code,
+					{
+						"custom_rfid_epc": f"POL-EPC-{i}",
+						"standard_rate": (i + 1) * 200.0,
+					},
+				)
 			self.items.append(item_code)
 
 		# Add stock
@@ -113,7 +117,10 @@ class TestAuditPolicy(FrappeTestCase):
 		self.assertGreater(final_res["variance_dollar_total"], 500)
 
 		# Check store is frozen
-		from zevar_core.unified_retail_management_system.doctype.case_audit_session.case_audit_session import is_store_frozen
+		from zevar_core.unified_retail_management_system.doctype.case_audit_session.case_audit_session import (
+			is_store_frozen,
+		)
+
 		freeze_reason = is_store_frozen(self.warehouse)
 		self.assertIsNotNone(freeze_reason)
 
@@ -133,10 +140,14 @@ class TestAuditPolicy(FrappeTestCase):
 				doc.standard_rate = 50.0  # Low value
 				doc.insert(ignore_permissions=True)
 			else:
-				frappe.db.set_value("Item", item_code, {
-					"custom_rfid_epc": f"LOW-EPC-{i}",
-					"standard_rate": 50.0,
-				})
+				frappe.db.set_value(
+					"Item",
+					item_code,
+					{
+						"custom_rfid_epc": f"LOW-EPC-{i}",
+						"standard_rate": 50.0,
+					},
+				)
 
 		# Add stock for low-value items
 		se = frappe.new_doc("Stock Entry")
@@ -180,7 +191,10 @@ class TestAuditPolicy(FrappeTestCase):
 		self.assertTrue(approve_res["success"])
 
 		# Store should be unfrozen
-		from zevar_core.unified_retail_management_system.doctype.case_audit_session.case_audit_session import is_store_frozen
+		from zevar_core.unified_retail_management_system.doctype.case_audit_session.case_audit_session import (
+			is_store_frozen,
+		)
+
 		self.assertIsNone(is_store_frozen(self.warehouse))
 
 	def test_perfect_reconciliation(self):

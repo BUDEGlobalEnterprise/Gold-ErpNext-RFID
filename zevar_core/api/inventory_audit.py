@@ -1,8 +1,13 @@
 import json
 
 import frappe
-from frappe.utils import flt, now_datetime, add_days, today
-from zevar_core.services.inventory_audit_utils import _log_audit_event, execute_submit_scan, execute_batch_scan
+from frappe.utils import add_days, flt, now_datetime, today
+
+from zevar_core.services.inventory_audit_utils import (
+	_log_audit_event,
+	execute_batch_scan,
+	execute_submit_scan,
+)
 
 
 @frappe.whitelist(allow_guest=False)
@@ -95,7 +100,7 @@ def _get_expected_items(warehouse, scope, display_case=None):
 		filters["warehouse"] = warehouse
 	elif scope == "Showcase":
 		# All showcase sub-warehouses
-		filters["warehouse"] = ["like", f"%Showcase%"]
+		filters["warehouse"] = ["like", "%Showcase%"]
 		if display_case:
 			case_wh = frappe.db.get_value("Display Case", display_case, "warehouse")
 			if case_wh:
@@ -104,7 +109,7 @@ def _get_expected_items(warehouse, scope, display_case=None):
 			# All showcases under the store
 			filters["warehouse"] = ["like", f"%{warehouse}%Showcase%"]
 			del filters["warehouse"]
-			showcase_whs = frappe.get_all("Warehouse", filters={"name": ["like", f"%Showcase%"]}, pluck="name")
+			showcase_whs = frappe.get_all("Warehouse", filters={"name": ["like", "%Showcase%"]}, pluck="name")
 			if not showcase_whs:
 				filters["warehouse"] = warehouse
 			else:
@@ -191,7 +196,10 @@ def finalize_audit(session, two_person_signoff_by=None, freeze_override_reason=N
 		frappe.throw("Audit session is not in progress.")
 
 	# Two-person sign-off
-	from zevar_core.unified_retail_management_system.doctype.case_audit_session.case_audit_session import _get_audit_policy
+	from zevar_core.unified_retail_management_system.doctype.case_audit_session.case_audit_session import (
+		_get_audit_policy,
+	)
+
 	policy = _get_audit_policy()
 	if policy.get("require_two_person_rule") and two_person_signoff_by:
 		session_doc.two_person_signoff_by = two_person_signoff_by
@@ -203,7 +211,8 @@ def finalize_audit(session, two_person_signoff_by=None, freeze_override_reason=N
 		"status": session_doc.status,
 		"missing_count": len(getattr(session_doc, "_missing_items", [])),
 		"variance_dollar_total": flt(session_doc.variance_dollar_total),
-		"shrinkage_processing_queued": session_doc.status in ("Discrepancy", "Reconciled with Shrinkage", "Pending Manager Review"),
+		"shrinkage_processing_queued": session_doc.status
+		in ("Discrepancy", "Reconciled with Shrinkage", "Pending Manager Review"),
 	}
 
 	return result
@@ -221,7 +230,10 @@ def approve_variance(session, approve_reason):
 	if session_doc.status != "Pending Manager Review":
 		frappe.throw("Session is not pending manager review")
 
-	from zevar_core.unified_retail_management_system.doctype.case_audit_session.case_audit_session import unfreeze_store
+	from zevar_core.unified_retail_management_system.doctype.case_audit_session.case_audit_session import (
+		unfreeze_store,
+	)
+
 	unfreeze_store(session_doc.store_location, frappe.session.user)
 
 	# If shrinkage wasn't auto-posted, do it now
@@ -335,13 +347,15 @@ def get_audit_progress(session):
 		if exp.item_code not in scanned_items:
 			item_name = frappe.db.get_value("Item", exp.item_code, "item_name")
 			rate = flt(frappe.db.get_value("Item", exp.item_code, "standard_rate") or 0)
-			missing_items.append({
-				"item_code": exp.item_code,
-				"item_name": item_name,
-				"expected_qty": flt(exp.actual_qty),
-				"scanned_qty": 0,
-				"valuation_rate": rate,
-			})
+			missing_items.append(
+				{
+					"item_code": exp.item_code,
+					"item_name": item_name,
+					"expected_qty": flt(exp.actual_qty),
+					"scanned_qty": 0,
+					"valuation_rate": rate,
+				}
+			)
 
 	return {
 		"success": True,
@@ -350,7 +364,8 @@ def get_audit_progress(session):
 		"missing_items": missing_items,
 		"unexpected_items": [
 			{"item_code": s.item_code, "item_name": s.item_name, "barcode_or_epc": s.barcode_or_epc}
-			for s in session_doc.scans if s.match_status == "Unexpected"
+			for s in session_doc.scans
+			if s.match_status == "Unexpected"
 		][-20:],
 		"session": {
 			"name": session_doc.name,
@@ -381,7 +396,17 @@ def get_audit_history(limit_start=0, page_size=10, status=None, scope=None):
 	sessions = frappe.get_all(
 		"Case Audit Session",
 		filters=filters,
-		fields=["name", "status", "started_at", "store_location", "scope", "expected_count", "scanned_count", "total_value_discrepancy", "variance_dollar_total"],
+		fields=[
+			"name",
+			"status",
+			"started_at",
+			"store_location",
+			"scope",
+			"expected_count",
+			"scanned_count",
+			"total_value_discrepancy",
+			"variance_dollar_total",
+		],
 		limit_start=limit_start,
 		limit=page_size,
 		order_by="started_at desc",
@@ -398,44 +423,66 @@ def get_audit_dashboard(store=None):
 	from frappe.utils import add_months, getdate
 
 	# Overdue audit plans
-	overdue_plans = frappe.get_all("Audit Plan", filters={
-		"status": "Scheduled",
-		"scheduled_for": ["<", today()],
-	}, fields=["name", "store_location", "scope", "scheduled_for"])
+	overdue_plans = frappe.get_all(
+		"Audit Plan",
+		filters={
+			"status": "Scheduled",
+			"scheduled_for": ["<", today()],
+		},
+		fields=["name", "store_location", "scope", "scheduled_for"],
+	)
 
 	# Next audit due
-	next_plan = frappe.get_all("Audit Plan", filters={
-		"status": "Scheduled",
-		"scheduled_for": [">=", today()],
-	}, fields=["name", "store_location", "scope", "scheduled_for"],
-		order_by="scheduled_for asc", limit=1)
+	next_plan = frappe.get_all(
+		"Audit Plan",
+		filters={
+			"status": "Scheduled",
+			"scheduled_for": [">=", today()],
+		},
+		fields=["name", "store_location", "scope", "scheduled_for"],
+		order_by="scheduled_for asc",
+		limit=1,
+	)
 
 	# Shrinkage last 30 days
 	thirty_days_ago = add_days(today(), -30)
-	shrinkage_sessions = frappe.get_all("Case Audit Session", filters={
-		"status": ["in", ["Discrepancy", "Reconciled with Shrinkage", "Pending Manager Review"]],
-		"started_at": [">=", thirty_days_ago],
-	}, fields=["sum(variance_dollar_total) as total_shrinkage", "count(*) as count"])
+	shrinkage_sessions = frappe.get_all(
+		"Case Audit Session",
+		filters={
+			"status": ["in", ["Discrepancy", "Reconciled with Shrinkage", "Pending Manager Review"]],
+			"started_at": [">=", thirty_days_ago],
+		},
+		fields=["sum(variance_dollar_total) as total_shrinkage", "count(*) as count"],
+	)
 
 	total_shrinkage = flt((shrinkage_sessions[0] or {}).get("total_shrinkage", 0))
 	shrinkage_count = (shrinkage_sessions[0] or {}).get("count", 0)
 
 	# Audit hit rate (last 30 days)
-	total_audits = frappe.db.count("Case Audit Session", filters={
-		"started_at": [">=", thirty_days_ago],
-		"docstatus": 1,
-	})
-	reconciled_audits = frappe.db.count("Case Audit Session", filters={
-		"status": "Reconciled",
-		"started_at": [">=", thirty_days_ago],
-		"docstatus": 1,
-	})
+	total_audits = frappe.db.count(
+		"Case Audit Session",
+		filters={
+			"started_at": [">=", thirty_days_ago],
+			"docstatus": 1,
+		},
+	)
+	reconciled_audits = frappe.db.count(
+		"Case Audit Session",
+		filters={
+			"status": "Reconciled",
+			"started_at": [">=", thirty_days_ago],
+			"docstatus": 1,
+		},
+	)
 	hit_rate = (reconciled_audits / total_audits * 100) if total_audits > 0 else 100
 
 	# Store frozen status
 	frozen_stores = []
 	if store:
-		from zevar_core.unified_retail_management_system.doctype.case_audit_session.case_audit_session import is_store_frozen
+		from zevar_core.unified_retail_management_system.doctype.case_audit_session.case_audit_session import (
+			is_store_frozen,
+		)
+
 		reason = is_store_frozen(store)
 		if reason:
 			frozen_stores.append({"store": store, "reason": reason})
@@ -464,9 +511,13 @@ def get_audit_plans(store=None, status="Scheduled"):
 	if status:
 		filters["status"] = status
 
-	plans = frappe.get_all("Audit Plan", filters=filters,
+	plans = frappe.get_all(
+		"Audit Plan",
+		filters=filters,
 		fields=["name", "store_location", "scope", "scheduled_for", "assigned_to", "status"],
-		order_by="scheduled_for asc", limit=50)
+		order_by="scheduled_for asc",
+		limit=50,
+	)
 
 	return {"success": True, "plans": plans}
 
@@ -484,7 +535,16 @@ def export_audit_results(session):
 	writer.writerow(["Item Code", "Item Name", "Barcode/EPC", "Match Status", "Scanned At", "Valuation Rate"])
 
 	for scan in session_doc.scans:
-		writer.writerow([scan.item_code, scan.item_name, scan.barcode_or_epc, scan.match_status, scan.scanned_at, scan.valuation_rate])
+		writer.writerow(
+			[
+				scan.item_code,
+				scan.item_name,
+				scan.barcode_or_epc,
+				scan.match_status,
+				scan.scanned_at,
+				scan.valuation_rate,
+			]
+		)
 
 	file_doc = frappe.new_doc("File")
 	file_doc.file_name = f"audit_export_{session}_{uuid.uuid4().hex[:8]}.csv"

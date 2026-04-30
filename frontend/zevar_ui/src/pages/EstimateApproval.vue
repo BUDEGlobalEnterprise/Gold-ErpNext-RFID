@@ -78,7 +78,9 @@
 					</div>
 
 					<!-- Cost Breakdown -->
-					<div class="mb-6 p-4 border border-gray-200 dark:border-warm-border rounded-lg">
+					<div
+						class="mb-6 p-4 border border-gray-200 dark:border-warm-border rounded-lg"
+					>
 						<h3 class="font-bold text-gray-900 dark:text-white mb-3">
 							Cost Breakdown
 						</h3>

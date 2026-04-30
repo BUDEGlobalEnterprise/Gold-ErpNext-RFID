@@ -1,0 +1,50 @@
+zevar_core/api/compliance.py:44:2: F841 Local variable `parts` is assigned to but never used
+zevar_core/api/compliance.py:54:3: F841 Local variable `customer_phone` is assigned to but never used
+zevar_core/api/compliance.py:75:2: F841 Local variable `parts` is assigned to but never used
+zevar_core/api/inventory.py:97:7: B007 Loop control variable `i` not used within loop body
+zevar_core/api/inventory.py:214:5: F811 Redefinition of unused `receive_inter_store_transfer` from line 37: `receive_inter_store_transfer` redefined here
+zevar_core/api/inventory.py:343:16: B905 `zip()` without an explicit `strict=` parameter
+zevar_core/api/repair.py:144:2: F841 Local variable `base_filter_conditions` is assigned to but never used
+zevar_core/api/repair_customer_portal.py:218:4: E722 Do not use bare `except`
+zevar_core/api/repair_customer_portal.py:590:4: E722 Do not use bare `except`
+zevar_core/api/repair_customer_portal.py:669:5: E722 Do not use bare `except`
+zevar_core/api/repair_customer_portal.py:760:4: E722 Do not use bare `except`
+zevar_core/api/reports.py:21:18: RUF003 Comment contains ambiguous `–` (EN DASH). Did you mean `-` (HYPHEN-MINUS)?
+zevar_core/api/reports.py:58:23: RUF003 Comment contains ambiguous `–` (EN DASH). Did you mean `-` (HYPHEN-MINUS)?
+zevar_core/api/reports.py:1009:15: RUF003 Comment contains ambiguous `–` (EN DASH). Did you mean `-` (HYPHEN-MINUS)?
+zevar_core/api/reports.py:1135:2: F841 Local variable `row` is assigned to but never used
+zevar_core/api/reports.py:1276:13: B007 Loop control variable `dt` not used within loop body
+zevar_core/api/reports.py:1359:8: F821 Undefined name `flt`
+zevar_core/api/reports.py:1391:2: F841 Local variable `contract` is assigned to but never used
+zevar_core/api/sales_history.py:447:2: F841 Local variable `start_date` is assigned to but never used
+zevar_core/integrations/aff/api.py:13:2: F841 Local variable `settings` is assigned to but never used
+zevar_core/integrations/aff/utils.py:49:2: F841 Local variable `settings` is assigned to but never used
+zevar_core/integrations/square_terminal/utils.py:126:3: F841 Local variable `computed` is assigned to but never used
+zevar_core/integrations/synchrony/utils.py:31:3: F841 Local variable `base_url` is assigned to but never used
+zevar_core/integrations/synchrony/utils.py:41:8: RUF034 Useless `if`-`else` condition
+zevar_core/integrations/waterfall.py:15:2: F821 Undefined name `frappe`
+zevar_core/integrations/waterfall.py:21:2: F821 Undefined name `frappe`
+zevar_core/integrations/waterfall.py:27:4: F821 Undefined name `frappe`
+zevar_core/integrations/waterfall.py:27:17: F821 Undefined name `_`
+zevar_core/integrations/waterfall.py:27:45: F821 Undefined name `_`
+zevar_core/integrations/waterfall.py:36:21: F821 Undefined name `flt`
+zevar_core/integrations/waterfall.py:37:23: F821 Undefined name `flt`
+zevar_core/integrations/waterfall.py:49:3: F821 Undefined name `frappe`
+zevar_core/integrations/waterfall.py:52:15: F821 Undefined name `frappe`
+zevar_core/integrations/waterfall.py:58:15: F821 Undefined name `_`
+zevar_core/integrations/waterfall.py:66:2: F821 Undefined name `frappe`
+zevar_core/integrations/waterfall.py:68:13: F821 Undefined name `frappe`
+zevar_core/scripts/patch_customers.py:56:15: RUF005 Consider `[*list(updates.values()), cust]` instead of concatenation
+zevar_core/services/inventory_events.py:212:16: B905 `zip()` without an explicit `strict=` parameter
+zevar_core/services/inventory_events.py:226:16: B905 `zip()` without an explicit `strict=` parameter
+zevar_core/services/inventory_events.py:280:16: B905 `zip()` without an explicit `strict=` parameter
+zevar_core/services/inventory_events.py:294:16: B905 `zip()` without an explicit `strict=` parameter
+zevar_core/tasks.py:283:2: F841 Local variable `abbr` is assigned to but never used
+zevar_core/tasks.py:305:15: F821 Undefined name `flt`
+zevar_core/tasks.py:310:19: F821 Undefined name `flt`
+zevar_core/tasks.py:512:2: F841 Local variable `abbr` is assigned to but never used
+zevar_core/tasks.py:513:2: F841 Local variable `now` is assigned to but never used
+zevar_core/tasks.py:686:9: F821 Undefined name `get_pdf`
+zevar_core/tests/test_damage_and_found.py:73:3: F841 Local variable `showcase` is assigned to but never used
+zevar_core/tests/test_damage_and_found.py:102:13: F821 Undefined name `flt`
+zevar_core/unified_retail_management_system/report/financier_receivables_today/financier_receivables_today.py:42:2: F841 Local variable `company` is assigned to but never used

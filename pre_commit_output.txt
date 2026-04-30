@@ -1,0 +1,4009 @@
+trim trailing whitespace.................................................Passed
+check for merge conflicts................................................Passed
+check python ast.........................................................Passed
+check json...............................................................Passed
+check toml...............................................................Passed
+check yaml...............................................................Passed
+debug statements (python)................................................Passed
+Run ruff import sorter...................................................Failed
+- hook id: ruff
+- files were modified by this hook
+
+Found 1 error (1 fixed, 0 remaining).
+
+Run ruff linter..........................................................Failed
+- hook id: ruff
+- exit code: 1
+
+zevar_core/api/compliance.py:44:2: F841 Local variable `parts` is assigned to but never used
+   |
+42 |     customer_doc = frappe.get_doc("Customer", customer)
+43 |     customer_name = customer_doc.customer_name or ""
+44 |     parts = customer_name.split(" ", 1)
+   |     ^^^^^ F841
+45 |     record = frappe.new_doc("IRS Form 8300 Record")
+46 |     record.customer = customer
+   |
+   = help: Remove assignment to unused variable `parts`
+
+zevar_core/api/compliance.py:54:3: F841 Local variable `customer_phone` is assigned to but never used
+   |
+52 |     if settings.auto_populate_8300:
+53 |         customer_email = frappe.db.get_value("Contact Email", {"parent": customer}, "email_id")
+54 |         customer_phone = frappe.db.get_value("Contact Phone", {"parent": customer}, "phone")
+   |         ^^^^^^^^^^^^^^ F841
+55 |         customer_address = frappe.db.get_value(
+56 |             "Address", {"link_name": customer}, ["address_line1", "city", "state", "pincode"], as_dict=True
+   |
+   = help: Remove assignment to unused variable `customer_phone`
+
+zevar_core/api/compliance.py:75:2: F841 Local variable `parts` is assigned to but never used
+   |
+73 |     customer_doc = frappe.get_doc("Customer", customer)
+74 |     customer_name = customer_doc.customer_name or ""
+75 |     parts = customer_name.split(" ", 1)
+   |     ^^^^^ F841
+76 |     record = frappe.new_doc("AML KYC Record")
+77 |     record.customer = customer
+   |
+   = help: Remove assignment to unused variable `parts`
+
+zevar_core/api/inventory.py:97:7: B007 Loop control variable `i` not used within loop body
+   |
+95 |         se.cost_center = cost_center
+96 | 
+97 |         for i in range(qty):
+   |             ^ B007
+98 |             se.append(
+99 |                 "items",
+   |
+   = help: Rename unused `i` to `_i`
+
+zevar_core/api/inventory.py:214:5: F811 Redefinition of unused `receive_inter_store_transfer` from line 37
+    |
+213 | @frappe.whitelist(allow_guest=False)
+214 | def receive_inter_store_transfer(transfer_name=None, scanned_serials=None):
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ F811
+215 |     frappe.has_permission("Stock Entry", ptype="create", throw=True)
+216 |     _validate_kwargs(locals(), ["scanned_serials"])
+    |
+    = help: Remove definition: `receive_inter_store_transfer`
+
+zevar_core/api/inventory.py:343:16: B905 [*] `zip()` without an explicit `strict=` parameter
+    |
+341 |     item_codes = [
+342 |         frappe.db.get_value("Serial No", sn, "item_code") or cstr(i.get("item_code"))
+343 |         for sn, i in zip(serial_nos, items)
+    |                      ^^^^^^^^^^^^^^^^^^^^^^ B905
+344 |     ]
+    |
+    = help: Add explicit value for parameter `strict=`
+
+zevar_core/api/layaway.py:38:9: UP038 Use `X | Y` in `isinstance` call instead of `(X, Y)`
+   |
+37 |     status_values = frappe.parse_json(statuses) if isinstance(statuses, str) else statuses
+38 |     if not isinstance(status_values, (list, tuple)):
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ UP038
+39 |         status_values = [status_values]
+   |
+   = help: Convert to `X | Y`
+
+zevar_core/api/pos_session.py:255:2: F841 Local variable `user` is assigned to but never used
+    |
+253 | def preview_close(session_name: str, total_cash_counted: float) -> dict:
+254 |     frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
+255 |     user = frappe.session.user
+    |     ^^^^ F841
+256 | 
+257 |     if not session_name or not frappe.db.exists("POS Opening Entry", session_name):
+    |
+    = help: Remove assignment to unused variable `user`
+
+zevar_core/api/repair.py:144:2: F841 Local variable `base_filter_conditions` is assigned to but never used
+    |
+142 |     frappe.has_permission("Repair Order", ptype="read", throw=True)
+143 | 
+144 |     base_filter_conditions = {}
+    |     ^^^^^^^^^^^^^^^^^^^^^^ F841
+145 |     warehouse_filter = None
+146 |     if warehouse:
+    |
+    = help: Remove assignment to unused variable `base_filter_conditions`
+
+zevar_core/api/repair_calendar.py:509:2: E722 Do not use bare `except`
+    |
+507 |         )
+508 |         return comm[0]["timestamp"] if comm else None
+509 |     except:
+    |     ^^^^^^ E722
+510 |         return None
+    |
+
+zevar_core/api/repair_customer_portal.py:218:4: E722 Do not use bare `except`
+    |
+216 |                 repair["days_until_promised"] = (promised - today).days
+217 |                 repair["is_overdue"] = repair["days_until_promised"] < 0
+218 |             except:
+    |             ^^^^^^ E722
+219 |                 repair["days_until_promised"] = None
+220 |                 repair["is_overdue"] = False
+    |
+
+zevar_core/api/repair_customer_portal.py:590:4: E722 Do not use bare `except`
+    |
+588 |                     }
+589 |                 )
+590 |             except:
+    |             ^^^^^^ E722
+591 |                 pass
+    |
+
+zevar_core/api/repair_customer_portal.py:669:5: E722 Do not use bare `except`
+    |
+667 |                     warranty_info["is_valid"] = today <= expiry
+668 |                     warranty_info["days_remaining"] = max(0, (expiry - today).days)
+669 |                 except:
+    |                 ^^^^^^ E722
+670 |                     warranty_info["is_valid"] = False
+671 |                     warranty_info["days_remaining"] = 0
+    |
+
+zevar_core/api/repair_customer_portal.py:760:4: E722 Do not use bare `except`
+    |
+758 |                     }
+759 |                 )
+760 |             except:
+    |             ^^^^^^ E722
+761 |                 pass
+    |
+
+zevar_core/api/reports.py:21:18: RUF003 Comment contains ambiguous `–` (EN DASH). Did you mean `-` (HYPHEN-MINUS)?
+   |
+20 | # ---------------------------------------------------------------------------
+21 | # Role constants – every report references one of these sets
+   |                  ^ RUF003
+22 | # ---------------------------------------------------------------------------
+   |
+
+zevar_core/api/reports.py:58:23: RUF003 Comment contains ambiguous `–` (EN DASH). Did you mean `-` (HYPHEN-MINUS)?
+   |
+57 | # ---------------------------------------------------------------------------
+58 | # Full report catalog – every report the system knows about
+   |                       ^ RUF003
+59 | # ---------------------------------------------------------------------------
+   |
+
+zevar_core/api/reports.py:1009:15: RUF003 Comment contains ambiguous `–` (EN DASH). Did you mean `-` (HYPHEN-MINUS)?
+     |
+1008 | # ---------------------------------------------------------------------------
+1009 | # Daily Brief – single aggregated endpoint for the Daily Brief tab
+     |               ^ RUF003
+1010 | # ---------------------------------------------------------------------------
+     |
+
+zevar_core/api/reports.py:1135:2: F841 Local variable `row` is assigned to but never used
+     |
+1133 |     if not (user_roles & (ACCOUNTING_ROLES | ADMIN_ROLES)):
+1134 |         return 0.0
+1135 |     row = frappe.db.sql(
+     |     ^^^ F841
+1136 |         """SELECT COALESCE(SUM(
+1137 |             CASE WHEN sip.mode_of_payment = 'Cash' THEN sip.amount ELSE 0 END
+     |
+     = help: Remove assignment to unused variable `row`
+
+zevar_core/api/reports.py:1276:13: B007 Loop control variable `dt` not used within loop body
+     |
+1274 |         params_last.append(user)
+1275 | 
+1276 |     for label, dt, params in [("this", today, params_this), ("last", last_year_today, params_last)]:
+     |                ^^ B007
+1277 |         row = frappe.db.sql(
+1278 |             f"""SELECT COALESCE(SUM(grand_total), 0) as total
+     |
+     = help: Rename unused `dt` to `_dt`
+
+zevar_core/api/reports.py:1359:8: F821 Undefined name `flt`
+     |
+1357 |     company = frappe.defaults.get_global_default("company")
+1358 |     cost_center = frappe.get_cached_value("Company", company, "cost_center")
+1359 |     qty = flt(row.get("suggested_qty") or row.get("qty") or 1)
+     |           ^^^ F821
+1360 | 
+1361 |     mr = frappe.new_doc("Material Request")
+     |
+
+zevar_core/api/reports.py:1391:2: F841 Local variable `contract` is assigned to but never used
+     |
+1389 | def _action_send_layaway_reminder(row):
+1390 |     customer = row.get("customer") or row.get("Customer")
+1391 |     contract = row.get("contract") or row.get("Contract")
+     |     ^^^^^^^^ F841
+1392 |     if not customer:
+1393 |         frappe.throw("Customer required", frappe.ValidationError)
+     |
+     = help: Remove assignment to unused variable `contract`
+
+zevar_core/api/sales_history.py:447:2: F841 Local variable `start_date` is assigned to but never used
+    |
+445 |     frappe.has_permission("Sales Invoice", "read", throw=True)
+446 | 
+447 |     start_date = f"{year}-{month:02d}-01"
+    |     ^^^^^^^^^^ F841
+448 |     # simple logic for end date (next month 1st minus 1 day), doing it via SQL
+    |
+    = help: Remove assignment to unused variable `start_date`
+
+zevar_core/integrations/aff/api.py:13:2: F841 Local variable `settings` is assigned to but never used
+   |
+12 | def _get_location_token():
+13 |     settings = frappe.get_single("Payment Gateway Settings")
+   |     ^^^^^^^^ F841
+14 |     location_id = frappe.db.get_value("Store Location", {"is_active": 1}, "store_code") or "default"
+15 |     result = aff_utils.get_access_token(location_id)
+   |
+   = help: Remove assignment to unused variable `settings`
+
+zevar_core/integrations/aff/utils.py:49:2: F841 Local variable `settings` is assigned to but never used
+   |
+48 | def get_access_token(location_id):
+49 |     settings = _get_settings()
+   |     ^^^^^^^^ F841
+50 |     data = {"locationId": location_id, "grant_type": "client_credentials"}
+51 |     return _api_request("POST", "/auth/token", data=data)
+   |
+   = help: Remove assignment to unused variable `settings`
+
+zevar_core/integrations/square_terminal/utils.py:126:3: F841 Local variable `computed` is assigned to but never used
+    |
+124 |     try:
+125 |         combined = sig_header + payload
+126 |         computed = hmac.new(sig_key.encode("utf-8"), combined.encode("utf-8"), hashlib.sha256).hexdigest()
+    |         ^^^^^^^^ F841
+127 |         return True
+128 |     except Exception as e:
+    |
+    = help: Remove assignment to unused variable `computed`
+
+zevar_core/integrations/synchrony/utils.py:31:3: F841 Local variable `base_url` is assigned to but never used
+   |
+29 |         base_url = "https://api.stg.syf.com"
+30 |     else:
+31 |         base_url = "https://api.syf.com"
+   |         ^^^^^^^^ F841
+32 |     return {
+33 |         "Content-Type": "application/json",
+   |
+   = help: Remove assignment to unused variable `base_url`
+
+zevar_core/integrations/waterfall.py:15:2: F821 Undefined name `frappe`
+   |
+15 | @frappe.whitelist(methods=["POST"])
+   |  ^^^^^^ F821
+16 | def start_financing_waterfall(**kwargs):
+17 |     """
+   |
+
+zevar_core/integrations/waterfall.py:21:2: F821 Undefined name `frappe`
+   |
+19 |     Can be run synchronously or asynchronously.
+20 |     """
+21 |     frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
+   |     ^^^^^^ F821
+22 | 
+23 |     # Validate and sanitize input
+   |
+
+zevar_core/integrations/waterfall.py:27:4: F821 Undefined name `frappe`
+   |
+25 |     for field in required_fields:
+26 |         if not kwargs.get(field):
+27 |             frappe.throw(_("{0} is required").format(_(field.replace("_", " ").title())))
+   |             ^^^^^^ F821
+28 | 
+29 |     # Structure data for internal processing
+   |
+
+zevar_core/integrations/waterfall.py:27:17: F821 Undefined name `_`
+   |
+25 |     for field in required_fields:
+26 |         if not kwargs.get(field):
+27 |             frappe.throw(_("{0} is required").format(_(field.replace("_", " ").title())))
+   |                          ^ F821
+28 | 
+29 |     # Structure data for internal processing
+   |
+
+zevar_core/integrations/waterfall.py:27:45: F821 Undefined name `_`
+   |
+25 |     for field in required_fields:
+26 |         if not kwargs.get(field):
+27 |             frappe.throw(_("{0} is required").format(_(field.replace("_", " ").title())))
+   |                                                      ^ F821
+28 | 
+29 |     # Structure data for internal processing
+   |
+
+zevar_core/integrations/waterfall.py:36:21: F821 Undefined name `flt`
+   |
+34 |         "email": kwargs.get("email"),
+35 |         "phone": kwargs.get("phone"),
+36 |         "monthly_income": flt(kwargs.get("monthly_income")),
+   |                           ^^^ F821
+37 |         "requested_amount": flt(kwargs.get("requested_amount")),
+38 |         "ssn_last4": str(kwargs.get("ssn_last4") or "")[-4:],
+   |
+
+zevar_core/integrations/waterfall.py:37:23: F821 Undefined name `flt`
+   |
+35 |         "phone": kwargs.get("phone"),
+36 |         "monthly_income": flt(kwargs.get("monthly_income")),
+37 |         "requested_amount": flt(kwargs.get("requested_amount")),
+   |                             ^^^ F821
+38 |         "ssn_last4": str(kwargs.get("ssn_last4") or "")[-4:],
+39 |         "address_line1": kwargs.get("address_line1"),
+   |
+
+zevar_core/integrations/waterfall.py:49:3: F821 Undefined name `frappe`
+   |
+48 |     if kwargs.get("async_mode"):
+49 |         frappe.enqueue(
+   |         ^^^^^^ F821
+50 |             "zevar_core.services.financing_service.run_waterfall_async",
+51 |             app_data=app_data,
+   |
+
+zevar_core/integrations/waterfall.py:52:15: F821 Undefined name `frappe`
+   |
+50 |             "zevar_core.services.financing_service.run_waterfall_async",
+51 |             app_data=app_data,
+52 |             user_email=frappe.session.user,
+   |                        ^^^^^^ F821
+53 |             queue="long",
+54 |             at_front=True,
+   |
+
+zevar_core/integrations/waterfall.py:58:15: F821 Undefined name `_`
+   |
+56 |         return {
+57 |             "status": "queued",
+58 |             "message": _("Financing waterfall started in background. You will be notified once complete."),
+   |                        ^ F821
+59 |         }
+   |
+
+zevar_core/integrations/waterfall.py:66:2: F821 Undefined name `frappe`
+   |
+66 | @frappe.whitelist()
+   |  ^^^^^^ F821
+67 | def get_waterfall_status():
+68 |     settings = frappe.get_single("Payment Gateway Settings")
+   |
+
+zevar_core/integrations/waterfall.py:68:13: F821 Undefined name `frappe`
+   |
+66 | @frappe.whitelist()
+67 | def get_waterfall_status():
+68 |     settings = frappe.get_single("Payment Gateway Settings")
+   |                ^^^^^^ F821
+69 |     waterfall = settings.get_financing_waterfall()
+70 |     available = []
+   |
+
+zevar_core/migration/foxpro_import_extended.py:10:13: F821 Undefined name `find_dbf`
+   |
+ 8 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+ 9 | 
+10 |     dbf_path = find_dbf(backup_path, "CUTS.DBF")
+   |                ^^^^^^^^ F821
+11 |     if not dbf_path:
+12 |         stats["errors"].append("CUTS.DBF not found")
+   |
+
+zevar_core/migration/foxpro_import_extended.py:15:12: F821 Undefined name `read_dbf`
+   |
+13 |         return stats
+14 | 
+15 |     records = read_dbf(dbf_path)
+   |               ^^^^^^^^ F821
+16 |     stats["total"] = len(records)
+   |
+
+zevar_core/migration/foxpro_import_extended.py:19:25: F821 Undefined name `frappe`
+   |
+18 |     attr_name = "Cut"
+19 |     if not dry_run and not frappe.db.exists("Item Attribute", attr_name):
+   |                            ^^^^^^ F821
+20 |         attr_doc = frappe.new_doc("Item Attribute")
+21 |         attr_doc.attribute_name = attr_name
+   |
+
+zevar_core/migration/foxpro_import_extended.py:20:14: F821 Undefined name `frappe`
+   |
+18 |     attr_name = "Cut"
+19 |     if not dry_run and not frappe.db.exists("Item Attribute", attr_name):
+20 |         attr_doc = frappe.new_doc("Item Attribute")
+   |                    ^^^^^^ F821
+21 |         attr_doc.attribute_name = attr_name
+22 |         attr_doc.numeric_values = 0
+   |
+
+zevar_core/migration/foxpro_import_extended.py:26:21: F821 Undefined name `frappe`
+   |
+25 |     existing_values = set()
+26 |     if not dry_run and frappe.db.exists("Item Attribute", attr_name):
+   |                        ^^^^^^ F821
+27 |         attr_doc = frappe.get_doc("Item Attribute", attr_name)
+28 |         for av in attr_doc.item_attribute_values:
+   |
+
+zevar_core/migration/foxpro_import_extended.py:27:14: F821 Undefined name `frappe`
+   |
+25 |     existing_values = set()
+26 |     if not dry_run and frappe.db.exists("Item Attribute", attr_name):
+27 |         attr_doc = frappe.get_doc("Item Attribute", attr_name)
+   |                    ^^^^^^ F821
+28 |         for av in attr_doc.item_attribute_values:
+29 |             existing_values.add(av.attribute_value)
+   |
+
+zevar_core/migration/foxpro_import_extended.py:34:12: F821 Undefined name `clean_str`
+   |
+32 |     for record in records:
+33 |         try:
+34 |             value = clean_str(record.get("cut"))
+   |                     ^^^^^^^^^ F821
+35 |             if not value or value in existing_values:
+36 |                 stats["skipped"] += 1
+   |
+
+zevar_core/migration/foxpro_import_extended.py:46:15: F821 Undefined name `frappe`
+   |
+44 |             abbr = f"CU{abbr_counter:02d}"
+45 | 
+46 |             attr_doc = frappe.get_doc("Item Attribute", attr_name)
+   |                        ^^^^^^ F821
+47 |             attr_doc.append("item_attribute_values", {"attribute_value": value, "abbr": abbr})
+48 |             attr_doc.save(ignore_permissions=True)
+   |
+
+zevar_core/migration/foxpro_import_extended.py:56:3: F821 Undefined name `frappe`
+   |
+55 |     if not dry_run:
+56 |         frappe.db.commit()
+   |         ^^^^^^ F821
+57 |     return stats
+   |
+
+zevar_core/migration/foxpro_import_extended.py:69:13: F821 Undefined name `find_dbf`
+   |
+67 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+68 | 
+69 |     dbf_path = find_dbf(backup_path, "TYPES.DBF")
+   |                ^^^^^^^^ F821
+70 |     if not dbf_path:
+71 |         stats["errors"].append("TYPES.DBF not found")
+   |
+
+zevar_core/migration/foxpro_import_extended.py:74:12: F821 Undefined name `read_dbf`
+   |
+72 |         return stats
+73 | 
+74 |     records = read_dbf(dbf_path)
+   |               ^^^^^^^^ F821
+75 |     stats["total"] = len(records)
+   |
+
+zevar_core/migration/foxpro_import_extended.py:78:25: F821 Undefined name `frappe`
+   |
+77 |     attr_name = "Stone Type"
+78 |     if not dry_run and not frappe.db.exists("Item Attribute", attr_name):
+   |                            ^^^^^^ F821
+79 |         attr_doc = frappe.new_doc("Item Attribute")
+80 |         attr_doc.attribute_name = attr_name
+   |
+
+zevar_core/migration/foxpro_import_extended.py:79:14: F821 Undefined name `frappe`
+   |
+77 |     attr_name = "Stone Type"
+78 |     if not dry_run and not frappe.db.exists("Item Attribute", attr_name):
+79 |         attr_doc = frappe.new_doc("Item Attribute")
+   |                    ^^^^^^ F821
+80 |         attr_doc.attribute_name = attr_name
+81 |         attr_doc.numeric_values = 0
+   |
+
+zevar_core/migration/foxpro_import_extended.py:85:21: F821 Undefined name `frappe`
+   |
+84 |     existing_values = set()
+85 |     if not dry_run and frappe.db.exists("Item Attribute", attr_name):
+   |                        ^^^^^^ F821
+86 |         attr_doc = frappe.get_doc("Item Attribute", attr_name)
+87 |         for av in attr_doc.item_attribute_values:
+   |
+
+zevar_core/migration/foxpro_import_extended.py:86:14: F821 Undefined name `frappe`
+   |
+84 |     existing_values = set()
+85 |     if not dry_run and frappe.db.exists("Item Attribute", attr_name):
+86 |         attr_doc = frappe.get_doc("Item Attribute", attr_name)
+   |                    ^^^^^^ F821
+87 |         for av in attr_doc.item_attribute_values:
+88 |             existing_values.add(av.attribute_value)
+   |
+
+zevar_core/migration/foxpro_import_extended.py:93:12: F821 Undefined name `clean_str`
+   |
+91 |     for record in records:
+92 |         try:
+93 |             value = clean_str(record.get("type"))
+   |                     ^^^^^^^^^ F821
+94 |             if not value or value in existing_values:
+95 |                 stats["skipped"] += 1
+   |
+
+zevar_core/migration/foxpro_import_extended.py:105:15: F821 Undefined name `frappe`
+    |
+103 |             abbr = f"ST{abbr_counter:02d}"
+104 | 
+105 |             attr_doc = frappe.get_doc("Item Attribute", attr_name)
+    |                        ^^^^^^ F821
+106 |             attr_doc.append("item_attribute_values", {"attribute_value": value, "abbr": abbr})
+107 |             attr_doc.save(ignore_permissions=True)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:115:3: F821 Undefined name `frappe`
+    |
+114 |     if not dry_run:
+115 |         frappe.db.commit()
+    |         ^^^^^^ F821
+116 |     return stats
+    |
+
+zevar_core/migration/foxpro_import_extended.py:128:13: F821 Undefined name `find_dbf`
+    |
+126 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+127 | 
+128 |     dbf_path = find_dbf(backup_path, "dept.dbf")
+    |                ^^^^^^^^ F821
+129 |     if not dbf_path:
+130 |         stats["errors"].append("dept.dbf not found")
+    |
+
+zevar_core/migration/foxpro_import_extended.py:133:12: F821 Undefined name `read_dbf`
+    |
+131 |         return stats
+132 | 
+133 |     records = read_dbf(dbf_path)
+    |               ^^^^^^^^ F821
+134 |     stats["total"] = len(records)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:139:15: F821 Undefined name `clean_str`
+    |
+137 |         try:
+138 |             # COLUMN1=abbrev, COLUMN2=full name
+139 |             fullname = clean_str(record.get("column2"))
+    |                        ^^^^^^^^^ F821
+140 |             abbrev = clean_str(record.get("column1"))
+141 |             if not fullname and not abbrev:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:140:13: F821 Undefined name `clean_str`
+    |
+138 |             # COLUMN1=abbrev, COLUMN2=full name
+139 |             fullname = clean_str(record.get("column2"))
+140 |             abbrev = clean_str(record.get("column1"))
+    |                      ^^^^^^^^^ F821
+141 |             if not fullname and not abbrev:
+142 |                 stats["skipped"] += 1
+    |
+
+zevar_core/migration/foxpro_import_extended.py:150:7: F821 Undefined name `frappe`
+    |
+149 |             name = fullname or abbrev
+150 |             if frappe.db.exists("Item Group", name):
+    |                ^^^^^^ F821
+151 |                 stats["skipped"] += 1
+152 |                 continue
+    |
+
+zevar_core/migration/foxpro_import_extended.py:158:10: F821 Undefined name `frappe`
+    |
+156 |                 continue
+157 | 
+158 |             doc = frappe.new_doc("Item Group")
+    |                   ^^^^^^ F821
+159 |             doc.item_group_name = name
+160 |             doc.parent_item_group = "All Item Groups"
+    |
+
+zevar_core/migration/foxpro_import_extended.py:169:3: F821 Undefined name `frappe`
+    |
+168 |     if not dry_run:
+169 |         frappe.db.commit()
+    |         ^^^^^^ F821
+170 |     return stats
+    |
+
+zevar_core/migration/foxpro_import_extended.py:182:13: F821 Undefined name `find_dbf`
+    |
+180 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+181 | 
+182 |     dbf_path = find_dbf(backup_path, "subcat.dbf")
+    |                ^^^^^^^^ F821
+183 |     if not dbf_path:
+184 |         stats["errors"].append("subcat.dbf not found")
+    |
+
+zevar_core/migration/foxpro_import_extended.py:187:12: F821 Undefined name `read_dbf`
+    |
+185 |         return stats
+186 | 
+187 |     records = read_dbf(dbf_path)
+    |               ^^^^^^^^ F821
+188 |     stats["total"] = len(records)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:192:12: F821 Undefined name `clean_str`
+    |
+190 |     for record in records:
+191 |         try:
+192 |             cdesc = clean_str(record.get("cdesc"))
+    |                     ^^^^^^^^^ F821
+193 |             code = clean_str(record.get("code"))
+194 |             if not cdesc and not code:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:193:11: F821 Undefined name `clean_str`
+    |
+191 |         try:
+192 |             cdesc = clean_str(record.get("cdesc"))
+193 |             code = clean_str(record.get("code"))
+    |                    ^^^^^^^^^ F821
+194 |             if not cdesc and not code:
+195 |                 stats["skipped"] += 1
+    |
+
+zevar_core/migration/foxpro_import_extended.py:199:7: F821 Undefined name `frappe`
+    |
+198 |             name = cdesc or code
+199 |             if frappe.db.exists("Item Group", name):
+    |                ^^^^^^ F821
+200 |                 stats["skipped"] += 1
+201 |                 continue
+    |
+
+zevar_core/migration/foxpro_import_extended.py:207:10: F821 Undefined name `frappe`
+    |
+205 |                 continue
+206 | 
+207 |             doc = frappe.new_doc("Item Group")
+    |                   ^^^^^^ F821
+208 |             doc.item_group_name = name
+209 |             doc.parent_item_group = "All Item Groups"
+    |
+
+zevar_core/migration/foxpro_import_extended.py:218:3: F821 Undefined name `frappe`
+    |
+217 |     if not dry_run:
+218 |         frappe.db.commit()
+    |         ^^^^^^ F821
+219 |     return stats
+    |
+
+zevar_core/migration/foxpro_import_extended.py:231:13: F821 Undefined name `find_dbf`
+    |
+229 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+230 | 
+231 |     dbf_path = find_dbf(backup_path, "taxrate.dbf")
+    |                ^^^^^^^^ F821
+232 |     if not dbf_path:
+233 |         stats["errors"].append("taxrate.dbf not found")
+    |
+
+zevar_core/migration/foxpro_import_extended.py:236:12: F821 Undefined name `read_dbf`
+    |
+234 |         return stats
+235 | 
+236 |     records = read_dbf(dbf_path)
+    |               ^^^^^^^^ F821
+237 |     stats["total"] = len(records)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:239:12: F821 Undefined name `frappe`
+    |
+237 |     stats["total"] = len(records)
+238 | 
+239 |     company = frappe.defaults.get_global_default("company") if not dry_run else "Default"
+    |               ^^^^^^ F821
+240 | 
+241 |     for record in records:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:243:14: F821 Undefined name `clean_str`
+    |
+241 |     for record in records:
+242 |         try:
+243 |             taxcode = clean_str(record.get("taxcode"))
+    |                       ^^^^^^^^^ F821
+244 |             descript = clean_str(record.get("descript"))
+245 |             rate = clean_float(record.get("rate"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:244:15: F821 Undefined name `clean_str`
+    |
+242 |         try:
+243 |             taxcode = clean_str(record.get("taxcode"))
+244 |             descript = clean_str(record.get("descript"))
+    |                        ^^^^^^^^^ F821
+245 |             rate = clean_float(record.get("rate"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:245:11: F821 Undefined name `clean_float`
+    |
+243 |             taxcode = clean_str(record.get("taxcode"))
+244 |             descript = clean_str(record.get("descript"))
+245 |             rate = clean_float(record.get("rate"))
+    |                    ^^^^^^^^^^^ F821
+246 | 
+247 |             if not taxcode:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:253:7: F821 Undefined name `frappe`
+    |
+251 |             title = descript or f"Tax {taxcode}"
+252 | 
+253 |             if frappe.db.exists("Sales Taxes and Charges Template", {"title": title}):
+    |                ^^^^^^ F821
+254 |                 stats["skipped"] += 1
+255 |                 continue
+    |
+
+zevar_core/migration/foxpro_import_extended.py:261:10: F821 Undefined name `frappe`
+    |
+259 |                 continue
+260 | 
+261 |             doc = frappe.new_doc("Sales Taxes and Charges Template")
+    |                   ^^^^^^ F821
+262 |             doc.title = title
+263 |             doc.company = company
+    |
+
+zevar_core/migration/foxpro_import_extended.py:281:3: F821 Undefined name `frappe`
+    |
+280 |     if not dry_run:
+281 |         frappe.db.commit()
+    |         ^^^^^^ F821
+282 |     return stats
+    |
+
+zevar_core/migration/foxpro_import_extended.py:287:13: F821 Undefined name `frappe`
+    |
+285 | def _get_or_create_tax_account(company: str) -> str:
+286 |     """Get or create a default tax account."""
+287 |     existing = frappe.db.get_value("Account", {"account_type": "Tax", "company": company}, "name")
+    |                ^^^^^^ F821
+288 |     if existing:
+289 |         return existing
+    |
+
+zevar_core/migration/foxpro_import_extended.py:291:13: F821 Undefined name `frappe`
+    |
+289 |         return existing
+290 |     # Fallback: find any account with 'tax' in the name
+291 |     existing = frappe.db.get_value("Account", {"account_name": ["like", "%tax%"], "company": company}, "name")
+    |                ^^^^^^ F821
+292 |     if existing:
+293 |         return existing
+    |
+
+zevar_core/migration/foxpro_import_extended.py:295:9: F821 Undefined name `frappe`
+    |
+293 |         return existing
+294 |     # Last resort: return first income account
+295 |     return frappe.db.get_value("Account", {"root_type": "Liability", "company": company}, "name") or "Tax"
+    |            ^^^^^^ F821
+    |
+
+zevar_core/migration/foxpro_import_extended.py:307:13: F821 Undefined name `find_dbf`
+    |
+305 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+306 | 
+307 |     dbf_path = find_dbf(backup_path, "SLUSH.DBF")
+    |                ^^^^^^^^ F821
+308 |     if not dbf_path:
+309 |         stats["errors"].append("SLUSH.DBF not found")
+    |
+
+zevar_core/migration/foxpro_import_extended.py:313:12: F821 Undefined name `read_dbf`
+    |
+312 |     # Reuse inventory import logic by reading the DBF and processing each record
+313 |     records = read_dbf(dbf_path)
+    |               ^^^^^^^^ F821
+314 |     stats["total"] = len(records)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:318:14: F821 Undefined name `clean_str`
+    |
+316 |     for idx, record in enumerate(records):
+317 |         try:
+318 |             barcode = clean_str(record.get("barcode"))
+    |                       ^^^^^^^^^ F821
+319 |             stockno = clean_str(record.get("stockno"))
+320 |             descript = clean_str(record.get("descript"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:319:14: F821 Undefined name `clean_str`
+    |
+317 |         try:
+318 |             barcode = clean_str(record.get("barcode"))
+319 |             stockno = clean_str(record.get("stockno"))
+    |                       ^^^^^^^^^ F821
+320 |             descript = clean_str(record.get("descript"))
+321 |             abr = clean_str(record.get("abr"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:320:15: F821 Undefined name `clean_str`
+    |
+318 |             barcode = clean_str(record.get("barcode"))
+319 |             stockno = clean_str(record.get("stockno"))
+320 |             descript = clean_str(record.get("descript"))
+    |                        ^^^^^^^^^ F821
+321 |             abr = clean_str(record.get("abr"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:321:10: F821 Undefined name `clean_str`
+    |
+319 |             stockno = clean_str(record.get("stockno"))
+320 |             descript = clean_str(record.get("descript"))
+321 |             abr = clean_str(record.get("abr"))
+    |                   ^^^^^^^^^ F821
+322 | 
+323 |             if not barcode and not stockno:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:332:7: F821 Undefined name `frappe`
+    |
+330 |             item_name = descript if descript else item_code
+331 | 
+332 |             if frappe.db.exists("Item", item_code):
+    |                ^^^^^^ F821
+333 |                 stats["skipped"] += 1
+334 |                 continue
+    |
+
+zevar_core/migration/foxpro_import_extended.py:340:15: F821 Undefined name `clean_str`
+    |
+338 |                 continue
+339 | 
+340 |             category = clean_str(record.get("category"))
+    |                        ^^^^^^^^^ F821
+341 |             clean_str(record.get("goldtype"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:341:4: F821 Undefined name `clean_str`
+    |
+340 |             category = clean_str(record.get("category"))
+341 |             clean_str(record.get("goldtype"))
+    |             ^^^^^^^^^ F821
+342 | 
+343 |             doc = frappe.new_doc("Item")
+    |
+
+zevar_core/migration/foxpro_import_extended.py:343:10: F821 Undefined name `frappe`
+    |
+341 |             clean_str(record.get("goldtype"))
+342 | 
+343 |             doc = frappe.new_doc("Item")
+    |                   ^^^^^^ F821
+344 |             doc.item_code = item_code
+345 |             doc.item_name = item_name[:140]
+    |
+
+zevar_core/migration/foxpro_import_extended.py:350:22: F821 Undefined name `_get_or_create_item_group`
+    |
+349 |             if category:
+350 |                 doc.item_group = _get_or_create_item_group(category)
+    |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^ F821
+351 | 
+352 |             cost = clean_float(record.get("cost"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:352:11: F821 Undefined name `clean_float`
+    |
+350 |                 doc.item_group = _get_or_create_item_group(category)
+351 | 
+352 |             cost = clean_float(record.get("cost"))
+    |                    ^^^^^^^^^^^ F821
+353 |             asklow = clean_float(record.get("asklow"))
+354 |             askhigh = clean_float(record.get("askhigh"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:353:13: F821 Undefined name `clean_float`
+    |
+352 |             cost = clean_float(record.get("cost"))
+353 |             asklow = clean_float(record.get("asklow"))
+    |                      ^^^^^^^^^^^ F821
+354 |             askhigh = clean_float(record.get("askhigh"))
+355 |             if asklow > 0:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:354:14: F821 Undefined name `clean_float`
+    |
+352 |             cost = clean_float(record.get("cost"))
+353 |             asklow = clean_float(record.get("asklow"))
+354 |             askhigh = clean_float(record.get("askhigh"))
+    |                       ^^^^^^^^^^^ F821
+355 |             if asklow > 0:
+356 |                 doc.standard_rate = asklow
+    |
+
+zevar_core/migration/foxpro_import_extended.py:362:4: F821 Undefined name `_set_custom_field`
+    |
+360 |                 doc.valuation_rate = cost
+361 | 
+362 |             _set_custom_field(doc, "custom_source", "SLUSH")
+    |             ^^^^^^^^^^^^^^^^^ F821
+363 |             _set_custom_field(doc, "custom_legacy_abr", abr)
+364 |             _set_custom_field(doc, "custom_legacy_stockno", stockno)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:363:4: F821 Undefined name `_set_custom_field`
+    |
+362 |             _set_custom_field(doc, "custom_source", "SLUSH")
+363 |             _set_custom_field(doc, "custom_legacy_abr", abr)
+    |             ^^^^^^^^^^^^^^^^^ F821
+364 |             _set_custom_field(doc, "custom_legacy_stockno", stockno)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:364:4: F821 Undefined name `_set_custom_field`
+    |
+362 |             _set_custom_field(doc, "custom_source", "SLUSH")
+363 |             _set_custom_field(doc, "custom_legacy_abr", abr)
+364 |             _set_custom_field(doc, "custom_legacy_stockno", stockno)
+    |             ^^^^^^^^^^^^^^^^^ F821
+365 | 
+366 |             doc.insert(ignore_permissions=True, ignore_mandatory=True)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:370:5: F821 Undefined name `frappe`
+    |
+369 |             if (idx + 1) % 50 == 0:
+370 |                 frappe.db.commit()
+    |                 ^^^^^^ F821
+371 | 
+372 |         except Exception as e:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:376:3: F821 Undefined name `frappe`
+    |
+375 |     if not dry_run:
+376 |         frappe.db.commit()
+    |         ^^^^^^ F821
+377 |     return stats
+    |
+
+zevar_core/migration/foxpro_import_extended.py:389:13: F821 Undefined name `find_dbf`
+    |
+387 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+388 | 
+389 |     dbf_path = find_dbf(backup_path, "CONSTANT.DBF")
+    |                ^^^^^^^^ F821
+390 |     if not dbf_path:
+391 |         stats["errors"].append("CONSTANT.DBF not found")
+    |
+
+zevar_core/migration/foxpro_import_extended.py:394:12: F821 Undefined name `read_dbf`
+    |
+392 |         return stats
+393 | 
+394 |     records = read_dbf(dbf_path)
+    |               ^^^^^^^^ F821
+395 |     stats["total"] = len(records)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:408:6: F821 Undefined name `frappe`
+    |
+407 |     try:
+408 |         if frappe.db.exists("DocType", "Gold Settings"):
+    |            ^^^^^^ F821
+409 |             frappe.get_single("Gold Settings")
+410 |             # Store spot gold/silver prices as gold rate logs
+    |
+
+zevar_core/migration/foxpro_import_extended.py:409:4: F821 Undefined name `frappe`
+    |
+407 |     try:
+408 |         if frappe.db.exists("DocType", "Gold Settings"):
+409 |             frappe.get_single("Gold Settings")
+    |             ^^^^^^ F821
+410 |             # Store spot gold/silver prices as gold rate logs
+411 |             spot_gold = clean_float(constant.get("spotgold"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:411:16: F821 Undefined name `clean_float`
+    |
+409 |             frappe.get_single("Gold Settings")
+410 |             # Store spot gold/silver prices as gold rate logs
+411 |             spot_gold = clean_float(constant.get("spotgold"))
+    |                         ^^^^^^^^^^^ F821
+412 |             if spot_gold > 0:
+413 |                 if not frappe.db.exists("Gold Rate Log", {"gold_price": spot_gold}):
+    |
+
+zevar_core/migration/foxpro_import_extended.py:413:12: F821 Undefined name `frappe`
+    |
+411 |             spot_gold = clean_float(constant.get("spotgold"))
+412 |             if spot_gold > 0:
+413 |                 if not frappe.db.exists("Gold Rate Log", {"gold_price": spot_gold}):
+    |                        ^^^^^^ F821
+414 |                     gr = frappe.new_doc("Gold Rate Log")
+415 |                     gr.gold_price = spot_gold
+    |
+
+zevar_core/migration/foxpro_import_extended.py:414:11: F821 Undefined name `frappe`
+    |
+412 |             if spot_gold > 0:
+413 |                 if not frappe.db.exists("Gold Rate Log", {"gold_price": spot_gold}):
+414 |                     gr = frappe.new_doc("Gold Rate Log")
+    |                          ^^^^^^ F821
+415 |                     gr.gold_price = spot_gold
+416 |                     gr.currency = "USD"
+    |
+
+zevar_core/migration/foxpro_import_extended.py:418:22: F821 Undefined name `frappe`
+    |
+416 |                     gr.currency = "USD"
+417 |                     gr.source = "Legacy Import (CONSTANT.DBF)"
+418 |                     gr.fetch_time = frappe.utils.now_datetime()
+    |                                     ^^^^^^ F821
+419 |                     gr.insert(ignore_permissions=True, ignore_mandatory=True)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:421:18: F821 Undefined name `clean_float`
+    |
+419 |                     gr.insert(ignore_permissions=True, ignore_mandatory=True)
+420 | 
+421 |             spot_silver = clean_float(constant.get("spotsilver"))
+    |                           ^^^^^^^^^^^ F821
+422 |             if spot_silver > 0:
+423 |                 if not frappe.db.exists("Gold Rate Log", {"gold_price": spot_silver}):
+    |
+
+zevar_core/migration/foxpro_import_extended.py:423:12: F821 Undefined name `frappe`
+    |
+421 |             spot_silver = clean_float(constant.get("spotsilver"))
+422 |             if spot_silver > 0:
+423 |                 if not frappe.db.exists("Gold Rate Log", {"gold_price": spot_silver}):
+    |                        ^^^^^^ F821
+424 |                     gr = frappe.new_doc("Gold Rate Log")
+425 |                     gr.gold_price = spot_silver
+    |
+
+zevar_core/migration/foxpro_import_extended.py:424:11: F821 Undefined name `frappe`
+    |
+422 |             if spot_silver > 0:
+423 |                 if not frappe.db.exists("Gold Rate Log", {"gold_price": spot_silver}):
+424 |                     gr = frappe.new_doc("Gold Rate Log")
+    |                          ^^^^^^ F821
+425 |                     gr.gold_price = spot_silver
+426 |                     gr.currency = "USD"
+    |
+
+zevar_core/migration/foxpro_import_extended.py:428:22: F821 Undefined name `frappe`
+    |
+426 |                     gr.currency = "USD"
+427 |                     gr.source = "Legacy Silver Price"
+428 |                     gr.fetch_time = frappe.utils.now_datetime()
+    |                                     ^^^^^^ F821
+429 |                     gr.insert(ignore_permissions=True, ignore_mandatory=True)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:431:4: F821 Undefined name `frappe`
+    |
+429 |                     gr.insert(ignore_permissions=True, ignore_mandatory=True)
+430 | 
+431 |             frappe.db.commit()
+    |             ^^^^^^ F821
+432 | 
+433 |         stats["imported"] = 1
+    |
+
+zevar_core/migration/foxpro_import_extended.py:473:5: F821 Undefined name `frappe`
+    |
+471 |     if not metal_name:
+472 |         return None
+473 |     if frappe.db.exists("DocType", "Zevar Metal") and frappe.db.exists("Zevar Metal", metal_name):
+    |        ^^^^^^ F821
+474 |         return metal_name
+475 |     try:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:473:52: F821 Undefined name `frappe`
+    |
+471 |     if not metal_name:
+472 |         return None
+473 |     if frappe.db.exists("DocType", "Zevar Metal") and frappe.db.exists("Zevar Metal", metal_name):
+    |                                                       ^^^^^^ F821
+474 |         return metal_name
+475 |     try:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:476:6: F821 Undefined name `frappe`
+    |
+474 |         return metal_name
+475 |     try:
+476 |         if frappe.db.exists("DocType", "Zevar Metal"):
+    |            ^^^^^^ F821
+477 |             doc = frappe.new_doc("Zevar Metal")
+478 |             doc.name = metal_name
+    |
+
+zevar_core/migration/foxpro_import_extended.py:477:10: F821 Undefined name `frappe`
+    |
+475 |     try:
+476 |         if frappe.db.exists("DocType", "Zevar Metal"):
+477 |             doc = frappe.new_doc("Zevar Metal")
+    |                   ^^^^^^ F821
+478 |             doc.name = metal_name
+479 |             doc.insert(ignore_permissions=True, ignore_mandatory=True)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:491:13: F821 Undefined name `find_dbf`
+    |
+490 |     # Try NEWAPPR.DBF first (has actual data), fall back to 1APTERM1.DBF
+491 |     dbf_path = find_dbf(backup_path, "NEWAPPR.DBF") or find_dbf(backup_path, "1APTERM1.DBF")
+    |                ^^^^^^^^ F821
+492 |     if not dbf_path:
+493 |         stats["errors"].append("NEWAPPR.DBF not found")
+    |
+
+zevar_core/migration/foxpro_import_extended.py:491:53: F821 Undefined name `find_dbf`
+    |
+490 |     # Try NEWAPPR.DBF first (has actual data), fall back to 1APTERM1.DBF
+491 |     dbf_path = find_dbf(backup_path, "NEWAPPR.DBF") or find_dbf(backup_path, "1APTERM1.DBF")
+    |                                                        ^^^^^^^^ F821
+492 |     if not dbf_path:
+493 |         stats["errors"].append("NEWAPPR.DBF not found")
+    |
+
+zevar_core/migration/foxpro_import_extended.py:496:12: F821 Undefined name `read_dbf`
+    |
+494 |         return stats
+495 | 
+496 |     records = read_dbf(dbf_path)
+    |               ^^^^^^^^ F821
+497 |     stats["total"] = len(records)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:504:11: F821 Undefined name `frappe`
+    |
+502 |     # Pre-fetch customer mapping
+503 |     customer_cache = {}
+504 |     for c in frappe.get_all("Customer", fields=["name", "customer_name"]):
+    |              ^^^^^^ F821
+505 |         customer_cache[c.customer_name.lower()] = c.name
+    |
+
+zevar_core/migration/foxpro_import_extended.py:508:22: F821 Undefined name `frappe`
+    |
+507 |     # Get default appraiser
+508 |     default_appraiser = frappe.db.get_value("Employee", {"status": "Active"}, "name") or "Administrator"
+    |                         ^^^^^^ F821
+509 | 
+510 |     for i, record in enumerate(records):
+    |
+
+zevar_core/migration/foxpro_import_extended.py:512:15: F821 Undefined name `clean_str`
+    |
+510 |     for i, record in enumerate(records):
+511 |         try:
+512 |             lastname = clean_str(record.get("lastname") or record.get("last"))
+    |                        ^^^^^^^^^ F821
+513 |             firstname = clean_str(record.get("firstname") or record.get("first"))
+514 |             descript = clean_str(record.get("descript") or record.get("desc1"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:513:16: F821 Undefined name `clean_str`
+    |
+511 |         try:
+512 |             lastname = clean_str(record.get("lastname") or record.get("last"))
+513 |             firstname = clean_str(record.get("firstname") or record.get("first"))
+    |                         ^^^^^^^^^ F821
+514 |             descript = clean_str(record.get("descript") or record.get("desc1"))
+515 |             stockno = clean_str(record.get("stockno"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:514:15: F821 Undefined name `clean_str`
+    |
+512 |             lastname = clean_str(record.get("lastname") or record.get("last"))
+513 |             firstname = clean_str(record.get("firstname") or record.get("first"))
+514 |             descript = clean_str(record.get("descript") or record.get("desc1"))
+    |                        ^^^^^^^^^ F821
+515 |             stockno = clean_str(record.get("stockno"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:515:14: F821 Undefined name `clean_str`
+    |
+513 |             firstname = clean_str(record.get("firstname") or record.get("first"))
+514 |             descript = clean_str(record.get("descript") or record.get("desc1"))
+515 |             stockno = clean_str(record.get("stockno"))
+    |                       ^^^^^^^^^ F821
+516 | 
+517 |             if not descript and not stockno:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:521:23: F821 Undefined name `clean_int`
+    |
+519 |                 continue
+520 | 
+521 |             appraisal_id = str(clean_int(record.get("appraisal"))) or f"{i + 1:04d}"
+    |                                ^^^^^^^^^ F821
+522 | 
+523 |             # Check by certificate_number or naming
+    |
+
+zevar_core/migration/foxpro_import_extended.py:524:15: F821 Undefined name `frappe`
+    |
+523 |             # Check by certificate_number or naming
+524 |             existing = frappe.db.get_value("Jewelry Appraisal", {"certificate_number": appraisal_id}, "name")
+    |                        ^^^^^^ F821
+525 |             if existing:
+526 |                 stats["skipped"] += 1
+    |
+
+zevar_core/migration/foxpro_import_extended.py:533:10: F821 Undefined name `frappe`
+    |
+531 |                 continue
+532 | 
+533 |             doc = frappe.new_doc("Jewelry Appraisal")
+    |                   ^^^^^^ F821
+534 | 
+535 |             # Resolve customer
+    |
+
+zevar_core/migration/foxpro_import_extended.py:538:58: F821 Undefined name `_get_default_customer`
+    |
+536 |             if firstname or lastname:
+537 |                 cust_name = f"{firstname} {lastname}".strip()
+538 |                 doc.customer = customer_cache.get(cust_name.lower(), _get_default_customer())
+    |                                                                      ^^^^^^^^^^^^^^^^^^^^^ F821
+539 | 
+540 |             doc.appraisal_date = format_date(record.get("transdate")) or frappe.utils.today()
+    |
+
+zevar_core/migration/foxpro_import_extended.py:540:25: F821 Undefined name `format_date`
+    |
+538 |                 doc.customer = customer_cache.get(cust_name.lower(), _get_default_customer())
+539 | 
+540 |             doc.appraisal_date = format_date(record.get("transdate")) or frappe.utils.today()
+    |                                  ^^^^^^^^^^^ F821
+541 |             doc.appraiser = default_appraiser
+542 |             doc.status = "Completed"
+    |
+
+zevar_core/migration/foxpro_import_extended.py:540:65: F821 Undefined name `frappe`
+    |
+538 |                 doc.customer = customer_cache.get(cust_name.lower(), _get_default_customer())
+539 | 
+540 |             doc.appraisal_date = format_date(record.get("transdate")) or frappe.utils.today()
+    |                                                                          ^^^^^^ F821
+541 |             doc.appraiser = default_appraiser
+542 |             doc.status = "Completed"
+    |
+
+zevar_core/migration/foxpro_import_extended.py:545:40: F821 Undefined name `clean_str`
+    |
+544 |             # Description
+545 |             desc_parts = [p for p in [descript, clean_str(record.get("desc2"))] if p]
+    |                                                 ^^^^^^^^^ F821
+546 |             doc.item_description = " ".join(desc_parts)[:140] if desc_parts else descript or stockno
+547 |             doc.item_type = _guess_item_type(descript)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:550:17: F821 Undefined name `clean_str`
+    |
+549 |             # Metal
+550 |             metal_type = clean_str(record.get("metal_type"))
+    |                          ^^^^^^^^^ F821
+551 |             if metal_type:
+552 |                 resolved = _get_or_create_metal(metal_type)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:556:17: F821 Undefined name `clean_str`
+    |
+554 |                     doc.metal_type = resolved
+555 | 
+556 |             karat_type = clean_str(record.get("karat_type"))
+    |                          ^^^^^^^^^ F821
+557 |             if karat_type and frappe.db.exists("Zevar Purity", karat_type):
+558 |                 doc.metal_purity = karat_type
+    |
+
+zevar_core/migration/foxpro_import_extended.py:557:22: F821 Undefined name `frappe`
+    |
+556 |             karat_type = clean_str(record.get("karat_type"))
+557 |             if karat_type and frappe.db.exists("Zevar Purity", karat_type):
+    |                               ^^^^^^ F821
+558 |                 doc.metal_purity = karat_type
+    |
+
+zevar_core/migration/foxpro_import_extended.py:560:13: F821 Undefined name `clean_float`
+    |
+558 |                 doc.metal_purity = karat_type
+559 | 
+560 |             weight = clean_float(record.get("weight"))
+    |                      ^^^^^^^^^^^ F821
+561 |             if weight > 0:
+562 |                 doc.total_weight_grams = weight
+    |
+
+zevar_core/migration/foxpro_import_extended.py:564:16: F821 Undefined name `clean_float`
+    |
+562 |                 doc.total_weight_grams = weight
+563 | 
+564 |             est_value = clean_float(record.get("estvalue"))
+    |                         ^^^^^^^^^^^ F821
+565 |             if est_value > 0:
+566 |                 doc.appraised_value = est_value
+    |
+
+zevar_core/migration/foxpro_import_extended.py:568:15: F821 Undefined name `clean_float`
+    |
+566 |                 doc.appraised_value = est_value
+567 | 
+568 |             purchase = clean_float(record.get("purchase"))
+    |                        ^^^^^^^^^^^ F821
+569 |             if purchase > 0:
+570 |                 doc.replacement_value = purchase
+    |
+
+zevar_core/migration/foxpro_import_extended.py:573:15: F821 Undefined name `clean_str`
+    |
+572 |             # Notes from memo
+573 |             apprtext = clean_str(record.get("apprtext"))
+    |                        ^^^^^^^^^ F821
+574 |             if apprtext:
+575 |                 doc.notes = apprtext
+    |
+
+zevar_core/migration/foxpro_import_extended.py:580:4: F821 Undefined name `_set_custom_field`
+    |
+579 |             # Custom fields for stone data
+580 |             _set_custom_field(doc, "custom_legacy_stock_no", stockno)
+    |             ^^^^^^^^^^^^^^^^^ F821
+581 |             _set_custom_field(doc, "custom_legacy_abr", clean_str(record.get("abr")))
+582 |             _set_custom_field(doc, "custom_center_stone_weight", clean_float(record.get("centerwgt")))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:581:4: F821 Undefined name `_set_custom_field`
+    |
+579 |             # Custom fields for stone data
+580 |             _set_custom_field(doc, "custom_legacy_stock_no", stockno)
+581 |             _set_custom_field(doc, "custom_legacy_abr", clean_str(record.get("abr")))
+    |             ^^^^^^^^^^^^^^^^^ F821
+582 |             _set_custom_field(doc, "custom_center_stone_weight", clean_float(record.get("centerwgt")))
+583 |             _set_custom_field(doc, "custom_center_stone_cut", clean_str(record.get("centercut")))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:581:48: F821 Undefined name `clean_str`
+    |
+579 |             # Custom fields for stone data
+580 |             _set_custom_field(doc, "custom_legacy_stock_no", stockno)
+581 |             _set_custom_field(doc, "custom_legacy_abr", clean_str(record.get("abr")))
+    |                                                         ^^^^^^^^^ F821
+582 |             _set_custom_field(doc, "custom_center_stone_weight", clean_float(record.get("centerwgt")))
+583 |             _set_custom_field(doc, "custom_center_stone_cut", clean_str(record.get("centercut")))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:582:4: F821 Undefined name `_set_custom_field`
+    |
+580 |             _set_custom_field(doc, "custom_legacy_stock_no", stockno)
+581 |             _set_custom_field(doc, "custom_legacy_abr", clean_str(record.get("abr")))
+582 |             _set_custom_field(doc, "custom_center_stone_weight", clean_float(record.get("centerwgt")))
+    |             ^^^^^^^^^^^^^^^^^ F821
+583 |             _set_custom_field(doc, "custom_center_stone_cut", clean_str(record.get("centercut")))
+584 |             _set_custom_field(doc, "custom_center_stone_type", clean_str(record.get("centertype")))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:582:57: F821 Undefined name `clean_float`
+    |
+580 |             _set_custom_field(doc, "custom_legacy_stock_no", stockno)
+581 |             _set_custom_field(doc, "custom_legacy_abr", clean_str(record.get("abr")))
+582 |             _set_custom_field(doc, "custom_center_stone_weight", clean_float(record.get("centerwgt")))
+    |                                                                  ^^^^^^^^^^^ F821
+583 |             _set_custom_field(doc, "custom_center_stone_cut", clean_str(record.get("centercut")))
+584 |             _set_custom_field(doc, "custom_center_stone_type", clean_str(record.get("centertype")))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:583:4: F821 Undefined name `_set_custom_field`
+    |
+581 |             _set_custom_field(doc, "custom_legacy_abr", clean_str(record.get("abr")))
+582 |             _set_custom_field(doc, "custom_center_stone_weight", clean_float(record.get("centerwgt")))
+583 |             _set_custom_field(doc, "custom_center_stone_cut", clean_str(record.get("centercut")))
+    |             ^^^^^^^^^^^^^^^^^ F821
+584 |             _set_custom_field(doc, "custom_center_stone_type", clean_str(record.get("centertype")))
+585 |             _set_custom_field(doc, "custom_center_stone_clarity", clean_str(record.get("centerclar")))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:583:54: F821 Undefined name `clean_str`
+    |
+581 |             _set_custom_field(doc, "custom_legacy_abr", clean_str(record.get("abr")))
+582 |             _set_custom_field(doc, "custom_center_stone_weight", clean_float(record.get("centerwgt")))
+583 |             _set_custom_field(doc, "custom_center_stone_cut", clean_str(record.get("centercut")))
+    |                                                               ^^^^^^^^^ F821
+584 |             _set_custom_field(doc, "custom_center_stone_type", clean_str(record.get("centertype")))
+585 |             _set_custom_field(doc, "custom_center_stone_clarity", clean_str(record.get("centerclar")))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:584:4: F821 Undefined name `_set_custom_field`
+    |
+582 |             _set_custom_field(doc, "custom_center_stone_weight", clean_float(record.get("centerwgt")))
+583 |             _set_custom_field(doc, "custom_center_stone_cut", clean_str(record.get("centercut")))
+584 |             _set_custom_field(doc, "custom_center_stone_type", clean_str(record.get("centertype")))
+    |             ^^^^^^^^^^^^^^^^^ F821
+585 |             _set_custom_field(doc, "custom_center_stone_clarity", clean_str(record.get("centerclar")))
+586 |             _set_custom_field(doc, "custom_center_stone_color", clean_str(record.get("centercol")))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:584:55: F821 Undefined name `clean_str`
+    |
+582 |             _set_custom_field(doc, "custom_center_stone_weight", clean_float(record.get("centerwgt")))
+583 |             _set_custom_field(doc, "custom_center_stone_cut", clean_str(record.get("centercut")))
+584 |             _set_custom_field(doc, "custom_center_stone_type", clean_str(record.get("centertype")))
+    |                                                                ^^^^^^^^^ F821
+585 |             _set_custom_field(doc, "custom_center_stone_clarity", clean_str(record.get("centerclar")))
+586 |             _set_custom_field(doc, "custom_center_stone_color", clean_str(record.get("centercol")))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:585:4: F821 Undefined name `_set_custom_field`
+    |
+583 |             _set_custom_field(doc, "custom_center_stone_cut", clean_str(record.get("centercut")))
+584 |             _set_custom_field(doc, "custom_center_stone_type", clean_str(record.get("centertype")))
+585 |             _set_custom_field(doc, "custom_center_stone_clarity", clean_str(record.get("centerclar")))
+    |             ^^^^^^^^^^^^^^^^^ F821
+586 |             _set_custom_field(doc, "custom_center_stone_color", clean_str(record.get("centercol")))
+587 |             _set_custom_field(doc, "custom_side_stones_weight", clean_float(record.get("side_wgt")))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:585:58: F821 Undefined name `clean_str`
+    |
+583 |             _set_custom_field(doc, "custom_center_stone_cut", clean_str(record.get("centercut")))
+584 |             _set_custom_field(doc, "custom_center_stone_type", clean_str(record.get("centertype")))
+585 |             _set_custom_field(doc, "custom_center_stone_clarity", clean_str(record.get("centerclar")))
+    |                                                                   ^^^^^^^^^ F821
+586 |             _set_custom_field(doc, "custom_center_stone_color", clean_str(record.get("centercol")))
+587 |             _set_custom_field(doc, "custom_side_stones_weight", clean_float(record.get("side_wgt")))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:586:4: F821 Undefined name `_set_custom_field`
+    |
+584 |             _set_custom_field(doc, "custom_center_stone_type", clean_str(record.get("centertype")))
+585 |             _set_custom_field(doc, "custom_center_stone_clarity", clean_str(record.get("centerclar")))
+586 |             _set_custom_field(doc, "custom_center_stone_color", clean_str(record.get("centercol")))
+    |             ^^^^^^^^^^^^^^^^^ F821
+587 |             _set_custom_field(doc, "custom_side_stones_weight", clean_float(record.get("side_wgt")))
+588 |             _set_custom_field(doc, "custom_side_stones_qty", clean_int(record.get("side_qty")))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:586:56: F821 Undefined name `clean_str`
+    |
+584 |             _set_custom_field(doc, "custom_center_stone_type", clean_str(record.get("centertype")))
+585 |             _set_custom_field(doc, "custom_center_stone_clarity", clean_str(record.get("centerclar")))
+586 |             _set_custom_field(doc, "custom_center_stone_color", clean_str(record.get("centercol")))
+    |                                                                 ^^^^^^^^^ F821
+587 |             _set_custom_field(doc, "custom_side_stones_weight", clean_float(record.get("side_wgt")))
+588 |             _set_custom_field(doc, "custom_side_stones_qty", clean_int(record.get("side_qty")))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:587:4: F821 Undefined name `_set_custom_field`
+    |
+585 |             _set_custom_field(doc, "custom_center_stone_clarity", clean_str(record.get("centerclar")))
+586 |             _set_custom_field(doc, "custom_center_stone_color", clean_str(record.get("centercol")))
+587 |             _set_custom_field(doc, "custom_side_stones_weight", clean_float(record.get("side_wgt")))
+    |             ^^^^^^^^^^^^^^^^^ F821
+588 |             _set_custom_field(doc, "custom_side_stones_qty", clean_int(record.get("side_qty")))
+589 |             _set_custom_field(doc, "custom_stones_count", clean_int(record.get("stones")))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:587:56: F821 Undefined name `clean_float`
+    |
+585 |             _set_custom_field(doc, "custom_center_stone_clarity", clean_str(record.get("centerclar")))
+586 |             _set_custom_field(doc, "custom_center_stone_color", clean_str(record.get("centercol")))
+587 |             _set_custom_field(doc, "custom_side_stones_weight", clean_float(record.get("side_wgt")))
+    |                                                                 ^^^^^^^^^^^ F821
+588 |             _set_custom_field(doc, "custom_side_stones_qty", clean_int(record.get("side_qty")))
+589 |             _set_custom_field(doc, "custom_stones_count", clean_int(record.get("stones")))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:588:4: F821 Undefined name `_set_custom_field`
+    |
+586 |             _set_custom_field(doc, "custom_center_stone_color", clean_str(record.get("centercol")))
+587 |             _set_custom_field(doc, "custom_side_stones_weight", clean_float(record.get("side_wgt")))
+588 |             _set_custom_field(doc, "custom_side_stones_qty", clean_int(record.get("side_qty")))
+    |             ^^^^^^^^^^^^^^^^^ F821
+589 |             _set_custom_field(doc, "custom_stones_count", clean_int(record.get("stones")))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:588:53: F821 Undefined name `clean_int`
+    |
+586 |             _set_custom_field(doc, "custom_center_stone_color", clean_str(record.get("centercol")))
+587 |             _set_custom_field(doc, "custom_side_stones_weight", clean_float(record.get("side_wgt")))
+588 |             _set_custom_field(doc, "custom_side_stones_qty", clean_int(record.get("side_qty")))
+    |                                                              ^^^^^^^^^ F821
+589 |             _set_custom_field(doc, "custom_stones_count", clean_int(record.get("stones")))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:589:4: F821 Undefined name `_set_custom_field`
+    |
+587 |             _set_custom_field(doc, "custom_side_stones_weight", clean_float(record.get("side_wgt")))
+588 |             _set_custom_field(doc, "custom_side_stones_qty", clean_int(record.get("side_qty")))
+589 |             _set_custom_field(doc, "custom_stones_count", clean_int(record.get("stones")))
+    |             ^^^^^^^^^^^^^^^^^ F821
+590 | 
+591 |             doc.insert(ignore_permissions=True, ignore_mandatory=True)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:589:50: F821 Undefined name `clean_int`
+    |
+587 |             _set_custom_field(doc, "custom_side_stones_weight", clean_float(record.get("side_wgt")))
+588 |             _set_custom_field(doc, "custom_side_stones_qty", clean_int(record.get("side_qty")))
+589 |             _set_custom_field(doc, "custom_stones_count", clean_int(record.get("stones")))
+    |                                                           ^^^^^^^^^ F821
+590 | 
+591 |             doc.insert(ignore_permissions=True, ignore_mandatory=True)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:595:5: F821 Undefined name `frappe`
+    |
+594 |             if (i + 1) % 50 == 0:
+595 |                 frappe.db.commit()
+    |                 ^^^^^^ F821
+596 | 
+597 |         except Exception as e:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:601:3: F821 Undefined name `frappe`
+    |
+600 |     if not dry_run:
+601 |         frappe.db.commit()
+    |         ^^^^^^ F821
+602 |     return stats
+    |
+
+zevar_core/migration/foxpro_import_extended.py:614:13: F821 Undefined name `find_dbf`
+    |
+612 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+613 | 
+614 |     dbf_path = find_dbf(backup_path, "receipt.DBF")
+    |                ^^^^^^^^ F821
+615 |     if not dbf_path:
+616 |         stats["errors"].append("receipt.DBF not found")
+    |
+
+zevar_core/migration/foxpro_import_extended.py:619:12: F821 Undefined name `read_dbf`
+    |
+617 |         return stats
+618 | 
+619 |     records = read_dbf(dbf_path)
+    |               ^^^^^^^^ F821
+620 |     stats["total"] = len(records)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:627:12: F821 Undefined name `frappe`
+    |
+625 |     # Build cache: receiptno -> Sales Invoice name
+626 |     si_cache = {}
+627 |     for si in frappe.get_all(
+    |               ^^^^^^ F821
+628 |         "Sales Invoice",
+629 |         filters={"custom_legacy_trans_no": ["!=", ""]},
+    |
+
+zevar_core/migration/foxpro_import_extended.py:635:14: F821 Undefined name `find_dbf`
+    |
+634 |     # Also build a transno->receiptno mapping from trans.dbf
+635 |     trans_dbf = find_dbf(backup_path, "trans.dbf")
+    |                 ^^^^^^^^ F821
+636 |     trans_to_receipt = {}
+637 |     if trans_dbf:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:638:14: F821 Undefined name `read_dbf`
+    |
+636 |     trans_to_receipt = {}
+637 |     if trans_dbf:
+638 |         for rec in read_dbf(trans_dbf):
+    |                    ^^^^^^^^ F821
+639 |             tn = clean_str(rec.get("transno"))
+640 |             rn = clean_str(rec.get("receiptno"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:639:9: F821 Undefined name `clean_str`
+    |
+637 |     if trans_dbf:
+638 |         for rec in read_dbf(trans_dbf):
+639 |             tn = clean_str(rec.get("transno"))
+    |                  ^^^^^^^^^ F821
+640 |             rn = clean_str(rec.get("receiptno"))
+641 |             if tn and rn:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:640:9: F821 Undefined name `clean_str`
+    |
+638 |         for rec in read_dbf(trans_dbf):
+639 |             tn = clean_str(rec.get("transno"))
+640 |             rn = clean_str(rec.get("receiptno"))
+    |                  ^^^^^^^^^ F821
+641 |             if tn and rn:
+642 |                 trans_to_receipt[rn] = tn
+    |
+
+zevar_core/migration/foxpro_import_extended.py:647:6: F821 Undefined name `clean_str`
+    |
+645 |     receipt_groups = {}
+646 |     for record in records:
+647 |         if clean_str(record.get("deleted")) == "1":
+    |            ^^^^^^^^^ F821
+648 |             continue
+649 |         # Skip slush placeholder items
+    |
+
+zevar_core/migration/foxpro_import_extended.py:650:6: F821 Undefined name `clean_str`
+    |
+648 |             continue
+649 |         # Skip slush placeholder items
+650 |         if clean_str(record.get("slush")) == "Y" and clean_str(record.get("payment")) == "R":
+    |            ^^^^^^^^^ F821
+651 |             continue
+    |
+
+zevar_core/migration/foxpro_import_extended.py:650:48: F821 Undefined name `clean_str`
+    |
+648 |             continue
+649 |         # Skip slush placeholder items
+650 |         if clean_str(record.get("slush")) == "Y" and clean_str(record.get("payment")) == "R":
+    |                                                      ^^^^^^^^^ F821
+651 |             continue
+    |
+
+zevar_core/migration/foxpro_import_extended.py:653:8: F821 Undefined name `clean_str`
+    |
+651 |             continue
+652 | 
+653 |         rn = clean_str(record.get("receiptno"))
+    |              ^^^^^^^^^ F821
+654 |         if rn:
+655 |             receipt_groups.setdefault(rn, []).append(record)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:671:13: F821 Undefined name `frappe`
+    |
+669 |                 continue
+670 | 
+671 |             si_doc = frappe.get_doc("Sales Invoice", si_name)
+    |                      ^^^^^^ F821
+672 | 
+673 |             for item_record in items:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:674:13: F821 Undefined name `clean_str`
+    |
+673 |             for item_record in items:
+674 |                 descs = clean_str(item_record.get("descs"))
+    |                         ^^^^^^^^^ F821
+675 |                 qty_str = clean_str(item_record.get("qtysold"))
+676 |                 price = clean_float(item_record.get("price"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:675:15: F821 Undefined name `clean_str`
+    |
+673 |             for item_record in items:
+674 |                 descs = clean_str(item_record.get("descs"))
+675 |                 qty_str = clean_str(item_record.get("qtysold"))
+    |                           ^^^^^^^^^ F821
+676 |                 price = clean_float(item_record.get("price"))
+677 |                 cost = clean_float(item_record.get("cost"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:676:13: F821 Undefined name `clean_float`
+    |
+674 |                 descs = clean_str(item_record.get("descs"))
+675 |                 qty_str = clean_str(item_record.get("qtysold"))
+676 |                 price = clean_float(item_record.get("price"))
+    |                         ^^^^^^^^^^^ F821
+677 |                 cost = clean_float(item_record.get("cost"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:677:12: F821 Undefined name `clean_float`
+    |
+675 |                 qty_str = clean_str(item_record.get("qtysold"))
+676 |                 price = clean_float(item_record.get("price"))
+677 |                 cost = clean_float(item_record.get("cost"))
+    |                        ^^^^^^^^^^^ F821
+678 | 
+679 |                 qty = 1
+    |
+
+zevar_core/migration/foxpro_import_extended.py:689:5: F821 Undefined name `clean_str`
+    |
+688 |                 # Try to find matching item
+689 |                 clean_str(item_record.get("category"))
+    |                 ^^^^^^^^^ F821
+690 |                 clean_str(item_record.get("stocknum"))
+691 |                 item_code = _get_default_item()
+    |
+
+zevar_core/migration/foxpro_import_extended.py:690:5: F821 Undefined name `clean_str`
+    |
+688 |                 # Try to find matching item
+689 |                 clean_str(item_record.get("category"))
+690 |                 clean_str(item_record.get("stocknum"))
+    |                 ^^^^^^^^^ F821
+691 |                 item_code = _get_default_item()
+    |
+
+zevar_core/migration/foxpro_import_extended.py:691:17: F821 Undefined name `_get_default_item`
+    |
+689 |                 clean_str(item_record.get("category"))
+690 |                 clean_str(item_record.get("stocknum"))
+691 |                 item_code = _get_default_item()
+    |                             ^^^^^^^^^^^^^^^^^ F821
+692 | 
+693 |                 si_doc.append(
+    |
+
+zevar_core/migration/foxpro_import_extended.py:712:4: F821 Undefined name `frappe`
+    |
+711 |         if not dry_run and len(receipt_groups) % 50 == 0:
+712 |             frappe.db.commit()
+    |             ^^^^^^ F821
+713 | 
+714 |     if not dry_run:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:715:3: F821 Undefined name `frappe`
+    |
+714 |     if not dry_run:
+715 |         frappe.db.commit()
+    |         ^^^^^^ F821
+716 |     return stats
+    |
+
+zevar_core/migration/foxpro_import_extended.py:740:13: F821 Undefined name `find_dbf`
+    |
+738 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+739 | 
+740 |     dbf_path = find_dbf(backup_path, "TENDER.DBF")
+    |                ^^^^^^^^ F821
+741 |     if not dbf_path:
+742 |         stats["errors"].append("TENDER.DBF not found")
+    |
+
+zevar_core/migration/foxpro_import_extended.py:745:12: F821 Undefined name `read_dbf`
+    |
+743 |         return stats
+744 | 
+745 |     records = read_dbf(dbf_path)
+    |               ^^^^^^^^ F821
+746 |     stats["total"] = len(records)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:751:12: F821 Undefined name `frappe`
+    |
+749 |         return stats
+750 | 
+751 |     company = frappe.defaults.get_global_default("company") if not dry_run else "Default"
+    |               ^^^^^^ F821
+752 | 
+753 |     # Build SI cache for linking
+    |
+
+zevar_core/migration/foxpro_import_extended.py:755:12: F821 Undefined name `frappe`
+    |
+753 |     # Build SI cache for linking
+754 |     si_cache = {}
+755 |     for si in frappe.get_all(
+    |               ^^^^^^ F821
+756 |         "Sales Invoice",
+757 |         filters={"custom_legacy_trans_no": ["!=", ""]},
+    |
+
+zevar_core/migration/foxpro_import_extended.py:765:7: F821 Undefined name `clean_str`
+    |
+763 |         try:
+764 |             # Skip voided tenders
+765 |             if clean_str(record.get("voided")) == "Y":
+    |                ^^^^^^^^^ F821
+766 |                 stats["skipped"] += 1
+767 |                 continue
+    |
+
+zevar_core/migration/foxpro_import_extended.py:769:14: F821 Undefined name `clean_str`
+    |
+767 |                 continue
+768 | 
+769 |             transno = clean_str(record.get("transno"))
+    |                       ^^^^^^^^^ F821
+770 |             amount = clean_float(record.get("amount"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:770:13: F821 Undefined name `clean_float`
+    |
+769 |             transno = clean_str(record.get("transno"))
+770 |             amount = clean_float(record.get("amount"))
+    |                      ^^^^^^^^^^^ F821
+771 | 
+772 |             if amount <= 0:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:782:48: F821 Undefined name `_get_default_customer`
+    |
+780 |             # Resolve customer from linked Sales Invoice
+781 |             si_info = si_cache.get(transno)
+782 |             customer = si_info.customer if si_info else _get_default_customer()
+    |                                                         ^^^^^^^^^^^^^^^^^^^^^ F821
+783 | 
+784 |             doc = frappe.new_doc("Payment Entry")
+    |
+
+zevar_core/migration/foxpro_import_extended.py:784:10: F821 Undefined name `frappe`
+    |
+782 |             customer = si_info.customer if si_info else _get_default_customer()
+783 | 
+784 |             doc = frappe.new_doc("Payment Entry")
+    |                   ^^^^^^ F821
+785 |             doc.payment_type = "Receive"
+786 |             doc.posting_date = format_date(record.get("transdate")) or frappe.utils.today()
+    |
+
+zevar_core/migration/foxpro_import_extended.py:786:23: F821 Undefined name `format_date`
+    |
+784 |             doc = frappe.new_doc("Payment Entry")
+785 |             doc.payment_type = "Receive"
+786 |             doc.posting_date = format_date(record.get("transdate")) or frappe.utils.today()
+    |                                ^^^^^^^^^^^ F821
+787 |             doc.company = company
+788 |             doc.party_type = "Customer"
+    |
+
+zevar_core/migration/foxpro_import_extended.py:786:63: F821 Undefined name `frappe`
+    |
+784 |             doc = frappe.new_doc("Payment Entry")
+785 |             doc.payment_type = "Receive"
+786 |             doc.posting_date = format_date(record.get("transdate")) or frappe.utils.today()
+    |                                                                        ^^^^^^ F821
+787 |             doc.company = company
+788 |             doc.party_type = "Customer"
+    |
+
+zevar_core/migration/foxpro_import_extended.py:794:18: F821 Undefined name `clean_str`
+    |
+793 |             # Mode of payment
+794 |             tender_code = clean_str(record.get("tendercode"))
+    |                           ^^^^^^^^^ F821
+795 |             mode = TENDER_MODE_MAP.get(tender_code, clean_str(record.get("tenderdesc")) or "Cash")
+796 |             doc.mode_of_payment = mode
+    |
+
+zevar_core/migration/foxpro_import_extended.py:795:44: F821 Undefined name `clean_str`
+    |
+793 |             # Mode of payment
+794 |             tender_code = clean_str(record.get("tendercode"))
+795 |             mode = TENDER_MODE_MAP.get(tender_code, clean_str(record.get("tenderdesc")) or "Cash")
+    |                                                     ^^^^^^^^^ F821
+796 |             doc.mode_of_payment = mode
+    |
+
+zevar_core/migration/foxpro_import_extended.py:799:14: F821 Undefined name `clean_str`
+    |
+798 |             # Reference
+799 |             cardnum = clean_str(record.get("cardnum"))
+    |                       ^^^^^^^^^ F821
+800 |             doc.reference_no = cardnum or transno
+801 |             doc.reference_date = format_date(record.get("transdate")) or frappe.utils.today()
+    |
+
+zevar_core/migration/foxpro_import_extended.py:801:25: F821 Undefined name `format_date`
+    |
+799 |             cardnum = clean_str(record.get("cardnum"))
+800 |             doc.reference_no = cardnum or transno
+801 |             doc.reference_date = format_date(record.get("transdate")) or frappe.utils.today()
+    |                                  ^^^^^^^^^^^ F821
+802 | 
+803 |             # Link to Sales Invoice if available
+    |
+
+zevar_core/migration/foxpro_import_extended.py:801:65: F821 Undefined name `frappe`
+    |
+799 |             cardnum = clean_str(record.get("cardnum"))
+800 |             doc.reference_no = cardnum or transno
+801 |             doc.reference_date = format_date(record.get("transdate")) or frappe.utils.today()
+    |                                                                          ^^^^^^ F821
+802 | 
+803 |             # Link to Sales Invoice if available
+    |
+
+zevar_core/migration/foxpro_import_extended.py:819:5: F821 Undefined name `frappe`
+    |
+818 |             if (idx + 1) % 50 == 0:
+819 |                 frappe.db.commit()
+    |                 ^^^^^^ F821
+820 | 
+821 |         except Exception as e:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:825:3: F821 Undefined name `frappe`
+    |
+824 |     if not dry_run:
+825 |         frappe.db.commit()
+    |         ^^^^^^ F821
+826 |     return stats
+    |
+
+zevar_core/migration/foxpro_import_extended.py:847:13: F821 Undefined name `find_dbf`
+    |
+845 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+846 | 
+847 |     dbf_path = find_dbf(backup_path, "jrepair.DBF")
+    |                ^^^^^^^^ F821
+848 |     if not dbf_path:
+849 |         stats["errors"].append("jrepair.DBF not found")
+    |
+
+zevar_core/migration/foxpro_import_extended.py:852:12: F821 Undefined name `read_dbf`
+    |
+850 |         return stats
+851 | 
+852 |     records = read_dbf(dbf_path)
+    |               ^^^^^^^^ F821
+853 |     stats["total"] = len(records)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:860:11: F821 Undefined name `frappe`
+    |
+858 |     # Pre-fetch customer and repair type caches
+859 |     customer_cache = {}
+860 |     for c in frappe.get_all("Customer", fields=["name", "customer_name"]):
+    |              ^^^^^^ F821
+861 |         customer_cache[c.customer_name.lower()] = c.name
+    |
+
+zevar_core/migration/foxpro_import_extended.py:863:36: F821 Undefined name `frappe`
+    |
+861 |         customer_cache[c.customer_name.lower()] = c.name
+862 | 
+863 |     repair_types = [rt.name for rt in frappe.get_all("Repair Type")]
+    |                                       ^^^^^^ F821
+864 |     default_repair_type = repair_types[0] if repair_types else None
+    |
+
+zevar_core/migration/foxpro_import_extended.py:868:14: F821 Undefined name `clean_str`
+    |
+866 |     for _idx, record in enumerate(records):
+867 |         try:
+868 |             rpairno = clean_str(record.get("rpairno"))
+    |                       ^^^^^^^^^ F821
+869 |             customer_str = clean_str(record.get("customer"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:869:19: F821 Undefined name `clean_str`
+    |
+867 |         try:
+868 |             rpairno = clean_str(record.get("rpairno"))
+869 |             customer_str = clean_str(record.get("customer"))
+    |                            ^^^^^^^^^ F821
+870 | 
+871 |             if not rpairno:
+    |
+
+zevar_core/migration/foxpro_import_extended.py:876:7: F821 Undefined name `frappe`
+    |
+875 |             # Check existing
+876 |             if frappe.db.exists("Repair Order", {"customer_notes": f"Legacy Repair #{rpairno}"}):
+    |                ^^^^^^ F821
+877 |                 stats["skipped"] += 1
+878 |                 continue
+    |
+
+zevar_core/migration/foxpro_import_extended.py:884:10: F821 Undefined name `frappe`
+    |
+882 |                 continue
+883 | 
+884 |             doc = frappe.new_doc("Repair Order")
+    |                   ^^^^^^ F821
+885 | 
+886 |             # Customer resolution
+    |
+
+zevar_core/migration/foxpro_import_extended.py:894:58: F821 Undefined name `_get_default_customer`
+    |
+892 |                 else:
+893 |                     cust_name = customer_str
+894 |                 doc.customer = customer_cache.get(cust_name.lower(), _get_default_customer())
+    |                                                                      ^^^^^^^^^^^^^^^^^^^^^ F821
+895 | 
+896 |             doc.customer_phone = clean_str(record.get("phone"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:896:25: F821 Undefined name `clean_str`
+    |
+894 |                 doc.customer = customer_cache.get(cust_name.lower(), _get_default_customer())
+895 | 
+896 |             doc.customer_phone = clean_str(record.get("phone"))
+    |                                  ^^^^^^^^^ F821
+897 | 
+898 |             # Description
+    |
+
+zevar_core/migration/foxpro_import_extended.py:901:9: F821 Undefined name `clean_str`
+    |
+899 |             desc_parts = []
+900 |             for d in ["desc1", "desc2"]:
+901 |                 v = clean_str(record.get(d))
+    |                     ^^^^^^^^^ F821
+902 |                 if v:
+903 |                     desc_parts.append(v)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:907:16: F821 Undefined name `clean_str`
+    |
+906 |             # Repair type
+907 |             item_type = clean_str(record.get("itemtype"))
+    |                         ^^^^^^^^^ F821
+908 |             if item_type and item_type in repair_types:
+909 |                 doc.repair_type = item_type
+    |
+
+zevar_core/migration/foxpro_import_extended.py:914:15: F821 Undefined name `clean_str`
+    |
+913 |             # Metal
+914 |             goldtype = clean_str(record.get("goldtype"))
+    |                        ^^^^^^^^^ F821
+915 |             if goldtype:
+916 |                 resolved = _get_or_create_metal(goldtype)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:921:18: F821 Undefined name `clean_str`
+    |
+920 |             # Status
+921 |             status_code = clean_str(record.get("status"))
+    |                           ^^^^^^^^^ F821
+922 |             doc.status = REPAIR_STATUS_MAP.get(status_code, "Received")
+    |
+
+zevar_core/migration/foxpro_import_extended.py:925:13: F821 Undefined name `clean_str`
+    |
+924 |             # Dates
+925 |             datein = clean_str(record.get("datein"))
+    |                      ^^^^^^^^^ F821
+926 |             if datein:
+927 |                 doc.received_date = _parse_foxpro_date(datein)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:929:15: F821 Undefined name `clean_str`
+    |
+927 |                 doc.received_date = _parse_foxpro_date(datein)
+928 | 
+929 |             dateprom = clean_str(record.get("dateprom"))
+    |                        ^^^^^^^^^ F821
+930 |             if dateprom:
+931 |                 doc.promised_date = _parse_foxpro_date(dateprom)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:933:15: F821 Undefined name `clean_str`
+    |
+931 |                 doc.promised_date = _parse_foxpro_date(dateprom)
+932 | 
+933 |             datecomp = clean_str(record.get("datecomp"))
+    |                        ^^^^^^^^^ F821
+934 |             if datecomp:
+935 |                 doc.completed_date = _parse_foxpro_date(datecomp)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:938:25: F821 Undefined name `clean_float`
+    |
+937 |             # Costs
+938 |             doc.estimated_cost = clean_float(record.get("price"))
+    |                                  ^^^^^^^^^^^ F821
+939 |             doc.material_cost = clean_float(record.get("matert"))
+940 |             doc.labor_cost = clean_float(record.get("labort"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:939:24: F821 Undefined name `clean_float`
+    |
+937 |             # Costs
+938 |             doc.estimated_cost = clean_float(record.get("price"))
+939 |             doc.material_cost = clean_float(record.get("matert"))
+    |                                 ^^^^^^^^^^^ F821
+940 |             doc.labor_cost = clean_float(record.get("labort"))
+941 |             doc.total_cost = clean_float(record.get("totalchar"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:940:21: F821 Undefined name `clean_float`
+    |
+938 |             doc.estimated_cost = clean_float(record.get("price"))
+939 |             doc.material_cost = clean_float(record.get("matert"))
+940 |             doc.labor_cost = clean_float(record.get("labort"))
+    |                              ^^^^^^^^^^^ F821
+941 |             doc.total_cost = clean_float(record.get("totalchar"))
+    |
+
+zevar_core/migration/foxpro_import_extended.py:941:21: F821 Undefined name `clean_float`
+    |
+939 |             doc.material_cost = clean_float(record.get("matert"))
+940 |             doc.labor_cost = clean_float(record.get("labort"))
+941 |             doc.total_cost = clean_float(record.get("totalchar"))
+    |                              ^^^^^^^^^^^ F821
+942 | 
+943 |             # Notes
+    |
+
+zevar_core/migration/foxpro_import_extended.py:946:9: F821 Undefined name `clean_str`
+    |
+944 |             instructions = []
+945 |             for inst in ["instruc1", "instruc2", "instruc3", "instruc4"]:
+946 |                 v = clean_str(record.get(inst))
+    |                     ^^^^^^^^^ F821
+947 |                 if v:
+948 |                     instructions.append(v)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:958:3: F821 Undefined name `frappe`
+    |
+957 |     if not dry_run:
+958 |         frappe.db.commit()
+    |         ^^^^^^ F821
+959 |     return stats
+    |
+
+zevar_core/migration/foxpro_import_extended.py:971:11: F821 Undefined name `datetime`
+    |
+969 |     for fmt in ("%m/%d/%y", "%m/%d/%Y", "%Y%m%d", "%m%d%y"):
+970 |         try:
+971 |             return datetime.strptime(val, fmt).strftime("%Y-%m-%d")
+    |                    ^^^^^^^^ F821
+972 |         except ValueError:
+973 |             continue
+    |
+
+zevar_core/migration/foxpro_import_extended.py:987:16: F821 Undefined name `find_dbf`
+    |
+986 |     # Read master records
+987 |     master_path = find_dbf(backup_path, "lw-maste.DBF")
+    |                   ^^^^^^^^ F821
+988 |     if not master_path:
+989 |         stats["errors"].append("lw-maste.DBF not found")
+    |
+
+zevar_core/migration/foxpro_import_extended.py:992:19: F821 Undefined name `read_dbf`
+    |
+990 |         return stats
+991 | 
+992 |     master_records = read_dbf(master_path)
+    |                      ^^^^^^^^ F821
+993 |     stats["total"] = len(master_records)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:997:15: F821 Undefined name `find_dbf`
+    |
+995 |     # Read entry (schedule) records
+996 |     entry_records = []
+997 |     entry_path = find_dbf(backup_path, "lw-entry.DBF")
+    |                  ^^^^^^^^ F821
+998 |     if entry_path:
+999 |         entry_records = read_dbf(entry_path)
+    |
+
+zevar_core/migration/foxpro_import_extended.py:999:19: F821 Undefined name `read_dbf`
+     |
+ 997 |     entry_path = find_dbf(backup_path, "lw-entry.DBF")
+ 998 |     if entry_path:
+ 999 |         entry_records = read_dbf(entry_path)
+     |                         ^^^^^^^^ F821
+1000 | 
+1001 |     # Group entries by ARNUM
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1004:11: F821 Undefined name `clean_str`
+     |
+1002 |     entries_by_arnum = {}
+1003 |     for entry in entry_records:
+1004 |         arnum = clean_str(entry.get("arnum"))
+     |                 ^^^^^^^^^ F821
+1005 |         if arnum:
+1006 |             entries_by_arnum.setdefault(arnum, []).append(entry)
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1010:11: F821 Undefined name `frappe`
+     |
+1008 |     # Pre-fetch customers
+1009 |     customer_cache = {}
+1010 |     for c in frappe.get_all("Customer", fields=["name", "customer_name"]):
+     |              ^^^^^^ F821
+1011 |         customer_cache[c.customer_name.lower()] = c.name
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1015:12: F821 Undefined name `clean_str`
+     |
+1013 |     for idx, record in enumerate(master_records):
+1014 |         try:
+1015 |             arnum = clean_str(record.get("arnum"))
+     |                     ^^^^^^^^^ F821
+1016 |             first = clean_str(record.get("first"))
+1017 |             last = clean_str(record.get("last"))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1016:12: F821 Undefined name `clean_str`
+     |
+1014 |         try:
+1015 |             arnum = clean_str(record.get("arnum"))
+1016 |             first = clean_str(record.get("first"))
+     |                     ^^^^^^^^^ F821
+1017 |             last = clean_str(record.get("last"))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1017:11: F821 Undefined name `clean_str`
+     |
+1015 |             arnum = clean_str(record.get("arnum"))
+1016 |             first = clean_str(record.get("first"))
+1017 |             last = clean_str(record.get("last"))
+     |                    ^^^^^^^^^ F821
+1018 | 
+1019 |             if not arnum:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1031:16: F821 Undefined name `frappe`
+     |
+1029 |             if not customer:
+1030 |                 # Try by ARNUM matching legacy account number
+1031 |                 customer = frappe.db.get_value("Customer", {"custom_legacy_account_no": arnum}, "name")
+     |                            ^^^^^^ F821
+1032 | 
+1033 |             if not customer:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1036:36: F821 Undefined name `frappe`
+     |
+1034 |                 # Create customer on-the-fly
+1035 |                 cust_name = f"{first} {last}".strip() if (first or last) else f"Layaway Customer {arnum}"
+1036 |                 if len(cust_name) >= 2 and not frappe.db.exists("Customer", {"customer_name": cust_name}):
+     |                                                ^^^^^^ F821
+1037 |                     try:
+1038 |                         c = frappe.new_doc("Customer")
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1038:11: F821 Undefined name `frappe`
+     |
+1036 |                 if len(cust_name) >= 2 and not frappe.db.exists("Customer", {"customer_name": cust_name}):
+1037 |                     try:
+1038 |                         c = frappe.new_doc("Customer")
+     |                             ^^^^^^ F821
+1039 |                         c.customer_name = cust_name
+1040 |                         c.customer_type = "Individual"
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1043:7: F821 Undefined name `_set_custom_field`
+     |
+1041 |                         c.customer_group = "Individual"
+1042 |                         c.territory = "All Territories"
+1043 |                         _set_custom_field(c, "custom_legacy_account_no", f"LW-{arnum}")
+     |                         ^^^^^^^^^^^^^^^^^ F821
+1044 |                         c.insert(ignore_permissions=True, ignore_mandatory=True)
+1045 |                         customer = c.name
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1048:18: F821 Undefined name `_get_default_customer`
+     |
+1046 |                         customer_cache[cust_name.lower()] = c.name
+1047 |                     except Exception:
+1048 |                         customer = _get_default_customer()
+     |                                    ^^^^^^^^^^^^^^^^^^^^^ F821
+1049 |                 else:
+1050 |                     customer = _get_default_customer()
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1050:17: F821 Undefined name `_get_default_customer`
+     |
+1048 |                         customer = _get_default_customer()
+1049 |                 else:
+1050 |                     customer = _get_default_customer()
+     |                                ^^^^^^^^^^^^^^^^^^^^^ F821
+1051 | 
+1052 |             if dry_run:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1056:10: F821 Undefined name `frappe`
+     |
+1054 |                 continue
+1055 | 
+1056 |             doc = frappe.new_doc("Layaway Contract")
+     |                   ^^^^^^ F821
+1057 |             doc.customer = customer
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1060:11: F821 Undefined name `clean_str`
+     |
+1059 |             # Status
+1060 |             code = clean_str(record.get("code"))
+     |                    ^^^^^^^^^ F821
+1061 |             status_map = {"L": "Active", "C": "Completed", "X": "Cancelled"}
+1062 |             doc.status = status_map.get(code, "Active")
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1065:14: F821 Undefined name `clean_float`
+     |
+1064 |             # Amounts
+1065 |             balance = clean_float(record.get("balance"))
+     |                       ^^^^^^^^^^^ F821
+1066 |             ytdsales = clean_float(record.get("ytdsales"))
+1067 |             total_amount = ytdsales if ytdsales > 0 else balance
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1066:15: F821 Undefined name `clean_float`
+     |
+1064 |             # Amounts
+1065 |             balance = clean_float(record.get("balance"))
+1066 |             ytdsales = clean_float(record.get("ytdsales"))
+     |                        ^^^^^^^^^^^ F821
+1067 |             total_amount = ytdsales if ytdsales > 0 else balance
+1068 |             doc.balance_amount = balance
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1076:25: F821 Undefined name `format_date`
+     |
+1074 |             if entries:
+1075 |                 first_entry = entries[0]
+1076 |                 doc.contract_date = format_date(first_entry.get("invdate")) or frappe.utils.today()
+     |                                     ^^^^^^^^^^^ F821
+1077 |                 doc.maximum_duration_months = "6"  # default
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1076:68: F821 Undefined name `frappe`
+     |
+1074 |             if entries:
+1075 |                 first_entry = entries[0]
+1076 |                 doc.contract_date = format_date(first_entry.get("invdate")) or frappe.utils.today()
+     |                                                                                ^^^^^^ F821
+1077 |                 doc.maximum_duration_months = "6"  # default
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1081:17: F821 Undefined name `clean_float`
+     |
+1079 |                 # Add payment schedule from entries
+1080 |                 for entry in entries:
+1081 |                     amt_paid = clean_float(entry.get("amtpaid"))
+     |                                ^^^^^^^^^^^ F821
+1082 |                     pay_date = format_date(entry.get("datepaid"))
+1083 |                     if pay_date:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1082:17: F821 Undefined name `format_date`
+     |
+1080 |                 for entry in entries:
+1081 |                     amt_paid = clean_float(entry.get("amtpaid"))
+1082 |                     pay_date = format_date(entry.get("datepaid"))
+     |                                ^^^^^^^^^^^ F821
+1083 |                     if pay_date:
+1084 |                         doc.append(
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1090:14: F821 Undefined name `clean_float`
+     |
+1088 |                                 "expected_amount": amt_paid
+1089 |                                 if amt_paid > 0
+1090 |                                 else clean_float(entry.get("invtot")),
+     |                                      ^^^^^^^^^^^ F821
+1091 |                             },
+1092 |                         )
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1094:25: F821 Undefined name `frappe`
+     |
+1092 |                         )
+1093 |             else:
+1094 |                 doc.contract_date = frappe.utils.today()
+     |                                     ^^^^^^ F821
+1095 |                 doc.maximum_duration_months = "6"
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1101:19: F821 Undefined name `_get_default_item`
+     |
+1099 |                 "items",
+1100 |                 {
+1101 |                     "item_code": _get_default_item(),
+     |                                  ^^^^^^^^^^^^^^^^^ F821
+1102 |                     "item_name": f"Layaway #{arnum}",
+1103 |                     "qty": 1,
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1112:5: F821 Undefined name `frappe`
+     |
+1111 |             if (idx + 1) % 100 == 0:
+1112 |                 frappe.db.commit()
+     |                 ^^^^^^ F821
+1113 | 
+1114 |         except Exception as e:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1118:3: F821 Undefined name `frappe`
+     |
+1117 |     if not dry_run:
+1118 |         frappe.db.commit()
+     |         ^^^^^^ F821
+1119 |     return stats
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1131:13: F821 Undefined name `find_dbf`
+     |
+1129 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+1130 | 
+1131 |     dbf_path = find_dbf(backup_path, "lw-link.DBF")
+     |                ^^^^^^^^ F821
+1132 |     if not dbf_path:
+1133 |         stats["errors"].append("lw-link.DBF not found")
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1136:12: F821 Undefined name `read_dbf`
+     |
+1134 |         return stats
+1135 | 
+1136 |     records = read_dbf(dbf_path)
+     |               ^^^^^^^^ F821
+1137 |     stats["total"] = len(records)
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1142:12: F821 Undefined name `frappe`
+     |
+1140 |         return stats
+1141 | 
+1142 |     company = frappe.defaults.get_global_default("company") if not dry_run else "Default"
+     |               ^^^^^^ F821
+1143 | 
+1144 |     # Build layaway contract cache by customer name patterns
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1145:21: F821 Undefined name `_get_default_customer`
+     |
+1144 |     # Build layaway contract cache by customer name patterns
+1145 |     default_customer = _get_default_customer()
+     |                        ^^^^^^^^^^^^^^^^^^^^^ F821
+1146 | 
+1147 |     for idx, record in enumerate(records):
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1149:13: F821 Undefined name `clean_float`
+     |
+1147 |     for idx, record in enumerate(records):
+1148 |         try:
+1149 |             amount = clean_float(record.get("amount"))
+     |                      ^^^^^^^^^^^ F821
+1150 |             if amount <= 0:
+1151 |                 stats["skipped"] += 1
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1158:12: F821 Undefined name `clean_str`
+     |
+1156 |                 continue
+1157 | 
+1158 |             arnum = clean_str(record.get("arnum"))
+     |                     ^^^^^^^^^ F821
+1159 | 
+1160 |             doc = frappe.new_doc("Payment Entry")
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1160:10: F821 Undefined name `frappe`
+     |
+1158 |             arnum = clean_str(record.get("arnum"))
+1159 | 
+1160 |             doc = frappe.new_doc("Payment Entry")
+     |                   ^^^^^^ F821
+1161 |             doc.payment_type = "Receive"
+1162 |             doc.posting_date = format_date(record.get("datepaid")) or frappe.utils.today()
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1162:23: F821 Undefined name `format_date`
+     |
+1160 |             doc = frappe.new_doc("Payment Entry")
+1161 |             doc.payment_type = "Receive"
+1162 |             doc.posting_date = format_date(record.get("datepaid")) or frappe.utils.today()
+     |                                ^^^^^^^^^^^ F821
+1163 |             doc.company = company
+1164 |             doc.party_type = "Customer"
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1162:62: F821 Undefined name `frappe`
+     |
+1160 |             doc = frappe.new_doc("Payment Entry")
+1161 |             doc.payment_type = "Receive"
+1162 |             doc.posting_date = format_date(record.get("datepaid")) or frappe.utils.today()
+     |                                                                       ^^^^^^ F821
+1163 |             doc.company = company
+1164 |             doc.party_type = "Customer"
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1169:17: F821 Undefined name `clean_str`
+     |
+1167 |             doc.received_amount = amount
+1168 | 
+1169 |             trans_type = clean_str(record.get("transtype")) or "LAYAWAY"
+     |                          ^^^^^^^^^ F821
+1170 |             pay_type = clean_str(record.get("paytype"))
+1171 |             mode = TENDER_MODE_MAP.get(pay_type, "Cash")
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1170:15: F821 Undefined name `clean_str`
+     |
+1169 |             trans_type = clean_str(record.get("transtype")) or "LAYAWAY"
+1170 |             pay_type = clean_str(record.get("paytype"))
+     |                        ^^^^^^^^^ F821
+1171 |             mode = TENDER_MODE_MAP.get(pay_type, "Cash")
+1172 |             doc.mode_of_payment = mode
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1174:37: F821 Undefined name `clean_str`
+     |
+1172 |             doc.mode_of_payment = mode
+1173 | 
+1174 |             doc.reference_no = f"LW-{arnum}-{clean_str(record.get('invnum'))}"
+     |                                              ^^^^^^^^^ F821
+1175 |             doc.reference_date = format_date(record.get("datepaid")) or frappe.utils.today()
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1175:25: F821 Undefined name `format_date`
+     |
+1174 |             doc.reference_no = f"LW-{arnum}-{clean_str(record.get('invnum'))}"
+1175 |             doc.reference_date = format_date(record.get("datepaid")) or frappe.utils.today()
+     |                                  ^^^^^^^^^^^ F821
+1176 | 
+1177 |             doc.remarks = f"Legacy layaway payment: {trans_type}, AR#{arnum}"
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1175:64: F821 Undefined name `frappe`
+     |
+1174 |             doc.reference_no = f"LW-{arnum}-{clean_str(record.get('invnum'))}"
+1175 |             doc.reference_date = format_date(record.get("datepaid")) or frappe.utils.today()
+     |                                                                         ^^^^^^ F821
+1176 | 
+1177 |             doc.remarks = f"Legacy layaway payment: {trans_type}, AR#{arnum}"
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1183:5: F821 Undefined name `frappe`
+     |
+1182 |             if (idx + 1) % 100 == 0:
+1183 |                 frappe.db.commit()
+     |                 ^^^^^^ F821
+1184 | 
+1185 |         except Exception as e:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1189:3: F821 Undefined name `frappe`
+     |
+1188 |     if not dry_run:
+1189 |         frappe.db.commit()
+     |         ^^^^^^ F821
+1190 |     return stats
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1202:13: F821 Undefined name `find_dbf`
+     |
+1200 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+1201 | 
+1202 |     dbf_path = find_dbf(backup_path, "saleman.dbf")
+     |                ^^^^^^^^ F821
+1203 |     if not dbf_path:
+1204 |         stats["errors"].append("saleman.dbf not found")
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1207:12: F821 Undefined name `read_dbf`
+     |
+1205 |         return stats
+1206 | 
+1207 |     records = read_dbf(dbf_path)
+     |               ^^^^^^^^ F821
+1208 |     stats["total"] = len(records)
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1212:12: F821 Undefined name `clean_str`
+     |
+1210 |     for record in records:
+1211 |         try:
+1212 |             empid = clean_str(record.get("empid"))
+     |                     ^^^^^^^^^ F821
+1213 |             if not empid:
+1214 |                 stats["skipped"] += 1
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1218:16: F821 Undefined name `clean_str`
+     |
+1217 |             # Skip system accounts
+1218 |             clerkname = clean_str(record.get("clerkname"))
+     |                         ^^^^^^^^^ F821
+1219 |             if clerkname == "SYSTEM ACCOUNT" or empid == "00001":
+1220 |                 stats["skipped"] += 1
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1224:15: F821 Undefined name `frappe`
+     |
+1223 |             # Find matching Employee
+1224 |             emp_name = frappe.db.get_value("Employee", {"employee_number": empid}, "name")
+     |                        ^^^^^^ F821
+1225 |             if not emp_name:
+1226 |                 stats["skipped"] += 1
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1233:10: F821 Undefined name `frappe`
+     |
+1231 |                 continue
+1232 | 
+1233 |             doc = frappe.get_doc("Employee", emp_name)
+     |                   ^^^^^^ F821
+1234 | 
+1235 |             _set_custom_field(doc, "custom_initials", clean_str(record.get("initials")))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1235:4: F821 Undefined name `_set_custom_field`
+     |
+1233 |             doc = frappe.get_doc("Employee", emp_name)
+1234 | 
+1235 |             _set_custom_field(doc, "custom_initials", clean_str(record.get("initials")))
+     |             ^^^^^^^^^^^^^^^^^ F821
+1236 |             _set_custom_field(doc, "custom_commission_rate", clean_float(record.get("commission")))
+1237 |             _set_custom_field(doc, "custom_sales_level", clean_str(record.get("level")))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1235:46: F821 Undefined name `clean_str`
+     |
+1233 |             doc = frappe.get_doc("Employee", emp_name)
+1234 | 
+1235 |             _set_custom_field(doc, "custom_initials", clean_str(record.get("initials")))
+     |                                                       ^^^^^^^^^ F821
+1236 |             _set_custom_field(doc, "custom_commission_rate", clean_float(record.get("commission")))
+1237 |             _set_custom_field(doc, "custom_sales_level", clean_str(record.get("level")))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1236:4: F821 Undefined name `_set_custom_field`
+     |
+1235 |             _set_custom_field(doc, "custom_initials", clean_str(record.get("initials")))
+1236 |             _set_custom_field(doc, "custom_commission_rate", clean_float(record.get("commission")))
+     |             ^^^^^^^^^^^^^^^^^ F821
+1237 |             _set_custom_field(doc, "custom_sales_level", clean_str(record.get("level")))
+1238 |             _set_custom_field(doc, "custom_discount_permission", clean_float(record.get("disc_per")))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1236:53: F821 Undefined name `clean_float`
+     |
+1235 |             _set_custom_field(doc, "custom_initials", clean_str(record.get("initials")))
+1236 |             _set_custom_field(doc, "custom_commission_rate", clean_float(record.get("commission")))
+     |                                                              ^^^^^^^^^^^ F821
+1237 |             _set_custom_field(doc, "custom_sales_level", clean_str(record.get("level")))
+1238 |             _set_custom_field(doc, "custom_discount_permission", clean_float(record.get("disc_per")))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1237:4: F821 Undefined name `_set_custom_field`
+     |
+1235 |             _set_custom_field(doc, "custom_initials", clean_str(record.get("initials")))
+1236 |             _set_custom_field(doc, "custom_commission_rate", clean_float(record.get("commission")))
+1237 |             _set_custom_field(doc, "custom_sales_level", clean_str(record.get("level")))
+     |             ^^^^^^^^^^^^^^^^^ F821
+1238 |             _set_custom_field(doc, "custom_discount_permission", clean_float(record.get("disc_per")))
+1239 |             _set_custom_field(doc, "custom_ytd_sales", clean_float(record.get("ytdsales")))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1237:49: F821 Undefined name `clean_str`
+     |
+1235 |             _set_custom_field(doc, "custom_initials", clean_str(record.get("initials")))
+1236 |             _set_custom_field(doc, "custom_commission_rate", clean_float(record.get("commission")))
+1237 |             _set_custom_field(doc, "custom_sales_level", clean_str(record.get("level")))
+     |                                                          ^^^^^^^^^ F821
+1238 |             _set_custom_field(doc, "custom_discount_permission", clean_float(record.get("disc_per")))
+1239 |             _set_custom_field(doc, "custom_ytd_sales", clean_float(record.get("ytdsales")))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1238:4: F821 Undefined name `_set_custom_field`
+     |
+1236 |             _set_custom_field(doc, "custom_commission_rate", clean_float(record.get("commission")))
+1237 |             _set_custom_field(doc, "custom_sales_level", clean_str(record.get("level")))
+1238 |             _set_custom_field(doc, "custom_discount_permission", clean_float(record.get("disc_per")))
+     |             ^^^^^^^^^^^^^^^^^ F821
+1239 |             _set_custom_field(doc, "custom_ytd_sales", clean_float(record.get("ytdsales")))
+1240 |             _set_custom_field(doc, "custom_sales_goal", clean_float(record.get("goal")))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1238:57: F821 Undefined name `clean_float`
+     |
+1236 |             _set_custom_field(doc, "custom_commission_rate", clean_float(record.get("commission")))
+1237 |             _set_custom_field(doc, "custom_sales_level", clean_str(record.get("level")))
+1238 |             _set_custom_field(doc, "custom_discount_permission", clean_float(record.get("disc_per")))
+     |                                                                  ^^^^^^^^^^^ F821
+1239 |             _set_custom_field(doc, "custom_ytd_sales", clean_float(record.get("ytdsales")))
+1240 |             _set_custom_field(doc, "custom_sales_goal", clean_float(record.get("goal")))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1239:4: F821 Undefined name `_set_custom_field`
+     |
+1237 |             _set_custom_field(doc, "custom_sales_level", clean_str(record.get("level")))
+1238 |             _set_custom_field(doc, "custom_discount_permission", clean_float(record.get("disc_per")))
+1239 |             _set_custom_field(doc, "custom_ytd_sales", clean_float(record.get("ytdsales")))
+     |             ^^^^^^^^^^^^^^^^^ F821
+1240 |             _set_custom_field(doc, "custom_sales_goal", clean_float(record.get("goal")))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1239:47: F821 Undefined name `clean_float`
+     |
+1237 |             _set_custom_field(doc, "custom_sales_level", clean_str(record.get("level")))
+1238 |             _set_custom_field(doc, "custom_discount_permission", clean_float(record.get("disc_per")))
+1239 |             _set_custom_field(doc, "custom_ytd_sales", clean_float(record.get("ytdsales")))
+     |                                                        ^^^^^^^^^^^ F821
+1240 |             _set_custom_field(doc, "custom_sales_goal", clean_float(record.get("goal")))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1240:4: F821 Undefined name `_set_custom_field`
+     |
+1238 |             _set_custom_field(doc, "custom_discount_permission", clean_float(record.get("disc_per")))
+1239 |             _set_custom_field(doc, "custom_ytd_sales", clean_float(record.get("ytdsales")))
+1240 |             _set_custom_field(doc, "custom_sales_goal", clean_float(record.get("goal")))
+     |             ^^^^^^^^^^^^^^^^^ F821
+1241 | 
+1242 |             homestore = clean_str(record.get("homestore"))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1240:48: F821 Undefined name `clean_float`
+     |
+1238 |             _set_custom_field(doc, "custom_discount_permission", clean_float(record.get("disc_per")))
+1239 |             _set_custom_field(doc, "custom_ytd_sales", clean_float(record.get("ytdsales")))
+1240 |             _set_custom_field(doc, "custom_sales_goal", clean_float(record.get("goal")))
+     |                                                         ^^^^^^^^^^^ F821
+1241 | 
+1242 |             homestore = clean_str(record.get("homestore"))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1242:16: F821 Undefined name `clean_str`
+     |
+1240 |             _set_custom_field(doc, "custom_sales_goal", clean_float(record.get("goal")))
+1241 | 
+1242 |             homestore = clean_str(record.get("homestore"))
+     |                         ^^^^^^^^^ F821
+1243 |             if homestore:
+1244 |                 sc = homestore.zfill(2)
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1245:8: F821 Undefined name `frappe`
+     |
+1243 |             if homestore:
+1244 |                 sc = homestore.zfill(2)
+1245 |                 if frappe.db.exists("Store Location", sc):
+     |                    ^^^^^^ F821
+1246 |                     _set_custom_field(doc, "custom_home_store", sc)
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1246:6: F821 Undefined name `_set_custom_field`
+     |
+1244 |                 sc = homestore.zfill(2)
+1245 |                 if frappe.db.exists("Store Location", sc):
+1246 |                     _set_custom_field(doc, "custom_home_store", sc)
+     |                     ^^^^^^^^^^^^^^^^^ F821
+1247 | 
+1248 |             # Manager designation
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1249:7: F821 Undefined name `clean_int`
+     |
+1248 |             # Manager designation
+1249 |             if clean_int(record.get("nmanager")) == 1:
+     |                ^^^^^^^^^ F821
+1250 |                 _set_custom_field(doc, "custom_is_manager", 1)
+1251 |                 _ensure_designation("Manager")
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1250:5: F821 Undefined name `_set_custom_field`
+     |
+1248 |             # Manager designation
+1249 |             if clean_int(record.get("nmanager")) == 1:
+1250 |                 _set_custom_field(doc, "custom_is_manager", 1)
+     |                 ^^^^^^^^^^^^^^^^^ F821
+1251 |                 _ensure_designation("Manager")
+1252 |                 doc.designation = "Manager"
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1251:5: F821 Undefined name `_ensure_designation`
+     |
+1249 |             if clean_int(record.get("nmanager")) == 1:
+1250 |                 _set_custom_field(doc, "custom_is_manager", 1)
+1251 |                 _ensure_designation("Manager")
+     |                 ^^^^^^^^^^^^^^^^^^^ F821
+1252 |                 doc.designation = "Manager"
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1255:16: F821 Undefined name `format_date`
+     |
+1254 |             # Update hire date if available and not set
+1255 |             hire_date = format_date(record.get("hiredate"))
+     |                         ^^^^^^^^^^^ F821
+1256 |             if hire_date and not doc.date_of_joining:
+1257 |                 doc.date_of_joining = hire_date
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1260:16: F821 Undefined name `format_date`
+     |
+1259 |             # If exit date, mark as Left
+1260 |             exit_date = format_date(record.get("exitdate"))
+     |                         ^^^^^^^^^^^ F821
+1261 |             if exit_date:
+1262 |                 doc.status = "Left"
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1272:3: F821 Undefined name `frappe`
+     |
+1271 |     if not dry_run:
+1272 |         frappe.db.commit()
+     |         ^^^^^^ F821
+1273 |     return stats
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1285:13: F821 Undefined name `find_dbf`
+     |
+1283 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+1284 | 
+1285 |     dbf_path = find_dbf(backup_path, "bonus.dbf")
+     |                ^^^^^^^^ F821
+1286 |     if not dbf_path:
+1287 |         stats["errors"].append("bonus.dbf not found")
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1290:12: F821 Undefined name `read_dbf`
+     |
+1288 |         return stats
+1289 | 
+1290 |     records = read_dbf(dbf_path)
+     |               ^^^^^^^^ F821
+1291 |     stats["total"] = len(records)
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1299:13: F821 Undefined name `clean_str`
+     |
+1297 |     emp_groups = {}
+1298 |     for record in records:
+1299 |         emplnum = clean_str(record.get("emplnum"))
+     |                   ^^^^^^^^^ F821
+1300 |         if emplnum:
+1301 |             emp_groups.setdefault(emplnum, []).append(record)
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1310:15: F821 Undefined name `frappe`
+     |
+1309 |             # Resolve employee
+1310 |             emp_name = frappe.db.get_value(
+     |                        ^^^^^^ F821
+1311 |                 "Employee", {"employee_number": str(int(float(emplnum))).zfill(5)}, "name"
+1312 |             )
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1318:7: F821 Undefined name `frappe`
+     |
+1317 |             rule_name = f"Commission - Employee {emplnum}"
+1318 |             if frappe.db.exists("Commission Rule", {"rule_name": rule_name}):
+     |                ^^^^^^ F821
+1319 |                 stats["skipped"] += len(bonus_records)
+1320 |                 continue
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1328:5: F821 Undefined name `clean_float`
+     |
+1326 |             # Determine calculation type
+1327 |             has_amount_tiers = any(
+1328 |                 clean_float(r.get("amt_from")) > 0 or clean_float(r.get("amt_upto")) > 0
+     |                 ^^^^^^^^^^^ F821
+1329 |                 for r in bonus_records
+1330 |             )
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1328:43: F821 Undefined name `clean_float`
+     |
+1326 |             # Determine calculation type
+1327 |             has_amount_tiers = any(
+1328 |                 clean_float(r.get("amt_from")) > 0 or clean_float(r.get("amt_upto")) > 0
+     |                                                       ^^^^^^^^^^^ F821
+1329 |                 for r in bonus_records
+1330 |             )
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1333:10: F821 Undefined name `frappe`
+     |
+1331 |             calc_type = "By Sale Amount" if has_amount_tiers else "By Discount Range"
+1332 | 
+1333 |             doc = frappe.new_doc("Commission Rule")
+     |                   ^^^^^^ F821
+1334 |             doc.rule_name = rule_name
+1335 |             doc.employee = emp_name
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1340:18: F821 Undefined name `clean_float`
+     |
+1338 |             for br in bonus_records:
+1339 |                 if calc_type == "By Discount Range":
+1340 |                     disc_from = clean_float(br.get("disc_from"))
+     |                                 ^^^^^^^^^^^ F821
+1341 |                     disc_to = clean_float(br.get("disc_to"))
+1342 |                     percent = clean_float(br.get("percent"))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1341:16: F821 Undefined name `clean_float`
+     |
+1339 |                 if calc_type == "By Discount Range":
+1340 |                     disc_from = clean_float(br.get("disc_from"))
+1341 |                     disc_to = clean_float(br.get("disc_to"))
+     |                               ^^^^^^^^^^^ F821
+1342 |                     percent = clean_float(br.get("percent"))
+1343 |                     if percent > 0:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1342:16: F821 Undefined name `clean_float`
+     |
+1340 |                     disc_from = clean_float(br.get("disc_from"))
+1341 |                     disc_to = clean_float(br.get("disc_to"))
+1342 |                     percent = clean_float(br.get("percent"))
+     |                               ^^^^^^^^^^^ F821
+1343 |                     if percent > 0:
+1344 |                         doc.append(
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1353:17: F821 Undefined name `clean_float`
+     |
+1351 |                         )
+1352 |                 else:
+1353 |                     amt_from = clean_float(br.get("amt_from"))
+     |                                ^^^^^^^^^^^ F821
+1354 |                     amt_upto = clean_float(br.get("amt_upto"))
+1355 |                     commrate = clean_float(br.get("commrate"))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1354:17: F821 Undefined name `clean_float`
+     |
+1352 |                 else:
+1353 |                     amt_from = clean_float(br.get("amt_from"))
+1354 |                     amt_upto = clean_float(br.get("amt_upto"))
+     |                                ^^^^^^^^^^^ F821
+1355 |                     commrate = clean_float(br.get("commrate"))
+1356 |                     if commrate > 0:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1355:17: F821 Undefined name `clean_float`
+     |
+1353 |                     amt_from = clean_float(br.get("amt_from"))
+1354 |                     amt_upto = clean_float(br.get("amt_upto"))
+1355 |                     commrate = clean_float(br.get("commrate"))
+     |                                ^^^^^^^^^^^ F821
+1356 |                     if commrate > 0:
+1357 |                         doc.append(
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1374:3: F821 Undefined name `frappe`
+     |
+1373 |     if not dry_run:
+1374 |         frappe.db.commit()
+     |         ^^^^^^ F821
+1375 |     return stats
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1387:13: F821 Undefined name `find_dbf`
+     |
+1385 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+1386 | 
+1387 |     dbf_path = find_dbf(backup_path, "payroll1.dbf")
+     |                ^^^^^^^^ F821
+1388 |     if not dbf_path:
+1389 |         stats["errors"].append("payroll1.dbf not found")
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1392:12: F821 Undefined name `read_dbf`
+     |
+1390 |         return stats
+1391 | 
+1392 |     records = read_dbf(dbf_path)
+     |               ^^^^^^^^ F821
+1393 |     stats["total"] = len(records)
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1401:12: F821 Undefined name `clean_str`
+     |
+1399 |     for idx, record in enumerate(records):
+1400 |         try:
+1401 |             inout = clean_str(record.get("inout"))
+     |                     ^^^^^^^^^ F821
+1402 |             if inout != "IN":
+1403 |                 stats["skipped"] += 1
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1406:12: F821 Undefined name `clean_str`
+     |
+1404 |                 continue
+1405 | 
+1406 |             empid = clean_str(record.get("empid"))
+     |                     ^^^^^^^^^ F821
+1407 |             weekof = format_date(record.get("weekof"))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1407:13: F821 Undefined name `format_date`
+     |
+1406 |             empid = clean_str(record.get("empid"))
+1407 |             weekof = format_date(record.get("weekof"))
+     |                      ^^^^^^^^^^^ F821
+1408 | 
+1409 |             if not empid:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1414:15: F821 Undefined name `frappe`
+     |
+1413 |             # Resolve employee
+1414 |             emp_name = frappe.db.get_value("Employee", {"employee_number": empid}, "name")
+     |                        ^^^^^^ F821
+1415 |             if not emp_name:
+1416 |                 stats["skipped"] += 1
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1431:7: F821 Undefined name `frappe`
+     |
+1430 |             # Check for duplicate
+1431 |             if frappe.db.exists("Attendance", {"employee": emp_name, "attendance_date": attendance_date}):
+     |                ^^^^^^ F821
+1432 |                 stats["skipped"] += 1
+1433 |                 continue
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1435:12: F821 Undefined name `clean_float`
+     |
+1433 |                 continue
+1434 | 
+1435 |             hours = clean_float(record.get("hours"))
+     |                     ^^^^^^^^^^^ F821
+1436 | 
+1437 |             doc = frappe.new_doc("Attendance")
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1437:10: F821 Undefined name `frappe`
+     |
+1435 |             hours = clean_float(record.get("hours"))
+1436 | 
+1437 |             doc = frappe.new_doc("Attendance")
+     |                   ^^^^^^ F821
+1438 |             doc.employee = emp_name
+1439 |             doc.attendance_date = attendance_date
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1447:5: F821 Undefined name `frappe`
+     |
+1446 |             if (idx + 1) % 100 == 0:
+1447 |                 frappe.db.commit()
+     |                 ^^^^^^ F821
+1448 | 
+1449 |         except Exception as e:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1453:3: F821 Undefined name `frappe`
+     |
+1452 |     if not dry_run:
+1453 |         frappe.db.commit()
+     |         ^^^^^^ F821
+1454 |     return stats
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1466:13: F821 Undefined name `find_dbf`
+     |
+1464 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+1465 | 
+1466 |     dbf_path = find_dbf(backup_path, "audit.dbf")
+     |                ^^^^^^^^ F821
+1467 |     if not dbf_path:
+1468 |         stats["errors"].append("audit.dbf not found")
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1471:12: F821 Undefined name `read_dbf`
+     |
+1469 |         return stats
+1470 | 
+1471 |     records = read_dbf(dbf_path)
+     |               ^^^^^^^^ F821
+1472 |     stats["total"] = len(records)
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1476:13: F821 Undefined name `clean_str`
+     |
+1474 |     for idx, record in enumerate(records):
+1475 |         try:
+1476 |             action = clean_str(record.get("caction"))
+     |                      ^^^^^^^^^ F821
+1477 |             if not action:
+1478 |                 stats["skipped"] += 1
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1485:10: F821 Undefined name `frappe`
+     |
+1483 |                 continue
+1484 | 
+1485 |             doc = frappe.new_doc("POS Audit Log")
+     |                   ^^^^^^ F821
+1486 |             doc.user = "Administrator"
+1487 |             doc.timestamp = format_date(record.get("dttime")) or frappe.utils.now_datetime()
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1487:20: F821 Undefined name `format_date`
+     |
+1485 |             doc = frappe.new_doc("POS Audit Log")
+1486 |             doc.user = "Administrator"
+1487 |             doc.timestamp = format_date(record.get("dttime")) or frappe.utils.now_datetime()
+     |                             ^^^^^^^^^^^ F821
+1488 |             doc.details = action[:500]
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1487:57: F821 Undefined name `frappe`
+     |
+1485 |             doc = frappe.new_doc("POS Audit Log")
+1486 |             doc.user = "Administrator"
+1487 |             doc.timestamp = format_date(record.get("dttime")) or frappe.utils.now_datetime()
+     |                                                                  ^^^^^^ F821
+1488 |             doc.details = action[:500]
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1502:12: F821 Undefined name `clean_str`
+     |
+1501 |             # Category
+1502 |             ctype = clean_str(record.get("ctype"))
+     |                     ^^^^^^^^^ F821
+1503 |             doc.category = ctype if ctype else "General"
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1506:10: F821 Undefined name `clean_str`
+     |
+1505 |             # Reference
+1506 |             abr = clean_str(record.get("abr"))
+     |                   ^^^^^^^^^ F821
+1507 |             stockno = clean_str(record.get("stockno"))
+1508 |             if abr or stockno:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1507:14: F821 Undefined name `clean_str`
+     |
+1505 |             # Reference
+1506 |             abr = clean_str(record.get("abr"))
+1507 |             stockno = clean_str(record.get("stockno"))
+     |                       ^^^^^^^^^ F821
+1508 |             if abr or stockno:
+1509 |                 doc.reference_document = f"{abr}/{stockno}"
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1515:5: F821 Undefined name `frappe`
+     |
+1514 |             if (idx + 1) % 100 == 0:
+1515 |                 frappe.db.commit()
+     |                 ^^^^^^ F821
+1516 | 
+1517 |         except Exception as e:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1521:3: F821 Undefined name `frappe`
+     |
+1520 |     if not dry_run:
+1521 |         frappe.db.commit()
+     |         ^^^^^^ F821
+1522 |     return stats
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1534:13: F821 Undefined name `find_dbf`
+     |
+1532 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+1533 | 
+1534 |     dbf_path = find_dbf(backup_path, "SOLDPARM.dbf")
+     |                ^^^^^^^^ F821
+1535 |     if not dbf_path:
+1536 |         stats["errors"].append("SOLDPARM.dbf not found")
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1539:12: F821 Undefined name `read_dbf`
+     |
+1537 |         return stats
+1538 | 
+1539 |     records = read_dbf(dbf_path)
+     |               ^^^^^^^^ F821
+1540 |     stats["total"] = len(records)
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1544:10: F821 Undefined name `clean_str`
+     |
+1542 |     for idx, record in enumerate(records):
+1543 |         try:
+1544 |             day = clean_str(record.get("day"))
+     |                   ^^^^^^^^^ F821
+1545 |             descs = clean_str(record.get("descs"))
+1546 |             price = clean_float(record.get("price"))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1545:12: F821 Undefined name `clean_str`
+     |
+1543 |         try:
+1544 |             day = clean_str(record.get("day"))
+1545 |             descs = clean_str(record.get("descs"))
+     |                     ^^^^^^^^^ F821
+1546 |             price = clean_float(record.get("price"))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1546:12: F821 Undefined name `clean_float`
+     |
+1544 |             day = clean_str(record.get("day"))
+1545 |             descs = clean_str(record.get("descs"))
+1546 |             price = clean_float(record.get("price"))
+     |                     ^^^^^^^^^^^ F821
+1547 | 
+1548 |             if not descs and price <= 0:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1556:10: F821 Undefined name `frappe`
+     |
+1554 |                 continue
+1555 | 
+1556 |             doc = frappe.new_doc("Customer Ledger Entry")
+     |                   ^^^^^^ F821
+1557 |             doc.entry_date = format_date(day) or frappe.utils.today()
+1558 |             doc.entry_type = "Sale"
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1557:21: F821 Undefined name `format_date`
+     |
+1556 |             doc = frappe.new_doc("Customer Ledger Entry")
+1557 |             doc.entry_date = format_date(day) or frappe.utils.today()
+     |                              ^^^^^^^^^^^ F821
+1558 |             doc.entry_type = "Sale"
+1559 |             doc.description = descs or "Legacy Sale"
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1557:41: F821 Undefined name `frappe`
+     |
+1556 |             doc = frappe.new_doc("Customer Ledger Entry")
+1557 |             doc.entry_date = format_date(day) or frappe.utils.today()
+     |                                                  ^^^^^^ F821
+1558 |             doc.entry_type = "Sale"
+1559 |             doc.description = descs or "Legacy Sale"
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1562:13: F821 Undefined name `clean_str`
+     |
+1560 |             doc.debit = price if price > 0 else 0
+1561 | 
+1562 |             vendor = clean_str(record.get("vendorid"))
+     |                      ^^^^^^^^^ F821
+1563 |             cat = clean_str(record.get("category"))
+1564 |             if vendor or cat:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1563:10: F821 Undefined name `clean_str`
+     |
+1562 |             vendor = clean_str(record.get("vendorid"))
+1563 |             cat = clean_str(record.get("category"))
+     |                   ^^^^^^^^^ F821
+1564 |             if vendor or cat:
+1565 |                 doc.reference_type = f"Vendor: {vendor}, Cat: {cat}"
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1571:5: F821 Undefined name `frappe`
+     |
+1570 |             if (idx + 1) % 50 == 0:
+1571 |                 frappe.db.commit()
+     |                 ^^^^^^ F821
+1572 | 
+1573 |         except Exception as e:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1577:3: F821 Undefined name `frappe`
+     |
+1576 |     if not dry_run:
+1577 |         frappe.db.commit()
+     |         ^^^^^^ F821
+1578 |     return stats
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1590:13: F821 Undefined name `find_dbf`
+     |
+1588 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+1589 | 
+1590 |     dbf_path = find_dbf(backup_path, "invdel.dbf")
+     |                ^^^^^^^^ F821
+1591 |     if not dbf_path:
+1592 |         stats["errors"].append("invdel.dbf not found")
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1595:12: F821 Undefined name `read_dbf`
+     |
+1593 |         return stats
+1594 | 
+1595 |     records = read_dbf(dbf_path)
+     |               ^^^^^^^^ F821
+1596 |     stats["total"] = len(records)
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1600:14: F821 Undefined name `clean_str`
+     |
+1598 |     for idx, record in enumerate(records):
+1599 |         try:
+1600 |             barcode = clean_str(record.get("barcode"))
+     |                       ^^^^^^^^^ F821
+1601 |             descript = clean_str(record.get("descript"))
+1602 |             reason = clean_str(record.get("reasons"))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1601:15: F821 Undefined name `clean_str`
+     |
+1599 |         try:
+1600 |             barcode = clean_str(record.get("barcode"))
+1601 |             descript = clean_str(record.get("descript"))
+     |                        ^^^^^^^^^ F821
+1602 |             reason = clean_str(record.get("reasons"))
+1603 |             trans_date = format_date(record.get("transdate"))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1602:13: F821 Undefined name `clean_str`
+     |
+1600 |             barcode = clean_str(record.get("barcode"))
+1601 |             descript = clean_str(record.get("descript"))
+1602 |             reason = clean_str(record.get("reasons"))
+     |                      ^^^^^^^^^ F821
+1603 |             trans_date = format_date(record.get("transdate"))
+1604 |             deleted_by = clean_str(record.get("deletedby"))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1603:17: F821 Undefined name `format_date`
+     |
+1601 |             descript = clean_str(record.get("descript"))
+1602 |             reason = clean_str(record.get("reasons"))
+1603 |             trans_date = format_date(record.get("transdate"))
+     |                          ^^^^^^^^^^^ F821
+1604 |             deleted_by = clean_str(record.get("deletedby"))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1604:17: F821 Undefined name `clean_str`
+     |
+1602 |             reason = clean_str(record.get("reasons"))
+1603 |             trans_date = format_date(record.get("transdate"))
+1604 |             deleted_by = clean_str(record.get("deletedby"))
+     |                          ^^^^^^^^^ F821
+1605 | 
+1606 |             if dry_run:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1610:10: F821 Undefined name `frappe`
+     |
+1608 |                 continue
+1609 | 
+1610 |             doc = frappe.new_doc("POS Audit Log")
+     |                   ^^^^^^ F821
+1611 |             doc.user = "Administrator"
+1612 |             doc.timestamp = trans_date or frappe.utils.now_datetime()
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1612:34: F821 Undefined name `frappe`
+     |
+1610 |             doc = frappe.new_doc("POS Audit Log")
+1611 |             doc.user = "Administrator"
+1612 |             doc.timestamp = trans_date or frappe.utils.now_datetime()
+     |                                           ^^^^^^ F821
+1613 |             doc.event_type = "Security"
+1614 |             doc.category = "Inventory Deletion"
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1622:5: F821 Undefined name `frappe`
+     |
+1621 |             if (idx + 1) % 100 == 0:
+1622 |                 frappe.db.commit()
+     |                 ^^^^^^ F821
+1623 | 
+1624 |         except Exception as e:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1628:3: F821 Undefined name `frappe`
+     |
+1627 |     if not dry_run:
+1628 |         frappe.db.commit()
+     |         ^^^^^^ F821
+1629 |     return stats
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1641:13: F821 Undefined name `find_dbf`
+     |
+1639 |     stats = {"total": 0, "imported": 0, "skipped": 0, "errors": []}
+1640 | 
+1641 |     dbf_path = find_dbf(backup_path, "wdetails.dbf")
+     |                ^^^^^^^^ F821
+1642 |     if not dbf_path:
+1643 |         stats["errors"].append("wdetails.dbf not found")
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1646:12: F821 Undefined name `read_dbf`
+     |
+1644 |         return stats
+1645 | 
+1646 |     records = read_dbf(dbf_path)
+     |               ^^^^^^^^ F821
+1647 |     stats["total"] = len(records)
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1651:10: F821 Undefined name `clean_str`
+     |
+1649 |     for _idx, record in enumerate(records):
+1650 |         try:
+1651 |             abr = clean_str(record.get("abr"))
+     |                   ^^^^^^^^^ F821
+1652 |             stockno = clean_str(record.get("stockno"))
+1653 |             model = clean_str(record.get("model__"))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1652:14: F821 Undefined name `clean_str`
+     |
+1650 |         try:
+1651 |             abr = clean_str(record.get("abr"))
+1652 |             stockno = clean_str(record.get("stockno"))
+     |                       ^^^^^^^^^ F821
+1653 |             model = clean_str(record.get("model__"))
+1654 |             serial = clean_str(record.get("serial__"))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1653:12: F821 Undefined name `clean_str`
+     |
+1651 |             abr = clean_str(record.get("abr"))
+1652 |             stockno = clean_str(record.get("stockno"))
+1653 |             model = clean_str(record.get("model__"))
+     |                     ^^^^^^^^^ F821
+1654 |             serial = clean_str(record.get("serial__"))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1654:13: F821 Undefined name `clean_str`
+     |
+1652 |             stockno = clean_str(record.get("stockno"))
+1653 |             model = clean_str(record.get("model__"))
+1654 |             serial = clean_str(record.get("serial__"))
+     |                      ^^^^^^^^^ F821
+1655 | 
+1656 |             if not abr and not stockno:
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1663:7: F821 Undefined name `frappe`
+     |
+1661 |             item_code = None
+1662 |             # Try by barcode pattern
+1663 |             if frappe.db.exists("Item", {"custom_legacy_abr": abr, "custom_legacy_stockno": stockno}):
+     |                ^^^^^^ F821
+1664 |                 item_code = frappe.db.get_value(
+1665 |                     "Item", {"custom_legacy_abr": abr, "custom_legacy_stockno": stockno}, "name"
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1664:17: F821 Undefined name `frappe`
+     |
+1662 |             # Try by barcode pattern
+1663 |             if frappe.db.exists("Item", {"custom_legacy_abr": abr, "custom_legacy_stockno": stockno}):
+1664 |                 item_code = frappe.db.get_value(
+     |                             ^^^^^^ F821
+1665 |                     "Item", {"custom_legacy_abr": abr, "custom_legacy_stockno": stockno}, "name"
+1666 |                 )
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1676:10: F821 Undefined name `frappe`
+     |
+1674 |                 continue
+1675 | 
+1676 |             doc = frappe.get_doc("Item", item_code)
+     |                   ^^^^^^ F821
+1677 |             _set_custom_field(doc, "custom_watch_model", model)
+1678 |             _set_custom_field(doc, "custom_watch_serial", serial)
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1677:4: F821 Undefined name `_set_custom_field`
+     |
+1676 |             doc = frappe.get_doc("Item", item_code)
+1677 |             _set_custom_field(doc, "custom_watch_model", model)
+     |             ^^^^^^^^^^^^^^^^^ F821
+1678 |             _set_custom_field(doc, "custom_watch_serial", serial)
+1679 |             _set_custom_field(doc, "custom_watch_condition", clean_str(record.get("condition")))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1678:4: F821 Undefined name `_set_custom_field`
+     |
+1676 |             doc = frappe.get_doc("Item", item_code)
+1677 |             _set_custom_field(doc, "custom_watch_model", model)
+1678 |             _set_custom_field(doc, "custom_watch_serial", serial)
+     |             ^^^^^^^^^^^^^^^^^ F821
+1679 |             _set_custom_field(doc, "custom_watch_condition", clean_str(record.get("condition")))
+1680 |             _set_custom_field(doc, "custom_watch_supplier", clean_str(record.get("supplierid")))
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1679:4: F821 Undefined name `_set_custom_field`
+     |
+1677 |             _set_custom_field(doc, "custom_watch_model", model)
+1678 |             _set_custom_field(doc, "custom_watch_serial", serial)
+1679 |             _set_custom_field(doc, "custom_watch_condition", clean_str(record.get("condition")))
+     |             ^^^^^^^^^^^^^^^^^ F821
+1680 |             _set_custom_field(doc, "custom_watch_supplier", clean_str(record.get("supplierid")))
+1681 |             doc.save(ignore_permissions=True)
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1679:53: F821 Undefined name `clean_str`
+     |
+1677 |             _set_custom_field(doc, "custom_watch_model", model)
+1678 |             _set_custom_field(doc, "custom_watch_serial", serial)
+1679 |             _set_custom_field(doc, "custom_watch_condition", clean_str(record.get("condition")))
+     |                                                              ^^^^^^^^^ F821
+1680 |             _set_custom_field(doc, "custom_watch_supplier", clean_str(record.get("supplierid")))
+1681 |             doc.save(ignore_permissions=True)
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1680:4: F821 Undefined name `_set_custom_field`
+     |
+1678 |             _set_custom_field(doc, "custom_watch_serial", serial)
+1679 |             _set_custom_field(doc, "custom_watch_condition", clean_str(record.get("condition")))
+1680 |             _set_custom_field(doc, "custom_watch_supplier", clean_str(record.get("supplierid")))
+     |             ^^^^^^^^^^^^^^^^^ F821
+1681 |             doc.save(ignore_permissions=True)
+1682 |             stats["imported"] += 1
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1680:52: F821 Undefined name `clean_str`
+     |
+1678 |             _set_custom_field(doc, "custom_watch_serial", serial)
+1679 |             _set_custom_field(doc, "custom_watch_condition", clean_str(record.get("condition")))
+1680 |             _set_custom_field(doc, "custom_watch_supplier", clean_str(record.get("supplierid")))
+     |                                                             ^^^^^^^^^ F821
+1681 |             doc.save(ignore_permissions=True)
+1682 |             stats["imported"] += 1
+     |
+
+zevar_core/migration/foxpro_import_extended.py:1688:3: F821 Undefined name `frappe`
+     |
+1687 |     if not dry_run:
+1688 |         frappe.db.commit()
+     |         ^^^^^^ F821
+1689 |     return stats
+     |
+
+zevar_core/scripts/migrate_csv_data.py:61:17: B905 [*] `zip()` without an explicit `strict=` parameter
+   |
+59 |                 if len(row) < len(header):
+60 |                     continue
+61 |                 data = dict(zip(header, row))
+   |                             ^^^^^^^^^^^^^^^^ B905
+62 |                 supplier_name = clean_value(data.get("FULLNAME"))
+63 |                 if not supplier_name:
+   |
+   = help: Add explicit value for parameter `strict=`
+
+zevar_core/scripts/migrate_csv_data.py:90:17: B905 [*] `zip()` without an explicit `strict=` parameter
+   |
+88 |                 if len(row) < len(header):
+89 |                     continue
+90 |                 data = dict(zip(header, row))
+   |                             ^^^^^^^^^^^^^^^^ B905
+91 |                 sku = clean_value(data.get("ABR"))
+92 |                 if not sku:
+   |
+   = help: Add explicit value for parameter `strict=`
+
+zevar_core/scripts/migrate_csv_data.py:140:17: B905 [*] `zip()` without an explicit `strict=` parameter
+    |
+138 |                 if len(row) < len(header):
+139 |                     continue
+140 |                 data = dict(zip(header, row))
+    |                             ^^^^^^^^^^^^^^^^ B905
+141 | 
+142 |                 first = clean_value(data.get("FIRST")) or ""
+    |
+    = help: Add explicit value for parameter `strict=`
+
+zevar_core/scripts/patch_customers.py:56:15: RUF005 Consider `[*list(updates.values()), cust]` instead of concatenation
+   |
+54 |                 if updates:
+55 |                     set_clause = ", ".join(f"`{k}`=%s" for k in updates.keys())
+56 |                     values = list(updates.values()) + [cust]
+   |                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ RUF005
+57 |                     frappe.db.sql(f"UPDATE `tabCustomer` SET {set_clause} WHERE name=%s", values)
+58 |                     updated += 1
+   |
+   = help: Replace with `[*list(updates.values()), cust]`
+
+zevar_core/services/inventory_events.py:212:16: B905 [*] `zip()` without an explicit `strict=` parameter
+    |
+210 | def dispatch_inter_store_transfer(serial_nos, item_codes, source_back_stock, transit_out_wh):
+211 |     entries = []
+212 |     for sn, ic in zip(serial_nos, item_codes):
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ B905
+213 |         se = transfer_serial(sn, ic, source_back_stock, transit_out_wh)
+214 |         entries.append(se.name)
+    |
+    = help: Add explicit value for parameter `strict=`
+
+zevar_core/services/inventory_events.py:226:16: B905 [*] `zip()` without an explicit `strict=` parameter
+    |
+224 | def receive_inter_store_transfer(serial_nos, item_codes, transit_out_wh, dest_back_stock):
+225 |     entries = []
+226 |     for sn, ic in zip(serial_nos, item_codes):
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ B905
+227 |         se = transfer_serial(sn, ic, transit_out_wh, dest_back_stock)
+228 |         entries.append(se.name)
+    |
+    = help: Add explicit value for parameter `strict=`
+
+zevar_core/services/inventory_events.py:280:16: B905 [*] `zip()` without an explicit `strict=` parameter
+    |
+278 | def consign_out(serial_nos, item_codes, from_warehouse, consignment_wh, event_name):
+279 |     entries = []
+280 |     for sn, ic in zip(serial_nos, item_codes):
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ B905
+281 |         se = transfer_serial(sn, ic, from_warehouse, consignment_wh)
+282 |         entries.append(se.name)
+    |
+    = help: Add explicit value for parameter `strict=`
+
+zevar_core/services/inventory_events.py:294:16: B905 [*] `zip()` without an explicit `strict=` parameter
+    |
+292 | def consign_in(serial_nos, item_codes, consignment_wh, back_stock_wh, event_name):
+293 |     entries = []
+294 |     for sn, ic in zip(serial_nos, item_codes):
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ B905
+295 |         se = transfer_serial(sn, ic, consignment_wh, back_stock_wh)
+296 |         entries.append(se.name)
+    |
+    = help: Add explicit value for parameter `strict=`
+
+zevar_core/tasks.py:283:2: F841 Local variable `abbr` is assigned to but never used
+    |
+281 |     from frappe.utils import add_days, today
+282 | 
+283 |     abbr = frappe.db.get_value("Company", "Zevar Jewelers", "abbr") or "Z"
+    |     ^^^^ F841
+284 |     cutoff = add_days(today(), -30)
+285 |     company = frappe.defaults.get_global_default("company") or "Zevar Jewelers"
+    |
+    = help: Remove assignment to unused variable `abbr`
+
+zevar_core/tasks.py:305:15: F821 Undefined name `flt`
+    |
+303 |             as_dict=True,
+304 |         )
+305 |         daily_vel = flt(velocity[0].sold) / 30.0 if velocity else 0
+    |                     ^^^ F821
+306 | 
+307 |         if daily_vel <= 0:
+    |
+
+zevar_core/tasks.py:310:19: F821 Undefined name `flt`
+    |
+308 |             continue
+309 | 
+310 |         total_on_hand = flt(
+    |                         ^^^ F821
+311 |             frappe.db.sql(
+312 |                 "SELECT SUM(actual_qty) FROM `tabBin` WHERE item_code = %s AND actual_qty > 0",
+    |
+
+zevar_core/tasks.py:512:2: F841 Local variable `abbr` is assigned to but never used
+    |
+511 | def consignment_overdue_alert():
+512 |     abbr = frappe.db.get_value("Company", "Zevar Jewelers", "abbr") or "Z"
+    |     ^^^^ F841
+513 |     now = frappe.utils.now_datetime()
+    |
+    = help: Remove assignment to unused variable `abbr`
+
+zevar_core/tasks.py:513:2: F841 Local variable `now` is assigned to but never used
+    |
+511 | def consignment_overdue_alert():
+512 |     abbr = frappe.db.get_value("Company", "Zevar Jewelers", "abbr") or "Z"
+513 |     now = frappe.utils.now_datetime()
+    |     ^^^ F841
+514 | 
+515 |     consignment_warehouses = frappe.get_all(
+    |
+    = help: Remove assignment to unused variable `now`
+
+zevar_core/tasks.py:686:9: F821 Undefined name `get_pdf`
+    |
+684 |         else f"<p>Report: {report_name}</p>"
+685 |     )
+686 |     return get_pdf(html)
+    |            ^^^^^^^ F821
+    |
+
+zevar_core/tests/test_damage_and_found.py:73:3: F841 Local variable `showcase` is assigned to but never used
+   |
+72 |         item_code = self._create_test_item()
+73 |         showcase = self._get_showcase_wh()
+   |         ^^^^^^^^ F841
+74 |         shrinkage = self._get_shrinkage_wh()
+75 |         sn = self._create_serial_no(item_code, shrinkage)
+   |
+   = help: Remove assignment to unused variable `showcase`
+
+zevar_core/tests/test_damage_and_found.py:102:13: F821 Undefined name `flt`
+    |
+100 |             fields=["actual_qty"],
+101 |         )
+102 |         net = sum(flt(sle.actual_qty) for sle in sles)
+    |                   ^^^ F821
+103 |         self.assertEqual(net, 0)
+    |
+
+zevar_core/tests/test_pos_session_fixed_float.py:82:53: F841 Local variable `context` is assigned to but never used
+   |
+80 |         # 1. Test balanced close
+81 |         # Actually we can't test multiple closes because one close finishes it. We'll test excess variance which requires manager override.
+82 |         with self.assertRaises(frappe.ValidationError) as context:
+   |                                                           ^^^^^^^ F841
+83 |             # Trying to close with 500 (variance +100 > threshold 5)
+84 |             # Needs manager override (meaning caller must have Sales Manager role)
+   |
+   = help: Remove assignment to unused variable `context`
+
+zevar_core/unified_retail_management_system/doctype/repair_communication/repair_communication.py:12:17: F821 Undefined name `_`
+   |
+10 |         """Validate communication entry"""
+11 |         if self.communication_type in ["SMS", "Email"] and not self.sent_via:
+12 |             frappe.throw(_("Recipient (phone/email) is required for SMS and Email"))
+   |                          ^ F821
+13 | 
+14 |         if self.direction == "Incoming" and self.status == "Pending":
+   |
+
+zevar_core/unified_retail_management_system/doctype/repair_order/repair_order.py:1213:6: F811 Redefinition of unused `on_update` from line 430
+     |
+1211 |         return {"valid": True, "message": f"Estimate valid until {self.estimate_valid_until}"}
+1212 | 
+1213 |     def on_update(self):
+     |         ^^^^^^^^^ F811
+1214 |         # When status is Delivered, create Stock Entry (Material Issue) for parts consumed (once)
+1215 |         if self.status == "Delivered" and self.parts and not self.get("parts_stock_created"):
+     |
+     = help: Remove definition: `on_update`
+
+zevar_core/unified_retail_management_system/report/financier_receivables_today/financier_receivables_today.py:42:2: F841 Local variable `company` is assigned to but never used
+   |
+40 | def get_data(filters):
+41 |     financiers = ["Synchrony", "AFF", "CIMA", "Progressive", "Snap"]
+42 |     company = "Zevar Jewelers"
+   |     ^^^^^^^ F841
+43 |     data = []
+   |
+   = help: Remove assignment to unused variable `company`
+
+Found 392 errors.
+[*] 8 fixable with the `--fix` option (22 hidden fixes can be enabled with the `--unsafe-fixes` option).
+
+Run ruff formatter.......................................................Failed
+- hook id: ruff-format
+- files were modified by this hook
+
+2 files reformatted, 322 files left unchanged
+
+prettier.................................................................Failed
+- hook id: prettier
+- files were modified by this hook
+
+frontend/zevar_ui/src/pages/Login.vue
+frontend/zevar_ui/src/composables/useBreakpoint.js
+frontend/employee_portal/src/views/ReportsView.vue
+frontend/employee_portal/src/views/RosterView.vue
+frontend/zevar_ui/src/components/AccountHistoryModal.vue
+frontend/zevar_ui/src/components/AppShell.vue
+frontend/zevar_ui/src/pages/RepairLookup.vue
+frontend/zevar_ui/src/stores/gold.js
+frontend/zevar_ui/tests/visual/routes.spec.js
+frontend/zevar_ui/src/components/ScannerInput.stories.js
+frontend/zevar_ui/src/components/PushToStoresModal.vue
+frontend/zevar_ui/src/pages/Layaway.vue
+frontend/zevar_ui/src/pages/POSClosing.vue
+frontend/zevar_ui/src/components/ConsignmentModal.vue
+frontend/zevar_ui/src/pages/Customers.vue
+frontend/zevar_ui/src/pages/Appraisals.vue
+frontend/zevar_ui/src/utils/permissions.js
+zevar_core/unified_retail_management_system/page/eod_calendar/eod_calendar.js
+frontend/zevar_ui/src/components/CartSidebar.vue
+frontend/zevar_ui/src/components/QuickAddItemModal.vue
+frontend/zevar_ui/src/pages/dashboards/Customer.vue
+zevar_core/unified_retail_management_system/page/case_audit/case_audit.js
+frontend/zevar_ui/src/components/SupportModal.vue
+frontend/zevar_ui/src/components/ResponsiveModal.vue
+frontend/zevar_ui/src/components/ScannerInput.vue
+frontend/zevar_ui/src/pages/RepairTerminal.vue
+frontend/zevar_ui/src/components/POSProductModal.vue
+frontend/zevar_ui/src/components/Header.vue
+frontend/zevar_ui/src/pages/Dashboard.vue
+zevar_core/public/pos/sw.js
+frontend/zevar_ui/src/components/ProfileSettingsModal.vue
+frontend/zevar_ui/src/components/DamageReportModal.vue
+zevar_core/unified_retail_management_system/page/new_layaway/new_layaway.js
+frontend/zevar_ui/src/pages/CategoryListing.vue
+zevar_core/public/js/layaway_desk.js
+frontend/zevar_ui/src/components/PieceLifecyclePanel.vue
+frontend/zevar_ui/src/pages/Contacts.vue
+frontend/zevar_ui/src/utils/dates.js
+frontend/zevar_ui/src/pages/Support.vue
+frontend/zevar_ui/src/components/ResponsiveTable.vue
+frontend/zevar_ui/src/components/reports/DailyBrief.vue
+frontend/zevar_ui/src/components/CheckoutModal.vue
+frontend/zevar_ui/src/components/ZelleQRModal.vue
+frontend/zevar_ui/src/components/RepairCard.vue
+frontend/zevar_ui/src/components/CustomerSelector.vue
+frontend/employee_portal/src/views/TasksView.vue
+zevar_core/unified_retail_management_system/page/cancel_layaway/cancel_layaway.js
+zevar_core/unified_retail_management_system/page/edit_layaway/edit_layaway.js
+zevar_core/unified_retail_management_system/doctype/repair_order/repair_order.js
+zevar_core/unified_retail_management_system/page/layaway_payment/layaway_payment.js
+frontend/zevar_ui/src/composables/useResponsive.js
+frontend/employee_portal/src/components/StandardCalendar.vue
+frontend/zevar_ui/src/components/reports/ScheduledTab.vue
+frontend/zevar_ui/src/components/NewRepairFormContent.vue
+frontend/zevar_ui/src/components/PreferencesModal.vue
+zevar_core/public/js/pages/eod_calendar/index.js
+frontend/employee_portal/src/views/PayrollView.vue
+frontend/zevar_ui/src/components/RepairDetailModal.vue
+frontend/zevar_ui/src/pages/dashboards/Inventory.vue
+frontend/zevar_ui/src/stores/session.js
+frontend/zevar_ui/src/components/QRCodeModal.vue
+frontend/zevar_ui/src/pages/SalesHistory.vue
+frontend/zevar_ui/src/components/CatalogueView.vue
+frontend/zevar_ui/src/components/ProductModal.vue
+frontend/zevar_ui/src/pages/ReportViewer.vue
+frontend/zevar_ui/src/components/reports/YoYBadge.vue
+frontend/zevar_ui/src/components/TransactionDetailModal.vue
+frontend/zevar_ui/src/stores/audit.js
+frontend/zevar_ui/src/pages/dashboards/Revenue.vue
+frontend/zevar_ui/src/pages/Reports.vue
+frontend/zevar_ui/src/pages/TradeIns.vue
+frontend/zevar_ui/src/components/StoreTransferModal.vue
+frontend/zevar_ui/src/components/reports/AllReports.vue
+frontend/employee_portal/src/views/DashboardView.vue
+frontend/zevar_ui/src/components/FinancingApplicationModal.vue
+frontend/zevar_ui/src/components/CameraModal.vue
+frontend/zevar_ui/src/components/CreateLayawayModal.vue
+frontend/zevar_ui/src/pages/Transactions.vue
+frontend/zevar_ui/src/components/LayawayDetailModal.vue
+frontend/zevar_ui/src/pages/InventoryAudit.vue
+frontend/zevar_ui/src/components/reports/Dashboards.vue
+frontend/zevar_ui/src/components/TagPrintPreview.vue
+frontend/employee_portal/src/views/AttendanceView.vue
+frontend/zevar_ui/src/components/ResponsiveTable.stories.js
+frontend/zevar_ui/src/components/reports/KPICard.vue
+frontend/zevar_ui/src/components/NewRepairModal.vue
+frontend/employee_portal/src/views/LeaveView.vue
+frontend/employee_portal/src/views/IssuesView.vue
+frontend/zevar_ui/src/components/reports/SubscribeModal.vue
+frontend/zevar_ui/.storybook/preview.js
+frontend/zevar_ui/src/pages/ReportsHub.vue
+frontend/zevar_ui/src/components/IDScannerPanel.vue
+frontend/zevar_ui/src/pages/Inventory.vue
+frontend/zevar_ui/src/components/ReservePieceModal.vue
+frontend/zevar_ui/src/components/QuickLayawayModal.vue
+frontend/zevar_ui/src/components/CustomerCreationModal.vue
+frontend/zevar_ui/src/pages/EstimateApproval.vue
+frontend/zevar_ui/src/router.js
+
+eslint...................................................................Failed
+- hook id: eslint
+- exit code: 1
+
+/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/page/cancel_layaway/cancel_layaway.js
+    2:6   error  'zevar' is not defined  no-undef
+    5:1   error  'zevar' is not defined  no-undef
+   15:16  error  'zevar' is not defined  no-undef
+   16:59  error  'zevar' is not defined  no-undef
+   63:18  error  'zevar' is not defined  no-undef
+   71:25  error  'zevar' is not defined  no-undef
+   94:4   error  'zevar' is not defined  no-undef
+   95:28  error  'zevar' is not defined  no-undef
+   99:4   error  'zevar' is not defined  no-undef
+  103:4   error  'zevar' is not defined  no-undef
+  110:32  error  'zevar' is not defined  no-undef
+  122:11  error  'zevar' is not defined  no-undef
+  151:29  error  'zevar' is not defined  no-undef
+  161:25  error  'zevar' is not defined  no-undef
+  168:6   error  'zevar' is not defined  no-undef
+
+/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/page/new_layaway/new_layaway.js
+    2:6   error  'zevar' is not defined  no-undef
+    5:1   error  'zevar' is not defined  no-undef
+   14:16  error  'zevar' is not defined  no-undef
+   15:59  error  'zevar' is not defined  no-undef
+   67:14  error  'zevar' is not defined  no-undef
+   74:14  error  'zevar' is not defined  no-undef
+   85:20  error  'zevar' is not defined  no-undef
+   94:18  error  'zevar' is not defined  no-undef
+  103:17  error  'zevar' is not defined  no-undef
+  112:20  error  'zevar' is not defined  no-undef
+  122:11  error  'zevar' is not defined  no-undef
+  127:20  error  'zevar' is not defined  no-undef
+  136:15  error  'zevar' is not defined  no-undef
+  145:9   error  'zevar' is not defined  no-undef
+  154:10  error  'zevar' is not defined  no-undef
+  218:14  error  'zevar' is not defined  no-undef
+  219:14  error  'zevar' is not defined  no-undef
+  220:14  error  'zevar' is not defined  no-undef
+  221:14  error  'zevar' is not defined  no-undef
+  234:80  error  'zevar' is not defined  no-undef
+  237:82  error  'zevar' is not defined  no-undef
+  240:82  error  'zevar' is not defined  no-undef
+  243:92  error  'zevar' is not defined  no-undef
+  269:25  error  'zevar' is not defined  no-undef
+
+✖ 39 problems (39 errors, 0 warnings)
+
+
+/workspace/development/frappe-bench/apps/zevar_core/zevar_core/public/js/pages/eod_calendar/index.js
+    3:1  error  'zevar_core' is not defined  no-undef
+  258:6  error  'zevar_core' is not defined  no-undef
+
+/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/page/edit_layaway/edit_layaway.js
+    2:6   error  'zevar' is not defined  no-undef
+    5:1   error  'zevar' is not defined  no-undef
+   15:16  error  'zevar' is not defined  no-undef
+   16:59  error  'zevar' is not defined  no-undef
+   63:18  error  'zevar' is not defined  no-undef
+   71:22  error  'zevar' is not defined  no-undef
+   75:24  error  'zevar' is not defined  no-undef
+   83:20  error  'zevar' is not defined  no-undef
+   92:18  error  'zevar' is not defined  no-undef
+  101:17  error  'zevar' is not defined  no-undef
+  110:11  error  'zevar' is not defined  no-undef
+  115:20  error  'zevar' is not defined  no-undef
+  137:4   error  'zevar' is not defined  no-undef
+  138:28  error  'zevar' is not defined  no-undef
+  142:4   error  'zevar' is not defined  no-undef
+  146:4   error  'zevar' is not defined  no-undef
+  153:32  error  'zevar' is not defined  no-undef
+  165:11  error  'zevar' is not defined  no-undef
+  204:25  error  'zevar' is not defined  no-undef
+  212:32  error  'zevar' is not defined  no-undef
+  218:11  error  'zevar' is not defined  no-undef
+
+✖ 23 problems (23 errors, 0 warnings)
+
+
+/workspace/development/frappe-bench/apps/zevar_core/zevar_core/public/js/layaway_desk.js
+  4:6   error  'zevar' is not defined  no-undef
+  8:13  error  'zevar' is not defined  no-undef
+
+✖ 2 problems (2 errors, 0 warnings)
+
+
+/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/page/layaway/layaway.js
+    2:6   error  'zevar' is not defined  no-undef
+    5:1   error  'zevar' is not defined  no-undef
+  157:24  error  'zevar' is not defined  no-undef
+  167:28  error  'zevar' is not defined  no-undef
+
+✖ 4 problems (4 errors, 0 warnings)
+
+
+/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/page/layaway_payment/layaway_payment.js
+    2:6   error  'zevar' is not defined  no-undef
+    5:1   error  'zevar' is not defined  no-undef
+   15:16  error  'zevar' is not defined  no-undef
+   16:59  error  'zevar' is not defined  no-undef
+   59:18  error  'zevar' is not defined  no-undef
+   67:20  error  'zevar' is not defined  no-undef
+   77:21  error  'zevar' is not defined  no-undef
+   87:22  error  'zevar' is not defined  no-undef
+  109:4   error  'zevar' is not defined  no-undef
+  110:28  error  'zevar' is not defined  no-undef
+  114:4   error  'zevar' is not defined  no-undef
+  118:4   error  'zevar' is not defined  no-undef
+  125:32  error  'zevar' is not defined  no-undef
+  131:11  error  'zevar' is not defined  no-undef
+  167:25  error  'zevar' is not defined  no-undef
+  178:6   error  'zevar' is not defined  no-undef
+  182:32  error  'zevar' is not defined  no-undef
+  188:11  error  'zevar' is not defined  no-undef
+
+✖ 18 problems (18 errors, 0 warnings)
+
+
+/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/page/eod_calendar/eod_calendar.js
+    3:1  error  'zevar_core' is not defined  no-undef
+  258:6  error  'zevar_core' is not defined  no-undef
+
+✖ 2 problems (2 errors, 0 warnings)
+

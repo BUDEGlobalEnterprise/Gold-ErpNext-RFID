@@ -54,7 +54,7 @@ class TestStreamSegregation(FrappeTestCase):
 			execute,
 		)
 
-		columns, data = execute(
+		_columns, data = execute(
 			{"from_date": frappe.utils.today(), "to_date": frappe.utils.today(), "company": "Zevar Jewelers"}
 		)
 

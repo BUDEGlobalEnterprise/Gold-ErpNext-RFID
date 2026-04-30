@@ -11,7 +11,7 @@ import json
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from zevar_core.api.inventory_audit import start_audit, submit_scan, finalize_audit
+from zevar_core.api.inventory_audit import finalize_audit, start_audit, submit_scan
 
 
 class TestAuditConcurrency(FrappeTestCase):
@@ -37,16 +37,18 @@ class TestAuditConcurrency(FrappeTestCase):
 				doc.standard_rate = 100.0
 				doc.insert(ignore_permissions=True)
 			else:
-				frappe.db.set_value("Item", item_code, {
-					"custom_rfid_epc": f"CONC-EPC-{i}",
-					"standard_rate": 100.0,
-				})
+				frappe.db.set_value(
+					"Item",
+					item_code,
+					{
+						"custom_rfid_epc": f"CONC-EPC-{i}",
+						"standard_rate": 100.0,
+					},
+				)
 			self.items.append(item_code)
 
 		# Add stock
-		if not frappe.db.exists(
-			"Stock Entry", {"purpose": "Material Receipt", "remarks": "Test Conc Stock"}
-		):
+		if not frappe.db.exists("Stock Entry", {"purpose": "Material Receipt", "remarks": "Test Conc Stock"}):
 			se = frappe.new_doc("Stock Entry")
 			se.stock_entry_type = "Material Receipt"
 			se.purpose = "Material Receipt"

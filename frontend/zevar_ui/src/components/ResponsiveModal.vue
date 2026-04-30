@@ -25,9 +25,7 @@
 						'bg-white dark:bg-warm-card shadow-2xl w-full overflow-hidden border border-transparent dark:border-warm-border flex flex-col',
 						noMaxHeight ? '' : isMobile ? '' : 'max-h-[90vh]',
 					]"
-					:style="[
-						!isMobile && fixedHeight ? { height: fixedHeight } : {},
-					]"
+					:style="[!isMobile && fixedHeight ? { height: fixedHeight } : {}]"
 					@touchstart.passive="onTouchStart"
 					@touchmove.passive="onTouchMove"
 					@touchend="onTouchEnd"
@@ -48,8 +46,18 @@
 							class="p-2 hover:bg-gray-100 dark:hover:bg-warm-dark-700 rounded-full transition touch-target"
 							aria-label="Close"
 						>
-							<svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+							<svg
+								class="w-5 h-5 text-gray-400"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M6 18L18 6M6 6l12 12"
+								/>
 							</svg>
 						</button>
 					</div>
@@ -61,13 +69,29 @@
 						class="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-warm-dark-700 rounded-full transition z-10 touch-target"
 						aria-label="Close"
 					>
-						<svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						<svg
+							class="w-5 h-5 text-gray-400"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
 						</svg>
 					</button>
 
 					<!-- Default Slot (Body) -->
-					<div :class="[scrollable ? 'overflow-y-auto' : '', 'flex-1 min-h-0', isMobile ? 'px-4 pb-4' : '']">
+					<div
+						:class="[
+							scrollable ? 'overflow-y-auto' : '',
+							'flex-1 min-h-0',
+							isMobile ? 'px-4 pb-4' : '',
+						]"
+					>
 						<slot></slot>
 					</div>
 

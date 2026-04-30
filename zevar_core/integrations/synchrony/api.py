@@ -62,8 +62,12 @@ def submit_application(
 
 	status = "Approved" if decision == "APPROVED" else "Denied"
 	_log_financing_application(
-		customer, "Synchrony", status, requested_amount,
-		provider_response=data, application_id=app_id,
+		customer,
+		"Synchrony",
+		status,
+		requested_amount,
+		provider_response=data,
+		application_id=app_id,
 		approved_amount=data.get("approvedCreditLimit"),
 	)
 	return {

@@ -1,6 +1,6 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, nowdate, today, flt
+from frappe.utils import add_days, flt, nowdate, today
 
 
 class TestDailyBrief(FrappeTestCase):

@@ -93,7 +93,9 @@
 							{{ step.label }}
 						</span>
 					</div>
-					<div class="h-2 bg-gray-200 dark:bg-warm-dark-800 rounded-full overflow-hidden">
+					<div
+						class="h-2 bg-gray-200 dark:bg-warm-dark-800 rounded-full overflow-hidden"
+					>
 						<div
 							class="h-full bg-[#D4AF37] transition-all duration-500"
 							:style="{ width: progressPercent + '%' }"

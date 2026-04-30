@@ -18,6 +18,7 @@ def handle_webhook(payload, sig_header):
 		return {"success": False, "error": "Invalid signature"}
 	try:
 		import json
+
 		event = json.loads(payload)
 	except Exception:
 		frappe.log_error("Invalid Stripe webhook payload", "Stripe Webhook")
@@ -48,6 +49,7 @@ def _handle_payment_succeeded(data):
 		_update_invoice_payment(invoice_name, payment_intent_id, amount, "Card Present")
 	_store_payment_token(data)
 	from zevar_core.api.audit_log import log_event_safely
+
 	log_event_safely(
 		event_type="stripe_payment_succeeded",
 		details={"payment_intent_id": payment_intent_id, "amount": amount, "invoice": invoice_name},
@@ -59,6 +61,7 @@ def _handle_payment_canceled(data):
 	payment_intent_id = data.get("id")
 	frappe.logger().info(f"Stripe payment canceled: {payment_intent_id}")
 	from zevar_core.api.audit_log import log_event_safely
+
 	log_event_safely(
 		event_type="stripe_payment_canceled",
 		details={"payment_intent_id": payment_intent_id},
@@ -71,6 +74,7 @@ def _handle_payment_failed(data):
 	invoice_name = metadata.get("invoice_name")
 	frappe.logger().warning(f"Stripe payment failed: {payment_intent_id}")
 	from zevar_core.api.audit_log import log_event_safely
+
 	log_event_safely(
 		event_type="stripe_payment_failed",
 		details={"payment_intent_id": payment_intent_id, "invoice": invoice_name},
@@ -83,6 +87,7 @@ def _handle_charge_refunded(data):
 	refund_amount = flt(data.get("amount_refunded", 0)) / 100
 	frappe.logger().info(f"Stripe charge refunded: {charge_id} for ${refund_amount}")
 	from zevar_core.api.audit_log import log_event_safely
+
 	log_event_safely(
 		event_type="stripe_refund_processed",
 		details={"charge_id": charge_id, "refund_amount": refund_amount},
@@ -98,7 +103,10 @@ def _update_invoice_payment(invoice_name, payment_intent_id, amount, method):
 				has_card_payment = True
 				break
 		if not has_card_payment:
-			si.append("payments", {"mode_of_payment": "Credit Card", "amount": amount, "reference_no": payment_intent_id})
+			si.append(
+				"payments",
+				{"mode_of_payment": "Credit Card", "amount": amount, "reference_no": payment_intent_id},
+			)
 			si.flags.ignore_validate_update_after_submit = True
 			si.save(ignore_permissions=True)
 		frappe.db.commit()

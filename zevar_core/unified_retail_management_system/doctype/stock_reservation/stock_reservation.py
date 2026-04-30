@@ -24,9 +24,7 @@ class StockReservation(Document):
 			)
 			if existing:
 				frappe.throw(
-					_("Serial No {0} already has an active reservation: {1}").format(
-						self.serial_no, existing
-					)
+					_("Serial No {0} already has an active reservation: {1}").format(self.serial_no, existing)
 				)
 
 			self.item_code = sn.item_code
@@ -71,7 +69,9 @@ class StockReservation(Document):
 			},
 		)
 
-		self._log_event("piece_reserved", f"Reserved {self.serial_no} for {self.customer} until {self.hold_until}")
+		self._log_event(
+			"piece_reserved", f"Reserved {self.serial_no} for {self.customer} until {self.hold_until}"
+		)
 
 	def on_cancel(self):
 		if self.status == "Active" and self.stock_entry_ref:

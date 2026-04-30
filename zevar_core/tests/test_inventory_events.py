@@ -8,45 +8,52 @@ class TestInventoryEvents(FrappeTestCase):
 		super().setUpClass()
 		cls.company = frappe.defaults.get_global_default("company") or "Zevar Jewelers"
 		if not frappe.db.exists("Company", cls.company):
-			frappe.get_doc({
-				"doctype": "Company",
-				"company_name": "Zevar Jewelers",
-				"abbr": "Z",
-				"default_currency": "USD",
-				"country": "United States",
-			}).insert(ignore_permissions=True)
+			frappe.get_doc(
+				{
+					"doctype": "Company",
+					"company_name": "Zevar Jewelers",
+					"abbr": "Z",
+					"default_currency": "USD",
+					"country": "United States",
+				}
+			).insert(ignore_permissions=True)
 
 		cls.abbr = frappe.get_cached_value("Company", cls.company, "abbr") or "Z"
 
 		from zevar_core.patches.v1_1.seed_warehouse_zones import execute as seed_warehouses
+
 		seed_warehouses()
 
 	def _create_test_item(self, item_code=None):
 		code = item_code or f"TEST-ITEM-{frappe.generate_hash(length=6)}"
 		if not frappe.db.exists("Item", code):
-			item = frappe.get_doc({
-				"doctype": "Item",
-				"item_code": code,
-				"item_name": f"Test Item {code}",
-				"item_group": "All Item Groups",
-				"stock_uom": "Nos",
-				"is_stock_item": 1,
-				"has_serial_no": 1,
-				"company": self.company,
-			})
+			item = frappe.get_doc(
+				{
+					"doctype": "Item",
+					"item_code": code,
+					"item_name": f"Test Item {code}",
+					"item_group": "All Item Groups",
+					"stock_uom": "Nos",
+					"is_stock_item": 1,
+					"has_serial_no": 1,
+					"company": self.company,
+				}
+			)
 			item.insert(ignore_permissions=True)
 		return code
 
 	def _create_serial_no(self, item_code, warehouse):
 		sn = f"SN-{frappe.generate_hash(length=8)}"
 		if not frappe.db.exists("Serial No", sn):
-			doc = frappe.get_doc({
-				"doctype": "Serial No",
-				"serial_no": sn,
-				"item_code": item_code,
-				"warehouse": warehouse,
-				"company": self.company,
-			})
+			doc = frappe.get_doc(
+				{
+					"doctype": "Serial No",
+					"serial_no": sn,
+					"item_code": item_code,
+					"warehouse": warehouse,
+					"company": self.company,
+				}
+			)
 			doc.insert(ignore_permissions=True)
 		return sn
 

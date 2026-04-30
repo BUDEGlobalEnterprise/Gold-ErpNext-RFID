@@ -7,9 +7,8 @@ and identity verification workflows.
 
 import frappe
 from frappe import _
-from frappe.utils import flt, today, now_datetime, add_days, getdate
-
 from frappe.query_builder.functions import Sum
+from frappe.utils import add_days, flt, getdate, now_datetime, today
 
 
 @frappe.whitelist()
@@ -42,7 +41,6 @@ def trigger_form_8300(customer, total_amount, transaction_details=None):
 		return {"success": False, "message": "8300 tracking is disabled"}
 	customer_doc = frappe.get_doc("Customer", customer)
 	customer_name = customer_doc.customer_name or ""
-	parts = customer_name.split(" ", 1)
 	record = frappe.new_doc("IRS Form 8300 Record")
 	record.customer = customer
 	record.status = "Triggered"
@@ -52,8 +50,9 @@ def trigger_form_8300(customer, total_amount, transaction_details=None):
 	record.recipient_name = customer_name
 	if settings.auto_populate_8300:
 		customer_email = frappe.db.get_value("Contact Email", {"parent": customer}, "email_id")
-		customer_phone = frappe.db.get_value("Contact Phone", {"parent": customer}, "phone")
-		customer_address = frappe.db.get_value("Address", {"link_name": customer}, ["address_line1", "city", "state", "pincode"], as_dict=True)
+		customer_address = frappe.db.get_value(
+			"Address", {"link_name": customer}, ["address_line1", "city", "state", "pincode"], as_dict=True
+		)
 		if customer_email:
 			record.notes = f"Customer email: {customer_email}"
 		if customer_address:
@@ -71,7 +70,6 @@ def verify_customer_identity(customer, id_type, id_number, id_state=None, id_exp
 		return {"success": False, "message": "AML/KYC is disabled"}
 	customer_doc = frappe.get_doc("Customer", customer)
 	customer_name = customer_doc.customer_name or ""
-	parts = customer_name.split(" ", 1)
 	record = frappe.new_doc("AML KYC Record")
 	record.customer = customer
 	record.verification_type = "High-Value Transaction"
@@ -85,6 +83,7 @@ def verify_customer_identity(customer, id_type, id_number, id_state=None, id_exp
 	if scan_data:
 		try:
 			import json
+
 			scan = json.loads(scan_data)
 			record.full_name = scan.get("name", customer_name)
 			record.address = scan.get("address", "")
@@ -111,6 +110,7 @@ def verify_customer_identity(customer, id_type, id_number, id_state=None, id_exp
 
 def _get_customer_cash_total(customer, window_days=365):
 	from frappe.query_builder import DocType
+
 	SalesInvoice = DocType("Sales Invoice")
 	SalesInvoicePayment = DocType("Sales Invoice Payment")
 	cutoff = getdate(add_days(today(), -window_days))
@@ -147,7 +147,12 @@ def _generate_risk_flags(customer):
 		flags.append("High cash volume in 30 days")
 	transactions = frappe.get_all(
 		"Sales Invoice",
-		filters={"customer": customer, "docstatus": 1, "is_return": 0, "posting_date": [">=", add_days(today(), -30)]},
+		filters={
+			"customer": customer,
+			"docstatus": 1,
+			"is_return": 0,
+			"posting_date": [">=", add_days(today(), -30)],
+		},
 		fields=["count(*) as cnt"],
 	)
 	if transactions and transactions[0].cnt > 10:
@@ -197,6 +202,7 @@ def scan_cash_transactions():
 		return
 	threshold = flt(settings.get("cash_threshold_8300") or 10000)
 	from frappe.query_builder import DocType, functions
+
 	SalesInvoice = DocType("Sales Invoice")
 	SalesInvoicePayment = DocType("Sales Invoice Payment")
 	cutoff = getdate(add_days(today(), -365))

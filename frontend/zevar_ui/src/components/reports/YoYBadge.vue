@@ -1,6 +1,12 @@
 <template>
-	<span v-if="delta" class="inline-flex items-center gap-0.5 text-[9px] font-bold" :class="badgeClass">
-		<span class="material-symbols-outlined !text-xs">{{ delta.pct >= 0 ? 'trending_up' : 'trending_down' }}</span>
+	<span
+		v-if="delta"
+		class="inline-flex items-center gap-0.5 text-[9px] font-bold"
+		:class="badgeClass"
+	>
+		<span class="material-symbols-outlined !text-xs">{{
+			delta.pct >= 0 ? 'trending_up' : 'trending_down'
+		}}</span>
 		{{ delta.pct >= 0 ? '+' : '' }}{{ delta.pct }}% vs LY
 	</span>
 </template>

@@ -70,7 +70,7 @@
 						>
 							My Profile
 						</p>
-						<button class="text-gray-400 ">
+						<button class="text-gray-400">
 							<span class="material-symbols-outlined text-base">edit</span>
 						</button>
 					</div>

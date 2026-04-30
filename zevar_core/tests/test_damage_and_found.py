@@ -1,5 +1,6 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import flt
 
 
 class TestDamageAndFound(FrappeTestCase):
@@ -10,32 +11,37 @@ class TestDamageAndFound(FrappeTestCase):
 		cls.abbr = frappe.get_cached_value("Company", cls.company, "abbr") or "Z"
 
 		from zevar_core.patches.v1_1.seed_warehouse_zones import execute as seed_warehouses
+
 		seed_warehouses()
 
 	def _create_test_item(self):
 		code = f"TEST-DMG-{frappe.generate_hash(length=6)}"
 		if not frappe.db.exists("Item", code):
-			frappe.get_doc({
-				"doctype": "Item",
-				"item_code": code,
-				"item_name": f"Test Damage Item {code}",
-				"item_group": "All Item Groups",
-				"stock_uom": "Nos",
-				"is_stock_item": 1,
-				"has_serial_no": 1,
-			}).insert(ignore_permissions=True)
+			frappe.get_doc(
+				{
+					"doctype": "Item",
+					"item_code": code,
+					"item_name": f"Test Damage Item {code}",
+					"item_group": "All Item Groups",
+					"stock_uom": "Nos",
+					"is_stock_item": 1,
+					"has_serial_no": 1,
+				}
+			).insert(ignore_permissions=True)
 		return code
 
 	def _create_serial_no(self, item_code, warehouse):
 		sn = f"SN-DMG-{frappe.generate_hash(length=8)}"
 		if not frappe.db.exists("Serial No", sn):
-			frappe.get_doc({
-				"doctype": "Serial No",
-				"serial_no": sn,
-				"item_code": item_code,
-				"warehouse": warehouse,
-				"company": self.company,
-			}).insert(ignore_permissions=True)
+			frappe.get_doc(
+				{
+					"doctype": "Serial No",
+					"serial_no": sn,
+					"item_code": item_code,
+					"warehouse": warehouse,
+					"company": self.company,
+				}
+			).insert(ignore_permissions=True)
 		return sn
 
 	def _get_showcase_wh(self):
@@ -65,7 +71,6 @@ class TestDamageAndFound(FrappeTestCase):
 		from zevar_core.services.inventory_events import material_issue
 
 		item_code = self._create_test_item()
-		showcase = self._get_showcase_wh()
 		shrinkage = self._get_shrinkage_wh()
 		sn = self._create_serial_no(item_code, shrinkage)
 

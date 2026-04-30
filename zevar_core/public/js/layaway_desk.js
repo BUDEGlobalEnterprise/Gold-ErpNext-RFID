@@ -43,7 +43,9 @@ frappe.provide("zevar.layaway");
 			return control;
 		} catch (err) {
 			console.error("zevar.layaway.makeControl failed:", err);
-			parent.innerHTML = `<div class="zevar-la-empty">Field "${df.label || df.fieldname}" failed to render.</div>`;
+			parent.innerHTML = `<div class="zevar-la-empty">Field "${
+				df.label || df.fieldname
+			}" failed to render.</div>`;
 			return null;
 		}
 	};
@@ -52,7 +54,7 @@ frappe.provide("zevar.layaway");
 		try {
 			return format_currency(Number(value || 0));
 		} catch {
-			return (Number(value || 0)).toFixed(2);
+			return Number(value || 0).toFixed(2);
 		}
 	};
 

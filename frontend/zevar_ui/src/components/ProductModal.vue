@@ -80,9 +80,7 @@
 					<!-- Product Details Table -->
 					<div class="border border-gray-200 rounded-lg overflow-hidden">
 						<div class="bg-gray-100 px-4 py-2 border-b border-gray-200">
-							<h3
-								class="font-bold text-gray-900 text-sm uppercase tracking-wide"
-							>
+							<h3 class="font-bold text-gray-900 text-sm uppercase tracking-wide">
 								Product Details
 							</h3>
 						</div>
@@ -166,9 +164,7 @@
 								}}</span>
 							</div>
 							<div v-if="details.country_of_origin" class="flex py-2.5 px-4">
-								<span class="w-1/2 text-sm text-gray-600"
-									>Country of Origin</span
-								>
+								<span class="w-1/2 text-sm text-gray-600">Country of Origin</span>
 								<span class="w-1/2 text-sm text-gray-900 font-medium">{{
 									details.country_of_origin || 'USA'
 								}}</span>
@@ -205,19 +201,11 @@
 							<table class="w-full text-sm">
 								<thead class="bg-gray-50 border-b border-gray-200">
 									<tr class="text-xs text-gray-600 uppercase">
-										<th class="px-4 py-2 text-left font-semibold">
-											Stone
-										</th>
+										<th class="px-4 py-2 text-left font-semibold">Stone</th>
 										<th class="px-4 py-2 text-left font-semibold">Cut</th>
-										<th class="px-4 py-2 text-left font-semibold">
-											Color
-										</th>
-										<th class="px-4 py-2 text-left font-semibold">
-											Clarity
-										</th>
-										<th class="px-4 py-2 text-right font-semibold">
-											Carat
-										</th>
+										<th class="px-4 py-2 text-left font-semibold">Color</th>
+										<th class="px-4 py-2 text-left font-semibold">Clarity</th>
+										<th class="px-4 py-2 text-right font-semibold">Carat</th>
 									</tr>
 								</thead>
 								<tbody class="divide-y divide-gray-100">
@@ -238,9 +226,7 @@
 										<td class="px-4 py-3 text-gray-600">
 											{{ gem.clarity || '-' }}
 										</td>
-										<td
-											class="px-4 py-3 text-right font-mono text-gray-900"
-										>
+										<td class="px-4 py-3 text-right font-mono text-gray-900">
 											{{ gem.carat || '0' }}
 										</td>
 									</tr>
@@ -255,9 +241,7 @@
 							<div>
 								<p class="text-sm text-gray-600 mb-1">
 									Total Price
-									<span
-										v-if="details.price_source"
-										class="text-xs text-gray-400"
+									<span v-if="details.price_source" class="text-xs text-gray-400"
 										>({{ details.price_source }})</span
 									>
 								</p>

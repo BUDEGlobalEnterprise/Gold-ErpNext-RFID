@@ -1,6 +1,6 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import now_datetime, add_to_date
+from frappe.utils import add_to_date, now_datetime
 
 
 class TestReservations(FrappeTestCase):
@@ -11,44 +11,51 @@ class TestReservations(FrappeTestCase):
 		cls.abbr = frappe.get_cached_value("Company", cls.company, "abbr") or "Z"
 
 		from zevar_core.patches.v1_1.seed_warehouse_zones import execute as seed_warehouses
+
 		seed_warehouses()
 
 	def _create_test_item(self):
 		code = f"TEST-RES-{frappe.generate_hash(length=6)}"
 		if not frappe.db.exists("Item", code):
-			item = frappe.get_doc({
-				"doctype": "Item",
-				"item_code": code,
-				"item_name": f"Test Res Item {code}",
-				"item_group": "All Item Groups",
-				"stock_uom": "Nos",
-				"is_stock_item": 1,
-				"has_serial_no": 1,
-			})
+			item = frappe.get_doc(
+				{
+					"doctype": "Item",
+					"item_code": code,
+					"item_name": f"Test Res Item {code}",
+					"item_group": "All Item Groups",
+					"stock_uom": "Nos",
+					"is_stock_item": 1,
+					"has_serial_no": 1,
+				}
+			)
 			item.insert(ignore_permissions=True)
 		return code
 
 	def _create_customer(self):
 		name = f"CUST-RES-{frappe.generate_hash(length=6)}"
 		if not frappe.db.exists("Customer", name):
-			frappe.get_doc({
-				"doctype": "Customer",
-				"customer_name": name,
-				"customer_group": "All Customer Groups",
-				"territory": "All Territories",
-			}).insert(ignore_permissions=True)
+			frappe.get_doc(
+				{
+					"doctype": "Customer",
+					"customer_name": name,
+					"customer_group": "All Customer Groups",
+					"territory": "All Territories",
+				}
+			).insert(ignore_permissions=True)
 		return name
 
 	def _create_serial_no(self, item_code, warehouse):
 		sn = f"SN-RES-{frappe.generate_hash(length=8)}"
 		if not frappe.db.exists("Serial No", sn):
-			frappe.get_doc({
-				"doctype": "Serial No",
-				"serial_no": sn,
-				"item_code": item_code,
-				"warehouse": warehouse,
-				"company": self.company,
-			}).insert(ignore_permissions=True)
+			frappe.get_doc(
+				{
+					"doctype": "Serial No",
+					"serial_no": sn,
+					"item_code": item_code,
+					"warehouse": warehouse,
+					"company": self.company,
+				}
+			).insert(ignore_permissions=True)
 		return sn
 
 	def _get_showcase_wh(self):
@@ -56,7 +63,7 @@ class TestReservations(FrappeTestCase):
 		return wh if frappe.db.exists("Warehouse", wh) else f"Stores - {self.abbr}"
 
 	def test_create_and_cancel_reservation(self):
-		from zevar_core.api.inventory import reserve_for_customer, release_reservation
+		from zevar_core.api.inventory import release_reservation, reserve_for_customer
 
 		item_code = self._create_test_item()
 		customer = self._create_customer()

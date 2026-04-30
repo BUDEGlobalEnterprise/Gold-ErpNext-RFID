@@ -23,19 +23,27 @@ class PaymentGatewaySettings(Document):
 			frappe.throw(frappe._("Financing Waterfall Order must be a valid JSON array."))
 
 	def get_stripe_secret_key(self):
-		return get_decrypted_password("Payment Gateway Settings", "Payment Gateway Settings", "stripe_api_key")
+		return get_decrypted_password(
+			"Payment Gateway Settings", "Payment Gateway Settings", "stripe_api_key"
+		)
 
 	def get_stripe_publishable_key(self):
 		return self.stripe_publishable_key or ""
 
 	def get_stripe_webhook_secret(self):
-		return get_decrypted_password("Payment Gateway Settings", "Payment Gateway Settings", "stripe_webhook_secret")
+		return get_decrypted_password(
+			"Payment Gateway Settings", "Payment Gateway Settings", "stripe_webhook_secret"
+		)
 
 	def get_square_access_token(self):
-		return get_decrypted_password("Payment Gateway Settings", "Payment Gateway Settings", "square_access_token")
+		return get_decrypted_password(
+			"Payment Gateway Settings", "Payment Gateway Settings", "square_access_token"
+		)
 
 	def get_square_webhook_signature(self):
-		return get_decrypted_password("Payment Gateway Settings", "Payment Gateway Settings", "square_webhook_signature_key")
+		return get_decrypted_password(
+			"Payment Gateway Settings", "Payment Gateway Settings", "square_webhook_signature_key"
+		)
 
 	def get_financing_waterfall(self):
 		if not self.financing_waterfall_order:

@@ -1,6 +1,8 @@
-import frappe
-from frappe.utils import now_datetime, flt
 import json
+
+import frappe
+from frappe.utils import flt, now_datetime
+
 
 def _reconcile_audit(session_doc):
 	scanned_counts = {}
@@ -34,7 +36,11 @@ def _reconcile_audit(session_doc):
 	# Build a rate map
 	item_rates = {}
 	if item_codes:
-		items = frappe.get_all("Item", filters={"name": ["in", list(item_codes)]}, fields=["name", "standard_rate", "valuation_rate"])
+		items = frappe.get_all(
+			"Item",
+			filters={"name": ["in", list(item_codes)]},
+			fields=["name", "standard_rate", "valuation_rate"],
+		)
 		for itm in items:
 			item_rates[itm.name] = flt(itm.standard_rate) or flt(itm.valuation_rate)
 
@@ -59,12 +65,16 @@ def _reconcile_audit(session_doc):
 			missing_count += missing_qty
 			rate = item_rates.get(exp.item_code)
 			if rate is None:
-				frappe.log_error(f"Missing valuation rate for expected item {exp.item_code}", "Audit Reconciliation Warning")
+				frappe.log_error(
+					f"Missing valuation rate for expected item {exp.item_code}",
+					"Audit Reconciliation Warning",
+				)
 				rate = 0.0
 			total_value_discrepancy += missing_qty * rate
 
 	# Add unexpected items to discrepancy value
 	from collections import Counter
+
 	unexpected_counts = Counter(unexpected_items)
 	for item_code, count in unexpected_counts.items():
 		rate = item_rates.get(item_code)
@@ -72,6 +82,7 @@ def _reconcile_audit(session_doc):
 			total_value_discrepancy -= count * rate
 
 	return missing_items, missing_count, total_value_scanned, total_value_discrepancy, has_unexpected
+
 
 def process_shrinkage_async(session, missing_items_json, store_location):
 	try:
@@ -82,7 +93,11 @@ def process_shrinkage_async(session, missing_items_json, store_location):
 		item_codes = [m["item_code"] for m in raw_missing]
 		bin_qtys = {}
 		if item_codes:
-			bins = frappe.get_all("Bin", filters={"item_code": ["in", item_codes], "warehouse": store_location}, fields=["item_code", "actual_qty"])
+			bins = frappe.get_all(
+				"Bin",
+				filters={"item_code": ["in", item_codes], "warehouse": store_location},
+				fields=["item_code", "actual_qty"],
+			)
 			for b in bins:
 				bin_qtys[b.item_code] = flt(b.actual_qty)
 
@@ -126,8 +141,9 @@ def process_shrinkage_async(session, missing_items_json, store_location):
 		se.insert()
 		se.submit()
 
-	except Exception as e:
+	except Exception:
 		frappe.log_error(title=f"Error processing shrinkage for {session}", message=frappe.get_traceback())
+
 
 def notify_shrinkage_async(session, missing_items_json, display_case):
 	try:
@@ -137,13 +153,18 @@ def notify_shrinkage_async(session, missing_items_json, display_case):
 		)
 		recipients = [o.parent for o in owners]
 		if recipients:
-			items_html = "<br>".join([f"{frappe.utils.escape_html(str(m['qty']))}x {frappe.utils.escape_html(str(m['item_code']))}" for m in missing_items])
+			items_html = "<br>".join(
+				[
+					f"{frappe.utils.escape_html(str(m['qty']))}x {frappe.utils.escape_html(str(m['item_code']))}"
+					for m in missing_items
+				]
+			)
 			frappe.sendmail(
 				recipients=recipients,
 				subject=f"Shrinkage Detected in Case {display_case}",
 				message=f"Missing items during audit session {session}: <br>" + items_html,
 			)
-	except Exception as e:
+	except Exception:
 		frappe.log_error(title=f"Error sending shrinkage alert for {session}", message=frappe.get_traceback())
 
 
@@ -154,19 +175,25 @@ def notify_variance_escalation(session, store_location, missing_items_json, free
 		recipients = []
 
 		# Get owners
-		owners = frappe.get_all("Has Role", filters={"role": "Owner", "parenttype": "User"}, fields=["parent"])
+		owners = frappe.get_all(
+			"Has Role", filters={"role": "Owner", "parenttype": "User"}, fields=["parent"]
+		)
 		recipients.extend([o.parent for o in owners])
 
 		# Get store managers
-		managers = frappe.get_all("Has Role", filters={"role": "Sales Manager", "parenttype": "User"}, fields=["parent"])
+		managers = frappe.get_all(
+			"Has Role", filters={"role": "Sales Manager", "parenttype": "User"}, fields=["parent"]
+		)
 		recipients.extend([m.parent for m in managers])
 
 		recipients = list(set(recipients))
 		if recipients:
-			items_html = "<br>".join([
-				f"{frappe.utils.escape_html(str(m.get('qty', 1)))}x {frappe.utils.escape_html(str(m.get('item_code', 'Unknown')))}"
-				for m in missing_items
-			])
+			items_html = "<br>".join(
+				[
+					f"{frappe.utils.escape_html(str(m.get('qty', 1)))}x {frappe.utils.escape_html(str(m.get('item_code', 'Unknown')))}"
+					for m in missing_items
+				]
+			)
 			frappe.sendmail(
 				recipients=recipients,
 				subject=f"URGENT: Store {store_location} Frozen - Audit Variance Exceeded",
@@ -181,7 +208,9 @@ def notify_variance_escalation(session, store_location, missing_items_json, free
 				""",
 			)
 	except Exception:
-		frappe.log_error(title=f"Error sending variance escalation for {session}", message=frappe.get_traceback())
+		frappe.log_error(
+			title=f"Error sending variance escalation for {session}", message=frappe.get_traceback()
+		)
 
 
 def quarantine_unexpected_items(session, store_location):
@@ -195,7 +224,9 @@ def quarantine_unexpected_items(session, store_location):
 
 		# Find or create quarantine warehouse
 		quarantine_wh = frappe.db.get_value(
-			"Warehouse", {"warehouse_name": ["like", "%Quarantine%"], "name": ["like", f"%{store_location}%"]}, "name"
+			"Warehouse",
+			{"warehouse_name": ["like", "%Quarantine%"], "name": ["like", f"%{store_location}%"]},
+			"name",
 		) or frappe.db.get_value("Warehouse", {"warehouse_name": ["like", "%Quarantine%"]}, "name")
 
 		if not quarantine_wh:
@@ -204,6 +235,7 @@ def quarantine_unexpected_items(session, store_location):
 
 		# Group by item_code
 		from collections import Counter
+
 		item_counts = Counter(s.item_code for s in unexpected if s.item_code)
 
 		se = frappe.new_doc("Stock Entry")
@@ -212,13 +244,16 @@ def quarantine_unexpected_items(session, store_location):
 		cost_center = frappe.get_cached_value("Company", se.company, "cost_center")
 
 		for item_code, qty in item_counts.items():
-			se.append("items", {
-				"item_code": item_code,
-				"qty": qty,
-				"s_warehouse": store_location,
-				"t_warehouse": quarantine_wh,
-				"cost_center": cost_center,
-			})
+			se.append(
+				"items",
+				{
+					"item_code": item_code,
+					"qty": qty,
+					"s_warehouse": store_location,
+					"t_warehouse": quarantine_wh,
+					"cost_center": cost_center,
+				},
+			)
 
 		se.insert()
 		se.submit()
@@ -230,7 +265,10 @@ def quarantine_unexpected_items(session, store_location):
 			f"Moved {len(item_counts)} unexpected items to quarantine from session {session}",
 		)
 	except Exception:
-		frappe.log_error(title=f"Error quarantining unexpected items for {session}", message=frappe.get_traceback())
+		frappe.log_error(
+			title=f"Error quarantining unexpected items for {session}", message=frappe.get_traceback()
+		)
+
 
 def _log_audit_event(event_type, category, reference_document, details):
 	audit_log = frappe.new_doc("POS Audit Log")
@@ -243,10 +281,11 @@ def _log_audit_event(event_type, category, reference_document, details):
 	audit_log.insert(ignore_permissions=True)
 
 
-
 def execute_submit_scan(session_doc, barcode_or_epc):
 	# Check for duplicates
-	existing_scan = frappe.db.exists("Case Audit Scan", {"parent": session_doc.name, "barcode_or_epc": barcode_or_epc})
+	existing_scan = frappe.db.exists(
+		"Case Audit Scan", {"parent": session_doc.name, "barcode_or_epc": barcode_or_epc}
+	)
 	if existing_scan:
 		return {
 			"success": True,
@@ -269,10 +308,7 @@ def execute_submit_scan(session_doc, barcode_or_epc):
 
 	if item_code:
 		item_data = frappe.db.get_value(
-			"Item",
-			item_code,
-			["item_name", "standard_rate", "valuation_rate"],
-			as_dict=True
+			"Item", item_code, ["item_name", "standard_rate", "valuation_rate"], as_dict=True
 		)
 		item_name = item_data.item_name
 		valuation_rate = flt(item_data.standard_rate) or flt(item_data.valuation_rate)
@@ -307,6 +343,7 @@ def execute_submit_scan(session_doc, barcode_or_epc):
 		"scanned_count": session_doc.scanned_count,
 	}
 
+
 def execute_batch_scan(session_doc, epcs):
 	results = []
 	duplicates_skipped = 0
@@ -315,7 +352,9 @@ def execute_batch_scan(session_doc, epcs):
 		frappe.throw("Audit session is not in progress.")
 
 	# Process EPCs efficiently
-	existing_epcs = set(frappe.db.get_all("Case Audit Scan", {"parent": session_doc.name}, pluck="barcode_or_epc"))
+	existing_epcs = set(
+		frappe.db.get_all("Case Audit Scan", {"parent": session_doc.name}, pluck="barcode_or_epc")
+	)
 
 	# Filter out duplicates first
 	unique_new_epcs = []
@@ -334,14 +373,20 @@ def execute_batch_scan(session_doc, epcs):
 		}
 
 	# Bulk fetch Items
-	items = frappe.get_all("Item", filters={"custom_rfid_epc": ["in", unique_new_epcs]}, fields=["name", "custom_rfid_epc"])
+	items = frappe.get_all(
+		"Item", filters={"custom_rfid_epc": ["in", unique_new_epcs]}, fields=["name", "custom_rfid_epc"]
+	)
 	epc_to_item = {itm.custom_rfid_epc: itm.name for itm in items}
 
 	# Bulk fetch Bins
 	item_codes = list(epc_to_item.values())
 	bin_qtys = {}
 	if item_codes:
-		bins = frappe.get_all("Bin", filters={"item_code": ["in", item_codes], "warehouse": session_doc.store_location}, fields=["item_code", "actual_qty"])
+		bins = frappe.get_all(
+			"Bin",
+			filters={"item_code": ["in", item_codes], "warehouse": session_doc.store_location},
+			fields=["item_code", "actual_qty"],
+		)
 		for b in bins:
 			bin_qtys[b.item_code] = flt(b.actual_qty)
 
@@ -349,12 +394,15 @@ def execute_batch_scan(session_doc, epcs):
 		item_code = epc_to_item.get(epc)
 		match_status = "Matched" if item_code and bin_qtys.get(item_code, 0) > 0 else "Unexpected"
 
-		session_doc.append("scans", {
-			"item_code": item_code,
-			"barcode_or_epc": epc,
-			"match_status": match_status,
-			"scanned_at": now_datetime()
-		})
+		session_doc.append(
+			"scans",
+			{
+				"item_code": item_code,
+				"barcode_or_epc": epc,
+				"match_status": match_status,
+				"scanned_at": now_datetime(),
+			},
+		)
 
 		results.append({"epc": epc, "match_status": match_status, "item_code": item_code})
 

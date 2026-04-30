@@ -2,16 +2,14 @@
 	<BaseModal :show="true" max-width="max-w-3xl" @close="$emit('close')">
 		<template #header>
 			<div class="flex items-center justify-between w-full">
-				<h3 class="text-lg font-bold text-gray-900 dark:text-white">
-					New Repair Order
-				</h3>
+				<h3 class="text-lg font-bold text-gray-900 dark:text-white">New Repair Order</h3>
 				<button
-						type="button"
-						@click="showRepairTypeManager = true"
-						class="px-3 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
-					>
-						Manage Repair Types
-					</button>
+					type="button"
+					@click="showRepairTypeManager = true"
+					class="px-3 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
+				>
+					Manage Repair Types
+				</button>
 			</div>
 		</template>
 
@@ -125,11 +123,7 @@
 							class="px-3 py-1 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
 						>
 							<option value="">All Categories</option>
-							<option
-								v-for="cat in repairCategories"
-								:key="cat"
-								:value="cat"
-							>
+							<option v-for="cat in repairCategories" :key="cat" :value="cat">
 								{{ cat }}
 							</option>
 						</select>
@@ -167,19 +161,13 @@
 								>${{ selectedRepairType.base_price || 0 }}</span
 							>
 						</div>
-						<div
-							v-if="selectedRepairType.estimated_days"
-							class="flex justify-between"
-						>
+						<div v-if="selectedRepairType.estimated_days" class="flex justify-between">
 							<span class="text-gray-600">Est. Days:</span>
 							<span class="font-medium"
 								>{{ selectedRepairType.estimated_days }} days</span
 							>
 						</div>
-						<p
-							v-if="selectedRepairType.description"
-							class="mt-1 text-gray-500"
-						>
+						<p v-if="selectedRepairType.description" class="mt-1 text-gray-500">
 							{{ selectedRepairType.description }}
 						</p>
 					</div>
@@ -271,9 +259,7 @@
 				<!-- Weight & Stones -->
 				<div class="grid grid-cols-2 gap-3">
 					<div>
-						<label class="block text-sm font-medium mb-1"
-							>Item Weight (g)</label
-						>
+						<label class="block text-sm font-medium mb-1">Item Weight (g)</label>
 						<input
 							v-model.number="form.item_weight"
 							type="number"
@@ -283,9 +269,7 @@
 						/>
 					</div>
 					<div>
-						<label class="block text-sm font-medium mb-1"
-							>Stone Weight (ct)</label
-						>
+						<label class="block text-sm font-medium mb-1">Stone Weight (ct)</label>
 						<input
 							v-model.number="form.stone_weight"
 							type="number"
@@ -443,9 +427,7 @@
 				<div
 					class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-100 dark:border-orange-800/30"
 				>
-					<h4
-						class="text-sm font-bold text-orange-700 dark:text-orange-400 mb-2"
-					>
+					<h4 class="text-sm font-bold text-orange-700 dark:text-orange-400 mb-2">
 						Customer ID Verification (JVC Compliance)
 					</h4>
 					<div class="grid grid-cols-2 gap-2">
@@ -479,13 +461,8 @@
 					class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-100 dark:border-green-800/30"
 				>
 					<label class="flex items-center gap-2">
-						<input
-							v-model="form.is_warranty_repair"
-							type="checkbox"
-							class="rounded"
-						/>
-						<span
-							class="text-sm font-medium text-green-800 dark:text-green-400"
+						<input v-model="form.is_warranty_repair" type="checkbox" class="rounded" />
+						<span class="text-sm font-medium text-green-800 dark:text-green-400"
 							>Warranty Repair</span
 						>
 					</label>
@@ -520,9 +497,7 @@
 
 				<!-- Estimated Cost -->
 				<div>
-					<label class="block text-sm font-medium mb-1"
-						>Estimated Cost ($)</label
-					>
+					<label class="block text-sm font-medium mb-1">Estimated Cost ($)</label>
 					<input
 						v-model.number="form.estimated_cost"
 						type="number"
@@ -538,11 +513,7 @@
 					class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-100 dark:border-blue-800/30"
 				>
 					<label class="flex items-center gap-2">
-						<input
-							v-model="form.collect_deposit"
-							type="checkbox"
-							class="rounded"
-						/>
+						<input v-model="form.collect_deposit" type="checkbox" class="rounded" />
 						<span class="text-sm font-medium text-blue-800 dark:text-blue-400"
 							>Collect Deposit Now</span
 						>
@@ -565,13 +536,14 @@
 						</select>
 					</div>
 				</div>
-
-
 			</form>
 		</div>
 
 		<template #footer>
-			<div v-if="errorMsg" class="w-full mb-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-lg text-sm text-red-700 dark:text-red-400">
+			<div
+				v-if="errorMsg"
+				class="w-full mb-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-lg text-sm text-red-700 dark:text-red-400"
+			>
 				{{ errorMsg }}
 			</div>
 			<div class="flex gap-3 w-full">
@@ -588,9 +560,25 @@
 					@click="submit"
 					class="flex-1 py-2.5 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] disabled:opacity-50 flex items-center justify-center gap-2"
 				>
-					<svg v-if="submitting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+					<svg
+						v-if="submitting"
+						class="w-4 h-4 animate-spin"
+						fill="none"
+						viewBox="0 0 24 24"
+					>
+						<circle
+							class="opacity-25"
+							cx="12"
+							cy="12"
+							r="10"
+							stroke="currentColor"
+							stroke-width="4"
+						></circle>
+						<path
+							class="opacity-75"
+							fill="currentColor"
+							d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+						></path>
 					</svg>
 					{{ submitting ? 'Creating...' : 'Create Repair Order' }}
 				</button>
@@ -616,7 +604,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { call, toast, createResource } from 'frappe-ui'
-	import { formatDate } from '@/utils/dates.js'
+import { formatDate } from '@/utils/dates.js'
 import { useSessionStore } from '@/stores/session.js'
 import BaseModal from './BaseModal.vue'
 import CustomerCreationModal from './CustomerCreationModal.vue'
@@ -755,7 +743,7 @@ function searchCustomers() {
 				query: customerSearch.value,
 			})
 			const list = results || []
-			customerResults.value = list.map(c => ({
+			customerResults.value = list.map((c) => ({
 				...c,
 				name: c.name || c.customer_name,
 				customer_name: c.display_name || c.customer_name,
@@ -869,7 +857,8 @@ async function submit() {
 			purity: form.value.purity || undefined,
 			metal_weight_in: form.value.metal_weight_in || undefined,
 			metal_weight_out: form.value.metal_weight_out || undefined,
-			gemstones_json: form.value.gemstones.length > 0 ? JSON.stringify(form.value.gemstones) : undefined,
+			gemstones_json:
+				form.value.gemstones.length > 0 ? JSON.stringify(form.value.gemstones) : undefined,
 			customer_id_type: form.value.customer_id_type || undefined,
 			customer_id_number: form.value.customer_id_number || undefined,
 			customer_id_state: form.value.customer_id_state || undefined,
@@ -882,7 +871,7 @@ async function submit() {
 		}
 
 		// Remove undefined values to avoid sending them as 'undefined' strings
-		Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key])
+		Object.keys(payload).forEach((key) => payload[key] === undefined && delete payload[key])
 
 		await call('zevar_core.api.create_repair_order', payload)
 

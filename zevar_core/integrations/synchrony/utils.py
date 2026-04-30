@@ -5,13 +5,13 @@ Handles API communication with Synchrony for prime credit applications
 and credit authorizations (Apply API + Credit Authorizations API).
 """
 
-import frappe
-from frappe import _
-from frappe.utils import flt
-
 import hashlib
 import json
 import time
+
+import frappe
+from frappe import _
+from frappe.utils import flt
 
 try:
 	import requests
@@ -24,11 +24,6 @@ def _get_settings():
 
 
 def _get_headers():
-	settings = _get_settings()
-	if settings.is_sandbox():
-		base_url = "https://api.stg.syf.com"
-	else:
-		base_url = "https://api.syf.com"
 	return {
 		"Content-Type": "application/json",
 		"Accept": "application/json",
@@ -38,7 +33,7 @@ def _get_headers():
 def _api_request(method, endpoint, data=None, headers=None):
 	if not requests:
 		frappe.throw(_("requests library is required for Synchrony integration."))
-	url = endpoint if endpoint.startswith("http") else endpoint
+	url = endpoint
 	req_headers = headers or _get_headers()
 	try:
 		resp = requests.request(method, url, headers=req_headers, json=data, timeout=30)

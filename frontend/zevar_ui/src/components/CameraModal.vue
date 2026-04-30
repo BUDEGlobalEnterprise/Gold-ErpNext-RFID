@@ -9,18 +9,14 @@
 			<div class="flex gap-2 mb-4">
 				<button
 					@click="photoType = 'before'"
-					:class="
-						photoType === 'before' ? 'bg-blue-500 text-white' : 'bg-gray-100'
-					"
+					:class="photoType === 'before' ? 'bg-blue-500 text-white' : 'bg-gray-100'"
 					class="px-4 py-2 rounded-lg text-sm font-medium"
 				>
 					Before Repair
 				</button>
 				<button
 					@click="photoType = 'after'"
-					:class="
-						photoType === 'after' ? 'bg-green-500 text-white' : 'bg-gray-100'
-					"
+					:class="photoType === 'after' ? 'bg-green-500 text-white' : 'bg-gray-100'"
 					class="px-4 py-2 rounded-lg text-sm font-medium"
 				>
 					After Repair
@@ -47,9 +43,7 @@
 
 				<!-- Camera Overlay -->
 				<div v-if="cameraActive" class="absolute inset-0 pointer-events-none">
-					<div
-						class="absolute inset-4 border-2 border-white/30 rounded-lg"
-					></div>
+					<div class="absolute inset-4 border-2 border-white/30 rounded-lg"></div>
 					<div
 						class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 border-2 border-[#D4AF37] rounded-full"
 					></div>
@@ -63,12 +57,7 @@
 					v-if="hasMultipleCameras"
 					class="p-3 bg-gray-100 dark:bg-warm-dark-900 rounded-full hover:bg-gray-200"
 				>
-					<svg
-						class="w-6 h-6"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -92,12 +81,7 @@
 					@click="uploadFile"
 					class="p-3 bg-gray-100 dark:bg-warm-dark-900 rounded-full hover:bg-gray-200"
 				>
-					<svg
-						class="w-6 h-6"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -120,10 +104,7 @@
 				<p class="text-sm font-medium text-gray-700 mb-2">Captured Image:</p>
 				<img :src="capturedImage" class="max-h-48 rounded-lg" />
 				<div class="flex gap-2 mt-2">
-					<button
-						@click="retakePhoto"
-						class="px-4 py-2 bg-gray-100 rounded-lg text-sm"
-					>
+					<button @click="retakePhoto" class="px-4 py-2 bg-gray-100 rounded-lg text-sm">
 						Retake
 					</button>
 					<button

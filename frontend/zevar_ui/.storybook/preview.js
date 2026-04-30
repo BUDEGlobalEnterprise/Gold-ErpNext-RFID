@@ -13,7 +13,10 @@ const preview = {
 		viewport: {
 			viewports: {
 				xs: { name: 'XS Phone (375px)', styles: { width: '375px', height: '667px' } },
-				sm: { name: 'SM Large Phone (640px)', styles: { width: '640px', height: '960px' } },
+				sm: {
+					name: 'SM Large Phone (640px)',
+					styles: { width: '640px', height: '960px' },
+				},
 				md: { name: 'MD Tablet (768px)', styles: { width: '768px', height: '1024px' } },
 				lg: { name: 'LG Laptop (1024px)', styles: { width: '1024px', height: '768px' } },
 				xl: { name: 'XL Desktop (1280px)', styles: { width: '1280px', height: '800px' } },

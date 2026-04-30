@@ -310,7 +310,10 @@ const goldPrice = computed(() => {
 	const rate22kt = goldStore.rates['Yellow Gold-22Kt']
 	if (!rate22kt) return '---'
 	const perOz = (rate22kt * 31.1035).toFixed(2)
-	return Number(perOz).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+	return Number(perOz).toLocaleString('en-US', {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	})
 })
 
 const priceChange = ref(0.0)

@@ -10,7 +10,6 @@ from zevar_core.integrations.aff import utils as aff_utils
 
 
 def _get_location_token():
-	settings = frappe.get_single("Payment Gateway Settings")
 	location_id = frappe.db.get_value("Store Location", {"is_active": 1}, "store_code") or "default"
 	result = aff_utils.get_access_token(location_id)
 	if not result.get("success"):

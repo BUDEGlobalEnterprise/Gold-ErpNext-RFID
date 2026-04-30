@@ -6,16 +6,16 @@
 				{{ monthName }} {{ currentYear }}
 			</h3>
 			<div class="flex gap-1">
-					<button
-						@click="prevMonth"
-						class="p-1.5 rounded-lg text-gray-400 dark:text-white/40 transition-all border border-transparent hover:bg-gray-100 dark:hover:bg-white/5"
-					>
+				<button
+					@click="prevMonth"
+					class="p-1.5 rounded-lg text-gray-400 dark:text-white/40 transition-all border border-transparent hover:bg-gray-100 dark:hover:bg-white/5"
+				>
 					<span class="material-symbols-outlined text-lg">chevron_left</span>
 				</button>
-					<button
-						@click="nextMonth"
-						class="p-1.5 rounded-lg text-gray-400 dark:text-white/40 transition-all border border-transparent hover:bg-gray-100 dark:hover:bg-white/5"
-					>
+				<button
+					@click="nextMonth"
+					class="p-1.5 rounded-lg text-gray-400 dark:text-white/40 transition-all border border-transparent hover:bg-gray-100 dark:hover:bg-white/5"
+				>
 					<span class="material-symbols-outlined text-lg">chevron_right</span>
 				</button>
 			</div>
@@ -43,14 +43,14 @@
 				:key="d"
 				@click="selectDate(d)"
 				class="aspect-square rounded-full flex items-center justify-center text-xs relative transition-all group"
-					:class="[
-						isSelected(d)
-							? 'bg-primary text-black font-bold shadow-lg shadow-primary/20 scale-110 z-10'
-							: isToday(d)
-							? 'bg-primary/10 text-primary font-bold'
-							: 'text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5',
-					]"
-				>
+				:class="[
+					isSelected(d)
+						? 'bg-primary text-black font-bold shadow-lg shadow-primary/20 scale-110 z-10'
+						: isToday(d)
+						? 'bg-primary/10 text-primary font-bold'
+						: 'text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5',
+				]"
+			>
 				{{ d }}
 				<!-- Event Dots or indicators can go here -->
 				<span

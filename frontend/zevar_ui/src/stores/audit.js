@@ -26,8 +26,7 @@ export const useAuditStore = defineStore('audit', () => {
 
 	// --- Computed ---
 	const isActive = computed(() => {
-		return activeSession.value &&
-			['Draft', 'In Progress'].includes(activeSession.value.status)
+		return activeSession.value && ['Draft', 'In Progress'].includes(activeSession.value.status)
 	})
 
 	const progressPercent = computed(() => {
@@ -74,7 +73,7 @@ export const useAuditStore = defineStore('audit', () => {
 		onSuccess(data) {
 			lastScanResult.value = { match_status: 'Batch', ...data }
 			if (data.results) {
-				data.results.forEach(r => addToScanFeed(r))
+				data.results.forEach((r) => addToScanFeed(r))
 			}
 		},
 	})

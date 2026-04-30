@@ -2,6 +2,7 @@
 
 import frappe
 import requests
+from frappe.utils import flt, get_pdf
 
 from zevar_core.constants import (
 	GOLD_PURITY_RATES,
@@ -280,7 +281,6 @@ def expire_stale_reservations():
 def reorder_suggestion_job():
 	from frappe.utils import add_days, today
 
-	abbr = frappe.db.get_value("Company", "Zevar Jewelers", "abbr") or "Z"
 	cutoff = add_days(today(), -30)
 	company = frappe.defaults.get_global_default("company") or "Zevar Jewelers"
 	cost_center = frappe.get_cached_value("Company", company, "cost_center")
@@ -307,10 +307,13 @@ def reorder_suggestion_job():
 		if daily_vel <= 0:
 			continue
 
-		total_on_hand = flt(frappe.db.sql(
-			"SELECT SUM(actual_qty) FROM `tabBin` WHERE item_code = %s AND actual_qty > 0",
-			(item.name,),
-		)[0][0] or 0)
+		total_on_hand = flt(
+			frappe.db.sql(
+				"SELECT SUM(actual_qty) FROM `tabBin` WHERE item_code = %s AND actual_qty > 0",
+				(item.name,),
+			)[0][0]
+			or 0
+		)
 
 		safety_stock = daily_vel * REORDER_SAFETY_DAYS
 
@@ -327,12 +330,15 @@ def reorder_suggestion_job():
 			mr.company = company
 			mr.cost_center = cost_center
 			mr.schedule_date = add_days(today(), 7)
-			mr.append("items", {
-				"item_code": item.name,
-				"qty": max(1, int(safety_stock - total_on_hand)),
-				"schedule_date": add_days(today(), 7),
-				"cost_center": cost_center,
-			})
+			mr.append(
+				"items",
+				{
+					"item_code": item.name,
+					"qty": max(1, int(safety_stock - total_on_hand)),
+					"schedule_date": add_days(today(), 7),
+					"cost_center": cost_center,
+				},
+			)
 			mr.insert(ignore_permissions=True)
 
 
@@ -342,7 +348,7 @@ def audit_cadence_heartbeat():
 	Runs daily at 05:00. For each store, checks when the last audit of each scope
 	was completed and creates a new Audit Plan if the cadence interval has elapsed.
 	"""
-	from frappe.utils import add_days, today, getdate
+	from frappe.utils import add_days, getdate, today
 
 	policy_data = _get_audit_policy_for_scheduler()
 
@@ -360,20 +366,29 @@ def audit_cadence_heartbeat():
 	for store in stores:
 		for scope, cadence_days in cadence_map.items():
 			# Skip if a pending plan already exists
-			existing = frappe.get_all("Audit Plan", filters={
-				"store_location": store,
-				"scope": scope,
-				"status": ["in", ["Scheduled", "In Progress"]],
-			}, limit=1)
+			existing = frappe.get_all(
+				"Audit Plan",
+				filters={
+					"store_location": store,
+					"scope": scope,
+					"status": ["in", ["Scheduled", "In Progress"]],
+				},
+				limit=1,
+			)
 			if existing:
 				continue
 
 			# Check last completed audit for this scope+store
-			last_audit = frappe.get_all("Case Audit Session", filters={
-				"store_location": store,
-				"scope": scope,
-				"docstatus": 1,
-			}, fields=["MAX(completed_at) as last_completed"], limit=1)
+			last_audit = frappe.get_all(
+				"Case Audit Session",
+				filters={
+					"store_location": store,
+					"scope": scope,
+					"docstatus": 1,
+				},
+				fields=["MAX(completed_at) as last_completed"],
+				limit=1,
+			)
 
 			last_completed = None
 			if last_audit and last_audit[0].get("last_completed"):
@@ -399,21 +414,28 @@ def audit_cadence_heartbeat():
 			frappe.logger().info(f"Created Audit Plan {plan.name} for {store} - {scope}")
 
 	# Mark overdue plans as Missed
-	overdue = frappe.get_all("Audit Plan", filters={
-		"status": "Scheduled",
-		"scheduled_for": ["<", today()],
-	})
+	overdue = frappe.get_all(
+		"Audit Plan",
+		filters={
+			"status": "Scheduled",
+			"scheduled_for": ["<", today()],
+		},
+	)
 	for p in overdue:
 		frappe.db.set_value("Audit Plan", p["name"], "status", "Missed")
 
 	# Daily spot check for the designated high-value case
 	spot_case = policy_data.get("daily_spot_case")
 	if spot_case and frappe.db.exists("Display Case", spot_case):
-		today_spot = frappe.get_all("Audit Plan", filters={
-			"scope": "Daily Spot",
-			"scheduled_for": today(),
-			"status": ["in", ["Scheduled", "In Progress"]],
-		}, limit=1)
+		today_spot = frappe.get_all(
+			"Audit Plan",
+			filters={
+				"scope": "Daily Spot",
+				"scheduled_for": today(),
+				"status": ["in", ["Scheduled", "In Progress"]],
+			},
+			limit=1,
+		)
 		if not today_spot:
 			case_wh = frappe.db.get_value("Display Case", spot_case, "warehouse")
 			if case_wh:
@@ -463,9 +485,9 @@ def _get_stores_for_audit():
 			return wh_list
 
 	# Fallback: group warehouses matching store pattern
-	stores = frappe.get_all("Warehouse",
-		filters={"is_group": 1, "name": ["like", "%-01"]},
-		pluck="name", limit=50)
+	stores = frappe.get_all(
+		"Warehouse", filters={"is_group": 1, "name": ["like", "%-01"]}, pluck="name", limit=50
+	)
 	if stores:
 		return stores
 
@@ -475,18 +497,18 @@ def _get_stores_for_audit():
 
 def _get_store_manager():
 	"""Get a store manager user to assign audits to."""
-	managers = frappe.get_all("Has Role",
+	managers = frappe.get_all(
+		"Has Role",
 		filters={"role": ["in", ["Sales Manager", "Store Manager"]], "parenttype": "User"},
-		fields=["parent"], limit=1)
+		fields=["parent"],
+		limit=1,
+	)
 	if managers:
 		return managers[0]["parent"]
 	return None
 
 
 def consignment_overdue_alert():
-	abbr = frappe.db.get_value("Company", "Zevar Jewelers", "abbr") or "Z"
-	now = frappe.utils.now_datetime()
-
 	consignment_warehouses = frappe.get_all(
 		"Warehouse",
 		filters={"warehouse_name": ["like", "Consignment%"]},
@@ -516,8 +538,11 @@ def consignment_overdue_alert():
 			)
 
 		from zevar_core.services.inventory_events import _log_inventory_event
+
 		_log_inventory_event(
-			"consignment_overdue", "Warehouse", wh.name,
+			"consignment_overdue",
+			"Warehouse",
+			wh.name,
 			f"Consignment {wh.warehouse_name} has {len(bins)} items overdue for return",
 		)
 
@@ -562,17 +587,30 @@ def run_report_subscriptions():
 	subs = frappe.get_all(
 		"Report Subscription",
 		filters={"enabled": 1, "next_run": ["<=", now]},
-		fields=["name", "user", "report_id", "report_title", "delivery_method",
-				"export_format", "filters_json", "recipient_email", "recipient_phone",
-				"cron_expression"],
+		fields=[
+			"name",
+			"user",
+			"report_id",
+			"report_title",
+			"delivery_method",
+			"export_format",
+			"filters_json",
+			"recipient_email",
+			"recipient_phone",
+			"cron_expression",
+		],
 	)
 
 	for sub in subs:
 		try:
 			_deliver_report_subscription(sub)
-			frappe.db.set_value("Report Subscription", sub.name, {
-				"last_run": now,
-			})
+			frappe.db.set_value(
+				"Report Subscription",
+				sub.name,
+				{
+					"last_run": now,
+				},
+			)
 			_update_next_run(sub.name, sub.cron_expression)
 			frappe.db.commit()
 		except Exception:
@@ -583,8 +621,6 @@ def run_report_subscriptions():
 
 
 def _deliver_report_subscription(sub):
-	from frappe.utils.pdf import get_pdf
-
 	report_id = sub.report_id
 	report_name = _resolve_frappe_report_name(report_id)
 	if not report_name:
@@ -594,6 +630,7 @@ def _deliver_report_subscription(sub):
 	if sub.filters_json:
 		try:
 			import json
+
 			filters = json.loads(sub.filters_json)
 		except Exception:
 			filters = {}
@@ -610,7 +647,9 @@ def _deliver_report_subscription(sub):
 			data = _generate_report_csv(report_name, filters)
 			_attach = [{"fname": f"{report_id}.xlsx", "fcontent": data}]
 
-		recipients = [sub.recipient_email] if sub.recipient_email else [frappe.db.get_value("User", sub.user, "email")]
+		recipients = (
+			[sub.recipient_email] if sub.recipient_email else [frappe.db.get_value("User", sub.user, "email")]
+		)
 		frappe.sendmail(
 			recipients=recipients,
 			subject=f"Scheduled Report: {sub.report_title or report_id}",
@@ -634,7 +673,11 @@ def _resolve_frappe_report_name(report_id):
 def _generate_report_pdf(report_name, filters):
 	report = frappe.get_doc("Report", report_name)
 	data = report.get_data(filters=filters) if hasattr(report, "get_data") else []
-	html = frappe.render_template("templates/report.html", {"data": data, "title": report_name}) if data else f"<p>Report: {report_name}</p>"
+	html = (
+		frappe.render_template("templates/report.html", {"data": data, "title": report_name})
+		if data
+		else f"<p>Report: {report_name}</p>"
+	)
 	return get_pdf(html)
 
 

@@ -23,7 +23,9 @@ const BREAKPOINTS = {
 function useResponsive() {
 	// Reactive device flags
 	const isMobile = computed(() => windowWidth.value < BREAKPOINTS.md) // < 768
-	const isTablet = computed(() => windowWidth.value >= BREAKPOINTS.md && windowWidth.value < BREAKPOINTS.lg) // 768–1023
+	const isTablet = computed(
+		() => windowWidth.value >= BREAKPOINTS.md && windowWidth.value < BREAKPOINTS.lg
+	) // 768–1023
 	const isMobileOrTablet = computed(() => windowWidth.value < BREAKPOINTS.lg) // < 1024
 	const isDesktop = computed(() => windowWidth.value >= BREAKPOINTS.lg) // >= 1024
 	const isLargeDesktop = computed(() => windowWidth.value >= BREAKPOINTS.xl) // >= 1280
@@ -103,7 +105,9 @@ export const responsiveClasses = computed(() => ({
 	tablet: windowWidth.value >= BREAKPOINTS.md && windowWidth.value < BREAKPOINTS.lg,
 	desktop: windowWidth.value >= BREAKPOINTS.lg,
 	largeDesktop: windowWidth.value >= BREAKPOINTS.xl,
-	touch: typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0),
+	touch:
+		typeof window !== 'undefined' &&
+		('ontouchstart' in window || navigator.maxTouchPoints > 0),
 	portrait: windowWidth.value <= windowHeight.value,
 	landscape: windowWidth.value > windowHeight.value,
 }))

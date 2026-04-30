@@ -9,7 +9,10 @@ the system automatically cascades to the next, reusing PII
 to prevent re-keying and cart abandonment.
 """
 
-from zevar_core.services.financing_service import FinancingWaterfallManager, WATERFALL_PROVIDERS
+import frappe
+from frappe import _, flt
+
+from zevar_core.services.financing_service import WATERFALL_PROVIDERS, FinancingWaterfallManager
 
 
 @frappe.whitelist(methods=["POST"])
@@ -51,11 +54,11 @@ def start_financing_waterfall(**kwargs):
 			app_data=app_data,
 			user_email=frappe.session.user,
 			queue="long",
-			at_front=True
+			at_front=True,
 		)
 		return {
 			"status": "queued",
-			"message": _("Financing waterfall started in background. You will be notified once complete.")
+			"message": _("Financing waterfall started in background. You will be notified once complete."),
 		}
 
 	# Synchronous execution
@@ -76,5 +79,3 @@ def get_waterfall_status():
 		"waterfall_order": waterfall,
 		"available_providers": available,
 	}
-
-

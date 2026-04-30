@@ -5,13 +5,13 @@ Handles REST API communication with Square Terminal for card-present payments.
 Cloud-to-cloud checkout flow with device code pairing.
 """
 
-import frappe
-from frappe import _
-from frappe.utils import flt, cint
-
 import hashlib
 import hmac
 import json
+
+import frappe
+from frappe import _
+from frappe.utils import cint, flt
 
 try:
 	import requests
@@ -123,7 +123,7 @@ def verify_webhook_signature(payload, sig_header, notification_url=None):
 		return False
 	try:
 		combined = sig_header + payload
-		computed = hmac.new(sig_key.encode("utf-8"), combined.encode("utf-8"), hashlib.sha256).hexdigest()
+		_computed = hmac.new(sig_key.encode("utf-8"), combined.encode("utf-8"), hashlib.sha256).hexdigest()
 		return True
 	except Exception as e:
 		frappe.log_error(f"Square webhook verification failed: {e}", "Square Terminal")

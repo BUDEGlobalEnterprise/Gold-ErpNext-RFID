@@ -46,7 +46,6 @@ def _api_request(method, endpoint, data=None, token=None):
 
 
 def get_access_token(location_id):
-	settings = _get_settings()
 	data = {"locationId": location_id, "grant_type": "client_credentials"}
 	return _api_request("POST", "/auth/token", data=data)
 

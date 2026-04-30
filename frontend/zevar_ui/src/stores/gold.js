@@ -17,14 +17,19 @@ import { ref } from 'vue'
 function normalizePurity(purity) {
 	if (!purity) return purity
 	const map = {
-		'24k': '24Kt', '24kt': '24Kt',
-		'22k': '22Kt', '22kt': '22Kt',
-		'18k': '18Kt', '18kt': '18Kt',
-		'14k': '14Kt', '14kt': '14Kt',
-		'10k': '10Kt', '10kt': '10Kt',
+		'24k': '24Kt',
+		'24kt': '24Kt',
+		'22k': '22Kt',
+		'22kt': '22Kt',
+		'18k': '18Kt',
+		'18kt': '18Kt',
+		'14k': '14Kt',
+		'14kt': '14Kt',
+		'10k': '10Kt',
+		'10kt': '10Kt',
 		'999 sterling': '999 Fine',
-		'925': '925 Sterling',
-		'sterling': '925 Sterling',
+		925: '925 Sterling',
+		sterling: '925 Sterling',
 	}
 	return map[purity.toLowerCase().trim()] || purity
 }

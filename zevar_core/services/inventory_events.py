@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
-from frappe.utils import flt, now_datetime, add_to_date
+from frappe.utils import add_to_date, flt, now_datetime
 
 
 def _get_company():
@@ -70,27 +70,34 @@ def _get_zone_warehouse(store_parent_wh, zone_name, store_code=None):
 	return None
 
 
-def transfer_serial(serial_no, item_code, from_warehouse, to_warehouse,
-					reference_doctype=None, reference_name=None, qty=1):
+def transfer_serial(
+	serial_no, item_code, from_warehouse, to_warehouse, reference_doctype=None, reference_name=None, qty=1
+):
 	se = frappe.new_doc("Stock Entry")
 	se.stock_entry_type = "Material Transfer"
 	se.company = _get_company()
 	se.cost_center = _get_cost_center(se.company)
 
 	if reference_doctype and reference_name:
-		se.append("additional_costs", {
-			"description": f"Ref: {reference_doctype} {reference_name}",
-			"amount": 0,
-		})
+		se.append(
+			"additional_costs",
+			{
+				"description": f"Ref: {reference_doctype} {reference_name}",
+				"amount": 0,
+			},
+		)
 
-	se.append("items", {
-		"item_code": item_code,
-		"qty": qty,
-		"s_warehouse": from_warehouse,
-		"t_warehouse": to_warehouse,
-		"cost_center": se.cost_center,
-		"serial_and_batch_bundle": _get_or_create_sbb(serial_no, item_code, from_warehouse),
-	})
+	se.append(
+		"items",
+		{
+			"item_code": item_code,
+			"qty": qty,
+			"s_warehouse": from_warehouse,
+			"t_warehouse": to_warehouse,
+			"cost_center": se.cost_center,
+			"serial_and_batch_bundle": _get_or_create_sbb(serial_no, item_code, from_warehouse),
+		},
+	)
 
 	se.insert(ignore_permissions=True)
 	se.submit()
@@ -113,8 +120,15 @@ def _get_or_create_sbb(serial_no, item_code, warehouse):
 	return None
 
 
-def material_receipt(item_code, to_warehouse, qty=1, serial_no=None,
-					 valuation_rate=None, reference_doctype=None, reference_name=None):
+def material_receipt(
+	item_code,
+	to_warehouse,
+	qty=1,
+	serial_no=None,
+	valuation_rate=None,
+	reference_doctype=None,
+	reference_name=None,
+):
 	se = frappe.new_doc("Stock Entry")
 	se.stock_entry_type = "Material Receipt"
 	se.company = _get_company()
@@ -140,8 +154,9 @@ def material_receipt(item_code, to_warehouse, qty=1, serial_no=None,
 	return se
 
 
-def material_issue(item_code, from_warehouse, qty=1, serial_no=None,
-				   reference_doctype=None, reference_name=None):
+def material_issue(
+	item_code, from_warehouse, qty=1, serial_no=None, reference_doctype=None, reference_name=None
+):
 	se = frappe.new_doc("Stock Entry")
 	se.stock_entry_type = "Material Issue"
 	se.company = _get_company()
@@ -168,7 +183,9 @@ def material_issue(item_code, from_warehouse, qty=1, serial_no=None,
 def move_to_showcase(serial_no, item_code, from_warehouse, showcase_warehouse):
 	se = transfer_serial(serial_no, item_code, from_warehouse, showcase_warehouse)
 	_log_inventory_event(
-		"move_to_showcase", "Serial No", serial_no,
+		"move_to_showcase",
+		"Serial No",
+		serial_no,
 		f"Moved {serial_no} from {from_warehouse} to {showcase_warehouse}",
 	)
 	return se
@@ -192,11 +209,13 @@ def return_to_quarantine(serial_no, item_code, to_warehouse):
 
 def dispatch_inter_store_transfer(serial_nos, item_codes, source_back_stock, transit_out_wh):
 	entries = []
-	for sn, ic in zip(serial_nos, item_codes):
+	for sn, ic in zip(serial_nos, item_codes, strict=False):
 		se = transfer_serial(sn, ic, source_back_stock, transit_out_wh)
 		entries.append(se.name)
 	_log_inventory_event(
-		"transfer_dispatched", "Stock Entry", ",".join(entries),
+		"transfer_dispatched",
+		"Stock Entry",
+		",".join(entries),
 		f"Dispatched {len(serial_nos)} pieces from {source_back_stock} to {transit_out_wh}",
 	)
 	return entries
@@ -204,12 +223,14 @@ def dispatch_inter_store_transfer(serial_nos, item_codes, source_back_stock, tra
 
 def receive_inter_store_transfer(serial_nos, item_codes, transit_out_wh, dest_back_stock):
 	entries = []
-	for sn, ic in zip(serial_nos, item_codes):
+	for sn, ic in zip(serial_nos, item_codes, strict=False):
 		se = transfer_serial(sn, ic, transit_out_wh, dest_back_stock)
 		entries.append(se.name)
 	_update_serial_last_seen(serial_nos[-1] if serial_nos else None)
 	_log_inventory_event(
-		"transfer_received", "Stock Entry", ",".join(entries),
+		"transfer_received",
+		"Stock Entry",
+		",".join(entries),
 		f"Received {len(serial_nos)} pieces at {dest_back_stock}",
 	)
 	return entries
@@ -218,7 +239,9 @@ def receive_inter_store_transfer(serial_nos, item_codes, transit_out_wh, dest_ba
 def damage_write_off(serial_no, item_code, warehouse, shrinkage_wh, reason=None):
 	se = transfer_serial(serial_no, item_code, warehouse, shrinkage_wh)
 	_log_inventory_event(
-		"damage_written_off", "Stock Entry", se.name,
+		"damage_written_off",
+		"Stock Entry",
+		se.name,
 		f"Damaged: {serial_no} moved to {shrinkage_wh}. Reason: {reason or 'N/A'}",
 	)
 	return se
@@ -227,7 +250,9 @@ def damage_write_off(serial_no, item_code, warehouse, shrinkage_wh, reason=None)
 def gift_out(serial_no, item_code, warehouse, reason=None):
 	se = material_issue(item_code, warehouse, qty=1, serial_no=serial_no)
 	_log_inventory_event(
-		"gift_out", "Stock Entry", se.name,
+		"gift_out",
+		"Stock Entry",
+		se.name,
 		f"Gifted out {serial_no}. Reason: {reason or 'N/A'}",
 	)
 	return se
@@ -235,11 +260,16 @@ def gift_out(serial_no, item_code, warehouse, reason=None):
 
 def trade_in_accept(item_code, to_warehouse, valuation_rate, serial_no=None):
 	se = material_receipt(
-		item_code, to_warehouse, qty=1,
-		serial_no=serial_no, valuation_rate=valuation_rate,
+		item_code,
+		to_warehouse,
+		qty=1,
+		serial_no=serial_no,
+		valuation_rate=valuation_rate,
 	)
 	_log_inventory_event(
-		"trade_in_accepted", "Stock Entry", se.name,
+		"trade_in_accepted",
+		"Stock Entry",
+		se.name,
 		f"Trade-in accepted: {serial_no or item_code} valued at ${valuation_rate}",
 	)
 	return se
@@ -247,11 +277,13 @@ def trade_in_accept(item_code, to_warehouse, valuation_rate, serial_no=None):
 
 def consign_out(serial_nos, item_codes, from_warehouse, consignment_wh, event_name):
 	entries = []
-	for sn, ic in zip(serial_nos, item_codes):
+	for sn, ic in zip(serial_nos, item_codes, strict=False):
 		se = transfer_serial(sn, ic, from_warehouse, consignment_wh)
 		entries.append(se.name)
 	_log_inventory_event(
-		"consignment_out", "Stock Entry", ",".join(entries),
+		"consignment_out",
+		"Stock Entry",
+		",".join(entries),
 		f"Consigned {len(serial_nos)} pieces for event '{event_name}'",
 	)
 	return entries
@@ -259,11 +291,13 @@ def consign_out(serial_nos, item_codes, from_warehouse, consignment_wh, event_na
 
 def consign_in(serial_nos, item_codes, consignment_wh, back_stock_wh, event_name):
 	entries = []
-	for sn, ic in zip(serial_nos, item_codes):
+	for sn, ic in zip(serial_nos, item_codes, strict=False):
 		se = transfer_serial(sn, ic, consignment_wh, back_stock_wh)
 		entries.append(se.name)
 	_log_inventory_event(
-		"consignment_back", "Stock Entry", ",".join(entries),
+		"consignment_back",
+		"Stock Entry",
+		",".join(entries),
 		f"Consign-in {len(serial_nos)} pieces from event '{event_name}'",
 	)
 	return entries
@@ -273,7 +307,9 @@ def recover_found_piece(serial_no, item_code, to_warehouse, original_shrinkage_r
 	se = material_receipt(item_code, to_warehouse, qty=1, serial_no=serial_no)
 	_update_serial_last_seen(serial_no)
 	_log_inventory_event(
-		"piece_recovered", "Stock Entry", se.name,
+		"piece_recovered",
+		"Stock Entry",
+		se.name,
 		f"Recovered {serial_no}. Original shrinkage ref: {original_shrinkage_ref or 'N/A'}",
 	)
 	return se
@@ -282,7 +318,9 @@ def recover_found_piece(serial_no, item_code, to_warehouse, original_shrinkage_r
 def vendor_return(serial_no, item_code, warehouse, reason=None):
 	se = material_issue(item_code, warehouse, qty=1, serial_no=serial_no)
 	_log_inventory_event(
-		"vendor_return", "Stock Entry", se.name,
+		"vendor_return",
+		"Stock Entry",
+		se.name,
 		f"Vendor return: {serial_no}. Reason: {reason or 'N/A'}",
 	)
 	return se
@@ -294,7 +332,9 @@ def repair_in(item_code, to_warehouse, serial_no=None):
 		frappe.db.set_value("Serial No", serial_no, "custom_is_customer_owned", 1)
 		_update_serial_last_seen(serial_no)
 	_log_inventory_event(
-		"repair_in", "Stock Entry", se.name,
+		"repair_in",
+		"Stock Entry",
+		se.name,
 		f"Repair-in: {serial_no or item_code}",
 	)
 	return se
@@ -306,7 +346,9 @@ def repair_out(serial_no, item_code, from_warehouse):
 		frappe.db.set_value("Serial No", serial_no, "custom_is_customer_owned", 0)
 		_update_serial_last_seen(serial_no)
 	_log_inventory_event(
-		"repair_out", "Stock Entry", se.name,
+		"repair_out",
+		"Stock Entry",
+		se.name,
 		f"Repair-out: {serial_no}",
 	)
 	return se

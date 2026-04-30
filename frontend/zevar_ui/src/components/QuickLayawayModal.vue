@@ -5,27 +5,54 @@
 		</template>
 
 		<!-- Success State Overlay -->
-		<div v-if="successResult" class="p-10 flex flex-col items-center justify-center text-center">
-			<div class="w-20 h-20 rounded-full flex items-center justify-center mb-6 bg-green-100 dark:bg-green-900/30">
-				<svg class="w-10 h-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+		<div
+			v-if="successResult"
+			class="p-10 flex flex-col items-center justify-center text-center"
+		>
+			<div
+				class="w-20 h-20 rounded-full flex items-center justify-center mb-6 bg-green-100 dark:bg-green-900/30"
+			>
+				<svg
+					class="w-10 h-10 text-green-600 dark:text-green-400"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2.5"
+						d="M5 13l4 4L19 7"
+					/>
 				</svg>
 			</div>
-			<h3 class="text-xl font-bold text-green-600 dark:text-green-400 mb-2">Layaway Created!</h3>
-			<p class="text-gray-500 dark:text-gray-400 mb-6">Contract: {{ successResult.contract_name }}</p>
+			<h3 class="text-xl font-bold text-green-600 dark:text-green-400 mb-2">
+				Layaway Created!
+			</h3>
+			<p class="text-gray-500 dark:text-gray-400 mb-6">
+				Contract: {{ successResult.contract_name }}
+			</p>
 
-			<div class="bg-gray-50 dark:bg-warm-dark-700 rounded-xl p-4 w-full mb-6 border border-gray-100 dark:border-warm-border space-y-2 text-left">
+			<div
+				class="bg-gray-50 dark:bg-warm-dark-700 rounded-xl p-4 w-full mb-6 border border-gray-100 dark:border-warm-border space-y-2 text-left"
+			>
 				<div class="flex justify-between text-sm py-2">
 					<span class="text-gray-500 dark:text-gray-400">Total Amount:</span>
-					<strong class="text-gray-900 dark:text-white">${{ formatAmount(successResult.total_amount) }}</strong>
+					<strong class="text-gray-900 dark:text-white"
+						>${{ formatAmount(successResult.total_amount) }}</strong
+					>
 				</div>
 				<div class="flex justify-between text-sm py-2">
 					<span class="text-gray-500 dark:text-gray-400">Down Payment:</span>
-					<strong class="text-gray-900 dark:text-white">${{ formatAmount(successResult.down_payment_amount) }}</strong>
+					<strong class="text-gray-900 dark:text-white"
+						>${{ formatAmount(successResult.down_payment_amount) }}</strong
+					>
 				</div>
 				<div class="flex justify-between text-sm py-2">
 					<span class="text-gray-500 dark:text-gray-400">Balance:</span>
-					<strong class="text-gray-900 dark:text-white">${{ formatAmount(successResult.balance_amount) }}</strong>
+					<strong class="text-gray-900 dark:text-white"
+						>${{ formatAmount(successResult.balance_amount) }}</strong
+					>
 				</div>
 			</div>
 
@@ -41,9 +68,14 @@
 		<div v-else class="p-6">
 			<!-- Step 1: Customer Selection -->
 			<div class="mb-6">
-				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Customer</label>
+				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+					>Customer</label
+				>
 				<div class="flex gap-2">
-					<select v-model="form.customer" required :disabled="loading"
+					<select
+						v-model="form.customer"
+						required
+						:disabled="loading"
 						class="flex-1 px-3 py-2.5 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white"
 					>
 						<option value="">Select customer...</option>
@@ -62,7 +94,12 @@
 						:disabled="loading"
 					>
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+							/>
 						</svg>
 					</button>
 				</div>
@@ -70,14 +107,28 @@
 
 			<!-- Step 2: Cart Items Summary -->
 			<div class="mb-6">
-				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Items ({{ cartItems.length }})</label>
+				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+					>Items ({{ cartItems.length }})</label
+				>
 				<div class="bg-gray-50 dark:bg-warm-dark-700 rounded-lg p-3">
-					<div v-for="item in cartItems" :key="item.item_code" class="flex items-center py-2 border-b border-gray-100 dark:border-warm-border/50 last:border-0">
-						<span class="flex-1 text-sm text-gray-900 dark:text-white">{{ item.item_name || item.item_code }}</span>
-						<span class="text-sm text-gray-500 dark:text-gray-400 mr-4">x{{ item.qty }}</span>
-						<span class="text-sm font-medium text-green-600 dark:text-green-400">${{ formatAmount(item.rate * item.qty) }}</span>
+					<div
+						v-for="item in cartItems"
+						:key="item.item_code"
+						class="flex items-center py-2 border-b border-gray-100 dark:border-warm-border/50 last:border-0"
+					>
+						<span class="flex-1 text-sm text-gray-900 dark:text-white">{{
+							item.item_name || item.item_code
+						}}</span>
+						<span class="text-sm text-gray-500 dark:text-gray-400 mr-4"
+							>x{{ item.qty }}</span
+						>
+						<span class="text-sm font-medium text-green-600 dark:text-green-400"
+							>${{ formatAmount(item.rate * item.qty) }}</span
+						>
 					</div>
-					<div class="flex justify-between pt-3 text-sm font-semibold text-gray-900 dark:text-white">
+					<div
+						class="flex justify-between pt-3 text-sm font-semibold text-gray-900 dark:text-white"
+					>
 						<span>Total:</span>
 						<strong>${{ formatAmount(cartTotal) }}</strong>
 					</div>
@@ -86,48 +137,66 @@
 
 			<!-- Step 3: Layaway Terms -->
 			<div class="mb-6">
-				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Payment Terms</label>
+				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+					>Payment Terms</label
+				>
 				<div class="grid grid-cols-4 gap-2">
 					<button
 						v-for="term in validTerms"
 						:key="term"
 						class="p-3 rounded-lg text-center transition-all border-2"
-						:class="form.term_months === term
-							? 'bg-blue-600/20 border-blue-500'
-							: 'bg-gray-50 dark:bg-warm-dark-700 border-gray-200 dark:border-warm-border hover:border-blue-400'"
+						:class="
+							form.term_months === term
+								? 'bg-blue-600/20 border-blue-500'
+								: 'bg-gray-50 dark:bg-warm-dark-700 border-gray-200 dark:border-warm-border hover:border-blue-400'
+						"
 						@click="selectTerm(term)"
 						:disabled="loading"
 					>
-						<span class="block text-sm font-semibold text-gray-900 dark:text-white">{{ term }} months</span>
-						<span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">${{ formatAmount(calculateMonthlyPayment(term)) }}/mo</span>
+						<span class="block text-sm font-semibold text-gray-900 dark:text-white"
+							>{{ term }} months</span
+						>
+						<span class="block text-xs text-gray-500 dark:text-gray-400 mt-1"
+							>${{ formatAmount(calculateMonthlyPayment(term)) }}/mo</span
+						>
 					</button>
 				</div>
 			</div>
 
 			<!-- Step 4: Down Payment -->
 			<div class="mb-6">
-				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Down Payment</label>
+				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+					>Down Payment</label
+				>
 				<div class="grid grid-cols-4 gap-2">
 					<button
 						v-for="percent in downPaymentOptions"
 						:key="percent"
 						class="p-3 rounded-lg text-center transition-all border-2 text-sm font-semibold text-gray-900 dark:text-white"
-						:class="form.down_payment_percent === percent
-							? 'bg-blue-600/20 border-blue-500'
-							: 'bg-gray-50 dark:bg-warm-dark-700 border-gray-200 dark:border-warm-border hover:border-blue-400'"
+						:class="
+							form.down_payment_percent === percent
+								? 'bg-blue-600/20 border-blue-500'
+								: 'bg-gray-50 dark:bg-warm-dark-700 border-gray-200 dark:border-warm-border hover:border-blue-400'
+						"
 						@click="form.down_payment_percent = percent"
 						:disabled="loading"
 					>
 						{{ percent }}%
-						<span class="block text-xs font-normal text-gray-500 dark:text-gray-400">${{ formatAmount((cartTotal * percent) / 100) }}</span>
+						<span class="block text-xs font-normal text-gray-500 dark:text-gray-400"
+							>${{ formatAmount((cartTotal * percent) / 100) }}</span
+						>
 					</button>
 				</div>
 			</div>
 
 			<!-- Payment Schedule Preview -->
 			<div v-if="preview" class="mb-6 bg-gray-50 dark:bg-warm-dark-700 rounded-lg p-4">
-				<h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Payment Schedule</h4>
-				<div class="grid grid-cols-3 gap-2 text-xs text-gray-500 dark:text-gray-400 uppercase font-medium mb-2">
+				<h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+					Payment Schedule
+				</h4>
+				<div
+					class="grid grid-cols-3 gap-2 text-xs text-gray-500 dark:text-gray-400 uppercase font-medium mb-2"
+				>
 					<span>Installment</span>
 					<span>Due Date</span>
 					<span class="text-right">Amount</span>
@@ -138,10 +207,16 @@
 					class="grid grid-cols-3 gap-2 text-sm py-2 border-b border-gray-100 dark:border-warm-border/50 last:border-0"
 				>
 					<span class="text-gray-900 dark:text-white">#{{ payment.installment }}</span>
-					<span class="text-gray-700 dark:text-gray-300">{{ formatDate(payment.due_date) }}</span>
-					<span class="text-right text-gray-900 dark:text-white">${{ formatAmount(payment.amount) }}</span>
+					<span class="text-gray-700 dark:text-gray-300">{{
+						formatDate(payment.due_date)
+					}}</span>
+					<span class="text-right text-gray-900 dark:text-white"
+						>${{ formatAmount(payment.amount) }}</span
+					>
 				</div>
-				<div class="flex justify-between pt-3 text-sm font-semibold text-gray-900 dark:text-white">
+				<div
+					class="flex justify-between pt-3 text-sm font-semibold text-gray-900 dark:text-white"
+				>
 					<span>Total:</span>
 					<strong>${{ formatAmount(preview.preview.total) }}</strong>
 				</div>
@@ -149,9 +224,13 @@
 
 			<!-- Initial Payment (Optional) -->
 			<div class="mb-2">
-				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Initial Payment (Optional)</label>
+				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+					>Initial Payment (Optional)</label
+				>
 				<div class="relative mb-2">
-					<span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+					<span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
+						>$</span
+					>
 					<input
 						type="number"
 						v-model.number="form.initial_payment"
@@ -280,7 +359,7 @@ async function searchCustomers() {
 			query: '',
 		})
 		const list = result || []
-		customers.value = list.map(c => ({
+		customers.value = list.map((c) => ({
 			...c,
 			name: c.name || c.customer_name,
 			customer_name: c.display_name || c.customer_name,

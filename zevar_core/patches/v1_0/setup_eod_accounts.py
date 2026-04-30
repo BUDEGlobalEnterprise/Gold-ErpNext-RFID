@@ -10,56 +10,56 @@ def execute():
 	accounts = [
 		{
 			"account_name": "Income — Repair Services",
-			"parent_account": f"Direct Income - ZJ",
+			"parent_account": "Direct Income - ZJ",
 			"account_type": "Income Account",
 			"company": company,
 			"is_group": 0,
 		},
 		{
 			"account_name": "Liability — Layaway Deposits Held",
-			"parent_account": f"Current Liabilities - ZJ",
+			"parent_account": "Current Liabilities - ZJ",
 			"account_type": "",
 			"company": company,
 			"is_group": 0,
 		},
 		{
 			"account_name": "Asset — A/R Synchrony",
-			"parent_account": f"Accounts Receivable - ZJ",
+			"parent_account": "Accounts Receivable - ZJ",
 			"account_type": "Receivable",
 			"company": company,
 			"is_group": 0,
 		},
 		{
 			"account_name": "Asset — A/R AFF",
-			"parent_account": f"Accounts Receivable - ZJ",
+			"parent_account": "Accounts Receivable - ZJ",
 			"account_type": "Receivable",
 			"company": company,
 			"is_group": 0,
 		},
 		{
 			"account_name": "Asset — A/R CIMA",
-			"parent_account": f"Accounts Receivable - ZJ",
+			"parent_account": "Accounts Receivable - ZJ",
 			"account_type": "Receivable",
 			"company": company,
 			"is_group": 0,
 		},
 		{
 			"account_name": "Asset — A/R Progressive",
-			"parent_account": f"Accounts Receivable - ZJ",
+			"parent_account": "Accounts Receivable - ZJ",
 			"account_type": "Receivable",
 			"company": company,
 			"is_group": 0,
 		},
 		{
 			"account_name": "Asset — A/R Snap",
-			"parent_account": f"Accounts Receivable - ZJ",
+			"parent_account": "Accounts Receivable - ZJ",
 			"account_type": "Receivable",
 			"company": company,
 			"is_group": 0,
 		},
 		{
 			"account_name": "Asset — Cash Drawer Float",
-			"parent_account": f"Cash In Hand - ZJ",
+			"parent_account": "Cash In Hand - ZJ",
 			"account_type": "Cash",
 			"company": company,
 			"is_group": 0,
@@ -84,9 +84,9 @@ def setup_register_floats(company):
 	if not pos_profiles:
 		return
 
-	cash_float_account = f"Asset — Cash Drawer Float - ZJ"
+	cash_float_account = "Asset — Cash Drawer Float - ZJ"
 	# Need a generic temporary account for opening entry, like "Temporary Opening - ZJ"
-	temp_account = f"Temporary Opening - ZJ"
+	temp_account = "Temporary Opening - ZJ"
 
 	if not frappe.db.exists("Account", cash_float_account) or not frappe.db.exists("Account", temp_account):
 		return

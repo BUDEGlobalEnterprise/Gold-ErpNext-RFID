@@ -74,7 +74,10 @@
 			</div>
 
 			<div class="flex-1 overflow-auto min-h-0 pr-2 custom-scrollbar">
-				<div v-if="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+				<div
+					v-if="viewMode === 'grid'"
+					class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+				>
 					<div
 						v-for="item in filteredAppraisals"
 						:key="item.id"
@@ -174,26 +177,49 @@
 						class="flex items-center justify-between bg-white dark:bg-warm-dark-900/50 rounded-lg px-4 py-3 border border-gray-100 dark:border-warm-border/50 hover:border-[#D4AF37]/30 transition cursor-pointer"
 					>
 						<div class="flex items-center gap-3 min-w-0">
-							<div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+							<div
+								class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
+							>
 								{{ getInitials(item.customer) }}
 							</div>
 							<div class="min-w-0">
-								<div class="font-bold text-gray-900 dark:text-white text-sm truncate">{{ item.description }}</div>
-								<div class="text-[10px] text-gray-500">{{ item.customer }} &middot; {{ item.date }}</div>
+								<div
+									class="font-bold text-gray-900 dark:text-white text-sm truncate"
+								>
+									{{ item.description }}
+								</div>
+								<div class="text-[10px] text-gray-500">
+									{{ item.customer }} &middot; {{ item.date }}
+								</div>
 							</div>
 						</div>
 						<div class="flex items-center gap-4 shrink-0">
 							<div class="hidden sm:block">
-								<div class="text-[9px] text-gray-500 uppercase font-bold">Metal</div>
-								<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400">{{ item.metal }}</span>
+								<div class="text-[9px] text-gray-500 uppercase font-bold">
+									Metal
+								</div>
+								<span
+									class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400"
+									>{{ item.metal }}</span
+								>
 							</div>
 							<div class="text-right">
-								<div class="text-[9px] text-gray-500 uppercase font-bold">Value</div>
-								<div class="text-sm font-bold text-[#D4AF37] font-mono">{{ formatCurrency(item.estimatedValue) }}</div>
+								<div class="text-[9px] text-gray-500 uppercase font-bold">
+									Value
+								</div>
+								<div class="text-sm font-bold text-[#D4AF37] font-mono">
+									{{ formatCurrency(item.estimatedValue) }}
+								</div>
 							</div>
 							<span
 								class="text-[9px] font-bold px-2 py-1 rounded-full"
-								:class="item.status === 'Pending' ? 'bg-amber-100 text-amber-700' : item.status === 'In Progress' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'"
+								:class="
+									item.status === 'Pending'
+										? 'bg-amber-100 text-amber-700'
+										: item.status === 'In Progress'
+										? 'bg-blue-100 text-blue-700'
+										: 'bg-green-100 text-green-700'
+								"
 							>
 								{{ item.status }}
 							</span>
@@ -225,7 +251,7 @@ const statusTabs = [
 ]
 
 import { createResource } from 'frappe-ui'
-	import { formatDate } from '@/utils/dates.js'
+import { formatDate } from '@/utils/dates.js'
 
 const appraisalData = ref([])
 
@@ -235,7 +261,7 @@ const appraisalResource = createResource({
 	fields: ['*'],
 	limit: 100,
 	onSuccess(data) {
-		appraisalData.value = data.map(a => ({
+		appraisalData.value = data.map((a) => ({
 			id: a.name,
 			description: a.description || a.item_description || a.name,
 			customer: a.customer || a.customer_name || 'Unknown',
@@ -246,13 +272,12 @@ const appraisalResource = createResource({
 			estimatedValue: a.estimated_value || a.appraised_value || 0,
 			certification: a.certification || null,
 			certNumber: a.certification_number || '',
-			status: a.status || 'Pending'
+			status: a.status || 'Pending',
 		}))
-	}
+	},
 })
 
 appraisalResource.fetch()
-
 
 const totalAppraised = computed(() =>
 	appraisalData.value
@@ -278,7 +303,12 @@ const filteredAppraisals = computed(() => {
 
 function getInitials(name) {
 	if (!name) return '?'
-	return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+	return name
+		.split(' ')
+		.map((n) => n[0])
+		.join('')
+		.substring(0, 2)
+		.toUpperCase()
 }
 
 function formatCurrency(val) {

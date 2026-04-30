@@ -100,9 +100,7 @@ def _create_serial_no_fields():
 
 def _insert_custom_fields(doctype, fields):
 	for field in fields:
-		exists = frappe.db.exists(
-			"Custom Field", {"dt": doctype, "fieldname": field["fieldname"]}
-		)
+		exists = frappe.db.exists("Custom Field", {"dt": doctype, "fieldname": field["fieldname"]})
 		if not exists:
 			cf = frappe.get_doc(
 				{

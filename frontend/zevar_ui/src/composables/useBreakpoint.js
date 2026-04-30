@@ -102,9 +102,7 @@ export function useBreakpoint() {
 		return 'ontouchstart' in window || navigator.maxTouchPoints > 0
 	})
 
-	const orientation = computed(() =>
-		width.value > height.value ? 'landscape' : 'portrait'
-	)
+	const orientation = computed(() => (width.value > height.value ? 'landscape' : 'portrait'))
 
 	// Grid column presets for responsive grids
 	const gridCols = computed(() => {
@@ -143,7 +141,7 @@ export function useBreakpoint() {
 	})
 
 	// Touch target size recommendation
-	const touchTarget = computed(() => isMobile.value ? 44 : 36)
+	const touchTarget = computed(() => (isMobile.value ? 44 : 36))
 
 	onMounted(() => {
 		listenerCount++
@@ -164,7 +162,12 @@ export function useBreakpoint() {
 		height: readonly(height),
 		dpr: readonly(dpr),
 		// Individual breakpoints
-		xs, sm, md, lg, xl, xxl,
+		xs,
+		sm,
+		md,
+		lg,
+		xl,
+		xxl,
 		// Semantic flags
 		isMobile,
 		isTablet,

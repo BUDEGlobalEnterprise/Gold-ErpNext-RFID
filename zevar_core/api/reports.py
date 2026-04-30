@@ -15,10 +15,10 @@ from __future__ import annotations
 from typing import Any
 
 import frappe
-from frappe.utils import getdate, nowdate
+from frappe.utils import flt, getdate, nowdate
 
 # ---------------------------------------------------------------------------
-# Role constants – every report references one of these sets
+# Role constants - every report references one of these sets
 # ---------------------------------------------------------------------------
 
 ADMIN_ROLES = {"Administrator", "System Manager"}
@@ -55,7 +55,7 @@ REPORT_GROUPS = [
 ]
 
 # ---------------------------------------------------------------------------
-# Full report catalog – every report the system knows about
+# Full report catalog - every report the system knows about
 # ---------------------------------------------------------------------------
 
 REPORT_CATALOG: list[dict[str, Any]] = [
@@ -873,7 +873,7 @@ def get_eod_summary() -> dict[str, Any]:
 	Returns sales, repairs, layaway, and cash position summary for today.
 	Only available to roles that can access daily closeout reports.
 	"""
-	from frappe.utils import flt, nowdate, cstr
+	from frappe.utils import cstr, flt, nowdate
 
 	user = frappe.session.user
 	if not user or user == "Guest":
@@ -911,9 +911,7 @@ def get_eod_summary() -> dict[str, Any]:
 			sales_data["total"] = flt(row.total)
 			sales_data["refunds"] = flt(row.refunds)
 			sales_data["discounts"] = flt(row.discounts)
-			sales_data["avg_ticket"] = (
-				flt(row.total) / row.cnt if row.cnt else 0
-			)
+			sales_data["avg_ticket"] = flt(row.total) / row.cnt if row.cnt else 0
 
 	repairs_data = {"total_revenue": 0, "active_count": 0, "completed_today": 0, "overdue": 0}
 	if user_roles & (SALES_ROLES | HR_ROLES | ADMIN_ROLES):
@@ -968,8 +966,7 @@ def get_eod_summary() -> dict[str, Any]:
 			as_dict=True,
 		)
 		payment_breakdown = [
-			{"method": p.method, "total": flt(p.total), "count": p.count}
-			for p in (payments or [])
+			{"method": p.method, "total": flt(p.total), "count": p.count} for p in (payments or [])
 		]
 
 	layaway_data = {"payments_due": 0, "overdue_count": 0}
@@ -1009,7 +1006,7 @@ def get_eod_summary() -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# Daily Brief – single aggregated endpoint for the Daily Brief tab
+# Daily Brief - single aggregated endpoint for the Daily Brief tab
 # ---------------------------------------------------------------------------
 
 ROW_ACTION_MAP = {
@@ -1037,7 +1034,7 @@ ROW_ACTION_MAP = {
 @frappe.whitelist(allow_guest=False)
 def get_daily_brief(store: str | None = None) -> dict[str, Any]:
 	"""Return all KPI tiles + live feed for the Daily Brief in one round-trip."""
-	from frappe.utils import flt, add_days, now_datetime, getdate
+	from frappe.utils import add_days, flt, now_datetime
 
 	user = frappe.session.user
 	if not user or user == "Guest":
@@ -1135,7 +1132,7 @@ def _brief_cash_variance(today, user_roles):
 
 	if not (user_roles & (ACCOUNTING_ROLES | ADMIN_ROLES)):
 		return 0.0
-	row = frappe.db.sql(
+	frappe.db.sql(
 		"""SELECT COALESCE(SUM(
 			CASE WHEN sip.mode_of_payment = 'Cash' THEN sip.amount ELSE 0 END
 		), 0) as expected
@@ -1179,6 +1176,7 @@ def _brief_overdue_repairs(user_roles):
 
 def _brief_financier_ar(today, user_roles):
 	from frappe.utils import flt
+
 	from zevar_core.constants import FINANCING_WATERFALL
 
 	if not (user_roles & (ACCOUNTING_ROLES | ADMIN_ROLES)):
@@ -1194,10 +1192,12 @@ def _brief_financier_ar(today, user_roles):
 			(financier, today),
 			as_dict=True,
 		)
-		result.append({
-			"financier": financier,
-			"today_ar": flt(row[0].today_total) if row else 0,
-		})
+		result.append(
+			{
+				"financier": financier,
+				"today_ar": flt(row[0].today_total) if row else 0,
+			}
+		)
 	return result
 
 
@@ -1226,14 +1226,20 @@ def _brief_next_audit(store, user_roles):
 def _brief_pending_approvals(user_roles):
 	if not (user_roles & (MANAGER_ROLES | ADMIN_ROLES)):
 		return {"variance_overrides": 0, "transfer_receives": 0}
-	variance = frappe.db.count("POS Audit Log", {
-		"event_type": "variance_override",
-		"timestamp": [">=", frappe.utils.nowdate()],
-	})
-	transfers = frappe.db.count("Stock Entry", {
-		"stock_entry_type": "Material Transfer",
-		"docstatus": 0,
-	})
+	variance = frappe.db.count(
+		"POS Audit Log",
+		{
+			"event_type": "variance_override",
+			"timestamp": [">=", frappe.utils.nowdate()],
+		},
+	)
+	transfers = frappe.db.count(
+		"Stock Entry",
+		{
+			"stock_entry_type": "Material Transfer",
+			"docstatus": 0,
+		},
+	)
 	return {"variance_overrides": variance, "transfer_receives": transfers}
 
 
@@ -1267,7 +1273,7 @@ def _brief_yoy_deltas(today, last_year_today, user_roles, user):
 		params_this.append(user)
 		params_last.append(user)
 
-	for label, dt, params in [("this", today, params_this), ("last", last_year_today, params_last)]:
+	for label, params in [("this", params_this), ("last", params_last)]:
 		row = frappe.db.sql(
 			f"""SELECT COALESCE(SUM(grand_total), 0) as total
 			FROM `tabSales Invoice`
@@ -1306,6 +1312,7 @@ def get_row_actions(report_id: str) -> list[dict]:
 def execute_row_action(report_id: str, action: str, row_data: dict | str = "{}"):
 	"""Execute a row-level action from within a report."""
 	import json
+
 	from frappe.utils import flt
 
 	user = frappe.session.user
@@ -1356,12 +1363,15 @@ def _action_raise_mr(row):
 	mr.company = company
 	mr.cost_center = cost_center
 	mr.schedule_date = add_days(today(), 7)
-	mr.append("items", {
-		"item_code": item_code,
-		"qty": qty,
-		"schedule_date": add_days(today(), 7),
-		"cost_center": cost_center,
-	})
+	mr.append(
+		"items",
+		{
+			"item_code": item_code,
+			"qty": qty,
+			"schedule_date": add_days(today(), 7),
+			"cost_center": cost_center,
+		},
+	)
 	mr.insert(ignore_permissions=True)
 	return {"status": "created", "name": mr.name}
 
@@ -1370,13 +1380,14 @@ def _action_call_customer(row):
 	customer = row.get("customer") or row.get("Customer")
 	if not customer:
 		frappe.throw("Customer required", frappe.ValidationError)
-	phone = frappe.db.get_value("Customer", customer, "mobile_no") or frappe.db.get_value("Contact", {"links": {"link_doctype": "Customer", "link_name": customer}}, "phone")
+	phone = frappe.db.get_value("Customer", customer, "mobile_no") or frappe.db.get_value(
+		"Contact", {"links": {"link_doctype": "Customer", "link_name": customer}}, "phone"
+	)
 	return {"action": "call", "customer": customer, "phone": phone or ""}
 
 
 def _action_send_layaway_reminder(row):
 	customer = row.get("customer") or row.get("Customer")
-	contract = row.get("contract") or row.get("Contract")
 	if not customer:
 		frappe.throw("Customer required", frappe.ValidationError)
 	email = frappe.db.get_value("Customer", customer, "email_id")
@@ -1384,7 +1395,7 @@ def _action_send_layaway_reminder(row):
 		frappe.sendmail(
 			recipients=[email],
 			subject="Layaway Payment Reminder",
-			message=f"This is a reminder that your layaway payment is overdue. Please contact the store.",
+			message="This is a reminder that your layaway payment is overdue. Please contact the store.",
 		)
 	return {"status": "sent", "customer": customer}
 
@@ -1433,7 +1444,12 @@ def _action_convert_reservation(row):
 	serial_no = row.get("serial_no") or row.get("Serial No")
 	if not reservation or not customer:
 		frappe.throw("Reservation and Customer required", frappe.ValidationError)
-	return {"action": "open_layaway_modal", "reservation": reservation, "customer": customer, "serial_no": serial_no}
+	return {
+		"action": "open_layaway_modal",
+		"reservation": reservation,
+		"customer": customer,
+		"serial_no": serial_no,
+	}
 
 
 # ---------------------------------------------------------------------------
@@ -1448,8 +1464,18 @@ def get_report_subscriptions() -> list[dict]:
 	subs = frappe.get_all(
 		"Report Subscription",
 		filters={"user": user},
-		fields=["name", "report_id", "report_title", "enabled", "delivery_method",
-				"export_format", "cron_expression", "schedule_label", "next_run", "last_run"],
+		fields=[
+			"name",
+			"report_id",
+			"report_title",
+			"enabled",
+			"delivery_method",
+			"export_format",
+			"cron_expression",
+			"schedule_label",
+			"next_run",
+			"last_run",
+		],
 		order_by="next_run asc",
 	)
 	return subs
@@ -1479,11 +1505,14 @@ def create_report_subscription(
 	if not _has_access(report_def, user_roles):
 		frappe.throw("No access to this report", frappe.PermissionError)
 
-	existing = frappe.db.exists("Report Subscription", {
-		"user": user,
-		"report_id": report_id,
-		"cron_expression": cron_expression,
-	})
+	existing = frappe.db.exists(
+		"Report Subscription",
+		{
+			"user": user,
+			"report_id": report_id,
+			"cron_expression": cron_expression,
+		},
+	)
 	if existing:
 		frappe.throw("Subscription already exists for this report and schedule", frappe.DuplicateEntryError)
 

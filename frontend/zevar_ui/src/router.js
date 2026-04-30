@@ -188,7 +188,7 @@ async function checkUserRole() {
 			'Employee',
 			'Employee Self Service',
 		]
-		return userInfo.roles.some(role => reportRoles.includes(role))
+		return userInfo.roles.some((role) => reportRoles.includes(role))
 	} catch {
 		return false
 	}

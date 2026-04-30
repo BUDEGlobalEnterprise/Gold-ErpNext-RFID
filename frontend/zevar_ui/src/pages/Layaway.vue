@@ -160,7 +160,11 @@
 					</p>
 				</div>
 
-				<div v-else v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+				<div
+					v-else
+					v-if="viewMode === 'grid'"
+					class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+				>
 					<div
 						v-for="layaway in layaways"
 						:key="layaway.name"
@@ -253,19 +257,33 @@
 						class="flex items-center justify-between bg-white dark:bg-warm-dark-900/50 rounded-lg px-4 py-3 border border-gray-100 dark:border-warm-border/50 hover:border-[#D4AF37]/30 transition cursor-pointer"
 					>
 						<div class="flex items-center gap-4 min-w-0">
-							<span class="font-mono text-xs text-[#D4AF37] w-32 shrink-0">{{ layaway.name }}</span>
-							<span class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ layaway.customer_name || layaway.customer }}</span>
+							<span class="font-mono text-xs text-[#D4AF37] w-32 shrink-0">{{
+								layaway.name
+							}}</span>
+							<span
+								class="text-sm font-bold text-gray-900 dark:text-white truncate"
+								>{{ layaway.customer_name || layaway.customer }}</span
+							>
 						</div>
 						<div class="flex items-center gap-6">
 							<div class="text-right">
 								<span class="text-xs text-gray-500">Total</span>
-								<span class="text-sm font-bold text-gray-900 dark:text-white ml-2">{{ formatCurrency(layaway.total_amount) }}</span>
+								<span
+									class="text-sm font-bold text-gray-900 dark:text-white ml-2"
+									>{{ formatCurrency(layaway.total_amount) }}</span
+								>
 							</div>
 							<div class="text-right">
 								<span class="text-xs text-gray-500">Balance</span>
-								<span class="text-sm font-bold text-orange-600 dark:text-orange-400 ml-2">{{ formatCurrency(layaway.balance_amount) }}</span>
+								<span
+									class="text-sm font-bold text-orange-600 dark:text-orange-400 ml-2"
+									>{{ formatCurrency(layaway.balance_amount) }}</span
+								>
 							</div>
-							<span class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold" :class="getStatusClass(layaway.status, layaway.is_overdue)">
+							<span
+								class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold"
+								:class="getStatusClass(layaway.status, layaway.is_overdue)"
+							>
 								{{ layaway.is_overdue ? 'Overdue' : layaway.status }}
 							</span>
 						</div>
@@ -301,19 +319,31 @@
 		<!-- Create Layaway Inline View -->
 		<div v-else class="flex flex-col p-2">
 			<div class="mb-4">
-				<button @click="closeCreateMode" class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center gap-1">
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+				<button
+					@click="closeCreateMode"
+					class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center gap-1"
+				>
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M10 19l-7-7m0 0l7-7m-7 7h18"
+						/>
+					</svg>
 					Back to Layaways
 				</button>
 			</div>
-			<div class="flex-1 overflow-hidden rounded-2xl border border-gray-100 dark:border-warm-border shadow-sm">
+			<div
+				class="flex-1 overflow-hidden rounded-2xl border border-gray-100 dark:border-warm-border shadow-sm"
+			>
 				<CreateLayawayModal
-				:show="showCreateModal"
-				inlineMode
-				@close="closeCreateMode"
-				@created="onLayawayCreated"
-				@proceedToPayment="onProceedToPayment"
-			/>
+					:show="showCreateModal"
+					inlineMode
+					@close="closeCreateMode"
+					@created="onLayawayCreated"
+					@proceedToPayment="onProceedToPayment"
+				/>
 			</div>
 		</div>
 
@@ -329,29 +359,61 @@
 		<!-- Layaway Success Confirmation Overlay -->
 		<Teleport to="body">
 			<Transition name="fade">
-				<div v-if="showSuccessConfirmation" class="fixed inset-0 z-[120] flex items-center justify-center p-4">
-					<div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" @click="dismissSuccess"></div>
-					<div class="relative bg-white dark:bg-warm-card rounded-2xl shadow-2xl max-w-md w-full p-10 flex flex-col items-center text-center border border-transparent dark:border-warm-border animate-bounce-in">
-						<div class="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-6">
-							<svg class="w-10 h-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+				<div
+					v-if="showSuccessConfirmation"
+					class="fixed inset-0 z-[120] flex items-center justify-center p-4"
+				>
+					<div
+						class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
+						@click="dismissSuccess"
+					></div>
+					<div
+						class="relative bg-white dark:bg-warm-card rounded-2xl shadow-2xl max-w-md w-full p-10 flex flex-col items-center text-center border border-transparent dark:border-warm-border animate-bounce-in"
+					>
+						<div
+							class="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-6"
+						>
+							<svg
+								class="w-10 h-10 text-green-600 dark:text-green-400"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2.5"
+									d="M5 13l4 4L19 7"
+								></path>
 							</svg>
 						</div>
-						<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Layaway Created!</h2>
-						<p class="text-gray-500 dark:text-gray-400 mb-6">Contract has been created and deposit payment recorded successfully.</p>
+						<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+							Layaway Created!
+						</h2>
+						<p class="text-gray-500 dark:text-gray-400 mb-6">
+							Contract has been created and deposit payment recorded successfully.
+						</p>
 
-						<div class="bg-gray-50 dark:bg-warm-dark-700 rounded-xl p-4 w-full mb-6 border border-gray-100 dark:border-warm-border/50 space-y-2">
+						<div
+							class="bg-gray-50 dark:bg-warm-dark-700 rounded-xl p-4 w-full mb-6 border border-gray-100 dark:border-warm-border/50 space-y-2"
+						>
 							<div class="flex justify-between text-sm">
 								<span class="text-gray-500 dark:text-gray-400">Contract ID</span>
-								<span class="font-mono font-bold text-gray-900 dark:text-white">{{ successData?.layaway_id || '—' }}</span>
+								<span class="font-mono font-bold text-gray-900 dark:text-white">{{
+									successData?.layaway_id || '—'
+								}}</span>
 							</div>
 							<div class="flex justify-between text-sm">
 								<span class="text-gray-500 dark:text-gray-400">Deposit Paid</span>
-								<span class="font-mono font-bold text-[#D4AF37]">{{ formatCurrency(successData?.deposit_amount) }}</span>
+								<span class="font-mono font-bold text-[#D4AF37]">{{
+									formatCurrency(successData?.deposit_amount)
+								}}</span>
 							</div>
 							<div class="flex justify-between text-sm">
 								<span class="text-gray-500 dark:text-gray-400">Status</span>
-								<span class="font-bold text-green-600 dark:text-green-400">{{ successData?.status || 'Active' }}</span>
+								<span class="font-bold text-green-600 dark:text-green-400">{{
+									successData?.status || 'Active'
+								}}</span>
 							</div>
 						</div>
 
@@ -386,7 +448,7 @@ import AppLayout from '@/components/AppLayout.vue'
 import LayawayDetailModal from '@/components/LayawayDetailModal.vue'
 import CreateLayawayModal from '@/components/CreateLayawayModal.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
-	import { formatDate as formatDateUtil } from '@/utils/dates.js'
+import { formatDate as formatDateUtil } from '@/utils/dates.js'
 
 // Routing
 const route = useRoute()
@@ -547,9 +609,17 @@ onMounted(() => {
 	opacity: 0;
 }
 @keyframes bounce-in {
-	0% { transform: scale(0.9); opacity: 0; }
-	50% { transform: scale(1.02); }
-	100% { transform: scale(1); opacity: 1; }
+	0% {
+		transform: scale(0.9);
+		opacity: 0;
+	}
+	50% {
+		transform: scale(1.02);
+	}
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
 }
 .animate-bounce-in {
 	animation: bounce-in 0.4s ease-out;

@@ -41,7 +41,9 @@ for (const route of ROUTES) {
 		await page.goto(route.path, { waitUntil: 'networkidle' })
 
 		// Wait for main content area to render
-		await page.waitForSelector('main, .app-shell-main, .app-layout-main', { timeout: 5000 }).catch(() => {})
+		await page
+			.waitForSelector('main, .app-shell-main, .app-layout-main', { timeout: 5000 })
+			.catch(() => {})
 
 		// Small delay for animations
 		await page.waitForTimeout(500)

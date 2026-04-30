@@ -2,9 +2,11 @@
 # For license information, please see license.txt
 
 import json
+
 import frappe
 from frappe.model.document import Document
-from frappe.utils import now_datetime, flt
+from frappe.utils import flt, now_datetime
+
 from zevar_core.services.inventory_audit_utils import _log_audit_event, _reconcile_audit
 
 
@@ -13,7 +15,9 @@ class CaseAuditSession(Document):
 		if not self.completed_at:
 			self.completed_at = now_datetime()
 
-		missing_items, missing_count, total_value_scanned, total_value_discrepancy, has_unexpected = _reconcile_audit(self)
+		missing_items, missing_count, total_value_scanned, total_value_discrepancy, has_unexpected = (
+			_reconcile_audit(self)
+		)
 
 		self.total_value_scanned = total_value_scanned
 		self.total_value_discrepancy = total_value_discrepancy
@@ -24,7 +28,11 @@ class CaseAuditSession(Document):
 			item_codes = [m["item_code"] for m in missing_items]
 			rates = {}
 			if item_codes:
-				for itm in frappe.get_all("Item", filters={"name": ["in", item_codes]}, fields=["name", "standard_rate", "valuation_rate"]):
+				for itm in frappe.get_all(
+					"Item",
+					filters={"name": ["in", item_codes]},
+					fields=["name", "standard_rate", "valuation_rate"],
+				):
 					rates[itm.name] = flt(itm.standard_rate) or flt(itm.valuation_rate)
 			for m in missing_items:
 				variance_dollar += flt(m.get("qty", 1)) * rates.get(m["item_code"], 0)
@@ -41,7 +49,9 @@ class CaseAuditSession(Document):
 		if missing_items or has_unexpected:
 			if above_dollar_threshold or above_pieces_threshold:
 				self.status = "Pending Manager Review"
-				self.freeze_reason = _build_freeze_reason(missing_count, variance_dollar, threshold_dollars, threshold_pieces)
+				self.freeze_reason = _build_freeze_reason(
+					missing_count, variance_dollar, threshold_dollars, threshold_pieces
+				)
 			else:
 				self.status = "Discrepancy"
 		else:
@@ -135,11 +145,15 @@ class CaseAuditSession(Document):
 
 		# Update linked Audit Plan
 		if self.audit_plan:
-			frappe.db.set_value("Audit Plan", self.audit_plan, {
-				"status": "Completed",
-				"completed_at": now_datetime(),
-				"audit_session": self.name,
-			})
+			frappe.db.set_value(
+				"Audit Plan",
+				self.audit_plan,
+				{
+					"status": "Completed",
+					"completed_at": now_datetime(),
+					"audit_session": self.name,
+				},
+			)
 
 
 def _get_audit_policy():

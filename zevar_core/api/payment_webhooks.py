@@ -13,9 +13,11 @@ from frappe.utils import now_datetime
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 def stripe_webhook():
 	import json
+
 	payload = frappe.request.get_data(as_text=True)
 	sig_header = frappe.get_request_header("Stripe-Signature", "")
 	from zevar_core.integrations.stripe_terminal.webhook import handle_webhook
+
 	result = handle_webhook(payload, sig_header)
 	return result
 
@@ -23,9 +25,11 @@ def stripe_webhook():
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 def square_webhook():
 	import json
+
 	payload = frappe.request.get_data(as_text=True)
 	sig_header = frappe.get_request_header("X-Square-Signature", "")
 	from zevar_core.integrations.square_terminal.webhook import handle_webhook
+
 	result = handle_webhook(payload, sig_header)
 	return result
 
@@ -39,7 +43,9 @@ def verify_webhook_token(provider):
 		# If no secret is configured, we assume it's not yet secured in settings
 		return
 
-	received = frappe.get_request_header("X-Zevar-Webhook-Secret") or frappe.get_request_header("Authorization")
+	received = frappe.get_request_header("X-Zevar-Webhook-Secret") or frappe.get_request_header(
+		"Authorization"
+	)
 	if received and received.startswith("Bearer "):
 		received = received[7:]
 
@@ -51,6 +57,7 @@ def verify_webhook_token(provider):
 def aff_callback():
 	verify_webhook_token("AFF")
 	import json
+
 	payload = frappe.request.get_data(as_text=True)
 	try:
 		data = json.loads(payload)
@@ -72,6 +79,7 @@ def aff_callback():
 		doc.save(ignore_permissions=True)
 		frappe.db.commit()
 	from zevar_core.api.audit_log import log_event_safely
+
 	log_event_safely(
 		event_type="aff_callback",
 		details={"application_id": application_id, "status": app_status, "event_type": event_type},
@@ -83,6 +91,7 @@ def aff_callback():
 def snap_callback():
 	verify_webhook_token("Snap")
 	import json
+
 	payload = frappe.request.get_data(as_text=True)
 	try:
 		data = json.loads(payload)
@@ -109,6 +118,7 @@ def snap_callback():
 def zelle_webhook():
 	verify_webhook_token("Zelle")
 	import json
+
 	payload = frappe.request.get_data(as_text=True)
 	try:
 		data = json.loads(payload)
@@ -131,6 +141,7 @@ def zelle_webhook():
 
 	frappe.logger().info(f"Zelle payment received: ${amount} from {safe_sender}")
 	from zevar_core.api.audit_log import log_event_safely
+
 	log_event_safely(
 		event_type="zelle_payment_received",
 		details={"amount": amount, "sender": safe_sender, "reference": reference},
