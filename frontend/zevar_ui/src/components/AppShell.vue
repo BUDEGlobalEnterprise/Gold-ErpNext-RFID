@@ -288,7 +288,6 @@
 										{{ trend === 'up' ? '↑' : '↓' }}{{ Math.abs(change) }}%
 									</span>
 								</div>
->>>>>>> origin/main
 							</div>
 						</div>
 					</div>
@@ -555,7 +554,6 @@
 							{{ trend === 'up' ? '↑' : '↓' }}{{ Math.abs(change) }}%
 						</span>
 					</div>
->>>>>>> origin/main
 				</div>
 			</div>
 		</div>

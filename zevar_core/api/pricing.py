@@ -46,7 +46,6 @@ def get_item_price(item_code: str) -> dict:
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def get_live_metal_rates():
 	"""
 	Get current live metal rates for all metals and purities.
@@ -252,50 +251,6 @@ def get_live_rate_history(metal="Yellow Gold", days=7):
 
 
 @frappe.whitelist()
-def get_live_metal_rates():
-	"""
-	Get current live metal rates for all metals and purities.
-	Accessible to all logged-in users (employees, POS users, etc).
-
-	Non-blocking: returns cached rates immediately, even if stale.
-	Stale refresh is attempted inline with a short timeout, and falls
-	back to cached/hardcoded data if external APIs are unreachable.
-
-	Returns:
-		dict: Current rates grouped by metal type with metadata.
-	"""
-	from frappe.utils import now_datetime, time_diff_in_seconds
-
-	rates = frappe.get_all(
-		"Gold Rate Log",
-		fields=["metal", "purity", "rate_per_gram", "source", "timestamp"],
-		filters={"docstatus": 0},
-		order_by="timestamp desc",
-		ignore_permissions=True,
-	)
-
-	# Group by purity
-	series = {}
-	for log in logs:
-		p = log["purity"]
-		if p not in series:
-			series[p] = []
-		series[p].append(
-			{
-				"rate": log["rate_per_gram"],
-				"timestamp": log["timestamp"].isoformat() if log["timestamp"] else None,
-			}
-		)
-
-	return {
-		"success": True,
-		"metal": metal,
-		"days": int(days),
-		"series": series,
-	}
-
-
-@frappe.whitelist()
 def refresh_gold_rates():
 	"""Manually trigger gold rate refresh."""
 	from zevar_core.tasks import fetch_live_metal_rates
@@ -306,6 +261,23 @@ def refresh_gold_rates():
 	except Exception as e:
 		frappe.log_error(f"Gold rate refresh failed: {e!s}")
 		return {"success": False, "message": f"Failed to refresh rates: {e!s}"}
+
+
+def _format_rates_from_fetch(fetch_result):
+	"""Convert fetch result dict to grouped format matching DB structure."""
+	grouped = {}
+
+	for purity, rate in fetch_result.get("gold", {}).items():
+		if "Yellow Gold" not in grouped:
+			grouped["Yellow Gold"] = []
+		grouped["Yellow Gold"].append({"purity": purity, "rate_per_gram": rate})
+
+	for purity, rate in fetch_result.get("silver", {}).items():
+		if "Silver" not in grouped:
+			grouped["Silver"] = []
+		grouped["Silver"].append({"purity": purity, "rate_per_gram": rate})
+
+	return grouped
 
 
 def _calculate_gold_value(item) -> float:
