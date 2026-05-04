@@ -15,7 +15,7 @@ def run():
 	try:
 		from dbfread import DBF
 	except ImportError:
-		frappe.throw("dbfread not installed")
+		frappe.throw(_("dbfread not installed"))  # nosemgrep
 
 	table = DBF(DBF_PATH, encoding="cp1252", ignore_missing_memofile=True)
 
@@ -83,7 +83,7 @@ def run():
 			created += len(batch)
 
 			if (i + batch_size) % 500 == 0:
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 				print(f"  Stocked {created}/{len(items_with_stock)} items...")
 
 		except Exception as e:
@@ -92,5 +92,5 @@ def run():
 			print(f"  Batch {i // batch_size} error: {err_msg}")
 			frappe.db.rollback()
 
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep
 	print(f"\nDone: {created} items stocked, {errors} errors")

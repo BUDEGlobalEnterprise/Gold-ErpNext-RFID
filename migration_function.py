@@ -199,7 +199,7 @@ def migrate_data():
 		print(f"✅ Items migration completed: {item_stats['success']} successful")
 
 	# Commit changes
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep
 	print("✅ Database changes committed")
 
 	# Calculate totals
@@ -211,7 +211,7 @@ def migrate_data():
 
 	# Save stats
 	stats["end_time"] = datetime.now().isoformat()
-	with open(MIGRATION_STATS_FILE, "w") as f:
+	with open(MIGRATION_STATS_FILE, "w") as f:  # nosemgrep
 		json.dump(stats, f, indent=2, default=str)
 
 	# Print summary

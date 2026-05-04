@@ -568,8 +568,8 @@ def create_journal_entry_for_repair(repair_order: str) -> dict[str, Any]:
 		return {"success": False, "message": "No company configured"}
 
 	# Get accounting settings
-	repair_revenue_account = frappe.db.get_value(
-		"Repair Accounting Settings", None, "repair_revenue_account"
+	repair_revenue_account = frappe.db.get_single_value(
+		"Repair Accounting Settings", "repair_revenue_account"
 	) or "Repair Revenue - {}".format(frappe.db.get_value("Company", company, "abbr"))
 
 	receivable_account = frappe.db.get_value("Account", {"account_type": "Receivable", "company": company})
@@ -806,22 +806,3 @@ def process_commission_payment(
 	except Exception as e:
 		frappe.log_error(f"Commission payment failed for {technician}: {e}")
 		return {"success": False, "message": f"Failed to create Payment Entry: {e!s}"}
-
-
-def validate_sales_invoice_stream(doc, method=None):
-	"""Validate that Repair invoices do not post to Jewelry Sales income accounts."""
-	if doc.custom_transaction_stream == "Repair":
-		for item in doc.items:
-			# Reject if the line item is a stock item
-			if frappe.db.get_value("Item", item.item_code, "is_stock_item"):
-				frappe.throw(
-					_("Repair invoices cannot contain stock items (Item: {0}).").format(item.item_code)
-				)
-
-			# Reject if the income account contains 'Jewelry Sales'
-			if item.income_account and "Jewelry Sales" in item.income_account:
-				frappe.throw(
-					_("Repair invoices cannot post to jewelry sales accounts (Item: {0}).").format(
-						item.item_code
-					)
-				)

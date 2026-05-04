@@ -6,6 +6,7 @@ Visual FoxPro (DBF) format into Zevar DocTypes.
 
 Main Components:
 - foxpro_import: DBF file parser and field mappers
+- foxpro_import_extended: Extended imports (appraisals, layaway, etc.)
 - commands: Bench commands for running migrations
 
 Usage:
@@ -22,6 +23,7 @@ from .foxpro_import import (
 	import_employees,
 	import_inventory,
 	import_stores,
+	import_suppliers,
 )
 
 __all__ = [
@@ -33,4 +35,5 @@ __all__ = [
 	"import_employees",
 	"import_inventory",
 	"import_stores",
+	"import_suppliers",
 ]

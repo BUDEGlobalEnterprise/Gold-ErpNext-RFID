@@ -6,6 +6,7 @@ from frappe.utils import flt
 
 from zevar_core.constants import (
 	GOLD_PURITY_RATES,
+	PURITY_ALIASES,
 	SILVER_PURITY_RATES,
 	TROY_OZ_TO_GRAMS,
 )
@@ -78,6 +79,15 @@ _API_SOURCES = [
 ]
 
 
+def _expand_purity_names(canonical_purities):
+	"""Return canonical names plus their aliases (e.g. "14Kt" -> also store as "14K")."""
+	result = dict(canonical_purities)
+	for alias, canonical in PURITY_ALIASES.items():
+		if canonical in canonical_purities:
+			result[alias] = canonical_purities[canonical]
+	return result
+
+
 def fetch_live_metal_rates():
 	"""
 	Fetches live gold and silver rates from free APIs with automatic fallback.
@@ -127,14 +137,13 @@ def fetch_live_metal_rates():
 
 			frappe.db.commit()  # nosemgrep: frappe-semgrep-rules/rules.frappe-manual-commit
 			_cleanup_legacy_k_entries()
-			
-			# Log updated rates with arrows
+
 			log_msg = f"Metal rates updated from {source_label}:\n"
-			for metal in ["Yellow Gold", "Silver"]:
+			for metal in ["gold", "silver"]:
 				if metal in rates:
-					for item in rates[metal]:
-						log_msg += f"  - {item['purity']} {metal}: ${item['rate_per_gram']:.2f}/g\n"
-			
+					for purity, rate_val in rates[metal].items():
+						log_msg += f"  - {purity} {metal}: ${rate_val:.2f}/g\n"
+
 			frappe.logger().info(log_msg.strip())
 			return rates
 
@@ -178,12 +187,14 @@ def _update_all_rates(gold_per_gram, silver_per_gram, rates):
 	"""Update Gold Rate Log for all purities (canonical + alias entries)."""
 	source = rates.get("source", "live")
 
-	for purity, multiplier in GOLD_PURITY_RATES.items():
+	expanded_gold = _expand_purity_names(GOLD_PURITY_RATES)
+	for purity, multiplier in expanded_gold.items():
 		rate = round(gold_per_gram * multiplier, 2)
 		_update_rate("Yellow Gold", purity, rate, source)
 		rates["gold"][purity] = rate
 
-	for purity, multiplier in SILVER_PURITY_RATES.items():
+	expanded_silver = _expand_purity_names(SILVER_PURITY_RATES)
+	for purity, multiplier in expanded_silver.items():
 		rate = round(silver_per_gram * multiplier, 2)
 		_update_rate("Silver", purity, rate, source)
 		rates["silver"][purity] = rate
@@ -193,17 +204,30 @@ def _update_all_rates(gold_per_gram, silver_per_gram, rates):
 
 
 def _update_rate(metal, purity, rate, source="live"):
-	"""Helper to update or create a rate entry."""
+	"""Helper to update or create a rate entry.
+
+	Handles duplicate entries by updating ALL matching records to keep
+	the Gold Rate Log consistent regardless of how many entries exist.
+	"""
 	from frappe.utils import now_datetime
 
-	existing = frappe.db.exists("Gold Rate Log", {"metal": metal, "purity": purity})
+	# Skip if the Zevar Purity record doesn't exist (Link validation)
+	if not frappe.db.exists("Zevar Purity", purity):
+		return
+
+	existing = frappe.get_all(
+		"Gold Rate Log",
+		filters={"metal": metal, "purity": purity},
+		fields=["name"],
+	)
 
 	if existing:
-		frappe.db.set_value(
-			"Gold Rate Log",
-			existing,
-			{"rate_per_gram": rate, "source": source, "timestamp": now_datetime()},
-		)
+		for entry in existing:
+			frappe.db.set_value(
+				"Gold Rate Log",
+				entry.name,
+				{"rate_per_gram": rate, "source": source, "timestamp": now_datetime()},
+			)
 	else:
 		frappe.get_doc(
 			{

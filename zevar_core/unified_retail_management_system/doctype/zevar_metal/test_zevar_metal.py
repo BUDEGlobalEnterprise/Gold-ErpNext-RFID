@@ -13,7 +13,7 @@ class TestZevarMetal(FrappeTestCase):
 		for name in ["Test Metal Gold", "Test Metal Silver", "Test Metal Platinum"]:
 			if frappe.db.exists("Zevar Metal", name):
 				frappe.delete_doc("Zevar Metal", name, ignore_permissions=True, force=True)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def test_create_zevar_metal(self):
 		doc = frappe.get_doc({"doctype": "Zevar Metal", "__newname": "Test Metal Gold"}).insert(

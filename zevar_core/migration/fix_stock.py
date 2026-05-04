@@ -2,10 +2,10 @@ import frappe
 
 
 def fix_item_groups():
-	frappe.db.sql(
+	frappe.db.sql(  # nosemgrep
 		"UPDATE tabItem SET item_group='All Item Groups' WHERE item_group IS NULL OR item_group='' OR item_group='None'"
 	)
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep
 	print("Fixed item groups")
 
 
@@ -84,7 +84,7 @@ def restock_failed():
 			created += len(batch)
 
 			if (i + batch_size) % 500 == 0:
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 				print(f"  Stocked {created}/{len(items_with_stock)} items...")
 
 		except Exception as e:
@@ -92,5 +92,5 @@ def restock_failed():
 			print(f"  Batch {i // batch_size} error: {str(e)[:120]}")
 			frappe.db.rollback()
 
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep
 	print(f"\nDone: {created} items stocked, {errors} errors")

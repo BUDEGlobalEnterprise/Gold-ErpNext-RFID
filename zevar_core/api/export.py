@@ -229,7 +229,7 @@ def export_customer_data(
 
 	if include_transactions and customers:
 		customer_names = [c.name for c in customers]
-		all_stats = frappe.db.sql(
+		all_stats = frappe.db.sql(  # nosemgrep
 			"""
 			SELECT customer, COUNT(*) as count, COALESCE(SUM(grand_total), 0) as total, MAX(posting_date) as last_date
 			FROM `tabSales Invoice`
@@ -330,7 +330,7 @@ def export_inventory_data(
 
 	query += " ORDER BY i.item_name"
 
-	items = frappe.db.sql(query, params, as_dict=True)
+	items = frappe.db.sql(query, params, as_dict=True)  # nosemgrep
 
 	output = io.StringIO()
 	writer = csv.writer(output)

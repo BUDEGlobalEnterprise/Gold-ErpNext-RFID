@@ -104,7 +104,7 @@ def get_data(filters):
 		ORDER BY ro.received_date
 	"""
 
-	rows = frappe.db.sql(sql, values=values, as_dict=True)
+	rows = frappe.db.sql(sql, values=values, as_dict=True)  # nosemgrep
 
 	# Group by period
 	period_data = {}

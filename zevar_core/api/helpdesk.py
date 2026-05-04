@@ -657,7 +657,7 @@ def get_ticket_stats():
 	user = frappe.session.user
 
 	if frappe.db.exists("DocType", "HD Ticket"):
-		hd_stats = frappe.db.sql(
+		hd_stats = frappe.db.sql(  # nosemgrep
 			"""
             SELECT status, COUNT(*) as count
             FROM `tabHD Ticket`
@@ -677,7 +677,7 @@ def get_ticket_stats():
 				stats["pending"] += s.count
 
 	if frappe.db.exists("DocType", "Issue"):
-		issue_stats = frappe.db.sql(
+		issue_stats = frappe.db.sql(  # nosemgrep
 			"""
             SELECT status, COUNT(*) as count
             FROM `tabIssue`

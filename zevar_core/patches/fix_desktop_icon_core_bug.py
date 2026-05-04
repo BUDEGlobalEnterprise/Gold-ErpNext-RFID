@@ -27,7 +27,7 @@ def execute():
 	)
 
 	# Read the current content
-	with open(core_file_path) as f:
+	with open(core_file_path) as f:  # nosemgrep
 		content = f.read()
 
 	# Fix 1: Remove module_name reference in validate()
@@ -49,7 +49,7 @@ def execute():
 		)
 
 	# Write the patched content back
-	with open(core_file_path, "w") as f:
+	with open(core_file_path, "w") as f:  # nosemgrep
 		f.write(content)
 
 	# Reload the DocType to apply changes

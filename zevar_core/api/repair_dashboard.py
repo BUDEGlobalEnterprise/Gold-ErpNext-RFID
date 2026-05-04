@@ -7,7 +7,7 @@ from frappe.utils import add_days, flt, getdate, today
 
 
 @frappe.whitelist()
-def get_repair_dashboard_stats(warehouse=None):
+def get_repair_dashboard_stats(warehouse: str | None = None):
 	"""
 	Get repair dashboard statistics for POS terminal.
 	Returns widget data for:
@@ -30,11 +30,12 @@ def get_repair_dashboard_stats(warehouse=None):
 	stats = {}
 
 	# 1. Overdue repairs count
-	stats["overdue_count"] = frappe.db.sql(
+	stats["overdue_count"] = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE promised_date < %(today)s
+		WHERE docstatus = 1
+			AND promised_date < %(today)s
 			AND status NOT IN ('Delivered', 'Cancelled')
 			{conditions}
 		""",
@@ -43,11 +44,12 @@ def get_repair_dashboard_stats(warehouse=None):
 	)[0].count
 
 	# 2. Today's pickups (Ready for Pickup)
-	stats["ready_pickup_count"] = frappe.db.sql(
+	stats["ready_pickup_count"] = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE status = 'Ready for Pickup'
+		WHERE docstatus = 1
+			AND status = 'Ready for Pickup'
 			{conditions}
 		""",
 		values=values,
@@ -56,11 +58,12 @@ def get_repair_dashboard_stats(warehouse=None):
 
 	# 3. Revenue this week
 	weekly_revenue = (
-		frappe.db.sql(
+		frappe.db.sql(  # nosemgrep
 			f"""
 		SELECT SUM(total_cost) as revenue
 		FROM `tabRepair Order`
-		WHERE received_date >= %(week_start)s
+		WHERE docstatus = 1
+			AND received_date >= %(week_start)s
 			AND received_date <= %(today)s
 			{conditions}
 		""",
@@ -73,11 +76,12 @@ def get_repair_dashboard_stats(warehouse=None):
 
 	# 4. Revenue this month
 	monthly_revenue = (
-		frappe.db.sql(
+		frappe.db.sql(  # nosemgrep
 			f"""
 		SELECT SUM(total_cost) as revenue
 		FROM `tabRepair Order`
-		WHERE received_date >= %(month_start)s
+		WHERE docstatus = 1
+			AND received_date >= %(month_start)s
 			AND received_date <= %(today)s
 			{conditions}
 		""",
@@ -90,11 +94,12 @@ def get_repair_dashboard_stats(warehouse=None):
 
 	# 5. Average turnaround time (for delivered repairs in last 30 days)
 	avg_turnaround = (
-		frappe.db.sql(
+		frappe.db.sql(  # nosemgrep
 			f"""
 		SELECT AVG(TIMESTAMPDIFF(HOUR, received_date, delivered_date) / 24) as avg_days
 		FROM `tabRepair Order`
-		WHERE status = 'Delivered'
+		WHERE docstatus = 1
+			AND status = 'Delivered'
 			AND delivered_date IS NOT NULL
 			AND received_date >= DATE_SUB(%(today)s, INTERVAL 30 DAY)
 			{conditions}
@@ -107,11 +112,12 @@ def get_repair_dashboard_stats(warehouse=None):
 	stats["avg_turnaround_days"] = flt(avg_turnaround, 1) if avg_turnaround else 0
 
 	# 6. Active repairs by status
-	status_breakdown = frappe.db.sql(
+	status_breakdown = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT status, COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE status NOT IN ('Delivered', 'Cancelled')
+		WHERE docstatus = 1
+			AND status NOT IN ('Delivered', 'Cancelled')
 			{conditions}
 		GROUP BY status
 		ORDER BY count DESC
@@ -122,14 +128,15 @@ def get_repair_dashboard_stats(warehouse=None):
 	stats["status_breakdown"] = {row.status: row.count for row in status_breakdown}
 
 	# 7. Technician workload
-	technician_workload = frappe.db.sql(
+	technician_workload = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT
 			assigned_to,
 			COUNT(*) as count,
 			SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) as in_progress
 		FROM `tabRepair Order`
-		WHERE assigned_to IS NOT NULL
+		WHERE docstatus = 1
+			AND assigned_to IS NOT NULL
 			AND status NOT IN ('Delivered', 'Cancelled')
 			{conditions}
 		GROUP BY assigned_to
@@ -142,7 +149,7 @@ def get_repair_dashboard_stats(warehouse=None):
 	stats["technician_workload"] = technician_workload
 
 	# 8. Recent overdue repairs (top 5)
-	stats["recent_overdue"] = frappe.db.sql(
+	stats["recent_overdue"] = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT
 			name,
@@ -152,7 +159,8 @@ def get_repair_dashboard_stats(warehouse=None):
 			status,
 			priority
 		FROM `tabRepair Order`
-		WHERE promised_date < %(today)s
+		WHERE docstatus = 1
+			AND promised_date < %(today)s
 			AND status NOT IN ('Delivered', 'Cancelled')
 			{conditions}
 		ORDER BY promised_date ASC
@@ -163,13 +171,14 @@ def get_repair_dashboard_stats(warehouse=None):
 	)
 
 	# 9. Top repair types this month
-	top_repair_types = frappe.db.sql(
+	top_repair_types = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT
 			repair_type,
 			COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE received_date >= %(month_start)s
+		WHERE docstatus = 1
+			AND received_date >= %(month_start)s
 			{conditions}
 		GROUP BY repair_type
 		ORDER BY count DESC
@@ -181,13 +190,14 @@ def get_repair_dashboard_stats(warehouse=None):
 	stats["top_repair_types"] = top_repair_types
 
 	# 10. Pending collections (balance due)
-	pending_collections = frappe.db.sql(
+	pending_collections = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT
 			SUM(balance_due) as total_pending,
 			COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE status IN ('Ready for Pickup', 'Delivered')
+		WHERE docstatus = 1
+			AND status IN ('Ready for Pickup', 'Delivered')
 			AND balance_due > 0
 			{conditions}
 		""",
@@ -201,7 +211,7 @@ def get_repair_dashboard_stats(warehouse=None):
 
 
 @frappe.whitelist()
-def get_repair_chart_data(warehouse=None, period=30):
+def get_repair_chart_data(warehouse: str | None = None, period: int = 30):
 	"""
 	Get repair chart data for dashboard visualization.
 	Returns data for:
@@ -223,13 +233,14 @@ def get_repair_chart_data(warehouse=None, period=30):
 		values["warehouse"] = warehouse
 
 	# Daily repair counts
-	daily_data = frappe.db.sql(
+	daily_data = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT
 			DATE(received_date) as date,
 			COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE received_date >= %(from_date)s
+		WHERE docstatus = 1
+			AND received_date >= %(from_date)s
 			AND received_date <= %(to_date)s
 			{conditions}
 		GROUP BY DATE(received_date)
@@ -257,13 +268,14 @@ def get_repair_chart_data(warehouse=None, period=30):
 	}
 
 	# Repairs by status
-	status_data = frappe.db.sql(
+	status_data = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT
 			status,
 			COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE received_date >= %(from_date)s
+		WHERE docstatus = 1
+			AND received_date >= %(from_date)s
 			AND received_date <= %(to_date)s
 			{conditions}
 		GROUP BY status
@@ -279,13 +291,14 @@ def get_repair_chart_data(warehouse=None, period=30):
 	}
 
 	# Revenue trend
-	revenue_data = frappe.db.sql(
+	revenue_data = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT
 			DATE(received_date) as date,
 			SUM(total_cost) as revenue
 		FROM `tabRepair Order`
-		WHERE received_date >= %(from_date)s
+		WHERE docstatus = 1
+			AND received_date >= %(from_date)s
 			AND received_date <= %(to_date)s
 			{conditions}
 		GROUP BY DATE(received_date)

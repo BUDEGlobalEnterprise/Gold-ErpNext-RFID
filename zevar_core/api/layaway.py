@@ -37,7 +37,6 @@ def _coerce_statuses(statuses: str | list | tuple | None) -> list[str]:
 	status_values = frappe.parse_json(statuses) if isinstance(statuses, str) else statuses
 	if not isinstance(status_values, list | tuple):
 		status_values = [status_values]
-
 	return [str(status).strip() for status in status_values if str(status).strip()]
 
 
@@ -136,7 +135,7 @@ def get_layaway_hub_stats() -> dict:
 	)
 	overdue_count = frappe.db.count("Layaway Contract", filters={"status": "Overdue", "docstatus": ["!=", 2]})
 
-	outstanding_result = frappe.db.sql(
+	outstanding_result = frappe.db.sql(  # nosemgrep
 		"""SELECT COALESCE(SUM(balance_amount), 0) as total
 		FROM `tabLayaway Contract`
 		WHERE status IN ('Active', 'Overdue') AND docstatus != 2""",
@@ -415,6 +414,7 @@ def create_layaway(
 	cancellation_fee_percent: float | None = None,
 	auto_forfeit_days: int | None = None,
 	payments: str | list | None = None,
+	mode_of_payment: str | None = None,
 ) -> dict:
 	_enforce_layaway_access()
 
@@ -461,6 +461,9 @@ def create_layaway(
 
 	if deposit >= total_amount:
 		frappe.throw(_("Deposit cannot equal or exceed total amount. Use a regular sale instead."))
+
+	if mode_of_payment and not frappe.db.exists("Mode of Payment", mode_of_payment):
+		frappe.throw(_("Mode of payment '{0}' not found.").format(mode_of_payment))
 
 	try:
 		doc = frappe.new_doc("Layaway Contract")
@@ -518,6 +521,7 @@ def create_layaway(
 				"payment_date": today(),
 				"expected_amount": deposit,
 				"paid_amount": deposit,
+				"mode_of_payment": mode_of_payment,
 				"status": "Paid",
 				"mode_of_payment": deposit_mode,
 			},

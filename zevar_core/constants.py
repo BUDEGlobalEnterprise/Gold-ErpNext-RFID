@@ -66,6 +66,13 @@ SILVER_PURITY_RATES = {
 	"925 Sterling": 0.925,
 }
 
+# Aliases: alternate names used on Items that map to the canonical purity key
+PURITY_ALIASES = {
+	"18K": "18Kt",
+	"14K": "14Kt",
+	"10K": "10k",
+}
+
 # Unit Conversions
 TROY_OZ_TO_GRAMS = 31.1035
 

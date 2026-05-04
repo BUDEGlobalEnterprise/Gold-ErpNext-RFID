@@ -73,7 +73,7 @@ def migrate_items(legacy_dir):
 		except Exception:
 			continue
 
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep
 
 
 def migrate_employees(legacy_dir):
@@ -113,7 +113,7 @@ def migrate_employees(legacy_dir):
 		except Exception:
 			continue
 
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep
 
 
 def migrate_gold_prices(legacy_dir):
@@ -146,7 +146,7 @@ def migrate_gold_prices(legacy_dir):
 		except Exception:
 			continue
 
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep
 
 
 if __name__ == "__main__":

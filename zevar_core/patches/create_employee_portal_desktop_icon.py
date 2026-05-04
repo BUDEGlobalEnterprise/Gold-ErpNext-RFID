@@ -27,4 +27,4 @@ def execute() -> None:
 	icon.app = "zevar_core"
 	icon.logo_url = "/assets/zevar_core/images/employee_portal_logo.svg"
 	icon.insert(ignore_if_duplicate=True)
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep

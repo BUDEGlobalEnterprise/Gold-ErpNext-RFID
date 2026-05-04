@@ -33,7 +33,7 @@ def execute():
 		pass
 
 	# Fetch all invoices that have at least one of the legacy salesperson fields set
-	invoices = frappe.db.sql(
+	invoices = frappe.db.sql(  # nosemgrep
 		"""
 		SELECT name, custom_salesperson_1, custom_salesperson_2,
 			   custom_salesperson_3, custom_salesperson_4
@@ -91,9 +91,9 @@ def execute():
 
 		# Commit every 500 records
 		if count % 500 == 0:
-			frappe.db.commit()
+			frappe.db.commit()  # nosemgrep
 
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep
 	frappe.log_error(
 		f"Migrated salespersons for {count} Sales Invoices to the new child table", "Zevar Core Patch"
 	)

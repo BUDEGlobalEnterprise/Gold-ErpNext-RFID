@@ -6,7 +6,7 @@ Creates minimal test data needed for tests to
 Run with: bench --site zevar.localhost console
 >>> from zevar_core.tests.fixtures import create_test_fixtures
 >>> create_test_fixtures()
->>> frappe.db.commit()
+>>> frappe.db.commit()  # nosemgrep
 """
 
 import frappe

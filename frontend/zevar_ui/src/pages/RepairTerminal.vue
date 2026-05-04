@@ -1,23 +1,119 @@
 <template>
 	<AppLayout>
-		<div class="flex flex-col">
+		<div class="h-full flex flex-col min-h-0">
 			<!-- Page Header - consistent with other pages -->
-			<!-- Page Header - consistent with other pages -->
-			<div class="flex items-center justify-between gap-4 mb-6 flex-shrink-0">
+			<div class="flex items-center justify-between gap-4 mb-4 flex-shrink-0">
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Repair Terminal</h2>
 					<span
-						class="text-xs font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-warm-dark-700 px-3 py-1 rounded-full border border-gray-200 dark:border-warm-border"
+						class="text-xs font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-3 py-1 rounded-full border border-gray-200 dark:border-white/10"
 					>
 						{{ orders.length }} Orders
 					</span>
 				</div>
 				<div class="flex items-center gap-2">
+					<!-- Store Selector (inline) -->
+					<select
+						v-model="selectedStore"
+						@change="onStoreChange"
+						class="hidden sm:block px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300"
+					>
+						<option value="all">All Stores</option>
+						<option
+							v-for="storeStat in multiStoreStats"
+							:key="storeStat.warehouse"
+							:value="storeStat.warehouse"
+						>
+							{{ storeStat.warehouse_name }} ({{ storeStat.total_active }})
+						</option>
+					</select>
 					<!-- View Toggle -->
-					<ViewToggle v-model="viewMode" storage-key="zevar_repairs_view" />
+					<div class="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+						<button
+							@click="viewMode = 'grid'"
+							class="px-3 py-1.5 rounded-md text-sm font-medium transition"
+							:class="
+								viewMode === 'grid'
+									? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-white'
+									: 'text-gray-500 hover:text-gray-700'
+							"
+						>
+							<svg
+								class="w-4 h-4"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+								/>
+							</svg>
+						</button>
+						<button
+							@click="viewMode = 'kanban'"
+							class="px-3 py-1.5 rounded-md text-sm font-medium transition"
+							:class="
+								viewMode === 'kanban'
+									? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-white'
+									: 'text-gray-500 hover:text-gray-700'
+							"
+						>
+							<svg
+								class="w-4 h-4"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
+								/>
+							</svg>
+						</button>
+						<button
+							v-if="isDesktop"
+							@click="viewMode = 'split'"
+							class="px-3 py-1.5 rounded-md text-sm font-medium transition"
+							:class="
+								viewMode === 'split'
+									? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-white'
+									: 'text-gray-500 hover:text-gray-700'
+							"
+						>
+							<svg
+								class="w-4 h-4"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 16a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"
+								/>
+							</svg>
+						</button>
+					</div>
+					<!-- Auto-refresh -->
+					<select
+						v-model="refreshInterval"
+						@change="setupAutoRefresh"
+						class="hidden md:block px-2 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-xs text-gray-500 dark:text-gray-400"
+					>
+						<option :value="0">Auto: Off</option>
+						<option :value="10000">10s</option>
+						<option :value="30000">30s</option>
+						<option :value="60000">1m</option>
+					</select>
 					<button
 						@click="showNewModal = true"
-						class="px-4 py-2 bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black rounded-lg text-xs font-bold hover:bg-gray-800 dark:hover:bg-[#c9a432] transition flex items-center gap-2"
+						class="px-4 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] transition flex items-center gap-2"
 					>
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
@@ -115,7 +211,7 @@
 					:class="
 						statusFilter === statusItem.value
 							? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30'
-							: 'bg-gray-100 dark:bg-warm-dark-900 text-gray-500 dark:text-gray-400 border border-transparent hover:bg-gray-200 dark:hover:bg-warm-dark-800'
+							: 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-transparent hover:bg-gray-200 dark:hover:bg-gray-700'
 					"
 				>
 					<span>{{ statusItem.label }}</span>
@@ -135,6 +231,21 @@
 
 			<!-- Search & Filter Bar -->
 			<div class="flex gap-2 mb-3 flex-shrink-0">
+				<!-- Mobile Store Selector -->
+				<select
+					v-model="selectedStore"
+					@change="onStoreChange"
+					class="sm:hidden px-2 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-xs text-gray-700 dark:text-gray-300"
+				>
+					<option value="all">All Stores</option>
+					<option
+						v-for="storeStat in multiStoreStats"
+						:key="storeStat.warehouse"
+						:value="storeStat.warehouse"
+					>
+						{{ storeStat.warehouse_name }} ({{ storeStat.total_active }})
+					</option>
+				</select>
 				<div class="flex-1 relative">
 					<svg
 						class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
@@ -153,12 +264,12 @@
 						v-model="searchTerm"
 						@input="debouncedLoad"
 						placeholder="Search repairs..."
-						class="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-warm-border rounded-lg bg-white dark:bg-warm-dark-900 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent placeholder-gray-400"
+						class="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent placeholder-gray-400"
 					/>
 				</div>
 				<button
 					@click="showAdvancedSearch = !showAdvancedSearch"
-					class="px-3 py-2 border border-gray-200 dark:border-warm-border rounded-lg bg-white dark:bg-warm-dark-900 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-warm-dark-800 transition flex items-center gap-1.5"
+					class="px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center gap-1.5"
 					:class="{ 'bg-[#D4AF37]/10 border-[#D4AF37]/30': hasActiveFilters }"
 				>
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -187,7 +298,7 @@
 			<!-- Advanced Search Panel -->
 			<div
 				v-if="showAdvancedSearch"
-				class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 mb-3 border border-gray-100 dark:border-warm-border/50 flex-shrink-0"
+				class="bg-white dark:bg-gray-800/50 rounded-xl p-4 mb-3 border border-gray-100 dark:border-gray-700/50 flex-shrink-0"
 			>
 				<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
 					<div>
@@ -198,7 +309,7 @@
 						<input
 							v-model="advancedFilters.from_date"
 							type="date"
-							class="w-full px-3 py-1.5 border border-gray-200 dark:border-warm-border rounded-lg bg-gray-50 dark:bg-warm-dark-950 text-sm"
+							class="w-full px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-sm"
 						/>
 					</div>
 					<div>
@@ -209,7 +320,7 @@
 						<input
 							v-model="advancedFilters.to_date"
 							type="date"
-							class="w-full px-3 py-1.5 border border-gray-200 dark:border-warm-border rounded-lg bg-gray-50 dark:bg-warm-dark-950 text-sm"
+							class="w-full px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-sm"
 						/>
 					</div>
 					<div>
@@ -219,7 +330,7 @@
 						>
 						<select
 							v-model="advancedFilters.priority"
-							class="w-full px-3 py-1.5 border border-gray-200 dark:border-warm-border rounded-lg bg-gray-50 dark:bg-warm-dark-950 text-sm"
+							class="w-full px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-sm"
 						>
 							<option value="">All</option>
 							<option value="Low">Low</option>
@@ -235,7 +346,7 @@
 						>
 						<select
 							v-model="advancedFilters.assigned_to"
-							class="w-full px-3 py-1.5 border border-gray-200 dark:border-warm-border rounded-lg bg-gray-50 dark:bg-warm-dark-950 text-sm"
+							class="w-full px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-sm"
 						>
 							<option value="">All</option>
 							<option
@@ -265,7 +376,7 @@
 			</div>
 
 			<!-- Main Content Area -->
-			<div class="flex-1 flex min-h-0">
+			<div class="flex-1 flex min-h-0 overflow-hidden">
 				<!-- Grid View -->
 				<div v-if="viewMode === 'grid'" class="flex-1 overflow-y-auto pb-20">
 					<div v-if="ordersResource.loading && !orders.length" class="py-20 text-center">
@@ -276,7 +387,7 @@
 					</div>
 					<div
 						v-else-if="!orders.length"
-						class="py-20 text-center bg-white dark:bg-warm-dark-900 rounded-2xl border border-dashed border-gray-200 dark:border-warm-border"
+						class="py-20 text-center bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700"
 					>
 						<p class="text-gray-500 text-sm">No repair orders found</p>
 					</div>
@@ -296,72 +407,15 @@
 					</div>
 				</div>
 
-				<!-- List View -->
-				<div v-else-if="viewMode === 'list'" class="flex-1 overflow-y-auto pb-20">
-					<div v-if="ordersResource.loading && !orders.length" class="py-20 text-center">
-						<div
-							class="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-[#D4AF37] mx-auto mb-4"
-						></div>
-						<p class="text-gray-500">Loading repairs...</p>
-					</div>
-					<div
-						v-else-if="!orders.length"
-						class="py-20 text-center bg-white dark:bg-warm-dark-900 rounded-2xl border border-dashed border-gray-200 dark:border-warm-border"
-					>
-						<p class="text-gray-500 text-sm">No repair orders found</p>
-					</div>
-					<div v-else class="space-y-2">
-						<div
-							v-for="order in filteredOrders"
-							:key="order.name"
-							@click="selectOrder(order)"
-							class="flex items-center justify-between bg-white dark:bg-warm-dark-900/50 rounded-lg px-4 py-3 border border-gray-100 dark:border-warm-border/50 hover:border-[#D4AF37]/30 transition cursor-pointer"
-							:class="{
-								'ring-2 ring-[#D4AF37]/30': selectedOrder?.name === order.name,
-							}"
-						>
-							<div class="flex items-center gap-4 min-w-0">
-								<span class="font-mono text-xs text-[#D4AF37] w-36 shrink-0">{{
-									order.name
-								}}</span>
-								<span
-									class="text-sm font-bold text-gray-900 dark:text-white truncate w-32"
-									>{{ order.customer_name }}</span
-								>
-								<span class="text-xs text-gray-500 truncate">{{
-									order.repair_type_name
-								}}</span>
-							</div>
-							<div class="flex items-center gap-4">
-								<span
-									v-if="order.priority === 'Urgent'"
-									class="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700"
-									>Urgent</span
-								>
-								<span
-									class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold"
-									:class="getStatusBadgeClass(order.status)"
-									>{{ order.status }}</span
-								>
-								<span class="text-sm font-bold text-gray-900 dark:text-white"
-									>${{
-										formatNum(order.total_cost || order.estimated_cost)
-									}}</span
-								>
-							</div>
-						</div>
-					</div>
-				</div>
-
 				<!-- Kanban View -->
 				<div v-else-if="viewMode === 'kanban'" class="flex-1 overflow-x-auto pb-4">
 					<div class="flex gap-3 min-w-max h-full">
 						<div
 							v-for="column in kanbanColumns"
 							:key="column.status"
-							class="w-72 flex-shrink-0 flex flex-col bg-gray-50 dark:bg-warm-dark-900 rounded-xl"
+							class="w-72 flex-shrink-0 flex flex-col bg-gray-50 dark:bg-gray-800 rounded-xl"
 						>
-							<div class="p-3 border-b border-gray-200 dark:border-warm-border/50">
+							<div class="p-3 border-b border-gray-200 dark:border-gray-700">
 								<h3
 									class="font-bold text-gray-800 dark:text-gray-200 flex items-center justify-between"
 								>
@@ -383,7 +437,7 @@
 									:key="order.name"
 									draggable="true"
 									@dragstart="onDragStart($event, order)"
-									class="p-3 bg-white dark:bg-warm-card rounded-lg shadow-sm cursor-pointer hover:shadow-md transition"
+									class="p-3 bg-white dark:bg-gray-900 rounded-lg shadow-sm cursor-pointer hover:shadow-md transition"
 									:class="getStatusBorderColor(order.status)"
 								>
 									<div class="flex justify-between items-start mb-2">
@@ -491,7 +545,7 @@
 								:class="
 									selectedSplitOrder?.name === order.name
 										? 'bg-[#D4AF37]/10 border-[#D4AF37]'
-										: 'bg-white dark:bg-warm-card border-gray-200 dark:border-warm-border'
+										: 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700'
 								"
 							>
 								<div class="flex justify-between items-start">
@@ -523,7 +577,7 @@
 					<div class="w-1/2 overflow-y-auto">
 						<div
 							v-if="selectedSplitOrder"
-							class="bg-white dark:bg-warm-card rounded-xl p-4 border border-gray-200 dark:border-warm-border"
+							class="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
 						>
 							<SplitDetailView
 								:order="selectedSplitOrder"
@@ -577,14 +631,11 @@
 		/>
 
 		<!-- Payment Modal -->
-		<CheckoutModal
+		<PaymentModal
 			v-if="showPaymentModal"
-			:show="showPaymentModal"
-			mode="repair"
-			:referenceId="paymentOrder?.name"
-			:balanceAmount="paymentOrder?.balance_due || 0"
+			:order="paymentOrder"
 			@close="showPaymentModal = false"
-			@success="onRepairCreated"
+			@payment-recorded="onRepairCreated"
 		/>
 	</AppLayout>
 </template>
@@ -601,34 +652,21 @@ import NewRepairModal from '@/components/NewRepairModal.vue'
 import QRCodeModal from '@/components/QRCodeModal.vue'
 import CameraModal from '@/components/CameraModal.vue'
 import StoreTransferModal from '@/components/StoreTransferModal.vue'
-import CheckoutModal from '@/components/CheckoutModal.vue'
-import ViewToggle from '@/components/ViewToggle.vue'
-import { useBreakpoint } from '@/composables/useBreakpoint.js'
-import { formatDate } from '@/utils/dates.js'
+import PaymentModal from '@/components/PaymentModal.vue'
 
 const session = useSessionStore()
-const viewMode = ref('grid') // grid, list, split (hidden)
+const viewMode = ref('grid') // grid, kanban, split
 const statusFilter = ref('')
 const searchTerm = ref('')
-// Use global warehouse from session
-const selectedStore = computed(() => session.currentWarehouse || 'all')
-
-// Watch for warehouse changes to reload orders
-watch(
-	() => session.currentWarehouse,
-	() => {
-		loadOrders()
-	}
-)
+const selectedStore = ref('all')
 const showAdvancedSearch = ref(false)
-const refreshInterval = ref(0) // Auto-refresh off by default
+const refreshInterval = ref(30000) // 30 seconds default
 const orders = ref([])
 const stats = ref(null)
 const dashboardStats = ref(null)
 const multiStoreStats = ref([])
 const detailOrder = ref(null)
 const selectedSplitOrder = ref(null)
-const selectedOrder = ref(null)
 const qrOrder = ref(null)
 const showCameraModal = ref(false)
 const showTransferModal = ref(false)
@@ -664,35 +702,16 @@ const statusTabs = computed(() => {
 			label: 'Ready',
 			count: stats.value?.['Ready for Pickup'] || 0,
 		},
-		{
-			value: 'Delivered',
-			label: 'Delivered',
-			count: stats.value?.['Delivered'] || 0,
-		},
-		{
-			value: 'Cancelled',
-			label: 'Cancelled',
-			count: stats.value?.['Cancelled'] || 0,
-		},
 	]
 	tabs[0].count = Object.values(stats.value || {}).reduce((a, b) => a + b, 0)
 	return tabs
 })
 
-const { isDesktop: isDesktopBP } = useBreakpoint()
-const isDesktop = computed(() => isDesktopBP.value)
+const isDesktop = computed(() => window.innerWidth >= 1024)
 
 const hasActiveFilters = computed(() => {
 	return Object.values(advancedFilters.value).some((v) => v !== '')
 })
-
-// Filtered orders for list view (same as orders, alias for template clarity)
-const filteredOrders = computed(() => orders.value)
-
-function selectOrder(order) {
-	selectedOrder.value = order
-	openDetail(order)
-}
 
 // Kanban columns
 const kanbanColumns = computed(() => {
@@ -740,12 +759,8 @@ const kanbanColumns = computed(() => {
 			orders: [],
 		},
 	]
-	const colMap = columns.reduce((acc, col) => {
-		acc[col.status] = col
-		return acc
-	}, {})
 	orders.value.forEach((order) => {
-		const col = colMap[order.status]
+		const col = columns.find((c) => c.status === order.status)
 		if (col) col.orders.push(order)
 	})
 	columns.forEach((c) => (c.count = c.orders.length))
@@ -764,7 +779,7 @@ const ordersResource = createResource({
 		priority: advancedFilters.value.priority || undefined,
 		assigned_to: advancedFilters.value.assigned_to || undefined,
 		customer: advancedFilters.value.customer || undefined,
-		page_length: 500,
+		page_length: 100,
 	}),
 	onSuccess: (data) => {
 		orders.value = data || []
@@ -848,9 +863,19 @@ function clearAdvancedFilters() {
 	loadOrders()
 }
 
+function onStoreChange() {
+	loadOrders()
+}
+
 function formatNum(n) {
 	if (n == null) return '0.00'
 	return Number(n).toFixed(2)
+}
+
+function formatDate(dateStr) {
+	if (!dateStr) return ''
+	const date = new Date(dateStr)
+	return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
 function getStatusBorderColor(status) {

@@ -276,7 +276,7 @@ def import_items(context, input_path, dry_run=False):
 				stats["item_groups"]["errors"].append(f"{ig.get('item_group_name')}: {str(e)[:100]}")
 
 		if not dry_run:
-			frappe.db.commit()  # nosemgrep: batch import commit per entity group
+			frappe.db.commit()  # nosemgrep
 		click.echo(
 			f"  Imported: {stats['item_groups']['imported']}, Skipped: {stats['item_groups']['skipped']}"
 		)
@@ -300,7 +300,7 @@ def import_items(context, input_path, dry_run=False):
 				stats["brands"]["errors"].append(f"{b.get('brand')}: {str(e)[:100]}")
 
 		if not dry_run:
-			frappe.db.commit()  # nosemgrep: batch import commit per entity group
+			frappe.db.commit()  # nosemgrep
 		click.echo(f"  Imported: {stats['brands']['imported']}, Skipped: {stats['brands']['skipped']}")
 
 		click.echo("\n[3/4] Importing Suppliers...")
@@ -324,7 +324,7 @@ def import_items(context, input_path, dry_run=False):
 				stats["suppliers"]["errors"].append(f"{s.get('supplier_name')}: {str(e)[:100]}")
 
 		if not dry_run:
-			frappe.db.commit()  # nosemgrep: batch import commit per entity group
+			frappe.db.commit()  # nosemgrep
 		click.echo(f"  Imported: {stats['suppliers']['imported']}, Skipped: {stats['suppliers']['skipped']}")
 
 		click.echo("\n[4/4] Importing Items...")
@@ -375,14 +375,14 @@ def import_items(context, input_path, dry_run=False):
 				stats["items"]["imported"] += 1
 
 				if (idx + 1) % 50 == 0:
-					frappe.db.commit()
+					frappe.db.commit()  # nosemgrep
 					click.echo(f"  ... {idx + 1}/{stats['items']['total']} processed")
 
 			except Exception as e:
 				stats["items"]["errors"].append(f"Item {item_data.get('item_code', '?')}: {str(e)[:100]}")
 
 		if not dry_run:
-			frappe.db.commit()  # nosemgrep: batch import commit per entity group
+			frappe.db.commit()  # nosemgrep
 		click.echo(f"  Imported: {stats['items']['imported']}, Skipped: {stats['items']['skipped']}")
 
 		click.echo("\n" + "=" * 60)

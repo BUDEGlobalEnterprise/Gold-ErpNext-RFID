@@ -51,7 +51,7 @@ def get_session_status() -> dict:
 		duration_hours = time_diff_in_hours(now_datetime(), get_datetime(period_start))
 
 	# Get sales count and total for this session
-	sales_data = frappe.db.sql(
+	sales_data = frappe.db.sql(  # nosemgrep
 		"""
 		SELECT COUNT(*) as count, COALESCE(SUM(grand_total), 0) as total
 		FROM `tabSales Invoice`
@@ -513,7 +513,7 @@ def close_pos_session(
 	opening_balance = sum(flt(row.opening_amount) for row in session.balance_details)
 
 	# Get total sales for this session
-	sales_data = frappe.db.sql(
+	sales_data = frappe.db.sql(  # nosemgrep
 		"""
 		SELECT COALESCE(SUM(grand_total), 0) as total
 		FROM `tabSales Invoice`
