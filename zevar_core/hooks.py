@@ -64,7 +64,7 @@ doc_events = {
 # Scheduler events
 scheduler_events = {
 	"cron": {
-		"*/15 * * * *": ["zevar_core.tasks.fetch_live_gold_rate"],
+		"*/15 * * * *": ["zevar_core.tasks.fetch_live_metal_rates"],
 		"0 2 1 * *": ["zevar_core.api.finance.apply_finance_charges"],
 		"0 8 * * *": [
 			"zevar_core.api.layaway.check_overdue_and_forfeit",

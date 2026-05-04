@@ -23,9 +23,12 @@
 							:class="isDark ? 'text-white' : 'text-gray-900'"
 							>${{ goldPrice }}/oz</span
 						>
-						<span :class="priceChange >= 0 ? 'text-emerald-500' : 'text-red-500'">
-							{{ priceChange >= 0 ? '▲' : '▼' }}
+						<span v-if="priceChange !== 0" :style="{ color: priceChange > 0 ? '#10b981' : '#ef4444', fontWeight: '700' }">
+							{{ priceChange > 0 ? '▲' : '▼' }}
 							{{ Math.abs(priceChange).toFixed(2) }}%
+						</span>
+						<span v-else class="text-gray-400">
+							— 0.00%
 						</span>
 					</div>
 				</div>
@@ -316,7 +319,10 @@ const goldPrice = computed(() => {
 	})
 })
 
-const priceChange = ref(0.0)
+const priceChange = computed(() => {
+	const trend = goldStore.trends['Yellow Gold-22Kt']
+	return trend ? trend.change_pct : 0.0
+})
 
 const navCategories = [
 	{ id: 'all', name: 'All Jewellery' },

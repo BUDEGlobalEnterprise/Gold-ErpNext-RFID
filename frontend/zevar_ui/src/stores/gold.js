@@ -41,7 +41,12 @@ export const useGoldStore = defineStore('gold', () => {
 
 	// Holds rates like { "Yellow Gold-18Kt": 75.00, "Silver-925 Sterling": 1.20 }
 	const rates = ref({})
+	// Holds trends like { "Yellow Gold-18Kt": { trend: "up", change_pct: 0.25 } }
+	const trends = ref({})
 	const lastUpdated = ref(null)
+	const isStale = ref(false)
+	const rateSource = ref('unknown')
+	const lastError = ref(null)
 
 	// ==========================================================================
 	// RESOURCES
@@ -55,6 +60,7 @@ export const useGoldStore = defineStore('gold', () => {
 			if (!result || !result.rates) return
 
 			const newRates = {}
+			const newTrends = {}
 			for (const [metal, purities] of Object.entries(result.rates)) {
 				for (const p of purities) {
 					const normalizedPurity = normalizePurity(p.purity)
@@ -62,10 +68,23 @@ export const useGoldStore = defineStore('gold', () => {
 					if (!newRates[key] || p.rate_per_gram > newRates[key]) {
 						newRates[key] = p.rate_per_gram
 					}
+					// Capture trend data from server
+					newTrends[key] = {
+						trend: p.trend || 'flat',
+						change_pct: p.change_pct || 0,
+					}
 				}
 			}
 			rates.value = newRates
+			trends.value = newTrends
 			lastUpdated.value = new Date()
+			isStale.value = result.is_stale || false
+			rateSource.value = result.source || 'unknown'
+			lastError.value = null
+		},
+		onError() {
+			lastError.value = 'Failed to fetch live rates'
+			isStale.value = true
 		},
 	})
 
@@ -92,7 +111,11 @@ export const useGoldStore = defineStore('gold', () => {
 
 	return {
 		rates,
+		trends,
 		lastUpdated,
+		isStale,
+		rateSource,
+		lastError,
 		startPolling,
 		stopPolling,
 	}

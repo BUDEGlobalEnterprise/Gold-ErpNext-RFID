@@ -238,7 +238,7 @@
 							class="flex items-center divide-x divide-gray-200 dark:divide-gray-700 h-full"
 						>
 							<div
-								v-for="[key, rate] in sortedRates"
+								v-for="[key, rate, trend] in sortedRates"
 								:key="key"
 								class="flex items-center gap-2 px-4 h-full shrink-0"
 							>
@@ -247,8 +247,20 @@
 									>{{ formatShortLabel(key) }}</span
 								>
 								<span
-									class="text-base font-mono font-black text-[#D4AF37] whitespace-nowrap"
+									class="text-base font-mono font-bold whitespace-nowrap text-[#D4AF37]"
 									>${{ rate }}</span
+								>
+								<span
+									v-if="trend.trend === 'up'"
+									style="font-size: 10px; font-weight: 700; color: #10b981; white-space: nowrap"
+									class="flex items-center gap-0.5"
+									>▲ {{ Math.abs(trend.change_pct).toFixed(2) }}%</span
+								>
+								<span
+									v-else-if="trend.trend === 'down'"
+									style="font-size: 10px; font-weight: 700; color: #ef4444; white-space: nowrap"
+									class="flex items-center gap-0.5"
+									>▼ {{ Math.abs(trend.change_pct).toFixed(2) }}%</span
 								>
 							</div>
 						</div>
@@ -497,14 +509,27 @@
 				class="flex items-center divide-x divide-gray-200 dark:divide-gray-800 min-w-max h-full"
 			>
 				<div
-					v-for="[key, rate] in sortedRates"
+					v-for="[key, rate, trend] in sortedRates"
 					:key="key"
 					class="flex items-center gap-2 px-4 h-full shrink-0"
 				>
 					<span class="text-[9px] text-gray-500 font-bold uppercase">{{
 						formatShortLabel(key)
 					}}</span>
-					<span class="text-xs font-mono font-black text-[#D4AF37]">${{ rate }}</span>
+					<span
+						class="text-xs font-mono font-bold whitespace-nowrap text-[#D4AF37]"
+						>${{ rate }}</span
+					>
+					<span
+						v-if="trend.trend === 'up'"
+						style="font-size: 9px; font-weight: 700; color: #10b981"
+						>▲</span
+					>
+					<span
+						v-else-if="trend.trend === 'down'"
+						style="font-size: 9px; font-weight: 700; color: #ef4444"
+						>▼</span
+					>
 				</div>
 			</div>
 		</div>
@@ -907,12 +932,14 @@ const sortedRates = computed(() => {
 		})
 		.map(([key, ratePerGram]) => {
 			const perOz = (ratePerGram * TROY_OZ_GRAMS).toFixed(2)
+			const trendInfo = goldStore.trends?.[key] || { trend: 'flat', change_pct: 0 }
 			return [
 				key,
 				Number(perOz).toLocaleString('en-US', {
 					minimumFractionDigits: 2,
 					maximumFractionDigits: 2,
 				}),
+				trendInfo,
 			]
 		})
 })
@@ -1001,29 +1028,33 @@ async function handleGlobalPaymentSuccess(result) {
 	const draftPayload = ui.layawayPayment.draftPayload
 	if (draftPayload) {
 		try {
-			const res = await fetch('/api/method/zevar_core.api.layaway.create_layaway', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'X-Frappe-CSRF-Token': window.csrf_token,
-				},
-				body: JSON.stringify({
-					...draftPayload,
-					payments: JSON.stringify(result.payments || []),
-				}),
+			const { call } = await import('frappe-ui')
+			const data = await call('zevar_core.api.layaway.create_layaway', {
+				...draftPayload,
+				payments: JSON.stringify(result.payments || []),
 			})
-			const data = await res.json()
-			if (!res.ok || data.exc_type) {
-				alert('Layaway creation failed')
-				return
-			}
-			const r = data.message ?? data
+			const r = data?.message ?? data
 			if (r?.success || r?.layaway_id) {
 				ui.closeLayawayPayment()
 				emit('layaway-created', r)
+			} else {
+				console.error('Layaway creation returned unexpected result:', r)
+				alert('Layaway creation failed: ' + (r?.message || 'Unknown error'))
+				ui.closeLayawayPayment()
 			}
 		} catch (err) {
-			alert('Network error')
+			console.error('Layaway creation error:', err)
+			const serverMsg = err?._server_messages || err?.message || 'Network error'
+			let displayMsg = serverMsg
+			try {
+				const msgs = JSON.parse(serverMsg)
+				displayMsg = msgs.map((m) => {
+					try { return JSON.parse(m).message } catch { return m }
+				}).join('\n')
+			} catch {
+				// serverMsg is already a string
+			}
+			alert('Layaway creation failed: ' + String(displayMsg).replace(/<[^>]+>/g, ''))
 			ui.closeLayawayPayment()
 		}
 	} else {

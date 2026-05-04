@@ -1,0 +1,1 @@
+import{Y as s,V as t,ap as a,aq as d}from"./index-dCaXiLB6.js";const c=s({__name:"InsertVideo",props:{editor:{}},setup(e){const o=e;function n(){o.editor.chain().focus().selectAndUploadVideo().run()}return(r,i)=>t(r.$slots,"default",a(d({onClick:n})))}});export{c as default};

@@ -1325,6 +1325,14 @@ def _create_layaway_payment_entry(doc, amount, mode_of_payment, reference=None):
 	if not company:
 		company = "Zevar Jewelers"
 
+	# Validate mode_of_payment exists BEFORE switching user context
+	if not mode_of_payment or not frappe.db.exists("Mode of Payment", mode_of_payment):
+		frappe.log_error(
+			title="Layaway Payment Entry Skipped",
+			message=f"Mode of Payment '{mode_of_payment}' not found for layaway {doc.name}. Payment Entry not created.",
+		)
+		return None
+
 	paid_to = None
 	mop = frappe.get_doc("Mode of Payment", mode_of_payment)
 	for row in mop.accounts:
@@ -1334,6 +1342,13 @@ def _create_layaway_payment_entry(doc, amount, mode_of_payment, reference=None):
 
 	if not paid_to:
 		paid_to = frappe.db.get_value("Account", {"account_type": "Cash", "company": company})
+
+	if not paid_to:
+		frappe.log_error(
+			title="Layaway Payment Entry Skipped",
+			message=f"No account found for Mode of Payment '{mode_of_payment}' in company '{company}'. Payment Entry not created for layaway {doc.name}.",
+		)
+		return None
 
 	liability_account = (
 		f"Liability — Layaway Deposits Held - {frappe.get_cached_value('Company', company, 'abbr')}"
@@ -1360,6 +1375,12 @@ def _create_layaway_payment_entry(doc, amount, mode_of_payment, reference=None):
 		pe.insert()
 		pe.submit()
 		return pe.name
+	except Exception:
+		frappe.log_error(
+			title="Layaway Payment Entry Failed",
+			message=frappe.get_traceback(),
+		)
+		return None
 	finally:
 		frappe.set_user(session_user)
 
