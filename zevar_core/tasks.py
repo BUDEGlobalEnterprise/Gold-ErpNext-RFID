@@ -111,6 +111,16 @@ def fetch_live_metal_rates():
 	source_label = "gold-api.com"
 
 	try:
+		# Validate Gold Rate Log doctype exists before attempting writes
+		if not frappe.db.exists("DocType", "Gold Rate Log"):
+			frappe.log_error(
+				title="Gold Rate Log doctype missing",
+				message="Gold Rate Log DocType does not exist — cannot store metal rates. Create it via the Desk."
+			)
+			rates["source"] = "error"
+			rates["error"] = "Gold Rate Log doctype missing"
+			return rates
+
 		if frappe.db.exists("Gold Settings", "Gold Settings"):
 			settings = frappe.get_single("Gold Settings")
 			if settings.api_endpoint:
@@ -149,7 +159,11 @@ def fetch_live_metal_rates():
 			return rates
 
 	except Exception as e:
-		frappe.logger().error(f"Metal rate fetch failed: {e!s}")
+		# Log to Frappe Error Snapshot so admins can see it in the UI
+		frappe.log_error(
+			title="Metal rate fetch failed",
+			message=f"{e!s}\n\nStack trace:\n{frappe.get_traceback()}"
+		)
 
 	rates["source"] = "fallback"
 	rates["error"] = "All APIs unreachable"
@@ -207,8 +221,9 @@ def _update_all_rates(gold_per_gram, silver_per_gram, rates):
 def _update_rate(metal, purity, rate, source="live"):
 	"""Helper to update or create a rate entry.
 
-	Handles duplicate entries by updating ALL matching records to keep
-	the Gold Rate Log consistent regardless of how many entries exist.
+	Handles duplicate entries by updating ALL matching records.
+	Skips DB write if the rate hasn't changed (within 0.01 tolerance)
+	to avoid unnecessary write amplification.
 	"""
 	from frappe.utils import now_datetime
 
@@ -224,6 +239,12 @@ def _update_rate(metal, purity, rate, source="live"):
 
 	if existing:
 		for entry in existing:
+			current_rate = frappe.db.get_value(
+				"Gold Rate Log", entry.name, "rate_per_gram"
+			)
+			# Skip update if rate is effectively unchanged (tolerance: $0.01)
+			if current_rate is not None and abs(float(current_rate) - rate) < 0.01:
+				continue
 			frappe.db.set_value(
 				"Gold Rate Log",
 				entry.name,

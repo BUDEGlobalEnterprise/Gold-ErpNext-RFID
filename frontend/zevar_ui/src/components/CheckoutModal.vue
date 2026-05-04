@@ -392,6 +392,7 @@
 						</h4>
 						<div class="space-y-2 mb-4">
 							<button
+								type="button"
 								v-for="pm in standardModes"
 								:key="pm.value"
 								@click="togglePaymentMode(pm.value)"
@@ -461,6 +462,7 @@
 						</h4>
 						<div class="space-y-2 mb-4">
 							<button
+								type="button"
 								v-for="pm in digitalWalletModes"
 								:key="pm.value"
 								@click="togglePaymentMode(pm.value)"
@@ -510,6 +512,7 @@
 						</h4>
 						<div class="space-y-2 mb-4">
 							<button
+								type="button"
 								v-for="pm in storedValueModes"
 								:key="pm.value"
 								@click="togglePaymentMode(pm.value)"
@@ -559,6 +562,7 @@
 						</h4>
 						<div class="space-y-2 mb-4">
 							<button
+								type="button"
 								v-for="pm in financingModes"
 								:key="pm.value"
 								@click="togglePaymentMode(pm.value)"
@@ -719,6 +723,7 @@
 					<!-- Confirm Button -->
 					<div class="flex-shrink-0">
 						<button
+							type="button"
 							@click="handlePayment"
 							:disabled="!canSubmit || processing"
 							class="w-full py-4 rounded-xl font-bold text-lg shadow-xl transition-all flex items-center justify-center gap-2 transform active:scale-95"
@@ -809,12 +814,14 @@
 
 				<div class="flex gap-3 w-full max-w-sm">
 					<button
+						type="button"
 						@click="close"
 						class="flex-1 py-3 rounded-xl font-bold bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black hover:bg-gray-800 dark:hover:bg-[#b5952f] transition"
 					>
 						{{ mode === 'sale' ? 'New Order' : 'Done' }}
 					</button>
 					<button
+						type="button"
 						v-if="mode === 'sale'"
 						@click="printReceipt"
 						class="flex-1 py-3 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-warm-dark-700 dark:text-gray-300 dark:hover:bg-white/10 transition flex items-center justify-center gap-2"

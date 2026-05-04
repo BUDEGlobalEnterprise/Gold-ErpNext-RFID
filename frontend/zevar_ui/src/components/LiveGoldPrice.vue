@@ -9,13 +9,22 @@
 				<div class="flex items-center gap-2 flex-shrink-0">
 					<div
 						class="flex items-center gap-1.5 px-2 py-1 rounded-md"
-						:class="isDark ? 'bg-emerald-500/10' : 'bg-emerald-50'"
+						:class="isOffline
+							? (isDark ? 'bg-red-500/10' : 'bg-red-50')
+							: (isDark ? 'bg-emerald-500/10' : 'bg-emerald-50')"
 					>
-						<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
 						<span
-							class="text-[10px] font-semibold text-emerald-600 uppercase tracking-wide"
-							>Live</span
+							class="w-1.5 h-1.5 rounded-full"
+							:class="isOffline ? 'bg-red-500' : 'bg-emerald-500 animate-pulse'"
+						></span>
+						<span
+							class="text-[10px] font-semibold uppercase tracking-wide"
+							:class="isOffline
+								? 'text-red-600'
+								: 'text-emerald-600'"
 						>
+							{{ isOffline ? 'Offline' : 'Live' }}
+						</span>
 					</div>
 					<span
 						class="text-[10px]"
@@ -42,7 +51,13 @@
 						</div>
 						<!-- Price -->
 						<div class="text-right">
-							<div class="flex items-center gap-1">
+							<div v-if="!isMetalSupported(metal)" class="flex items-center gap-1">
+								<span class="text-xs font-semibold text-gray-400">N/A</span>
+							</div>
+							<div v-else-if="!hasValidPrice(metal)" class="flex items-center gap-1">
+								<span class="text-xs font-semibold text-amber-500">--</span>
+							</div>
+							<div v-else class="flex items-center gap-1">
 								<span
 									class="text-xs font-semibold"
 									:class="isDark ? 'text-gray-100' : 'text-gray-900'"
@@ -50,9 +65,7 @@
 								>
 								<span
 									class="text-[9px] font-medium"
-									:class="
-										metal.change >= 0 ? 'text-emerald-500' : 'text-red-500'
-									"
+									:style="{ color: metal.change >= 0 ? '#10b981' : '#ef4444' }"
 								>
 									{{ metal.change >= 0 ? '+' : ''
 									}}{{ metal.change?.toFixed(2) }}%
@@ -73,9 +86,12 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { call } from 'frappe-ui'
 
 const isDark = ref(true)
 const isLoading = ref(true)
+const isOffline = ref(false)
+const lastSuccessfulFetch = ref(null)
 let refreshInterval = null
 let observer = null
 
@@ -99,70 +115,88 @@ const formattedTime = computed(() =>
 	new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
 )
 
+function isMetalSupported(metal) {
+	return metal.supported !== false
+}
+
+function hasValidPrice(metal) {
+	return metal.price !== null && metal.price !== undefined
+}
+
 const metals = ref([
 	{
 		symbol: 'Au',
 		name: 'Gold (XAU)',
-		price: 2028.43,
-		change: 0.27,
+		price: null,
+		change: null,
 		badgeClass: 'bg-gradient-to-br from-[#D4AF37] to-amber-600 text-black',
+		supported: true, // This metal is provided by the live API
 	},
 	{
 		symbol: 'Ag',
 		name: 'Silver (XAG)',
-		price: 22.85,
-		change: -0.41,
+		price: null,
+		change: null,
 		badgeClass: 'bg-gradient-to-br from-gray-300 to-gray-400 text-gray-700',
+		supported: true,
+		purity: '999 Fine', // Silver rate to use from the API
 	},
 	{
 		symbol: 'Pt',
 		name: 'Platinum',
-		price: 917.11,
-		change: 0.84,
+		price: null,
+		change: null,
 		badgeClass: 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700',
+		supported: false, // Not available from Zevar live API
 	},
 	{
 		symbol: 'Pd',
 		name: 'Palladium',
-		price: 949.37,
-		change: 1.23,
+		price: null,
+		change: null,
 		badgeClass: 'bg-gradient-to-br from-blue-200 to-blue-300 text-blue-800',
+		supported: false,
 	},
 ])
 
 function formatPrice(price) {
-	return (
-		price?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ||
-		'0.00'
-	)
+	if (price === null || price === undefined) return '0.00'
+	return price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
 async function fetchPrices() {
 	try {
-		const response = await fetch('https://api.metals.live/v1/spot')
-		const data = await response.json()
+		const result = await call('zevar_core.api.pricing.get_live_metal_rates')
+		const data = result?.rates || result?.message?.rates || result
 
-		if (Array.isArray(data)) {
-			data.forEach((item) => {
-				const metal = metals.value.find((m) =>
-					m.name.toLowerCase().includes(item.metal?.toLowerCase())
-				)
-				if (metal && item.price) {
-					const oldPrice = metal.price
-					metal.price = item.price
-					metal.change =
-						oldPrice > 0
-							? ((item.price - oldPrice) / oldPrice) * 100
-							: Math.random() * 2 - 1
+		const TROY_OZ_GRAMS = 31.1035
+		isOffline.value = false
+		lastSuccessfulFetch.value = new Date()
+
+		metals.value.forEach((metal) => {
+			// Skip metals not provided by the Zevar API
+			if (!metal.supported) return
+
+			let metalKey = metal.name.includes('Gold') ? 'Yellow Gold' : metal.name.includes('Silver') ? 'Silver' : null
+			if (!metalKey) return
+
+			const metalRates = data[metalKey] || data.rates?.[metalKey]
+			if (metalRates && metalRates.length > 0) {
+				const rate24k = metal.purity === '999 Fine'
+					? metalRates.find((r) => r.purity === '999 Fine')
+					: metalRates.find((r) => r.purity === '24Kt')
+				if (rate24k) {
+					const spotPrice = rate24k.rate_per_gram * TROY_OZ_GRAMS
+					metal.price = spotPrice
+					// Use server-side trend data if available, else compute client-side
+					metal.change = rate24k.change_pct !== undefined ? rate24k.change_pct : 0
 				}
-			})
-		}
-	} catch {
-		// Keep simulated values
-		metals.value.forEach((m) => {
-			m.price *= 1 + (Math.random() * 0.002 - 0.001)
-			m.change = Math.random() * 2 - 1
+			}
 		})
+	} catch (err) {
+		// API unreachable — show offline state, do NOT fake data
+		isOffline.value = true
+		// Keep previous prices intact (don't mutate)
 	} finally {
 		isLoading.value = false
 	}

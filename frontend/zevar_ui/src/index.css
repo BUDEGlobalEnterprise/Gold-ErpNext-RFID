@@ -2,6 +2,9 @@
 @import './styles/typography.css';
 @import './styles/responsive.css';
 
+@import './styles/typography.css';
+@import './styles/responsive.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

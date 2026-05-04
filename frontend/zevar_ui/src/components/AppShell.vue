@@ -1062,29 +1062,33 @@ async function handleGlobalPaymentSuccess(result) {
 	const draftPayload = ui.layawayPayment.draftPayload
 	if (draftPayload) {
 		try {
-			const res = await fetch('/api/method/zevar_core.api.layaway.create_layaway', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'X-Frappe-CSRF-Token': window.csrf_token,
-				},
-				body: JSON.stringify({
-					...draftPayload,
-					payments: JSON.stringify(result.payments || []),
-				}),
+			const { call } = await import('frappe-ui')
+			const data = await call('zevar_core.api.layaway.create_layaway', {
+				...draftPayload,
+				payments: JSON.stringify(result.payments || []),
 			})
-			const data = await res.json()
-			if (!res.ok || data.exc_type) {
-				alert('Layaway creation failed')
-				return
-			}
-			const r = data.message ?? data
+			const r = data?.message ?? data
 			if (r?.success || r?.layaway_id) {
 				ui.closeLayawayPayment()
 				emit('layaway-created', r)
+			} else {
+				console.error('Layaway creation returned unexpected result:', r)
+				alert('Layaway creation failed: ' + (r?.message || 'Unknown error'))
+				ui.closeLayawayPayment()
 			}
 		} catch (err) {
-			alert('Network error')
+			console.error('Layaway creation error:', err)
+			const serverMsg = err?._server_messages || err?.message || 'Network error'
+			let displayMsg = serverMsg
+			try {
+				const msgs = JSON.parse(serverMsg)
+				displayMsg = msgs.map((m) => {
+					try { return JSON.parse(m).message } catch { return m }
+				}).join('\n')
+			} catch {
+				// serverMsg is already a string
+			}
+			alert('Layaway creation failed: ' + String(displayMsg).replace(/<[^>]+>/g, ''))
 			ui.closeLayawayPayment()
 		}
 	} else {

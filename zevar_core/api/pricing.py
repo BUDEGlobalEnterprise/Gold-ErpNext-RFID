@@ -46,6 +46,211 @@ def get_item_price(item_code: str) -> dict:
 
 
 @frappe.whitelist()
+def get_live_metal_rates():
+	"""
+	Get current live metal rates for all metals and purities.
+	Accessible to all logged-in users (employees, POS users, etc).
+
+	Non-blocking: returns cached rates immediately, even if stale.
+	Stale refresh is attempted inline with a short timeout, and falls
+	back to cached/hardcoded data if external APIs are unreachable.
+
+	Returns:
+		dict: Current rates grouped by metal type with metadata.
+	"""
+	from frappe.utils import now_datetime, time_diff_in_seconds
+
+	rates = frappe.get_all(
+		"Gold Rate Log",
+		fields=["metal", "purity", "rate_per_gram", "source", "timestamp"],
+		filters={"docstatus": 0},
+		order_by="timestamp desc",
+		ignore_permissions=True,
+	)
+
+	if not rates:
+		# No cached rates at all — attempt a quick fetch, but don't hang
+		try:
+			from zevar_core.tasks import fetch_live_metal_rates
+
+			fetch_result = fetch_live_metal_rates()
+			return {
+				"success": True,
+				"rates": _format_rates_from_fetch(fetch_result),
+				"last_updated": now_datetime().isoformat(),
+				"source": fetch_result.get("source", "live"),
+			}
+		except Exception:
+			# External APIs unreachable — return hardcoded fallback rates
+			fallback = _get_hardcoded_fallback_rates()
+			return {
+				"success": True,
+				"rates": fallback,
+				"last_updated": now_datetime().isoformat(),
+				"source": "fallback",
+				"is_stale": True,
+			}
+
+	latest_ts = max((r["timestamp"] for r in rates if r.get("timestamp")), default=None)
+
+	if latest_ts:
+		age_seconds = time_diff_in_seconds(now_datetime(), latest_ts)
+		# Handle clock skew: negative age means DB time is ahead of app server
+		if age_seconds < 0:
+			age_seconds = 0
+		is_stale = age_seconds > 900
+	else:
+		is_stale = True
+
+	if is_stale:
+		# Attempt a non-blocking refresh; if it fails, serve stale data
+		try:
+			from zevar_core.tasks import fetch_live_metal_rates
+
+			fetch_live_metal_rates()
+			rates = frappe.get_all(
+				"Gold Rate Log",
+				fields=["metal", "purity", "rate_per_gram", "source", "timestamp"],
+				filters={"docstatus": 0},
+				order_by="timestamp desc",
+				ignore_permissions=True,
+			)
+			latest_ts = max((r["timestamp"] for r in rates if r.get("timestamp")), default=None)
+			is_stale = False
+		except Exception:
+			# Keep serving stale cached rates
+			pass
+
+	latest_per_key = {}
+	# Also track the second-most-recent rate per key for trend calculation
+	prev_per_key = {}
+	for r in rates:
+		key = (r["metal"], r["purity"])
+		if key not in latest_per_key:
+			latest_per_key[key] = r
+		elif key not in prev_per_key:
+			prev_per_key[key] = r
+
+	grouped = {}
+	for r in latest_per_key.values():
+		metal = r["metal"]
+		purity = r["purity"]
+		if metal not in grouped:
+			grouped[metal] = []
+
+		rate_per_gram = r["rate_per_gram"]
+		prev = prev_per_key.get((metal, purity))
+		prev_rate = prev["rate_per_gram"] if prev else None
+
+		# Compute trend
+		if prev_rate and prev_rate > 0:
+			change_pct = round(((rate_per_gram - prev_rate) / prev_rate) * 100, 2)
+			if change_pct > 0:
+				trend = "up"
+			elif change_pct < 0:
+				trend = "down"
+			else:
+				trend = "flat"
+		else:
+			change_pct = 0
+			trend = "flat"
+
+		grouped[metal].append(
+			{
+				"purity": purity,
+				"rate_per_gram": rate_per_gram,
+				"trend": trend or "flat",
+				"change_pct": change_pct or 0,
+			}
+		)
+
+	return {
+		"success": True,
+		"rates": grouped,
+		"last_updated": latest_ts.isoformat() if latest_ts else None,
+		"source": rates[0]["source"] if rates else "unknown",
+		"is_stale": is_stale,
+	}
+
+
+def _get_hardcoded_fallback_rates():
+	"""Return hardcoded fallback rates when no cached data and APIs are unreachable."""
+	from zevar_core.constants import GOLD_PURITY_RATES, SILVER_PURITY_RATES, TROY_OZ_TO_GRAMS
+
+	# Approximate spot prices (USD per troy oz) as of mid-2025
+	gold_oz = 3300.0
+	silver_oz = 33.0
+	gold_per_gram = gold_oz / TROY_OZ_TO_GRAMS
+	silver_per_gram = silver_oz / TROY_OZ_TO_GRAMS
+
+	grouped = {"Yellow Gold": [], "Silver": []}
+	for purity, multiplier in GOLD_PURITY_RATES.items():
+		grouped["Yellow Gold"].append(
+			{
+				"purity": purity,
+				"rate_per_gram": round(gold_per_gram * multiplier, 2),
+				"trend": "flat",
+				"change_pct": 0,
+			}
+		)
+	for purity, multiplier in SILVER_PURITY_RATES.items():
+		grouped["Silver"].append(
+			{
+				"purity": purity,
+				"rate_per_gram": round(silver_per_gram * multiplier, 2),
+				"trend": "flat",
+				"change_pct": 0,
+			}
+		)
+	return grouped
+
+
+@frappe.whitelist()
+def get_live_rate_history(metal="Yellow Gold", days=7):
+	"""
+	Get historical rate data for a specific metal.
+	Accessible to all logged-in users.
+
+	Args:
+	    metal: Metal type to get history for (default: Yellow Gold)
+	    days: Number of days of history (default: 7)
+
+	Returns:
+	    dict: Historical rates with timestamps for charting.
+	"""
+	from frappe.utils import add_days, now_datetime
+
+	since = add_days(now_datetime(), -int(days))
+
+	logs = frappe.get_all(
+		"Gold Rate Log",
+		fields=["purity", "rate_per_gram", "timestamp"],
+		filters={"metal": metal, "timestamp": [">=", since]},
+		order_by="timestamp asc",
+	)
+
+	# Group by purity
+	series = {}
+	for log in logs:
+		p = log["purity"]
+		if p not in series:
+			series[p] = []
+		series[p].append(
+			{
+				"rate": log["rate_per_gram"],
+				"timestamp": log["timestamp"].isoformat() if log["timestamp"] else None,
+			}
+		)
+
+	return {
+		"success": True,
+		"metal": metal,
+		"days": int(days),
+		"series": series,
+	}
+
+
+@frappe.whitelist()
 def refresh_gold_rates():
 	"""Manually trigger gold rate refresh."""
 	from zevar_core.tasks import fetch_live_metal_rates
@@ -56,6 +261,23 @@ def refresh_gold_rates():
 	except Exception as e:
 		frappe.log_error(f"Gold rate refresh failed: {e!s}")
 		return {"success": False, "message": f"Failed to refresh rates: {e!s}"}
+
+
+def _format_rates_from_fetch(fetch_result):
+	"""Convert fetch result dict to grouped format matching DB structure."""
+	grouped = {}
+
+	for purity, rate in fetch_result.get("gold", {}).items():
+		if "Yellow Gold" not in grouped:
+			grouped["Yellow Gold"] = []
+		grouped["Yellow Gold"].append({"purity": purity, "rate_per_gram": rate})
+
+	for purity, rate in fetch_result.get("silver", {}).items():
+		if "Silver" not in grouped:
+			grouped["Silver"] = []
+		grouped["Silver"].append({"purity": purity, "rate_per_gram": rate})
+
+	return grouped
 
 
 def _calculate_gold_value(item) -> float:

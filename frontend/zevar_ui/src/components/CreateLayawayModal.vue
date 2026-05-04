@@ -959,13 +959,10 @@
 
 							<!-- Quick Add Item Buttons -->
 							<div v-if="selectedItems.length > 0" class="mt-3 flex gap-2">
-								<button
-									@click="
-										itemSearch = ''
-										$refs.itemSearchInput?.focus()
-									"
-									class="px-3 py-2 text-xs font-medium text-[#D4AF37] border border-[#D4AF37]/30 rounded-lg hover:bg-[#D4AF37]/10 transition flex items-center gap-1"
-								>
+									<button
+										@click="itemSearch = ''; $refs.itemSearchInput?.focus()"
+										class="px-3 py-2 text-xs font-medium text-[#D4AF37] border border-[#D4AF37]/30 rounded-lg hover:bg-[#D4AF37]/10 transition flex items-center gap-1"
+									>
 									<svg
 										class="w-3.5 h-3.5"
 										fill="none"
