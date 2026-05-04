@@ -3,6 +3,7 @@
 import frappe
 import requests
 from frappe.utils import flt
+from frappe.utils.pdf import get_pdf
 
 from zevar_core.constants import (
 	GOLD_PURITY_RATES,

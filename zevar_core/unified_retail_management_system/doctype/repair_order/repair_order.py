@@ -438,7 +438,6 @@ class RepairOrder(Document):  # nosemgrep
 			if self.warranty_expiry_date:
 				self.db_set("warranty_expiry_date", self.warranty_expiry_date)
 
-
 	def _create_parts_stock_entry(self):
 		"""Create Material Issue stock entry for parts consumed in this repair."""
 		if not self.parts:
@@ -1218,7 +1217,6 @@ class RepairOrder(Document):  # nosemgrep
 			return {"valid": False, "message": f"Estimate expired on {self.estimate_valid_until}"}
 
 		return {"valid": True, "message": f"Estimate valid until {self.estimate_valid_until}"}
-
 
 	def set_warranty_defaults(self):
 		"""Auto-set warranty_months from Repair Type if not set"""

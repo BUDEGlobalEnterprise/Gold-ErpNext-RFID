@@ -521,9 +521,8 @@ def create_layaway(
 				"payment_date": today(),
 				"expected_amount": deposit,
 				"paid_amount": deposit,
-				"mode_of_payment": mode_of_payment,
+				"mode_of_payment": deposit_mode or mode_of_payment or "Cash",
 				"status": "Paid",
-				"mode_of_payment": deposit_mode,
 			},
 		)
 

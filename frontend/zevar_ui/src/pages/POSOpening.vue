@@ -44,13 +44,10 @@
 				>
 					No POS profiles found. Please create a POS Profile in ERPNext first.
 				</div>
-				<form
-					v-if="profiles.length > 0"
-					@submit.prevent="submitOpening"
-					class="space-y-6"
-				>
+				<form v-if="profiles.length > 0" @submit.prevent="submitOpening" class="space-y-6">
 					<div>
-						<label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+						<label
+							class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
 							>POS Profile</label
 						>
 						<select
@@ -71,7 +68,8 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+						<label
+							class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
 							>Opening Cash Balance</label
 						>
 						<div
@@ -101,19 +99,17 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+						<label
+							class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
 							>Cash Breakdown (Optional)</label
 						>
-						<div
-							class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3"
-						>
+						<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
 							<div
 								v-for="denom in denominations"
 								:key="denom.value"
 								class="flex flex-col gap-1"
 							>
-								<span
-									class="text-xs font-medium text-gray-500 dark:text-gray-500"
+								<span class="text-xs font-medium text-gray-500 dark:text-gray-500"
 									>${{ denom.value }}</span
 								>
 								<input
@@ -152,7 +148,8 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+						<label
+							class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
 							>Opening Notes (Optional)</label
 						>
 						<textarea

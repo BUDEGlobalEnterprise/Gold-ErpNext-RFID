@@ -30,8 +30,12 @@
 					<h3 class="premium-title !text-base mb-4">Session Summary</h3>
 					<div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
 						<div class="flex flex-col gap-1">
-							<span class="text-xs text-gray-500 dark:text-gray-500">Session ID</span>
-							<span class="text-sm font-bold text-gray-900 dark:text-white font-mono">
+							<span class="text-xs text-gray-500 dark:text-gray-500"
+								>Session ID</span
+							>
+							<span
+								class="text-sm font-bold text-gray-900 dark:text-white font-mono"
+							>
 								{{ posSession.status.session?.name }}
 							</span>
 						</div>
@@ -39,18 +43,26 @@
 							<span class="text-xs text-gray-500 dark:text-gray-500"
 								>Opening Balance</span
 							>
-							<span class="text-sm font-bold text-gray-900 dark:text-white font-mono">
+							<span
+								class="text-sm font-bold text-gray-900 dark:text-white font-mono"
+							>
 								${{ formatAmount(posSession.status.session?.opening_balance) }}
 							</span>
 						</div>
 						<div class="flex flex-col gap-1">
-							<span class="text-xs text-gray-500 dark:text-gray-500">Total Sales</span>
-							<span class="text-sm font-bold text-gray-900 dark:text-white font-mono">
+							<span class="text-xs text-gray-500 dark:text-gray-500"
+								>Total Sales</span
+							>
+							<span
+								class="text-sm font-bold text-gray-900 dark:text-white font-mono"
+							>
 								${{ formatAmount(posSession.status.session?.sales_total) }}
 							</span>
 						</div>
 						<div class="flex flex-col gap-1">
-							<span class="text-xs text-gray-500 dark:text-gray-500">Sales Count</span>
+							<span class="text-xs text-gray-500 dark:text-gray-500"
+								>Sales Count</span
+							>
 							<span class="text-sm font-bold text-gray-900 dark:text-white">
 								{{ posSession.status.session?.sales_count }}
 							</span>
@@ -103,9 +115,7 @@
 								class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
 								>Cash Breakdown (Optional)</label
 							>
-							<div
-								class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3"
-							>
+							<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
 								<div
 									v-for="denom in denominations"
 									:key="denom.value"
@@ -133,7 +143,9 @@
 								class="flex justify-between items-center p-3 bg-gray-50 dark:bg-warm-dark-700/50 rounded-lg mt-3 text-sm text-gray-700 dark:text-gray-300"
 							>
 								<span>Calculated Total:</span>
-								<strong class="font-mono">${{ calculatedTotal.toFixed(2) }}</strong>
+								<strong class="font-mono"
+									>${{ calculatedTotal.toFixed(2) }}</strong
+								>
 							</div>
 						</div>
 
@@ -148,9 +160,7 @@
 									varianceClass === 'shortage',
 							}"
 						>
-							<div
-								class="text-xs text-gray-500 dark:text-gray-500 mb-1"
-							>
+							<div class="text-xs text-gray-500 dark:text-gray-500 mb-1">
 								Variance
 							</div>
 							<div
@@ -165,9 +175,7 @@
 									formatAmount(Math.abs(variance))
 								}}
 							</div>
-							<div
-								class="text-sm text-gray-500 dark:text-gray-400 mt-1"
-							>
+							<div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
 								{{ varianceStatus }}
 							</div>
 						</div>
@@ -246,9 +254,12 @@
 								<div
 									class="flex justify-between text-sm pb-3"
 									:class="{
-										'text-red-500': closingResult.variance_status === 'shortage',
-										'text-blue-500': closingResult.variance_status === 'excess',
-										'text-green-500': closingResult.variance_status === 'balanced',
+										'text-red-500':
+											closingResult.variance_status === 'shortage',
+										'text-blue-500':
+											closingResult.variance_status === 'excess',
+										'text-green-500':
+											closingResult.variance_status === 'balanced',
 									}"
 								>
 									<span>Variance:</span>

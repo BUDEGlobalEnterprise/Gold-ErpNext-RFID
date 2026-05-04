@@ -30,7 +30,8 @@
 		</div>
 
 		<div v-else class="flex flex-col">
-			<div class="flex items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-8 flex-shrink-0"
+			<div
+				class="flex items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-8 flex-shrink-0"
 			>
 				<div class="flex items-center gap-2 sm:gap-4">
 					<h2 class="premium-title !text-xl sm:!text-2xl">
@@ -51,7 +52,14 @@
 						to="/closing"
 						class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/30 hover:bg-green-500/20 transition"
 					>
-						<span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span></span>
+						<span class="relative flex h-1.5 w-1.5"
+							><span
+								class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"
+							></span
+							><span
+								class="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"
+							></span
+						></span>
 						Session Open
 					</router-link>
 					<router-link
@@ -59,7 +67,11 @@
 						to="/opening"
 						class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500/20 transition"
 					>
-						<span class="relative flex h-1.5 w-1.5"><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span></span>
+						<span class="relative flex h-1.5 w-1.5"
+							><span
+								class="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"
+							></span
+						></span>
 						No Register Session
 					</router-link>
 				</div>

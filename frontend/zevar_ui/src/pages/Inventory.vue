@@ -80,25 +80,37 @@
 
 			<div v-if="mobileMenuOpen" class="md:hidden grid grid-cols-2 gap-2 mb-4">
 				<button
-					@click="showQuickAdd = true; mobileMenuOpen = false"
+					@click="
+						showQuickAdd = true
+						mobileMenuOpen = false
+					"
 					class="py-2 bg-[#D4AF37] text-white rounded-lg text-xs font-bold"
 				>
 					Quick Add
 				</button>
 				<button
-					@click="showPushToStores = true; mobileMenuOpen = false"
+					@click="
+						showPushToStores = true
+						mobileMenuOpen = false
+					"
 					class="py-2 bg-blue-600 text-white rounded-lg text-xs font-bold"
 				>
 					Push to Stores
 				</button>
 				<button
-					@click="showTransferModal = true; mobileMenuOpen = false"
+					@click="
+						showTransferModal = true
+						mobileMenuOpen = false
+					"
 					class="py-2 border rounded-lg text-xs font-bold"
 				>
 					Transfer
 				</button>
 				<button
-					@click="showConsignment = true; mobileMenuOpen = false"
+					@click="
+						showConsignment = true
+						mobileMenuOpen = false
+					"
 					class="py-2 border rounded-lg text-xs font-bold"
 				>
 					Consignment
