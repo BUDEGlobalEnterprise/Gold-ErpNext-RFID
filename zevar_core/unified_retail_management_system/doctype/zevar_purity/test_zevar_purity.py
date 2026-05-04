@@ -21,7 +21,7 @@ class TestZevarPurity(FrappeTestCase):
 		]:
 			if frappe.db.exists("Zevar Purity", name):
 				frappe.delete_doc("Zevar Purity", name, ignore_permissions=True, force=True)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def test_create_zevar_purity(self):
 		doc = frappe.get_doc(

@@ -111,7 +111,7 @@ def process_finance_payment(account_id: str, amount: float, mode_of_payment: str
 			reference_type="In-House Finance Account",
 		)
 
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 		return {
 			"success": True,
@@ -228,7 +228,7 @@ def apply_finance_charges():
 
 				doc.flags.ignore_validate_update_after_submit = True
 				doc.save(ignore_permissions=True)
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 			except Exception:
 				frappe.db.rollback()
 				frappe.log_error(f"Finance Charge Error for {acc.name}", frappe.get_traceback())

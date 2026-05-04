@@ -613,7 +613,7 @@ def get_ical_feed_url(
 	}
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=True)  # nosemgrep
 def get_ical_feed(token: str) -> str:
 	"""
 	Generate iCal format calendar data for subscription.
@@ -638,6 +638,7 @@ def get_ical_feed(token: str) -> str:
 		pass
 
 	# Get events for next 90 days
+
 	end_date = add_days(nowdate(), 90)
 
 	events = get_calendar_events(

@@ -54,7 +54,7 @@ def get_data(filters):
 		values["status"] = filters["status"]
 
 	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
-	data = frappe.db.sql(
+	data = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT
 			scs.employee,

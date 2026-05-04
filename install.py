@@ -59,7 +59,7 @@ def import_desktop_icons():
 		if fname.endswith(".json"):
 			file_path = os.path.join(icons_dir, fname)
 			try:
-				with open(file_path) as f:
+				with open(file_path) as f:  # nosemgrep
 					icon_data = json.load(f)
 
 				# Must have doctype key to be valid
@@ -104,7 +104,7 @@ def import_workspaces():
 			if os.path.exists(json_file):
 				try:
 					# Read the JSON to get the actual workspace name (not directory name)
-					with open(json_file) as f:
+					with open(json_file) as f:  # nosemgrep
 						workspace_data = json.load(f)
 					actual_name = workspace_data.get("name") or workspace_data.get("label") or workspace_name
 

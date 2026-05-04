@@ -36,6 +36,9 @@ def get_pos_profiles() -> dict:
 			"write_off_cost_center",
 			"expense_account",
 			"cost_center",
+			"custom_enforce_fixed_float",
+			"custom_fixed_opening_float",
+			"custom_variance_alert_threshold",
 		],
 		order_by="name",
 	)

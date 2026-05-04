@@ -65,8 +65,13 @@ export const useGoldStore = defineStore('gold', () => {
 				for (const p of purities) {
 					const normalizedPurity = normalizePurity(p.purity)
 					const key = `${metal}-${normalizedPurity}`
-					if (!newRates[key] || p.rate_per_gram > newRates[key]) {
-						newRates[key] = p.rate_per_gram
+					// Store the full object instead of just rate_per_gram
+					if (!newRates[key] || p.rate_per_gram > newRates[key].rate_per_gram) {
+						newRates[key] = {
+							rate_per_gram: p.rate_per_gram,
+							change_percent: p.change_percent || 0,
+							trend: p.trend || 'none',
+						}
 					}
 					// Capture trend data from server
 					newTrends[key] = {

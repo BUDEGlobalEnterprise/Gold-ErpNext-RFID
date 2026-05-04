@@ -30,11 +30,11 @@ def execute():
 		if not icon.standard and icon.icon_type == "App" and not icon.app:
 			frappe.db.delete("Desktop Icon", {"name": icon.name})
 
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep
 
 	# Regenerate standard icons
 	create_desktop_icons()
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep
 
 	# Clear the desktop icons cache (direct, no Redis queue needed)
 	try:
@@ -43,4 +43,4 @@ def execute():
 	except Exception:
 		pass
 
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep

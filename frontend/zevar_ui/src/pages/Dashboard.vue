@@ -1049,23 +1049,23 @@
 						</h4>
 						<div class="market-grid">
 							<div
-								v-for="[key, rate, trend] in sortedRates"
+								v-for="[key, rate, change, trend] in sortedRates"
 								:key="key"
 								class="market-card"
 							>
 								<div class="market-name">{{ formatPurityLabel(key) }}</div>
-								<div style="display: flex; align-items: center; gap: 0.375rem">
-									<div class="market-price">
-										${{ rate }}
+								<div class="flex items-center gap-1.5 mt-0.5">
+									<div class="market-price">${{ rate }}</div>
+									<div
+										v-if="trend !== 'none'"
+										class="flex items-center text-[10px] font-bold"
+										:class="
+											trend === 'up' ? 'text-emerald-500' : 'text-rose-500'
+										"
+									>
+										<span>{{ trend === 'up' ? '↑' : '↓' }}</span>
+										<span>{{ Math.abs(change) }}%</span>
 									</div>
-									<span
-										v-if="trend && trend.trend === 'up'"
-										style="font-size: 10px; font-weight: 700; color: #10b981; white-space: nowrap"
-									>▲ {{ Math.abs(trend.change_pct).toFixed(2) }}%</span>
-									<span
-										v-else-if="trend && trend.trend === 'down'"
-										style="font-size: 10px; font-weight: 700; color: #ef4444; white-space: nowrap"
-									>▼ {{ Math.abs(trend.change_pct).toFixed(2) }}%</span>
 								</div>
 							</div>
 						</div>
@@ -1122,16 +1122,18 @@ const DASHBOARD_RATE_PRIORITIES = [
 const sortedRates = computed(() => {
 	if (!goldStore.rates) return []
 	return Object.entries(goldStore.rates)
-		.filter(([key, ratePerGram]) => {
-			if (!key || key === 'null' || !ratePerGram) return false
+		.filter(([key, data]) => {
+			if (!key || key === 'null' || !data.rate_per_gram) return false
 			if (key.includes('Platinum')) return false
 			if (key.includes('24Kt') || key.includes('24K') || key.includes('24kt')) return false
 			return true
 		})
-		.map(([key, ratePerGram]) => {
-			const trendInfo = goldStore.trends?.[key] || { trend: 'flat', change_pct: 0 }
-			return [key, (ratePerGram * TROY_OZ_GRAMS).toFixed(2), trendInfo]
-		})
+		.map(([key, data]) => [
+			key,
+			(data.rate_per_gram * TROY_OZ_GRAMS).toFixed(2),
+			data.change_percent,
+			data.trend,
+		])
 		.sort((a, b) => {
 			const iA = DASHBOARD_RATE_PRIORITIES.findIndex((p) => a[0].includes(p))
 			const iB = DASHBOARD_RATE_PRIORITIES.findIndex((p) => b[0].includes(p))

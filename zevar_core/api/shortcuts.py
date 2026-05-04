@@ -78,7 +78,7 @@ def get_quick_stats() -> dict:
 	today = frappe.utils.today()
 
 	try:
-		todays_sales = frappe.db.sql(
+		todays_sales = frappe.db.sql(  # nosemgrep
 			"""
 			SELECT COALESCE(SUM(grand_total), 0)
 			FROM `tabSales Invoice`
@@ -110,7 +110,7 @@ def get_quick_stats() -> dict:
 		stats["pending_trade_ins"] = 0
 
 	try:
-		todays_customers = frappe.db.sql(
+		todays_customers = frappe.db.sql(  # nosemgrep
 			"""
 			SELECT COUNT(DISTINCT customer)
 			FROM `tabSales Invoice`

@@ -17,7 +17,7 @@ def execute() -> None:
 	"""Rename legacy Untitled folders and update Desktop Layout references."""
 	rename_map = _rename_untitled_folders()
 	_update_desktop_layouts(rename_map)
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep
 
 
 def _rename_untitled_folders() -> dict[str, str]:

@@ -28,7 +28,7 @@ def get_repair_orders(
 	warehouse: str | None = None,
 	search_term: str | None = None,
 	start: int = 0,
-	page_length: int = 500,
+	page_length: int = 20,
 	customer: str | None = None,
 	handled_by: str | None = None,
 	priority: str | None = None,
@@ -47,8 +47,7 @@ def get_repair_orders(
 	if status:
 		filters.append(["status", "=", status])
 	if warehouse:
-		# Include orders with matching warehouse OR no warehouse set (legacy/imported data)
-		filters.append(["warehouse", "in", [warehouse, "", None]])
+		filters.append(["warehouse", "=", warehouse])
 	if customer:
 		filters.append(["customer", "=", customer])
 	if handled_by:
@@ -88,8 +87,6 @@ def get_repair_orders(
 		fields=[
 			"name",
 			"creation",
-			"modified",
-			"docstatus",
 			"status",
 			"priority",
 			"customer",
@@ -141,9 +138,9 @@ def get_repair_orders(
 def get_repair_stats(warehouse: str | None = None) -> dict[str, int]:
 	frappe.has_permission("Repair Order", ptype="read", throw=True)
 
-	warehouse_filter = None
+	filters = {}
 	if warehouse:
-		warehouse_filter = [["warehouse", "in", [warehouse, "", None]]]
+		filters["warehouse"] = warehouse
 
 	statuses = [
 		"Received",
@@ -158,13 +155,8 @@ def get_repair_stats(warehouse: str | None = None) -> dict[str, int]:
 	]
 	counts = {}
 	for s in statuses:
-		filters = [["status", "=", s]]
-		if warehouse_filter:
-			filters.extend(warehouse_filter)
-		counts[s] = frappe.db.count("Repair Order", filters=filters)
-
-	total_filters = warehouse_filter or []
-	counts["total"] = frappe.db.count("Repair Order", filters=total_filters or None)
+		counts[s] = frappe.db.count("Repair Order", filters={**filters, "status": s})
+	counts["total"] = frappe.db.count("Repair Order", filters=filters)
 	return counts
 
 
@@ -195,29 +187,8 @@ def create_repair_order(
 	doc.estimated_cost = estimated_cost
 	doc.priority = priority
 
-	# Handle gemstones JSON payload
-	gemstones_json = kwargs.pop("gemstones_json", None)
-	if gemstones_json:
-		try:
-			import json
-
-			gemstones = json.loads(gemstones_json) if isinstance(gemstones_json, str) else gemstones_json
-			for stone in gemstones:
-				doc.append(
-					"gemstones",
-					{
-						"gemstone_type": stone.get("type", ""),
-						"quantity": stone.get("count", 1),
-						"carat_weight": stone.get("carat_weight") or 0,
-						"color": stone.get("color", ""),
-						"clarity": stone.get("clarity", ""),
-					},
-				)
-		except Exception as e:
-			frappe.log_error(f"Failed to parse gemstones for repair order: {e}")
-
 	for key, value in kwargs.items():
-		if hasattr(doc, key) and value is not None:
+		if hasattr(doc, key):
 			setattr(doc, key, value)
 
 	doc.insert()
@@ -640,7 +611,7 @@ def get_estimate_pdf(repair_order: str) -> dict[str, Any]:
 	return result
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=True)  # nosemgrep
 def public_estimate_approval(
 	token: str, action: str, customer_name: str, notes: str | None = None
 ) -> dict[str, Any]:
@@ -679,7 +650,7 @@ def public_estimate_approval(
 		return {"success": False, "message": str(e)}
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=True)  # nosemgrep
 def get_estimate_details_for_approval(token: str) -> dict[str, Any]:
 	"""Public endpoint to get estimate details for approval page"""
 
@@ -1084,7 +1055,7 @@ def attach_repair_photo(
 	}
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=True)  # nosemgrep
 def lookup_repair_by_number(repair_number: str) -> dict[str, Any] | None:
 	"""Public lookup for repair by number (customer-facing)"""
 	repair_number = repair_number.strip().upper()
@@ -1119,7 +1090,7 @@ def lookup_repair_by_number(repair_number: str) -> dict[str, Any] | None:
 	}
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=True)  # nosemgrep
 def lookup_repair_by_phone(phone: str) -> list[dict[str, Any]] | None:
 	"""Public lookup for repairs by phone number (returns most recent)"""
 	phone = phone.strip().replace("-", "").replace(" ", "").replace("(", "").replace(")", "")

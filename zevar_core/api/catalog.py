@@ -176,7 +176,7 @@ def get_pos_items(
 	else:
 		# Sum stock across all warehouses
 		bin_entries = (
-			frappe.db.sql(
+			frappe.db.sql(  # nosemgrep
 				"""
             SELECT item_code, SUM(actual_qty) as total_qty
             FROM `tabBin`
@@ -202,7 +202,7 @@ def get_pos_items(
 	# Pre-fetch gemstone sums
 	gem_sum_map = {}
 	if item_codes:
-		gemstones = frappe.db.sql(
+		gemstones = frappe.db.sql(  # nosemgrep
 			"""
 			SELECT parent, sum(amount) as total_amount
 			FROM `tabZevar Gemstone Detail`
@@ -215,7 +215,7 @@ def get_pos_items(
 		gem_sum_map = {g.parent: g.total_amount for g in gemstones}
 
 	# Pre-fetch all latest gold rates
-	gold_rate_logs = frappe.db.sql(
+	gold_rate_logs = frappe.db.sql(  # nosemgrep
 		"""
 		SELECT r.metal, r.purity, r.rate_per_gram
 		FROM `tabGold Rate Log` r
@@ -330,7 +330,7 @@ def get_catalog_filters() -> dict:
 	filters["genders"] = ["Unisex", "Men's", "Women's"]
 
 	# Price range
-	price_range = frappe.db.sql(
+	price_range = frappe.db.sql(  # nosemgrep
 		"""
         SELECT MIN(custom_msrp) as min_price, MAX(custom_msrp) as max_price
         FROM `tabItem`

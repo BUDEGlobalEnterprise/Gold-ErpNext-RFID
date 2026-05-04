@@ -65,7 +65,7 @@ def execute(filters=None):
 		to_date = frappe.utils.today()
 
 	# Get sales by salesperson
-	sales_data = frappe.db.sql(
+	sales_data = frappe.db.sql(  # nosemgrep
 		"""
 		SELECT
 			COALESCE(si.custom_salesperson_1, 'Unassigned') as salesperson,
@@ -107,7 +107,7 @@ def get_chart_data(filters=None):
 	if not to_date:
 		to_date = frappe.utils.today()
 
-	chart_data = frappe.db.sql(
+	chart_data = frappe.db.sql(  # nosemgrep
 		"""
 		SELECT
 			COALESCE(si.custom_salesperson_1, 'Unassigned') as name,

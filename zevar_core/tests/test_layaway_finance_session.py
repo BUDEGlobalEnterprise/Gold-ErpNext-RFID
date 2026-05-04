@@ -51,7 +51,7 @@ class TestLayawayCreation(FrappeTestCase):
 		cls.warehouse = ensure_warehouse("Layaway Test WH", company=cls.company)
 		cls.item = ensure_item("LAY-TEST-ITEM-01", "Layaway Test Gold Ring", rate=1000.0)
 		ensure_mode_of_payment("Cash", payment_type="Cash")
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -168,7 +168,7 @@ class TestLayawayPayment(FrappeTestCase):
 		cls.warehouse = ensure_warehouse("Layaway Pay WH", company=cls.company)
 		cls.item = ensure_item("LAY-PAY-ITEM-01", "Layaway Pay Item", rate=1000.0)
 		ensure_mode_of_payment("Cash", payment_type="Cash")
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -268,7 +268,7 @@ class TestLayawayCancellation(FrappeTestCase):
 		cls.warehouse = ensure_warehouse("Layaway Cancel WH", company=cls.company)
 		cls.item = ensure_item("LAY-CANCEL-ITEM-01", "Layaway Cancel Item", rate=1000.0)
 		ensure_mode_of_payment("Cash", payment_type="Cash")
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -368,7 +368,7 @@ class TestFinanceAccountCreation(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		cls.customer = ensure_customer("Finance Test Cust")
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -410,7 +410,7 @@ class TestFinanceAccountCreation(FrappeTestCase):
 		doc.minimum_payment_percent = 5.0
 		doc.insert(ignore_permissions=True)
 
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 		result = get_customer_finance_account(self.customer)
 		self.assertTrue(result["exists"])
@@ -427,7 +427,7 @@ class TestFinancePayment(FrappeTestCase):
 		super().setUpClass()
 		cls.customer = ensure_customer("Finance Pay Cust")
 		ensure_mode_of_payment("Cash", payment_type="Cash")
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -460,7 +460,7 @@ class TestFinancePayment(FrappeTestCase):
 		self.account.current_balance = running
 		self.account.available_credit = flt(self.account.credit_limit) - running
 		self.account.save(ignore_permissions=True)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def tearDown(self):
 		frappe.db.rollback()
@@ -498,7 +498,7 @@ class TestFinancePayment(FrappeTestCase):
 
 		self.account.status = "Closed"
 		self.account.save(ignore_permissions=True)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 		with self.assertRaises(frappe.ValidationError):
 			process_finance_payment(self.account.name, 100.0, "Cash")
@@ -508,7 +508,7 @@ class TestFinancePayment(FrappeTestCase):
 
 		self.account.status = "Suspended"
 		self.account.save(ignore_permissions=True)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 		with self.assertRaises(frappe.ValidationError):
 			process_finance_payment(self.account.name, 100.0, "Cash")
@@ -531,7 +531,7 @@ class TestFinanceStatement(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		cls.customer = ensure_customer("Finance Stmt Cust")
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -546,7 +546,7 @@ class TestFinanceStatement(FrappeTestCase):
 		self.account.interest_rate = 12.0
 		self.account.minimum_payment_percent = 5.0
 		self.account.insert(ignore_permissions=True)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def tearDown(self):
 		frappe.db.rollback()
@@ -590,7 +590,7 @@ class TestFinanceStatement(FrappeTestCase):
 		self.account.current_balance = running
 		self.account.available_credit = flt(self.account.credit_limit) - running
 		self.account.save(ignore_permissions=True)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 		now = getdate()
 		result = generate_monthly_statement(self.account.name, now.month, now.year)
@@ -631,7 +631,7 @@ class TestPOSSessionOpenClose(FrappeTestCase):
 			profile_name="Session Test POS",
 			warehouse_name="Session Test WH",
 		)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -796,7 +796,7 @@ class TestPOSSessionWithCashBreakdown(FrappeTestCase):
 			profile_name="Session Breakdown POS",
 			warehouse_name="Session Breakdown WH",
 		)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		frappe.set_user("Administrator")

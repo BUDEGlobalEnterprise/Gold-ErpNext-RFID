@@ -192,7 +192,7 @@
   },
   {
    "read": 1,
-   "role": "All",
+   "role": "System Manager",
    "select": 1
   }
  ],

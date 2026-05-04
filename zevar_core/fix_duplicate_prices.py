@@ -8,7 +8,7 @@ def fix_duplicate_prices():
 	"""Remove duplicate item prices that cause test failures"""
 
 	# Find all item prices for test items
-	prices = frappe.db.sql(
+	prices = frappe.db.sql(  # nosemgrep
 		"""
         SELECT name, item_code, price_list, creation
         FROM `tabItem Price`

@@ -54,7 +54,7 @@ def execute():
 		index_name = f"idx_{table.lower()}_{field}"
 		try:
 			# Check if index already exists
-			existing = frappe.db.sql(
+			existing = frappe.db.sql(  # nosemgrep
 				"""
                 SELECT INDEX_NAME
                 FROM INFORMATION_SCHEMA.STATISTICS

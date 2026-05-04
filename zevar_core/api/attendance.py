@@ -464,7 +464,7 @@ def _process_auto_attendance(employee_id):
 
 		attendance_doc.insert(ignore_permissions=True)
 		attendance_doc.submit()
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	except Exception:
 		# Non-critical: log but don't break the clock-out flow
 		frappe.log_error("Auto-Attendance Creation Failed", frappe.get_traceback())

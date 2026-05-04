@@ -1,13 +1,13 @@
 import frappe
+from frappe import _
 
 
 def get_test_company() -> str:
-	"""Return the default company for test data creation."""
 	company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value(
 		"Global Defaults", "default_company"
 	)
 	if not company:
-		frappe.throw("Default company is required for tests.")
+		frappe.throw(_("Default company is required for tests."))
 	return company
 
 

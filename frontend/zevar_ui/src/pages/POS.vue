@@ -46,6 +46,34 @@
 								: catalog.length + ' Pieces'
 						}}
 					</span>
+
+					<router-link
+						v-if="posSession.hasActiveSession"
+						to="/closing"
+						class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/30 hover:bg-green-500/20 transition"
+					>
+						<span class="relative flex h-1.5 w-1.5"
+							><span
+								class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"
+							></span
+							><span
+								class="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"
+							></span
+						></span>
+						Session Open
+					</router-link>
+					<router-link
+						v-else
+						to="/opening"
+						class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500/20 transition"
+					>
+						<span class="relative flex h-1.5 w-1.5"
+							><span
+								class="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"
+							></span
+						></span>
+						No Register Session
+					</router-link>
 				</div>
 
 				<!-- Inline Filter Bar - Occupies the central "blank space" -->
@@ -183,9 +211,10 @@ import ProductModal from '@/components/POSProductModal.vue'
 import { useSessionStore } from '@/stores/session.js'
 import { useUIStore } from '@/stores/ui.js'
 import { useCartStore } from '@/stores/cart.js'
+import { usePosSessionStore } from '@/stores/posSession.js'
 import { useBreakpoint } from '@/composables/useBreakpoint.js'
 import { createResource } from 'frappe-ui'
-import { watch, ref, computed } from 'vue'
+import { watch, ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -193,6 +222,7 @@ const router = useRouter()
 const session = useSessionStore()
 const ui = useUIStore()
 const cart = useCartStore()
+const posSession = usePosSessionStore()
 const { isMobile: isMobileBP, productGridCols } = useBreakpoint()
 
 // View mode toggle
@@ -355,6 +385,15 @@ watch(
 	},
 	{ immediate: true }
 )
+
+let sessionPollInterval = null
+onMounted(() => {
+	posSession.fetchStatus()
+	sessionPollInterval = setInterval(() => posSession.fetchStatus(), 60000)
+})
+onUnmounted(() => {
+	if (sessionPollInterval) clearInterval(sessionPollInterval)
+})
 </script>
 
 <style scoped>

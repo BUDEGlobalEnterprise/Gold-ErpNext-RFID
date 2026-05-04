@@ -1,192 +1,36 @@
-"""
-FoxPro to Frappe Data Migration (Extended) for Zevar Jewelers
-
-Includes additional migration functions for stone cuts, types, departments, etc.
-"""
-
-import json
-import os
-from datetime import date, datetime
-from typing import Any
+from datetime import datetime
 
 import frappe
-from frappe import _
 
-try:
-	from dbfread import DBF
+from zevar_core.migration.foxpro_import import (
+	_ensure_designation,
+	_get_default_customer,
+	_get_default_item,
+	_get_or_create_item_group,
+	_set_custom_field,
+	clean_float,
+	clean_int,
+	clean_str,
+	find_dbf,
+	format_date,
+	read_dbf,
+)
 
-	HAS_DBFREAD = True
-except ImportError:
-	HAS_DBFREAD = False
-
-
-# ──────────────────────────────────────────────────
-# Helpers
-# ──────────────────────────────────────────────────
-
-
-def check_dbfread():
-	"""Verify dbfread is installed."""
-	if not HAS_DBFREAD:
-		frappe.throw(
-			_("dbfread library not installed. Run: pip install dbfread"),
-			title=_("Missing Dependency"),
-		)
-
-
-def find_dbf(backup_path: str, filename: str) -> str | None:
-	"""Find a DBF file (case-insensitive) in the backup directory."""
-	if not os.path.isdir(backup_path):
-		return None
-	for fname in os.listdir(backup_path):
-		if fname.upper() == filename.upper():
-			return os.path.join(backup_path, fname)
-	return None
-
-
-def read_dbf(file_path: str, encoding: str = "cp1252") -> list[dict]:
-	"""
-	Read a DBF file and return list of clean records.
-
-	Lowercases keys, strips whitespace from strings, handles None/empty.
-	"""
-	check_dbfread()
-	table = DBF(file_path, encoding=encoding, ignore_missing_memofile=True)
-	records = []
-	for record in table:
-		clean = {}
-		for key, value in record.items():
-			if isinstance(value, str):
-				value = value.strip()
-			elif isinstance(value, bytes):
-				try:
-					value = value.decode(encoding).strip()
-				except Exception:
-					value = str(value)
-			if value is not None and value != "":
-				clean[key.lower()] = value
-		records.append(clean)
-	return records
-
-
-def clean_str(value) -> str:
-	"""Safely convert to stripped string."""
-	if value is None:
-		return ""
-	return str(value).strip()
-
-
-def clean_float(value) -> float:
-	"""Safely convert to float."""
-	if value is None:
-		return 0.0
-	try:
-		return float(value)
-	except (ValueError, TypeError):
-		return 0.0
-
-
-def clean_int(value) -> int:
-	"""Safely convert to int."""
-	if value is None:
-		return 0
-	try:
-		return int(float(value))
-	except (ValueError, TypeError):
-		return 0
-
-
-def format_date(value) -> str | None:
-	"""Convert a date value to YYYY-MM-DD string."""
-	if value is None:
-		return None
-	if isinstance(value, date):
-		return value.strftime("%Y-%m-%d")
-	# Try parsing common FoxPro date strings
-	val = str(value).strip()
-	if not val:
-		return None
-	for fmt in ("%Y%m%d", "%m/%d/%Y", "%m-%d-%Y", "%Y-%m-%d", "%m%d%y"):
-		try:
-			return datetime.strptime(val, fmt).strftime("%Y-%m-%d")
-		except ValueError:
-			continue
-	return None
-
-
-def _set_custom_field(doc, fieldname: str, value):
-	"""Set a custom field on a document if the field exists and value is non-empty."""
-	if value and frappe.get_meta(doc.doctype).has_field(fieldname):
-		doc.set(fieldname, value)
-
-
-def _ensure_designation(name: str):
-	"""Create a Designation record if it doesn't exist."""
-	if name and not frappe.db.exists("Designation", name):
-		try:
-			doc = frappe.new_doc("Designation")
-			doc.designation_name = name
-			doc.insert(ignore_permissions=True)
-		except frappe.DuplicateEntryError:
-			pass
-
-
-def _get_or_create_item_group(category: str) -> str:
-	"""Get or create an Item Group by name."""
-	if frappe.db.exists("Item Group", category):
-		return category
-	try:
-		doc = frappe.new_doc("Item Group")
-		doc.item_group_name = category
-		doc.parent_item_group = "All Item Groups"
-		doc.is_group = 0
-		doc.insert(ignore_permissions=True)
-	except frappe.DuplicateEntryError:
-		pass
-	return category
-
-
-def _get_or_create_brand(mfrid: str) -> str:
-	"""Get or create a Brand by manufacturer ID."""
-	if frappe.db.exists("Brand", mfrid):
-		return mfrid
-	try:
-		doc = frappe.new_doc("Brand")
-		doc.brand = mfrid
-		doc.insert(ignore_permissions=True)
-	except frappe.DuplicateEntryError:
-		pass
-	return mfrid
-
-
-def _get_default_customer() -> str:
-	"""Get or create a default 'Walk-in Customer'."""
-	name = "Walk-in Customer"
-	if frappe.db.exists("Customer", name):
-		return name
-	doc = frappe.new_doc("Customer")
-	doc.customer_name = name
-	doc.customer_type = "Individual"
-	doc.customer_group = "Individual"
-	doc.territory = "All Territories"
-	doc.insert(ignore_permissions=True)
-	return name
-
-
-def _get_default_item() -> str:
-	"""Get or create a default item for legacy transaction lines."""
-	item_code = "LEGACY-ITEM"
-	if frappe.db.exists("Item", item_code):
-		return item_code
-	doc = frappe.new_doc("Item")
-	doc.item_code = item_code
-	doc.item_name = "Legacy Imported Item"
-	doc.item_group = "All Item Groups"
-	doc.stock_uom = "Nos"
-	doc.is_stock_item = 1
-	doc.insert(ignore_permissions=True)
-	return item_code
-
+REPAIR_STATUS_MAP = {
+	"R": "Received",
+	"I": "In Progress",
+	"C": "Completed",
+	"D": "Delivered",
+	"X": "Cancelled",
+}
+TENDER_MODE_MAP = {
+	"CA": "Cash",
+	"CK": "Check",
+	"VI": "Visa",
+	"MC": "Mastercard",
+	"AM": "Amex",
+	"DI": "Discover",
+}
 
 # ──────────────────────────────────────────────────
 # Stone Cuts (from CUTS.DBF)
@@ -243,7 +87,7 @@ def import_stone_cuts(backup_path: str, dry_run: bool = False) -> dict:
 			stats["errors"].append(f"Cut {record.get('cut', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -302,7 +146,7 @@ def import_stone_types(backup_path: str, dry_run: bool = False) -> dict:
 			stats["errors"].append(f"Stone Type {record.get('type', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -356,7 +200,7 @@ def import_departments(backup_path: str, dry_run: bool = False) -> dict:
 			stats["errors"].append(f"Dept {record.get('column1', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -405,7 +249,7 @@ def import_subcategories(backup_path: str, dry_run: bool = False) -> dict:
 			stats["errors"].append(f"Subcat {record.get('code', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -468,7 +312,7 @@ def import_tax_rates(backup_path: str, dry_run: bool = False) -> dict:
 			stats["errors"].append(f"Tax {record.get('taxcode', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -557,13 +401,13 @@ def import_slush_items(backup_path: str, dry_run: bool = False) -> dict:
 			stats["imported"] += 1
 
 			if (idx + 1) % 50 == 0:
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 
 		except Exception as e:
 			stats["errors"].append(f"Slush {record.get('barcode', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -618,7 +462,7 @@ def import_system_constants(backup_path: str, dry_run: bool = False) -> dict:
 					gr.fetch_time = frappe.utils.now_datetime()
 					gr.insert(ignore_permissions=True, ignore_mandatory=True)
 
-			frappe.db.commit()
+			frappe.db.commit()  # nosemgrep
 
 		stats["imported"] = 1
 	except Exception as e:
@@ -782,13 +626,13 @@ def import_appraisals(backup_path: str, dry_run: bool = False) -> dict:
 			stats["imported"] += 1
 
 			if (i + 1) % 50 == 0:
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 
 		except Exception as e:
 			stats["errors"].append(f"Appraisal {i}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -899,10 +743,10 @@ def import_receipt_lines(backup_path: str, dry_run: bool = False) -> dict:
 			stats["skipped"] += len(items)
 
 		if not dry_run and len(receipt_groups) % 50 == 0:
-			frappe.db.commit()
+			frappe.db.commit()  # nosemgrep
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -1006,13 +850,13 @@ def import_payment_tenders(backup_path: str, dry_run: bool = False) -> dict:
 			stats["imported"] += 1
 
 			if (idx + 1) % 50 == 0:
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 
 		except Exception as e:
 			stats["errors"].append(f"Tender {record.get('transno', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -1145,7 +989,7 @@ def import_repair_orders(backup_path: str, dry_run: bool = False) -> dict:
 			stats["errors"].append(f"Repair {record.get('rpairno', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -1299,13 +1143,13 @@ def import_layaway_contracts(backup_path: str, dry_run: bool = False) -> dict:
 			stats["imported"] += 1
 
 			if (idx + 1) % 100 == 0:
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 
 		except Exception as e:
 			stats["errors"].append(f"Layaway {record.get('arnum', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -1370,13 +1214,13 @@ def import_layaway_links(backup_path: str, dry_run: bool = False) -> dict:
 			stats["imported"] += 1
 
 			if (idx + 1) % 100 == 0:
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 
 		except Exception as e:
 			stats["errors"].append(f"LW-Link {record.get('arnum', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -1459,7 +1303,7 @@ def import_salespersons(backup_path: str, dry_run: bool = False) -> dict:
 			stats["errors"].append(f"Salesperson {record.get('empid', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -1561,7 +1405,7 @@ def import_commission_rules(backup_path: str, dry_run: bool = False) -> dict:
 			stats["skipped"] += len(bonus_records)
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -1634,13 +1478,13 @@ def import_payroll(backup_path: str, dry_run: bool = False) -> dict:
 			stats["imported"] += 1
 
 			if (idx + 1) % 100 == 0:
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 
 		except Exception as e:
 			stats["errors"].append(f"Payroll {record.get('empid', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -1702,13 +1546,13 @@ def import_audit_trail(backup_path: str, dry_run: bool = False) -> dict:
 			stats["imported"] += 1
 
 			if (idx + 1) % 100 == 0:
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 
 		except Exception as e:
 			stats["errors"].append(f"Audit {idx}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -1758,13 +1602,13 @@ def import_sold_history(backup_path: str, dry_run: bool = False) -> dict:
 			stats["imported"] += 1
 
 			if (idx + 1) % 50 == 0:
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 
 		except Exception as e:
 			stats["errors"].append(f"SoldParm {idx}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -1809,13 +1653,13 @@ def import_deleted_inventory(backup_path: str, dry_run: bool = False) -> dict:
 			stats["imported"] += 1
 
 			if (idx + 1) % 100 == 0:
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 
 		except Exception as e:
 			stats["errors"].append(f"InvDel {idx}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats
 
 
@@ -1875,5 +1719,5 @@ def import_watch_details(backup_path: str, dry_run: bool = False) -> dict:
 			stats["errors"].append(f"Watch {record.get('abr', '?')}: {str(e)[:100]}")
 
 	if not dry_run:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	return stats

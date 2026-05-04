@@ -310,9 +310,9 @@ const goldStore = useGoldStore()
 const openDropdown = ref(null)
 
 const goldPrice = computed(() => {
-	const rate22kt = goldStore.rates['Yellow Gold-22Kt']
-	if (!rate22kt) return '---'
-	const perOz = (rate22kt * 31.1035).toFixed(2)
+	const data22kt = goldStore.rates['Yellow Gold-22Kt']
+	if (!data22kt || !data22kt.rate_per_gram) return '---'
+	const perOz = (data22kt.rate_per_gram * 31.1035).toFixed(2)
 	return Number(perOz).toLocaleString('en-US', {
 		minimumFractionDigits: 2,
 		maximumFractionDigits: 2,
@@ -320,8 +320,8 @@ const goldPrice = computed(() => {
 })
 
 const priceChange = computed(() => {
-	const trend = goldStore.trends['Yellow Gold-22Kt']
-	return trend ? trend.change_pct : 0.0
+	const data22kt = goldStore.rates['Yellow Gold-22Kt']
+	return data22kt?.change_percent || 0.0
 })
 
 const navCategories = [

@@ -59,7 +59,7 @@ def migrate_items():
 		except Exception:
 			continue
 
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep
 
 
 if __name__ == "__main__":

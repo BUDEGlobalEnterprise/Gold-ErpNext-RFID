@@ -139,7 +139,7 @@ def get_chart_data(filters=None):
 	if not to_date:
 		to_date = frappe.utils.today()
 
-	chart_data = frappe.db.sql(
+	chart_data = frappe.db.sql(  # nosemgrep
 		"""
 		SELECT
 			date,

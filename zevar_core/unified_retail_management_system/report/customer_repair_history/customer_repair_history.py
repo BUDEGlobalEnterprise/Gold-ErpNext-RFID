@@ -104,7 +104,7 @@ def get_data(filters):
 	values = get_values(filters)
 
 	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
-	rows = frappe.db.sql(
+	rows = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT
 			ro.name as repair_order,

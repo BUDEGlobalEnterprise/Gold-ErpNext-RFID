@@ -151,6 +151,18 @@ const routes = [
 		component: () => import('./pages/Support.vue'),
 		meta: { requiresAuth: true },
 	},
+	{
+		path: '/opening',
+		name: 'POSOpening',
+		component: () => import('./pages/POSOpening.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/closing',
+		name: 'POSClosing',
+		component: () => import('./pages/POSClosing.vue'),
+		meta: { requiresAuth: true },
+	},
 	// Catch-all → Dashboard
 	{
 		path: '/:pathMatch(.*)*',

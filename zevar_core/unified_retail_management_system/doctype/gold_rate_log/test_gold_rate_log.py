@@ -26,12 +26,12 @@ class TestGoldRateLog(FrappeTestCase):
 			frappe.get_doc(
 				{"doctype": "Zevar Purity", "__newname": "18Kt", "fine_metal_content": 0.750}
 			).insert(ignore_permissions=True)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def cleanup_test_data(self):
 		for name in frappe.get_all("Gold Rate Log", filters={"source": "test"}, pluck="name"):
 			frappe.delete_doc("Gold Rate Log", name, ignore_permissions=True, force=True)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def test_create_gold_rate_log(self):
 		doc = frappe.get_doc(

@@ -212,8 +212,37 @@
 					</div>
 				</div>
 
-				<!-- Right side: rates + user + cart -->
+				<!-- Right side: session + rates + user + cart -->
 				<div class="flex items-center gap-2 sm:gap-3 lg:ml-8">
+					<!-- POS Session Status (header) -->
+					<router-link
+						v-if="posSession.hasActiveSession"
+						to="/closing"
+						class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/30 hover:bg-green-500/20 transition"
+					>
+						<span class="relative flex h-1.5 w-1.5"
+							><span
+								class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"
+							></span
+							><span
+								class="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"
+							></span
+						></span>
+						Register Open
+					</router-link>
+					<router-link
+						v-else
+						to="/opening"
+						class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500/20 transition"
+					>
+						<span class="relative flex h-1.5 w-1.5"
+							><span
+								class="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"
+							></span
+						></span>
+						No Register
+					</router-link>
+
 					<!-- Live Rates (desktop only) -->
 					<div
 						class="hidden xl:flex items-center h-11 bg-gray-50/50 dark:bg-warm-dark-900/50 border border-gray-200 dark:border-warm-border rounded-lg shadow-sm max-w-2xl overflow-x-auto custom-scrollbar-hide"
@@ -238,7 +267,7 @@
 							class="flex items-center divide-x divide-gray-200 dark:divide-gray-700 h-full"
 						>
 							<div
-								v-for="[key, rate, trend] in sortedRates"
+								v-for="[key, rate, change, trend] in sortedRates"
 								:key="key"
 								class="flex items-center gap-2 px-4 h-full shrink-0"
 							>
@@ -246,22 +275,20 @@
 									class="text-[11px] text-gray-500 font-bold uppercase whitespace-nowrap"
 									>{{ formatShortLabel(key) }}</span
 								>
-								<span
-									class="text-base font-mono font-bold whitespace-nowrap text-[#D4AF37]"
-									>${{ rate }}</span
-								>
-								<span
-									v-if="trend.trend === 'up'"
-									style="font-size: 10px; font-weight: 700; color: #10b981; white-space: nowrap"
-									class="flex items-center gap-0.5"
-									>▲ {{ Math.abs(trend.change_pct).toFixed(2) }}%</span
-								>
-								<span
-									v-else-if="trend.trend === 'down'"
-									style="font-size: 10px; font-weight: 700; color: #ef4444; white-space: nowrap"
-									class="flex items-center gap-0.5"
-									>▼ {{ Math.abs(trend.change_pct).toFixed(2) }}%</span
-								>
+								<div class="flex items-baseline gap-1">
+									<span
+										class="text-base font-mono font-black text-[#D4AF37] whitespace-nowrap"
+										>${{ rate }}</span
+									>
+									<span
+										v-if="trend !== 'none'"
+										class="text-[10px] font-bold"
+										:class="trend === 'up' ? 'text-green-500' : 'text-red-500'"
+									>
+										{{ trend === 'up' ? '↑' : '↓' }}{{ Math.abs(change) }}%
+									</span>
+								</div>
+>>>>>>> origin/main
 							</div>
 						</div>
 					</div>
@@ -509,27 +536,26 @@
 				class="flex items-center divide-x divide-gray-200 dark:divide-gray-800 min-w-max h-full"
 			>
 				<div
-					v-for="[key, rate, trend] in sortedRates"
+					v-for="[key, rate, change, trend] in sortedRates"
 					:key="key"
 					class="flex items-center gap-2 px-4 h-full shrink-0"
 				>
 					<span class="text-[9px] text-gray-500 font-bold uppercase">{{
 						formatShortLabel(key)
 					}}</span>
-					<span
-						class="text-xs font-mono font-bold whitespace-nowrap text-[#D4AF37]"
-						>${{ rate }}</span
-					>
-					<span
-						v-if="trend.trend === 'up'"
-						style="font-size: 9px; font-weight: 700; color: #10b981"
-						>▲</span
-					>
-					<span
-						v-else-if="trend.trend === 'down'"
-						style="font-size: 9px; font-weight: 700; color: #ef4444"
-						>▼</span
-					>
+					<div class="flex items-baseline gap-1">
+						<span class="text-xs font-mono font-black text-[#D4AF37]"
+							>${{ rate }}</span
+						>
+						<span
+							v-if="trend !== 'none'"
+							class="text-[8px] font-bold"
+							:class="trend === 'up' ? 'text-green-500' : 'text-red-500'"
+						>
+							{{ trend === 'up' ? '↑' : '↓' }}{{ Math.abs(change) }}%
+						</span>
+					</div>
+>>>>>>> origin/main
 				</div>
 			</div>
 		</div>
@@ -724,6 +750,7 @@ import { useSessionStore } from '@/stores/session.js'
 import { useGoldStore } from '@/stores/gold.js'
 import { useCartStore } from '@/stores/cart.js'
 import { useUIStore } from '@/stores/ui.js'
+import { usePosSessionStore } from '@/stores/posSession.js'
 import { createResource } from 'frappe-ui'
 import { onMounted, ref, computed, watch, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
@@ -736,6 +763,7 @@ const session = useSessionStore()
 const goldStore = useGoldStore()
 const cartStore = useCartStore()
 const ui = useUIStore()
+const posSession = usePosSessionStore()
 const emit = defineEmits(['layaway-payment-success', 'layaway-created'])
 const route = useRoute()
 const { isMobile, isLargeDesktop } = useBreakpoint()
@@ -796,6 +824,13 @@ const sidebarSections = computed(() => {
 					to: '/terminal',
 					label: 'POS Terminal',
 					icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z',
+				},
+				{
+					to: posSession.hasActiveSession ? '/closing' : '/opening',
+					label: posSession.hasActiveSession ? 'Close Register' : 'Open Register',
+					icon: posSession.hasActiveSession
+						? 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
+						: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
 				},
 				{
 					to: '/inventory',
@@ -913,10 +948,11 @@ const sortedRates = computed(() => {
 	if (!goldStore.rates) return []
 	return Object.entries(goldStore.rates)
 		.filter(
-			([key, rate]) =>
+			([key, data]) =>
 				key &&
 				key !== 'null' &&
-				rate &&
+				data &&
+				data.rate_per_gram &&
 				!key.includes('Platinum') &&
 				!key.toLowerCase().includes('24k')
 		)
@@ -930,16 +966,16 @@ const sortedRates = computed(() => {
 			const pPB = purityPriority[purityB] || 0
 			return pPB - pPA
 		})
-		.map(([key, ratePerGram]) => {
-			const perOz = (ratePerGram * TROY_OZ_GRAMS).toFixed(2)
-			const trendInfo = goldStore.trends?.[key] || { trend: 'flat', change_pct: 0 }
+		.map(([key, data]) => {
+			const perOz = (data.rate_per_gram * TROY_OZ_GRAMS).toFixed(2)
 			return [
 				key,
 				Number(perOz).toLocaleString('en-US', {
 					minimumFractionDigits: 2,
 					maximumFractionDigits: 2,
 				}),
-				trendInfo,
+				data.change_percent,
+				data.trend,
 			]
 		})
 })
@@ -1071,6 +1107,7 @@ watch(
 )
 onMounted(() => {
 	goldStore.startPolling()
+	posSession.fetchStatus()
 	if (session.currentWarehouse) cartStore.loadTaxForWarehouse(session.currentWarehouse)
 	document.addEventListener('click', handleDocumentClick)
 })

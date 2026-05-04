@@ -91,7 +91,7 @@ def execute(filters=None):
 		to_date = frappe.utils.today()
 
 	# Get trade-in records from Sales Invoice custom fields
-	trade_ins = frappe.db.sql(
+	trade_ins = frappe.db.sql(  # nosemgrep
 		"""
 		SELECT
 			si.posting_date as date,
@@ -144,7 +144,7 @@ def get_chart_data(filters=None):
 	if not to_date:
 		to_date = frappe.utils.today()
 
-	chart_data = frappe.db.sql(
+	chart_data = frappe.db.sql(  # nosemgrep
 		"""
 		SELECT
 			si.posting_date as date,

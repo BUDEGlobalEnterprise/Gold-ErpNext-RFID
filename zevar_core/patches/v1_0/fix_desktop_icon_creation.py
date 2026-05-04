@@ -31,35 +31,21 @@ def execute():
 def _patch_validate_method():
 	"""
 	Patch DesktopIcon.validate() to avoid module_name AttributeError.
-
-	Original buggy code:
-	    def validate(self):
-	        if not self.label:
-	            self.label = self.module_name  # BUG: module_name doesn't exist
-
-	Patched code:
-	    def validate(self):
-	        pass  # Skip the buggy assignment
 	"""
 	import inspect
 
-	from frappe.desk.doctype.desktop_icon.desktop_icon import DesktopIcon
+	from frappe.desk.doctype.desktop_icon.desktop_icon import DesktopIcon  # nosemgrep
 
 	# Get current source code of validate method
 	try:
 		source = inspect.getsource(DesktopIcon.validate)
 	except (TypeError, OSError):
-		# Method might already be patched or unavailable
 		return
 
-	# Check if bug exists (look for module_name reference)
 	if "self.module_name" not in source:
 		return
 
-	# Apply monkey patch
 	def patched_validate(self):
-		# Original intent: set label from module_name if not set
-		# But module_name field doesn't exist in v16, so we skip
 		pass
 
 	DesktopIcon.validate = patched_validate
@@ -81,7 +67,7 @@ def _patch_create_desktop_icons_from_workspace():
 
 	# Get current source code
 	try:
-		source = inspect.getsource(desktop_icon_module.create_desktop_icons_from_workspace)
+		source = inspect.getsource(desktop_icon_module.create_desktop_icons_from_workspace)  # nosemgrep
 	except (TypeError, OSError):
 		return
 

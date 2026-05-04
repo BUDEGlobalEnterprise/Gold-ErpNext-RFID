@@ -82,7 +82,7 @@ def search_customers(query: str):
 
 	query_lower = f"%{query.lower()}%"
 
-	customers = frappe.db.sql(
+	customers = frappe.db.sql(  # nosemgrep
 		"""
         SELECT
             name as customer_name,

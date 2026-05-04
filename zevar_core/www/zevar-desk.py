@@ -36,7 +36,7 @@ def get_context(context):
 
 	# Check if user can manage shortcuts
 	context.can_manage_shortcuts = (
-		frappe.has_permission("Zevar Desk Shortcut", "write")
+		frappe.has_permission("Zevar Desk Shortcut", "write", throw=True)
 		or frappe.user.has_role("System Manager")
 		or frappe.user.has_role("Desk Customization Manager")
 	)

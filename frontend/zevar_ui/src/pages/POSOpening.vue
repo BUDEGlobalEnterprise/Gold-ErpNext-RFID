@@ -1,135 +1,233 @@
 <template>
-	<div class="pos-opening-page">
-		<div class="page-header">
-			<h1>POS Opening Entry</h1>
-			<p>Start your cash register session</p>
-		</div>
-
-		<!-- Session Status Check -->
-		<div v-if="sessionStatus.has_active_session" class="active-session-warning">
-			<div class="warning-icon">⚠️</div>
-			<div class="warning-content">
-				<h3>Active Session Detected</h3>
-				<p>You already have an open session: {{ sessionStatus.session?.name }}</p>
-				<p class="session-details">
-					Opened: {{ sessionStatus.session?.opening_date }} at
-					{{ sessionStatus.session?.opening_time }} | Duration:
-					{{ sessionStatus.session?.duration_hours }}h | Sales:
-					{{ sessionStatus.session?.sales_count }}
-				</p>
+	<AppLayout>
+		<div class="max-w-3xl mx-auto">
+			<div class="text-center mb-8">
+				<h1 class="premium-title !text-2xl">POS Opening Entry</h1>
+				<p class="premium-subtitle mt-2">Start your cash register session</p>
 			</div>
-			<router-link to="/pos/closing" class="btn btn-primary"> Go to Closing </router-link>
-		</div>
 
-		<!-- Opening Form -->
-		<div v-else class="opening-form-container">
-			<form @submit.prevent="submitOpening" class="opening-form">
-				<!-- POS Profile Selection -->
-				<div class="form-group">
-					<label>POS Profile</label>
-					<select v-model="form.pos_profile" required :disabled="loading">
-						<option value="">Select a profile...</option>
-						<option
-							v-for="profile in profiles"
-							:key="profile.name"
-							:value="profile.name"
-						>
-							{{ profile.name }} - {{ profile.warehouse }}
-						</option>
-					</select>
+			<div
+				v-if="posSession.hasActiveSession"
+				class="flex items-center gap-4 p-5 bg-amber-500/10 border border-amber-500/30 rounded-xl mb-6"
+			>
+				<span class="text-3xl shrink-0">&#9888;&#65039;</span>
+				<div class="flex-1 min-w-0">
+					<h3 class="text-amber-400 font-bold mb-1">Active Session Detected</h3>
+					<p class="text-gray-400 text-sm">
+						You already have an open session: {{ posSession.status.session?.name }}
+					</p>
+					<p class="text-gray-500 text-xs mt-1">
+						Opened: {{ posSession.status.session?.opening_date }} at
+						{{ posSession.status.session?.opening_time }} | Duration:
+						{{ posSession.status.session?.duration_hours }}h | Sales:
+						{{ posSession.status.session?.sales_count }}
+					</p>
 				</div>
+				<router-link
+					to="/closing"
+					class="px-5 py-2.5 bg-[#D4AF37] text-black font-bold rounded-lg hover:bg-[#b5952f] transition text-sm shrink-0"
+				>
+					Go to Closing
+				</router-link>
+			</div>
 
-				<!-- Opening Balance -->
-				<div class="form-group">
-					<label>Opening Cash Balance</label>
-					<div class="currency-input">
-						<span class="currency-symbol">$</span>
-						<input
-							type="number"
-							v-model.number="form.opening_balance"
-							step="0.01"
-							min="0"
-							placeholder="0.00"
+			<div v-else class="premium-card p-6">
+				<div
+					v-if="profileError"
+					class="p-4 mb-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500 text-sm"
+				>
+					{{ profileError }}
+				</div>
+				<div
+					v-if="!profileError && profiles.length === 0"
+					class="p-4 mb-4 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-500 text-sm"
+				>
+					No POS profiles found. Please create a POS Profile in ERPNext first.
+				</div>
+				<form v-if="profiles.length > 0" @submit.prevent="submitOpening" class="space-y-6">
+					<div>
+						<label
+							class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+							>POS Profile</label
+						>
+						<select
+							v-model="form.pos_profile"
 							required
 							:disabled="loading"
-						/>
-					</div>
-				</div>
-
-				<!-- Cash Breakdown (Optional) -->
-				<div class="form-group">
-					<label>Cash Breakdown (Optional)</label>
-					<div class="breakdown-grid">
-						<div
-							v-for="denom in denominations"
-							:key="denom.value"
-							class="breakdown-item"
+							class="w-full px-4 py-3 bg-white dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border rounded-lg text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] outline-none"
 						>
-							<label>${{ denom.value }}</label>
+							<option value="">Select a profile...</option>
+							<option
+								v-for="profile in profiles"
+								:key="profile.name"
+								:value="profile.name"
+							>
+								{{ profile.name }} - {{ profile.warehouse }}
+							</option>
+						</select>
+					</div>
+
+					<div>
+						<label
+							class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+							>Opening Cash Balance</label
+						>
+						<div
+							v-if="enforceFixedFloat"
+							class="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg text-sm text-blue-500 mb-2"
+						>
+							Fixed float policy: opening balance must be ${{
+								fixedFloatAmount.toFixed(2)
+							}}
+						</div>
+						<div class="relative">
+							<span
+								class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium"
+								>$</span
+							>
 							<input
 								type="number"
-								v-model.number="form.cash_breakdown[denom.value]"
+								v-model.number="form.opening_balance"
+								step="0.01"
 								min="0"
-								placeholder="0"
-								@change="calculateTotal"
-								:disabled="loading"
+								placeholder="0.00"
+								required
+								:disabled="loading || enforceFixedFloat"
+								class="w-full pl-8 pr-4 py-3 bg-white dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border rounded-lg text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] outline-none font-mono disabled:opacity-60 disabled:cursor-not-allowed"
 							/>
-							<span class="subtotal">${{ getSubtotal(denom.value) }}</span>
 						</div>
 					</div>
-					<div class="breakdown-total">
-						<span>Calculated Total:</span>
-						<strong>${{ calculatedTotal.toFixed(2) }}</strong>
+
+					<div>
+						<label
+							class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+							>Cash Breakdown (Optional)</label
+						>
+						<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+							<div
+								v-for="denom in denominations"
+								:key="denom.value"
+								class="flex flex-col gap-1"
+							>
+								<span class="text-xs font-medium text-gray-500 dark:text-gray-500"
+									>${{ denom.value }}</span
+								>
+								<input
+									type="number"
+									v-model.number="form.cash_breakdown[denom.value]"
+									min="0"
+									placeholder="0"
+									@change="calculateTotal"
+									:disabled="loading"
+									class="w-full px-3 py-2 bg-white dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border rounded-lg text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] outline-none font-mono"
+								/>
+								<span class="text-xs text-gray-500"
+									>${{ getSubtotal(denom.value) }}</span
+								>
+							</div>
+						</div>
+						<div
+							class="flex justify-between items-center p-3 bg-gray-50 dark:bg-warm-dark-700/50 rounded-lg mt-3 text-sm text-gray-700 dark:text-gray-300"
+						>
+							<span>Calculated Total:</span>
+							<strong class="font-mono">${{ calculatedTotal.toFixed(2) }}</strong>
+						</div>
+						<div
+							v-if="breakdownMismatch"
+							class="p-3 mt-2 bg-red-500/10 border border-red-500/30 rounded-lg text-sm text-red-500"
+						>
+							Breakdown total (${{ calculatedTotal.toFixed(2) }}) does not match
+							required float (${{ fixedFloatAmount.toFixed(2) }}). Please adjust.
+						</div>
+						<div
+							v-if="!breakdownMismatch && calculatedTotal > 0 && enforceFixedFloat"
+							class="p-3 mt-2 bg-green-500/10 border border-green-500/30 rounded-lg text-sm text-green-500"
+						>
+							Breakdown matches required float.
+						</div>
 					</div>
-				</div>
 
-				<!-- Notes -->
-				<div class="form-group">
-					<label>Opening Notes (Optional)</label>
-					<textarea
-						v-model="form.notes"
-						placeholder="Any notes for this session..."
-						rows="3"
-						:disabled="loading"
-					></textarea>
-				</div>
+					<div>
+						<label
+							class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+							>Opening Notes (Optional)</label
+						>
+						<textarea
+							v-model="form.notes"
+							placeholder="Any notes for this session..."
+							rows="3"
+							:disabled="loading"
+							class="w-full px-4 py-3 bg-white dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border rounded-lg text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] outline-none resize-none"
+						></textarea>
+					</div>
 
-				<!-- Submit Button -->
-				<div class="form-actions">
-					<button
-						type="submit"
-						class="btn btn-primary btn-lg"
-						:disabled="loading || !form.pos_profile"
-					>
-						<span v-if="loading">Opening Session...</span>
-						<span v-else>Open Cash Register</span>
-					</button>
-				</div>
-			</form>
-		</div>
-
-		<!-- Success Message -->
-		<div v-if="successMessage" class="success-overlay">
-			<div class="success-card">
-				<div class="success-icon">✅</div>
-				<h2>Session Opened Successfully!</h2>
-				<p>{{ successMessage }}</p>
-				<router-link to="/pos" class="btn btn-primary"> Start Selling </router-link>
+					<div class="text-center pt-2">
+						<button
+							type="submit"
+							:disabled="loading || !form.pos_profile || breakdownMismatch"
+							class="px-12 py-4 bg-[#D4AF37] text-black font-bold rounded-lg hover:bg-[#b5952f] transition text-base disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+						>
+							<span v-if="loading">Opening Session...</span>
+							<span v-else>Open Cash Register</span>
+						</button>
+					</div>
+				</form>
 			</div>
+
+			<Teleport to="body">
+				<Transition
+					enter-active-class="transition-opacity duration-300"
+					enter-from-class="opacity-0"
+					enter-to-class="opacity-100"
+					leave-active-class="transition-opacity duration-200"
+					leave-from-class="opacity-100"
+					leave-to-class="opacity-0"
+				>
+					<div
+						v-if="successMessage"
+						class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[1000]"
+					>
+						<div
+							class="bg-white dark:bg-warm-card p-12 rounded-2xl text-center max-w-md mx-4"
+						>
+							<div class="text-6xl mb-4">&#9989;</div>
+							<h2 class="premium-title !text-xl mb-2">Session Opened!</h2>
+							<p class="text-gray-500 dark:text-gray-400 mb-8">
+								{{ successMessage }}
+							</p>
+							<div class="flex gap-3 justify-center">
+								<router-link
+									to="/terminal"
+									class="px-8 py-3 bg-[#D4AF37] text-black font-bold rounded-lg hover:bg-[#b5952f] transition"
+								>
+									Start Selling
+								</router-link>
+							</div>
+						</div>
+					</div>
+				</Transition>
+			</Teleport>
 		</div>
-	</div>
+	</AppLayout>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { createResource } from 'frappe-ui'
+import { usePosSessionStore } from '@/stores/posSession.js'
+import AppLayout from '@/components/AppLayout.vue'
 
-// State
+const posSession = usePosSessionStore()
+posSession.fetchStatus()
+
 const loading = ref(false)
 const profiles = ref([])
-const sessionStatus = ref({ has_active_session: false })
+const profileError = ref('')
 const successMessage = ref('')
 const calculatedTotal = ref(0)
+const fixedFloatAmount = ref(0)
+const enforceFixedFloat = ref(false)
+const breakdownMismatch = ref(false)
 
 const form = ref({
 	pos_profile: '',
@@ -151,33 +249,48 @@ const denominations = [
 	{ value: 0.01 },
 ]
 
-// Resources
-const profilesResource = createResource({
-	url: 'zevar_core.api.pos_profile.get_pos_profiles',
-	auto: true,
-	onSuccess(data) {
-		profiles.value = data.profiles || []
-		// Auto-select first profile if only one
-		if (profiles.value.length === 1) {
-			form.value.pos_profile = profiles.value[0].name
-		}
-	},
-})
-
-const sessionStatusResource = createResource({
-	url: 'zevar_core.api.pos_session.get_session_status',
-	auto: true,
-	onSuccess(data) {
-		sessionStatus.value = data
-	},
-})
-
 const openSessionResource = createResource({
 	url: 'zevar_core.api.pos_session.open_pos_session',
 	auto: false,
 })
 
-// Methods
+async function loadProfiles() {
+	try {
+		const res = await fetch('/api/method/zevar_core.api.pos_profile.get_pos_profiles', {
+			headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
+		})
+		const json = await res.json()
+		const data = json.message || json
+		profiles.value = data.profiles || []
+		if (profiles.value.length === 1) {
+			form.value.pos_profile = profiles.value[0].name
+			applyProfileSettings(profiles.value[0])
+		}
+	} catch (err) {
+		console.error('Failed to load profiles:', err)
+		profileError.value = 'Failed to load POS profiles. Check permissions.'
+	}
+}
+
+function applyProfileSettings(profile) {
+	if (!profile) return
+	enforceFixedFloat.value = !!profile.custom_enforce_fixed_float
+	fixedFloatAmount.value = parseFloat(profile.custom_fixed_opening_float || 0)
+	if (enforceFixedFloat.value && fixedFloatAmount.value > 0) {
+		form.value.opening_balance = fixedFloatAmount.value
+		calculatedTotal.value = 0
+		breakdownMismatch.value = false
+	}
+}
+
+watch(
+	() => form.value.pos_profile,
+	(name) => {
+		const profile = profiles.value.find((p) => p.name === name)
+		if (profile) applyProfileSettings(profile)
+	}
+)
+
 function getSubtotal(denom) {
 	const count = form.value.cash_breakdown[denom] || 0
 	return (count * denom).toFixed(2)
@@ -190,7 +303,13 @@ function calculateTotal() {
 		total += count * denom.value
 	}
 	calculatedTotal.value = total
-	form.value.opening_balance = total
+	if (enforceFixedFloat.value && total > 0) {
+		form.value.opening_balance = fixedFloatAmount.value
+		breakdownMismatch.value = Math.abs(total - fixedFloatAmount.value) > 0.01
+	} else {
+		form.value.opening_balance = total
+		breakdownMismatch.value = false
+	}
 }
 
 async function submitOpening() {
@@ -212,17 +331,17 @@ async function submitOpening() {
 
 		if (result.success) {
 			successMessage.value = result.message
+			posSession.fetchStatus()
 		}
 	} catch (error) {
 		console.error('Failed to open session:', error)
-		alert('Failed to open session: ' + (error.message || 'Unknown error'))
 	} finally {
 		loading.value = false
 	}
 }
 
 onMounted(() => {
-	// Initialize cash breakdown object
+	loadProfiles()
 	denominations.forEach((d) => {
 		if (form.value.cash_breakdown[d.value] === undefined) {
 			form.value.cash_breakdown[d.value] = 0
@@ -230,219 +349,3 @@ onMounted(() => {
 	})
 })
 </script>
-
-<style scoped>
-.pos-opening-page {
-	padding: 24px;
-	max-width: 800px;
-	margin: 0 auto;
-}
-
-.page-header {
-	text-align: center;
-	margin-bottom: 32px;
-}
-
-.page-header h1 {
-	font-size: 28px;
-	font-weight: 700;
-	color: white;
-	margin-bottom: 8px;
-}
-
-.page-header p {
-	color: rgba(255, 255, 255, 0.6);
-}
-
-.active-session-warning {
-	display: flex;
-	align-items: center;
-	gap: 16px;
-	padding: 20px;
-	background: rgba(251, 191, 36, 0.1);
-	border: 1px solid rgba(251, 191, 36, 0.3);
-	border-radius: 12px;
-	margin-bottom: 24px;
-}
-
-.warning-icon {
-	font-size: 32px;
-}
-
-.warning-content {
-	flex: 1;
-}
-
-.warning-content h3 {
-	color: #fbbf24;
-	margin-bottom: 4px;
-}
-
-.warning-content p {
-	color: rgba(255, 255, 255, 0.7);
-	font-size: 14px;
-}
-
-.session-details {
-	font-size: 12px;
-	margin-top: 8px;
-}
-
-.opening-form-container {
-	background: rgba(255, 255, 255, 0.05);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	border-radius: 16px;
-	padding: 24px;
-}
-
-.form-group {
-	margin-bottom: 24px;
-}
-
-.form-group label {
-	display: block;
-	color: rgba(255, 255, 255, 0.8);
-	font-size: 14px;
-	font-weight: 500;
-	margin-bottom: 8px;
-}
-
-.form-group select,
-.form-group input[type='number'],
-.form-group textarea {
-	width: 100%;
-	padding: 12px 16px;
-	background: rgba(255, 255, 255, 0.1);
-	border: 1px solid rgba(255, 255, 255, 0.2);
-	border-radius: 8px;
-	color: white;
-	font-size: 16px;
-}
-
-.form-group select:focus,
-.form-group input:focus,
-.form-group textarea:focus {
-	outline: none;
-	border-color: #3b82f6;
-}
-
-.currency-input {
-	position: relative;
-}
-
-.currency-symbol {
-	position: absolute;
-	left: 16px;
-	top: 50%;
-	transform: translateY(-50%);
-	color: rgba(255, 255, 255, 0.5);
-}
-
-.currency-input input {
-	padding-left: 32px;
-}
-
-.breakdown-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-	gap: 12px;
-}
-
-.breakdown-item {
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
-}
-
-.breakdown-item label {
-	font-size: 12px;
-	color: rgba(255, 255, 255, 0.6);
-}
-
-.breakdown-item input {
-	padding: 8px 12px;
-}
-
-.subtotal {
-	font-size: 12px;
-	color: rgba(255, 255, 255, 0.5);
-}
-
-.breakdown-total {
-	display: flex;
-	justify-content: space-between;
-	padding: 12px;
-	background: rgba(255, 255, 255, 0.05);
-	border-radius: 8px;
-	margin-top: 12px;
-	color: white;
-}
-
-.form-actions {
-	text-align: center;
-	padding-top: 16px;
-}
-
-.btn {
-	padding: 12px 24px;
-	border-radius: 8px;
-	font-weight: 600;
-	cursor: pointer;
-	transition: all 0.2s;
-	text-decoration: none;
-	display: inline-block;
-}
-
-.btn-primary {
-	background: #3b82f6;
-	color: white;
-	border: none;
-}
-
-.btn-primary:hover:not(:disabled) {
-	background: #2563eb;
-}
-
-.btn:disabled {
-	opacity: 0.6;
-	cursor: not-allowed;
-}
-
-.btn-lg {
-	padding: 16px 48px;
-	font-size: 18px;
-}
-
-.success-overlay {
-	position: fixed;
-	inset: 0;
-	background: rgba(0, 0, 0, 0.8);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 1000;
-}
-
-.success-card {
-	background: #1e293b;
-	padding: 48px;
-	border-radius: 16px;
-	text-align: center;
-	max-width: 400px;
-}
-
-.success-icon {
-	font-size: 64px;
-	margin-bottom: 16px;
-}
-
-.success-card h2 {
-	color: white;
-	margin-bottom: 8px;
-}
-
-.success-card p {
-	color: rgba(255, 255, 255, 0.7);
-	margin-bottom: 24px;
-}
-</style>

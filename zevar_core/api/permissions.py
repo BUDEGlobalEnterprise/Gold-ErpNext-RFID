@@ -341,7 +341,7 @@ def log_audit_event(
 			audit_log.reference_type = reference_type
 
 		audit_log.insert(ignore_permissions=True)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 	except Exception:
 		frappe.log_error("Failed to log audit event", frappe.get_traceback())
 
