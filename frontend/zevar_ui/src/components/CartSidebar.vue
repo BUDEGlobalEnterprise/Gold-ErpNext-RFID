@@ -394,12 +394,21 @@
 
 						<div class="flex flex-col gap-2 mt-4">
 							<button
+								v-if="posSession.hasActiveSession"
 								@click="startLayaway"
 								class="w-full py-3 rounded-lg font-bold shadow-lg transition-all flex items-center justify-center gap-2 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 hover:bg-[#D4AF37]/20 active:scale-95"
 							>
 								Create Layaway
 							</button>
+							<router-link
+								v-if="!posSession.hasActiveSession"
+								to="/opening"
+								class="w-full py-3 rounded-lg font-bold shadow-lg transition-all flex items-center justify-center gap-2 bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500/20 active:scale-95 text-sm"
+							>
+								Open Register Session
+							</router-link>
 							<button
+								v-else
 								@click="showCheckout = true"
 								:disabled="!isCheckoutReady"
 								class="w-full py-3 rounded-lg font-bold shadow-lg transition-all flex items-center justify-center gap-2"
@@ -423,6 +432,7 @@
 
 <script setup>
 import { useCartStore } from '@/stores/cart.js'
+import { usePosSessionStore } from '@/stores/posSession.js'
 import CheckoutModal from '@/components/CheckoutModal.vue'
 import CustomerSelector from '@/components/CustomerSelector.vue'
 import { ref, computed } from 'vue'
@@ -434,6 +444,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['close'])
 const cart = useCartStore()
+const posSession = usePosSessionStore()
 const router = useRouter()
 const showCheckout = ref(false)
 
@@ -447,11 +458,13 @@ function startLayaway() {
 }
 
 const isCheckoutReady = computed(() => {
+	if (!posSession.hasActiveSession) return false
 	if (cart.customerType === 'Walkin') return true
 	return !!cart.customer
 })
 
 const checkoutButtonText = computed(() => {
+	if (!posSession.hasActiveSession) return 'Open Register to Checkout'
 	if (cart.customerType === 'Walkin') return 'Checkout'
 	if (!cart.customer) return 'Select Customer to Checkout'
 	return 'Checkout'

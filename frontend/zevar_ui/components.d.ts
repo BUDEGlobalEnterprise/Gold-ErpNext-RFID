@@ -38,6 +38,7 @@ declare module 'vue' {
     KPICard: typeof import('./src/components/reports/KPICard.vue')['default']
     LayawayDetailModal: typeof import('./src/components/LayawayDetailModal.vue')['default']
     LiveGoldPrice: typeof import('./src/components/LiveGoldPrice.vue')['default']
+    ManagerOverrideModal: typeof import('./src/components/ManagerOverrideModal.vue')['default']
     NewRepairFormContent: typeof import('./src/components/NewRepairFormContent.vue')['default']
     NewRepairModal: typeof import('./src/components/NewRepairModal.vue')['default']
     PieceLifecyclePanel: typeof import('./src/components/PieceLifecyclePanel.vue')['default']

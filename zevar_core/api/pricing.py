@@ -52,15 +52,17 @@ def get_live_metal_rates():
 	Accessible to all logged-in users (employees, POS users, etc).
 
 	Returns:
-		dict: Current rates grouped by metal type with metadata.
+		dict: Current rates grouped by metal type with metadata, including trends.
 	"""
 	from frappe.utils import now_datetime, time_diff_in_seconds
 
+	# Fetch more records to allow trend calculation (latest + previous)
 	rates = frappe.get_all(
 		"Gold Rate Log",
 		fields=["metal", "purity", "rate_per_gram", "source", "timestamp"],
 		filters={"docstatus": 0},
 		order_by="timestamp desc",
+		limit=50,  # Enough to cover all purities twice
 		ignore_permissions=True,
 	)
 
@@ -90,30 +92,79 @@ def get_live_metal_rates():
 				fields=["metal", "purity", "rate_per_gram", "source", "timestamp"],
 				filters={"docstatus": 0},
 				order_by="timestamp desc",
+				limit=50,
 				ignore_permissions=True,
 			)
 			latest_ts = max((r["timestamp"] for r in rates if r.get("timestamp")), default=None)
 		except Exception:
 			pass
 
-	latest_per_key = {}
+	# Group by (metal, purity) to find latest and previous
+	history_per_key = {}
 	for r in rates:
 		key = (r["metal"], r["purity"])
-		if key not in latest_per_key:
-			latest_per_key[key] = r
+		if key not in history_per_key:
+			history_per_key[key] = []
+		if len(history_per_key[key]) < 2:
+			history_per_key[key].append(r)
 
 	grouped = {}
-	for r in latest_per_key.values():
-		metal = r["metal"]
-		purity = r["purity"]
+	terminal_output = []
+
+	for (metal, purity), logs in history_per_key.items():
+		if not metal or not purity:
+			continue
+			
+		latest = logs[0]
+		previous = logs[1] if len(logs) > 1 else None
+
+		rate = latest["rate_per_gram"]
+		prev_rate = previous["rate_per_gram"] if previous else rate
+		diff = rate - prev_rate
+		change_percent = (diff / prev_rate * 100) if prev_rate > 0 else 0
+
+		trend = "none"
+		if diff > 0.001:
+			trend = "up"
+		elif diff < -0.001:
+			trend = "down"
+
 		if metal not in grouped:
 			grouped[metal] = []
+
 		grouped[metal].append(
 			{
 				"purity": purity,
-				"rate_per_gram": r["rate_per_gram"],
+				"rate_per_gram": rate,
+				"change_percent": round(change_percent, 2),
+				"trend": trend,
 			}
 		)
+
+		# Prepare terminal output
+		arrow = ""
+		color = ""
+		if trend == "up":
+			arrow = "↑"
+			color = "\033[92m"  # Green
+		elif trend == "down":
+			arrow = "↓"
+			color = "\033[91m"  # Red
+		reset = "\033[0m"
+
+		line = f"{purity} {metal}: ${rate:,.2f}/g"
+		if trend != "none":
+			line += f" {color}{arrow} {change_percent:+.2f}%{reset}"
+		terminal_output.append(line)
+
+	# Print to terminal for live monitoring
+	if terminal_output:
+		print("\n" + "=" * 40)
+		print(f"LIVE METAL RATES @ {latest_ts.strftime('%H:%M:%S') if latest_ts else '---'}")
+		print("-" * 40)
+		for line in sorted(terminal_output):
+			print(line)
+		print("=" * 40 + "\n")
 
 	return {
 		"success": True,

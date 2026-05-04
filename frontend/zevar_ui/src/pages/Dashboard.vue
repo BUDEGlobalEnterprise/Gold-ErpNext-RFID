@@ -1049,12 +1049,22 @@
 						</h4>
 						<div class="market-grid">
 							<div
-								v-for="[key, rate, change] in sortedRates"
+								v-for="[key, rate, change, trend] in sortedRates"
 								:key="key"
 								class="market-card"
 							>
 								<div class="market-name">{{ formatPurityLabel(key) }}</div>
-								<div class="market-price">${{ rate }}</div>
+								<div class="flex items-center gap-1.5 mt-0.5">
+									<div class="market-price">${{ rate }}</div>
+									<div
+										v-if="trend !== 'none'"
+										class="flex items-center text-[10px] font-bold"
+										:class="trend === 'up' ? 'text-emerald-500' : 'text-rose-500'"
+									>
+										<span>{{ trend === 'up' ? '↑' : '↓' }}</span>
+										<span>{{ Math.abs(change) }}%</span>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -1110,13 +1120,18 @@ const DASHBOARD_RATE_PRIORITIES = [
 const sortedRates = computed(() => {
 	if (!goldStore.rates) return []
 	return Object.entries(goldStore.rates)
-		.filter(([key, ratePerGram]) => {
-			if (!key || key === 'null' || !ratePerGram) return false
+		.filter(([key, data]) => {
+			if (!key || key === 'null' || !data.rate_per_gram) return false
 			if (key.includes('Platinum')) return false
 			if (key.includes('24Kt') || key.includes('24K') || key.includes('24kt')) return false
 			return true
 		})
-		.map(([key, ratePerGram]) => [key, (ratePerGram * TROY_OZ_GRAMS).toFixed(2)])
+		.map(([key, data]) => [
+			key,
+			(data.rate_per_gram * TROY_OZ_GRAMS).toFixed(2),
+			data.change_percent,
+			data.trend,
+		])
 		.sort((a, b) => {
 			const iA = DASHBOARD_RATE_PRIORITIES.findIndex((p) => a[0].includes(p))
 			const iB = DASHBOARD_RATE_PRIORITIES.findIndex((p) => b[0].includes(p))

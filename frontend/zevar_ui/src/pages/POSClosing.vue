@@ -1,177 +1,310 @@
 <template>
-	<div class="pos-closing-page">
-		<div class="page-header">
-			<h1>POS Closing Entry</h1>
-			<p>Close your cash register and reconcile</p>
-		</div>
-
-		<!-- No Active Session -->
-		<div v-if="!sessionStatus.has_active_session && !loading" class="no-session-warning">
-			<div class="warning-icon">ℹ️</div>
-			<div class="warning-content">
-				<h3>No Active Session</h3>
-				<p>You don't have an open POS session. Please open one first.</p>
-			</div>
-			<router-link to="/pos/opening" class="btn btn-primary">
-				Open Cash Register
-			</router-link>
-		</div>
-
-		<!-- Closing Form -->
-		<div v-else class="closing-form-container">
-			<!-- Session Summary -->
-			<div class="session-summary">
-				<h3>Session Summary</h3>
-				<div class="summary-grid">
-					<div class="summary-item">
-						<span class="label">Session ID</span>
-						<span class="value">{{ sessionStatus.session?.name }}</span>
-					</div>
-					<div class="summary-item">
-						<span class="label">Opening Balance</span>
-						<span class="value"
-							>${{ formatAmount(sessionStatus.session?.opening_balance) }}</span
-						>
-					</div>
-					<div class="summary-item">
-						<span class="label">Total Sales</span>
-						<span class="value"
-							>${{ formatAmount(sessionStatus.session?.sales_total) }}</span
-						>
-					</div>
-					<div class="summary-item">
-						<span class="label">Sales Count</span>
-						<span class="value">{{ sessionStatus.session?.sales_count }}</span>
-					</div>
-					<div class="summary-item">
-						<span class="label">Duration</span>
-						<span class="value">{{ sessionStatus.session?.duration_hours }}h</span>
-					</div>
-					<div class="summary-item expected">
-						<span class="label">Expected Balance</span>
-						<span class="value">${{ formatAmount(expectedBalance) }}</span>
-					</div>
-				</div>
+	<AppLayout>
+		<div class="max-w-3xl mx-auto">
+			<div class="text-center mb-8">
+				<h1 class="premium-title !text-2xl">POS Closing Entry</h1>
+				<p class="premium-subtitle mt-2">Close your cash register and reconcile</p>
 			</div>
 
-			<form @submit.prevent="submitClosing" class="closing-form">
-				<!-- Closing Balance -->
-				<div class="form-group">
-					<label>Actual Closing Balance</label>
-					<div class="currency-input">
-						<span class="currency-symbol">$</span>
-						<input
-							type="number"
-							v-model.number="form.closing_balance"
-							step="0.01"
-							min="0"
-							placeholder="0.00"
-							required
-							:disabled="loading"
-							@input="calculateVariance"
-						/>
-					</div>
+			<div
+				v-if="!posSession.hasActiveSession && !loading"
+				class="flex items-center gap-4 p-5 bg-blue-500/10 border border-blue-500/30 rounded-xl"
+			>
+				<span class="text-3xl shrink-0">&#8505;&#65039;</span>
+				<div class="flex-1 min-w-0">
+					<h3 class="text-blue-400 font-bold mb-1">No Active Session</h3>
+					<p class="text-gray-400 text-sm">
+						You don't have an open POS session. Please open one first.
+					</p>
 				</div>
+				<router-link
+					to="/opening"
+					class="px-5 py-2.5 bg-[#D4AF37] text-black font-bold rounded-lg hover:bg-[#b5952f] transition text-sm shrink-0"
+				>
+					Open Cash Register
+				</router-link>
+			</div>
 
-				<!-- Cash Breakdown (Optional) -->
-				<div class="form-group">
-					<label>Cash Breakdown (Optional)</label>
-					<div class="breakdown-grid">
+			<div v-else class="space-y-6">
+				<div class="premium-card p-5">
+					<h3 class="premium-title !text-base mb-4">Session Summary</h3>
+					<div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+						<div class="flex flex-col gap-1">
+							<span class="text-xs text-gray-500 dark:text-gray-500">Session ID</span>
+							<span class="text-sm font-bold text-gray-900 dark:text-white font-mono">
+								{{ posSession.status.session?.name }}
+							</span>
+						</div>
+						<div class="flex flex-col gap-1">
+							<span class="text-xs text-gray-500 dark:text-gray-500"
+								>Opening Balance</span
+							>
+							<span class="text-sm font-bold text-gray-900 dark:text-white font-mono">
+								${{ formatAmount(posSession.status.session?.opening_balance) }}
+							</span>
+						</div>
+						<div class="flex flex-col gap-1">
+							<span class="text-xs text-gray-500 dark:text-gray-500">Total Sales</span>
+							<span class="text-sm font-bold text-gray-900 dark:text-white font-mono">
+								${{ formatAmount(posSession.status.session?.sales_total) }}
+							</span>
+						</div>
+						<div class="flex flex-col gap-1">
+							<span class="text-xs text-gray-500 dark:text-gray-500">Sales Count</span>
+							<span class="text-sm font-bold text-gray-900 dark:text-white">
+								{{ posSession.status.session?.sales_count }}
+							</span>
+						</div>
+						<div class="flex flex-col gap-1">
+							<span class="text-xs text-gray-500 dark:text-gray-500">Duration</span>
+							<span class="text-sm font-bold text-gray-900 dark:text-white">
+								{{ posSession.status.session?.duration_hours }}h
+							</span>
+						</div>
 						<div
-							v-for="denom in denominations"
-							:key="denom.value"
-							class="breakdown-item"
+							class="col-span-2 sm:col-span-1 bg-blue-500/10 p-3 rounded-lg flex flex-col gap-1"
 						>
-							<label>${{ denom.value }}</label>
-							<input
-								type="number"
-								v-model.number="form.cash_breakdown[denom.value]"
-								min="0"
-								placeholder="0"
-								@change="calculateFromBreakdown"
-								:disabled="loading"
-							/>
-							<span class="subtotal">${{ getSubtotal(denom.value) }}</span>
+							<span class="text-xs text-blue-400">Expected Balance</span>
+							<span class="text-lg font-bold text-blue-500 font-mono">
+								${{ formatAmount(expectedBalance) }}
+							</span>
 						</div>
 					</div>
-					<div class="breakdown-total">
-						<span>Calculated Total:</span>
-						<strong>${{ calculatedTotal.toFixed(2) }}</strong>
-					</div>
 				</div>
 
-				<!-- Variance Display -->
-				<div class="variance-display" :class="varianceClass">
-					<div class="variance-label">Variance</div>
-					<div class="variance-amount">
-						<span v-if="variance > 0">+</span>${{ formatAmount(Math.abs(variance)) }}
-					</div>
-					<div class="variance-status">
-						{{ varianceStatus }}
-					</div>
-				</div>
+				<div class="premium-card p-6">
+					<form @submit.prevent="submitClosing" class="space-y-6">
+						<div>
+							<label
+								class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+								>Actual Closing Balance</label
+							>
+							<div class="relative">
+								<span
+									class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium"
+									>$</span
+								>
+								<input
+									type="number"
+									v-model.number="form.closing_balance"
+									step="0.01"
+									min="0"
+									placeholder="0.00"
+									required
+									:disabled="loading"
+									@input="calculateVariance"
+									class="w-full pl-8 pr-4 py-3 bg-white dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border rounded-lg text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] outline-none font-mono"
+								/>
+							</div>
+						</div>
 
-				<!-- Notes -->
-				<div class="form-group">
-					<label>Closing Notes</label>
-					<textarea
-						v-model="form.notes"
-						placeholder="Any notes about discrepancies or issues..."
-						rows="3"
-						:disabled="loading"
-					></textarea>
-				</div>
+						<div>
+							<label
+								class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+								>Cash Breakdown (Optional)</label
+							>
+							<div
+								class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3"
+							>
+								<div
+									v-for="denom in denominations"
+									:key="denom.value"
+									class="flex flex-col gap-1"
+								>
+									<span
+										class="text-xs font-medium text-gray-500 dark:text-gray-500"
+										>${{ denom.value }}</span
+									>
+									<input
+										type="number"
+										v-model.number="form.cash_breakdown[denom.value]"
+										min="0"
+										placeholder="0"
+										@change="calculateFromBreakdown"
+										:disabled="loading"
+										class="w-full px-3 py-2 bg-white dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border rounded-lg text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] outline-none font-mono"
+									/>
+									<span class="text-xs text-gray-500"
+										>${{ getSubtotal(denom.value) }}</span
+									>
+								</div>
+							</div>
+							<div
+								class="flex justify-between items-center p-3 bg-gray-50 dark:bg-warm-dark-700/50 rounded-lg mt-3 text-sm text-gray-700 dark:text-gray-300"
+							>
+								<span>Calculated Total:</span>
+								<strong class="font-mono">${{ calculatedTotal.toFixed(2) }}</strong>
+							</div>
+						</div>
 
-				<!-- Submit Button -->
-				<div class="form-actions">
-					<button type="submit" class="btn btn-primary btn-lg" :disabled="loading">
-						<span v-if="loading">Closing Session...</span>
-						<span v-else>Close Cash Register</span>
-					</button>
-				</div>
-			</form>
-		</div>
+						<div
+							class="text-center p-5 rounded-xl"
+							:class="{
+								'bg-green-500/10 border border-green-500/30':
+									varianceClass === 'balanced',
+								'bg-blue-500/10 border border-blue-500/30':
+									varianceClass === 'excess',
+								'bg-red-500/10 border border-red-500/30':
+									varianceClass === 'shortage',
+							}"
+						>
+							<div
+								class="text-xs text-gray-500 dark:text-gray-500 mb-1"
+							>
+								Variance
+							</div>
+							<div
+								class="text-3xl font-bold font-mono"
+								:class="{
+									'text-green-500': varianceClass === 'balanced',
+									'text-blue-500': varianceClass === 'excess',
+									'text-red-500': varianceClass === 'shortage',
+								}"
+							>
+								<span v-if="variance > 0">+</span>${{
+									formatAmount(Math.abs(variance))
+								}}
+							</div>
+							<div
+								class="text-sm text-gray-500 dark:text-gray-400 mt-1"
+							>
+								{{ varianceStatus }}
+							</div>
+						</div>
 
-		<!-- Success Message -->
-		<div v-if="closingResult" class="success-overlay">
-			<div class="success-card">
-				<div class="success-icon">✅</div>
-				<h2>Session Closed!</h2>
-				<div class="closing-summary">
-					<div class="summary-row">
-						<span>Opening Balance:</span>
-						<strong>${{ formatAmount(closingResult.opening_balance) }}</strong>
-					</div>
-					<div class="summary-row">
-						<span>Total Sales:</span>
-						<strong>${{ formatAmount(closingResult.total_sales) }}</strong>
-					</div>
-					<div class="summary-row">
-						<span>Closing Balance:</span>
-						<strong>${{ formatAmount(closingResult.closing_balance) }}</strong>
-					</div>
-					<div class="summary-row" :class="closingResult.variance_status">
-						<span>Variance:</span>
-						<strong>${{ formatAmount(Math.abs(closingResult.variance)) }}</strong>
-					</div>
+						<div>
+							<label
+								class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+								>Closing Notes</label
+							>
+							<textarea
+								v-model="form.notes"
+								placeholder="Any notes about discrepancies or issues..."
+								rows="3"
+								:disabled="loading"
+								class="w-full px-4 py-3 bg-white dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border rounded-lg text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] outline-none resize-none"
+							></textarea>
+						</div>
+
+						<div class="text-center pt-2">
+							<button
+								type="submit"
+								:disabled="loading"
+								class="px-12 py-4 bg-[#D4AF37] text-black font-bold rounded-lg hover:bg-[#b5952f] transition text-base disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+							>
+								<span v-if="loading">Closing Session...</span>
+								<span v-else>Close Cash Register</span>
+							</button>
+						</div>
+					</form>
 				</div>
-				<router-link to="/pos" class="btn btn-primary"> Done </router-link>
 			</div>
+
+			<Teleport to="body">
+				<Transition
+					enter-active-class="transition-opacity duration-300"
+					enter-from-class="opacity-0"
+					enter-to-class="opacity-100"
+					leave-active-class="transition-opacity duration-200"
+					leave-from-class="opacity-100"
+					leave-to-class="opacity-0"
+				>
+					<div
+						v-if="closingResult"
+						class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[1000] p-4"
+					>
+						<div
+							class="bg-white dark:bg-warm-card p-10 rounded-2xl text-center max-w-md w-full"
+						>
+							<div class="text-6xl mb-4">&#9989;</div>
+							<h2 class="premium-title !text-xl mb-6">Session Closed!</h2>
+							<div class="text-left space-y-3 mb-8">
+								<div
+									class="flex justify-between text-sm text-gray-600 dark:text-gray-400 pb-3 border-b border-gray-100 dark:border-warm-border/50"
+								>
+									<span>Opening Balance:</span>
+									<strong class="font-mono text-gray-900 dark:text-white">
+										${{ formatAmount(closingResult.opening_balance) }}
+									</strong>
+								</div>
+								<div
+									class="flex justify-between text-sm text-gray-600 dark:text-gray-400 pb-3 border-b border-gray-100 dark:border-warm-border/50"
+								>
+									<span>Total Sales:</span>
+									<strong class="font-mono text-gray-900 dark:text-white">
+										${{ formatAmount(closingResult.total_sales) }}
+									</strong>
+								</div>
+								<div
+									class="flex justify-between text-sm text-gray-600 dark:text-gray-400 pb-3 border-b border-gray-100 dark:border-warm-border/50"
+								>
+									<span>Closing Balance:</span>
+									<strong class="font-mono text-gray-900 dark:text-white">
+										${{ formatAmount(closingResult.closing_balance) }}
+									</strong>
+								</div>
+								<div
+									class="flex justify-between text-sm pb-3"
+									:class="{
+										'text-red-500': closingResult.variance_status === 'shortage',
+										'text-blue-500': closingResult.variance_status === 'excess',
+										'text-green-500': closingResult.variance_status === 'balanced',
+									}"
+								>
+									<span>Variance:</span>
+									<strong class="font-mono">
+										${{ formatAmount(Math.abs(closingResult.variance)) }}
+									</strong>
+								</div>
+							</div>
+							<div class="flex gap-3 justify-center">
+								<button
+									@click="printReceipt"
+									class="px-6 py-3 border border-gray-200 dark:border-warm-border rounded-lg font-medium text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition"
+								>
+									Print Receipt
+								</button>
+								<router-link
+									to="/terminal"
+									class="px-8 py-3 bg-[#D4AF37] text-black font-bold rounded-lg hover:bg-[#b5952f] transition"
+								>
+									Done
+								</router-link>
+							</div>
+						</div>
+					</div>
+				</Transition>
+			</Teleport>
+
+			<ManagerOverrideModal
+				:show="showOverrideModal"
+				:variance="variance"
+				:threshold="alertThreshold"
+				@approved="handleOverrideApproved"
+				@cancel="showOverrideModal = false"
+			/>
 		</div>
-	</div>
+	</AppLayout>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { createResource } from 'frappe-ui'
+import { usePosSessionStore } from '@/stores/posSession.js'
+import AppLayout from '@/components/AppLayout.vue'
+import ManagerOverrideModal from '@/components/ManagerOverrideModal.vue'
 
-// State
+const posSession = usePosSessionStore()
+posSession.fetchStatus()
+
 const loading = ref(false)
-const sessionStatus = ref({ has_active_session: false })
 const closingResult = ref(null)
 const calculatedTotal = ref(0)
 const previewData = ref(null)
 const overrideRequired = ref(false)
+const showOverrideModal = ref(false)
+const alertThreshold = ref(5)
+const managerOverride = ref(null)
 
 const form = ref({
 	closing_balance: 0,
@@ -192,13 +325,12 @@ const denominations = [
 	{ value: 0.01 },
 ]
 
-// Computed
 const expectedBalance = computed(() => {
 	if (previewData.value) {
 		return previewData.value.expected_cash + previewData.value.fixed_float
 	}
-	const opening = sessionStatus.value.session?.opening_balance || 0
-	const sales = sessionStatus.value.session?.sales_total || 0
+	const opening = posSession.status.session?.opening_balance || 0
+	const sales = posSession.status.session?.sales_total || 0
 	return opening + sales
 })
 
@@ -216,18 +348,9 @@ const varianceClass = computed(() => {
 })
 
 const varianceStatus = computed(() => {
-	if (variance.value === 0) return 'Balanced ✓'
+	if (variance.value === 0) return 'Balanced'
 	if (variance.value > 0) return 'Excess (Over)'
 	return 'Shortage (Under)'
-})
-
-// Resources
-const sessionStatusResource = createResource({
-	url: 'zevar_core.api.pos_session.get_session_status',
-	auto: true,
-	onSuccess(data) {
-		sessionStatus.value = data
-	},
 })
 
 const previewCloseResource = createResource({
@@ -240,7 +363,6 @@ const closeSessionResource = createResource({
 	auto: false,
 })
 
-// Methods
 function formatAmount(amount) {
 	if (amount === null || amount === undefined) return '0.00'
 	return Number(amount).toFixed(2)
@@ -264,21 +386,23 @@ function calculateFromBreakdown() {
 
 let timeoutId = null
 function calculateVariance() {
-	if (!sessionStatus.value.session?.name) return
+	if (!posSession.status.session?.name) return
 
 	clearTimeout(timeoutId)
 	timeoutId = setTimeout(async () => {
 		try {
 			const res = await previewCloseResource.submit({
-				session_name: sessionStatus.value.session?.name,
+				session_name: posSession.status.session?.name,
 				total_cash_counted: form.value.closing_balance,
 			})
 			previewData.value = res
+			alertThreshold.value = res.alert_threshold || 5
 
 			if (Math.abs(res.variance) > res.alert_threshold) {
 				overrideRequired.value = true
 			} else {
 				overrideRequired.value = false
+				managerOverride.value = null
 			}
 		} catch (err) {
 			console.error(err)
@@ -286,18 +410,26 @@ function calculateVariance() {
 	}, 500)
 }
 
-async function submitClosing() {
-	if (overrideRequired.value) {
-		const confirmed = confirm(
-			`Variance is over threshold! A manager override is required. Are you a manager?`
-		)
-		if (!confirmed) return
-	}
+function handleOverrideApproved(data) {
+	managerOverride.value = data
+	showOverrideModal.value = false
+	overrideRequired.value = false
+	doClose()
+}
 
+async function submitClosing() {
+	if (overrideRequired.value && !managerOverride.value) {
+		showOverrideModal.value = true
+		return
+	}
+	await doClose()
+}
+
+async function doClose() {
 	loading.value = true
 	try {
 		const result = await closeSessionResource.submit({
-			session_name: sessionStatus.value.session?.name,
+			session_name: posSession.status.session?.name,
 			total_cash_counted: form.value.closing_balance,
 			breakdown: Object.entries(form.value.cash_breakdown)
 				.filter(([_, count]) => count > 0)
@@ -312,17 +444,25 @@ async function submitClosing() {
 
 		if (result.success) {
 			closingResult.value = result
+			posSession.fetchStatus()
 		}
 	} catch (error) {
 		console.error('Failed to close session:', error)
-		alert('Failed to close session: ' + (error.message || 'Unknown error'))
 	} finally {
 		loading.value = false
 	}
 }
 
+function printReceipt() {
+	if (closingResult.value?.closing_entry) {
+		window.open(
+			`/api/method/frappe.utils.print_format.download_pdf?doctype=POS+Closing+Entry&name=${closingResult.value.closing_entry}&format=Standard`,
+			'_blank'
+		)
+	}
+}
+
 onMounted(() => {
-	// Initialize cash breakdown object
 	denominations.forEach((d) => {
 		if (form.value.cash_breakdown[d.value] === undefined) {
 			form.value.cash_breakdown[d.value] = 0
@@ -330,326 +470,3 @@ onMounted(() => {
 	})
 })
 </script>
-
-<style scoped>
-.pos-closing-page {
-	padding: 24px;
-	max-width: 800px;
-	margin: 0 auto;
-}
-
-.page-header {
-	text-align: center;
-	margin-bottom: 32px;
-}
-
-.page-header h1 {
-	font-size: 28px;
-	font-weight: 700;
-	color: white;
-	margin-bottom: 8px;
-}
-
-.page-header p {
-	color: rgba(255, 255, 255, 0.6);
-}
-
-.no-session-warning {
-	display: flex;
-	align-items: center;
-	gap: 16px;
-	padding: 20px;
-	background: rgba(59, 130, 246, 0.1);
-	border: 1px solid rgba(59, 130, 246, 0.3);
-	border-radius: 12px;
-}
-
-.warning-icon {
-	font-size: 32px;
-}
-
-.warning-content {
-	flex: 1;
-}
-
-.warning-content h3 {
-	color: #3b82f6;
-	margin-bottom: 4px;
-}
-
-.warning-content p {
-	color: rgba(255, 255, 255, 0.7);
-}
-
-.session-summary {
-	background: rgba(255, 255, 255, 0.05);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	border-radius: 12px;
-	padding: 20px;
-	margin-bottom: 24px;
-}
-
-.session-summary h3 {
-	color: white;
-	margin-bottom: 16px;
-	font-size: 16px;
-}
-
-.summary-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-	gap: 16px;
-}
-
-.summary-item {
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
-}
-
-.summary-item .label {
-	font-size: 12px;
-	color: rgba(255, 255, 255, 0.6);
-}
-
-.summary-item .value {
-	font-size: 18px;
-	font-weight: 600;
-	color: white;
-}
-
-.summary-item.expected {
-	background: rgba(59, 130, 246, 0.1);
-	padding: 12px;
-	border-radius: 8px;
-	grid-column: span 2;
-}
-
-.closing-form-container {
-	background: rgba(255, 255, 255, 0.05);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	border-radius: 16px;
-	padding: 24px;
-}
-
-.form-group {
-	margin-bottom: 24px;
-}
-
-.form-group label {
-	display: block;
-	color: rgba(255, 255, 255, 0.8);
-	font-size: 14px;
-	font-weight: 500;
-	margin-bottom: 8px;
-}
-
-.form-group select,
-.form-group input[type='number'],
-.form-group textarea {
-	width: 100%;
-	padding: 12px 16px;
-	background: rgba(255, 255, 255, 0.1);
-	border: 1px solid rgba(255, 255, 255, 0.2);
-	border-radius: 8px;
-	color: white;
-	font-size: 16px;
-}
-
-.form-group select:focus,
-.form-group input:focus,
-.form-group textarea:focus {
-	outline: none;
-	border-color: #3b82f6;
-}
-
-.currency-input {
-	position: relative;
-}
-
-.currency-symbol {
-	position: absolute;
-	left: 16px;
-	top: 50%;
-	transform: translateY(-50%);
-	color: rgba(255, 255, 255, 0.5);
-}
-
-.currency-input input {
-	padding-left: 32px;
-}
-
-.breakdown-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-	gap: 12px;
-}
-
-.breakdown-item {
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
-}
-
-.breakdown-item label {
-	font-size: 12px;
-	color: rgba(255, 255, 255, 0.6);
-}
-
-.breakdown-item input {
-	padding: 8px 12px;
-}
-
-.subtotal {
-	font-size: 12px;
-	color: rgba(255, 255, 255, 0.5);
-}
-
-.breakdown-total {
-	display: flex;
-	justify-content: space-between;
-	padding: 12px;
-	background: rgba(255, 255, 255, 0.05);
-	border-radius: 8px;
-	margin-top: 12px;
-	color: white;
-}
-
-.variance-display {
-	text-align: center;
-	padding: 20px;
-	border-radius: 12px;
-	margin-bottom: 24px;
-}
-
-.variance-display.balanced {
-	background: rgba(34, 197, 94, 0.1);
-	border: 1px solid rgba(34, 197, 94, 0.3);
-}
-
-.variance-display.excess {
-	background: rgba(59, 130, 246, 0.1);
-	border: 1px solid rgba(59, 130, 246, 0.3);
-}
-
-.variance-display.shortage {
-	background: rgba(239, 68, 68, 0.1);
-	border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
-.variance-label {
-	font-size: 12px;
-	color: rgba(255, 255, 255, 0.6);
-	margin-bottom: 4px;
-}
-
-.variance-amount {
-	font-size: 32px;
-	font-weight: 700;
-	color: white;
-}
-
-.variance-display.balanced .variance-amount {
-	color: #22c55e;
-}
-.variance-display.excess .variance-amount {
-	color: #3b82f6;
-}
-.variance-display.shortage .variance-amount {
-	color: #ef4444;
-}
-
-.variance-status {
-	font-size: 14px;
-	color: rgba(255, 255, 255, 0.7);
-	margin-top: 4px;
-}
-
-.form-actions {
-	text-align: center;
-	padding-top: 16px;
-}
-
-.btn {
-	padding: 12px 24px;
-	border-radius: 8px;
-	font-weight: 600;
-	cursor: pointer;
-	transition: all 0.2s;
-	text-decoration: none;
-	display: inline-block;
-}
-
-.btn-primary {
-	background: #3b82f6;
-	color: white;
-	border: none;
-}
-
-.btn-primary:hover:not(:disabled) {
-	background: #2563eb;
-}
-
-.btn:disabled {
-	opacity: 0.6;
-	cursor: not-allowed;
-}
-
-.btn-lg {
-	padding: 16px 48px;
-	font-size: 18px;
-}
-
-.success-overlay {
-	position: fixed;
-	inset: 0;
-	background: rgba(0, 0, 0, 0.8);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 1000;
-}
-
-.success-card {
-	background: #1e293b;
-	padding: 48px;
-	border-radius: 16px;
-	text-align: center;
-	max-width: 450px;
-}
-
-.success-icon {
-	font-size: 64px;
-	margin-bottom: 16px;
-}
-
-.success-card h2 {
-	color: white;
-	margin-bottom: 24px;
-}
-
-.closing-summary {
-	text-align: left;
-	margin-bottom: 24px;
-}
-
-.summary-row {
-	display: flex;
-	justify-content: space-between;
-	padding: 12px 0;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-	color: rgba(255, 255, 255, 0.8);
-}
-
-.summary-row:last-child {
-	border-bottom: none;
-}
-
-.summary-row.shortage {
-	color: #ef4444;
-}
-
-.summary-row.excess {
-	color: #3b82f6;
-}
-</style>

@@ -1,11 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&family=Cinzel:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Spline+Sans:wght@300;400;500;600;700;800&display=block');
+@import './styles/typography.css';
+@import './styles/responsive.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import './styles/typography.css';
-@import './styles/responsive.css';
 
 /* 1. Define Luxury Fonts */
 :root {

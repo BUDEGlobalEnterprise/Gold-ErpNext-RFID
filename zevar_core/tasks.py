@@ -2,7 +2,7 @@
 
 import frappe
 import requests
-from frappe.utils import flt, get_pdf
+from frappe.utils import flt
 
 from zevar_core.constants import (
 	GOLD_PURITY_RATES,
@@ -127,9 +127,15 @@ def fetch_live_metal_rates():
 
 			frappe.db.commit()  # nosemgrep: frappe-semgrep-rules/rules.frappe-manual-commit
 			_cleanup_legacy_k_entries()
-			frappe.logger().info(
-				f"Metal rates updated from {source_label}: Gold 22Kt=${gold_per_gram * 0.916:.2f}/g, Silver 925=${silver_per_gram * 0.925:.2f}/g"
-			)
+			
+			# Log updated rates with arrows
+			log_msg = f"Metal rates updated from {source_label}:\n"
+			for metal in ["Yellow Gold", "Silver"]:
+				if metal in rates:
+					for item in rates[metal]:
+						log_msg += f"  - {item['purity']} {metal}: ${item['rate_per_gram']:.2f}/g\n"
+			
+			frappe.logger().info(log_msg.strip())
 			return rates
 
 	except Exception as e:
