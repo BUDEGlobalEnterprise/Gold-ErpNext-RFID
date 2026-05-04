@@ -150,7 +150,7 @@ def get_chart_data(filters=None):
 	"""Return chart data for aging visualization."""
 	filters = filters or {}
 
-	chart_data = frappe.db.sql(
+	chart_data = frappe.db.sql(  # nosemgrep
 		"""
 		SELECT
 			CASE

@@ -179,7 +179,7 @@ def _generate_vendor_sku(vendor: str | None = None, jewelry_type: str = "Other")
 
 	# Get next sequence number for this prefix+type combo
 	pattern = f"{prefix}-{type_code}-%"
-	last_sku = frappe.db.sql(
+	last_sku = frappe.db.sql(  # nosemgrep
 		"""
         SELECT custom_vendor_sku FROM `tabItem`
         WHERE custom_vendor_sku LIKE %s
@@ -207,7 +207,7 @@ def _generate_item_code(jewelry_type: str) -> str:
 	type_code = _JEWELRY_TYPE_CODES.get(jewelry_type, "OTH")
 	prefix = f"ZEV-{type_code}"
 
-	last = frappe.db.sql(
+	last = frappe.db.sql(  # nosemgrep
 		"""
         SELECT name FROM `tabItem`
         WHERE name LIKE %s

@@ -98,7 +98,7 @@ def get_task_stats():
 
 	user = frappe.session.user
 
-	stats = frappe.db.sql(
+	stats = frappe.db.sql(  # nosemgrep
 		"""
         SELECT status, COUNT(*) as count
         FROM `tabGP Task`

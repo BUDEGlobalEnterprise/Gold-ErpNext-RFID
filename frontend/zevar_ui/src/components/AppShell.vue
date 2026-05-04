@@ -220,7 +220,14 @@
 						to="/closing"
 						class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/30 hover:bg-green-500/20 transition"
 					>
-						<span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span></span>
+						<span class="relative flex h-1.5 w-1.5"
+							><span
+								class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"
+							></span
+							><span
+								class="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"
+							></span
+						></span>
 						Register Open
 					</router-link>
 					<router-link
@@ -228,7 +235,11 @@
 						to="/opening"
 						class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500/20 transition"
 					>
-						<span class="relative flex h-1.5 w-1.5"><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span></span>
+						<span class="relative flex h-1.5 w-1.5"
+							><span
+								class="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"
+							></span
+						></span>
 						No Register
 					</router-link>
 
@@ -532,7 +543,9 @@
 						formatShortLabel(key)
 					}}</span>
 					<div class="flex items-baseline gap-1">
-						<span class="text-xs font-mono font-black text-[#D4AF37]">${{ rate }}</span>
+						<span class="text-xs font-mono font-black text-[#D4AF37]"
+							>${{ rate }}</span
+						>
 						<span
 							v-if="trend !== 'none'"
 							class="text-[8px] font-bold"

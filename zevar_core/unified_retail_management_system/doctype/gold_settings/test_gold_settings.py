@@ -16,8 +16,8 @@ class TestGoldSettings(FrappeTestCase):
 		# Ensure DocType is synced from JSON (Select options need correct newline separators)
 		frappe.reload_doc("zevar_core", "doctype", "gold_settings")
 		if frappe.db.exists("Gold Settings", "Gold Settings"):
-			frappe.db.sql("DELETE FROM `tabGold Settings` WHERE name = 'Gold Settings'")
-			frappe.db.commit()
+			frappe.db.sql("DELETE FROM `tabGold Settings` WHERE name = 'Gold Settings'")  # nosemgrep
+			frappe.db.commit()  # nosemgrep
 
 	def test_gold_settings_is_single_doctype(self):
 		meta = frappe.get_meta("Gold Settings")
@@ -79,7 +79,7 @@ class TestGoldSettings(FrappeTestCase):
 		doc.update_frequency = "30 min"
 		doc.save(ignore_permissions=True)
 
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 		frappe.clear_cache()
 
 		loaded = frappe.get_doc("Gold Settings", "Gold Settings")

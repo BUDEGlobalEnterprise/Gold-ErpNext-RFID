@@ -1059,7 +1059,9 @@
 									<div
 										v-if="trend !== 'none'"
 										class="flex items-center text-[10px] font-bold"
-										:class="trend === 'up' ? 'text-emerald-500' : 'text-rose-500'"
+										:class="
+											trend === 'up' ? 'text-emerald-500' : 'text-rose-500'
+										"
 									>
 										<span>{{ trend === 'up' ? '↑' : '↓' }}</span>
 										<span>{{ Math.abs(change) }}%</span>

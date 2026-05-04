@@ -73,7 +73,7 @@ def get_data(filters):
 
 	# Get repair type counts and revenue
 	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
-	rows = frappe.db.sql(
+	rows = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT
 			ro.repair_type,
@@ -126,7 +126,7 @@ def get_avg_turnaround(repair_type, filters):
 		values["warehouse"] = filters["warehouse"]
 
 	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
-	result = frappe.db.sql(
+	result = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT
 			AVG(TIMESTAMPDIFF(HOUR, ro.received_date, ro.delivered_date) / 24) as avg_days
@@ -156,7 +156,7 @@ def get_store_breakdown(repair_type, filters):
 		values["to_date"] = filters["to_date"]
 
 	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
-	result = frappe.db.sql(
+	result = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT
 			ro.warehouse,

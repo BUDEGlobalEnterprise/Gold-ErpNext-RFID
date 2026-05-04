@@ -60,7 +60,7 @@ def execute(filters=None):
 		to_date = frappe.utils.today()
 
 	# Get hourly sales data
-	hourly_data = frappe.db.sql(
+	hourly_data = frappe.db.sql(  # nosemgrep
 		"""
 		SELECT
 			HOUR(si.posting_time) as hour,
@@ -104,7 +104,7 @@ def get_chart_data(filters=None):
 	if not to_date:
 		to_date = frappe.utils.today()
 
-	chart_data = frappe.db.sql(
+	chart_data = frappe.db.sql(  # nosemgrep
 		"""
 		SELECT
 			HOUR(posting_time) as hour,

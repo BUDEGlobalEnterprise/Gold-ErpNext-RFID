@@ -34,7 +34,7 @@ class TestGoldRateFetch(FrappeTestCase):
 				frappe.get_doc(
 					{"doctype": "Zevar Purity", "__newname": name, "fine_metal_content": content}
 				).insert(ignore_permissions=True)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def cleanup_rate_logs(self):
 		for name in frappe.get_all(

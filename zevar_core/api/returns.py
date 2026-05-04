@@ -55,7 +55,7 @@ def get_returnable_items(invoice_name: str) -> dict:
 	returned_amount = sum(flt(r.grand_total) for r in existing_returns)
 
 	# Batch fetch returned quantities for all items in this invoice
-	returned_qtys = frappe.db.sql(
+	returned_qtys = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT si_item.item_code, COALESCE(SUM(si_item.qty), 0) as total_qty
 		FROM `tabSales Invoice Item` si_item

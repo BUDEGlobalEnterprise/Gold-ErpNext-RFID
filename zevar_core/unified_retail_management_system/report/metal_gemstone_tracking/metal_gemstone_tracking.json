@@ -1,0 +1,73 @@
+{
+    "add_total_row": 1,
+    "creation": "2026-04-11 00:00:00.000000",
+    "docstatus": 0,
+    "doctype": "Report",
+    "modified": "2026-04-11 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Unified Retail Management System",
+    "name": "Metal/Gemstone Tracking",
+    "owner": "Administrator",
+    "ref_doctype": "Repair Order",
+    "report_name": "Metal/Gemstone Tracking",
+    "report_type": "Script Report",
+    "roles": [
+        {
+            "role": "System Manager"
+        },
+        {
+            "role": "Sales Manager"
+        },
+        {
+            "role": "Accounts Manager"
+        }
+    ],
+    "filters": [
+        {
+            "fieldname": "from_date",
+            "fieldtype": "Date",
+            "label": "From Date",
+            "reqd": 0
+        },
+        {
+            "fieldname": "to_date",
+            "fieldtype": "Date",
+            "label": "To Date",
+            "reqd": 0
+        },
+        {
+            "fieldname": "warehouse",
+            "fieldtype": "Link",
+            "label": "Store/Warehouse",
+            "options": "Warehouse",
+            "reqd": 0
+        },
+        {
+            "fieldname": "customer",
+            "fieldtype": "Link",
+            "label": "Customer",
+            "options": "Customer",
+            "reqd": 0
+        },
+        {
+            "fieldname": "metal_type",
+            "fieldtype": "Link",
+            "label": "Metal Type",
+            "options": "Zevar Metal",
+            "reqd": 0
+        },
+        {
+            "fieldname": "status",
+            "fieldtype": "Select",
+            "label": "Status",
+            "options": "Received\nEstimated\nApproved\nIn Progress\nWaiting for Parts\nQuality Check\nReady for Pickup\nDelivered\nCancelled",
+            "reqd": 0
+        },
+        {
+            "fieldname": "has_discrepancy",
+            "fieldtype": "Check",
+            "label": "Has Weight Discrepancy Only",
+            "default": 0
+        }
+    ]
+}

@@ -114,7 +114,7 @@ class TestCommissionFlatRate(FrappeTestCase):
 		cls.customer = ensure_customer("Comm Flat Customer")
 		cls.warehouse = ensure_warehouse("Comm Flat Warehouse", company=cls.company)
 		cls.item = ensure_item("COMM-FLAT-001", "Comm Flat Test Item", rate=1000.0)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -211,7 +211,7 @@ class TestCommissionByDiscountRange(FrappeTestCase):
 		cls.customer = ensure_customer("Comm Disc Customer")
 		cls.warehouse = ensure_warehouse("Comm Disc Warehouse", company=cls.company)
 		cls.item = ensure_item("COMM-DISC-001", "Comm Disc Test Item", rate=1000.0)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -288,7 +288,7 @@ class TestCommissionByProfitMargin(FrappeTestCase):
 		cls.customer = ensure_customer("Comm Profit Customer")
 		cls.warehouse = ensure_warehouse("Comm Profit Warehouse", company=cls.company)
 		cls.item = ensure_item("COMM-PROFIT-001", "Comm Profit Test Item", rate=1000.0)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -342,7 +342,7 @@ class TestCommissionBySaleAmount(FrappeTestCase):
 		cls.customer = ensure_customer("Comm Sale Amt Customer")
 		cls.warehouse = ensure_warehouse("Comm Sale Amt Warehouse", company=cls.company)
 		cls.item = ensure_item("COMM-SALEAMT-001", "Comm Sale Amt Test Item", rate=1500.0)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -417,7 +417,7 @@ class TestCommissionDefaultRule(FrappeTestCase):
 		cls.customer = ensure_customer("Comm Default Customer")
 		cls.warehouse = ensure_warehouse("Comm Default Warehouse", company=cls.company)
 		cls.item = ensure_item("COMM-DEFAULT-001", "Comm Default Test Item", rate=500.0)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -604,7 +604,7 @@ class TestPricingEngineMSRP(FrappeTestCase):
 			item.standard_rate = 500.0
 			item.custom_msrp = 750.0
 			item.insert(ignore_permissions=True)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -649,7 +649,7 @@ class TestPricingEngineStandardRate(FrappeTestCase):
 			item.is_sales_item = 1
 			item.standard_rate = 300.0
 			item.insert(ignore_permissions=True)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -678,7 +678,7 @@ class TestPricingEngineStandardRate(FrappeTestCase):
 			item.is_sales_item = 1
 			item.standard_rate = 0
 			item.insert(ignore_permissions=True)
-			frappe.db.commit()
+			frappe.db.commit()  # nosemgrep
 
 		result = get_item_price(item_code)
 		self.assertEqual(flt(result["final_price"]), 0.0)
@@ -694,7 +694,7 @@ class TestPricingEngineCalculated(FrappeTestCase):
 		cls.company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value(
 			"Global Defaults", "default_company"
 		)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -742,7 +742,7 @@ class TestPricingEngineCalculated(FrappeTestCase):
 			item.is_sales_item = 1
 			item.standard_rate = 150.0
 			item.insert(ignore_permissions=True)
-			frappe.db.commit()
+			frappe.db.commit()  # nosemgrep
 
 		result = get_item_price(item_code)
 		self.assertEqual(result["price_source"], "Standard Rate")

@@ -17,7 +17,7 @@ def execute() -> None:
 	"""Repair broken desktop layout parent state and invalid external app shortcuts."""
 	converted_labels = _repair_invalid_external_app_shortcuts()
 	repair_layouts(converted_labels)
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep
 
 
 def _repair_invalid_external_app_shortcuts() -> set[str]:

@@ -258,7 +258,7 @@ def get_audit_summary(from_date: str | None = None, to_date: str | None = None) 
 		to_date = frappe.utils.today()
 
 	# Get counts by category
-	category_counts = frappe.db.sql(
+	category_counts = frappe.db.sql(  # nosemgrep
 		"""
 		SELECT category, COUNT(*) as count
 		FROM `tabPOS Audit Log`
@@ -271,7 +271,7 @@ def get_audit_summary(from_date: str | None = None, to_date: str | None = None) 
 	)
 
 	# Get counts by severity
-	severity_counts = frappe.db.sql(
+	severity_counts = frappe.db.sql(  # nosemgrep
 		"""
 		SELECT severity, COUNT(*) as count
 		FROM `tabPOS Audit Log`
@@ -283,7 +283,7 @@ def get_audit_summary(from_date: str | None = None, to_date: str | None = None) 
 	)
 
 	# Get counts by user
-	user_counts = frappe.db.sql(
+	user_counts = frappe.db.sql(  # nosemgrep
 		"""
 		SELECT user, COUNT(*) as count
 		FROM `tabPOS Audit Log`

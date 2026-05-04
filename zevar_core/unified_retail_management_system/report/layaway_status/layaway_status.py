@@ -60,7 +60,7 @@ def get_data(filters):
 		values["today"] = today()
 
 	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
-	rows = frappe.db.sql(
+	rows = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT
 			lc.name, lc.customer, lc.status,

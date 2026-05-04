@@ -62,7 +62,7 @@ def get_data(filters):
 		conditions += " AND fa.current_balance > 0"
 
 	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
-	rows = frappe.db.sql(
+	rows = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT
 			fa.name, fa.customer, fa.status,

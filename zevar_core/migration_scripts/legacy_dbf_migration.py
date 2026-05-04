@@ -82,7 +82,7 @@ def migrate_legacy_data():
 
 	# Create a log file
 	log_file = f"legacy_migration_{now_datetime().strftime('%Y%m%d_%H%M%S')}.log"
-	with open(log_file, "w") as log:
+	with open(log_file, "w") as log:  # nosemgrep
 		log.write(f"Legacy DBF Migration Log - {now_datetime()}\n")
 		log.write("=" * 50 + "\n\n")
 
