@@ -29,8 +29,10 @@ zevar_core/scripts/scraped_data/
 *.local
 
 # Frappe build artifacts
-zevar_core/public/dist/
-zevar_core/public/node_modules/
+public/dist/
+public/node_modules/
+zevar_core/public/pos/assets/
+zevar_core/public/pos/.vite/
 frontend/zevar_ui/dist/
 frontend/zevar_ui/node_modules/
 
