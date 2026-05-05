@@ -1,0 +1,104 @@
+{
+ "actions": [],
+ "autoname": "RAG-KB-.#####",
+ "creation": "2026-05-05 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "category",
+  "visibility",
+  "column_break_1",
+  "tags",
+  "is_active",
+  "content_section",
+  "content"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "options": "Policy\nSOP\nRepair Guide\nProduct Info\nFAQ\nOther",
+   "default": "FAQ",
+   "label": "Category",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "visibility",
+   "fieldtype": "Select",
+   "options": "Internal\nPublic",
+   "default": "Internal",
+   "label": "Visibility",
+   "description": "Internal = staff only, Public = customer-facing"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tags",
+   "fieldtype": "Data",
+   "label": "Tags",
+   "description": "Comma-separated tags for search"
+  },
+  {
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "default": 1,
+   "label": "Active",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "content_section",
+   "fieldtype": "Section Break",
+   "label": "Content"
+  },
+  {
+   "fieldname": "content",
+   "fieldtype": "Text Editor",
+   "label": "Content",
+   "reqd": 1
+  }
+ ],
+ "module": "Unified Retail Management System",
+ "name": "RAG Knowledge Article",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Sales User"
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "title",
+ "track_changes": 1
+}

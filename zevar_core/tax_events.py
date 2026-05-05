@@ -16,8 +16,7 @@ def apply_store_tax(doc, method):
 	if not doc.is_pos:
 		return
 
-	# Honour the no-tax override flag
-	if doc.get("custom_no_tax_override"):
+	if getattr(doc, "custom_no_tax_override", 0):
 		return
 
 	store_info = _resolve_store(doc)

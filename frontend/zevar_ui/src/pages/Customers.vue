@@ -45,6 +45,11 @@
 				</div>
 			</div>
 
+			<!-- Filters -->
+			<div class="mb-6">
+				<CustomerFilterBar />
+			</div>
+
 			<!-- Stats Row -->
 			<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 flex-shrink-0">
 				<div class="premium-card !p-4">
@@ -477,12 +482,23 @@
 <script setup>
 import AppLayout from '@/components/AppLayout.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
-import { ref, onMounted } from 'vue'
+import CustomerFilterBar from '@/components/CustomerFilterBar.vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { createResource } from 'frappe-ui'
 import { formatDate } from '@/utils/dates.js'
-import { useSessionStore } from '@/stores/session'
+import { useSessionStore } from '@/stores/session.js'
+import { useUIStore } from '@/stores/ui.js'
 
 const sessionStore = useSessionStore()
+const ui = useUIStore()
+
+const filters = computed(() => ui.activeFilters.customers || {})
+
+// Watch filters to trigger fetch
+watch(filters, () => {
+	pagination.value.page = 1
+	fetchCustomers()
+}, { deep: true })
 const viewMode = ref(localStorage.getItem('zevar_customers_view') || 'list')
 const customers = ref([])
 const loading = ref(true)
@@ -500,31 +516,38 @@ const pagination = ref({
 const getListResource = createResource({
 	url: 'frappe.client.get_list',
 	makeParams() {
-		const filters = {}
+		const frappeFilters = []
+		
+		// Search filter
 		if (activeSearch.value) {
-			return {
-				doctype: 'Customer',
-				fields: [
-					'name',
-					'customer_name',
-					'mobile_no',
-					'email_id',
-					'customer_group',
-					'territory',
-					'creation',
-				],
-				or_filters: [
-					['name', 'like', `%${activeSearch.value}%`],
-					['customer_name', 'like', `%${activeSearch.value}%`],
-					['mobile_no', 'like', `%${activeSearch.value}%`],
-					['email_id', 'like', `%${activeSearch.value}%`],
-				],
-				limit_start: (pagination.value.page - 1) * pagination.value.page_length,
-				limit_page_length: pagination.value.page_length,
-				order_by: 'creation desc',
-			}
+			// Search handled via or_filters if provided, but here we merge with regular filters
 		}
-		return {
+
+		// Group filter
+		if (filters.value.customer_group) {
+			frappeFilters.push(['customer_group', '=', filters.value.customer_group])
+		}
+		
+		// Territory filter
+		if (filters.value.territory) {
+			frappeFilters.push(['territory', '=', filters.value.territory])
+		}
+		
+		// Activity filter (Special cases)
+		if (filters.value.activity === 'Recently Joined') {
+			const thirtyDaysAgo = new Date()
+			thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+			frappeFilters.push(['creation', '>=', thirtyDaysAgo.toISOString().split('T')[0]])
+		} else if (filters.value.activity === 'High Value (VIP)') {
+			frappeFilters.push(['customer_group', '=', 'VIP'])
+		} else if (filters.value.activity === 'Inactive (90+ Days)') {
+			// This would ideally be based on last transaction date, but for now we use creation
+			const ninetyDaysAgo = new Date()
+			ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
+			frappeFilters.push(['creation', '<', ninetyDaysAgo.toISOString().split('T')[0]])
+		}
+
+		const params = {
 			doctype: 'Customer',
 			fields: [
 				'name',
@@ -535,10 +558,22 @@ const getListResource = createResource({
 				'territory',
 				'creation',
 			],
+			filters: frappeFilters,
 			limit_start: (pagination.value.page - 1) * pagination.value.page_length,
 			limit_page_length: pagination.value.page_length,
 			order_by: 'creation desc',
 		}
+
+		if (activeSearch.value) {
+			params.or_filters = [
+				['name', 'like', `%${activeSearch.value}%`],
+				['customer_name', 'like', `%${activeSearch.value}%`],
+				['mobile_no', 'like', `%${activeSearch.value}%`],
+				['email_id', 'like', `%${activeSearch.value}%`],
+			]
+		}
+		
+		return params
 	},
 })
 

@@ -205,7 +205,7 @@
 
 <script setup>
 import { computed, ref, onMounted } from 'vue'
-import { useUIStore } from '@/stores/ui'
+import { useUIStore } from '@/stores/ui.js'
 import { createResource } from 'frappe-ui'
 
 const ui = useUIStore()

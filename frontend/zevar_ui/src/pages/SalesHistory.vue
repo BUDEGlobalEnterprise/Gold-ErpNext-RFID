@@ -19,73 +19,10 @@
 			</div>
 
 			<!-- Filters -->
-			<div
-				class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 mb-6 border border-gray-100 dark:border-warm-border/50 flex-shrink-0"
-			>
-				<div class="flex flex-wrap gap-3 items-end">
-					<div class="flex flex-col gap-1">
-						<label class="text-xs font-medium text-gray-500 dark:text-gray-400"
-							>From</label
-						>
-						<input
-							type="date"
-							v-model="filters.from_date"
-							@change="fetchSales"
-							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
-						/>
-					</div>
-					<div class="flex flex-col gap-1">
-						<label class="text-xs font-medium text-gray-500 dark:text-gray-400"
-							>To</label
-						>
-						<input
-							type="date"
-							v-model="filters.to_date"
-							@change="fetchSales"
-							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
-						/>
-					</div>
-					<div class="flex flex-col gap-1">
-						<label class="text-xs font-medium text-gray-500 dark:text-gray-400"
-							>Customer</label
-						>
-						<input
-							type="text"
-							v-model="filters.customer"
-							placeholder="Search customer..."
-							@keyup.enter="fetchSales"
-							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-40"
-						/>
-					</div>
-					<div class="flex flex-col gap-1">
-						<label class="text-xs font-medium text-gray-500 dark:text-gray-400"
-							>Invoice #</label
-						>
-						<input
-							type="text"
-							v-model="filters.search"
-							placeholder="Invoice #..."
-							@keyup.enter="fetchSales"
-							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-36"
-						/>
-					</div>
-					<button
-						@click="fetchSales"
-						:disabled="loading"
-						class="px-4 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] transition disabled:opacity-50 flex items-center gap-2"
-					>
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-							/>
-						</svg>
-						Search
-					</button>
-				</div>
+			<div class="mb-6">
+				<TransactionFilterBar />
 			</div>
+
 
 			<!-- Summary Cards -->
 			<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 flex-shrink-0" v-if="summary">
@@ -662,11 +599,15 @@
 
 <script setup>
 import ViewToggle from '@/components/ViewToggle.vue'
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { createResource } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
-import { useSessionStore } from '@/stores/session'
+import TransactionFilterBar from '@/components/TransactionFilterBar.vue'
+import { useSessionStore } from '@/stores/session.js'
+import { useUIStore } from '@/stores/ui.js'
 import { canViewAllSalesHistory } from '@/utils/permissions.js'
+
+const ui = useUIStore()
 
 const session = useSessionStore()
 const isOwnSalesOnly = computed(() => !canViewAllSalesHistory())
@@ -678,13 +619,12 @@ const summary = ref(null)
 const selectedTransaction = ref(null)
 const pagination = ref({ page: 1, total_pages: 1, total_count: 0 })
 
-const filters = ref({
-	from_date: getDefaultFromDate(),
-	to_date: getDefaultDate(),
-	customer: '',
-	status: '',
-	search: '',
-})
+const filters = computed(() => ui.activeFilters.transactions || {})
+
+// Watch filters to trigger fetch
+watch(filters, () => {
+	fetchSales()
+}, { deep: true })
 
 const salesResource = createResource({
 	url: 'zevar_core.api.sales_history.get_sales_history',

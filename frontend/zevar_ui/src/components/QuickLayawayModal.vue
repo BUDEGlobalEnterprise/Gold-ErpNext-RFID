@@ -277,7 +277,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { createResource } from 'frappe-ui'
+import { createResource, call } from 'frappe-ui'
 import BaseModal from './BaseModal.vue'
 import { formatDate } from '@/utils/dates.js'
 
@@ -320,10 +320,7 @@ const previewResource = createResource({
 	auto: false,
 })
 
-const createResource2 = createResource({
-	url: 'zevar_core.api.quick_layaway.create_quick_layaway',
-	auto: false,
-})
+const createLayawayFn = 'zevar_core.api.quick_layaway.create_quick_layaway'
 
 // Computed
 const cartItemsJson = computed(() =>
@@ -387,7 +384,7 @@ async function fetchPreview() {
 async function submitLayaway() {
 	loading.value = true
 	try {
-		const rawResult = await createResource2.submit({
+		const rawResult = await call(createLayawayFn, {
 			items: cartItemsJson.value,
 			customer: form.value.customer,
 			down_payment_percent: form.value.down_payment_percent,
@@ -398,7 +395,6 @@ async function submitLayaway() {
 			notes: form.value.notes,
 		})
 
-		// Unwrap frappe-ui response
 		const result = rawResult?.message ?? rawResult
 
 		if (result?.success || result?.layaway_id || result?.contract_name) {
@@ -407,25 +403,30 @@ async function submitLayaway() {
 		}
 	} catch (error) {
 		console.error('Failed to create layaway:', error)
-		// Extract Frappe server messages for better UX
 		let errorMsg = ''
-		if (error?._server_messages) {
+		const data = error?.data || error?.response?.data || error
+		if (data?._server_messages) {
 			try {
-				const msgs = JSON.parse(error._server_messages)
+				const msgs = JSON.parse(data._server_messages)
 				errorMsg = msgs
 					.map((m) => {
-						try {
-							return JSON.parse(m).message
-						} catch {
-							return m
-						}
+						try { return JSON.parse(m).message }
+						catch { return m }
 					})
 					.join('\n')
 			} catch {
-				errorMsg = String(error._server_messages)
+				errorMsg = String(data._server_messages)
 			}
+		} else if (data?.exception) {
+			errorMsg = data.exception
+		} else if (data?.message) {
+			errorMsg = data.message
+		} else if (error?.message) {
+			errorMsg = error.message
+		} else if (typeof error === 'string') {
+			errorMsg = error
 		} else {
-			errorMsg = error?.message || error?.exc || 'Unknown error'
+			errorMsg = JSON.stringify(error)
 		}
 		errorMsg = errorMsg.replace(/<[^>]+>/g, '')
 		alert('Failed to create layaway: ' + errorMsg)

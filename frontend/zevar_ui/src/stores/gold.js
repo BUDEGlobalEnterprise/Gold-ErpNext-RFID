@@ -69,7 +69,8 @@ export const useGoldStore = defineStore('gold', () => {
 					if (!newRates[key] || p.rate_per_gram > newRates[key].rate_per_gram) {
 						newRates[key] = {
 							rate_per_gram: p.rate_per_gram,
-							change_percent: p.change_percent || 0,
+							change_pct: p.change_pct || 0,
+							change_amount: p.change_amount || 0,
 							trend: p.trend || 'none',
 						}
 					}
@@ -77,6 +78,7 @@ export const useGoldStore = defineStore('gold', () => {
 					newTrends[key] = {
 						trend: p.trend || 'flat',
 						change_pct: p.change_pct || 0,
+						change_amount: p.change_amount || 0,
 					}
 				}
 			}

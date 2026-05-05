@@ -1049,22 +1049,22 @@
 						</h4>
 						<div class="market-grid">
 							<div
-								v-for="[key, rate, change, trend] in sortedRates"
+								v-for="[key, rate, changePct, trend, changeAmt] in sortedRates"
 								:key="key"
 								class="market-card"
 							>
-								<div class="market-name">{{ formatPurityLabel(key) }}</div>
-								<div class="flex items-center gap-1.5 mt-0.5">
+								<div class="market-name">{{ formatPurityLabel(key).toUpperCase() }}</div>
+								<div class="flex items-end justify-between mt-1">
 									<div class="market-price">${{ rate }}</div>
 									<div
 										v-if="trend !== 'none'"
-										class="flex items-center text-[10px] font-bold"
-										:class="
-											trend === 'up' ? 'text-emerald-500' : 'text-rose-500'
-										"
+										class="flex items-center gap-1 text-[11px] font-bold pb-0.5"
+										:style="{ color: trend === 'up' ? '#10b981' : trend === 'down' ? '#ef4444' : '#9ca3af' }"
 									>
-										<span>{{ trend === 'up' ? '↑' : '↓' }}</span>
-										<span>{{ Math.abs(change) }}%</span>
+										<span v-if="trend !== 'flat'">{{ trend === 'up' ? '+' : '-' }}{{ Math.abs(changeAmt) }}</span>
+										<span v-else>0.00</span>
+										<span class="text-[9px]">{{ trend === 'up' ? '▲' : trend === 'down' ? '▼' : '●' }}</span>
+										<span>{{ Math.abs(changePct) }}%</span>
 									</div>
 								</div>
 							</div>
@@ -1078,7 +1078,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useSessionStore } from '@/stores/session'
+import { useSessionStore } from '@/stores/session.js'
 import { useGoldStore } from '@/stores/gold.js'
 import { getDashboardVisibility } from '@/utils/permissions.js'
 
@@ -1131,8 +1131,9 @@ const sortedRates = computed(() => {
 		.map(([key, data]) => [
 			key,
 			(data.rate_per_gram * TROY_OZ_GRAMS).toFixed(2),
-			data.change_percent,
+			data.change_pct,
 			data.trend,
+			(data.change_amount * TROY_OZ_GRAMS).toFixed(2),
 		])
 		.sort((a, b) => {
 			const iA = DASHBOARD_RATE_PRIORITIES.findIndex((p) => a[0].includes(p))
@@ -1172,7 +1173,7 @@ onUnmounted(() => {
 	min-height: 100vh;
 	display: flex;
 	flex-direction: column;
-	background: #f9fafb;
+	background: transparent;
 }
 
 /* Header */
@@ -1182,8 +1183,8 @@ onUnmounted(() => {
 	justify-content: space-between;
 	padding: 1.25rem 2rem;
 	flex-shrink: 0;
-	background: white;
-	border-bottom: 1px solid #f3f4f6;
+	background: transparent;
+	border-bottom: none;
 }
 
 .header-left {
@@ -1526,31 +1527,36 @@ onUnmounted(() => {
 
 /* Market Prices */
 .market-prices {
-	margin-top: 0;
+	margin-top: 0.5rem;
 }
 .market-grid {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
 }
 .market-card {
-	padding: 0.5rem 0.5rem;
+	padding: 0.75rem 0.25rem;
 	border-bottom: 1px solid #f3f4f6;
 	background: transparent;
+	transition: background 0.2s;
+}
+.market-card:last-child {
+	border-bottom: none;
 }
 .market-name {
-	font-size: 0.6rem;
-	font-weight: 600;
+	font-size: 0.65rem;
+	font-weight: 700;
 	color: #9ca3af;
 	text-transform: uppercase;
-	letter-spacing: 0.03em;
+	letter-spacing: 0.05em;
+	margin-bottom: 0.25rem;
 }
 .market-price {
-	font-size: 0.95rem;
+	font-size: 1.25rem;
 	font-weight: 800;
 	color: #111827;
-	margin-top: 0.1rem;
 	font-variant-numeric: tabular-nums;
+	line-height: 1;
 }
 
 /* Responsive */

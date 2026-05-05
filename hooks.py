@@ -50,7 +50,11 @@ fixtures = ["Item Attribute", "Custom Field", "Property Setter"]
 
 # Document Events
 doc_events = {
-	"Item": {"validate": "zevar_core.item_events.calculate_net_weight_g"},
+	"Item": {
+		"validate": "zevar_core.item_events.calculate_net_weight_g",
+		"on_update": "zevar_core.rag.hooks.doc_events.on_item_update",
+		"on_trash": "zevar_core.rag.hooks.doc_events.on_item_trash",
+	},
 	"Sales Invoice": {
 		"validate": [
 			"zevar_core.tax_events.apply_store_tax",
@@ -58,10 +62,22 @@ doc_events = {
 		],
 		"on_submit": "zevar_core.api.commission.calculate_commissions",
 	},
+	"Customer": {
+		"on_update": "zevar_core.rag.hooks.doc_events.on_customer_update",
+	},
+	"RAG Knowledge Article": {
+		"on_update": "zevar_core.rag.hooks.doc_events.on_article_update",
+		"on_trash": "zevar_core.rag.hooks.doc_events.on_article_trash",
+	},
 }
 
 # Scheduler events
-scheduler_events = {"cron": {"*/15 * * * *": ["zevar_core.tasks.fetch_live_gold_rate"]}}
+scheduler_events = {
+	"cron": {
+		"*/15 * * * *": ["zevar_core.tasks.fetch_live_gold_rate"],
+		"0 2 * * *": ["zevar_core.rag.hooks.scheduler.reconcile_indexes"],
+	}
+}
 
 # Installation hooks
 after_install = [
@@ -86,4 +102,7 @@ after_migrate = [
 bench_commands = [
 	"zevar_core.migration.commands.import_legacy_data",
 	"zevar_core.migration.commands.show_mapping_info",
+	"zevar_core.rag.commands.build_rag_index",
+	"zevar_core.rag.commands.rag_stats",
+	"zevar_core.rag.commands.build_dev_index",
 ]

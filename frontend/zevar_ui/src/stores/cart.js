@@ -6,7 +6,7 @@
 
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { createResource } from 'frappe-ui'
+import { createResource, call } from 'frappe-ui'
 
 export const useCartStore = defineStore('cart', () => {
 	// ==========================================================================
@@ -291,20 +291,14 @@ export const useCartStore = defineStore('cart', () => {
 				? 'Walk-In Customer'
 				: customer.value?.name || 'Walk-In Customer'
 
-		const r = await createResource({
-			url: 'zevar_core.api.layaway.create_layaway',
-			method: 'POST',
-			params: {
-				customer: customerName,
-				items: JSON.stringify(itemsPayload),
-				deposit_amount: depositAmount,
-				duration_months: durationMonths,
-				warehouse: warehouse || undefined,
-			},
-		}).fetch()
+		const data = await call('zevar_core.api.layaway.create_layaway', {
+			customer: customerName,
+			items: JSON.stringify(itemsPayload),
+			deposit_amount: depositAmount,
+			duration_months: durationMonths,
+			warehouse: warehouse || undefined,
+		})
 
-		// Unwrap frappe-ui response (may be wrapped in 'message')
-		const data = r?.message ?? r
 		return data
 	}
 

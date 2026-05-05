@@ -9,9 +9,23 @@ import { ref, computed } from 'vue'
 
 export const useUIStore = defineStore('ui', () => {
 	const searchQuery = ref('')
-	const activeFilters = ref({})
+	const activeFilters = ref({
+		pos: {},
+		transactions: {
+			from_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+			to_date: new Date().toISOString().split('T')[0],
+			date_preset: 'Last 7 Days',
+		},
+		customers: {},
+		inventory: {},
+	})
 	const sidebarCollapsed = ref(false)
-	const sortBy = ref('')
+	const sortBy = ref({
+		pos: '',
+		transactions: '',
+		customers: '',
+		inventory: '',
+	})
 
 	// Migrate legacy 'zevar-theme' key to 'theme'
 	const legacy = localStorage.getItem('zevar-theme')
@@ -29,18 +43,22 @@ export const useUIStore = defineStore('ui', () => {
 		document.documentElement.classList.remove('dark')
 	}
 
-	const activeFilterCount = computed(() => {
+	function getActiveFilterCount(context = 'pos') {
 		let count = 0
-		const f = activeFilters.value
-		if (f.in_stock_only) count++
-		if (f.out_of_stock_only) count++
-		if (f.custom_metal_type) count++
-		if (f.custom_gemstone) count++
-		if (f.custom_purity) count++
-		if (f.custom_jewelry_type) count++
-		if (f.price_min || f.price_max) count++
+		const f = activeFilters.value[context] || {}
+		// General count for any truthy value except specific exclusions
+		Object.keys(f).forEach((key) => {
+			if (f[key] !== null && f[key] !== undefined && f[key] !== '' && f[key] !== false) {
+				// Handle price min/max as one filter
+				if (key === 'price_min' || key === 'price_max') {
+					if (key === 'price_min') count++
+				} else {
+					count++
+				}
+			}
+		})
 		return count
-	})
+	}
 
 	function toggleTheme() {
 		isDark.value = !isDark.value
@@ -53,22 +71,31 @@ export const useUIStore = defineStore('ui', () => {
 		}
 	}
 
-	function setFilter(key, value) {
+	function setFilter(context, key, value) {
+		if (!activeFilters.value[context]) {
+			activeFilters.value[context] = {}
+		}
 		if (value === null || value === undefined || value === '' || value === false) {
-			delete activeFilters.value[key]
+			delete activeFilters.value[context][key]
 		} else {
-			activeFilters.value[key] = value
+			activeFilters.value[context][key] = value
 		}
 	}
 
-	function setSort(value) {
-		sortBy.value = value || ''
+	function setSort(context, value) {
+		if (sortBy.value[context] !== undefined) {
+			sortBy.value[context] = value || ''
+		}
 	}
 
-	function resetFilters() {
-		activeFilters.value = {}
+	function resetFilters(context) {
+		if (activeFilters.value[context]) {
+			activeFilters.value[context] = {}
+		}
+		if (sortBy.value[context] !== undefined) {
+			sortBy.value[context] = ''
+		}
 		searchQuery.value = ''
-		sortBy.value = ''
 	}
 
 	const layawayPayment = ref({
@@ -98,7 +125,7 @@ export const useUIStore = defineStore('ui', () => {
 		sidebarCollapsed,
 		sortBy,
 		isDark,
-		activeFilterCount,
+		getActiveFilterCount,
 		toggleTheme,
 		setFilter,
 		setSort,

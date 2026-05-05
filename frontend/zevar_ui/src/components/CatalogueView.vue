@@ -665,7 +665,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useUIStore } from '@/stores/ui'
+import { useUIStore } from '@/stores/ui.js'
 import Header from '@/components/Header.vue'
 import ProductModal from '@/components/ProductModal.vue'
 

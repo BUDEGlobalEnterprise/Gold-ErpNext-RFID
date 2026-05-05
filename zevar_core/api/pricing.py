@@ -143,8 +143,10 @@ def get_live_metal_rates():
 		prev_rate = prev["rate_per_gram"] if prev else None
 
 		# Compute trend
+		change_amount = 0
 		if prev_rate and prev_rate > 0:
-			change_pct = round(((rate_per_gram - prev_rate) / prev_rate) * 100, 2)
+			change_amount = round(rate_per_gram - prev_rate, 4)
+			change_pct = round((change_amount / prev_rate) * 100, 2)
 			if change_pct > 0:
 				trend = "up"
 			elif change_pct < 0:
@@ -153,14 +155,15 @@ def get_live_metal_rates():
 				trend = "flat"
 		else:
 			change_pct = 0
-			trend = "flat"
+			trend = "none"
 
 		grouped[metal].append(
 			{
 				"purity": purity,
 				"rate_per_gram": rate_per_gram,
-				"trend": trend or "flat",
-				"change_pct": change_pct or 0,
+				"trend": trend,
+				"change_pct": change_pct,
+				"change_amount": change_amount,
 			}
 		)
 
