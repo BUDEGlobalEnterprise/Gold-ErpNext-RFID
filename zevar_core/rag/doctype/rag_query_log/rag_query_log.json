@@ -1,0 +1,115 @@
+{
+ "actions": [],
+ "autoname": "RAG-QRY-.#####",
+ "creation": "2026-05-05 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "query",
+  "query_type",
+  "column_break_1",
+  "user",
+  "timestamp",
+  "results_section",
+  "answer",
+  "sources",
+  "column_break_results",
+  "confidence_score",
+  "llm_provider",
+  "latency_ms"
+ ],
+ "fields": [
+  {
+   "fieldname": "query",
+   "fieldtype": "Small Text",
+   "label": "Query",
+   "reqd": 1
+  },
+  {
+   "fieldname": "query_type",
+   "fieldtype": "Select",
+   "options": "product\ncustomer\nrepair\npolicy\ngeneral",
+   "default": "general",
+   "label": "Query Type"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "timestamp",
+   "fieldtype": "Datetime",
+   "default": "Now",
+   "label": "Timestamp"
+  },
+  {
+   "fieldname": "results_section",
+   "fieldtype": "Section Break",
+   "label": "Results"
+  },
+  {
+   "fieldname": "answer",
+   "fieldtype": "Small Text",
+   "label": "Answer"
+  },
+  {
+   "fieldname": "sources",
+   "fieldtype": "Code",
+   "options": "JSON",
+   "label": "Sources"
+  },
+  {
+   "fieldname": "column_break_results",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "confidence_score",
+   "fieldtype": "Float",
+   "label": "Confidence Score"
+  },
+  {
+   "fieldname": "llm_provider",
+   "fieldtype": "Data",
+   "label": "LLM Provider Used"
+  },
+  {
+   "fieldname": "latency_ms",
+   "fieldtype": "Int",
+   "label": "Latency (ms)"
+  }
+ ],
+ "module": "Unified Retail Management System",
+ "name": "RAG Query Log",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Manager",
+   "share": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

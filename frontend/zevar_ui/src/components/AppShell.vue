@@ -283,9 +283,9 @@
 									<span
 										v-if="trend !== 'none'"
 										class="text-[10px] font-bold"
-										:class="trend === 'up' ? 'text-green-500' : 'text-red-500'"
+										:style="{ color: trend === 'up' ? '#10b981' : trend === 'down' ? '#ef4444' : '#9ca3af' }"
 									>
-										{{ trend === 'up' ? '↑' : '↓' }}{{ Math.abs(change) }}%
+										{{ trend === 'up' ? '↑' : trend === 'down' ? '↓' : '●' }}{{ Math.abs(change) }}%
 									</span>
 								</div>
 							</div>
@@ -549,9 +549,9 @@
 						<span
 							v-if="trend !== 'none'"
 							class="text-[8px] font-bold"
-							:class="trend === 'up' ? 'text-green-500' : 'text-red-500'"
+							:style="{ color: trend === 'up' ? '#10b981' : trend === 'down' ? '#ef4444' : '#9ca3af' }"
 						>
-							{{ trend === 'up' ? '↑' : '↓' }}{{ Math.abs(change) }}%
+							{{ trend === 'up' ? '↑' : trend === 'down' ? '↓' : '●' }}{{ Math.abs(change) }}%
 						</span>
 					</div>
 				</div>
@@ -740,6 +740,9 @@
 				</div>
 			</nav>
 		</aside>
+
+		<!-- AI Assistant Floating Panel -->
+		<AiAssistant />
 	</div>
 </template>
 
@@ -756,6 +759,7 @@ import { useBreakpoint } from '@/composables/useBreakpoint.js'
 import { canAccessReports } from '@/utils/permissions.js'
 import CartSidebar from '@/components/CartSidebar.vue'
 import CheckoutModal from '@/components/CheckoutModal.vue'
+import AiAssistant from '@/components/ai/AiAssistant.vue'
 
 const session = useSessionStore()
 const goldStore = useGoldStore()
@@ -972,7 +976,7 @@ const sortedRates = computed(() => {
 					minimumFractionDigits: 2,
 					maximumFractionDigits: 2,
 				}),
-				data.change_percent,
+				data.change_pct,
 				data.trend,
 			]
 		})

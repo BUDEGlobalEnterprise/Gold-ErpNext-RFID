@@ -106,7 +106,7 @@
 			</div>
 
 			<div class="hidden md:flex justify-center px-4 mb-4">
-				<FilterBar />
+				<ItemFilterBar context="inventory" />
 			</div>
 
 			<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4 flex-shrink-0">
@@ -478,7 +478,7 @@
 import { ref, computed } from 'vue'
 import { createResource } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
-import FilterBar from '@/components/FilterBar.vue'
+import ItemFilterBar from '@/components/ItemFilterBar.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
 import { useUIStore } from '@/stores/ui.js'
 import { useSessionStore } from '@/stores/session.js'
@@ -541,7 +541,9 @@ const outOfStockItems = computed(() => inventoryData.value.filter((i) => i.stock
 
 const filteredItems = computed(() => {
 	let items = [...inventoryData.value]
-	const f = ui.activeFilters
+	const f = ui.activeFilters.inventory || {}
+	const sortBy = ui.sortBy.inventory || ''
+	
 	if (f.custom_metal_type) items = items.filter((i) => i.metal === f.custom_metal_type)
 	if (f.custom_jewelry_type) items = items.filter((i) => i.category === f.custom_jewelry_type)
 	if (f.in_stock_only) items = items.filter((i) => i.stock > 0)
@@ -550,17 +552,20 @@ const filteredItems = computed(() => {
 	if (f.price_min) items = items.filter((i) => i.price >= f.price_min)
 	if (f.price_max) items = items.filter((i) => i.price <= f.price_max)
 	if (f.custom_purity) items = items.filter((i) => i.purity === f.custom_purity)
+	
 	if (ui.searchQuery) {
 		const q = ui.searchQuery.toLowerCase()
 		items = items.filter(
 			(i) => i.name.toLowerCase().includes(q) || i.code.toLowerCase().includes(q)
 		)
 	}
-	if (ui.sortBy === 'price_asc') items.sort((a, b) => a.price - b.price)
-	else if (ui.sortBy === 'price_desc') items.sort((a, b) => b.price - a.price)
-	else if (ui.sortBy === 'weight_asc') items.sort((a, b) => a.weight - b.weight)
-	else if (ui.sortBy === 'weight_desc') items.sort((a, b) => b.weight - a.weight)
-	else if (ui.sortBy === 'name_asc') items.sort((a, b) => a.name.localeCompare(b.name))
+	
+	if (sortBy === 'price_asc') items.sort((a, b) => a.price - b.price)
+	else if (sortBy === 'price_desc') items.sort((a, b) => b.price - a.price)
+	else if (sortBy === 'weight_asc') items.sort((a, b) => a.weight - b.weight)
+	else if (sortBy === 'weight_desc') items.sort((a, b) => b.weight - a.weight)
+	else if (sortBy === 'name_asc') items.sort((a, b) => a.name.localeCompare(b.name))
+	
 	return items
 })
 

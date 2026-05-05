@@ -27,7 +27,14 @@ LAYAWAY_ALLOWED_ROLES = [
 
 
 def _enforce_layaway_access() -> None:
-	frappe.only_for(LAYAWAY_ALLOWED_ROLES)
+	user_roles = set(frappe.get_roles())
+	if frappe.session.user == "Administrator":
+		return
+	if not user_roles & set(LAYAWAY_ALLOWED_ROLES):
+		frappe.throw(
+			_("You do not have permission for layaway operations."),
+			frappe.PermissionError,
+		)
 
 
 def _coerce_statuses(statuses: str | list | tuple | None) -> list[str]:
@@ -481,13 +488,13 @@ def create_layaway(
 		doc.auto_forfeit_days = (
 			int(auto_forfeit_days) if auto_forfeit_days is not None else DEFAULT_AUTO_FORFEIT_DAYS
 		)
-		doc.store_location = store_location
-		doc.sales_person = sales_person
-		doc.pos_profile = pos_profile
-		doc.notes = notes
+		doc.store_location = store_location or ""
+		doc.sales_person = sales_person or ""
+		doc.pos_profile = pos_profile or ""
+		doc.notes = notes or ""
 		doc.terms_accepted = 1 if int(terms_accepted or 0) else 0
-		doc.customer_contact = customer_contact
-		doc.customer_email = customer_email
+		doc.customer_contact = customer_contact or ""
+		doc.customer_email = customer_email or ""
 
 		for item in items_list:
 			qty = flt(item.get("qty", 1))
@@ -499,7 +506,7 @@ def create_layaway(
 					"qty": qty,
 					"rate": rate,
 					"amount": qty * rate,
-					"warehouse": item.get("warehouse") or warehouse,
+					"warehouse": item.get("warehouse") or warehouse or "",
 				},
 			)
 
@@ -508,7 +515,6 @@ def create_layaway(
 		doc.balance_amount = total_amount - deposit
 		doc.total_paid = deposit
 
-		# Parse provided payments to determine mode_of_payment for the deposit
 		deposit_mode = "Cash"
 		if payments:
 			payments_list_raw = frappe.parse_json(payments) if isinstance(payments, str) else payments
@@ -527,7 +533,7 @@ def create_layaway(
 		)
 
 		remaining_months = duration - 1
-		remaining_balance = doc.balance_amount
+		remaining_balance = flt(doc.balance_amount)
 		if remaining_months > 0 and remaining_balance > 0:
 			monthly_payment = remaining_balance / remaining_months
 			for month_index in range(1, remaining_months + 1):
@@ -544,31 +550,47 @@ def create_layaway(
 		doc.status = "Active"
 		doc.flags.ignore_permissions = True
 		doc.insert(ignore_permissions=True)
+
 		doc.flags.ignore_permissions = True
 		doc.submit()
 
+	except Exception as insert_err:
+		frappe.db.rollback()
+		frappe.log_error(
+			"Layaway Insert/Submit Failed",
+			f"{type(insert_err).__name__}: {insert_err}\n\n{frappe.get_traceback()}",
+		)
+		frappe.throw(
+			_("Layaway insert/submit failed ({0}): {1}").format(type(insert_err).__name__, str(insert_err))
+		)
+
+	try:
 		_reserve_inventory(doc)
+	except Exception as reserve_err:
+		frappe.log_error(
+			"Layaway Inventory Reserve Error",
+			f"{type(reserve_err).__name__}: {reserve_err}",
+		)
+
+	try:
 		_create_layaway_payment_entry(doc, deposit, deposit_mode)
+	except Exception as pe_err:
+		frappe.log_error(
+			"Layaway Payment Entry Error",
+			f"{type(pe_err).__name__}: {pe_err}",
+		)
 
-		payment_results = [
-			{"mode": deposit_mode, "amount": deposit},
-		]
+	payment_results = [
+		{"mode": deposit_mode, "amount": deposit},
+	]
 
-		return {
-			"success": True,
-			"layaway_id": doc.name,
-			"deposit_amount": doc.deposit_amount,
-			"payment_results": payment_results,
-			"message": "Layaway created and deposit recorded successfully",
-		}
-	except frappe.ValidationError:
-		frappe.db.rollback()
-		raise
-	except Exception as e:
-		frappe.db.rollback()
-		frappe.log_error("Layaway Creation Failed", frappe.get_traceback())
-		frappe.throw(_("Could not create layaway: {0}").format(str(e)))
-		frappe.throw(_("Failed to create layaway: {0}").format(str(e)))
+	return {
+		"success": True,
+		"layaway_id": doc.name,
+		"deposit_amount": doc.deposit_amount,
+		"payment_results": payment_results,
+		"message": "Layaway created and deposit recorded successfully",
+	}
 
 
 @frappe.whitelist(methods=["POST"])
@@ -1321,6 +1343,56 @@ def send_payment_confirmation(layaway_id: str, amount: float, new_balance: float
 		frappe.log_error(f"Payment Confirmation Failed for {layaway_id}", frappe.get_traceback())
 
 
+def _ensure_layaway_liability_account(company: str, abbr: str) -> str | None:
+	account_name = f"Liability — Layaway Deposits Held - {abbr}"
+	if frappe.db.exists("Account", account_name):
+		return account_name
+
+	root_liability = frappe.db.get_value(
+		"Account",
+		{"root_type": "Liability", "is_group": 1, "company": company},
+		"name",
+		order_by="lft asc",
+	)
+	if not root_liability:
+		return None
+
+	try:
+		acc = frappe.new_doc("Account")
+		acc.account_name = "Liability — Layaway Deposits Held"
+		acc.company = company
+		acc.parent_account = root_liability
+		acc.is_group = 0
+		acc.insert(ignore_permissions=True)
+		frappe.db.commit()
+		return acc.name
+	except Exception:
+		frappe.log_error("Layaway Liability Account Creation Failed", frappe.get_traceback())
+		return None
+
+
+def _resolve_paid_to_account(mode_of_payment: str, company: str) -> str | None:
+	paid_to = None
+	if frappe.db.exists("Mode of Payment", mode_of_payment):
+		mop = frappe.get_doc("Mode of Payment", mode_of_payment)
+		for row in mop.accounts:
+			if row.company == company:
+				paid_to = row.default_account
+				break
+
+	if not paid_to:
+		paid_to = frappe.db.get_value("Account", {"account_type": "Cash", "company": company})
+
+	if not paid_to:
+		paid_to = frappe.db.get_value(
+			"Account",
+			{"account_name": "Cash", "company": company, "is_group": 0},
+			"name",
+		)
+
+	return paid_to
+
+
 def _create_layaway_payment_entry(doc, amount, mode_of_payment, reference=None):
 	company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value(
 		"Global Defaults", "default_company"
@@ -1328,7 +1400,6 @@ def _create_layaway_payment_entry(doc, amount, mode_of_payment, reference=None):
 	if not company:
 		company = "Zevar Jewelers"
 
-	# Validate mode_of_payment exists BEFORE switching user context
 	if not mode_of_payment or not frappe.db.exists("Mode of Payment", mode_of_payment):
 		frappe.log_error(
 			title="Layaway Payment Entry Skipped",
@@ -1336,15 +1407,7 @@ def _create_layaway_payment_entry(doc, amount, mode_of_payment, reference=None):
 		)
 		return None
 
-	paid_to = None
-	mop = frappe.get_doc("Mode of Payment", mode_of_payment)
-	for row in mop.accounts:
-		if row.company == company:
-			paid_to = row.default_account
-			break
-
-	if not paid_to:
-		paid_to = frappe.db.get_value("Account", {"account_type": "Cash", "company": company})
+	paid_to = _resolve_paid_to_account(mode_of_payment, company)
 
 	if not paid_to:
 		frappe.log_error(
@@ -1353,12 +1416,24 @@ def _create_layaway_payment_entry(doc, amount, mode_of_payment, reference=None):
 		)
 		return None
 
-	liability_account = (
-		f"Liability — Layaway Deposits Held - {frappe.get_cached_value('Company', company, 'abbr')}"
-	)
+	abbr = frappe.get_cached_value("Company", company, "abbr")
+	liability_account = _ensure_layaway_liability_account(company, abbr)
 
-	# Elevate to Administrator: ERPNext Payment Entry validate() internally calls
-	# the global frappe.has_permission() which ignores document-level ignore_permissions.
+	if not liability_account:
+		debtors_account = frappe.db.get_value(
+			"Account",
+			{"account_type": "Receivable", "company": company, "is_group": 0},
+			"name",
+		)
+		liability_account = debtors_account
+
+	if not liability_account:
+		frappe.log_error(
+			title="Layaway Payment Entry Skipped",
+			message=f"No liability or receivable account found for company '{company}'. Payment Entry not created for layaway {doc.name}.",
+		)
+		return None
+
 	session_user = frappe.session.user
 	frappe.set_user("Administrator")
 	try:
@@ -1395,9 +1470,16 @@ def _create_layaway_final_invoice(doc):
 	if not company:
 		company = "Zevar Jewelers"
 
-	liability_account = (
-		f"Liability — Layaway Deposits Held - {frappe.get_cached_value('Company', company, 'abbr')}"
-	)
+	abbr = frappe.get_cached_value("Company", company, "abbr")
+	liability_account = _ensure_layaway_liability_account(company, abbr)
+
+	if not liability_account:
+		debtors_account = frappe.db.get_value(
+			"Account",
+			{"account_type": "Receivable", "company": company, "is_group": 0},
+			"name",
+		)
+		liability_account = debtors_account
 
 	session_user = frappe.session.user
 	frappe.set_user("Administrator")
@@ -1407,7 +1489,8 @@ def _create_layaway_final_invoice(doc):
 		invoice.company = company
 		invoice.due_date = nowdate()
 		invoice.custom_transaction_stream = "Layaway Final"
-		invoice.debit_to = liability_account
+		if liability_account:
+			invoice.debit_to = liability_account
 
 		for item in doc.items:
 			invoice.append(

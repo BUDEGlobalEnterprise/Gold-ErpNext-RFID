@@ -1,0 +1,218 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-05-05 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "embedding_section",
+  "embedding_model",
+  "embedding_dimension",
+  "column_break_1",
+  "embedding_batch_size",
+  "use_embedding_cache",
+  "llm_section",
+  "primary_llm_provider",
+  "column_break_llm1",
+  "llm_temperature",
+  "llm_max_tokens",
+  "glm_section",
+  "glm_api_key",
+  "glm_model",
+  "column_break_glm1",
+  "glm_endpoint",
+  "qwen_section",
+  "qwen_endpoint",
+  "qwen_model",
+  "column_break_qwen1",
+  "qwen_api_key",
+  "advanced_section",
+  "chunk_size_tokens",
+  "chunk_overlap_tokens",
+  "column_break_adv1",
+  "default_top_k",
+  "similarity_threshold",
+  "enable_query_cache"
+ ],
+ "fields": [
+  {
+   "fieldname": "embedding_section",
+   "fieldtype": "Section Break",
+   "label": "Embedding Model"
+  },
+  {
+   "fieldname": "embedding_model",
+   "fieldtype": "Select",
+   "default": "all-MiniLM-L6-v2",
+   "options": "all-MiniLM-L6-v2\nall-mpnet-base-v2",
+   "label": "Embedding Model",
+   "reqd": 1
+  },
+  {
+   "fieldname": "embedding_dimension",
+   "fieldtype": "Int",
+   "default": 384,
+   "label": "Embedding Dimension",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "embedding_batch_size",
+   "fieldtype": "Int",
+   "default": 100,
+   "label": "Batch Size"
+  },
+  {
+   "fieldname": "use_embedding_cache",
+   "fieldtype": "Check",
+   "default": 1,
+   "label": "Use Redis Cache for Embeddings"
+  },
+  {
+   "fieldname": "llm_section",
+   "fieldtype": "Section Break",
+   "label": "LLM Generation"
+  },
+  {
+   "fieldname": "primary_llm_provider",
+   "fieldtype": "Select",
+   "default": "GLM",
+   "options": "GLM\nQwen\nAuto",
+   "label": "Primary LLM Provider",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_llm1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "llm_temperature",
+   "fieldtype": "Float",
+   "default": 0.3,
+   "label": "Temperature",
+   "description": "Lower = more deterministic, Higher = more creative"
+  },
+  {
+   "fieldname": "llm_max_tokens",
+   "fieldtype": "Int",
+   "default": 1024,
+   "label": "Max Tokens"
+  },
+  {
+   "fieldname": "glm_section",
+   "fieldtype": "Section Break",
+   "label": "Z.ai / GLM API"
+  },
+  {
+   "fieldname": "glm_api_key",
+   "fieldtype": "Password",
+   "label": "GLM API Key"
+  },
+  {
+   "fieldname": "glm_model",
+   "fieldtype": "Data",
+   "default": "glm-4-flash",
+   "label": "GLM Model"
+  },
+  {
+   "fieldname": "column_break_glm1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "glm_endpoint",
+   "fieldtype": "Data",
+   "default": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+   "label": "GLM API Endpoint"
+  },
+  {
+   "fieldname": "qwen_section",
+   "fieldtype": "Section Break",
+   "label": "Self-Hosted Qwen (OpenAI-Compatible)"
+  },
+  {
+   "fieldname": "qwen_endpoint",
+   "fieldtype": "Data",
+   "default": "http://localhost:11434/v1/chat/completions",
+   "label": "Qwen API Endpoint"
+  },
+  {
+   "fieldname": "qwen_model",
+   "fieldtype": "Data",
+   "default": "qwen3:34b",
+   "label": "Qwen Model Name"
+  },
+  {
+   "fieldname": "column_break_qwen1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qwen_api_key",
+   "fieldtype": "Password",
+   "label": "Qwen API Key",
+   "description": "Optional - only if your self-hosted API requires authentication"
+  },
+  {
+   "fieldname": "advanced_section",
+   "fieldtype": "Section Break",
+   "label": "Advanced Settings"
+  },
+  {
+   "fieldname": "chunk_size_tokens",
+   "fieldtype": "Int",
+   "default": 200,
+   "label": "Chunk Size (tokens)"
+  },
+  {
+   "fieldname": "chunk_overlap_tokens",
+   "fieldtype": "Int",
+   "default": 50,
+   "label": "Chunk Overlap (tokens)"
+  },
+  {
+   "fieldname": "column_break_adv1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_top_k",
+   "fieldtype": "Int",
+   "default": 10,
+   "label": "Default Top K Results"
+  },
+  {
+   "fieldname": "similarity_threshold",
+   "fieldtype": "Float",
+   "default": 0.5,
+   "label": "Similarity Threshold"
+  },
+  {
+   "fieldname": "enable_query_cache",
+   "fieldtype": "Check",
+   "default": 1,
+   "label": "Enable Query Cache"
+  }
+ ],
+ "issingle": 1,
+ "module": "Unified Retail Management System",
+ "name": "RAG Settings",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

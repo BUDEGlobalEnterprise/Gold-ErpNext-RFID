@@ -78,7 +78,7 @@
 
 				<!-- Inline Filter Bar - Occupies the central "blank space" -->
 				<div class="flex-1 hidden md:flex justify-center px-4">
-					<FilterBar />
+					<ItemFilterBar context="pos" />
 				</div>
 
 				<div class="flex gap-2">
@@ -205,7 +205,7 @@
  */
 
 import AppLayout from '@/components/AppLayout.vue'
-import FilterBar from '@/components/FilterBar.vue'
+import ItemFilterBar from '@/components/ItemFilterBar.vue'
 import ItemCard from '@/components/ItemCard.vue'
 import ProductModal from '@/components/POSProductModal.vue'
 import { useSessionStore } from '@/stores/session.js'
@@ -242,11 +242,17 @@ const catalog = ref([])
 const start = ref(0)
 const PAGE_LENGTH = 20
 const hasMore = ref(true)
+const filteredItems = computed(() => {
+	let items = [...(catalog.value || [])]
+	const filters = ui.activeFilters.pos || {}
+	return items
+})
 
 // Fetch Items Resource
 const items = createResource({
 	url: 'zevar_core.api.catalog.get_pos_items',
 	makeParams() {
+		const f = ui.activeFilters.pos || {}
 		const {
 			in_stock_only,
 			out_of_stock_only,
@@ -257,7 +263,7 @@ const items = createResource({
 			custom_purity,
 			custom_gemstone,
 			...otherFilters
-		} = ui.activeFilters
+		} = f
 
 		const params = {
 			warehouse: session.currentWarehouse,
@@ -275,7 +281,7 @@ const items = createResource({
 			out_of_stock_only: out_of_stock_only || false,
 			min_price: price_min || undefined,
 			max_price: price_max || undefined,
-			sort_by: ui.sortBy || undefined,
+			sort_by: ui.sortBy.pos || undefined,
 		}
 
 		console.log('🔍 POS Items API Params:', params)
@@ -359,8 +365,8 @@ let searchTimeout = null
 watch(
 	() => ({
 		search: ui.searchQuery,
-		filters: JSON.stringify(ui.activeFilters),
-		sort: ui.sortBy,
+		filters: JSON.stringify(ui.activeFilters.pos),
+		sort: ui.sortBy.pos,
 	}),
 	() => {
 		if (searchTimeout) clearTimeout(searchTimeout)

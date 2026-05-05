@@ -17,6 +17,18 @@ from frappe import _
 from frappe.utils import add_to_date, flt, fmt_money, get_datetime_str, getdate, now, nowdate
 
 
+def validate_sales_invoice_stream(doc, method=None):
+	"""Hook: Sales Invoice before_submit. Auto-set transaction_stream if missing."""
+	if not doc.get("custom_transaction_stream"):
+		if hasattr(doc, "custom_transaction_stream"):
+			if doc.get("custom_layaway_reference"):
+				doc.custom_transaction_stream = "Layaway Deposit"
+			elif doc.is_pos:
+				doc.custom_transaction_stream = "Jewelry Sale"
+			else:
+				doc.custom_transaction_stream = "Jewelry Sale"
+
+
 @frappe.whitelist()
 def get_revenue_recognition(
 	start_date: str,

@@ -4,6 +4,7 @@ import click
 from frappe.commands import get_site, pass_context
 
 from zevar_core.migration.commands import import_legacy_data, show_mapping_info
+from zevar_core.rag.commands import build_rag_index, rag_stats, build_dev_index
 
 
 @click.command("fix-desktop-icons")
@@ -57,4 +58,4 @@ def fix_desktop_icons(context, verbose=False):
 		frappe.destroy()
 
 
-commands = [import_legacy_data, show_mapping_info, fix_desktop_icons]
+commands = [import_legacy_data, show_mapping_info, fix_desktop_icons, build_rag_index, rag_stats, build_dev_index]

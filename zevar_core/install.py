@@ -83,6 +83,58 @@ def create_required_modes_of_payment():
 		)
 		return
 
+	company = frappe.db.get_single_value("Global Defaults", "default_company")
+	abbr = frappe.get_cached_value("Company", company, "abbr") if company else None
+
+	cash_account = None
+	bank_account = None
+	if company:
+		cash_account = frappe.db.get_value(
+			"Account", {"account_type": "Cash", "company": company}, "name"
+		)
+		if not cash_account:
+			cash_account = frappe.db.get_value(
+				"Account",
+				{"account_name": "Cash", "company": company, "is_group": 0},
+				"name",
+			)
+		bank_accounts = frappe.get_all(
+			"Account",
+			filters={"account_type": "Bank", "company": company, "is_group": 0},
+			pluck="name",
+			limit=1,
+		)
+		bank_account = bank_accounts[0] if bank_accounts else cash_account
+
+	financier_map = {
+		"Synchrony": f"Asset — A/R Synchrony - {abbr}" if abbr else None,
+		"AFF": f"Asset — A/R AFF - {abbr}" if abbr else None,
+		"CIMA": f"Asset — A/R CIMA - {abbr}" if abbr else None,
+		"Progressive": f"Asset — A/R Progressive - {abbr}" if abbr else None,
+		"Snap": f"Asset — A/R Snap - {abbr}" if abbr else None,
+	}
+
+	account_map = {
+		"Cash": cash_account,
+		"Credit Card": bank_account,
+		"Debit Card": bank_account,
+		"Check": bank_account,
+		"Wire Transfer": bank_account,
+		"Zelle": cash_account,
+		"Gift Card": cash_account,
+		"Trade-In": cash_account,
+		"Apple Pay": bank_account,
+		"Google Pay": bank_account,
+		"Venmo": cash_account,
+		"Cash App": cash_account,
+		"Synchrony": financier_map.get("Synchrony"),
+		"AFF": financier_map.get("AFF"),
+		"CIMA": financier_map.get("CIMA"),
+		"Progressive": financier_map.get("Progressive"),
+		"Snap": financier_map.get("Snap"),
+		"In-House Finance": cash_account,
+	}
+
 	modes = [
 		{"mode_of_payment": "Cash", "type": "Cash"},
 		{"mode_of_payment": "Credit Card", "type": "Bank"},
@@ -105,12 +157,34 @@ def create_required_modes_of_payment():
 	]
 
 	for mode in modes:
-		if not frappe.db.exists("Mode of Payment", mode["mode_of_payment"]):
+		mode_name = mode["mode_of_payment"]
+		target_account = account_map.get(mode_name)
+
+		if frappe.db.exists("Mode of Payment", mode_name):
+			doc = frappe.get_doc("Mode of Payment", mode_name)
+		else:
 			doc = frappe.new_doc("Mode of Payment")
-			doc.mode_of_payment = mode["mode_of_payment"]
+			doc.mode_of_payment = mode_name
 			doc.type = mode["type"]
 			doc.enabled = 1
+
+		doc.type = mode["type"]
+
+		if company and target_account and frappe.db.exists("Account", target_account):
+			account_exists = False
+			for acc in doc.accounts:
+				if acc.company == company:
+					acc.default_account = target_account
+					account_exists = True
+					break
+
+			if not account_exists:
+				doc.append("accounts", {"company": company, "default_account": target_account})
+
+		try:
 			doc.save(ignore_permissions=True)
+		except Exception:
+			frappe.log_error(f"install: Failed to save Mode of Payment '{mode_name}'")
 
 	frappe.db.commit()  # nosemgrep (manual commit during install)
 

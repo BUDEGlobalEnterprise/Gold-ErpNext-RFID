@@ -11,7 +11,7 @@
  * - Employee / Employee Self Service: Limited POS access, own sales only
  */
 
-import { useSessionStore } from '@/stores/session'
+import { useSessionStore } from '@/stores/session.js'
 
 /**
  * Check if user can access Reports page

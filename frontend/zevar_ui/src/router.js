@@ -152,6 +152,12 @@ const routes = [
 		meta: { requiresAuth: true },
 	},
 	{
+		path: '/knowledge-base',
+		name: 'KnowledgeBase',
+		component: () => import('./pages/KnowledgeBase.vue'),
+		meta: { requiresAuth: true, requiresManagement: true },
+	},
+	{
 		path: '/opening',
 		name: 'POSOpening',
 		component: () => import('./pages/POSOpening.vue'),

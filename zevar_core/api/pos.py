@@ -126,6 +126,18 @@ def create_pos_invoice(
 	if not customer:
 		customer = frappe.db.get_single_value("Global Defaults", "default_customer") or "Walk-In Customer"
 
+	for pay in payments_list:
+		mode = pay.get("mode_of_payment") or pay.get("mode", "")
+		if mode and not frappe.db.exists("Mode of Payment", mode):
+			from zevar_core.install import create_required_modes_of_payment
+
+			create_required_modes_of_payment()
+			if not frappe.db.exists("Mode of Payment", mode):
+				frappe.throw(
+					_("Payment mode '{0}' is not set up. Please run migrate or contact admin.").format(mode),
+					frappe.ValidationError,
+				)
+
 	if not frappe.db.exists("Customer", customer):
 		if customer == "Walk-In Customer":
 			try:
@@ -231,45 +243,57 @@ def create_pos_invoice(
 			si.apply_discount_on = "Grand Total"
 			si.discount_amount = flt(discount_amount)
 
+		has_no_tax_field = hasattr(si, "custom_no_tax_override")
+		has_transaction_stream = hasattr(si, "custom_transaction_stream")
+
 		if is_tax_exempt:
-			# Clear any existing taxes and set override flag
 			si.taxes = []
-			si.custom_no_tax_override = 1
+			if has_no_tax_field:
+				si.custom_no_tax_override = 1
 		elif tax_template:
 			si.taxes_and_charges = tax_template
-			si.custom_no_tax_override = 0
+			if has_no_tax_field:
+				si.custom_no_tax_override = 0
 		else:
-			# Prevent auto-fetching company default if store has no tax template
 			si.taxes = []
 			si.taxes_and_charges = ""
-			si.custom_no_tax_override = 1
+			if has_no_tax_field:
+				si.custom_no_tax_override = 1
 
+		if has_transaction_stream and not si.get("custom_transaction_stream"):
+			si.custom_transaction_stream = "Jewelry Sale"
+
+		has_salesperson_splits = hasattr(si, "custom_salesperson_splits")
+		has_salesperson_fields = hasattr(si, "custom_salesperson_1")
 		for i, sp in enumerate(salesperson_data):
 			emp = sp.get("salesperson") or sp.get("employee")
 			split = flt(sp.get("split"))
-			si.append(
-				"custom_salesperson_splits",
-				{
-					"employee": emp,
-					"split_percent": split,
-				},
-			)
-			if i == 0:
-				si.custom_salesperson_1 = emp
-				si.custom_salesperson_1_split = split
-			elif i == 1:
-				si.custom_salesperson_2 = emp
-				si.custom_salesperson_2_split = split
-			elif i == 2:
-				si.custom_salesperson_3 = emp
-				si.custom_salesperson_3_split = split
-			elif i == 3:
-				si.custom_salesperson_4 = emp
-				si.custom_salesperson_4_split = split
+			if has_salesperson_splits:
+				si.append(
+					"custom_salesperson_splits",
+					{
+						"employee": emp,
+						"split_percent": split,
+					},
+				)
+			if has_salesperson_fields:
+				if i == 0:
+					si.custom_salesperson_1 = emp
+					si.custom_salesperson_1_split = split
+				elif i == 1:
+					si.custom_salesperson_2 = emp
+					si.custom_salesperson_2_split = split
+				elif i == 2:
+					si.custom_salesperson_3 = emp
+					si.custom_salesperson_3_split = split
+				elif i == 3:
+					si.custom_salesperson_4 = emp
+					si.custom_salesperson_4_split = split
 
-		if layaway_reference:
+		if layaway_reference and hasattr(si, "custom_layaway_reference"):
 			si.custom_layaway_reference = layaway_reference
 
+		has_trade_ins = hasattr(si, "custom_trade_ins")
 		for ti in trade_in_list:
 			trade_in_item = {
 				"trade_in_value": flt(ti.get("trade_in_value")),
@@ -277,20 +301,17 @@ def create_pos_invoice(
 				"manager_override": ti.get("manager_override"),
 				"override_reason": ti.get("override_reason"),
 			}
-			# Use first item from cart as new_item_code if not provided
 			if not ti.get("new_item_code") and items_list:
 				trade_in_item["new_item_code"] = items_list[0].get("item_code")
 
-			# Map description to original_item_code if it's a valid item code, though it's optional now
 			if ti.get("original_item_code"):
 				trade_in_item["original_item_code"] = ti.get("original_item_code")
 			elif ti.get("description"):
-				# If description is provided but not a valid item code, we can't put it in original_item_code (Link)
-				# but we can log it or put it in override_reason if blank
 				if not trade_in_item.get("override_reason"):
 					trade_in_item["override_reason"] = f"Trade-In Item: {ti.get('description')}"
 
-			si.append("custom_trade_ins", trade_in_item)
+			if has_trade_ins:
+				si.append("custom_trade_ins", trade_in_item)
 
 		# Add trade-in credit as a payment entry
 		total_trade_in_credit = (

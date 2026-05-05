@@ -319,7 +319,7 @@ const props = defineProps({
 const isEmbedded = computed(() => props.isEmbedded || route.meta?.fullPage === true)
 
 // Dark mode
-import { useUIStore } from '@/stores/ui'
+import { useUIStore } from '@/stores/ui.js'
 const uiStore = useUIStore()
 const isDark = ref(uiStore.isDark)
 function toggleTheme() {

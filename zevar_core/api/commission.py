@@ -81,7 +81,7 @@ def calculate_commissions(doc, method=None):
 
 	sales_persons = []
 	for row in doc.get("custom_salesperson_splits") or []:
-		if row.employee and flt(row.split_percent) > 0:
+		if hasattr(row, "employee") and row.employee and hasattr(row, "split_percent") and flt(row.split_percent) > 0:
 			sales_persons.append({"employee": row.employee, "split_percent": flt(row.split_percent)})
 
 	if not sales_persons:
