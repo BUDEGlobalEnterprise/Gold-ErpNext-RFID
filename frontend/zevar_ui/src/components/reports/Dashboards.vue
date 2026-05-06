@@ -64,5 +64,14 @@ const dashboards = [
 		text: 'text-purple-500',
 		description: 'New vs returning, avg lifetime value, layaway cohort retention, repair NPS.',
 	},
+	{
+		id: 'admin',
+		label: 'Live Monitor',
+		icon: 'visibility',
+		bg: 'bg-blue-500/10',
+		text: 'text-blue-500',
+		description:
+			'Real-time sales feed, active registers, tax override approvals, employee activity audit log.',
+	},
 ]
 </script>

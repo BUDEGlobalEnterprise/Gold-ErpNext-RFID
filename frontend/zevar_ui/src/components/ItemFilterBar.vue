@@ -346,8 +346,8 @@ import BaseFilterBar from './BaseFilterBar.vue'
 const props = defineProps({
 	context: {
 		type: String,
-		default: 'pos'
-	}
+		default: 'pos',
+	},
 })
 
 const ui = useUIStore()

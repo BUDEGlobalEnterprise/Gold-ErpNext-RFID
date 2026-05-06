@@ -3,7 +3,7 @@
 		<!-- ===== DESKTOP SIDEBAR (>= lg) ===== -->
 		<aside
 			ref="sidebarRef"
-			class="hidden lg:flex bg-white/40 dark:bg-warm-dark-900/60 backdrop-blur-xl border-r border-gray-200 dark:border-warm-border/50 flex-col z-30 relative"
+			class="hidden lg:flex bg-white/40 dark:bg-warm-dark-900/60 backdrop-blur-xl border-r border-gray-200 dark:border-warm-border/50 flex-col z-30 relative min-h-0"
 			:class="isResizing ? 'transition-none' : 'transition-all duration-300'"
 			:style="
 				isSidebarCollapsed
@@ -63,7 +63,7 @@
 				</button>
 			</div>
 
-			<div class="flex-1 flex flex-col overflow-hidden">
+			<div class="flex-1 flex flex-col overflow-hidden min-h-0">
 				<nav class="p-4 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
 					<template v-for="(section, groupIdx) in sidebarSections" :key="groupIdx">
 						<div class="space-y-1">
@@ -281,11 +281,19 @@
 										>${{ rate }}</span
 									>
 									<span
-										v-if="trend !== 'none'"
+										v-if="change != null"
 										class="text-[10px] font-bold"
-										:style="{ color: trend === 'up' ? '#10b981' : trend === 'down' ? '#ef4444' : '#9ca3af' }"
+										:style="{
+											color:
+												trend === 'up'
+													? '#10b981'
+													: trend === 'down'
+													? '#ef4444'
+													: '#9ca3af',
+										}"
 									>
-										{{ trend === 'up' ? '↑' : trend === 'down' ? '↓' : '●' }}{{ Math.abs(change) }}%
+										{{ trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'
+										}}{{ Math.abs(change).toFixed(2) }}%
 									</span>
 								</div>
 							</div>
@@ -547,11 +555,19 @@
 							>${{ rate }}</span
 						>
 						<span
-							v-if="trend !== 'none'"
+							v-if="change != null"
 							class="text-[8px] font-bold"
-							:style="{ color: trend === 'up' ? '#10b981' : trend === 'down' ? '#ef4444' : '#9ca3af' }"
+							:style="{
+								color:
+									trend === 'up'
+										? '#10b981'
+										: trend === 'down'
+										? '#ef4444'
+										: '#9ca3af',
+							}"
 						>
-							{{ trend === 'up' ? '↑' : trend === 'down' ? '↓' : '●' }}{{ Math.abs(change) }}%
+							{{ trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'
+							}}{{ Math.abs(change).toFixed(2) }}%
 						</span>
 					</div>
 				</div>
@@ -742,7 +758,7 @@
 		</aside>
 
 		<!-- AI Assistant Floating Panel -->
-		<AiAssistant />
+		<AiAssistant v-if="false" />
 	</div>
 </template>
 
@@ -756,7 +772,7 @@ import { createResource } from 'frappe-ui'
 import { onMounted, ref, computed, watch, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useBreakpoint } from '@/composables/useBreakpoint.js'
-import { canAccessReports } from '@/utils/permissions.js'
+import { canAccessReports, canAccessMonitor } from '@/utils/permissions.js'
 import CartSidebar from '@/components/CartSidebar.vue'
 import CheckoutModal from '@/components/CheckoutModal.vue'
 import AiAssistant from '@/components/ai/AiAssistant.vue'
@@ -899,6 +915,13 @@ const sidebarSections = computed(() => {
 			to: '/reports',
 			label: 'Reports',
 			icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+		})
+	}
+	if (canAccessMonitor()) {
+		sections[3].items.push({
+			to: '/reports/dashboards/admin',
+			label: 'Live Monitor',
+			icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z',
 		})
 	}
 	sections[3].items.push(
@@ -1082,16 +1105,49 @@ async function handleGlobalPaymentSuccess(result) {
 			}
 		} catch (err) {
 			console.error('Layaway creation error:', err)
-			const serverMsg = err?._server_messages || err?.message || 'Network error'
-			let displayMsg = serverMsg
-			try {
-				const msgs = JSON.parse(serverMsg)
-				displayMsg = msgs.map((m) => {
-					try { return JSON.parse(m).message } catch { return m }
-				}).join('\n')
-			} catch {
-				// serverMsg is already a string
+
+			// Extract the most specific error message available
+			let displayMsg = ''
+
+			// 1. Try the exception field directly (most specific)
+			if (err?.data?.exception) {
+				displayMsg = err.data.exception
 			}
+
+			// 2. Try parsing _server_messages for structured messages
+			if (!displayMsg) {
+				const rawServerMsg =
+					err?.data?._server_messages || err?._server_messages
+				if (rawServerMsg) {
+					try {
+						const msgs = JSON.parse(rawServerMsg)
+						displayMsg = msgs
+							.map((m) => {
+								try {
+									return JSON.parse(m).message || JSON.parse(m).title || m
+								} catch {
+									return m
+								}
+							})
+							.filter((m) => m && m !== 'ValidationError' && m !== 'frappe.exceptions.ValidationError')
+							.join('\n')
+					} catch {
+						displayMsg = rawServerMsg
+					}
+				}
+			}
+
+			// 3. Fallback to the message field
+			if (!displayMsg) {
+				displayMsg = err?.message || 'Network error'
+			}
+
+			// Strip class path from exception messages (e.g., "frappe.exceptions.ValidationError: Actual message")
+			const match = displayMsg.match(/^(?:[\w.]+(?:Error|Exception)):\s*(.+)$/s)
+			if (match) {
+				displayMsg = match[1]
+			}
+
 			alert('Layaway creation failed: ' + String(displayMsg).replace(/<[^>]+>/g, ''))
 			ui.closeLayawayPayment()
 		}

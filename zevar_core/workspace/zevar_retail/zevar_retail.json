@@ -1,277 +1,295 @@
 {
- "app": "zevar_core",
- "charts": [],
- "content": "[{\"id\":\"header-quick\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Quick Access</b></span>\",\"col\":12}},{\"id\":\"shortcuts\",\"type\":\"paragraph\",\"data\":{\"text\":\"Use keyboard shortcuts: <kbd>Alt+P</kbd> POS, <kbd>Alt+E</kbd> Portal, <kbd>Alt+L</kbd> Layaway, <kbd>Alt+R</kbd> Repairs\",\"col\":12}},{\"id\":\"sales-service\",\"type\":\"card\",\"data\":{\"card_name\":\"Sales & Service\",\"col\":4}},{\"id\":\"finance\",\"type\":\"card\",\"data\":{\"card_name\":\"Gift Cards & Finance\",\"col\":4}},{\"id\":\"inventory\",\"type\":\"card\",\"data\":{\"card_name\":\"Inventory & Pricing\",\"col\":4}},{\"id\":\"settings\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}}]",
- "creation": "2026-03-17 00:00:00.000000",
- "docstatus": 0,
- "doctype": "Workspace",
- "for_user": "",
- "hide_custom": 0,
- "icon": "shopping-bag",
- "idx": 0,
- "is_hidden": 0,
- "label": "Zevar Retail",
- "links": [
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sales & Service",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Layaway Contract",
-   "link_count": 0,
-   "link_to": "Layaway Contract",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Repair Order",
-   "link_count": 0,
-   "link_to": "Repair Order",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Trade In Record",
-   "link_count": 0,
-   "link_to": "Trade In Record",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Jewelry Appraisal",
-   "link_count": 0,
-   "link_to": "Jewelry Appraisal",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sales Commission Split",
-   "link_count": 0,
-   "link_to": "Sales Commission Split",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Gift Cards & Finance",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Gift Card",
-   "link_count": 0,
-   "link_to": "Gift Card",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "In House Finance Account",
-   "link_count": 0,
-   "link_to": "In House Finance Account",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Customer Ledger Entry",
-   "link_count": 0,
-   "link_to": "Customer Ledger Entry",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Inventory & Pricing",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Gold Rate Log",
-   "link_count": 0,
-   "link_to": "Gold Rate Log",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Gold Settings",
-   "link_count": 0,
-   "link_to": "Gold Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Store Location",
-   "link_count": 0,
-   "link_to": "Store Location",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Trending Item",
-   "link_count": 0,
-   "link_to": "Trending Item",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Settings",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Commission Rule",
-   "link_count": 0,
-   "link_to": "Commission Rule",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Commission Range",
-   "link_count": 0,
-   "link_to": "Commission Range",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Repair Type",
-   "link_count": 0,
-   "link_to": "Repair Type",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Zevar Metal",
-   "link_count": 0,
-   "link_to": "Zevar Metal",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Zevar Purity",
-   "link_count": 0,
-   "link_to": "Zevar Purity",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Zevar Gemstone Detail",
-   "link_count": 0,
-   "link_to": "Zevar Gemstone Detail",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Desk Shortcuts",
-   "link_count": 0,
-   "link_to": "Zevar Desk Shortcut",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  }
- ],
- "modified": "2026-03-17 00:00:00.000000",
- "modified_by": "Administrator",
- "module": "Unified Retail Management System",
- "name": "Zevar Retail",
- "owner": "Administrator",
- "parent_page": "",
- "public": 1,
- "quick_lists": [],
- "restrict_to_domain": "",
- "roles": [],
- "sequence_id": 1.0,
- "shortcuts": [
-  {
-   "color": "#2563eb",
-   "doc_view": "",
-   "format": "",
-   "label": "POS Terminal",
-   "link_to": "/pos",
-   "type": "URL"
-  },
-  {
-   "color": "#6b7280",
-   "doc_view": "",
-   "format": "",
-   "label": "Employee Portal",
-   "link_to": "/employee-portal",
-   "type": "URL"
-  },
-  {
-   "color": "#8b5cf6",
-   "doc_view": "",
-   "format": "",
-   "label": "Custom Desk",
-   "link_to": "/zevar-desk",
-   "type": "URL"
-  }
- ],
- "title": "Zevar Retail",
- "type": "Workspace"
+  "app": "zevar_core",
+  "charts": [],
+  "content": "[{\"id\":\"header-quick\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Quick Access</b></span>\",\"col\":12}},{\"id\":\"shortcuts\",\"type\":\"paragraph\",\"data\":{\"text\":\"Use keyboard shortcuts: <kbd>Alt+P</kbd> POS, <kbd>Alt+E</kbd> Portal, <kbd>Alt+L</kbd> Layaway, <kbd>Alt+R</kbd> Repairs\",\"col\":12}},{\"id\":\"sales-service\",\"type\":\"card\",\"data\":{\"card_name\":\"Sales & Service\",\"col\":4}},{\"id\":\"finance\",\"type\":\"card\",\"data\":{\"card_name\":\"Gift Cards & Finance\",\"col\":4}},{\"id\":\"inventory\",\"type\":\"card\",\"data\":{\"card_name\":\"Inventory & Pricing\",\"col\":4}},{\"id\":\"settings\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}}]",
+  "creation": "2026-03-17 00:00:00.000000",
+  "docstatus": 0,
+  "doctype": "Workspace",
+  "for_user": "",
+  "hide_custom": 0,
+  "icon": "shopping-bag",
+  "idx": 0,
+  "is_hidden": 0,
+  "label": "Zevar Retail",
+  "links": [
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Sales & Service",
+      "link_count": 0,
+      "onboard": 0,
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Layaway Contract",
+      "link_count": 0,
+      "link_to": "Layaway Contract",
+      "link_type": "DocType",
+      "onboard": 1,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Repair Order",
+      "link_count": 0,
+      "link_to": "Repair Order",
+      "link_type": "DocType",
+      "onboard": 1,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Trade In Record",
+      "link_count": 0,
+      "link_to": "Trade In Record",
+      "link_type": "DocType",
+      "onboard": 1,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Jewelry Appraisal",
+      "link_count": 0,
+      "link_to": "Jewelry Appraisal",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Sales Commission Split",
+      "link_count": 0,
+      "link_to": "Sales Commission Split",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Gift Cards & Finance",
+      "link_count": 0,
+      "onboard": 0,
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Gift Card",
+      "link_count": 0,
+      "link_to": "Gift Card",
+      "link_type": "DocType",
+      "onboard": 1,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "In House Finance Account",
+      "link_count": 0,
+      "link_to": "In House Finance Account",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Customer Ledger Entry",
+      "link_count": 0,
+      "link_to": "Customer Ledger Entry",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Inventory & Pricing",
+      "link_count": 0,
+      "onboard": 0,
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Gold Rate Log",
+      "link_count": 0,
+      "link_to": "Gold Rate Log",
+      "link_type": "DocType",
+      "onboard": 1,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Gold Settings",
+      "link_count": 0,
+      "link_to": "Gold Settings",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Store Location",
+      "link_count": 0,
+      "link_to": "Store Location",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Trending Item",
+      "link_count": 0,
+      "link_to": "Trending Item",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Settings",
+      "link_count": 0,
+      "onboard": 0,
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Commission Rule",
+      "link_count": 0,
+      "link_to": "Commission Rule",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Commission Range",
+      "link_count": 0,
+      "link_to": "Commission Range",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Repair Type",
+      "link_count": 0,
+      "link_to": "Repair Type",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Zevar Metal",
+      "link_count": 0,
+      "link_to": "Zevar Metal",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Zevar Purity",
+      "link_count": 0,
+      "link_to": "Zevar Purity",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Zevar Gemstone Detail",
+      "link_count": 0,
+      "link_to": "Zevar Gemstone Detail",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Desk Shortcuts",
+      "link_count": 0,
+      "link_to": "Zevar Desk Shortcut",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Monitoring",
+      "link_count": 0,
+      "onboard": 0,
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Live Monitor",
+      "link_count": 0,
+      "link_to": "admin_monitor",
+      "link_type": "Page",
+      "onboard": 0,
+      "type": "Link"
+    }
+  ],
+  "modified": "2026-03-17 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Unified Retail Management System",
+  "name": "Zevar Retail",
+  "owner": "Administrator",
+  "parent_page": "",
+  "public": 1,
+  "quick_lists": [],
+  "restrict_to_domain": "",
+  "roles": [],
+  "sequence_id": 1.0,
+  "shortcuts": [
+    {
+      "color": "#2563eb",
+      "doc_view": "",
+      "format": "",
+      "label": "POS Terminal",
+      "link_to": "/pos",
+      "type": "URL"
+    },
+    {
+      "color": "#6b7280",
+      "doc_view": "",
+      "format": "",
+      "label": "Employee Portal",
+      "link_to": "/employee-portal",
+      "type": "URL"
+    },
+    {
+      "color": "#8b5cf6",
+      "doc_view": "",
+      "format": "",
+      "label": "Custom Desk",
+      "link_to": "/zevar-desk",
+      "type": "URL"
+    }
+  ],
+  "title": "Zevar Retail",
+  "type": "Workspace"
 }

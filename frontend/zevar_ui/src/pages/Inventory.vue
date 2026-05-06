@@ -13,6 +13,54 @@
 
 				<div class="flex items-center gap-2">
 					<button
+						@click="refreshData"
+						class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700"
+						title="Refresh"
+					>
+						<svg
+							class="w-4 h-4 text-gray-500"
+							:class="{ 'animate-spin': inventoryResource.loading }"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357 2m15.357 2H15"
+							/>
+						</svg>
+					</button>
+					<button
+						@click="showStockAdjust = true"
+						class="hidden sm:flex items-center gap-1.5 px-3 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition"
+					>
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+							/>
+						</svg>
+						Adjust Stock
+					</button>
+					<button
+						@click="showReductions = true"
+						class="hidden sm:flex items-center gap-1.5 px-3 py-2 border border-amber-300 bg-amber-50 text-amber-700 rounded-lg text-xs font-bold hover:bg-amber-100 transition"
+					>
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"
+							/>
+						</svg>
+						Reductions
+					</button>
+					<button
 						@click="showQuickAdd = true"
 						class="hidden sm:flex items-center gap-1.5 px-3 py-2 bg-[#D4AF37] text-white rounded-lg text-xs font-bold hover:bg-[#C4A030] transition"
 					>
@@ -27,7 +75,7 @@
 						Quick Add
 					</button>
 					<button
-						@click="showPushToStores = true"
+						@click="openPushForSelected"
 						class="hidden sm:flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition"
 					>
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,13 +86,13 @@
 								d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
 							/>
 						</svg>
-						Push to Stores
+						Push
 					</button>
 					<button
 						@click="showTransferModal = true"
 						class="hidden sm:flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-lg text-xs font-bold hover:bg-gray-50 transition"
 					>
-						New Transfer
+						Transfer
 					</button>
 					<button
 						@click="showConsignment = true"
@@ -80,16 +128,28 @@
 
 			<div v-if="mobileMenuOpen" class="md:hidden grid grid-cols-2 gap-2 mb-4">
 				<button
+					@click="showStockAdjust = true; mobileMenuOpen = false"
+					class="py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold"
+				>
+					Adjust Stock
+				</button>
+				<button
+					@click="showReductions = true; mobileMenuOpen = false"
+					class="py-2 bg-amber-50 text-amber-700 border border-amber-300 rounded-lg text-xs font-bold"
+				>
+					Reductions
+				</button>
+				<button
 					@click="showQuickAdd = true; mobileMenuOpen = false"
 					class="py-2 bg-[#D4AF37] text-white rounded-lg text-xs font-bold"
 				>
 					Quick Add
 				</button>
 				<button
-					@click="showPushToStores = true; mobileMenuOpen = false"
+					@click="openPushForSelected(); mobileMenuOpen = false"
 					class="py-2 bg-blue-600 text-white rounded-lg text-xs font-bold"
 				>
-					Push to Stores
+					Push
 				</button>
 				<button
 					@click="showTransferModal = true; mobileMenuOpen = false"
@@ -205,6 +265,10 @@
 								v-for="item in filteredItems"
 								:key="item.code"
 								class="border-b border-gray-100 dark:border-warm-border/50 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors cursor-pointer"
+								:class="{
+									'bg-emerald-50/50 dark:bg-emerald-900/10':
+										selectedItem?.code === item.code,
+								}"
 								@click="selectedItem = item"
 							>
 								<td class="px-4 py-3">
@@ -286,6 +350,25 @@
 								</td>
 								<td class="px-4 py-3 text-center hidden lg:table-cell">
 									<div class="flex items-center justify-center gap-1">
+										<button
+											@click.stop="openEdit(item)"
+											class="p-1 hover:bg-blue-50 dark:hover:bg-warm-dark-700 rounded"
+											title="Edit"
+										>
+											<svg
+												class="w-4 h-4 text-blue-500"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+												/>
+											</svg>
+										</button>
 										<button
 											@click.stop="openLifecycle(item)"
 											class="p-1 hover:bg-gray-100 dark:hover:bg-warm-dark-700 rounded"
@@ -391,6 +474,88 @@
 									>{{ item.stock }} pcs</span
 								>
 							</div>
+							<div
+								class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition flex items-center justify-center opacity-0 group-hover:opacity-100"
+							>
+								<div class="flex gap-1">
+									<button
+										@click.stop="openEdit(item)"
+										class="p-1.5 bg-white/90 rounded-full hover:bg-white"
+										title="Edit"
+									>
+										<svg
+											class="w-3.5 h-3.5 text-blue-600"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+											/>
+										</svg>
+									</button>
+									<button
+										@click.stop="openLifecycle(item)"
+										class="p-1.5 bg-white/90 rounded-full hover:bg-white"
+										title="Lifecycle"
+									>
+										<svg
+											class="w-3.5 h-3.5 text-gray-700"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+											/>
+										</svg>
+									</button>
+									<button
+										@click.stop="openReserve(item)"
+										class="p-1.5 bg-white/90 rounded-full hover:bg-white"
+										title="Reserve"
+									>
+										<svg
+											class="w-3.5 h-3.5 text-gray-700"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+											/>
+										</svg>
+									</button>
+									<button
+										@click.stop="openDamage(item)"
+										class="p-1.5 bg-white/90 rounded-full hover:bg-white"
+										title="Damage"
+									>
+										<svg
+											class="w-3.5 h-3.5 text-gray-700"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+											/>
+										</svg>
+									</button>
+								</div>
+							</div>
 						</div>
 						<div class="p-3">
 							<div
@@ -424,9 +589,12 @@
 				v-if="selectedItem"
 				:item="selectedItem"
 				@close="selectedItem = null"
-				@reserve="openReserve(selectedItem)"
-				@damage="openDamage(selectedItem)"
-				@lifecycle="openLifecycle(selectedItem)"
+				@reserve="openReserve(selectedItem); selectedItem = null"
+				@damage="openDamage(selectedItem); selectedItem = null"
+				@lifecycle="openLifecycle(selectedItem); selectedItem = null"
+				@push="openPushForItem(selectedItem); selectedItem = null"
+				@transfer="showTransferModal = true; selectedItem = null"
+				@edit="openEdit(selectedItem); selectedItem = null"
 			/>
 		</div>
 
@@ -471,12 +639,24 @@
 			:serial-no="lifecycleSerialNo"
 			@close="showLifecycle = false"
 		/>
+		<StockAdjustModal
+			v-if="showStockAdjust"
+			@close="showStockAdjust = false"
+			@completed="onDataChanged"
+		/>
+		<StockReductionsPanel v-if="showReductions" @close="showReductions = false" />
+		<ItemEditModal
+			v-if="showEditItem && editItemCode"
+			:item-code="editItemCode"
+			@close="showEditItem = false"
+			@saved="onDataChanged"
+		/>
 	</AppLayout>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
-import { createResource } from 'frappe-ui'
+import { createResource, toast } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
 import ItemFilterBar from '@/components/ItemFilterBar.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
@@ -489,6 +669,10 @@ import ConsignmentModal from '@/components/ConsignmentModal.vue'
 import ReservePieceModal from '@/components/ReservePieceModal.vue'
 import DamageReportModal from '@/components/DamageReportModal.vue'
 import PieceLifecyclePanel from '@/components/PieceLifecyclePanel.vue'
+import StockAdjustModal from '@/components/StockAdjustModal.vue'
+import StockReductionsPanel from '@/components/StockReductionsPanel.vue'
+import ItemActionDrawer from '@/components/ItemActionDrawer.vue'
+import ItemEditModal from '@/components/ItemEditModal.vue'
 
 const ui = useUIStore()
 const session = useSessionStore()
@@ -505,9 +689,13 @@ const showConsignment = ref(false)
 const showReserve = ref(false)
 const showDamage = ref(false)
 const showLifecycle = ref(false)
+const showStockAdjust = ref(false)
+const showReductions = ref(false)
+const showEditItem = ref(false)
 const reserveSerialNo = ref('')
 const damageSerialNo = ref('')
 const lifecycleSerialNo = ref('')
+const editItemCode = ref('')
 const pushItemCode = ref('')
 
 const inventoryResource = createResource({
@@ -543,7 +731,7 @@ const filteredItems = computed(() => {
 	let items = [...inventoryData.value]
 	const f = ui.activeFilters.inventory || {}
 	const sortBy = ui.sortBy.inventory || ''
-	
+
 	if (f.custom_metal_type) items = items.filter((i) => i.metal === f.custom_metal_type)
 	if (f.custom_jewelry_type) items = items.filter((i) => i.category === f.custom_jewelry_type)
 	if (f.in_stock_only) items = items.filter((i) => i.stock > 0)
@@ -552,22 +740,31 @@ const filteredItems = computed(() => {
 	if (f.price_min) items = items.filter((i) => i.price >= f.price_min)
 	if (f.price_max) items = items.filter((i) => i.price <= f.price_max)
 	if (f.custom_purity) items = items.filter((i) => i.purity === f.custom_purity)
-	
+
 	if (ui.searchQuery) {
 		const q = ui.searchQuery.toLowerCase()
 		items = items.filter(
 			(i) => i.name.toLowerCase().includes(q) || i.code.toLowerCase().includes(q)
 		)
 	}
-	
+
 	if (sortBy === 'price_asc') items.sort((a, b) => a.price - b.price)
 	else if (sortBy === 'price_desc') items.sort((a, b) => b.price - a.price)
 	else if (sortBy === 'weight_asc') items.sort((a, b) => a.weight - b.weight)
 	else if (sortBy === 'weight_desc') items.sort((a, b) => b.weight - a.weight)
 	else if (sortBy === 'name_asc') items.sort((a, b) => a.name.localeCompare(b.name))
-	
+
 	return items
 })
+
+function refreshData() {
+	inventoryResource.fetch()
+}
+
+function openEdit(item) {
+	editItemCode.value = item.code
+	showEditItem.value = true
+}
 
 function openLifecycle(item) {
 	lifecycleSerialNo.value = item.serialNo || item.code
@@ -581,6 +778,22 @@ function openDamage(item) {
 	damageSerialNo.value = item.serialNo || item.code
 	showDamage.value = true
 }
+function openPushForItem(item) {
+	if (!item) {
+		toast({ title: 'Select an item first', icon: 'info', intent: 'warning' })
+		return
+	}
+	pushItemCode.value = item.code
+	showPushToStores.value = true
+}
+function openPushForSelected() {
+	if (selectedItem.value) {
+		openPushForItem(selectedItem.value)
+	} else {
+		pushItemCode.value = ''
+		showPushToStores.value = true
+	}
+}
 function onDataChanged() {
 	inventoryResource.fetch()
 	showQuickAdd.value = false
@@ -589,6 +802,7 @@ function onDataChanged() {
 	showConsignment.value = false
 	showReserve.value = false
 	showDamage.value = false
+	showEditItem.value = false
 	selectedItem.value = null
 }
 

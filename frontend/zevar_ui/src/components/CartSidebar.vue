@@ -31,7 +31,7 @@
 					:class="[
 						persistent
 							? 'flex flex-col flex-1 h-full min-h-0 overflow-hidden bg-transparent'
-							: 'fixed bottom-0 left-0 right-0 z-50 max-h-[85vh] bg-white dark:bg-warm-card rounded-t-2xl shadow-2xl flex flex-col border-t border-gray-200 dark:border-warm-border min-h-0',
+							: 'fixed bottom-0 left-0 right-0 z-50 max-h-[85vh] bg-white dark:bg-warm-card rounded-t-2xl shadow-2xl flex flex-col border-t border-gray-200 dark:border-warm-border min-h-0 overflow-hidden',
 					]"
 				>
 					<!-- Cart Header -->
@@ -409,7 +409,7 @@
 							</router-link>
 							<button
 								v-else
-								@click="showCheckout = true"
+								@click="showCheckout = true; ui.closeLayawayPayment()"
 								:disabled="!isCheckoutReady"
 								class="w-full py-3 rounded-lg font-bold shadow-lg transition-all flex items-center justify-center gap-2"
 								:class="
@@ -437,6 +437,7 @@ import CheckoutModal from '@/components/CheckoutModal.vue'
 import CustomerSelector from '@/components/CustomerSelector.vue'
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUIStore } from '@/stores/ui.js'
 
 const props = defineProps({
 	isOpen: Boolean,
@@ -445,11 +446,14 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 const cart = useCartStore()
 const posSession = usePosSessionStore()
+const ui = useUIStore()
 const router = useRouter()
 const showCheckout = ref(false)
 
 function startLayaway() {
 	emit('close')
+	showCheckout.value = false
+	ui.closeLayawayPayment()
 	const query = { action: 'new' }
 	if (cart.customer) {
 		query.customer = cart.customer.name || cart.customer.customer_name

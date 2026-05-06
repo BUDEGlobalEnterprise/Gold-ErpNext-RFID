@@ -61,7 +61,9 @@ def list_articles(
 
 
 @frappe.whitelist(methods=["POST"])
-def create_article(title: str, content: str, category: str = "FAQ", visibility: str = "Internal", tags: str | None = None) -> dict:
+def create_article(
+	title: str, content: str, category: str = "FAQ", visibility: str = "Internal", tags: str | None = None
+) -> dict:
 	"""Create a new knowledge base article.
 
 	Args:

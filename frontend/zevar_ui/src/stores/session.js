@@ -40,6 +40,46 @@ export const useSessionStore = defineStore('session', () => {
 			: null
 	)
 
+	// POS session state (active cash register)
+	const hasActiveSession = ref(false)
+	const activeSessionData = ref(null)
+
+	const posSessionResource = createResource({
+		url: 'zevar_core.api.pos_session.get_session_status',
+		onSuccess(data) {
+			if (data) {
+				hasActiveSession.value = data.has_active_session || false
+				activeSessionData.value = data.session || null
+			}
+		},
+	})
+
+	function checkPosSession() {
+		posSessionResource.fetch()
+	}
+
+	// Realtime event state for manager monitoring
+	const latestSaleEvent = ref(null)
+	const latestSessionEvent = ref(null)
+
+	function startSalesMonitoring() {
+		if (typeof frappe !== 'undefined' && frappe.realtime) {
+			frappe.realtime.on('pos_sale_event', (data) => {
+				latestSaleEvent.value = data
+			})
+			frappe.realtime.on('pos_session_event', (data) => {
+				latestSessionEvent.value = data
+			})
+		}
+	}
+
+	function stopSalesMonitoring() {
+		if (typeof frappe !== 'undefined' && frappe.realtime) {
+			frappe.realtime.off('pos_sale_event')
+			frappe.realtime.off('pos_session_event')
+		}
+	}
+
 	// Computed role checks
 	const isAdmin = computed(() => {
 		return (
@@ -193,11 +233,19 @@ export const useSessionStore = defineStore('session', () => {
 		isManager,
 		currentWarehouse,
 		currentStoreLocation,
+		hasActiveSession,
+		activeSessionData,
+		posSessionResource,
 		userResource,
 		logoutResource,
 		hasRole,
 		hasAnyRole,
 		setWarehouse,
 		setStoreLocation,
+		checkPosSession,
+		latestSaleEvent,
+		latestSessionEvent,
+		startSalesMonitoring,
+		stopSalesMonitoring,
 	}
 })

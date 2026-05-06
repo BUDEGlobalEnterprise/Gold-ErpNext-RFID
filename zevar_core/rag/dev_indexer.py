@@ -97,11 +97,13 @@ def build_index():
 			rel_path = config_file
 			with open(fpath) as f:
 				content = f.read()
-			chunks.append({
-				"id": f"config_{config_file.replace('.', '_')}",
-				"text": f"File: {config_file}\n{content[:2000]}",
-				"metadata": {"file_path": rel_path, "type": "config", "name": config_file},
-			})
+			chunks.append(
+				{
+					"id": f"config_{config_file.replace('.', '_')}",
+					"text": f"File: {config_file}\n{content[:2000]}",
+					"metadata": {"file_path": rel_path, "type": "config", "name": config_file},
+				}
+			)
 
 	print(f"\nTotal chunks to index: {len(chunks)}")
 
@@ -160,12 +162,14 @@ def search_code(query: str, n_results: int = 10, file_type: str | None = None) -
 		for i, doc_id in enumerate(results["ids"][0]):
 			distance = results["distances"][0][i]
 			similarity = 1.0 - (distance / 2.0)
-			output.append({
-				"id": doc_id,
-				"text": results["documents"][0][i] if results.get("documents") else "",
-				"metadata": results["metadatas"][0][i] if results.get("metadatas") else {},
-				"similarity": round(similarity, 4),
-			})
+			output.append(
+				{
+					"id": doc_id,
+					"text": results["documents"][0][i] if results.get("documents") else "",
+					"metadata": results["metadatas"][0][i] if results.get("metadatas") else {},
+					"similarity": round(similarity, 4),
+				}
+			)
 
 	return output
 
@@ -185,21 +189,23 @@ def _parse_python_file(fpath: str, rel_path: str) -> list[dict]:
 
 	module_doc = ast.get_docstring(tree)
 	if module_doc:
-		chunks.append({
-			"id": f"py:{rel_path}:module",
-			"text": f"File: {rel_path}\nModule docstring: {module_doc}",
-			"metadata": {"file_path": rel_path, "type": "python", "name": rel_path, "kind": "module"},
-		})
+		chunks.append(
+			{
+				"id": f"py:{rel_path}:module",
+				"text": f"File: {rel_path}\nModule docstring: {module_doc}",
+				"metadata": {"file_path": rel_path, "type": "python", "name": rel_path, "kind": "module"},
+			}
+		)
 
 	for node in ast.iter_child_nodes(tree):
-		if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+		if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
 			chunks.append(_chunk_from_ast_node(node, rel_path, "function", source))
-		elif isinstance(node, (ast.ClassDef,)):
+		elif isinstance(node, ast.ClassDef):
 			# Add class itself
 			chunks.append(_chunk_from_ast_node(node, rel_path, "class", source))
 			# Add methods
 			for method in node.body:
-				if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef)):
+				if isinstance(method, ast.FunctionDef | ast.AsyncFunctionDef):
 					chunks.append(_chunk_from_ast_node(method, rel_path, "method", source, parent=node.name))
 
 	return chunks
@@ -264,19 +270,28 @@ def _parse_vue_file(fpath: str, rel_path: str) -> list[dict]:
 
 	# Index script section (most useful for code search)
 	if sections["script"]:
-		chunks.append({
-			"id": f"vue:{rel_path}:script",
-			"text": f"File: {rel_path}\nComponent: {component_name}\nScript:\n{sections['script'][:3000]}",
-			"metadata": {"file_path": rel_path, "type": "vue", "name": component_name, "kind": "script"},
-		})
+		chunks.append(
+			{
+				"id": f"vue:{rel_path}:script",
+				"text": f"File: {rel_path}\nComponent: {component_name}\nScript:\n{sections['script'][:3000]}",
+				"metadata": {"file_path": rel_path, "type": "vue", "name": component_name, "kind": "script"},
+			}
+		)
 
 	# Index template (useful for finding UI patterns)
 	if sections["template"]:
-		chunks.append({
-			"id": f"vue:{rel_path}:template",
-			"text": f"File: {rel_path}\nComponent: {component_name}\nTemplate:\n{sections['template'][:2000]}",
-			"metadata": {"file_path": rel_path, "type": "vue", "name": component_name, "kind": "template"},
-		})
+		chunks.append(
+			{
+				"id": f"vue:{rel_path}:template",
+				"text": f"File: {rel_path}\nComponent: {component_name}\nTemplate:\n{sections['template'][:2000]}",
+				"metadata": {
+					"file_path": rel_path,
+					"type": "vue",
+					"name": component_name,
+					"kind": "template",
+				},
+			}
+		)
 
 	return chunks
 
@@ -313,20 +328,25 @@ def _parse_doctype_json(fpath: str, rel_path: str) -> list[dict]:
 	if field_summary:
 		text_parts.append(f"Fields ({len(field_summary)}):\n" + "\n".join(field_summary[:50]))
 	if data.get("permissions"):
-		perms = [f"{p.get('role', '')} ({'R' if p.get('read') else ''}{'W' if p.get('write') else ''}{'C' if p.get('create') else ''}{'D' if p.get('delete') else ''})" for p in data["permissions"][:10]]
+		perms = [
+			f"{p.get('role', '')} ({'R' if p.get('read') else ''}{'W' if p.get('write') else ''}{'C' if p.get('create') else ''}{'D' if p.get('delete') else ''})"
+			for p in data["permissions"][:10]
+		]
 		text_parts.append(f"Permissions: {', '.join(perms)}")
 
-	chunks.append({
-		"id": f"doctype:{rel_path}",
-		"text": "\n".join(text_parts),
-		"metadata": {
-			"file_path": rel_path,
-			"type": "doctype",
-			"name": doctype_name,
-			"kind": "schema",
-			"field_count": len(fields),
-		},
-	})
+	chunks.append(
+		{
+			"id": f"doctype:{rel_path}",
+			"text": "\n".join(text_parts),
+			"metadata": {
+				"file_path": rel_path,
+				"type": "doctype",
+				"name": doctype_name,
+				"kind": "schema",
+				"field_count": len(fields),
+			},
+		}
+	)
 
 	return chunks
 

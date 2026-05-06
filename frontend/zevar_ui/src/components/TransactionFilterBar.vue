@@ -305,7 +305,7 @@ function applyDatePreset(preset) {
 		const to = new Date()
 		const from = new Date()
 		from.setDate(to.getDate() - preset.days)
-		
+
 		ui.setFilter('transactions', 'from_date', from.toISOString().split('T')[0])
 		ui.setFilter('transactions', 'to_date', to.toISOString().split('T')[0])
 		ui.setFilter('transactions', 'date_preset', preset.label)

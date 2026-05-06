@@ -94,6 +94,16 @@ def create_quick_layaway(
 	in addition to the standard contract fields.
 	"""
 	items_list = frappe.parse_json(items) if isinstance(items, str) else items
+
+	# Walk-in customers are not eligible for layaway
+	if not customer or customer == "Walk-In Customer":
+		frappe.throw(
+			_(
+				"Walk-In customers cannot use layaway. Please select a registered customer with contact details."
+			),
+			frappe.ValidationError,
+		)
+
 	total = sum(flt(item.get("qty", 1)) * flt(item.get("rate")) for item in items_list)
 	down_payment = (
 		flt(initial_payment) if initial_payment is not None else total * (flt(down_payment_percent) / 100)

@@ -6,7 +6,7 @@ Replaces the multi-step legacy item addition workflow with a single-call API.
 
 import frappe
 from frappe import _
-from frappe.utils import nowdate
+from frappe.utils import cint, flt, nowdate
 
 _JEWELRY_TYPE_CODES = {
 	"Rings": "RNG",
@@ -276,3 +276,151 @@ def _create_stock_entry(item_code: str, warehouse: str, qty: int) -> bool:
 	se.insert()
 	se.submit()
 	return True
+
+
+@frappe.whitelist(methods=["POST"])
+def pos_quick_add_item(
+	item_name: str,
+	metal_type: str | None = None,
+	purity: str | None = None,
+	jewelry_type: str = "Other",
+	gross_weight: float = 0,
+	msrp: float = 0,
+	warehouse: str | None = None,
+	qty: int = 1,
+) -> dict:
+	"""
+	POS-specific item creation with relaxed permissions for Sales User role.
+
+	Allows POS operators to create items directly from the terminal.
+	Delegates to quick_add_item after role validation.
+	"""
+	allowed_roles = {"Sales User", "Sales Manager", "Store Manager", "POS Manager", "System Manager"}
+	if not (allowed_roles & set(frappe.get_roles())):
+		frappe.throw(_("You don't have permission to create items from POS."), frappe.PermissionError)
+
+	return quick_add_item(
+		item_name=item_name,
+		metal_type=metal_type,
+		purity=purity,
+		jewelry_type=jewelry_type,
+		gross_weight=gross_weight,
+		msrp=msrp,
+		warehouse=warehouse,
+		qty=qty,
+	)
+
+
+@frappe.whitelist(methods=["POST"])
+def update_item(
+	item_code: str,
+	item_name: str | None = None,
+	vendor: str | None = None,
+	vendor_sku: str | None = None,
+	metal_type: str | None = None,
+	purity: str | None = None,
+	jewelry_type: str | None = None,
+	jewelry_subtype: str | None = None,
+	product_type: str | None = None,
+	gender: str | None = None,
+	gross_weight: float | None = None,
+	stone_weight: float | None = None,
+	msrp: float | None = None,
+	cost_price: float | None = None,
+	barcode: str | None = None,
+	rfid_epc: str | None = None,
+	description: str | None = None,
+	country_of_origin: str | None = None,
+	material_color: str | None = None,
+	finish: str | None = None,
+	plating: str | None = None,
+	size: str | None = None,
+	chain_type: str | None = None,
+	clasp_type: str | None = None,
+	length_value: float | None = None,
+	length_unit: str | None = None,
+	width_value: float | None = None,
+	width_unit: str | None = None,
+	standard_rate: float | None = None,
+	image: str | None = None,
+	gemstones: str | None = None,
+	**_kwargs,
+) -> dict:
+	allowed_roles = {"Sales Manager", "Store Manager", "System Manager"}
+	if not (allowed_roles & set(frappe.get_roles())):
+		frappe.throw(_("You don't have permission to update items."), frappe.PermissionError)
+
+	if not frappe.db.exists("Item", item_code):
+		frappe.throw(_("Item {0} not found").format(item_code))
+
+	doc = frappe.get_doc("Item", item_code)
+
+	field_map = {
+		"item_name": item_name,
+		"custom_vendor": vendor,
+		"custom_vendor_sku": vendor_sku,
+		"custom_metal_type": metal_type,
+		"custom_purity": purity,
+		"custom_jewelry_type": jewelry_type,
+		"custom_jewelry_subtype": jewelry_subtype,
+		"custom_product_type": product_type,
+		"custom_gender": gender,
+		"custom_gross_weight_g": gross_weight,
+		"custom_stone_weight_g": stone_weight,
+		"custom_msrp": msrp,
+		"custom_cost_price": cost_price,
+		"custom_barcode": barcode,
+		"custom_rfid_epc": rfid_epc,
+		"description": description,
+		"custom_country_of_origin": country_of_origin,
+		"custom_material_color": material_color,
+		"custom_finish": finish,
+		"custom_plating": plating,
+		"custom_size": size,
+		"custom_chain_type": chain_type,
+		"custom_clasp_type": clasp_type,
+		"custom_length_value": length_value,
+		"custom_length_unit": length_unit,
+		"custom_width_value": width_value,
+		"custom_width_unit": width_unit,
+		"standard_rate": standard_rate,
+		"image": image,
+	}
+
+	if jewelry_type:
+		doc.item_group = _get_item_group(jewelry_type)
+
+	for field, value in field_map.items():
+		if value is not None:
+			setattr(doc, field, value)
+
+	if gemstones:
+		import json
+
+		gem_list = json.loads(gemstones) if isinstance(gemstones, str) else gemstones
+		existing_child_field = None
+		for fname in ["custom_gemstones", "gemstones"]:
+			if hasattr(doc, fname):
+				existing_child_field = fname
+				break
+		if existing_child_field:
+			getattr(doc, existing_child_field).clear()
+			for g in gem_list:
+				doc.append(
+					existing_child_field,
+					{
+						"gem_type": g.get("gem_type"),
+						"carat": flt(g.get("carat", 0), 3),
+						"count": cint(g.get("count", 1)),
+						"cut": g.get("cut"),
+						"color": g.get("color"),
+						"clarity": g.get("clarity"),
+						"rate": flt(g.get("rate", 0)),
+					},
+				)
+
+	doc.save()
+
+	from frappe.utils import flt as _flt
+
+	return {"success": True, "item_code": doc.name, "item_name": doc.item_name}

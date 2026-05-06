@@ -23,7 +23,6 @@
 				<TransactionFilterBar />
 			</div>
 
-
 			<!-- Summary Cards -->
 			<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 flex-shrink-0" v-if="summary">
 				<div class="premium-card !p-4">
@@ -622,9 +621,13 @@ const pagination = ref({ page: 1, total_pages: 1, total_count: 0 })
 const filters = computed(() => ui.activeFilters.transactions || {})
 
 // Watch filters to trigger fetch
-watch(filters, () => {
-	fetchSales()
-}, { deep: true })
+watch(
+	filters,
+	() => {
+		fetchSales()
+	},
+	{ deep: true }
+)
 
 const salesResource = createResource({
 	url: 'zevar_core.api.sales_history.get_sales_history',

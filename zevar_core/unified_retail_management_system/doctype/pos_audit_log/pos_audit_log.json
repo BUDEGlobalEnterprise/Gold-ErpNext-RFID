@@ -35,7 +35,7 @@
             "fieldtype": "Select",
             "in_list_view": 1,
             "label": "Event Type",
-            "options": "invoice_created\ninvoice_submitted\ninvoice_cancelled\ninvoice_voided\ninvoice_returned\npayment_received\npayment_refunded\nsplit_payment_processed\nfinance_payment\ngift_card_used\ngift_card_issued\ntrade_in_processed\ndiscount_applied\nlarge_discount_applied\ndiscount_override_approved\nsession_opened\nsession_closed\ncash_variance_detected\nlogin_success\nlogin_failed\nmanager_override_requested\nmanager_override_approved\nmanager_override_rejected\npermission_denied\nlayaway_created\nlayaway_payment\nlayaway_cancelled\nlayaway_completed\ncustomer_created\ncustomer_updated\nstock_adjusted\nlow_stock_alert\naudit_started\naudit_scan_batch\naudit_cancelled\nshrinkage_detected\naudit_reconciled\nfixed_float_enforced\nvariance_override\nstream_reclassified\neod_brief_sent",
+            "options": "invoice_created\ninvoice_submitted\ninvoice_cancelled\ninvoice_voided\ninvoice_returned\npayment_received\npayment_refunded\nsplit_payment_processed\nfinance_payment\ngift_card_used\ngift_card_issued\ntrade_in_processed\ndiscount_applied\nlarge_discount_applied\ndiscount_override_approved\nsession_opened\nsession_closed\ncash_variance_detected\nlogin_success\nlogin_failed\nmanager_override_requested\nmanager_override_approved\nmanager_override_rejected\npermission_denied\nlayaway_created\nlayaway_payment\nlayaway_cancelled\nlayaway_completed\ncustomer_created\ncustomer_updated\nstock_adjusted\nstock_auto_reduced\nstock_cli_adjustment\nlow_stock_alert\naudit_started\naudit_scan_batch\naudit_cancelled\nshrinkage_detected\naudit_reconciled\nfixed_float_enforced\nvariance_override\nstream_reclassified\neod_brief_sent\ntax_exemption_approved\ntax_exemption_denied",
             "reqd": 1
         },
         {
@@ -129,6 +129,17 @@
             "read": 1,
             "report": 1,
             "role": "Sales Manager",
+            "share": 1,
+            "write": 1
+        },
+        {
+            "create": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Store Manager",
             "share": 1,
             "write": 1
         }

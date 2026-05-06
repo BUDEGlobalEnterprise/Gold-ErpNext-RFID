@@ -44,7 +44,11 @@ class ResponseBuilder:
 		start = time.time()
 
 		# Step 1: Classify the query
-		domain = context_type if context_type in ("product", "customer", "repair", "policy", "general") else classify(question)
+		domain = (
+			context_type
+			if context_type in ("product", "customer", "repair", "policy", "general")
+			else classify(question)
+		)
 
 		# Step 2: Retrieve relevant documents (hybrid: vector + keyword)
 		collections = get_search_collections(domain)
@@ -67,16 +71,16 @@ class ResponseBuilder:
 
 		# Step 4: Generate LLM response
 		confidence = results[0].get("similarity", 0) if results else 0
- 
+
 		try:
 			system_prompt = get_system_prompt(domain)
 			messages = build_messages(system_prompt, assembled["context_text"], question)
 			answer, provider_name = self.router.generate(messages, domain=domain)
-			
+
 			# Step 5: Check for tool calls
-			if "{\"tool\":" in answer:
+			if '{"tool":' in answer:
 				answer = self._handle_tool_calls(answer)
-				
+
 		except RuntimeError as e:
 			# LLM unavailable - fall back to retrieval-only answer
 			log.warning("LLM generation failed: %s. Falling back to retrieval-only.", e)
@@ -86,9 +90,9 @@ class ResponseBuilder:
 			log.exception("Unexpected LLM error")
 			answer = _build_fallback_answer(question, assembled, domain)
 			provider_name = "retrieval-only (error)"
- 
+
 		latency = int((time.time() - start) * 1000)
- 
+
 		return {
 			"answer": answer,
 			"sources": assembled["sources"],
@@ -101,6 +105,7 @@ class ResponseBuilder:
 	def _handle_tool_calls(self, answer: str) -> str:
 		"""Parse and execute tool calls from the LLM answer."""
 		import json
+
 		from zevar_core.rag.tools import agent_tools
 
 		# Find JSON block using a more robust method than regex for nested objects
@@ -109,44 +114,43 @@ class ResponseBuilder:
 			return answer
 
 		start_idx = answer.find(marker)
-		
+
 		# Basic brace matching to find the full JSON object
 		brace_count = 0
 		end_idx = -1
 		for i in range(start_idx, len(answer)):
-			if answer[i] == '{':
+			if answer[i] == "{":
 				brace_count += 1
-			elif answer[i] == '}':
+			elif answer[i] == "}":
 				brace_count -= 1
 				if brace_count == 0:
 					end_idx = i + 1
 					break
-		
+
 		if end_idx == -1:
 			return answer
 
 		json_str = answer[start_idx:end_idx]
-		
+
 		try:
 			data = json.loads(json_str)
 			tool_name = data.get("tool")
 			params = data.get("params", {})
-			
+
 			# Security: Only allow tools explicitly listed in AGENT_TOOLS registry
 			if hasattr(agent_tools, "AGENT_TOOLS") and tool_name in agent_tools.AGENT_TOOLS:
 				tool_func = getattr(agent_tools, tool_name)
 				result = tool_func(**params)
-				
+
 				# Format result back into the answer
 				clean_answer = answer.replace(json_str, "").strip()
 				status_msg = f"\n\n[Action Executed: {tool_name}]\n{result.get('message', 'Done')}"
-				
+
 				return f"{clean_answer}{status_msg}".strip()
 			else:
 				return f"{answer}\n\n(Error: Tool '{tool_name}' not found)"
 		except Exception as e:
 			return f"{answer}\n\n(Error executing tool: {e})"
-
 
 
 def _build_fallback_answer(question: str, assembled: dict, domain: str) -> str:
@@ -159,7 +163,9 @@ def _build_fallback_answer(question: str, assembled: dict, domain: str) -> str:
 	if domain == "product":
 		lines = ["Here are the matching products:"]
 		for i, src in enumerate(sources[:5]):
-			lines.append(f"  {i + 1}. {src.get('label', 'Unknown')} (relevance: {src.get('similarity', 0):.0%})")
+			lines.append(
+				f"  {i + 1}. {src.get('label', 'Unknown')} (relevance: {src.get('similarity', 0):.0%})"
+			)
 		return "\n".join(lines)
 
 	# Return top context snippets
@@ -167,4 +173,4 @@ def _build_fallback_answer(question: str, assembled: dict, domain: str) -> str:
 	for src in sources[:3]:
 		snippets.append(f"- {src.get('label', 'Source')}")
 
-	return f"Top results found:\n" + "\n".join(snippets)
+	return "Top results found:\n" + "\n".join(snippets)

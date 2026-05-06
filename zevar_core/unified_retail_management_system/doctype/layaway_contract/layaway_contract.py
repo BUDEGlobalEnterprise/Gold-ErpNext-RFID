@@ -45,6 +45,8 @@ class LayawayContract(Document):
 
 	def _calculate_amounts(self):
 		"""Calculate derived amount fields."""
+		if self.items:
+			self.total_amount = sum(flt(row.amount) for row in self.items)
 		if flt(self.total_amount) > 0:
 			self.down_payment_percent = (flt(self.deposit_amount) / flt(self.total_amount)) * 100
 		if self.is_new():

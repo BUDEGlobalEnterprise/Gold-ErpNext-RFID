@@ -153,9 +153,7 @@ def _ensure_layaway_liability_account(company, abbr):
 		order_by="lft asc",
 	)
 	if not root_liability:
-		frappe.logger().warning(
-			f"bootstrap_payment_modes: No root liability account found for {company}"
-		)
+		frappe.logger().warning(f"bootstrap_payment_modes: No root liability account found for {company}")
 		return
 
 	parent = root_liability
@@ -215,9 +213,7 @@ def _ensure_financier_accounts(company, abbr):
 
 
 def _ensure_all_modes_of_payment(company, abbr):
-	cash_account = frappe.db.get_value(
-		"Account", {"account_type": "Cash", "company": company}, "name"
-	)
+	cash_account = frappe.db.get_value("Account", {"account_type": "Cash", "company": company}, "name")
 	if not cash_account:
 		cash_account = frappe.db.get_value(
 			"Account",
@@ -254,10 +250,18 @@ def _ensure_all_modes_of_payment(company, abbr):
 		{"mode_of_payment": "Google Pay", "type": "Bank", "account": bank_account},
 		{"mode_of_payment": "Venmo", "type": "General", "account": cash_account},
 		{"mode_of_payment": "Cash App", "type": "General", "account": cash_account},
-		{"mode_of_payment": "Synchrony", "type": "General", "account": financier_account_map.get("Synchrony")},
+		{
+			"mode_of_payment": "Synchrony",
+			"type": "General",
+			"account": financier_account_map.get("Synchrony"),
+		},
 		{"mode_of_payment": "AFF", "type": "General", "account": financier_account_map.get("AFF")},
 		{"mode_of_payment": "CIMA", "type": "General", "account": financier_account_map.get("CIMA")},
-		{"mode_of_payment": "Progressive", "type": "General", "account": financier_account_map.get("Progressive")},
+		{
+			"mode_of_payment": "Progressive",
+			"type": "General",
+			"account": financier_account_map.get("Progressive"),
+		},
 		{"mode_of_payment": "Snap", "type": "General", "account": financier_account_map.get("Snap")},
 		{"mode_of_payment": "In-House Finance", "type": "General", "account": cash_account},
 	]
@@ -291,8 +295,6 @@ def _ensure_all_modes_of_payment(company, abbr):
 		try:
 			doc.save(ignore_permissions=True)
 		except Exception:
-			frappe.log_error(
-				f"bootstrap_payment_modes: Failed to save Mode of Payment '{mode_name}'"
-			)
+			frappe.log_error(f"bootstrap_payment_modes: Failed to save Mode of Payment '{mode_name}'")
 
 	frappe.db.commit()

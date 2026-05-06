@@ -35,7 +35,10 @@
 			<slot name="filters"></slot>
 
 			<!-- Sort Slot (Optional) -->
-			<div v-if="$slots.sort" class="border-l border-gray-200 dark:border-warm-border pl-4 ml-auto flex-shrink-0">
+			<div
+				v-if="$slots.sort"
+				class="border-l border-gray-200 dark:border-warm-border pl-4 ml-auto flex-shrink-0"
+			>
 				<slot name="sort"></slot>
 			</div>
 
@@ -62,7 +65,7 @@ const props = defineProps({
 	context: {
 		type: String,
 		required: true,
-	}
+	},
 })
 
 const ui = useUIStore()

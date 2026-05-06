@@ -234,6 +234,19 @@ def open_pos_session(
 			reference_type="POS Opening Entry",
 		)
 
+		# Notify managers about session opening
+		_notify_managers(
+			"pos_session_event",
+			{
+				"event_type": "session_opened",
+				"user": frappe.session.user,
+				"session_name": opening_entry.name,
+				"pos_profile": pos_profile,
+				"opening_balance": flt(opening_balance),
+				"timestamp": str(now_datetime()),
+			},
+		)
+
 		return {
 			"success": True,
 			"session_name": opening_entry.name,
@@ -445,6 +458,20 @@ def close_pos_session_v2(
 		elif variance < 0:
 			variance_status = "shortage"
 
+		# Notify managers about session closing
+		_notify_managers(
+			"pos_session_event",
+			{
+				"event_type": "session_closed",
+				"user": session.user,
+				"session_name": session_name,
+				"pos_profile": session.pos_profile,
+				"closing_entry": closing_entry.name,
+				"variance": variance,
+				"timestamp": str(now_datetime()),
+			},
+		)
+
 		return {
 			"success": True,
 			"closing_entry": closing_entry.name,
@@ -625,6 +652,20 @@ def close_pos_session(
 				reference_type="POS Closing Entry",
 			)
 
+		# Notify managers about session closing
+		_notify_managers(
+			"pos_session_event",
+			{
+				"event_type": "session_closed",
+				"user": session.user,
+				"session_name": session_name,
+				"pos_profile": session.pos_profile,
+				"closing_entry": closing_entry.name,
+				"variance": variance,
+				"timestamp": str(now_datetime()),
+			},
+		)
+
 		return {
 			"success": True,
 			"closing_entry": closing_entry.name,
@@ -696,4 +737,217 @@ def get_session_sales(session_name: str) -> dict:
 		"sales": sales,
 		"total_count": len(sales),
 		"total_amount": total,
+	}
+
+
+@frappe.whitelist()
+def get_all_active_sessions() -> dict:
+	"""
+	Get all currently open POS sessions. Admin/manager only.
+
+	Returns:
+		dict: List of active sessions with user, profile, and sales info.
+	"""
+	frappe.only_for(["Sales Manager", "Store Manager", "System Manager"])
+
+	sessions = frappe.get_all(
+		"POS Opening Entry",
+		filters={"docstatus": 1, "status": "Open"},
+		fields=["name", "user", "pos_profile", "company", "period_start_date", "opening_amount"],
+		order_by="period_start_date desc",
+	)
+
+	enriched = []
+	for session in sessions:
+		# Get user full name
+		full_name = frappe.db.get_value("User", session.user, "full_name") or session.user
+		session_dict = {
+			"name": session.name,
+			"user": session.user,
+			"user_full_name": full_name,
+			"pos_profile": session.pos_profile,
+			"company": session.company,
+			"period_start_date": str(session.period_start_date) if session.period_start_date else None,
+			"opening_amount": flt(session.opening_amount),
+		}
+
+		# Get warehouse from POS Profile
+		warehouse = frappe.db.get_value("POS Profile", session.pos_profile, "warehouse")
+		session_dict["warehouse"] = warehouse
+
+		# Get sales count and total for this session
+		sales_data = frappe.db.sql(
+			"""
+			SELECT COUNT(*) as count, COALESCE(SUM(grand_total), 0) as total
+			FROM `tabSales Invoice`
+			WHERE owner = %s
+			AND posting_date >= DATE(%s)
+			AND docstatus = 1
+			AND is_pos = 1
+			""",
+			(
+				session.user,
+				session.period_start_date.date()
+				if hasattr(session.period_start_date, "date")
+				else session.period_start_date,
+			),
+			as_dict=True,
+		)
+		session_dict["sales_count"] = sales_data[0].get("count", 0) if sales_data else 0
+		session_dict["sales_total"] = flt(sales_data[0].get("total", 0)) if sales_data else 0
+		session_dict["duration_hours"] = round(
+			time_diff_in_hours(now_datetime(), get_datetime(session.period_start_date)), 2
+		)
+
+		enriched.append(session_dict)
+
+	return {
+		"sessions": enriched,
+		"total_count": len(enriched),
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def force_close_session(session_name: str, reason: str | None = None) -> dict:
+	"""
+	Force-close another user's POS session. Admin/manager only.
+
+	Args:
+		session_name: Name of the POS Opening Entry to close
+		reason: Reason for force closure
+
+	Returns:
+		dict: Success status and closing details
+	"""
+	frappe.only_for(["Sales Manager", "Store Manager", "System Manager"])
+
+	if not session_name or not frappe.db.exists("POS Opening Entry", session_name):
+		frappe.throw(_("POS Session '{0}' not found.").format(session_name or ""))
+
+	session = frappe.get_doc("POS Opening Entry", session_name)
+
+	if session.status != "Open":
+		frappe.throw(_("Session is already closed."))
+
+	# Get expected closing balance
+	opening_balance = sum(flt(row.opening_amount) for row in session.balance_details)
+
+	sales_data = frappe.db.sql(
+		"""
+		SELECT COALESCE(SUM(grand_total), 0) as total
+		FROM `tabSales Invoice`
+		WHERE owner = %s
+		AND posting_date >= DATE(%s)
+		AND docstatus = 1
+		AND is_pos = 1
+		""",
+		(
+			session.user,
+			session.period_start_date.date()
+			if hasattr(session.period_start_date, "date")
+			else session.period_start_date,
+		),
+		as_dict=True,
+	)
+
+	total_sales = flt(sales_data[0].get("total", 0)) if sales_data else 0
+	closing_balance = opening_balance + total_sales
+
+	# Build notes
+	force_close_note = f"Force closed by {frappe.session.user}"
+	if reason:
+		force_close_note += f". Reason: {reason}"
+	closing_notes = f"{session.remarks or ''}\n{force_close_note}".strip()
+
+	return close_pos_session(
+		session_name=session_name,
+		closing_balance=closing_balance,
+		cash_breakdown=None,
+		notes=closing_notes,
+	)
+
+
+def _notify_managers(event_name: str, data: dict) -> None:
+	"""Send a realtime event to all users with Sales Manager or Store Manager role."""
+	try:
+		managers = frappe.get_all(
+			"Has Role",
+			filters={"role": ["in", ["Sales Manager", "Store Manager"]], "parenttype": "User"},
+			fields=["parent"],
+		)
+		for mgr in managers:
+			frappe.publish_realtime(event_name, data, user=mgr.parent)
+	except Exception:
+		frappe.log_error("POS Manager Notification Failed", frappe.get_traceback())
+
+
+@frappe.whitelist()
+def get_live_sales_feed(hours: int = 24) -> dict:
+	"""
+	Get recent sales events for live monitoring. Admin/manager only.
+
+	Args:
+		hours: Number of hours to look back (default 24)
+
+	Returns:
+		dict: Recent invoices, open sessions, and summary stats
+	"""
+	frappe.only_for(["Sales Manager", "Store Manager", "System Manager"])
+
+	from frappe.utils import add_hours
+	from frappe.utils import now_datetime as _now
+
+	since = add_hours(_now(), -int(hours or 24))
+
+	# Get recent POS invoices
+	invoices = frappe.get_all(
+		"Sales Invoice",
+		filters={"creation": [">=", since], "docstatus": 1, "is_pos": 1},
+		fields=["name", "customer", "grand_total", "owner", "posting_date", "posting_time", "creation"],
+		order_by="creation desc",
+		limit=100,
+	)
+
+	# Enrich with user full names
+	if invoices:
+		owner_ids = list({inv.owner for inv in invoices if inv.owner})
+		user_names = {}
+		if owner_ids:
+			users = frappe.get_all("User", filters={"name": ["in", owner_ids]}, fields=["name", "full_name"])
+			user_names = {u.name: u.full_name for u in users}
+		for inv in invoices:
+			inv["salesperson_name"] = user_names.get(inv.owner, inv.owner)
+
+	# Get open sessions
+	open_sessions = frappe.get_all(
+		"POS Opening Entry",
+		filters={"docstatus": 1, "status": "Open"},
+		fields=["name", "user", "pos_profile", "period_start_date", "opening_amount"],
+	)
+
+	# Enrich sessions
+	if open_sessions:
+		session_user_ids = list({s.user for s in open_sessions if s.user})
+		session_user_names = {}
+		if session_user_ids:
+			users = frappe.get_all(
+				"User", filters={"name": ["in", session_user_ids]}, fields=["name", "full_name"]
+			)
+			session_user_names = {u.name: u.full_name for u in users}
+		for s in open_sessions:
+			s["user_full_name"] = session_user_names.get(s.user, s.user)
+			s["warehouse"] = frappe.db.get_value("POS Profile", s.pos_profile, "warehouse")
+			s["duration_hours"] = round(
+				time_diff_in_hours(now_datetime(), get_datetime(s.period_start_date)), 2
+			)
+
+	return {
+		"recent_invoices": invoices,
+		"open_sessions": open_sessions,
+		"summary": {
+			"total_sales": sum(flt(i.grand_total) for i in invoices),
+			"invoice_count": len(invoices),
+			"open_session_count": len(open_sessions),
+			"hours": int(hours or 24),
+		},
 	}

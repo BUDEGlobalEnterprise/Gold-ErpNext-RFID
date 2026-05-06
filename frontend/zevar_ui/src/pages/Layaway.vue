@@ -439,7 +439,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createResource } from 'frappe-ui'
 import { useUIStore } from '@/stores/ui.js'
@@ -597,6 +597,16 @@ onMounted(() => {
 		showCreateModal.value = true
 	}
 })
+
+// Watch route query so "Create Layaway" from cart sidebar works when already on this page
+watch(
+	() => route.query.action,
+	(action) => {
+		if (action === 'new' && !showCreateModal.value) {
+			showCreateModal.value = true
+		}
+	}
+)
 </script>
 
 <style scoped>

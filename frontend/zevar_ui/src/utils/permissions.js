@@ -40,6 +40,26 @@ export function canAccessReports() {
 }
 
 /**
+ * Check if user can access the Live Monitor (admin dashboard)
+ * Only managers and admins can access this
+ * @returns {boolean}
+ */
+export function canAccessMonitor() {
+	const session = useSessionStore()
+	return (
+		session.isAdmin ||
+		session.isManager ||
+		session.hasAnyRole([
+			'System Manager',
+			'Administrator',
+			'Store Manager',
+			'Sales Manager',
+			'Accounts Manager',
+		])
+	)
+}
+
+/**
  * Check if user can view all sales history (vs own only)
  * @returns {boolean}
  */

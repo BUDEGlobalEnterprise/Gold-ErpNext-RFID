@@ -1,5 +1,5 @@
 <template>
-	<BaseModal :show="true" max-width="max-w-4xl" scrollable @close="$emit('close')">
+	<BaseModal :show="true" max-width="max-w-3xl" scrollable @close="$emit('close')">
 		<template #header>
 			<div class="flex items-center gap-3">
 				<div class="p-2 bg-[#D4AF37]/10 rounded-lg">
@@ -19,146 +19,145 @@
 				</div>
 				<div>
 					<h3 class="text-lg font-bold text-gray-900 dark:text-white">Quick Add Item</h3>
-					<p class="text-xs text-gray-500">Step {{ currentStep }} of 4</p>
+					<p class="text-xs text-gray-500">Create item & allocate stock in one step</p>
 				</div>
 			</div>
 		</template>
 
 		<div class="p-6">
-			<div class="flex items-center gap-2 mb-6">
-				<div
-					v-for="s in 4"
-					:key="s"
-					class="flex-1 h-1.5 rounded-full"
-					:class="
-						s <= currentStep ? 'bg-[#D4AF37]' : 'bg-gray-200 dark:bg-warm-dark-700'
-					"
-				/>
+			<div class="mb-4">
+				<ScannerInput placeholder="Scan barcode or RFID tag..." @scan="onScan" />
 			</div>
 
-			<div v-if="currentStep === 1">
-				<h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
-					Photo / Tag Scan
-				</h4>
-				<ScannerInput placeholder="Scan item barcode or RFID..." @scan="onScanTag" />
-				<div class="mt-4 text-center text-gray-400 text-xs">or</div>
-				<button
-					class="mt-3 w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-[#D4AF37] hover:text-[#D4AF37] transition"
-				>
-					Upload Photo of Tag
-				</button>
-			</div>
-
-			<div v-if="currentStep === 2">
-				<h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
-					Item Details
-				</h4>
-				<div class="grid grid-cols-2 gap-3">
-					<div>
-						<label class="block text-xs font-medium mb-1">Item Name *</label>
-						<input
-							v-model="form.item_name"
-							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
-						/>
-					</div>
-					<div>
-						<label class="block text-xs font-medium mb-1">Item Code</label>
-						<input
-							v-model="form.item_code"
-							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
-						/>
-					</div>
-					<div>
-						<label class="block text-xs font-medium mb-1">Metal Type</label>
-						<select
-							v-model="form.metal"
-							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
-						>
-							<option value="">Select...</option>
-							<option>Yellow Gold</option>
-							<option>White Gold</option>
-							<option>Rose Gold</option>
-							<option>Silver</option>
-							<option>Platinum</option>
-						</select>
-					</div>
-					<div>
-						<label class="block text-xs font-medium mb-1">Purity</label>
-						<select
-							v-model="form.purity"
-							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
-						>
-							<option value="">Select...</option>
-							<option>24Kt</option>
-							<option>22Kt</option>
-							<option>18Kt</option>
-							<option>14Kt</option>
-							<option>10Kt</option>
-							<option>925 Sterling</option>
-						</select>
-					</div>
-					<div>
-						<label class="block text-xs font-medium mb-1">Weight (g)</label>
-						<input
-							v-model="form.weight"
-							type="number"
-							step="0.01"
-							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
-						/>
-					</div>
-					<div>
-						<label class="block text-xs font-medium mb-1">Vendor SKU</label>
-						<input
-							v-model="form.vendor_sku"
-							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
-						/>
-					</div>
-				</div>
-			</div>
-
-			<div v-if="currentStep === 3">
-				<h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
-					Pricing & Store Allocation
-				</h4>
-				<div class="grid grid-cols-2 gap-3 mb-4">
-					<div>
-						<label class="block text-xs font-medium mb-1">Retail Price *</label>
-						<input
-							v-model="form.price"
-							type="number"
-							step="0.01"
-							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
-						/>
-					</div>
-					<div>
-						<label class="block text-xs font-medium mb-1">Cost Price</label>
-						<input
-							v-model="form.cost_price"
-							type="number"
-							step="0.01"
-							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
-						/>
-					</div>
+			<div class="grid grid-cols-3 gap-3 mb-3">
+				<div class="col-span-2">
+					<label class="block text-xs font-medium mb-1">Item Name *</label>
+					<input
+						v-model="form.item_name"
+						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						placeholder="e.g. 14K Gold Diamond Ring"
+					/>
 				</div>
 				<div>
-					<label class="block text-xs font-medium mb-2">Allocate to Stores</label>
-					<div
-						v-for="store in stores"
-						:key="store.code"
-						class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-warm-border/30 last:border-0"
+					<label class="block text-xs font-medium mb-1">Jewelry Type</label>
+					<select
+						v-model="form.jewelry_type"
+						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
 					>
-						<span class="text-sm text-gray-700 dark:text-gray-300"
-							>{{ store.code }} — {{ store.city }}</span
-						>
-						<div class="flex items-center gap-2">
+						<option value="Other">Other</option>
+						<option>Rings</option>
+						<option>Earrings</option>
+						<option>Necklaces</option>
+						<option>Bracelets</option>
+						<option>Chains</option>
+						<option>Pendants</option>
+						<option>Watches</option>
+					</select>
+				</div>
+			</div>
+
+			<div class="grid grid-cols-4 gap-3 mb-3">
+				<div>
+					<label class="block text-xs font-medium mb-1">Metal Type</label>
+					<select
+						v-model="form.metal_type"
+						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+					>
+						<option value="">Select...</option>
+						<option>Yellow Gold</option>
+						<option>White Gold</option>
+						<option>Rose Gold</option>
+						<option>Silver</option>
+						<option>Platinum</option>
+					</select>
+				</div>
+				<div>
+					<label class="block text-xs font-medium mb-1">Purity</label>
+					<select
+						v-model="form.purity"
+						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+					>
+						<option value="">Select...</option>
+						<option>24Kt</option>
+						<option>22Kt</option>
+						<option>18Kt</option>
+						<option>14Kt</option>
+						<option>10Kt</option>
+						<option>925 Sterling</option>
+					</select>
+				</div>
+				<div>
+					<label class="block text-xs font-medium mb-1">Gross Wt (g)</label>
+					<input
+						v-model="form.gross_weight"
+						type="number"
+						step="0.01"
+						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						placeholder="0.00"
+					/>
+				</div>
+				<div>
+					<label class="block text-xs font-medium mb-1">Stone Wt (g)</label>
+					<input
+						v-model="form.stone_weight"
+						type="number"
+						step="0.01"
+						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						placeholder="0.00"
+					/>
+				</div>
+			</div>
+
+			<div class="grid grid-cols-4 gap-3 mb-3">
+				<div>
+					<label class="block text-xs font-medium mb-1">Retail Price (MSRP) *</label>
+					<input
+						v-model="form.msrp"
+						type="number"
+						step="0.01"
+						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						placeholder="0.00"
+					/>
+				</div>
+				<div>
+					<label class="block text-xs font-medium mb-1">Cost Price</label>
+					<input
+						v-model="form.cost_price"
+						type="number"
+						step="0.01"
+						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						placeholder="0.00"
+					/>
+				</div>
+				<div>
+					<label class="block text-xs font-medium mb-1">Vendor</label>
+					<input
+						v-model="form.vendor"
+						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						placeholder="Supplier name"
+					/>
+				</div>
+				<div>
+					<label class="block text-xs font-medium mb-1">Vendor SKU</label>
+					<input
+						v-model="form.vendor_sku"
+						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						placeholder="Auto-generated if blank"
+					/>
+				</div>
+			</div>
+
+			<div class="mb-4">
+				<label class="block text-xs font-medium mb-2">Allocate to Stores</label>
+				<div class="grid grid-cols-5 gap-2">
+					<div v-for="store in stores" :key="store.code" class="text-center">
+						<div class="text-[10px] font-bold text-gray-500 mb-1">
+							{{ store.code }}
+						</div>
+						<div class="flex items-center justify-center gap-1">
 							<button
-								@click="
-									form.allocation[store.code] = Math.max(
-										0,
-										(form.allocation[store.code] || 0) - 1
-									)
-								"
-								class="w-7 h-7 rounded bg-gray-100 dark:bg-warm-dark-700 text-xs font-bold"
+								@click="form.allocation[store.code] = Math.max(0, (form.allocation[store.code] || 0) - 1)"
+								class="w-7 h-7 rounded bg-gray-100 dark:bg-warm-dark-700 text-xs font-bold hover:bg-gray-200"
 							>
 								−
 							</button>
@@ -166,75 +165,72 @@
 								form.allocation[store.code] || 0
 							}}</span>
 							<button
-								@click="
-									form.allocation[store.code] =
-										(form.allocation[store.code] || 0) + 1
-								"
-								class="w-7 h-7 rounded bg-gray-100 dark:bg-warm-dark-700 text-xs font-bold"
+								@click="form.allocation[store.code] = (form.allocation[store.code] || 0) + 1"
+								class="w-7 h-7 rounded bg-gray-100 dark:bg-warm-dark-700 text-xs font-bold hover:bg-gray-200"
 							>
 								+
 							</button>
 						</div>
 					</div>
 				</div>
+				<div class="text-xs text-gray-400 mt-1 text-right">Total: {{ totalQty }} pcs</div>
 			</div>
 
-			<div v-if="currentStep === 4">
-				<h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
-					Confirm & Print Tags
-				</h4>
-				<div class="premium-card !p-4 mb-4">
-					<div class="grid grid-cols-2 gap-2 text-sm">
-						<div><span class="text-gray-500">Item:</span> {{ form.item_name }}</div>
-						<div>
-							<span class="text-gray-500">Metal:</span> {{ form.metal }}
-							{{ form.purity }}
-						</div>
-						<div><span class="text-gray-500">Price:</span> ${{ form.price }}</div>
-						<div><span class="text-gray-500">Weight:</span> {{ form.weight }}g</div>
-					</div>
-					<div class="mt-2 text-sm">
-						<span class="text-gray-500">Stores:</span>
-						{{
-							Object.entries(form.allocation)
-								.filter(([, q]) => q > 0)
-								.map(([s, q]) => `${s}(${q})`)
-								.join(', ') || 'None'
-						}}
-					</div>
-				</div>
-				<div v-for="tag in printTags" :key="tag.serialNo" class="mb-3">
-					<TagPrintPreview :item-data="tag" @printed="onTagPrinted" />
+			<div
+				v-if="errorMsg"
+				class="bg-red-50 dark:bg-red-900/20 rounded-lg p-3 border border-red-100 mb-3"
+			>
+				<p class="text-xs text-red-700">{{ errorMsg }}</p>
+			</div>
+
+			<div
+				v-if="createdItem"
+				class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-100 mb-3"
+			>
+				<p class="text-xs text-green-700 font-bold">
+					Item created: {{ createdItem.item_code }}
+				</p>
+				<p class="text-xs text-green-600">SKU: {{ createdItem.vendor_sku }}</p>
+				<p v-if="createdItem.stock_entry_created" class="text-xs text-green-600">
+					Stock entry created
+				</p>
+			</div>
+
+			<div v-if="showTags && createdItem" class="border-t pt-4 mt-4">
+				<h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Print Tags</h4>
+				<div class="grid grid-cols-2 gap-3">
+					<TagPrintPreview
+						v-for="(tag, idx) in printTags"
+						:key="idx"
+						:item-data="tag"
+						@printed="onTagPrinted"
+					/>
 				</div>
 			</div>
 		</div>
 
 		<template #footer>
-			<div class="flex gap-3 w-full">
-				<button
-					v-if="currentStep > 1"
-					@click="currentStep--"
-					class="flex-1 py-2 border rounded-lg text-sm font-medium hover:bg-gray-50 transition"
-				>
-					Back
-				</button>
-				<button
-					v-if="currentStep < 4"
-					@click="nextStep"
-					:disabled="!canProceed"
-					class="flex-1 py-2 bg-[#D4AF37] text-white rounded-lg text-sm font-medium hover:bg-[#C4A030] disabled:opacity-50 transition"
-				>
-					Next
-				</button>
-				<button
-					v-if="currentStep === 4"
-					@click="submitItem"
-					:disabled="submitting"
-					class="flex-1 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition"
-				>
-					{{ submitting ? 'Creating...' : 'Create Item & Push' }}
-				</button>
-			</div>
+			<button
+				@click="$emit('close')"
+				class="flex-1 py-2 border rounded-lg text-sm font-medium hover:bg-gray-50"
+			>
+				{{ createdItem ? 'Done' : 'Cancel' }}
+			</button>
+			<button
+				v-if="!createdItem"
+				@click="submitItem"
+				:disabled="submitting || !canSubmit"
+				class="flex-1 py-2 bg-[#D4AF37] text-white rounded-lg text-sm font-bold hover:bg-[#C4A030] disabled:opacity-50 transition"
+			>
+				{{ submitting ? 'Creating...' : `Create Item & Push ${totalQty} pcs` }}
+			</button>
+			<button
+				v-if="createdItem && !showTags"
+				@click="showTags = true"
+				class="flex-1 py-2 bg-[#D4AF37] text-white rounded-lg text-sm font-bold hover:bg-[#C4A030] transition"
+			>
+				Print Tags
+			</button>
 		</template>
 	</BaseModal>
 </template>
@@ -248,8 +244,10 @@ import TagPrintPreview from './TagPrintPreview.vue'
 
 const emit = defineEmits(['close', 'created'])
 
-const currentStep = ref(1)
 const submitting = ref(false)
+const errorMsg = ref('')
+const createdItem = ref(null)
+const showTags = ref(false)
 const printTags = ref([])
 
 const stores = [
@@ -262,52 +260,40 @@ const stores = [
 
 const form = reactive({
 	item_name: '',
-	item_code: '',
-	metal: '',
+	metal_type: '',
 	purity: '',
-	weight: '',
-	vendor_sku: '',
-	price: '',
+	jewelry_type: 'Other',
+	gross_weight: '',
+	stone_weight: '',
+	msrp: '',
 	cost_price: '',
+	vendor: '',
+	vendor_sku: '',
 	barcode: '',
 	allocation: { 'NY-01': 1, 'Miami-01': 0, 'LA-01': 0, 'Houston-01': 0, 'Chicago-01': 0 },
 })
 
-const canProceed = computed(() => {
-	if (currentStep.value === 1) return true
-	if (currentStep.value === 2) return !!form.item_name
-	if (currentStep.value === 3)
-		return !!form.price && Object.values(form.allocation).some((q) => q > 0)
-	return true
-})
+const totalQty = computed(() => Object.values(form.allocation).reduce((s, q) => s + q, 0))
 
-function onScanTag(value) {
+const canSubmit = computed(() => !!form.item_name && !!form.msrp && totalQty.value > 0)
+
+function onScan(value) {
 	form.barcode = value
-	currentStep.value = 2
 }
 
-function nextStep() {
-	if (!canProceed.value) return
-	currentStep.value++
-	if (currentStep.value === 4) {
-		buildPrintTags()
-	}
-}
-
-function buildPrintTags() {
+function buildPrintTags(itemResult) {
 	printTags.value = []
-	const totalQty = Object.values(form.allocation).reduce((s, q) => s + q, 0)
-	for (let i = 0; i < totalQty; i++) {
+	for (let i = 0; i < totalQty.value; i++) {
 		printTags.value.push({
-			barcode: form.barcode || `ZV-${Date.now()}-${i}`,
+			barcode: form.barcode || `${itemResult.item_code}-${i}`,
 			serialNo: '',
-			itemCode: form.item_code,
+			itemCode: itemResult.item_code,
 			itemName: form.item_name,
-			price: form.price,
-			metal: form.metal,
+			price: form.msrp,
+			metal: form.metal_type,
 			purity: form.purity,
-			weight: form.weight,
-			vendorSku: form.vendor_sku,
+			weight: form.gross_weight,
+			vendorSku: itemResult.vendor_sku,
 		})
 	}
 }
@@ -316,27 +302,49 @@ function onTagPrinted() {}
 
 async function submitItem() {
 	submitting.value = true
+	errorMsg.value = ''
+
 	try {
-		await call('zevar_core.api.inventory.bulk_push_to_stores', {
-			item_code: form.item_code,
-			allocation: Object.entries(form.allocation)
-				.filter(([, q]) => q > 0)
-				.map(([store_code, qty]) => ({ store_code, qty })),
+		const result = await call('zevar_core.api.item_entry.pos_quick_add_item', {
+			item_name: form.item_name,
+			metal_type: form.metal_type || undefined,
+			purity: form.purity || undefined,
+			jewelry_type: form.jewelry_type,
+			gross_weight: form.gross_weight || 0,
+			stone_weight: form.stone_weight || 0,
+			msrp: form.msrp || 0,
+			cost_price: form.cost_price || 0,
+			vendor: form.vendor || undefined,
+			vendor_sku: form.vendor_sku || undefined,
+			warehouse: undefined,
+			qty: 0,
 		})
+
+		if (result.success && totalQty.value > 0) {
+			const alloc = Object.entries(form.allocation)
+				.filter(([, q]) => q > 0)
+				.map(([store_code, qty]) => ({ store_code, qty }))
+
+			if (alloc.length > 0) {
+				await call('zevar_core.api.inventory.bulk_push_to_stores', {
+					item_code: result.item_code,
+					allocation: alloc,
+				})
+			}
+		}
+
+		createdItem.value = result
+		buildPrintTags(result)
 		toast({
 			title: 'Item Created',
-			message: 'Item pushed to stores',
+			message: `${result.item_code} — ${result.vendor_sku}`,
 			icon: 'check',
 			intent: 'success',
 		})
 		emit('created')
 	} catch (e) {
-		toast({
-			title: 'Error',
-			message: e.messages?.[0] || e.message || 'Failed',
-			icon: 'alert-triangle',
-			intent: 'error',
-		})
+		errorMsg.value = e.messages?.[0] || e.message || 'Failed to create item'
+		toast({ title: 'Error', message: errorMsg.value, icon: 'alert-triangle', intent: 'error' })
 	} finally {
 		submitting.value = false
 	}

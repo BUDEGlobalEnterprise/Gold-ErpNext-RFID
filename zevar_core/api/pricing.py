@@ -144,17 +144,18 @@ def get_live_metal_rates():
 
 		# Compute trend
 		change_amount = 0
+		change_pct = 0
 		if prev_rate and prev_rate > 0:
 			change_amount = round(rate_per_gram - prev_rate, 4)
 			change_pct = round((change_amount / prev_rate) * 100, 2)
-			if change_pct > 0:
+			# Use change_amount for trend direction to be more sensitive than rounded change_pct
+			if change_amount > 0.0001:
 				trend = "up"
-			elif change_pct < 0:
+			elif change_amount < -0.0001:
 				trend = "down"
 			else:
 				trend = "flat"
 		else:
-			change_pct = 0
 			trend = "none"
 
 		grouped[metal].append(

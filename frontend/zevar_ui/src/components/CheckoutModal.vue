@@ -1090,6 +1090,8 @@ async function handlePayment() {
 				successInvoiceId.value = props.referenceId
 				step.value = 'success'
 				emit('success', result)
+			} else {
+				throw new Error(result?.message || 'Layaway payment failed')
 			}
 		} else if (props.mode === 'repair') {
 			const primary = payments[0]
