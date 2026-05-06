@@ -81,7 +81,12 @@ def calculate_commissions(doc, method=None):
 
 	sales_persons = []
 	for row in doc.get("custom_salesperson_splits") or []:
-		if hasattr(row, "employee") and row.employee and hasattr(row, "split_percent") and flt(row.split_percent) > 0:
+		if (
+			hasattr(row, "employee")
+			and row.employee
+			and hasattr(row, "split_percent")
+			and flt(row.split_percent) > 0
+		):
 			sales_persons.append({"employee": row.employee, "split_percent": flt(row.split_percent)})
 
 	if not sales_persons:
@@ -172,3 +177,84 @@ def _get_rate_from_tiers(rule_name: str, value: float) -> float:
 		if flt(r.min_value) <= value <= flt(r.max_value):
 			return flt(r.commission_percent)
 	return 0.0
+
+
+@frappe.whitelist(methods=["GET"])
+def get_invoice_commission_summary(sales_invoice: str) -> dict:
+	"""
+	Return a rich commission summary for a Sales Invoice including
+	all splits, employee names, commission rules, and totals.
+	"""
+	frappe.only_for(["Sales User", "Sales Manager", "System Manager", "HR User"])
+
+	if not sales_invoice or not frappe.db.exists("Sales Invoice", sales_invoice):
+		frappe.throw(_("Sales Invoice '{0}' not found.").format(sales_invoice))
+
+	# Fetch commission splits
+	splits = frappe.get_all(
+		"Sales Commission Split",
+		filters={"sales_invoice": sales_invoice},
+		fields=[
+			"name",
+			"employee",
+			"sale_amount",
+			"commission_rate",
+			"commission_amount",
+			"split_percent",
+			"status",
+		],
+	)
+
+	# Enrich with employee names
+	employee_names = {}
+	if splits:
+		emp_ids = list({s.employee for s in splits if s.employee})
+		if emp_ids:
+			emps = frappe.get_all(
+				"Employee",
+				filters={"name": ["in", emp_ids]},
+				fields=["name", "employee_name", "designation"],
+			)
+			employee_names = {e.name: e for e in emps}
+
+	enriched_splits = []
+	for s in splits:
+		emp_info = employee_names.get(s.employee, {})
+		s_dict = {
+			"name": s.name,
+			"employee": s.employee,
+			"employee_name": emp_info.get("employee_name", s.employee),
+			"designation": emp_info.get("designation", ""),
+			"sale_amount": flt(s.sale_amount),
+			"commission_rate": flt(s.commission_rate),
+			"commission_amount": flt(s.commission_amount),
+			"split_percent": flt(s.split_percent),
+			"status": s.status,
+		}
+		enriched_splits.append(s_dict)
+
+	# Get the salesperson configuration from the invoice
+	salespersons_config = []
+	si_meta = frappe.get_meta("Sales Invoice")
+	if si_meta.has_field("custom_salesperson_splits"):
+		config_rows = frappe.get_all(
+			"Sales Invoice Salesperson Split",
+			filters={"parent": sales_invoice, "parentfield": "custom_salesperson_splits"},
+			fields=["employee", "split_percent"],
+		)
+		for row in config_rows:
+			emp_info = employee_names.get(row.employee, {})
+			salespersons_config.append(
+				{
+					"employee": row.employee,
+					"employee_name": emp_info.get("employee_name", row.employee),
+					"split_percent": flt(row.split_percent),
+				}
+			)
+
+	return {
+		"sales_invoice": sales_invoice,
+		"splits": enriched_splits,
+		"total_commission": sum(flt(s["commission_amount"]) for s in enriched_splits),
+		"salespersons_config": salespersons_config,
+	}

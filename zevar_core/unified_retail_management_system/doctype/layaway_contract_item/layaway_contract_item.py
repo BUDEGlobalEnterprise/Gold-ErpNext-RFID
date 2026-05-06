@@ -1,13 +1,17 @@
 # Copyright (c) 2026, Zevar and contributors
 # For license information, please see license.txt
 
-# import frappe
 from frappe.model.document import Document
+from frappe.utils import flt
 
 
 class LayawayContractItem(Document):
 	def before_insert(self):
 		self._set_item_details()
+
+	def validate(self):
+		if flt(self.qty) > 0 and flt(self.rate) > 0:
+			self.amount = flt(self.qty) * flt(self.rate)
 
 	def _set_item_details(self):
 		"""Auto-populate item details from item code."""

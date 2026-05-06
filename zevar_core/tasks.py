@@ -115,7 +115,7 @@ def fetch_live_metal_rates():
 		if not frappe.db.exists("DocType", "Gold Rate Log"):
 			frappe.log_error(
 				title="Gold Rate Log doctype missing",
-				message="Gold Rate Log DocType does not exist — cannot store metal rates. Create it via the Desk."
+				message="Gold Rate Log DocType does not exist — cannot store metal rates. Create it via the Desk.",
 			)
 			rates["source"] = "error"
 			rates["error"] = "Gold Rate Log doctype missing"
@@ -161,8 +161,7 @@ def fetch_live_metal_rates():
 	except Exception as e:
 		# Log to Frappe Error Snapshot so admins can see it in the UI
 		frappe.log_error(
-			title="Metal rate fetch failed",
-			message=f"{e!s}\n\nStack trace:\n{frappe.get_traceback()}"
+			title="Metal rate fetch failed", message=f"{e!s}\n\nStack trace:\n{frappe.get_traceback()}"
 		)
 
 	rates["source"] = "fallback"
@@ -221,9 +220,8 @@ def _update_all_rates(gold_per_gram, silver_per_gram, rates):
 def _update_rate(metal, purity, rate, source="live"):
 	"""Helper to update or create a rate entry.
 
-	Handles duplicate entries by updating ALL matching records.
-	Skips DB write if the rate hasn't changed (within 0.01 tolerance)
-	to avoid unnecessary write amplification.
+	Maintains history by inserting a new record whenever the price changes.
+	If the price is the same, only the timestamp of the latest record is updated.
 	"""
 	from frappe.utils import now_datetime
 
@@ -231,35 +229,41 @@ def _update_rate(metal, purity, rate, source="live"):
 	if not frappe.db.exists("Zevar Purity", purity):
 		return
 
-	existing = frappe.get_all(
+	# Get the most recent log entry for this metal/purity
+	latest = frappe.get_all(
 		"Gold Rate Log",
 		filters={"metal": metal, "purity": purity},
-		fields=["name"],
+		fields=["name", "rate_per_gram"],
+		order_by="timestamp desc",
+		limit=1,
+		ignore_permissions=True,
 	)
 
-	if existing:
-		for entry in existing:
-			current_rate = frappe.db.get_value(
-				"Gold Rate Log", entry.name, "rate_per_gram"
-			)
-			# Skip update if rate is effectively unchanged (tolerance: $0.01)
-			if current_rate is not None and abs(float(current_rate) - rate) < 0.01:
-				continue
+	if latest:
+		current_rate = float(latest[0].rate_per_gram or 0)
+		# Skip update if rate is effectively unchanged (tolerance: $0.001)
+		if abs(current_rate - rate) < 0.001:
+			# Just update the timestamp of the latest record to show it's still current
 			frappe.db.set_value(
 				"Gold Rate Log",
-				entry.name,
-				{"rate_per_gram": rate, "source": source, "timestamp": now_datetime()},
+				latest[0].name,
+				"timestamp",
+				now_datetime(),
+				update_modified=False,
 			)
-	else:
-		frappe.get_doc(
-			{
-				"doctype": "Gold Rate Log",
-				"metal": metal,
-				"purity": purity,
-				"rate_per_gram": rate,
-				"source": source,
-			}
-		).insert(ignore_permissions=True)
+			return
+
+	# If price changed or no record exists, insert a new history record
+	frappe.get_doc(
+		{
+			"doctype": "Gold Rate Log",
+			"metal": metal,
+			"purity": purity,
+			"rate_per_gram": rate,
+			"source": source,
+			"timestamp": now_datetime(),
+		}
+	).insert(ignore_permissions=True)
 
 
 # Keep the old function name for backward compatibility
@@ -281,18 +285,112 @@ def _cleanup_legacy_k_entries():
 
 
 def email_eod_brief():
-	"""Emails the EOD Daily Brief to owners."""
+	"""Emails the EOD Daily Brief to owners and managers with enriched data."""
+	from frappe.utils import flt, today
+
+	# Get owners and managers as recipients
 	owners = frappe.get_all("Has Role", filters={"role": "Owner", "parenttype": "User"}, fields=["parent"])
-	recipients = [o.parent for o in owners]
+	managers = frappe.get_all(
+		"Has Role",
+		filters={"role": ["in", ["Sales Manager", "Store Manager"]], "parenttype": "User"},
+		fields=["parent"],
+	)
+	recipient_set = set(o.parent for o in owners + managers)
+	recipients = list(recipient_set)
 
 	if not recipients:
 		return
 
-	html = frappe.get_print("Company", "Zevar Jewelers", "EOD Daily Brief", as_pdf=False)
+	today_date = today()
+
+	# Build summary data
+	# Total sales
+	sales_data = frappe.db.sql(
+		"""
+		SELECT COUNT(*) as count, COALESCE(SUM(grand_total), 0) as total
+		FROM `tabSales Invoice`
+		WHERE posting_date = %s AND docstatus = 1 AND is_pos = 1
+	""",
+		(today_date,),
+		as_dict=True,
+	)
+	total_sales = flt(sales_data[0].total) if sales_data else 0
+	sales_count = sales_data[0].count if sales_data else 0
+
+	# Per-user breakdown
+	user_breakdown = frappe.db.sql(
+		"""
+		SELECT si.owner, COUNT(*) as count, COALESCE(SUM(si.grand_total), 0) as total
+		FROM `tabSales Invoice` si
+		WHERE si.posting_date = %s AND si.docstatus = 1 AND si.is_pos = 1
+		GROUP BY si.owner
+		ORDER BY total DESC
+	""",
+		(today_date,),
+		as_dict=True,
+	)
+	user_names = {}
+	if user_breakdown:
+		uids = [u.owner for u in user_breakdown]
+		users = frappe.get_all("User", filters={"name": ["in", uids]}, fields=["name", "full_name"])
+		user_names = {u.name: u.full_name for u in users}
+		for u in user_breakdown:
+			u["full_name"] = user_names.get(u.owner, u.owner)
+
+	# Cash variance from closed sessions today
+	variance_data = frappe.db.sql(
+		"""
+		SELECT COALESCE(SUM(ABS(p.expected_amount - p.closing_amount)), 0) as total_variance,
+			   SUM(CASE WHEN p.closing_amount < p.expected_amount THEN 1 ELSE 0 END) as shortage_count
+		FROM `tabPOS Closing Entry` pce
+		JOIN `tabPayment Reconciliation` p ON p.parent = pce.name
+		WHERE pce.posting_date = %s AND pce.docstatus = 1
+	""",
+		(today_date,),
+		as_dict=True,
+	)
+	total_variance = flt(variance_data[0].total_variance) if variance_data else 0
+
+	# Tax exemption summary
+	tax_exempt_data = frappe.db.sql(
+		"""
+		SELECT COUNT(*) as count, COALESCE(SUM(grand_total), 0) as total
+		FROM `tabSales Invoice`
+		WHERE posting_date = %s AND docstatus = 1 AND is_pos = 1
+		AND custom_no_tax_override = 1
+	""",
+		(today_date,),
+		as_dict=True,
+	)
+	tax_exempt_count = tax_exempt_data[0].count if tax_exempt_data else 0
+	tax_exempt_total = flt(tax_exempt_data[0].total) if tax_exempt_data else 0
+
+	# Active layaways
+	active_layaways = frappe.db.count(
+		"Layaway Contract", filters={"status": ["in", ["Active", "Overdue"]], "docstatus": ["!=", 2]}
+	)
+
+	# Build HTML
+	date_str = frappe.utils.formatdate(today_date)
+	html = f"""
+	<h2>End of Day Report - {date_str}</h2>
+	<table style="border-collapse: collapse; width: 100%; margin-bottom: 20px;">
+		<tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Total Sales</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${total_sales:,.2f} ({sales_count} invoices)</td></tr>
+		<tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Cash Variance</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${total_variance:,.2f}</td></tr>
+		<tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Tax Exempt Invoices</strong></td><td style="padding: 8px; border: 1px solid #ddd;">{tax_exempt_count} (${tax_exempt_total:,.2f})</td></tr>
+		<tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Active Layaways</strong></td><td style="padding: 8px; border: 1px solid #ddd;">{active_layaways}</td></tr>
+	</table>
+	<h3>Sales by Employee</h3>
+	<table style="border-collapse: collapse; width: 100%;">
+		<tr style="background: #f5f5f5;"><th style="padding: 8px; border: 1px solid #ddd;">Employee</th><th style="padding: 8px; border: 1px solid #ddd;">Invoices</th><th style="padding: 8px; border: 1px solid #ddd;">Total</th></tr>
+"""
+	for u in user_breakdown:
+		html += f'<tr><td style="padding: 8px; border: 1px solid #ddd;">{u.full_name}</td><td style="padding: 8px; border: 1px solid #ddd;">{u.count}</td><td style="padding: 8px; border: 1px solid #ddd;">${flt(u.total):,.2f}</td></tr>'
+	html += "</table>"
 
 	frappe.sendmail(
 		recipients=recipients,
-		subject=f"End of Day Brief - {frappe.utils.formatdate(frappe.utils.today())}",
+		subject=f"End of Day Report - {date_str}",
 		message=html,
 	)
 

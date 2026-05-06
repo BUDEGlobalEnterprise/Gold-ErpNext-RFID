@@ -1053,18 +1053,33 @@
 								:key="key"
 								class="market-card"
 							>
-								<div class="market-name">{{ formatPurityLabel(key).toUpperCase() }}</div>
+								<div class="market-name">
+									{{ formatPurityLabel(key).toUpperCase() }}
+								</div>
 								<div class="flex items-end justify-between mt-1">
 									<div class="market-price">${{ rate }}</div>
 									<div
-										v-if="trend !== 'none'"
+										v-if="changePct != null"
 										class="flex items-center gap-1 text-[11px] font-bold pb-0.5"
-										:style="{ color: trend === 'up' ? '#10b981' : trend === 'down' ? '#ef4444' : '#9ca3af' }"
+										:style="{
+											color:
+												trend === 'up'
+													? '#10b981'
+													: trend === 'down'
+													? '#ef4444'
+													: '#9ca3af',
+										}"
 									>
-										<span v-if="trend !== 'flat'">{{ trend === 'up' ? '+' : '-' }}{{ Math.abs(changeAmt) }}</span>
-										<span v-else>0.00</span>
-										<span class="text-[9px]">{{ trend === 'up' ? '▲' : trend === 'down' ? '▼' : '●' }}</span>
-										<span>{{ Math.abs(changePct) }}%</span>
+										<span
+											>{{ trend === 'up' ? '+' : trend === 'down' ? '-' : ''
+											}}{{
+												changeAmt !== '0.00' ? Math.abs(changeAmt) : '0.00'
+											}}</span
+										>
+										<span class="text-[9px]">{{
+											trend === 'up' ? '▲' : trend === 'down' ? '▼' : '●'
+										}}</span>
+										<span>{{ Math.abs(changePct).toFixed(2) }}%</span>
 									</div>
 								</div>
 							</div>

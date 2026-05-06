@@ -35,7 +35,9 @@ class LLMRouter:
 		"""
 		return self.qwen
 
-	def generate(self, messages: list[dict], domain: str = "general", max_tokens: int = 1024, temperature: float = 0.3) -> tuple[str, str]:
+	def generate(
+		self, messages: list[dict], domain: str = "general", max_tokens: int = 1024, temperature: float = 0.3
+	) -> tuple[str, str]:
 		"""Generate a response using Qwen.
 
 		Returns:
@@ -46,7 +48,11 @@ class LLMRouter:
 		try:
 			settings = frappe.get_single("RAG Settings")
 			max_tokens = max_tokens or settings.llm_max_tokens or 1024
-			temperature = temperature if temperature != 0.3 else (settings.llm_max_tokens and settings.llm_temperature or 0.3)
+			temperature = (
+				temperature
+				if temperature != 0.3
+				else ((settings.llm_max_tokens and settings.llm_temperature) or 0.3)
+			)
 		except Exception:
 			pass
 

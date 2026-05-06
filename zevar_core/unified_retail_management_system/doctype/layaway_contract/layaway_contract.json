@@ -143,14 +143,12 @@
         {
             "fieldname": "total_amount",
             "fieldtype": "Currency",
-            "label": "Total Amount",
-            "read_only": 1
+            "label": "Total Amount"
         },
         {
             "fieldname": "deposit_amount",
             "fieldtype": "Currency",
-            "label": "Deposit Amount",
-            "read_only": 1
+            "label": "Deposit Amount"
         },
         {
             "fieldname": "column_break_amt",
@@ -159,20 +157,17 @@
         {
             "fieldname": "down_payment_percent",
             "fieldtype": "Percent",
-            "label": "Down Payment %",
-            "read_only": 1
+            "label": "Down Payment %"
         },
         {
             "fieldname": "balance_amount",
             "fieldtype": "Currency",
-            "label": "Balance Amount",
-            "read_only": 1
+            "label": "Balance Amount"
         },
         {
             "fieldname": "total_paid",
             "fieldtype": "Currency",
-            "label": "Total Paid",
-            "read_only": 1
+            "label": "Total Paid"
         },
         {
             "fieldname": "payment_count",

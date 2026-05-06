@@ -140,6 +140,12 @@ const routes = [
 		meta: { requiresAuth: true, requiresManagement: true },
 	},
 	{
+		path: '/reports/dashboards/admin',
+		name: 'AdminMonitor',
+		component: () => import('./pages/dashboards/AdminMonitor.vue'),
+		meta: { requiresAuth: true, requiresManagement: true },
+	},
+	{
 		path: '/contacts',
 		name: 'Contacts',
 		component: () => import('./pages/Contacts.vue'),

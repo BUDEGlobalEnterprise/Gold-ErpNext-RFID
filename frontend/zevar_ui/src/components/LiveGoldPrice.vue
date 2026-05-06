@@ -9,9 +9,15 @@
 				<div class="flex items-center gap-2 flex-shrink-0">
 					<div
 						class="flex items-center gap-1.5 px-2 py-1 rounded-md"
-						:class="isOffline
-							? (isDark ? 'bg-red-500/10' : 'bg-red-50')
-							: (isDark ? 'bg-emerald-500/10' : 'bg-emerald-50')"
+						:class="
+							isOffline
+								? isDark
+									? 'bg-red-500/10'
+									: 'bg-red-50'
+								: isDark
+								? 'bg-emerald-500/10'
+								: 'bg-emerald-50'
+						"
 					>
 						<span
 							class="w-1.5 h-1.5 rounded-full"
@@ -19,9 +25,7 @@
 						></span>
 						<span
 							class="text-[10px] font-semibold uppercase tracking-wide"
-							:class="isOffline
-								? 'text-red-600'
-								: 'text-emerald-600'"
+							:class="isOffline ? 'text-red-600' : 'text-emerald-600'"
 						>
 							{{ isOffline ? 'Offline' : 'Live' }}
 						</span>
@@ -64,11 +68,12 @@
 									>${{ formatPrice(metal.price) }}</span
 								>
 								<span
+									v-if="metal.change != null"
 									class="text-[9px] font-medium"
-									:style="{ color: metal.change >= 0 ? '#10b981' : '#ef4444' }"
+									:style="{ color: metal.change > 0 ? '#10b981' : '#ef4444' }"
 								>
-									{{ metal.change >= 0 ? '+' : ''
-									}}{{ metal.change?.toFixed(2) }}%
+									{{ metal.change > 0 ? '↑+' : '↓'
+									}}{{ Math.abs(metal.change).toFixed(2) }}%
 								</span>
 							</div>
 							<span
@@ -177,14 +182,19 @@ async function fetchPrices() {
 			// Skip metals not provided by the Zevar API
 			if (!metal.supported) return
 
-			let metalKey = metal.name.includes('Gold') ? 'Yellow Gold' : metal.name.includes('Silver') ? 'Silver' : null
+			let metalKey = metal.name.includes('Gold')
+				? 'Yellow Gold'
+				: metal.name.includes('Silver')
+				? 'Silver'
+				: null
 			if (!metalKey) return
 
 			const metalRates = data[metalKey] || data.rates?.[metalKey]
 			if (metalRates && metalRates.length > 0) {
-				const rate24k = metal.purity === '999 Fine'
-					? metalRates.find((r) => r.purity === '999 Fine')
-					: metalRates.find((r) => r.purity === '24Kt')
+				const rate24k =
+					metal.purity === '999 Fine'
+						? metalRates.find((r) => r.purity === '999 Fine')
+						: metalRates.find((r) => r.purity === '24Kt')
 				if (rate24k) {
 					const spotPrice = rate24k.rate_per_gram * TROY_OZ_GRAMS
 					metal.price = spotPrice

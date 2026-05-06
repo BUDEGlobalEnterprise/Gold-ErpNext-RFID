@@ -194,4 +194,6 @@ INVENTORY_EVENT_TYPES = [
 	"shrinkage_detected",
 	"vendor_return",
 	"consignment_overdue",
+	"stock_auto_reduced",
+	"stock_cli_adjustment",
 ]

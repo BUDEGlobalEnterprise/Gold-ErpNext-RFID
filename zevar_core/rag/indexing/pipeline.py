@@ -145,9 +145,7 @@ class IndexingPipeline:
 			)
 
 			indexed += len(serialized_batch)
-			log.info(
-				"Indexed %d/%d %s documents", min(batch_start + BATCH_SIZE, total), total, doctype
-			)
+			log.info("Indexed %d/%d %s documents", min(batch_start + BATCH_SIZE, total), total, doctype)
 
 		log.info("Bulk indexing complete: %d %s documents indexed", indexed, doctype)
 		return indexed

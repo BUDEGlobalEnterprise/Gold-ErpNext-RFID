@@ -89,9 +89,7 @@ def create_required_modes_of_payment():
 	cash_account = None
 	bank_account = None
 	if company:
-		cash_account = frappe.db.get_value(
-			"Account", {"account_type": "Cash", "company": company}, "name"
-		)
+		cash_account = frappe.db.get_value("Account", {"account_type": "Cash", "company": company}, "name")
 		if not cash_account:
 			cash_account = frappe.db.get_value(
 				"Account",

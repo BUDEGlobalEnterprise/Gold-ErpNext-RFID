@@ -24,3 +24,4 @@ zevar_core.patches.v1_1.seed_warehouse_zones
 zevar_core.patches.v1_1.seed_custom_fields_item_serial
 zevar_core.patches.v1_1.backfill_serial_last_seen
 zevar_core.patches.v1_1.bootstrap_payment_modes_and_accounts
+zevar_core.patches.v1_1.add_tax_override_fields

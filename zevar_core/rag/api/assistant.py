@@ -26,7 +26,15 @@ def _check_rag_rate_limit():
 	frappe.cache().set_value(key, current + 1, expires_in_sec=60)
 
 
-def _log_query(query: str, query_type: str, answer: str | None, sources: list, confidence: float | None = None, latency_ms: int | None = None, provider: str | None = None):
+def _log_query(
+	query: str,
+	query_type: str,
+	answer: str | None,
+	sources: list,
+	confidence: float | None = None,
+	latency_ms: int | None = None,
+	provider: str | None = None,
+):
 	"""Log a RAG query to the audit DocType."""
 	try:
 		log = frappe.get_doc(

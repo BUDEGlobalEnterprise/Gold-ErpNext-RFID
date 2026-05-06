@@ -57,14 +57,17 @@ doc_events = {
 			"zevar_core.api.inventory.validate_serial_sellable_zones",
 		],
 		"before_submit": ["zevar_core.api.repair_accounting.validate_sales_invoice_stream"],
-		"on_submit": "zevar_core.api.commission.calculate_commissions",
+		"on_submit": [
+			"zevar_core.api.commission.calculate_commissions",
+			"zevar_core.services.stock_reduction.detect_stock_reduction",
+		],
 	},
 }
 
 # Scheduler events
 scheduler_events = {
 	"cron": {
-		"*/15 * * * *": ["zevar_core.tasks.fetch_live_metal_rates"],
+		"*/60 * * * *": ["zevar_core.tasks.fetch_live_metal_rates"],
 		"0 2 1 * *": ["zevar_core.api.finance.apply_finance_charges"],
 		"0 8 * * *": [
 			"zevar_core.api.layaway.check_overdue_and_forfeit",
@@ -105,4 +108,5 @@ bench_commands = [
 	"zevar_core.migration.commands.show_mapping_info",
 	"zevar_core.migration.items_transfer.export_items",
 	"zevar_core.migration.items_transfer.import_items",
+	"zevar_core.stock_cli.stock_cli",
 ]

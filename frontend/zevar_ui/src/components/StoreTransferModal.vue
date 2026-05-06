@@ -197,7 +197,7 @@ async function submit() {
 				intent: 'success',
 			})
 		} else {
-			await call('zevar_core.api.inventory.receive_inter_store_transfer', {
+			await call('zevar_core.api.inventory.do_receive_inter_store_transfer', {
 				transfer_name: props.order.name,
 				scanned_serials: receivedSerials.value,
 			})

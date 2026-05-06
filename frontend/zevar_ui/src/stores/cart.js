@@ -173,6 +173,15 @@ export const useCartStore = defineStore('cart', () => {
 		saveToStorage()
 	}
 
+	function updateItemQuantity(index, qty) {
+		if (qty <= 0) {
+			items.value.splice(index, 1)
+		} else {
+			items.value[index].qty = qty
+		}
+		saveToStorage()
+	}
+
 	function saveToStorage() {
 		localStorage.setItem('zevar_cart_items', JSON.stringify(items.value))
 	}
@@ -209,9 +218,13 @@ export const useCartStore = defineStore('cart', () => {
 	 * @param {boolean} [options.taxExempt=false] - Whether to exempt tax.
 	 * @param {string} [options.warehouse] - Warehouse for stock deduction.
 	 * @param {string} [options.giftCardNumber] - Gift card number if paying by gift card.
+	 * @param {string} [options.overrideReference] - Reference ID for tax override.
 	 * @returns {Promise<object>} The API response.
 	 */
-	async function submitOrder(payments, { taxExempt = false, warehouse, giftCardNumber } = {}) {
+	async function submitOrder(
+		payments,
+		{ taxExempt = false, warehouse, giftCardNumber, overrideReference } = {}
+	) {
 		const itemsPayload = items.value.map((i) => ({
 			item_code: i.item_code,
 			qty: i.qty || 1,
@@ -239,6 +252,11 @@ export const useCartStore = defineStore('cart', () => {
 		// Attach gift card number if provided
 		if (giftCardNumber) {
 			params.gift_card_number = giftCardNumber
+		}
+
+		// Attach tax override reference if provided
+		if (overrideReference) {
+			params.override_reference = overrideReference
 		}
 
 		// Attach salespersons if any are assigned
@@ -291,6 +309,13 @@ export const useCartStore = defineStore('cart', () => {
 				? 'Walk-In Customer'
 				: customer.value?.name || 'Walk-In Customer'
 
+		// Walk-in customers are not eligible for layaway
+		if (customerName === 'Walk-In Customer') {
+			throw new Error(
+				'Walk-In customers are not eligible for layaway. Please select a registered customer with contact details.'
+			)
+		}
+
 		const data = await call('zevar_core.api.layaway.create_layaway', {
 			customer: customerName,
 			items: JSON.stringify(itemsPayload),
@@ -315,6 +340,7 @@ export const useCartStore = defineStore('cart', () => {
 		loadTaxForWarehouse,
 		addItem,
 		removeItem,
+		updateItemQuantity,
 		clearCart,
 		submitOrder,
 		submitLayaway,

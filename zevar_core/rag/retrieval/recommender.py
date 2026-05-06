@@ -85,11 +85,15 @@ def get_customer_profile(customer_id: str) -> dict:
 			metals = {}
 			for row in purchased_items:
 				if row.custom_jewelry_type:
-					jewelry_types[row.custom_jewelry_type] = jewelry_types.get(row.custom_jewelry_type, 0) + row.count
+					jewelry_types[row.custom_jewelry_type] = (
+						jewelry_types.get(row.custom_jewelry_type, 0) + row.count
+					)
 				if row.custom_metal_type:
 					metals[row.custom_metal_type] = metals.get(row.custom_metal_type, 0) + row.count
 
-			profile["purchase_summary"]["jewelry_types"] = dict(sorted(jewelry_types.items(), key=lambda x: -x[1]))
+			profile["purchase_summary"]["jewelry_types"] = dict(
+				sorted(jewelry_types.items(), key=lambda x: -x[1])
+			)
 			profile["purchase_summary"]["metals"] = dict(sorted(metals.items(), key=lambda x: -x[1]))
 
 		# Spending range
@@ -150,7 +154,7 @@ def recommend_for_customer(
 
 	# Filter and enrich recommendations
 	recommendations = []
-	for r in results[:limit * 2]:
+	for r in results[: limit * 2]:
 		item_code = r.get("id") or r.get("metadata", {}).get("item_code")
 		if not item_code:
 			continue
@@ -190,12 +194,12 @@ def _build_search_query(profile: dict) -> str:
 	purchase = profile.get("purchase_summary", {})
 	jewelry_types = purchase.get("jewelry_types", {})
 	if jewelry_types and not prefs.get("preferred_jewelry_type"):
-		top_type = list(jewelry_types.keys())[0]
+		top_type = next(iter(jewelry_types.keys()))
 		parts.append(top_type)
 
 	metals = purchase.get("metals", {})
 	if metals and not prefs.get("preferred_metal"):
-		top_metal = list(metals.keys())[0]
+		top_metal = next(iter(metals.keys()))
 		parts.append(top_metal)
 
 	return " ".join(parts) if parts else "jewelry"
@@ -215,7 +219,7 @@ def _build_reasoning(result: dict, profile: dict, occasion: str | None) -> str:
 
 	jewelry_types = purchase.get("jewelry_types", {})
 	if jewelry_types:
-		top_type = list(jewelry_types.keys())[0]
+		top_type = next(iter(jewelry_types.keys()))
 		if metadata.get("jewelry_type") == top_type:
 			reasons.append(f"matches most-purchased type ({top_type})")
 
@@ -235,10 +239,15 @@ def _get_product_details(item_code: str) -> dict | None:
 			"Item",
 			item_code,
 			[
-				"name", "item_name", "image",
-				"custom_metal_type", "custom_purity",
-				"custom_jewelry_type", "custom_msrp",
-				"custom_gender", "custom_source",
+				"name",
+				"item_name",
+				"image",
+				"custom_metal_type",
+				"custom_purity",
+				"custom_jewelry_type",
+				"custom_msrp",
+				"custom_gender",
+				"custom_source",
 			],
 			as_dict=True,
 		)

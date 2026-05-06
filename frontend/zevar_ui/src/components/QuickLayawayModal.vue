@@ -382,6 +382,12 @@ async function fetchPreview() {
 }
 
 async function submitLayaway() {
+	if (!form.value.customer || form.value.customer === 'Walk-In Customer') {
+		alert(
+			'Walk-In customers are not eligible for layaway. Please select a registered customer with contact details.'
+		)
+		return
+	}
 	loading.value = true
 	try {
 		const rawResult = await call(createLayawayFn, {
@@ -410,8 +416,11 @@ async function submitLayaway() {
 				const msgs = JSON.parse(data._server_messages)
 				errorMsg = msgs
 					.map((m) => {
-						try { return JSON.parse(m).message }
-						catch { return m }
+						try {
+							return JSON.parse(m).message
+						} catch {
+							return m
+						}
 					})
 					.join('\n')
 			} catch {
@@ -425,11 +434,15 @@ async function submitLayaway() {
 			errorMsg = error.message
 		} else if (typeof error === 'string') {
 			errorMsg = error
-		} else {
-			errorMsg = JSON.stringify(error)
 		}
-		errorMsg = errorMsg.replace(/<[^>]+>/g, '')
-		alert('Failed to create layaway: ' + errorMsg)
+
+		if (errorMsg === 'frappe.exceptions.ValidationError' || errorMsg === 'ValidationError') {
+			if (data?.exc_type === 'ValidationError') {
+				errorMsg = data.exception || 'Validation Error: Please check your inputs.'
+			}
+		}
+
+		alert('Failed to create layaway: ' + String(errorMsg).replace(/<[^>]+>/g, ''))
 	} finally {
 		loading.value = false
 	}

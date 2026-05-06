@@ -433,6 +433,28 @@ def create_layaway(
 	if not customer or not frappe.db.exists("Customer", customer):
 		frappe.throw(_("Customer '{0}' not found.").format(customer))
 
+	# Walk-in customers are not eligible for layaway
+	if customer == "Walk-In Customer":
+		frappe.throw(
+			_(
+				"Walk-In customers cannot use layaway. Please select a registered customer with contact details."
+			),
+			frappe.ValidationError,
+		)
+
+	# Customer must have at least a phone number or email on file or provided in the request
+	cust_record = frappe.db.get_value("Customer", customer, ["mobile_no", "email_id"], as_dict=True)
+	has_contact = (cust_record and (cust_record.mobile_no or cust_record.email_id)) or (
+		customer_contact or customer_email
+	)
+	if not has_contact:
+		frappe.throw(
+			_(
+				"Customer must have a phone number or email address to use layaway. Please provide it in the contact details."
+			),
+			frappe.ValidationError,
+		)
+
 	try:
 		duration = int(duration_months)
 	except (ValueError, TypeError):
@@ -560,9 +582,7 @@ def create_layaway(
 			"Layaway Insert/Submit Failed",
 			f"{type(insert_err).__name__}: {insert_err}\n\n{frappe.get_traceback()}",
 		)
-		frappe.throw(
-			_("Layaway insert/submit failed ({0}): {1}").format(type(insert_err).__name__, str(insert_err))
-		)
+		raise
 
 	try:
 		_reserve_inventory(doc)
@@ -876,23 +896,22 @@ def _reserve_inventory(doc) -> None:
 	for item in doc.items:
 		if item.warehouse and item.item_code:
 			try:
-				reservation_note = f"Layaway {doc.name}"
 				existing = frappe.db.get_value(
 					"Stock Reservation Entry",
 					{"item_code": item.item_code, "warehouse": item.warehouse, "docstatus": 1},
 					"name",
 				)
 				if not existing:
-					from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-						create_stock_reservation_entry,
-					)
-
-					create_stock_reservation_entry(
-						item_code=item.item_code,
-						warehouse=item.warehouse,
-						qty=item.qty,
-						reservation_note=reservation_note,
-					)
+					sre = frappe.new_doc("Stock Reservation Entry")
+					sre.item_code = item.item_code
+					sre.warehouse = item.warehouse
+					sre.reserved_qty = item.qty
+					sre.voucher_type = "Layaway Contract"
+					sre.voucher_no = doc.name
+					sre.company = doc.company or frappe.db.get_default("company")
+					sre.reservation_based_on = "Qty"
+					sre.insert(ignore_permissions=True)
+					sre.submit()
 			except Exception:
 				frappe.log_error(f"Inventory Reservation Failed for {doc.name}", frappe.get_traceback())
 
@@ -1416,21 +1435,17 @@ def _create_layaway_payment_entry(doc, amount, mode_of_payment, reference=None):
 		)
 		return None
 
-	abbr = frappe.get_cached_value("Company", company, "abbr")
-	liability_account = _ensure_layaway_liability_account(company, abbr)
+	# For "Receive" Payment Entry, paid_from MUST be a Receivable account
+	debtors_account = frappe.db.get_value(
+		"Account",
+		{"account_type": "Receivable", "company": company, "is_group": 0},
+		"name",
+	)
 
-	if not liability_account:
-		debtors_account = frappe.db.get_value(
-			"Account",
-			{"account_type": "Receivable", "company": company, "is_group": 0},
-			"name",
-		)
-		liability_account = debtors_account
-
-	if not liability_account:
+	if not debtors_account:
 		frappe.log_error(
 			title="Layaway Payment Entry Skipped",
-			message=f"No liability or receivable account found for company '{company}'. Payment Entry not created for layaway {doc.name}.",
+			message=f"No receivable account found for company '{company}'. Payment Entry not created for layaway {doc.name}.",
 		)
 		return None
 
@@ -1442,7 +1457,7 @@ def _create_layaway_payment_entry(doc, amount, mode_of_payment, reference=None):
 		pe.company = company
 		pe.party_type = "Customer"
 		pe.party = doc.customer
-		pe.paid_from = liability_account
+		pe.paid_from = debtors_account
 		pe.paid_to = paid_to
 		pe.paid_amount = amount
 		pe.received_amount = amount
@@ -1470,16 +1485,12 @@ def _create_layaway_final_invoice(doc):
 	if not company:
 		company = "Zevar Jewelers"
 
-	abbr = frappe.get_cached_value("Company", company, "abbr")
-	liability_account = _ensure_layaway_liability_account(company, abbr)
-
-	if not liability_account:
-		debtors_account = frappe.db.get_value(
-			"Account",
-			{"account_type": "Receivable", "company": company, "is_group": 0},
-			"name",
-		)
-		liability_account = debtors_account
+	# Sales Invoice debit_to MUST be a Receivable account
+	debtors_account = frappe.db.get_value(
+		"Account",
+		{"account_type": "Receivable", "company": company, "is_group": 0},
+		"name",
+	)
 
 	session_user = frappe.session.user
 	frappe.set_user("Administrator")
@@ -1489,8 +1500,8 @@ def _create_layaway_final_invoice(doc):
 		invoice.company = company
 		invoice.due_date = nowdate()
 		invoice.custom_transaction_stream = "Layaway Final"
-		if liability_account:
-			invoice.debit_to = liability_account
+		if debtors_account:
+			invoice.debit_to = debtors_account
 
 		for item in doc.items:
 			invoice.append(

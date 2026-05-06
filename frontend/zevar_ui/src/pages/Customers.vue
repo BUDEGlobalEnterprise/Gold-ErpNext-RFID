@@ -495,10 +495,14 @@ const ui = useUIStore()
 const filters = computed(() => ui.activeFilters.customers || {})
 
 // Watch filters to trigger fetch
-watch(filters, () => {
-	pagination.value.page = 1
-	fetchCustomers()
-}, { deep: true })
+watch(
+	filters,
+	() => {
+		pagination.value.page = 1
+		fetchCustomers()
+	},
+	{ deep: true }
+)
 const viewMode = ref(localStorage.getItem('zevar_customers_view') || 'list')
 const customers = ref([])
 const loading = ref(true)
@@ -517,7 +521,7 @@ const getListResource = createResource({
 	url: 'frappe.client.get_list',
 	makeParams() {
 		const frappeFilters = []
-		
+
 		// Search filter
 		if (activeSearch.value) {
 			// Search handled via or_filters if provided, but here we merge with regular filters
@@ -527,12 +531,12 @@ const getListResource = createResource({
 		if (filters.value.customer_group) {
 			frappeFilters.push(['customer_group', '=', filters.value.customer_group])
 		}
-		
+
 		// Territory filter
 		if (filters.value.territory) {
 			frappeFilters.push(['territory', '=', filters.value.territory])
 		}
-		
+
 		// Activity filter (Special cases)
 		if (filters.value.activity === 'Recently Joined') {
 			const thirtyDaysAgo = new Date()
@@ -572,7 +576,7 @@ const getListResource = createResource({
 				['email_id', 'like', `%${activeSearch.value}%`],
 			]
 		}
-		
+
 		return params
 	},
 })

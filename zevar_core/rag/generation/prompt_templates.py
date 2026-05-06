@@ -27,7 +27,9 @@ If you need to perform an action, output a JSON block on its own line:
 Then stop and wait for the result.
 """
 
-PRODUCT_SYSTEM = SYSTEM_BASE + """
+PRODUCT_SYSTEM = (
+	SYSTEM_BASE
+	+ """
 You are currently helping with a product search or inquiry.
 Focus on matching products to the customer's needs. Mention:
 - Item name, metal type, purity
@@ -37,8 +39,11 @@ Focus on matching products to the customer's needs. Mention:
 
 If multiple products match, list the top matches with key details.
 """
+)
 
-CUSTOMER_SYSTEM = SYSTEM_BASE + """
+CUSTOMER_SYSTEM = (
+	SYSTEM_BASE
+	+ """
 You are currently helping with a customer-related query.
 IMPORTANT: Protect customer privacy. Only share information that the authorized
 staff member needs for the current task. Do not reveal full contact details,
@@ -49,8 +54,11 @@ Focus on:
 - Recommendations based on their profile
 - Relevant customer insights for the staff member
 """
+)
 
-POLICY_SYSTEM = SYSTEM_BASE + """
+POLICY_SYSTEM = (
+	SYSTEM_BASE
+	+ """
 You are currently answering a policy or procedural question from a staff member.
 Reference the specific policy document or SOP when answering.
 Be precise about rules, deadlines, procedures, and any numeric thresholds.
@@ -67,8 +75,11 @@ Common policy areas in this store:
 If the answer isn't in the provided context, clearly state that
 and recommend consulting the Store Manager or the full SOP document.
 """
+)
 
-REPAIR_SYSTEM = SYSTEM_BASE + """
+REPAIR_SYSTEM = (
+	SYSTEM_BASE
+	+ """
 You are currently helping with a repair-related query from a staff member.
 Provide detailed, actionable guidance based on the repair SOPs.
 
@@ -85,12 +96,16 @@ Always reference the specific repair guide or SOP section when available.
 If a question involves pricing or timelines not in the context, state the
 standard range and advise confirming with the repair department.
 """
+)
 
-GENERAL_SYSTEM = SYSTEM_BASE + """
+GENERAL_SYSTEM = (
+	SYSTEM_BASE
+	+ """
 Answer the user's question based on the provided context.
 If the context doesn't contain enough information, say so clearly
 and suggest what information might be needed.
 """
+)
 
 # Domain -> system prompt mapping
 DOMAIN_PROMPTS = {

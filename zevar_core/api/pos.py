@@ -21,6 +21,7 @@ def create_pos_invoice(
 	layaway_reference: str | None = None,
 	trade_ins: str | None = None,
 	gift_card_number: str | None = None,
+	override_reference: str | None = None,
 ) -> dict:
 	"""
 	Create a complete POS Invoice with:
@@ -105,6 +106,21 @@ def create_pos_invoice(
 			_("Warehouse '{0}' not found. Please ensure a valid warehouse is configured.").format(warehouse),
 			frappe.ValidationError,
 		)
+
+	# Validate active POS session exists (managers bypass)
+	active_session = frappe.db.get_value(
+		"POS Opening Entry",
+		filters={"user": frappe.session.user, "docstatus": 1, "status": "Open"},
+		fieldname="name",
+		order_by="creation desc",
+	)
+	if not active_session:
+		manager_roles = {"Sales Manager", "Store Manager", "System Manager"}
+		if not (manager_roles & set(frappe.get_roles())):
+			frappe.throw(
+				_("You must open a POS session before making sales. Please open a register first."),
+				frappe.PermissionError,
+			)
 
 	salesperson_data = []
 	if salespersons:
@@ -245,11 +261,36 @@ def create_pos_invoice(
 
 		has_no_tax_field = hasattr(si, "custom_no_tax_override")
 		has_transaction_stream = hasattr(si, "custom_transaction_stream")
+		has_tax_override_fields = hasattr(si, "custom_tax_override_approved_by")
 
 		if is_tax_exempt:
+			# Validate customer tax exemption status
+			customer_doc = frappe.db.get_value(
+				"Customer",
+				customer,
+				["exempt_from_sales_tax", "customer_name"],
+				as_dict=True,
+			)
+			customer_is_exempt = bool(customer_doc and customer_doc.get("exempt_from_sales_tax"))
+
+			if not customer_is_exempt:
+				# Non-exempt customer requires manager override
+				if not override_reference:
+					frappe.throw(
+						_(
+							"Tax exemption requires manager approval. Customer ''{0}'' is not marked as tax exempt."
+						).format(customer),
+						frappe.ValidationError,
+					)
+				_validate_tax_override(override_reference, customer)
+
 			si.taxes = []
 			if has_no_tax_field:
 				si.custom_no_tax_override = 1
+			if has_tax_override_fields and not customer_is_exempt and override_reference:
+				override_doc = frappe.get_doc("POS Manager Override", override_reference)
+				si.custom_tax_override_approved_by = override_doc.approved_by or frappe.session.user
+				si.custom_tax_override_reason = override_doc.reason or ""
 		elif tax_template:
 			si.taxes_and_charges = tax_template
 			if has_no_tax_field:
@@ -372,6 +413,26 @@ def create_pos_invoice(
 			reference_type="Sales Invoice",
 		)
 
+		# Notify managers about new sale
+		try:
+			managers = frappe.get_all(
+				"Has Role",
+				filters={"role": ["in", ["Sales Manager", "Store Manager"]], "parenttype": "User"},
+				fields=["parent"],
+			)
+			sale_event = {
+				"event_type": "invoice_created",
+				"invoice_name": si.name,
+				"customer": si.customer,
+				"grand_total": flt(si.grand_total),
+				"salesperson": frappe.session.user,
+				"timestamp": str(frappe.utils.now_datetime()),
+			}
+			for mgr in managers:
+				frappe.publish_realtime("pos_sale_event", sale_event, user=mgr.parent)
+		except Exception:
+			frappe.log_error("POS Sale Notification Failed", frappe.get_traceback())
+
 		if gc_payment_amount > 0 and gift_card_number:
 			log_gift_card_used(gc_doc, gc_payment_amount, source_reference=si.name)
 
@@ -492,4 +553,200 @@ def calculate_invoice_totals(
 		"subtotal_after_discount": subtotal_after_discount,
 		"tax": tax,
 		"grand_total": grand_total,
+	}
+
+
+# ---------------------------------------------------------------------------
+# Tax Exemption Override Helpers & Endpoints
+# ---------------------------------------------------------------------------
+
+
+def _validate_tax_override(override_name: str, customer: str) -> None:
+	"""Validate that a POS Manager Override is approved for tax exemption."""
+	if not frappe.db.exists("POS Manager Override", override_name):
+		frappe.throw(
+			_("Override reference '{0}' not found.").format(override_name),
+			frappe.ValidationError,
+		)
+
+	override = frappe.get_doc("POS Manager Override", override_name)
+
+	if override.status != "Approved":
+		frappe.throw(
+			_("Tax exemption override is {0}. Only approved overrides are accepted.").format(override.status),
+			frappe.ValidationError,
+		)
+
+	if override.action != "tax_exemption":
+		frappe.throw(
+			_("Override is not for tax exemption."),
+			frappe.ValidationError,
+		)
+
+
+@frappe.whitelist(methods=["POST"])
+def request_tax_exemption_override(
+	customer: str,
+	reason: str,
+	invoice_data: str | None = None,
+) -> dict:
+	"""
+	Request a manager override for tax exemption.
+
+	Creates a POS Manager Override document in Pending status.
+	"""
+	allowed_roles = {
+		"Sales User",
+		"Sales Manager",
+		"Store Manager",
+		"POS Manager",
+		"Employee",
+		"Employee Self Service",
+		"System Manager",
+	}
+	if not (allowed_roles & set(frappe.get_roles())):
+		frappe.throw(_("You don't have permission to request overrides."), frappe.PermissionError)
+
+	if not customer:
+		frappe.throw(_("Customer is required."))
+
+	if not reason or not reason.strip():
+		frappe.throw(_("A reason is required for tax exemption override."))
+
+	override = frappe.new_doc("POS Manager Override")
+	override.requested_by = frappe.session.user
+	override.action = "tax_exemption"
+	override.reason = reason.strip()
+	override.status = "Pending"
+	override.reference_type = "Customer"
+	override.reference_document = customer
+	override.notes = invoice_data or ""
+	override.insert(ignore_permissions=True)
+
+	from zevar_core.api.audit_log import log_event_safely
+
+	log_event_safely(
+		event_type="manager_override_requested",
+		details={
+			"override_name": override.name,
+			"customer": customer,
+			"reason": reason.strip(),
+			"action": "tax_exemption",
+		},
+	)
+
+	return {
+		"success": True,
+		"override_name": override.name,
+		"status": "Pending",
+		"message": _("Tax exemption override requested. Waiting for manager approval."),
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def approve_tax_exemption_override(override_name: str) -> dict:
+	"""Approve a tax exemption override. Manager only."""
+	frappe.only_for(["Sales Manager", "Store Manager", "System Manager"])
+
+	if not override_name or not frappe.db.exists("POS Manager Override", override_name):
+		frappe.throw(_("Override '{0}' not found.").format(override_name or ""))
+
+	override = frappe.get_doc("POS Manager Override", override_name)
+
+	if override.action != "tax_exemption":
+		frappe.throw(_("This override is not for tax exemption."))
+
+	if override.status != "Pending":
+		frappe.throw(_("Override is already {0}.").format(override.status))
+
+	override.status = "Approved"
+	override.approved_by = frappe.session.user
+	override.approval_time = frappe.utils.now_datetime()
+	override.flags.ignore_permissions = True
+	override.save(ignore_permissions=True)
+
+	from zevar_core.api.audit_log import log_event_safely
+
+	log_event_safely(
+		event_type="tax_exemption_approved",
+		details={
+			"override_name": override.name,
+			"customer": override.reference_document,
+			"approved_by": frappe.session.user,
+		},
+	)
+
+	return {
+		"success": True,
+		"override_name": override.name,
+		"status": "Approved",
+		"message": _("Tax exemption override approved."),
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def reject_tax_exemption_override(override_name: str, notes: str | None = None) -> dict:
+	"""Reject a tax exemption override. Manager only."""
+	frappe.only_for(["Sales Manager", "Store Manager", "System Manager"])
+
+	if not override_name or not frappe.db.exists("POS Manager Override", override_name):
+		frappe.throw(_("Override '{0}' not found.").format(override_name or ""))
+
+	override = frappe.get_doc("POS Manager Override", override_name)
+
+	if override.action != "tax_exemption":
+		frappe.throw(_("This override is not for tax exemption."))
+
+	if override.status != "Pending":
+		frappe.throw(_("Override is already {0}.").format(override.status))
+
+	override.status = "Rejected"
+	override.approved_by = frappe.session.user
+	override.approval_time = frappe.utils.now_datetime()
+	if notes:
+		override.notes = notes
+	override.flags.ignore_permissions = True
+	override.save(ignore_permissions=True)
+
+	from zevar_core.api.audit_log import log_event_safely
+
+	log_event_safely(
+		event_type="tax_exemption_denied",
+		details={
+			"override_name": override.name,
+			"customer": override.reference_document,
+			"rejected_by": frappe.session.user,
+		},
+	)
+
+	return {
+		"success": True,
+		"override_name": override.name,
+		"status": "Rejected",
+		"message": _("Tax exemption override rejected."),
+	}
+
+
+@frappe.whitelist()
+def get_pending_overrides() -> dict:
+	"""Get all pending tax exemption overrides. Manager only."""
+	frappe.only_for(["Sales Manager", "Store Manager", "System Manager"])
+
+	overrides = frappe.get_all(
+		"POS Manager Override",
+		filters={"action": "tax_exemption", "status": "Pending"},
+		fields=["name", "requested_by", "reason", "request_time", "reference_document", "notes"],
+		order_by="request_time asc",
+	)
+
+	# Enrich with requester names
+	for o in overrides:
+		o["requester_name"] = frappe.db.get_value("User", o.requested_by, "full_name") or o.requested_by
+		o["customer_name"] = (
+			frappe.db.get_value("Customer", o.reference_document, "customer_name") or o.reference_document
+		)
+
+	return {
+		"overrides": overrides,
+		"count": len(overrides),
 	}

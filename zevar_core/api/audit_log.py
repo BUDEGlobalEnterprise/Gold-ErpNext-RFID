@@ -41,6 +41,9 @@ AUDIT_EVENTS = {
 	"manager_override_approved": {"category": "Security", "severity": "Warning"},
 	"manager_override_rejected": {"category": "Security", "severity": "Warning"},
 	"permission_denied": {"category": "Security", "severity": "Warning"},
+	# Tax exemption events
+	"tax_exemption_approved": {"category": "Security", "severity": "Warning"},
+	"tax_exemption_denied": {"category": "Security", "severity": "Warning"},
 	# Layaway events
 	"layaway_created": {"category": "Layaway", "severity": "Info"},
 	"layaway_payment": {"category": "Layaway", "severity": "Info"},
@@ -88,8 +91,14 @@ def log_event(
 	ip_address = None
 	user_agent = None
 	if hasattr(frappe.local, "request"):
-		ip_address = frappe.local.request.get("REMOTE_ADDR")
-		user_agent = frappe.local.request.get("HTTP_USER_AGENT", "")[:500]
+		try:
+			ip_address = frappe.local.request_ip
+		except Exception:
+			ip_address = None
+		try:
+			user_agent = frappe.local.request.headers.get("User-Agent", "")[:500]
+		except Exception:
+			user_agent = None
 
 	# Create audit log entry
 	audit_log = frappe.new_doc("POS Audit Log")

@@ -9,9 +9,9 @@ import frappe
 
 def reconcile_indexes():
 	"""Nightly job: verify ChromaDB counts match MariaDB counts and re-index discrepancies."""
+	from zevar_core.rag.config import DOCTYPE_COLLECTION_MAP
 	from zevar_core.rag.indexing.pipeline import IndexingPipeline
 	from zevar_core.rag.indexing.store import VectorStore
-	from zevar_core.rag.config import DOCTYPE_COLLECTION_MAP
 
 	store = VectorStore()
 	pipeline = IndexingPipeline()

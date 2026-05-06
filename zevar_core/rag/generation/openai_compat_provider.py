@@ -32,7 +32,7 @@ class OpenAICompatProvider(LLMProvider):
 
 	def _load_settings(self):
 		"""Load settings from RAG Settings DocType, falling back to config defaults."""
-		from zevar_core.rag.config import QWEN_DEFAULT_ENDPOINT, QWEN_DEFAULT_MODEL, QWEN_DEFAULT_API_KEY
+		from zevar_core.rag.config import QWEN_DEFAULT_API_KEY, QWEN_DEFAULT_ENDPOINT, QWEN_DEFAULT_MODEL
 
 		try:
 			settings = frappe.get_single("RAG Settings")
@@ -96,7 +96,11 @@ class OpenAICompatProvider(LLMProvider):
 			return content.strip()
 
 		except requests.exceptions.Timeout:
-			raise RuntimeError("Qwen API request timed out after 45s. Check if the server at " + self.endpoint + " is responding.")
+			raise RuntimeError(
+				"Qwen API request timed out after 45s. Check if the server at "
+				+ self.endpoint
+				+ " is responding."
+			)
 		except requests.exceptions.ConnectionError:
 			raise RuntimeError(f"Cannot connect to Qwen at {self.endpoint}. Is the server running?")
 		except requests.exceptions.HTTPError as e:
@@ -118,4 +122,4 @@ class OpenAICompatProvider(LLMProvider):
 			return False
 
 	def get_name(self) -> str:
-		return f"Qwen"
+		return "Qwen"
