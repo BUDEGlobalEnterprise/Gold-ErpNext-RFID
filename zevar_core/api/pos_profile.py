@@ -16,32 +16,70 @@ from frappe.utils import cstr
 def get_pos_profiles() -> dict:
 	"""
 	Get all available POS profiles for the current user.
+	Filters based on 'Applicable for Users' table in POS Profile.
 
 	Returns:
 		dict: Contains 'profiles' list with profile details
 	"""
-	frappe.has_permission("POS Profile", ptype="read", throw=True)
+	user = frappe.session.user
 
-	profiles = frappe.get_all(
-		"POS Profile",
-		filters={"disabled": 0},
-		fields=[
-			"name",
-			"company",
-			"warehouse",
-			"currency",
-			"selling_price_list",
-			"customer",
-			"write_off_account",
-			"write_off_cost_center",
-			"expense_account",
-			"cost_center",
-			"custom_enforce_fixed_float",
-			"custom_fixed_opening_float",
-			"custom_variance_alert_threshold",
-		],
-		order_by="name",
-	)
+	# Check if user has broad read permission or specific POS roles
+	has_full_read = frappe.has_permission("POS Profile", ptype="read")
+	pos_roles = ["POS Manager", "Sales User", "Employee", "Employee Self Service"]
+	user_roles = frappe.get_roles(user)
+
+	if not has_full_read and not any(role in pos_roles for role in user_roles):
+		frappe.throw(_("Not authorized to access POS profiles."), frappe.PermissionError)
+
+	fields = [
+		"name",
+		"company",
+		"warehouse",
+		"currency",
+		"selling_price_list",
+		"customer",
+		"write_off_account",
+		"write_off_cost_center",
+		"expense_account",
+		"cost_center",
+		"custom_enforce_fixed_float",
+		"custom_fixed_opening_float",
+		"custom_variance_alert_threshold",
+	]
+
+	if has_full_read:
+		# Admins/Accounts Managers see all enabled profiles
+		profiles = frappe.get_all(
+			"POS Profile",
+			filters={"disabled": 0},
+			fields=fields,
+			order_by="name",
+		)
+	else:
+		# Employees only see profiles assigned to them OR profiles with no user assignments (public)
+		assigned_profiles = frappe.get_all("POS Profile User", filters={"user": user}, pluck="parent")
+
+		# Get profiles with NO users assigned
+		public_profiles = frappe.db.sql_list(
+			"""
+			select name from `tabPOS Profile` pf
+			where pf.disabled = 0
+			and not exists (select 1 from `tabPOS Profile User` pfu where pfu.parent = pf.name)
+		"""
+		)
+
+		allowed_names = list(set(assigned_profiles + public_profiles))
+
+		if not allowed_names:
+			return {"profiles": [], "count": 0}
+
+		profiles = frappe.get_all(
+			"POS Profile",
+			filters={"name": ["in", allowed_names], "disabled": 0},
+			fields=fields,
+			order_by="name",
+			ignore_permissions=True,
+		)
 
 	# Enrich profiles with additional info
 	for profile in profiles:
@@ -177,7 +215,24 @@ def set_active_profile(profile_name: str) -> dict:
 	Returns:
 		dict: Success status and message
 	"""
-	frappe.has_permission("POS Profile", ptype="read", throw=True)
+	user = frappe.session.user
+
+	# Check authorization
+	has_full_read = frappe.has_permission("POS Profile", ptype="read")
+	pos_roles = ["POS Manager", "Sales User", "Employee", "Employee Self Service"]
+	user_roles = frappe.get_roles(user)
+
+	if not has_full_read:
+		if not any(role in pos_roles for role in user_roles):
+			frappe.throw(_("Not authorized to access POS profiles."), frappe.PermissionError)
+
+		# Verify user is allowed to use THIS specific profile
+		# A profile is allowed if explicitly assigned OR if it has NO assignments
+		assigned = frappe.db.exists("POS Profile User", {"parent": profile_name, "user": user})
+		has_any_assignment = frappe.db.exists("POS Profile User", {"parent": profile_name})
+
+		if has_any_assignment and not assigned:
+			frappe.throw(_("You are not authorized to use POS Profile '{0}'").format(profile_name))
 
 	if not profile_name:
 		frappe.throw(_("Profile name is required."))
@@ -217,7 +272,25 @@ def get_profile_settings(profile_name: str) -> dict:
 	Returns:
 		dict: Complete profile settings including payment modes, item groups, etc.
 	"""
-	frappe.has_permission("POS Profile", ptype="read", throw=True)
+	user = frappe.session.user
+
+	# Check authorization
+	has_full_read = frappe.has_permission("POS Profile", ptype="read")
+	pos_roles = ["POS Manager", "Sales User", "Employee", "Employee Self Service"]
+	user_roles = frappe.get_roles(user)
+
+	if not has_full_read:
+		if not any(role in pos_roles for role in user_roles):
+			frappe.throw(_("Not authorized to access POS profiles."), frappe.PermissionError)
+
+		# Verify user is allowed to access THIS specific profile
+		assigned = frappe.db.exists("POS Profile User", {"parent": profile_name, "user": user})
+		has_any_assignment = frappe.db.exists("POS Profile User", {"parent": profile_name})
+
+		if has_any_assignment and not assigned:
+			frappe.throw(
+				_("You are not authorized to access settings for POS Profile '{0}'").format(profile_name)
+			)
 
 	if not profile_name or not frappe.db.exists("POS Profile", profile_name):
 		frappe.throw(_("POS Profile '{0}' not found.").format(profile_name or ""))

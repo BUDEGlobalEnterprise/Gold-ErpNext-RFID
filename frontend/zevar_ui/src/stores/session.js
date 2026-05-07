@@ -102,16 +102,24 @@ export const useSessionStore = defineStore('session', () => {
 		url: 'zevar_core.api.user_info.get_user_info',
 		auto: true,
 		onSuccess(data) {
+			console.log('session.js: userResource received data:', data)
 			if (!data || data === 'Guest') {
+				if (isLoggedIn.value) {
+					console.warn('session.js: User was logged in but received Guest. This might be a transient error. Not logging out immediately.')
+					// If we get Guest but think we are logged in, we'll wait for the next manual check 
+					// or next mount before forcing a logout, to avoid flickering during network glitches.
+					return
+				}
+				
 				user.value = null
 				isLoggedIn.value = false
 				userRoles.value = []
 				localStorage.removeItem('session_user')
 				localStorage.removeItem('session_roles')
 
-				// Only redirect if not already on login page
-				if (window.location.pathname !== '/pos/login') {
-					router.push('/login')
+				if (window.location.pathname !== '/pos/login' && window.location.pathname !== '/login') {
+					console.log('session.js: Redirecting to /pos/login (triggered by Guest response)')
+					window.location.href = '/pos/login'
 				}
 				return
 			}
@@ -126,15 +134,20 @@ export const useSessionStore = defineStore('session', () => {
 			localStorage.setItem('session_roles', JSON.stringify(userRoles.value))
 			startActivityTracking()
 		},
-		onError() {
-			user.value = null
-			isLoggedIn.value = false
-			userRoles.value = []
-			localStorage.removeItem('session_user')
-			localStorage.removeItem('session_roles')
+		onError(err) {
+			console.error('session.js: userResource error:', err)
+			// Don't log out immediately on network error, only if specifically unauthorized (401)
+			if (err?.status_code === 401) {
+				console.warn('session.js: Unauthorized (401) detected. Forcing logout.')
+				user.value = null
+				isLoggedIn.value = false
+				userRoles.value = []
+				localStorage.removeItem('session_user')
+				localStorage.removeItem('session_roles')
 
-			if (window.location.pathname !== '/pos/login') {
-				router.push('/login')
+				if (window.location.pathname !== '/pos/login' && window.location.pathname !== '/login') {
+					window.location.href = '/pos/login'
+				}
 			}
 		},
 	})

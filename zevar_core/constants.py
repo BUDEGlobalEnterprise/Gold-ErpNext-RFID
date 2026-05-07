@@ -66,11 +66,13 @@ SILVER_PURITY_RATES = {
 	"925 Sterling": 0.925,
 }
 
-# Aliases: alternate names used on Items that map to the canonical purity key
-PURITY_ALIASES = {
+# Additional PURITY_ALIASES for direct Kt variants (e.g., "18K" -> "18Kt")
+# Note: These values override the earlier lowercase aliases - this is intentional
+# as we want "18K" to map to "18Kt", not "18k"
+PURITY_ALIASES_DIRECT = {
 	"18K": "18Kt",
 	"14K": "14Kt",
-	"10K": "10k",
+	"10K": "10Kt",
 }
 
 # Unit Conversions

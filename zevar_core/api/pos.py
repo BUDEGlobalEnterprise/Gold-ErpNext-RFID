@@ -37,6 +37,23 @@ def create_pos_invoice(
 	payments_list = frappe.parse_json(payments) if isinstance(payments, str) else payments
 	trade_in_list = frappe.parse_json(trade_ins) if trade_ins else []
 
+	from zevar_core.api.audit_log import log_event_safely
+
+	def checkout_bouncer(message, event_type="permission_denied", details=None):
+		"""Log failure and throw error."""
+		log_event_safely(
+			event_type=event_type,
+			details={
+				"message": message,
+				"customer": customer,
+				"items_count": len(items_list) if items_list else 0,
+				"additional_details": details or {},
+			},
+		)
+		frappe.throw(
+			message, frappe.ValidationError if "permission" not in event_type else frappe.PermissionError
+		)
+
 	# Validate the user has an allowed role for POS invoicing
 	allowed_roles = {
 		"Sales User",
@@ -49,38 +66,35 @@ def create_pos_invoice(
 	}
 	user_roles = set(frappe.get_roles())
 	if not user_roles & allowed_roles:
-		frappe.throw(
+		checkout_bouncer(
 			_(
 				"You do not have permission to create POS Invoices. Required role: Sales User, Employee, or equivalent."
 			),
-			frappe.PermissionError,
+			"permission_denied",
 		)
 
 	if not items_list:
-		frappe.throw(_("At least one item is required."), frappe.ValidationError)
+		checkout_bouncer(_("At least one item is required."), "invoice_failed")
 
 	if not payments_list:
-		frappe.throw(_("At least one payment mode is required."), frappe.ValidationError)
+		checkout_bouncer(_("At least one payment mode is required."), "invoice_failed")
 
 	# Validate all items before creating invoice
 	for item in items_list:
-		if not item.get("item_code"):
-			frappe.throw(_("Each item must have an item_code."), frappe.ValidationError)
+		item_code = item.get("item_code")
+		if not item_code:
+			checkout_bouncer(_("Each item must have an item_code."), "invoice_failed")
 		if flt(item.get("qty", 0)) <= 0:
-			frappe.throw(
-				_("Item {0}: quantity must be greater than zero.").format(item.get("item_code")),
-				frappe.ValidationError,
+			checkout_bouncer(
+				_("Item {0}: quantity must be greater than zero.").format(item_code), "invoice_failed"
 			)
 		if flt(item.get("rate", 0)) <= 0:
-			frappe.throw(
-				_("Item {0}: rate must be greater than zero.").format(item.get("item_code")),
-				frappe.ValidationError,
+			checkout_bouncer(
+				_("Item {0}: rate must be greater than zero.").format(item_code), "invoice_failed"
 			)
 		# Verify item exists in the system
-		if not frappe.db.exists("Item", item.get("item_code")):
-			frappe.throw(
-				_("Item '{0}' not found in the system.").format(item.get("item_code")), frappe.ValidationError
-			)
+		if not frappe.db.exists("Item", item_code):
+			checkout_bouncer(_("Item '{0}' not found in the system.").format(item_code), "invoice_failed")
 
 	if not warehouse:
 		# Try to get warehouse from active store location
@@ -96,15 +110,15 @@ def create_pos_invoice(
 				warehouse = frappe.db.get_value("Company", company, "default_warehouse")
 
 	if not warehouse:
-		frappe.throw(
+		checkout_bouncer(
 			_("Warehouse is required. Please select a store location or configure a default warehouse."),
-			frappe.ValidationError,
+			"invoice_failed",
 		)
 
 	if not frappe.db.exists("Warehouse", warehouse):
-		frappe.throw(
+		checkout_bouncer(
 			_("Warehouse '{0}' not found. Please ensure a valid warehouse is configured.").format(warehouse),
-			frappe.ValidationError,
+			"invoice_failed",
 		)
 
 	# Validate active POS session exists (managers bypass)
@@ -117,9 +131,9 @@ def create_pos_invoice(
 	if not active_session:
 		manager_roles = {"Sales Manager", "Store Manager", "System Manager"}
 		if not (manager_roles & set(frappe.get_roles())):
-			frappe.throw(
+			checkout_bouncer(
 				_("You must open a POS session before making sales. Please open a register first."),
-				frappe.PermissionError,
+				"permission_denied",
 			)
 
 	salesperson_data = []
@@ -129,12 +143,12 @@ def create_pos_invoice(
 		for sp in salesperson_data[:4]:
 			emp = sp.get("salesperson") or sp.get("employee")
 			if emp and not frappe.db.exists("Employee", emp):
-				frappe.throw(_("Salesperson '{0}' not found.").format(emp), frappe.ValidationError)
+				checkout_bouncer(_("Salesperson '{0}' not found.").format(emp), "invoice_failed")
 		total_split = sum(flt(sp.get("split")) for sp in salesperson_data[:4])
 		if salesperson_data and abs(total_split - 100) > 0.01:
-			frappe.throw(
+			checkout_bouncer(
 				_("Salesperson splits must total 100%. Current total: {0}%").format(total_split),
-				frappe.ValidationError,
+				"invoice_failed",
 			)
 
 	is_tax_exempt = str(tax_exempt).lower() in ["true", "1", "t", "y", "yes"]
@@ -149,9 +163,9 @@ def create_pos_invoice(
 
 			create_required_modes_of_payment()
 			if not frappe.db.exists("Mode of Payment", mode):
-				frappe.throw(
+				checkout_bouncer(
 					_("Payment mode '{0}' is not set up. Please run migrate or contact admin.").format(mode),
-					frappe.ValidationError,
+					"invoice_failed",
 				)
 
 	if not frappe.db.exists("Customer", customer):
@@ -167,7 +181,7 @@ def create_pos_invoice(
 				cust.customer_type = "Individual"
 				cust.insert(ignore_permissions=True)
 		else:
-			frappe.throw(_("Customer '{0}' not found.").format(customer), frappe.ValidationError)
+			checkout_bouncer(_("Customer '{0}' not found.").format(customer), "invoice_failed")
 
 	# Validate gift card before creating invoice
 	gc_payment_amount = 0
@@ -179,27 +193,27 @@ def create_pos_invoice(
 
 	if gc_payment_amount > 0:
 		if not gift_card_number:
-			frappe.throw(
-				_("Gift Card number is required when using Gift Card payment."), frappe.ValidationError
+			checkout_bouncer(
+				_("Gift Card number is required when using Gift Card payment."), "invoice_failed"
 			)
 		if not frappe.db.exists("Gift Card", gift_card_number):
-			frappe.throw(_("Gift Card '{0}' not found.").format(gift_card_number), frappe.ValidationError)
+			checkout_bouncer(_("Gift Card '{0}' not found.").format(gift_card_number), "invoice_failed")
 
 		from frappe.utils import getdate, today
 
 		gc_doc = frappe.get_doc("Gift Card", gift_card_number)
 		if gc_doc.status != "Active":
-			frappe.throw(
-				_("Gift Card is {0}. Cannot process payment.").format(gc_doc.status), frappe.ValidationError
+			checkout_bouncer(
+				_("Gift Card is {0}. Cannot process payment.").format(gc_doc.status), "invoice_failed"
 			)
 		if gc_doc.expiry_date and getdate(gc_doc.expiry_date) < getdate(today()):
-			frappe.throw(_("Gift Card has expired."), frappe.ValidationError)
+			checkout_bouncer(_("Gift Card has expired."), "invoice_failed")
 		if gc_payment_amount > flt(gc_doc.balance):
-			frappe.throw(
+			checkout_bouncer(
 				_("Gift Card balance insufficient. Available: {0}, Requested: {1}").format(
 					flt(gc_doc.balance), gc_payment_amount
 				),
-				frappe.ValidationError,
+				"invoice_failed",
 			)
 
 	try:
@@ -276,11 +290,11 @@ def create_pos_invoice(
 			if not customer_is_exempt:
 				# Non-exempt customer requires manager override
 				if not override_reference:
-					frappe.throw(
+					checkout_bouncer(
 						_(
-							"Tax exemption requires manager approval. Customer ''{0}'' is not marked as tax exempt."
+							"Tax exemption requires manager approval. Customer '{0}' is not marked as tax exempt."
 						).format(customer),
-						frappe.ValidationError,
+						"invoice_failed",
 					)
 				_validate_tax_override(override_reference, customer)
 

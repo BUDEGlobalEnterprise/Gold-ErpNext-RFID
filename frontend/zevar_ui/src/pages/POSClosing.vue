@@ -338,7 +338,7 @@ const denominations = [
 
 const expectedBalance = computed(() => {
 	if (previewData.value) {
-		return previewData.value.expected_cash + previewData.value.fixed_float
+		return previewData.value.total_expected
 	}
 	const opening = posSession.status.session?.opening_balance || 0
 	const sales = posSession.status.session?.sales_total || 0

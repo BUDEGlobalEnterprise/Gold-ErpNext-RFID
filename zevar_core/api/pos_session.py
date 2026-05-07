@@ -51,24 +51,38 @@ def get_session_status() -> dict:
 		duration_hours = time_diff_in_hours(now_datetime(), get_datetime(period_start))
 
 	# Get sales count and total for this session
-	sales_data = frappe.db.sql(  # nosemgrep
+	# Calculate total sales since opening date
+	start_date = (
+		session.period_start_date.date()
+		if hasattr(session.period_start_date, "date")
+		else session.period_start_date
+	)
+	invoices = frappe.db.sql(
 		"""
 		SELECT COUNT(*) as count, COALESCE(SUM(grand_total), 0) as total
 		FROM `tabSales Invoice`
 		WHERE owner = %s
-		AND posting_date >= DATE(%s)
+		AND posting_date >= %s
 		AND docstatus = 1
-		AND is_pos = 1
 		""",
-		(user, period_start.date() if hasattr(period_start, "date") else period_start),
+		(user, start_date),
 		as_dict=True,
 	)
+	invoices = invoices[0] if invoices else {"count": 0, "total": 0}
 
-	sales_count = 0
-	sales_total = 0
-	if sales_data and sales_data[0]:
-		sales_count = sales_data[0].get("count", 0) or 0
-		sales_total = flt(sales_data[0].get("total", 0))
+	# Calculate cash specifically for expected balance
+	cash_payments = frappe.db.sql(
+		"""
+		SELECT COALESCE(SUM(sip.amount), 0)
+		FROM `tabSales Invoice Payment` sip
+		JOIN `tabSales Invoice` si ON sip.parent = si.name
+		WHERE si.owner = %s
+		AND si.posting_date >= %s
+		AND si.docstatus = 1
+		AND sip.mode_of_payment = 'Cash'
+		""",
+		(user, start_date),
+	)[0][0]
 
 	# Get opening time
 	opening_time = frappe.db.get_value("POS Opening Entry", session_name, "period_start_date")
@@ -90,8 +104,9 @@ def get_session_status() -> dict:
 			if opening_time and hasattr(opening_time, "time")
 			else "",
 			"opening_balance": flt(opening_amount),
-			"sales_count": sales_count,
-			"sales_total": flt(sales_total),
+			"sales_count": invoices.count,
+			"sales_total": invoices.total,
+			"expected_cash": flt(cash_payments),
 			"duration_hours": round(duration_hours, 2),
 		},
 	}
@@ -190,7 +205,7 @@ def open_pos_session(
 		opening_entry.user = user
 		opening_entry.company = profile.company
 		opening_entry.period_start_date = now_datetime()
-		opening_entry.opening_amount = flt(opening_balance)
+		# opening_amount is not a field in the main DocType, it's in balance_details
 
 		if notes:
 			opening_entry.remarks = notes
@@ -278,36 +293,41 @@ def preview_close(session_name: str, total_cash_counted: float) -> dict:
 		else sum(flt(row.opening_amount) for row in session.balance_details)
 	)
 
-	expected_cash_data = frappe.db.sql(
+	# Calculate expected amounts per payment mode
+	start_date = (
+		session.period_start_date.date()
+		if hasattr(session.period_start_date, "date")
+		else session.period_start_date
+	)
+	payments = frappe.db.sql(
 		"""
-		SELECT SUM(sip.amount) as expected_cash
+		SELECT sip.mode_of_payment, SUM(sip.amount) as amount
 		FROM `tabSales Invoice Payment` sip
 		JOIN `tabSales Invoice` si ON sip.parent = si.name
 		WHERE si.owner = %s
 		AND si.docstatus = 1
-		AND si.is_pos = 1
-		AND si.posting_date >= DATE(%s)
-		AND sip.mode_of_payment = 'Cash'
-	""",
-		(
-			session.user,
-			session.period_start_date.date()
-			if hasattr(session.period_start_date, "date")
-			else session.period_start_date,
-		),
-		as_dict=1,
+		AND si.posting_date >= %s
+		GROUP BY sip.mode_of_payment
+		""",
+		(session.user, start_date),
+		as_dict=True,
 	)
 
-	expected_cash = flt(expected_cash_data[0].expected_cash) if expected_cash_data else 0.0
-	cash_taken_in = flt(total_cash_counted) - fixed_float
-	variance = cash_taken_in - expected_cash
+	expected_cash = sum(flt(p.amount) for p in payments if p.mode_of_payment == "Cash")
+	total_expected_sales = sum(flt(p.amount) for p in payments)
+
+	# Calculate variance against total expected (since UI has only one input)
+	total_actual = flt(total_cash_counted)
+	total_expected_balance = fixed_float + total_expected_sales
+	variance = total_actual - total_expected_balance
 
 	return {
-		"fixed_float": fixed_float,
-		"total_cash_counted": flt(total_cash_counted),
-		"cash_taken_in": cash_taken_in,
+		"opening_balance": fixed_float,
 		"expected_cash": expected_cash,
+		"total_expected": total_expected_balance,
 		"variance": variance,
+		"payments": payments,
+		"cash_taken_in": flt(total_cash_counted) - fixed_float,
 		"alert_threshold": flt(profile.get("custom_variance_alert_threshold", 5.0)),
 	}
 
@@ -346,7 +366,7 @@ def close_pos_session_v2(
 
 	preview = preview_close(session_name, total_cash_counted)
 
-	fixed_float = preview["fixed_float"]
+	fixed_float = preview["opening_balance"]
 	cash_taken_in = preview["cash_taken_in"]
 	expected_cash = preview["expected_cash"]
 	variance = preview["variance"]
@@ -362,27 +382,6 @@ def close_pos_session_v2(
 
 	breakdown_list = _normalize_cash_breakdown(breakdown)
 
-	# We also need total sales for closing entry
-	sales_data = frappe.db.sql(
-		"""
-		SELECT COALESCE(SUM(grand_total), 0) as total
-		FROM `tabSales Invoice`
-		WHERE owner = %s
-		AND posting_date >= DATE(%s)
-		AND docstatus = 1
-		AND is_pos = 1
-	""",
-		(
-			session.user,
-			session.period_start_date.date()
-			if hasattr(session.period_start_date, "date")
-			else session.period_start_date,
-		),
-		as_dict=1,
-	)
-
-	total_sales = flt(sales_data[0].get("total", 0)) if sales_data else 0
-
 	try:
 		from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
 			make_closing_entry_from_opening,
@@ -394,30 +393,72 @@ def close_pos_session_v2(
 		if notes:
 			closing_entry.remarks = notes
 
+		# Calculate expected amounts per mode from invoices
+		start_date = (
+			session.period_start_date.date()
+			if hasattr(session.period_start_date, "date")
+			else session.period_start_date
+		)
+		payments = frappe.db.sql(
+			"""
+			SELECT sip.mode_of_payment, SUM(sip.amount) as amount
+			FROM `tabSales Invoice Payment` sip
+			JOIN `tabSales Invoice` si ON sip.parent = si.name
+			WHERE si.owner = %s
+			AND si.docstatus = 1
+			AND si.posting_date >= %s
+			GROUP BY sip.mode_of_payment
+			""",
+			(session.user, start_date),
+			as_dict=True,
+		)
+
+		# Calculate total variance to distribute to Cash
+		total_actual = flt(total_cash_counted)
+		total_sales = sum(flt(p.amount) for p in payments)
+		total_expected = fixed_float + total_sales
+		total_variance = total_actual - total_expected
+
+		# Sync payment reconciliation for ALL modes
 		closing_entry.set("payment_reconciliation", [])
 
-		# Add cash breakdown details
-		for item in breakdown_list:
-			if flt(item.get("amount", 0)) > 0:
-				closing_entry.append(
-					"payment_reconciliation",
-					{
-						"mode_of_payment": item.get("mode_of_payment", "Cash"),
-						"opening_amount": flt(item.get("opening_amount", 0)),
-						"closing_amount": flt(item.get("amount", 0)),
-						"expected_amount": flt(item.get("expected_amount", item.get("amount", 0))),
-					},
-				)
+		# Track if we handled Cash
+		cash_handled = False
 
-		# If no breakdown provided, add default cash entry
-		if not breakdown_list and flt(total_cash_counted) > 0:
+		for p in payments:
+			mode = p.mode_of_payment
+			expected_sale = flt(p.amount)
+			opening = fixed_float if mode == "Cash" else 0
+			expected_total = opening + expected_sale
+			closing = 0
+
+			if mode == "Cash":
+				# Cash gets the opening + expected sales + the total variance
+				closing = expected_total + total_variance
+				cash_handled = True
+			else:
+				# Other modes: closing matches expected
+				closing = expected_total
+
+			closing_entry.append(
+				"payment_reconciliation",
+				{
+					"mode_of_payment": mode,
+					"opening_amount": opening,
+					"expected_amount": expected_total,
+					"closing_amount": closing,
+				},
+			)
+
+		# Ensure Cash row exists even if no cash sales
+		if not cash_handled:
 			closing_entry.append(
 				"payment_reconciliation",
 				{
 					"mode_of_payment": "Cash",
 					"opening_amount": fixed_float,
-					"closing_amount": flt(total_cash_counted),
-					"expected_amount": fixed_float + expected_cash,
+					"expected_amount": fixed_float,
+					"closing_amount": fixed_float + total_variance,
 				},
 			)
 
@@ -540,21 +581,15 @@ def close_pos_session(
 	opening_balance = sum(flt(row.opening_amount) for row in session.balance_details)
 
 	# Get total sales for this session
-	sales_data = frappe.db.sql(  # nosemgrep
+	sales_data = frappe.db.sql(
 		"""
 		SELECT COALESCE(SUM(grand_total), 0) as total
 		FROM `tabSales Invoice`
 		WHERE owner = %s
-		AND posting_date >= DATE(%s)
+		AND creation >= %s
 		AND docstatus = 1
-		AND is_pos = 1
 		""",
-		(
-			user,
-			session.period_start_date.date()
-			if hasattr(session.period_start_date, "date")
-			else session.period_start_date,
-		),
+		(user, session.creation),
 		as_dict=True,
 	)
 
@@ -708,14 +743,8 @@ def get_session_sales(session_name: str) -> dict:
 		"Sales Invoice",
 		filters={
 			"owner": session.user,
-			"posting_date": [
-				">=",
-				session.period_start_date.date()
-				if hasattr(session.period_start_date, "date")
-				else session.period_start_date,
-			],
+			"creation": [">=", session.creation],
 			"docstatus": 1,
-			"is_pos": 1,
 		},
 		fields=[
 			"name",
@@ -753,7 +782,7 @@ def get_all_active_sessions() -> dict:
 	sessions = frappe.get_all(
 		"POS Opening Entry",
 		filters={"docstatus": 1, "status": "Open"},
-		fields=["name", "user", "pos_profile", "company", "period_start_date", "opening_amount"],
+		fields=["name", "user", "pos_profile", "company", "period_start_date"],
 		order_by="period_start_date desc",
 	)
 
@@ -768,8 +797,12 @@ def get_all_active_sessions() -> dict:
 			"pos_profile": session.pos_profile,
 			"company": session.company,
 			"period_start_date": str(session.period_start_date) if session.period_start_date else None,
-			"opening_amount": flt(session.opening_amount),
 		}
+
+		# Sum opening amount from balance details
+		session_doc = frappe.get_doc("POS Opening Entry", session.name)
+		opening_amount = sum(flt(d.opening_amount) for d in session_doc.balance_details)
+		session_dict["opening_amount"] = opening_amount
 
 		# Get warehouse from POS Profile
 		warehouse = frappe.db.get_value("POS Profile", session.pos_profile, "warehouse")
@@ -781,16 +814,10 @@ def get_all_active_sessions() -> dict:
 			SELECT COUNT(*) as count, COALESCE(SUM(grand_total), 0) as total
 			FROM `tabSales Invoice`
 			WHERE owner = %s
-			AND posting_date >= DATE(%s)
+			AND creation >= %s
 			AND docstatus = 1
-			AND is_pos = 1
 			""",
-			(
-				session.user,
-				session.period_start_date.date()
-				if hasattr(session.period_start_date, "date")
-				else session.period_start_date,
-			),
+			(session.user, session_doc.creation),
 			as_dict=True,
 		)
 		session_dict["sales_count"] = sales_data[0].get("count", 0) if sales_data else 0
@@ -837,16 +864,10 @@ def force_close_session(session_name: str, reason: str | None = None) -> dict:
 		SELECT COALESCE(SUM(grand_total), 0) as total
 		FROM `tabSales Invoice`
 		WHERE owner = %s
-		AND posting_date >= DATE(%s)
+		AND creation >= %s
 		AND docstatus = 1
-		AND is_pos = 1
 		""",
-		(
-			session.user,
-			session.period_start_date.date()
-			if hasattr(session.period_start_date, "date")
-			else session.period_start_date,
-		),
+		(session.user, session.creation),
 		as_dict=True,
 	)
 
@@ -922,7 +943,7 @@ def get_live_sales_feed(hours: int = 24) -> dict:
 	open_sessions = frappe.get_all(
 		"POS Opening Entry",
 		filters={"docstatus": 1, "status": "Open"},
-		fields=["name", "user", "pos_profile", "period_start_date", "opening_amount"],
+		fields=["name", "user", "pos_profile", "period_start_date"],
 	)
 
 	# Enrich sessions

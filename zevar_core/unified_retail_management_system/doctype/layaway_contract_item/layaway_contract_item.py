@@ -18,6 +18,8 @@ class LayawayContractItem(Document):
 		if self.item_code:
 			import frappe
 
+			if not frappe.db.exists("Item", self.item_code):
+				return
 			item = frappe.get_doc("Item", self.item_code)
 			self.item_name = item.item_name
-			self.description = item.description
+			self.description = getattr(item, "description", "") or ""

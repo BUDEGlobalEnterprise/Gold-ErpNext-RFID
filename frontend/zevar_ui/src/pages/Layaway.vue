@@ -594,18 +594,29 @@ function closeCreateMode() {
 onMounted(() => {
 	fetchLayaways()
 	if (route.query.action === 'new') {
+		if (route.query.customer && (!cart.customer || cart.customer.name !== route.query.customer)) {
+			cart.setCustomer({ name: route.query.customer, customer_name: route.query.customer })
+		}
 		showCreateModal.value = true
 	}
 })
 
 // Watch route query so "Create Layaway" from cart sidebar works when already on this page
 watch(
-	() => route.query.action,
-	(action) => {
-		if (action === 'new' && !showCreateModal.value) {
-			showCreateModal.value = true
+	() => route.query,
+	(query) => {
+		if (query.action === 'new') {
+			if (query.customer && (!cart.customer || cart.customer.name !== query.customer)) {
+				// If customer is in query but not in cart, we should try to set it
+				// This handles the "Start Layaway" from cart sidebar flow better
+				cart.setCustomer({ name: query.customer, customer_name: query.customer })
+			}
+			if (!showCreateModal.value) {
+				showCreateModal.value = true
+			}
 		}
-	}
+	},
+	{ deep: true }
 )
 </script>
 
