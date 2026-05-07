@@ -7,6 +7,9 @@ import App from './App.vue'
 
 import { Button, setConfig, frappeRequest, resourcesPlugin } from 'frappe-ui'
 
+import { hardwareService } from '@/services/HardwareService.js'
+hardwareService.connect()
+
 const app = createApp(App)
 const pinia = createPinia()
 

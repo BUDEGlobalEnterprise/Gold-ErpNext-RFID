@@ -1,20 +1,20 @@
 {
-  "_attendance-Bpr1hLHm.js": {
-    "file": "assets/attendance-Bpr1hLHm.js",
+  "_attendance-BaTLoJjt.js": {
+    "file": "assets/attendance-BaTLoJjt.js",
     "name": "attendance",
     "imports": [
       "index.html"
     ]
   },
-  "_tasks-sUP9NnBf.js": {
-    "file": "assets/tasks-sUP9NnBf.js",
+  "_tasks-CQZfWzbx.js": {
+    "file": "assets/tasks-CQZfWzbx.js",
     "name": "tasks",
     "imports": [
       "index.html"
     ]
   },
   "index.html": {
-    "file": "assets/index--QSaCgLC.js",
+    "file": "assets/index-DNVh00kd.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -29,10 +29,11 @@
       "src/views/ExpenseView.vue",
       "src/views/IssuesView.vue",
       "src/views/TeamView.vue",
-      "src/views/ReportsView.vue"
+      "src/views/ReportsView.vue",
+      "src/views/DashboardView.vue"
     ],
     "css": [
-      "assets/index-C8A_hs6F.css"
+      "assets/index-geJ6DKWU.css"
     ],
     "assets": [
       "assets/Inter.var-C9xDBOS3.woff2",
@@ -48,34 +49,34 @@
     "src": "node_modules/frappe-ui/src/fonts/Inter/Inter.var.woff2"
   },
   "src/views/AttendanceView.vue": {
-    "file": "assets/AttendanceView-B1_ep8hU.js",
+    "file": "assets/AttendanceView-CR3-2Utr.js",
     "name": "AttendanceView",
     "src": "src/views/AttendanceView.vue",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_attendance-Bpr1hLHm.js"
+      "_attendance-BaTLoJjt.js"
     ],
     "css": [
-      "assets/AttendanceView-DAEqNYLP.css"
+      "assets/AttendanceView-CDmf1Yjq.css"
     ]
   },
   "src/views/DashboardView.vue": {
-    "file": "assets/DashboardView-BhsdiHM8.js",
+    "file": "assets/DashboardView-DdOU3vhc.js",
     "name": "DashboardView",
     "src": "src/views/DashboardView.vue",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_attendance-Bpr1hLHm.js",
-      "_tasks-sUP9NnBf.js"
+      "_attendance-BaTLoJjt.js",
+      "_tasks-CQZfWzbx.js"
     ],
     "css": [
-      "assets/DashboardView-BgDgRTc1.css"
+      "assets/DashboardView-CeW-ksWe.css"
     ]
   },
   "src/views/ExpenseView.vue": {
-    "file": "assets/ExpenseView-DM4A6kHN.js",
+    "file": "assets/ExpenseView-BvViVOQ6.js",
     "name": "ExpenseView",
     "src": "src/views/ExpenseView.vue",
     "isDynamicEntry": true,
@@ -83,11 +84,11 @@
       "index.html"
     ],
     "css": [
-      "assets/ExpenseView-DkZrKgwG.css"
+      "assets/ExpenseView-y1IJAkYD.css"
     ]
   },
   "src/views/IssuesView.vue": {
-    "file": "assets/IssuesView-feE05JAX.js",
+    "file": "assets/IssuesView-DvQ1qErU.js",
     "name": "IssuesView",
     "src": "src/views/IssuesView.vue",
     "isDynamicEntry": true,
@@ -96,7 +97,7 @@
     ]
   },
   "src/views/LeaveView.vue": {
-    "file": "assets/LeaveView-BiJsmGuj.js",
+    "file": "assets/LeaveView-BfQHZBsJ.js",
     "name": "LeaveView",
     "src": "src/views/LeaveView.vue",
     "isDynamicEntry": true,
@@ -104,11 +105,11 @@
       "index.html"
     ],
     "css": [
-      "assets/LeaveView-BxSG7qLx.css"
+      "assets/LeaveView-DWoaWNUI.css"
     ]
   },
   "src/views/Login.vue": {
-    "file": "assets/Login-O6U_jqAc.js",
+    "file": "assets/Login-wUEmdSjz.js",
     "name": "Login",
     "src": "src/views/Login.vue",
     "isDynamicEntry": true,
@@ -116,11 +117,11 @@
       "index.html"
     ],
     "css": [
-      "assets/Login-6YkUCwn6.css"
+      "assets/Login-Dow5KCrM.css"
     ]
   },
   "src/views/PayrollView.vue": {
-    "file": "assets/PayrollView-BoaT_D9r.js",
+    "file": "assets/PayrollView-BA9axGwZ.js",
     "name": "PayrollView",
     "src": "src/views/PayrollView.vue",
     "isDynamicEntry": true,
@@ -128,11 +129,11 @@
       "index.html"
     ],
     "css": [
-      "assets/PayrollView-BMpzVnBj.css"
+      "assets/PayrollView-CihvdtY5.css"
     ]
   },
   "src/views/ReportsView.vue": {
-    "file": "assets/ReportsView-BC65Vnog.js",
+    "file": "assets/ReportsView-BONsa0FZ.js",
     "name": "ReportsView",
     "src": "src/views/ReportsView.vue",
     "isDynamicEntry": true,
@@ -140,37 +141,37 @@
       "index.html"
     ],
     "css": [
-      "assets/ReportsView-DMwE_7Tn.css"
+      "assets/ReportsView-HYX6robI.css"
     ]
   },
   "src/views/RosterView.vue": {
-    "file": "assets/RosterView-FZmq0lh4.js",
+    "file": "assets/RosterView-DhBnEH_J.js",
     "name": "RosterView",
     "src": "src/views/RosterView.vue",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_attendance-Bpr1hLHm.js"
+      "_attendance-BaTLoJjt.js"
     ],
     "css": [
-      "assets/RosterView-DdnUypCz.css"
+      "assets/RosterView-ZSTMq2gi.css"
     ]
   },
   "src/views/TasksView.vue": {
-    "file": "assets/TasksView-DUsb-irb.js",
+    "file": "assets/TasksView-BNUHSCeA.js",
     "name": "TasksView",
     "src": "src/views/TasksView.vue",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_tasks-sUP9NnBf.js"
+      "_tasks-CQZfWzbx.js"
     ],
     "css": [
-      "assets/TasksView-BMKdIhrV.css"
+      "assets/TasksView-D6zj1L0m.css"
     ]
   },
   "src/views/TeamView.vue": {
-    "file": "assets/TeamView-Bt65vO11.js",
+    "file": "assets/TeamView-vqLjw7rq.js",
     "name": "TeamView",
     "src": "src/views/TeamView.vue",
     "isDynamicEntry": true,
@@ -178,7 +179,7 @@
       "index.html"
     ],
     "css": [
-      "assets/TeamView-C5Yt4woz.css"
+      "assets/TeamView-BWqv06iU.css"
     ]
   }
 }

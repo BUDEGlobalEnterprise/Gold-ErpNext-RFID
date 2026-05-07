@@ -673,9 +673,11 @@ import StockAdjustModal from '@/components/StockAdjustModal.vue'
 import StockReductionsPanel from '@/components/StockReductionsPanel.vue'
 import ItemActionDrawer from '@/components/ItemActionDrawer.vue'
 import ItemEditModal from '@/components/ItemEditModal.vue'
+import { useRoute } from 'vue-router'
 
 const ui = useUIStore()
 const session = useSessionStore()
+const route = useRoute()
 const viewMode = ref(localStorage.getItem('zevar_inventory_view') || 'list')
 
 const inventoryData = ref([])
@@ -813,5 +815,9 @@ function formatCurrency(val) {
 		currency: 'USD',
 		maximumFractionDigits: 0,
 	}).format(val)
+}
+
+if (route.name === 'InventoryAdd') {
+	showQuickAdd.value = true
 }
 </script>

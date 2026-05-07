@@ -8,7 +8,7 @@ export const useAuthStore = defineStore("auth", () => {
 	const ready = ref(false);
 
 	const userResource = createResource({
-		url: "frappe.auth.get_logged_user",
+		url: "zevar_core.api.user_info.get_user_info",
 		auto: true,
 		onSuccess(data) {
 			if (typeof data === "string") {

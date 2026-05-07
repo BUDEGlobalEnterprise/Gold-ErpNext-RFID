@@ -1302,6 +1302,7 @@ watch(
 
 			// Try to set customer from cart if selected
 			if (cartStore.customer) {
+				console.log('CreateLayawayModal: Auto-filling customer from cart:', cartStore.customer.name)
 				selectedCustomer.value = cartStore.customer
 				isNewCustomerMode.value = false
 				autoFillCustomerFromCart(cartStore.customer)
@@ -1339,6 +1340,7 @@ watch(
 
 async function autoFillCustomerFromCart(cust) {
 	if (!cust) return
+	console.log('CreateLayawayModal: autoFillCustomerFromCart called with:', cust)
 
 	selectedCustomer.value = cust
 	customerSearch.value = cust.display_name || cust.customer_name || cust.name
@@ -1349,8 +1351,13 @@ async function autoFillCustomerFromCart(cust) {
 
 	try {
 		const customerName = cust.name || cust.customer_name
+		console.log('CreateLayawayModal: Fetching full details for:', customerName)
 		const result = await customerDetailsResource.submit({ customer_name: customerName })
+		
+		// Handle both unwrapped and wrapped responses
 		const details = result?.message ?? result
+		console.log('CreateLayawayModal: Full customer details received:', details)
+		
 		if (details) {
 			form.value.phone = details.mobile_no || form.value.phone
 			form.value.email = details.email_id || form.value.email
@@ -1369,6 +1376,7 @@ async function autoFillCustomerFromCart(cust) {
 			}
 		}
 	} catch (e) {
+		console.error('CreateLayawayModal: Failed to fetch full customer details:', e)
 		if ('address' in cust && cust.address) form.value.address = cust.address
 		if ('city' in cust && cust.city) form.value.city = cust.city
 		if ('state' in cust && cust.state) form.value.state = cust.state

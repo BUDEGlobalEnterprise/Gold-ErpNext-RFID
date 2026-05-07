@@ -32,6 +32,12 @@ const routes = [
 		meta: { requiresAuth: true },
 	},
 	{
+		path: '/inventory/add',
+		name: 'InventoryAdd',
+		component: () => import('./pages/Inventory.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
 		path: '/inventory-audit',
 		name: 'InventoryAudit',
 		component: () => import('./pages/InventoryAudit.vue'),
@@ -175,6 +181,142 @@ const routes = [
 		component: () => import('./pages/POSClosing.vue'),
 		meta: { requiresAuth: true },
 	},
+	// Phase 1: Stock
+	{
+		path: '/stock/supplier-orders',
+		name: 'SupplierOrders',
+		component: () => import('./pages/stock/SupplierOrders.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/stock/incoming-memos',
+		name: 'IncomingMemos',
+		component: () => import('./pages/stock/IncomingMemos.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/stock/assemblies',
+		name: 'Assemblies',
+		component: () => import('./pages/stock/Assemblies.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/stock/metals',
+		name: 'Metals',
+		component: () => import('./pages/stock/Metals.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/stock/gems',
+		name: 'Gems',
+		component: () => import('./pages/stock/Gems.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/stock/storages',
+		name: 'Storages',
+		component: () => import('./pages/stock/Storages.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/stock/categories',
+		name: 'Categories',
+		component: () => import('./pages/stock/Categories.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/stock/brands',
+		name: 'Brands',
+		component: () => import('./pages/stock/Brands.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/stock/collections',
+		name: 'Collections',
+		component: () => import('./pages/stock/Collections.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/stock/catalogs',
+		name: 'Catalogs',
+		component: () => import('./pages/stock/Catalogs.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/inventory-counts',
+		name: 'InventoryCounts',
+		component: () => import('./pages/InventoryAudit.vue'),
+		meta: { requiresAuth: true },
+	},
+	// Phase 2: Accounting
+	{
+		path: '/accounting/transactions',
+		name: 'AccountingTransactions',
+		component: () => import('./pages/accounting/Transactions.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/accounting/terminals',
+		name: 'Terminals',
+		component: () => import('./pages/accounting/Terminals.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/accounting/invoices',
+		name: 'Invoices',
+		component: () => import('./pages/accounting/Invoices.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/accounting/credit-notes',
+		name: 'CreditNotes',
+		component: () => import('./pages/accounting/CreditNotes.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/accounting/export-ubl',
+		name: 'ExportUBL',
+		component: () => import('./pages/accounting/ExportUBL.vue'),
+		meta: { requiresAuth: true },
+	},
+	// Phase 3: Core Ops
+	{
+		path: '/quotes',
+		name: 'Quotes',
+		component: () => import('./pages/Quotes.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/tasks',
+		name: 'Tasks',
+		component: () => import('./pages/Tasks.vue'),
+		meta: { requiresAuth: true },
+	},
+	// Phase 4: HR
+	{
+		path: '/time-clock',
+		name: 'TimeClock',
+		component: () => import('./pages/TimeClock.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/leave',
+		name: 'Leave',
+		component: () => import('./pages/LeaveManagement.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/portal',
+		name: 'EmployeePortal',
+		component: () => import('./pages/EmployeePortal.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/settings',
+		name: 'Settings',
+		component: () => import('./pages/Settings.vue'),
+		meta: { requiresAuth: true },
+	},
 	// Catch-all → Dashboard
 	{
 		path: '/:pathMatch(.*)*',
@@ -228,7 +370,7 @@ router.beforeEach(async (to, _from, next) => {
 	// Check if user is logged in via Frappe session
 	if (to.meta.requiresAuth) {
 		try {
-			const res = await fetch('/api/method/frappe.auth.get_logged_user', {
+			const res = await fetch('/api/method/zevar_core.api.user_info.get_user_info', {
 				headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
 			})
 			if (!res.ok) throw new Error('Not authenticated')

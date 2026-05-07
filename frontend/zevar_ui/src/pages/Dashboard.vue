@@ -87,7 +87,7 @@
 					>
 						<h4 class="section-label">Employee Portal</h4>
 						<div class="tile-row-4">
-							<a href="/employee-portal/#/" class="tile-secondary">
+							<router-link to="/portal" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #0ea5e9">
 									<svg
 										viewBox="0 0 24 24"
@@ -102,8 +102,8 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">My Portal</h3>
-							</a>
-							<a href="/employee-portal/#/tasks" class="tile-secondary">
+							</router-link>
+							<router-link to="/time-clock" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #f43f5e">
 									<svg
 										viewBox="0 0 24 24"
@@ -113,15 +113,13 @@
 										stroke-linecap="round"
 										stroke-linejoin="round"
 									>
-										<polyline points="9 11 12 14 22 4"></polyline>
-										<path
-											d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"
-										></path>
+										<circle cx="12" cy="12" r="10"></circle>
+										<polyline points="12 6 12 12 16 14"></polyline>
 									</svg>
 								</div>
-								<h3 class="tile-title-sm">My Tasks</h3>
-							</a>
-							<a href="/employee-portal/#/attendance" class="tile-secondary">
+								<h3 class="tile-title-sm">Time Clock</h3>
+							</router-link>
+							<router-link to="/time-clock" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #10b981">
 									<svg
 										viewBox="0 0 24 24"
@@ -145,8 +143,8 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Attendance</h3>
-							</a>
-							<a href="/employee-portal/#/leave" class="tile-secondary">
+							</router-link>
+							<router-link to="/leave" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #8b5cf6">
 									<svg
 										viewBox="0 0 24 24"
@@ -161,7 +159,7 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Leave</h3>
-							</a>
+							</router-link>
 						</div>
 					</div>
 
@@ -277,7 +275,7 @@
 								<h3 class="tile-title-sm">Inventory</h3>
 							</router-link>
 							<!-- Time Clock -->
-							<a href="/employee-portal/#/" class="tile-secondary">
+							<router-link to="/time-clock" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #f43f5e">
 									<svg
 										viewBox="0 0 24 24"
@@ -292,7 +290,7 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Time Clock</h3>
-							</a>
+							</router-link>
 							<!-- Back Up -->
 							<router-link to="/support" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #6b7280">
@@ -358,7 +356,7 @@
 								<h3 class="tile-title-sm">Sales</h3>
 							</router-link>
 							<!-- Quotes -->
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/quotes" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #0ea5e9">
 									<svg
 										viewBox="0 0 24 24"
@@ -480,7 +478,7 @@
 								<h3 class="tile-title-sm">Products</h3>
 							</router-link>
 							<!-- Tasks -->
-							<a href="/employee-portal/#/tasks" class="tile-secondary">
+							<router-link to="/tasks" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #f43f5e">
 									<svg
 										viewBox="0 0 24 24"
@@ -497,7 +495,7 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Tasks</h3>
-							</a>
+							</router-link>
 						</div>
 					</div>
 
@@ -514,7 +512,7 @@
 					>
 						<h4 class="section-label">Stock</h4>
 						<div class="tile-row-4">
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/stock/supplier-orders" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #64748b">
 									<svg
 										viewBox="0 0 24 24"
@@ -531,7 +529,7 @@
 								</div>
 								<h3 class="tile-title-sm">Supplier Orders</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/stock/incoming-memos" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #64748b">
 									<svg
 										viewBox="0 0 24 24"
@@ -569,7 +567,7 @@
 								</div>
 								<h3 class="tile-title-sm">Stock In</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/stock/assemblies" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #64748b">
 									<svg
 										viewBox="0 0 24 24"
@@ -586,7 +584,7 @@
 								</div>
 								<h3 class="tile-title-sm">Assemblies</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/stock/metals" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #64748b">
 									<svg
 										viewBox="0 0 24 24"
@@ -603,7 +601,7 @@
 								</div>
 								<h3 class="tile-title-sm">Metals</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/stock/gems" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #64748b">
 									<svg
 										viewBox="0 0 24 24"
@@ -618,7 +616,7 @@
 								</div>
 								<h3 class="tile-title-sm">Gems</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/inventory-counts" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #64748b">
 									<svg
 										viewBox="0 0 24 24"
@@ -643,7 +641,7 @@
 								</div>
 								<h3 class="tile-title-sm">Inventory Counts</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/stock/storages" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #64748b">
 									<svg
 										viewBox="0 0 24 24"
@@ -660,7 +658,7 @@
 								</div>
 								<h3 class="tile-title-sm">Storages</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/stock/categories" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #64748b">
 									<svg
 										viewBox="0 0 24 24"
@@ -680,7 +678,7 @@
 								</div>
 								<h3 class="tile-title-sm">Categories</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/stock/brands" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #64748b">
 									<svg
 										viewBox="0 0 24 24"
@@ -698,7 +696,7 @@
 								</div>
 								<h3 class="tile-title-sm">Brands</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/stock/collections" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #64748b">
 									<svg
 										viewBox="0 0 24 24"
@@ -716,7 +714,7 @@
 								</div>
 								<h3 class="tile-title-sm">Collections</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/stock/catalogs" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #64748b">
 									<svg
 										viewBox="0 0 24 24"
@@ -751,7 +749,7 @@
 					>
 						<h4 class="section-label">Accounting</h4>
 						<div class="tile-row-4">
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/accounting/transactions" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -769,7 +767,7 @@
 								</div>
 								<h3 class="tile-title-sm">Transactions</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/closing" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -807,7 +805,7 @@
 								</div>
 								<h3 class="tile-title-sm">Reports</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/accounting/terminals" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -831,7 +829,7 @@
 								</div>
 								<h3 class="tile-title-sm">Terminals</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/accounting/invoices" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -851,7 +849,7 @@
 								</div>
 								<h3 class="tile-title-sm">Invoices to be Processed</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/accounting/invoices?tab=purchase" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -871,7 +869,7 @@
 								</div>
 								<h3 class="tile-title-sm">Incoming Invoices</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/accounting/invoices?tab=sales" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -891,7 +889,7 @@
 								</div>
 								<h3 class="tile-title-sm">Outgoing Invoices</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/accounting/credit-notes?tab=incoming" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -911,7 +909,7 @@
 								</div>
 								<h3 class="tile-title-sm">Incoming Credit Notes</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/accounting/credit-notes?tab=outgoing" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -931,7 +929,7 @@
 								</div>
 								<h3 class="tile-title-sm">Outgoing Credit Notes</h3>
 							</router-link>
-							<router-link to="#" class="tile-secondary">
+							<router-link to="/accounting/export-ubl" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -955,7 +953,7 @@
 					<div v-if="session.isAdmin" class="admin-section">
 						<h4 class="section-label">System Administration</h4>
 						<div class="tile-row-4">
-							<a href="/employee-portal/#/" class="tile-secondary">
+							<router-link to="/portal" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #0ea5e9">
 									<svg
 										viewBox="0 0 24 24"
@@ -970,8 +968,8 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Employee Portal</h3>
-							</a>
-							<router-link to="/support" class="tile-secondary">
+							</router-link>
+							<router-link to="/settings" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #6b7280">
 									<svg
 										viewBox="0 0 24 24"

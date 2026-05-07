@@ -82,12 +82,27 @@ let bufferTimer = null
 function onInput(e) {
 	clearTimeout(bufferTimer)
 	buffer = inputValue.value
-	bufferTimer = setTimeout(() => {
-		if (buffer.includes('\n') || buffer.length > 3) {
-			processScan(buffer.replace('\n', '').trim())
-			inputValue.value = ''
+	
+	// If the buffer contains multiple newlines, process them immediately
+	if (buffer.includes('\n')) {
+		const lines = buffer.split('\n')
+		// Process all complete lines (everything except the last partial line)
+		for (let i = 0; i < lines.length - 1; i++) {
+			const scan = lines[i].trim()
+			if (scan) processScan(scan)
 		}
-	}, 100)
+		// Keep the remaining partial line in the input
+		inputValue.value = lines[lines.length - 1]
+		buffer = inputValue.value
+	}
+
+	bufferTimer = setTimeout(() => {
+		if (buffer.length > 3) {
+			processScan(buffer.trim())
+			inputValue.value = ''
+			buffer = ''
+		}
+	}, 150) // Slightly longer timeout for RFID bursts
 }
 
 function onScan() {

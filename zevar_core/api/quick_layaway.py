@@ -118,6 +118,7 @@ def create_quick_layaway(
 		initial_payment=initial_payment,
 		initial_payment_mode=initial_payment_mode,
 		warehouse=warehouse,
+		notes=notes,
 	)
 
 	return {

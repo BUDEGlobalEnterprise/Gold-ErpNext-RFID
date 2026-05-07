@@ -34,7 +34,7 @@ class LayawayContract(Document):
 			customer_doc = frappe.get_doc("Customer", self.customer)
 			self.customer_name = customer_doc.customer_name
 			if not self.customer_contact:
-				self.customer_contact = customer_doc.mobile_no or getattr(customer_doc, "phone", "") or ""
+				self.customer_contact = customer_doc.mobile_no or getattr(customer_doc, "custom_phone2", "") or ""
 			if not self.customer_email:
 				self.customer_email = customer_doc.email_id or ""
 
@@ -51,7 +51,7 @@ class LayawayContract(Document):
 			self.down_payment_percent = (flt(self.deposit_amount) / flt(self.total_amount)) * 100
 		if self.is_new():
 			self.total_paid = flt(self.deposit_amount)
-			self.balance_amount = flt(self.total_amount) - flt(self.deposit_amount)
+		self.balance_amount = flt(self.total_amount) - flt(self.total_paid)
 
 	def _calculate_payment_stats(self):
 		"""Calculate payment statistics from schedule."""
@@ -88,7 +88,7 @@ class LayawayContract(Document):
 
 	def _validate_duration(self):
 		valid = ("1", "2", "3", "6", "9", "12")
-		if self.maximum_duration_months not in valid:
+		if str(self.maximum_duration_months or "") not in valid:
 			frappe.throw(frappe._("Duration must be 1, 2, 3, 6, 9, or 12 months."))
 
 	def _calculate_cancellation_fee(self):

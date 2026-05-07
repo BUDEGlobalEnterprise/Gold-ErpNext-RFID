@@ -840,6 +840,15 @@
 			</div>
 		</template>
 	</BaseModal>
+
+	<!-- Financing Waterfall Modal -->
+	<FinancingApplicationModal
+		:show="showFinancingWaterfall"
+		:customer="cart.customerId"
+		:amount="totalAmount"
+		@close="showFinancingWaterfall = false"
+		@approved="onFinancingApproved"
+	/>
 </template>
 
 <script setup>
@@ -847,7 +856,9 @@ import { ref, watch, computed } from 'vue'
 import { createResource, call } from 'frappe-ui'
 import { useCartStore } from '@/stores/cart.js'
 import { useSessionStore } from '@/stores/session.js'
+import { hardwareService } from '@/services/HardwareService.js'
 import BaseModal from './BaseModal.vue'
+import FinancingApplicationModal from './FinancingApplicationModal.vue'
 
 const props = defineProps({
 	show: { type: Boolean, default: false },
@@ -1133,9 +1144,24 @@ async function handlePayment() {
 	}
 }
 
+function onFinancingApproved(result) {
+	showFinancingWaterfall.value = false
+	// Add financing as a payment mode
+	const mode = result.provider
+	const amount = result.approval_amount || totalAmount.value
+	
+	const existing = selectedPayments.value.findIndex(p => p.mode === mode)
+	if (existing >= 0) {
+		selectedPayments.value[existing].amount = amount
+	} else {
+		selectedPayments.value.push({ mode, amount })
+	}
+	recalculateSplit(mode)
+}
+
 function printReceipt() {
 	if (successInvoiceId.value) {
-		window.open(`/printview?doctype=Sales Invoice&name=${successInvoiceId.value}`, '_blank')
+		hardwareService.printReceipt(successInvoiceId.value)
 	}
 }
 

@@ -768,7 +768,7 @@ import { useGoldStore } from '@/stores/gold.js'
 import { useCartStore } from '@/stores/cart.js'
 import { useUIStore } from '@/stores/ui.js'
 import { usePosSessionStore } from '@/stores/posSession.js'
-import { createResource } from 'frappe-ui'
+import { createResource, call } from 'frappe-ui'
 import { onMounted, ref, computed, watch, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useBreakpoint } from '@/composables/useBreakpoint.js'
@@ -1086,25 +1086,43 @@ function handleDocumentClick(e) {
 }
 
 async function handleGlobalPaymentSuccess(result) {
+	console.log('AppShell: handleGlobalPaymentSuccess triggered with result:', result)
 	const draftPayload = ui.layawayPayment.draftPayload
 	if (draftPayload) {
+		console.log('AppShell: Processing layaway draft payload')
 		try {
-			const { call } = await import('frappe-ui')
 			const data = await call('zevar_core.api.layaway.create_layaway', {
 				...draftPayload,
 				payments: JSON.stringify(result.payments || []),
 			})
-			const r = data?.message ?? data
-			if (r?.success || r?.layaway_id) {
+
+			console.log('AppShell: create_layaway response received:', data)
+
+			// frappe-ui's call() automatically unwraps the response.message object.
+			// We handle both wrapped/unwrapped just in case.
+			const responseObj =
+				data && typeof data === 'object' && data.success !== undefined
+					? data
+					: data?.message ?? data
+
+			if (
+				(responseObj && typeof responseObj === 'object' && responseObj.success) ||
+				responseObj?.layaway_id
+			) {
+				console.log('AppShell: Layaway creation successful, emitting event')
 				ui.closeLayawayPayment()
-				emit('layaway-created', r)
+				emit('layaway-created', responseObj)
 			} else {
-				console.error('Layaway creation returned unexpected result:', r)
-				alert('Layaway creation failed: ' + (r?.message || 'Unknown error'))
+				console.error('AppShell: Layaway creation returned unexpected result:', responseObj)
+				const displayMsg =
+					typeof responseObj === 'string'
+						? responseObj
+						: responseObj?.message || 'Unknown error'
+				alert('Layaway creation failed: ' + displayMsg)
 				ui.closeLayawayPayment()
 			}
 		} catch (err) {
-			console.error('Layaway creation error:', err)
+			console.error('AppShell: Layaway creation error catch block:', err)
 
 			// Extract the most specific error message available
 			let displayMsg = ''
