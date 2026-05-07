@@ -52,7 +52,11 @@ def get_session_status() -> dict:
 
 	# Get sales count and total for this session
 	# Calculate total sales since opening date
-	start_date = session.period_start_date.date() if hasattr(session.period_start_date, "date") else session.period_start_date
+	start_date = (
+		session.period_start_date.date()
+		if hasattr(session.period_start_date, "date")
+		else session.period_start_date
+	)
 	invoices = frappe.db.sql(
 		"""
 		SELECT COUNT(*) as count, COALESCE(SUM(grand_total), 0) as total
@@ -290,7 +294,11 @@ def preview_close(session_name: str, total_cash_counted: float) -> dict:
 	)
 
 	# Calculate expected amounts per payment mode
-	start_date = session.period_start_date.date() if hasattr(session.period_start_date, "date") else session.period_start_date
+	start_date = (
+		session.period_start_date.date()
+		if hasattr(session.period_start_date, "date")
+		else session.period_start_date
+	)
 	payments = frappe.db.sql(
 		"""
 		SELECT sip.mode_of_payment, SUM(sip.amount) as amount
@@ -307,7 +315,7 @@ def preview_close(session_name: str, total_cash_counted: float) -> dict:
 
 	expected_cash = sum(flt(p.amount) for p in payments if p.mode_of_payment == "Cash")
 	total_expected_sales = sum(flt(p.amount) for p in payments)
-	
+
 	# Calculate variance against total expected (since UI has only one input)
 	total_actual = flt(total_cash_counted)
 	total_expected_balance = fixed_float + total_expected_sales
@@ -386,7 +394,11 @@ def close_pos_session_v2(
 			closing_entry.remarks = notes
 
 		# Calculate expected amounts per mode from invoices
-		start_date = session.period_start_date.date() if hasattr(session.period_start_date, "date") else session.period_start_date
+		start_date = (
+			session.period_start_date.date()
+			if hasattr(session.period_start_date, "date")
+			else session.period_start_date
+		)
 		payments = frappe.db.sql(
 			"""
 			SELECT sip.mode_of_payment, SUM(sip.amount) as amount
@@ -409,17 +421,17 @@ def close_pos_session_v2(
 
 		# Sync payment reconciliation for ALL modes
 		closing_entry.set("payment_reconciliation", [])
-		
+
 		# Track if we handled Cash
 		cash_handled = False
-		
+
 		for p in payments:
 			mode = p.mode_of_payment
 			expected_sale = flt(p.amount)
 			opening = fixed_float if mode == "Cash" else 0
 			expected_total = opening + expected_sale
 			closing = 0
-			
+
 			if mode == "Cash":
 				# Cash gets the opening + expected sales + the total variance
 				closing = expected_total + total_variance
@@ -427,22 +439,28 @@ def close_pos_session_v2(
 			else:
 				# Other modes: closing matches expected
 				closing = expected_total
-				
-			closing_entry.append("payment_reconciliation", {
-				"mode_of_payment": mode,
-				"opening_amount": opening,
-				"expected_amount": expected_total,
-				"closing_amount": closing
-			})
-			
+
+			closing_entry.append(
+				"payment_reconciliation",
+				{
+					"mode_of_payment": mode,
+					"opening_amount": opening,
+					"expected_amount": expected_total,
+					"closing_amount": closing,
+				},
+			)
+
 		# Ensure Cash row exists even if no cash sales
 		if not cash_handled:
-			closing_entry.append("payment_reconciliation", {
-				"mode_of_payment": "Cash",
-				"opening_amount": fixed_float,
-				"expected_amount": fixed_float,
-				"closing_amount": fixed_float + total_variance
-			})
+			closing_entry.append(
+				"payment_reconciliation",
+				{
+					"mode_of_payment": "Cash",
+					"opening_amount": fixed_float,
+					"expected_amount": fixed_float,
+					"closing_amount": fixed_float + total_variance,
+				},
+			)
 
 		closing_entry.insert(ignore_permissions=True)
 
@@ -780,7 +798,7 @@ def get_all_active_sessions() -> dict:
 			"company": session.company,
 			"period_start_date": str(session.period_start_date) if session.period_start_date else None,
 		}
-		
+
 		# Sum opening amount from balance details
 		session_doc = frappe.get_doc("POS Opening Entry", session.name)
 		opening_amount = sum(flt(d.opening_amount) for d in session_doc.balance_details)

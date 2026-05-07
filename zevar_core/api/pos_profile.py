@@ -288,7 +288,9 @@ def get_profile_settings(profile_name: str) -> dict:
 		has_any_assignment = frappe.db.exists("POS Profile User", {"parent": profile_name})
 
 		if has_any_assignment and not assigned:
-			frappe.throw(_("You are not authorized to access settings for POS Profile '{0}'").format(profile_name))
+			frappe.throw(
+				_("You are not authorized to access settings for POS Profile '{0}'").format(profile_name)
+			)
 
 	if not profile_name or not frappe.db.exists("POS Profile", profile_name):
 		frappe.throw(_("POS Profile '{0}' not found.").format(profile_name or ""))

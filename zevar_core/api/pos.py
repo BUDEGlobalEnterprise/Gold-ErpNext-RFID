@@ -50,7 +50,9 @@ def create_pos_invoice(
 				"additional_details": details or {},
 			},
 		)
-		frappe.throw(message, frappe.ValidationError if "permission" not in event_type else frappe.PermissionError)
+		frappe.throw(
+			message, frappe.ValidationError if "permission" not in event_type else frappe.PermissionError
+		)
 
 	# Validate the user has an allowed role for POS invoicing
 	allowed_roles = {
@@ -65,8 +67,10 @@ def create_pos_invoice(
 	user_roles = set(frappe.get_roles())
 	if not user_roles & allowed_roles:
 		checkout_bouncer(
-			_("You do not have permission to create POS Invoices. Required role: Sales User, Employee, or equivalent."),
-			"permission_denied"
+			_(
+				"You do not have permission to create POS Invoices. Required role: Sales User, Employee, or equivalent."
+			),
+			"permission_denied",
 		)
 
 	if not items_list:
@@ -81,9 +85,13 @@ def create_pos_invoice(
 		if not item_code:
 			checkout_bouncer(_("Each item must have an item_code."), "invoice_failed")
 		if flt(item.get("qty", 0)) <= 0:
-			checkout_bouncer(_("Item {0}: quantity must be greater than zero.").format(item_code), "invoice_failed")
+			checkout_bouncer(
+				_("Item {0}: quantity must be greater than zero.").format(item_code), "invoice_failed"
+			)
 		if flt(item.get("rate", 0)) <= 0:
-			checkout_bouncer(_("Item {0}: rate must be greater than zero.").format(item_code), "invoice_failed")
+			checkout_bouncer(
+				_("Item {0}: rate must be greater than zero.").format(item_code), "invoice_failed"
+			)
 		# Verify item exists in the system
 		if not frappe.db.exists("Item", item_code):
 			checkout_bouncer(_("Item '{0}' not found in the system.").format(item_code), "invoice_failed")
@@ -102,10 +110,16 @@ def create_pos_invoice(
 				warehouse = frappe.db.get_value("Company", company, "default_warehouse")
 
 	if not warehouse:
-		checkout_bouncer(_("Warehouse is required. Please select a store location or configure a default warehouse."), "invoice_failed")
+		checkout_bouncer(
+			_("Warehouse is required. Please select a store location or configure a default warehouse."),
+			"invoice_failed",
+		)
 
 	if not frappe.db.exists("Warehouse", warehouse):
-		checkout_bouncer(_("Warehouse '{0}' not found. Please ensure a valid warehouse is configured.").format(warehouse), "invoice_failed")
+		checkout_bouncer(
+			_("Warehouse '{0}' not found. Please ensure a valid warehouse is configured.").format(warehouse),
+			"invoice_failed",
+		)
 
 	# Validate active POS session exists (managers bypass)
 	active_session = frappe.db.get_value(
@@ -117,7 +131,10 @@ def create_pos_invoice(
 	if not active_session:
 		manager_roles = {"Sales Manager", "Store Manager", "System Manager"}
 		if not (manager_roles & set(frappe.get_roles())):
-			checkout_bouncer(_("You must open a POS session before making sales. Please open a register first."), "permission_denied")
+			checkout_bouncer(
+				_("You must open a POS session before making sales. Please open a register first."),
+				"permission_denied",
+			)
 
 	salesperson_data = []
 	if salespersons:
@@ -129,7 +146,10 @@ def create_pos_invoice(
 				checkout_bouncer(_("Salesperson '{0}' not found.").format(emp), "invoice_failed")
 		total_split = sum(flt(sp.get("split")) for sp in salesperson_data[:4])
 		if salesperson_data and abs(total_split - 100) > 0.01:
-			checkout_bouncer(_("Salesperson splits must total 100%. Current total: {0}%").format(total_split), "invoice_failed")
+			checkout_bouncer(
+				_("Salesperson splits must total 100%. Current total: {0}%").format(total_split),
+				"invoice_failed",
+			)
 
 	is_tax_exempt = str(tax_exempt).lower() in ["true", "1", "t", "y", "yes"]
 
@@ -143,7 +163,10 @@ def create_pos_invoice(
 
 			create_required_modes_of_payment()
 			if not frappe.db.exists("Mode of Payment", mode):
-				checkout_bouncer(_("Payment mode '{0}' is not set up. Please run migrate or contact admin.").format(mode), "invoice_failed")
+				checkout_bouncer(
+					_("Payment mode '{0}' is not set up. Please run migrate or contact admin.").format(mode),
+					"invoice_failed",
+				)
 
 	if not frappe.db.exists("Customer", customer):
 		if customer == "Walk-In Customer":
@@ -170,7 +193,9 @@ def create_pos_invoice(
 
 	if gc_payment_amount > 0:
 		if not gift_card_number:
-			checkout_bouncer(_("Gift Card number is required when using Gift Card payment."), "invoice_failed")
+			checkout_bouncer(
+				_("Gift Card number is required when using Gift Card payment."), "invoice_failed"
+			)
 		if not frappe.db.exists("Gift Card", gift_card_number):
 			checkout_bouncer(_("Gift Card '{0}' not found.").format(gift_card_number), "invoice_failed")
 
@@ -178,7 +203,9 @@ def create_pos_invoice(
 
 		gc_doc = frappe.get_doc("Gift Card", gift_card_number)
 		if gc_doc.status != "Active":
-			checkout_bouncer(_("Gift Card is {0}. Cannot process payment.").format(gc_doc.status), "invoice_failed")
+			checkout_bouncer(
+				_("Gift Card is {0}. Cannot process payment.").format(gc_doc.status), "invoice_failed"
+			)
 		if gc_doc.expiry_date and getdate(gc_doc.expiry_date) < getdate(today()):
 			checkout_bouncer(_("Gift Card has expired."), "invoice_failed")
 		if gc_payment_amount > flt(gc_doc.balance):
@@ -186,7 +213,7 @@ def create_pos_invoice(
 				_("Gift Card balance insufficient. Available: {0}, Requested: {1}").format(
 					flt(gc_doc.balance), gc_payment_amount
 				),
-				"invoice_failed"
+				"invoice_failed",
 			)
 
 	try:
@@ -267,7 +294,7 @@ def create_pos_invoice(
 						_(
 							"Tax exemption requires manager approval. Customer '{0}' is not marked as tax exempt."
 						).format(customer),
-						"invoice_failed"
+						"invoice_failed",
 					)
 				_validate_tax_override(override_reference, customer)
 

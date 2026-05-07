@@ -1531,7 +1531,6 @@ def _create_layaway_final_invoice(doc):
 		"name",
 	)
 
-	session_user = frappe.session.user
 	try:
 		invoice = frappe.new_doc("Sales Invoice")
 		invoice.customer = doc.customer
