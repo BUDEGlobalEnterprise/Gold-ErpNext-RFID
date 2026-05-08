@@ -96,6 +96,14 @@
 						<span>Sales Count</span>
 						<span>{{ session.sales_count }}</span>
 					</div>
+					<div class="flex justify-between text-sm text-emerald-400/80">
+						<span>Today's Count</span>
+						<span>{{ session.today_sales_count || 0 }}</span>
+					</div>
+					<div class="flex justify-between text-sm text-emerald-400/80">
+						<span>Today's Sales</span>
+						<span>${{ formatAmount(session.today_sales_total || 0) }}</span>
+					</div>
 				</div>
 			</div>
 		</div>

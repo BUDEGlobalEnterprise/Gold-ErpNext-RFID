@@ -50,7 +50,7 @@ def get_session_status() -> dict:
 	if period_start:
 		duration_hours = time_diff_in_hours(now_datetime(), get_datetime(period_start))
 
-	# Get sales count and total for this session
+	# Get sales count and total for this session (cumulative since session start)
 	# Calculate total sales since opening date
 	start_date = (
 		session.period_start_date.date()
@@ -69,6 +69,21 @@ def get_session_status() -> dict:
 		as_dict=True,
 	)
 	invoices = invoices[0] if invoices else {"count": 0, "total": 0}
+
+	# Get today's sales count and total (separate from cumulative)
+	today = nowdate()
+	today_invoices = frappe.db.sql(
+		"""
+		SELECT COUNT(*) as count, COALESCE(SUM(grand_total), 0) as total
+		FROM `tabSales Invoice`
+		WHERE owner = %s
+		AND posting_date = %s
+		AND docstatus = 1
+		""",
+		(user, today),
+		as_dict=True,
+	)
+	today_invoices = today_invoices[0] if today_invoices else {"count": 0, "total": 0}
 
 	# Calculate cash specifically for expected balance
 	cash_payments = frappe.db.sql(
@@ -106,6 +121,8 @@ def get_session_status() -> dict:
 			"opening_balance": flt(opening_amount),
 			"sales_count": invoices.count,
 			"sales_total": invoices.total,
+			"today_sales_count": today_invoices.count,
+			"today_sales_total": today_invoices.total,
 			"expected_cash": flt(cash_payments),
 			"duration_hours": round(duration_hours, 2),
 		},
@@ -808,7 +825,7 @@ def get_all_active_sessions() -> dict:
 		warehouse = frappe.db.get_value("POS Profile", session.pos_profile, "warehouse")
 		session_dict["warehouse"] = warehouse
 
-		# Get sales count and total for this session
+		# Get sales count and total for this session (cumulative since session start)
 		sales_data = frappe.db.sql(
 			"""
 			SELECT COUNT(*) as count, COALESCE(SUM(grand_total), 0) as total
@@ -822,6 +839,22 @@ def get_all_active_sessions() -> dict:
 		)
 		session_dict["sales_count"] = sales_data[0].get("count", 0) if sales_data else 0
 		session_dict["sales_total"] = flt(sales_data[0].get("total", 0)) if sales_data else 0
+
+		# Get today's sales for this session
+		today_sales_data = frappe.db.sql(
+			"""
+			SELECT COUNT(*) as count, COALESCE(SUM(grand_total), 0) as total
+			FROM `tabSales Invoice`
+			WHERE owner = %s
+			AND posting_date = %s
+			AND docstatus = 1
+			""",
+			(session.user, nowdate()),
+			as_dict=True,
+		)
+		session_dict["today_sales_count"] = today_sales_data[0].get("count", 0) if today_sales_data else 0
+		session_dict["today_sales_total"] = flt(today_sales_data[0].get("total", 0)) if today_sales_data else 0
+
 		session_dict["duration_hours"] = round(
 			time_diff_in_hours(now_datetime(), get_datetime(session.period_start_date)), 2
 		)
