@@ -1503,8 +1503,10 @@ def _create_layaway_payment_entry(doc, amount, mode_of_payment, reference=None):
 		pe.remarks = f"Layaway Payment for {doc.name}"
 		pe.flags.ignore_permissions = True
 		pe.flags.ignore_mandatory = True
-		frappe.flags.ignore_permissions = True
-		pe.insert()
+		original_user = frappe.session.user
+		if original_user != "Administrator":
+			frappe.set_user("Administrator")
+		pe.insert(ignore_permissions=True)
 		pe.submit()
 		return pe.name
 	except Exception:
@@ -1514,7 +1516,8 @@ def _create_layaway_payment_entry(doc, amount, mode_of_payment, reference=None):
 		)
 		return None
 	finally:
-		frappe.flags.ignore_permissions = False
+		if "original_user" in locals() and original_user != "Administrator":
+			frappe.set_user(original_user)
 
 
 def _create_layaway_final_invoice(doc):

@@ -51,7 +51,25 @@
 						</div>
 						<div class="flex flex-col gap-1">
 							<span class="text-xs text-gray-500 dark:text-gray-500"
-								>Total Sales</span
+								>Today's Sales</span
+							>
+							<span
+								class="text-sm font-bold text-emerald-600 dark:text-emerald-400 font-mono"
+							>
+								${{ formatAmount(posSession.status.session?.today_sales_total) }}
+							</span>
+						</div>
+						<div class="flex flex-col gap-1">
+							<span class="text-xs text-gray-500 dark:text-gray-500"
+								>Today's Count</span
+							>
+							<span class="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+								{{ posSession.status.session?.today_sales_count || 0 }}
+							</span>
+						</div>
+						<div class="flex flex-col gap-1">
+							<span class="text-xs text-gray-500 dark:text-gray-500"
+								>Session Total</span
 							>
 							<span
 								class="text-sm font-bold text-gray-900 dark:text-white font-mono"
@@ -61,7 +79,7 @@
 						</div>
 						<div class="flex flex-col gap-1">
 							<span class="text-xs text-gray-500 dark:text-gray-500"
-								>Sales Count</span
+								>Session Count</span
 							>
 							<span class="text-sm font-bold text-gray-900 dark:text-white">
 								{{ posSession.status.session?.sales_count }}
@@ -74,11 +92,19 @@
 							</span>
 						</div>
 						<div
+							class="col-span-2 sm:col-span-1 bg-green-500/10 p-3 rounded-lg flex flex-col gap-1"
+						>
+							<span class="text-xs text-green-400">Expected Balance (Today)</span>
+							<span class="text-lg font-bold text-green-500 font-mono">
+								${{ formatAmount(todayExpectedBalance) }}
+							</span>
+						</div>
+						<div
 							class="col-span-2 sm:col-span-1 bg-blue-500/10 p-3 rounded-lg flex flex-col gap-1"
 						>
-							<span class="text-xs text-blue-400">Expected Balance</span>
-							<span class="text-lg font-bold text-blue-500 font-mono">
-								${{ formatAmount(expectedBalance) }}
+							<span class="text-xs text-blue-400">Expected Balance (Session)</span>
+							<span class="text-sm font-bold text-blue-500 font-mono">
+								${{ formatAmount(sessionExpectedBalance) }}
 							</span>
 						</div>
 					</div>
@@ -161,7 +187,7 @@
 							}"
 						>
 							<div class="text-xs text-gray-500 dark:text-gray-500 mb-1">
-								Variance
+								Variance (Today)
 							</div>
 							<div
 								class="text-3xl font-bold font-mono"
@@ -177,6 +203,26 @@
 							</div>
 							<div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
 								{{ varianceStatus }}
+							</div>
+							<div
+								v-if="sessionVariance !== 0"
+								class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700"
+							>
+								<div class="text-xs text-gray-400 mb-1">
+									Variance (Session Since {{ openingDate }})
+								</div>
+								<div
+									class="text-lg font-bold font-mono"
+									:class="{
+										'text-green-500': sessionVariance === 0,
+										'text-blue-500': sessionVariance > 0,
+										'text-red-500': sessionVariance < 0,
+									}"
+								>
+									<span v-if="sessionVariance > 0">+</span>${{
+										formatAmount(Math.abs(sessionVariance))
+									}}
+								</div>
 							</div>
 						</div>
 
@@ -289,7 +335,7 @@
 
 			<ManagerOverrideModal
 				:show="showOverrideModal"
-				:variance="variance"
+				:variance="previewData?.variance ?? todayVariance"
 				:threshold="alertThreshold"
 				@approved="handleOverrideApproved"
 				@cancel="showOverrideModal = false"
@@ -336,32 +382,55 @@ const denominations = [
 	{ value: 0.01 },
 ]
 
-const expectedBalance = computed(() => {
+const todayOpening = computed(() => {
+  const sessionDate = posSession.status.session?.opening_date
+  const today = new Date().toISOString().split('T')[0]
+  if (sessionDate === today) {
+    return posSession.status.session?.opening_balance || 0
+  }
+  return 0
+})
+const todaySalesTotal = computed(() => posSession.status.session?.today_sales_total || 0)
+const sessionSalesTotal = computed(() => posSession.status.session?.sales_total || 0)
+
+const todayExpectedBalance = computed(() => {
+	return todayOpening.value + todaySalesTotal.value
+})
+
+const sessionExpectedBalance = computed(() => {
 	if (previewData.value) {
 		return previewData.value.total_expected
 	}
-	const opening = posSession.status.session?.opening_balance || 0
-	const sales = posSession.status.session?.sales_total || 0
-	return opening + sales
+	return (posSession.status.session?.opening_balance || 0) + sessionSalesTotal.value
 })
 
-const variance = computed(() => {
+const todayVariance = computed(() => {
+	return form.value.closing_balance - todayExpectedBalance.value
+})
+
+const sessionVariance = computed(() => {
 	if (previewData.value) {
 		return previewData.value.variance
 	}
-	return form.value.closing_balance - expectedBalance.value
+	return form.value.closing_balance - sessionExpectedBalance.value
 })
 
 const varianceClass = computed(() => {
-	if (variance.value === 0) return 'balanced'
-	if (variance.value > 0) return 'excess'
+	if (todayVariance.value === 0) return 'balanced'
+	if (todayVariance.value > 0) return 'excess'
 	return 'shortage'
 })
 
 const varianceStatus = computed(() => {
-	if (variance.value === 0) return 'Balanced'
-	if (variance.value > 0) return 'Excess (Over)'
-	return 'Shortage (Under)'
+	if (todayVariance.value === 0) return 'Balanced (Today)'
+	if (todayVariance.value > 0) return 'Excess (Over) Today'
+	return 'Shortage (Under) Today'
+})
+
+const variance = todayVariance
+
+const openingDate = computed(() => {
+	return posSession.status.session?.opening_date || ''
 })
 
 const previewCloseResource = createResource({

@@ -3,7 +3,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
 from zevar_core.api.sales_history import (
-	get_daily_sales_heatmap,
+	,
 	get_day_drilldown,
 	get_yoy_delta,
 )
@@ -42,12 +42,12 @@ class TestEODCalendarAPI(FrappeTestCase):
 		si.insert(ignore_permissions=True)
 		si.submit()
 
-	def test_get_daily_sales_heatmap(self):
+	def test_(self):
 		year = int(self.today.split("-")[0])
 		month = int(self.today.split("-")[1])
 
 		# Jewelry
-		data = get_daily_sales_heatmap(year, month, "Jewelry Sale")
+		data = (year, month, "Jewelry Sale")
 		self.assertGreaterEqual(len(data), 1)
 
 		today_row = next((r for r in data if str(r.date) == self.today), None)
@@ -55,7 +55,7 @@ class TestEODCalendarAPI(FrappeTestCase):
 		self.assertGreaterEqual(today_row.net, 1000.0)
 
 		# Repair
-		repair_data = get_daily_sales_heatmap(year, month, "Repair")
+		repair_data = (year, month, "Repair")
 		today_repair = next((r for r in repair_data if str(r.date) == self.today), None)
 		self.assertIsNotNone(today_repair)
 		self.assertGreaterEqual(today_repair.net, 250.0)

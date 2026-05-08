@@ -81,7 +81,7 @@
 								</div>
 							</div>
 							<div class="text-right">
-								<p class="text-sm font-medium text-gray-900 dark:text-white">{{ s.sales_count || 0 }} sales | ${{ fmt(s.sales_total || 0) }}</p>
+								<p class="text-sm font-medium text-gray-900 dark:text-white">{{ s.today_sales_count || 0 }} today | {{ s.sales_count || 0 }} total | ${{ fmt(s.today_sales_total || 0) }}</p>
 								<p class="text-xs text-gray-400">Opened {{ s.duration_hours || 0 }}h ago (${{ fmt(s.opening_amount || 0) }} float)</p>
 							</div>
 							<button @click="confirmForceClose(s)" class="ml-4 px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition">

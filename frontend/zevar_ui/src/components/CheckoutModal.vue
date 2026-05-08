@@ -1049,6 +1049,17 @@ async function handlePayment() {
 	if (!canSubmit.value) return
 
 	if (props.mode === 'sale') {
+		await session.posSessionResource.fetch()
+		const canBypassSession = session.hasAnyRole([
+			'Sales Manager',
+			'Store Manager',
+			'System Manager',
+		])
+		if (!session.hasActiveSession && !canBypassSession) {
+			error.value = 'You must open a POS session before making sales. Please open a register first.'
+			return
+		}
+
 		const gc = selectedPayments.value.find((p) => p.mode === 'Gift Card')
 		if (gc && (!giftCardInfo.value?.valid || !giftCardNumber.value)) {
 			error.value = 'Please enter and verify a valid Gift Card number.'

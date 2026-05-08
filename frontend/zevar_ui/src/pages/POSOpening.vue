@@ -20,7 +20,8 @@
 						Opened: {{ posSession.status.session?.opening_date }} at
 						{{ posSession.status.session?.opening_time }} | Duration:
 						{{ posSession.status.session?.duration_hours }}h | Sales:
-						{{ posSession.status.session?.sales_count }}
+						{{ posSession.status.session?.today_sales_count || 0 }} today /
+						{{ posSession.status.session?.sales_count }} total
 					</p>
 				</div>
 				<router-link
