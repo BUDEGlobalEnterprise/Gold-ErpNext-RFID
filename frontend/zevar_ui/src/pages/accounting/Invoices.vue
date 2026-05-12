@@ -22,7 +22,12 @@
 						stroke="currentColor"
 						viewBox="0 0 24 24"
 					>
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357 2m15.357 2H15" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357 2m15.357 2H15"
+						/>
 					</svg>
 				</button>
 			</div>
@@ -45,30 +50,68 @@
 
 			<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4 flex-shrink-0">
 				<div class="premium-card !p-4">
-					<div class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Total</div>
-					<div class="text-2xl font-bold text-gray-900 dark:text-white">{{ store.invoicesTotal }}</div>
+					<div
+						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+					>
+						Total
+					</div>
+					<div class="text-2xl font-bold text-gray-900 dark:text-white">
+						{{ store.invoicesTotal }}
+					</div>
 				</div>
 				<div class="premium-card !p-4">
-					<div class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Draft</div>
+					<div
+						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+					>
+						Draft
+					</div>
 					<div class="text-2xl font-bold text-amber-500">{{ draftCount }}</div>
 				</div>
 				<div class="premium-card !p-4">
-					<div class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Unpaid</div>
+					<div
+						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+					>
+						Unpaid
+					</div>
 					<div class="text-2xl font-bold text-red-500">{{ unpaidCount }}</div>
 				</div>
 				<div class="premium-card !p-4">
-					<div class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Total Value</div>
-					<div class="text-2xl font-bold text-[#D4AF37]">{{ formatCurrency(totalValue) }}</div>
+					<div
+						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+					>
+						Total Value
+					</div>
+					<div class="text-2xl font-bold text-[#D4AF37]">
+						{{ formatCurrency(totalValue) }}
+					</div>
 				</div>
 			</div>
 
 			<div class="flex-1 overflow-y-auto min-h-0">
-				<div v-if="store.invoicesResource.loading && !store.invoices.length" class="flex items-center justify-center py-20">
-					<div class="animate-spin w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full"></div>
+				<div
+					v-if="store.invoicesResource.loading && !store.invoices.length"
+					class="flex items-center justify-center py-20"
+				>
+					<div
+						class="animate-spin w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full"
+					></div>
 				</div>
-				<div v-else-if="!store.invoices.length" class="flex flex-col items-center justify-center py-20 text-gray-400 dark:text-gray-500">
-					<svg class="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+				<div
+					v-else-if="!store.invoices.length"
+					class="flex flex-col items-center justify-center py-20 text-gray-400 dark:text-gray-500"
+				>
+					<svg
+						class="w-12 h-12 mb-3"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="1.5"
+							d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+						/>
 					</svg>
 					<p class="text-sm font-medium">No invoices found</p>
 				</div>
@@ -82,23 +125,45 @@
 						<div class="flex items-center gap-3 min-w-0">
 							<div
 								class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-								:class="inv.invoice_type === 'Sales' ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-purple-100 dark:bg-purple-900/30'"
+								:class="
+									inv.invoice_type === 'Sales'
+										? 'bg-blue-100 dark:bg-blue-900/30'
+										: 'bg-purple-100 dark:bg-purple-900/30'
+								"
 							>
-								<span class="text-[10px] font-bold" :class="inv.invoice_type === 'Sales' ? 'text-blue-600' : 'text-purple-600'">
+								<span
+									class="text-[10px] font-bold"
+									:class="
+										inv.invoice_type === 'Sales'
+											? 'text-blue-600'
+											: 'text-purple-600'
+									"
+								>
 									{{ inv.invoice_type === 'Sales' ? 'SI' : 'PI' }}
 								</span>
 							</div>
 							<div class="min-w-0">
-								<div class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ inv.name }}</div>
+								<div
+									class="text-sm font-bold text-gray-900 dark:text-white truncate"
+								>
+									{{ inv.name }}
+								</div>
 								<div class="text-[11px] text-gray-500 dark:text-gray-400 truncate">
 									{{ inv.customer_name }}
-									<span v-if="inv.due_date"> &middot; Due: {{ inv.due_date }}</span>
+									<span v-if="inv.due_date">
+										&middot; Due: {{ inv.due_date }}</span
+									>
 								</div>
 							</div>
 						</div>
 						<div class="text-right flex-shrink-0 ml-3">
-							<div class="text-sm font-bold text-gray-900 dark:text-white">{{ formatCurrency(inv.grand_total) }}</div>
-							<div v-if="inv.outstanding_amount > 0" class="text-[10px] text-red-500">
+							<div class="text-sm font-bold text-gray-900 dark:text-white">
+								{{ formatCurrency(inv.grand_total) }}
+							</div>
+							<div
+								v-if="inv.outstanding_amount > 0"
+								class="text-[10px] text-red-500"
+							>
 								{{ formatCurrency(inv.outstanding_amount) }} outstanding
 							</div>
 							<span
@@ -141,10 +206,14 @@ function formatCurrency(val) {
 
 function invoiceStatusClass(inv) {
 	const s = inv.status || ''
-	if (inv.docstatus === 0) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-	if (s === 'Paid') return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-	if (s === 'Unpaid' || s === 'Overdue') return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-	if (s === 'Return') return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+	if (inv.docstatus === 0)
+		return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+	if (s === 'Paid')
+		return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+	if (s === 'Unpaid' || s === 'Overdue')
+		return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+	if (s === 'Return')
+		return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
 	return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
 }
 

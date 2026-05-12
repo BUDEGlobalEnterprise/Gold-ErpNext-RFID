@@ -9,6 +9,7 @@ def _has_eod_calendar_functions():
 	"""Check if EOD calendar functions exist in sales_history API."""
 	try:
 		from zevar_core.api.sales_history import get_day_drilldown, get_yoy_delta
+
 		return True
 	except ImportError:
 		return False

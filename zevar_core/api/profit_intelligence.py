@@ -10,8 +10,7 @@ import json
 
 import frappe
 from frappe import _
-from frappe.utils import flt, today, now_datetime, add_days, getdate
-
+from frappe.utils import add_days, flt, getdate, now_datetime, today
 
 # ---------------------------------------------------------------------------
 # Sales Invoice on_submit Hook
@@ -40,14 +39,16 @@ def calculate_sale_cost_breakdown(doc, method=None):
 	# --- Metal & Gemstone COGS ---
 	metal_cogs, gemstone_cogs, gold_rate, gold_source, gold_ts = _calculate_item_cogs(doc)
 	item_cogs = flt(metal_cogs) + flt(gemstone_cogs)
-	log["steps"].append({
-		"step": "cogs",
-		"metal_cogs": metal_cogs,
-		"gemstone_cogs": gemstone_cogs,
-		"item_cogs": item_cogs,
-		"gold_rate_used": gold_rate,
-		"gold_rate_source": gold_source,
-	})
+	log["steps"].append(
+		{
+			"step": "cogs",
+			"metal_cogs": metal_cogs,
+			"gemstone_cogs": gemstone_cogs,
+			"item_cogs": item_cogs,
+			"gold_rate_used": gold_rate,
+			"gold_rate_source": gold_source,
+		}
+	)
 
 	# --- Labor Cost ---
 	labor_cost, labor_detail = _allocate_labor(doc)
@@ -66,7 +67,9 @@ def calculate_sale_cost_breakdown(doc, method=None):
 	log["steps"].append({"step": "overhead", "overhead_cost": overhead_cost, "method": overhead_method})
 
 	# --- Totals ---
-	total_cost = flt(item_cogs) + flt(labor_cost) + flt(commission_total) + flt(payment_cost) + flt(overhead_cost)
+	total_cost = (
+		flt(item_cogs) + flt(labor_cost) + flt(commission_total) + flt(payment_cost) + flt(overhead_cost)
+	)
 	gross_profit = flt(total_revenue) - flt(total_cost)
 	gross_margin_pct = (flt(gross_profit) / flt(total_revenue) * 100) if total_revenue else 0
 
@@ -113,7 +116,9 @@ def calculate_sale_cost_breakdown(doc, method=None):
 	}
 	frappe.logger().info(
 		"Sale Cost Breakdown created for %s: profit=$%.2f margin=%.1f%%",
-		doc.name, gross_profit, gross_margin_pct,
+		doc.name,
+		gross_profit,
+		gross_margin_pct,
 	)
 
 
@@ -151,7 +156,7 @@ def _calculate_item_cogs(invoice_doc):
 		if not item_doc:
 			continue
 
-		# Metal COGS: net weight × gold rate per gram
+		# Metal COGS: net weight x gold rate per gram
 		metal_cogs = 0.0
 		net_weight = flt(item_doc.custom_net_weight_g)
 		if net_weight > 0 and item_doc.custom_metal_type and item_doc.custom_purity:
@@ -208,7 +213,12 @@ def _allocate_labor(invoice_doc):
 	# Get salesperson splits from the invoice
 	salespersons = []
 	for row in invoice_doc.get("custom_salesperson_splits") or []:
-		if hasattr(row, "employee") and row.employee and hasattr(row, "split_percent") and flt(row.split_percent) > 0:
+		if (
+			hasattr(row, "employee")
+			and row.employee
+			and hasattr(row, "split_percent")
+			and flt(row.split_percent) > 0
+		):
 			salespersons.append({"employee": row.employee, "split_percent": flt(row.split_percent)})
 
 	if not salespersons:
@@ -224,13 +234,15 @@ def _allocate_labor(invoice_doc):
 			minutes = flt(pool.default_minutes_per_sale) or 30
 			cost = flt(pool.hourly_rate) * (minutes / 60)
 			total_labor = cost
-			allocation_detail.append({
-				"pool": pool.name,
-				"role": "Sales Associate",
-				"minutes": minutes,
-				"hourly_rate": flt(pool.hourly_rate),
-				"cost": flt(cost),
-			})
+			allocation_detail.append(
+				{
+					"pool": pool.name,
+					"role": "Sales Associate",
+					"minutes": minutes,
+					"hourly_rate": flt(pool.hourly_rate),
+					"cost": flt(cost),
+				}
+			)
 		return total_labor, allocation_detail
 
 	# Map employees to their labor pools
@@ -269,14 +281,16 @@ def _allocate_labor(invoice_doc):
 		cost = flt(p.hourly_rate) * (allocated_minutes / 60)
 		total_labor += cost
 
-		allocation_detail.append({
-			"employee": sp["employee"],
-			"split_percent": sp["split_percent"],
-			"pool": p.name,
-			"hourly_rate": flt(p.hourly_rate),
-			"allocated_minutes": flt(allocated_minutes, 2),
-			"cost": flt(cost),
-		})
+		allocation_detail.append(
+			{
+				"employee": sp["employee"],
+				"split_percent": sp["split_percent"],
+				"pool": p.name,
+				"hourly_rate": flt(p.hourly_rate),
+				"allocated_minutes": flt(allocated_minutes, 2),
+				"cost": flt(cost),
+			}
+		)
 
 	return total_labor, allocation_detail
 
@@ -354,13 +368,15 @@ def _calculate_payment_costs(invoice_doc):
 		fee = (amount * rate / 100) + flat
 		total_cost += fee
 
-		detail.append({
-			"mode": mode,
-			"amount": amount,
-			"rate_pct": rate,
-			"flat_fee": flat,
-			"processing_fee": flt(fee),
-		})
+		detail.append(
+			{
+				"mode": mode,
+				"amount": amount,
+				"rate_pct": rate,
+				"flat_fee": flat,
+				"processing_fee": flt(fee),
+			}
+		)
 
 	return total_cost, detail
 
@@ -392,41 +408,49 @@ def _allocate_overhead(invoice_revenue, invoice_date):
 	if method == "Proportional to Revenue":
 		# Total revenue for the month
 		month_start = getdate(invoice_date).replace(day=1)
-		month_revenue = flt(frappe.db.sql(
-			"""SELECT COALESCE(SUM(base_grand_total), 0)
+		month_revenue = flt(
+			frappe.db.sql(
+				"""SELECT COALESCE(SUM(base_grand_total), 0)
 			FROM `tabSales Invoice`
 			WHERE posting_date >= %s AND posting_date < DATE_ADD(%s, INTERVAL 1 MONTH)
 			AND docstatus = 1 AND is_pos = 1""",
-			(month_start, month_start),
-		)[0][0])
+				(month_start, month_start),
+			)[0][0]
+		)
 
 		if month_revenue > 0:
 			overhead = total_monthly_overhead * (flt(invoice_revenue) / month_revenue)
 		else:
 			# Fallback to equal split
-			invoice_count = frappe.db.count(
-				"Sales Invoice",
-				filters={
-					"posting_date": [">=", month_start],
-					"posting_date": ["<", add_days(month_start, 30)],
-					"docstatus": 1,
-					"is_pos": 1,
-				},
-			) or 1
+			invoice_count = (
+				frappe.db.count(
+					"Sales Invoice",
+					filters=[
+						["posting_date", ">=", month_start],
+						["posting_date", "<", add_days(month_start, 30)],
+						["docstatus", "=", 1],
+						["is_pos", "=", 1],
+					],
+				)
+				or 1
+			)
 			overhead = total_monthly_overhead / max(invoice_count, 1)
 			method = "Equal Per Invoice (fallback)"
 	else:
 		# Equal Per Invoice
 		month_start = getdate(invoice_date).replace(day=1)
-		invoice_count = frappe.db.count(
-			"Sales Invoice",
-			filters={
-				"posting_date": [">=", month_start],
-				"posting_date": ["<", add_days(month_start, 30)],
-				"docstatus": 1,
-				"is_pos": 1,
-			},
-		) or 1
+		invoice_count = (
+			frappe.db.count(
+				"Sales Invoice",
+				filters=[
+					["posting_date", ">=", month_start],
+					["posting_date", "<", add_days(month_start, 30)],
+					["docstatus", "=", 1],
+					["is_pos", "=", 1],
+				],
+			)
+			or 1
+		)
 		overhead = total_monthly_overhead / max(invoice_count, 1)
 
 	return flt(overhead), method
@@ -639,7 +663,8 @@ def get_cost_breakdown_detail(sales_invoice):
 	)
 	for item_row in items:
 		item_meta = frappe.get_cached_value(
-			"Item", item_row.item_code,
+			"Item",
+			item_row.item_code,
 			["custom_metal_type", "custom_purity", "custom_net_weight_g", "custom_jewelry_type"],
 			as_dict=True,
 		)
@@ -661,8 +686,6 @@ def get_profit_trends(period="monthly", months=12):
 	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
 
 	from_date = add_days(today(), -int(months) * 30)
-
-	scb = frappe.qb.DocType("Sale Cost Breakdown")
 
 	if period == "weekly":
 		date_format = "%Y-%u"
@@ -781,7 +804,11 @@ def get_cost_component_trends(from_date=None, to_date=None, granularity="weekly"
 		as_dict=True,
 	)
 
-	return {"data": results, "granularity": granularity, "period": {"from_date": from_date, "to_date": to_date}}
+	return {
+		"data": results,
+		"granularity": granularity,
+		"period": {"from_date": from_date, "to_date": to_date},
+	}
 
 
 @frappe.whitelist(methods=["GET"])
@@ -793,10 +820,19 @@ def get_recommendations(status="Pending Review", limit=20):
 		"Pricing Recommendation",
 		filters={"status": status},
 		fields=[
-			"name", "item_code", "item_name", "recommendation_type",
-			"current_price", "recommended_price", "projected_margin_pct",
-			"price_change_pct", "confidence_level", "reasoning",
-			"generated_by", "creation", "valid_until",
+			"name",
+			"item_code",
+			"item_name",
+			"recommendation_type",
+			"current_price",
+			"recommended_price",
+			"projected_margin_pct",
+			"price_change_pct",
+			"confidence_level",
+			"reasoning",
+			"generated_by",
+			"creation",
+			"valid_until",
 		],
 		order_by="creation desc",
 		limit_page_length=int(limit),

@@ -177,14 +177,17 @@ class TestVerifyCustomerIdentity(FrappeTestCase):
 		if not frappe.db.exists("DocType", "AML KYC Record"):
 			self.skipTest("AML KYC Record DocType not found")
 
+		import json
+
 		from zevar_core.api.compliance import verify_customer_identity
 
-		import json
-		scan_data = json.dumps({
-			"name": "John Doe",
-			"address": "123 Main St",
-			"dob": "1990-01-15",
-		})
+		scan_data = json.dumps(
+			{
+				"name": "John Doe",
+				"address": "123 Main St",
+				"dob": "1990-01-15",
+			}
+		)
 
 		try:
 			result = verify_customer_identity(

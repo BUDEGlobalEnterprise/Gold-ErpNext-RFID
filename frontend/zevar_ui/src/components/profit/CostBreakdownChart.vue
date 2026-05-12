@@ -2,8 +2,12 @@
 	<div class="space-y-4">
 		<!-- Toggle -->
 		<div class="flex items-center justify-between">
-			<h3 class="text-sm font-bold text-gray-900 dark:text-white">Cost Component Breakdown</h3>
-			<div class="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+			<h3 class="text-sm font-bold text-gray-900 dark:text-white">
+				Cost Component Breakdown
+			</h3>
+			<div
+				class="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+			>
 				<button
 					@click="mode = 'absolute'"
 					:class="[
@@ -31,17 +35,20 @@
 
 		<!-- Chart -->
 		<div v-if="periods.length" class="premium-card !p-5 space-y-3">
-			<div
-				v-for="period in periods"
-				:key="period.label"
-				class="space-y-1"
-			>
+			<div v-for="period in periods" :key="period.label" class="space-y-1">
 				<div class="flex items-center justify-between">
-					<span class="text-[10px] font-medium text-gray-500 dark:text-gray-400">{{ period.label }}</span>
-					<span v-if="mode === 'absolute'" class="text-[10px] font-bold text-gray-900 dark:text-white">
+					<span class="text-[10px] font-medium text-gray-500 dark:text-gray-400">{{
+						period.label
+					}}</span>
+					<span
+						v-if="mode === 'absolute'"
+						class="text-[10px] font-bold text-gray-900 dark:text-white"
+					>
 						{{ fmtCurrency(period.total) }}
 					</span>
-					<span v-else class="text-[10px] font-bold text-gray-900 dark:text-white">100%</span>
+					<span v-else class="text-[10px] font-bold text-gray-900 dark:text-white"
+						>100%</span
+					>
 				</div>
 				<div class="flex w-full h-6 rounded overflow-hidden bg-gray-100 dark:bg-gray-800">
 					<div
@@ -64,7 +71,9 @@
 
 		<!-- Empty state -->
 		<div v-else class="premium-card !p-8 text-center">
-			<p class="text-xs text-gray-400">No cost trend data available for the selected period.</p>
+			<p class="text-xs text-gray-400">
+				No cost trend data available for the selected period.
+			</p>
 		</div>
 
 		<!-- Legend -->
@@ -72,7 +81,9 @@
 			<div class="flex flex-wrap gap-x-4 gap-y-2">
 				<div v-for="comp in legendItems" :key="comp.key" class="flex items-center gap-1.5">
 					<div :class="[comp.colorClass, 'w-3 h-3 rounded-sm']"></div>
-					<span class="text-[10px] text-gray-600 dark:text-gray-400">{{ comp.label }}</span>
+					<span class="text-[10px] text-gray-600 dark:text-gray-400">{{
+						comp.label
+					}}</span>
 				</div>
 			</div>
 		</div>

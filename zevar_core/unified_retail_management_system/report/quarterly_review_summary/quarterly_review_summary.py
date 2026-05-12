@@ -14,87 +14,87 @@ from frappe.utils import flt
 
 
 def execute(filters=None):
-    """Entry point for the Script Report.
+	"""Entry point for the Script Report.
 
-    Args:
-        filters: Dictionary with required ``review_period`` (Q1/Q2/Q3/Q4) and
-            ``review_year`` (Int) keys.
+	Args:
+	    filters: Dictionary with required ``review_period`` (Q1/Q2/Q3/Q4) and
+	        ``review_year`` (Int) keys.
 
-    Returns:
-        Tuple of (columns, data).
-    """
-    columns = get_columns()
-    data = get_data(filters)
-    return columns, data
+	Returns:
+	    Tuple of (columns, data).
+	"""
+	columns = get_columns()
+	data = get_data(filters)
+	return columns, data
 
 
 def get_columns():
-    """Return column definitions for the report."""
-    return [
-        {
-            "fieldname": "employee",
-            "label": _("Employee"),
-            "fieldtype": "Link",
-            "options": "Employee",
-            "width": 140,
-        },
-        {
-            "fieldname": "employee_name",
-            "label": _("Employee Name"),
-            "fieldtype": "Data",
-            "width": 160,
-        },
-        {
-            "fieldname": "overall_score",
-            "label": _("Overall Score"),
-            "fieldtype": "Percent",
-            "width": 110,
-        },
-        {
-            "fieldname": "performance_tier",
-            "label": _("Performance Tier"),
-            "fieldtype": "Data",
-            "width": 140,
-        },
-        {
-            "fieldname": "recommendation",
-            "label": _("Recommendation"),
-            "fieldtype": "Data",
-            "width": 180,
-        },
-        {
-            "fieldname": "quarterly_revenue",
-            "label": _("Quarterly Revenue"),
-            "fieldtype": "Currency",
-            "width": 130,
-        },
-        {
-            "fieldname": "attendance_rate",
-            "label": _("Attendance Rate"),
-            "fieldtype": "Percent",
-            "width": 120,
-        },
-    ]
+	"""Return column definitions for the report."""
+	return [
+		{
+			"fieldname": "employee",
+			"label": _("Employee"),
+			"fieldtype": "Link",
+			"options": "Employee",
+			"width": 140,
+		},
+		{
+			"fieldname": "employee_name",
+			"label": _("Employee Name"),
+			"fieldtype": "Data",
+			"width": 160,
+		},
+		{
+			"fieldname": "overall_score",
+			"label": _("Overall Score"),
+			"fieldtype": "Percent",
+			"width": 110,
+		},
+		{
+			"fieldname": "performance_tier",
+			"label": _("Performance Tier"),
+			"fieldtype": "Data",
+			"width": 140,
+		},
+		{
+			"fieldname": "recommendation",
+			"label": _("Recommendation"),
+			"fieldtype": "Data",
+			"width": 180,
+		},
+		{
+			"fieldname": "quarterly_revenue",
+			"label": _("Quarterly Revenue"),
+			"fieldtype": "Currency",
+			"width": 130,
+		},
+		{
+			"fieldname": "attendance_rate",
+			"label": _("Attendance Rate"),
+			"fieldtype": "Percent",
+			"width": 120,
+		},
+	]
 
 
 def get_data(filters):
-    """Fetch quarterly performance review records.
+	"""Fetch quarterly performance review records.
 
-    Queries ``tabQuarterly Performance Review`` filtered by the selected
-    review period and year.  Results are ordered by overall score descending.
+	Queries ``tabQuarterly Performance Review`` filtered by the selected
+	review period and year.  Results are ordered by overall score descending.
 
-    Args:
-        filters: Report filter dictionary with ``review_period`` and
-            ``review_year``.
+	Args:
+	    filters: Report filter dictionary with ``review_period`` and
+	        ``review_year``.
 
-    Returns:
-        List of dictionaries representing report rows.
-    """
-    conditions, values = build_conditions(filters)
+	Returns:
+	    List of dictionaries representing report rows.
+	"""
+	conditions, values = build_conditions(filters)
 
-    # nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
-    data = frappe.db.sql(  # nosemgrep
-        f"""
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
+	data = frappe.db.sql(  # nosemgrep
+		f"""
         SELECT
             qpr.employee,
             qpr.employee_name,
@@ -108,35 +108,35 @@ def get_data(filters):
             {conditions}
         ORDER BY qpr.overall_score DESC
         """,
-        values=values,
-        as_dict=True,
-    )
+		values=values,
+		as_dict=True,
+	)
 
-    for row in data:
-        row["overall_score"] = flt(row.get("overall_score"), 2)
-        row["attendance_rate"] = flt(row.get("attendance_rate"), 2)
+	for row in data:
+		row["overall_score"] = flt(row.get("overall_score"), 2)
+		row["attendance_rate"] = flt(row.get("attendance_rate"), 2)
 
-    return data
+	return data
 
 
 def build_conditions(filters):
-    """Build SQL WHERE clause fragments and parameter values from *filters*.
+	"""Build SQL WHERE clause fragments and parameter values from *filters*.
 
-    Args:
-        filters: Report filter dictionary.
+	Args:
+	    filters: Report filter dictionary.
 
-    Returns:
-        Tuple of (conditions_string, values_dict).
-    """
-    conditions = ""
-    values = {}
+	Returns:
+	    Tuple of (conditions_string, values_dict).
+	"""
+	conditions = ""
+	values = {}
 
-    if filters.get("review_period"):
-        conditions += " AND qpr.review_period = %(review_period)s"
-        values["review_period"] = filters["review_period"]
+	if filters.get("review_period"):
+		conditions += " AND qpr.review_period = %(review_period)s"
+		values["review_period"] = filters["review_period"]
 
-    if filters.get("review_year"):
-        conditions += " AND qpr.review_year = %(review_year)s"
-        values["review_year"] = filters["review_year"]
+	if filters.get("review_year"):
+		conditions += " AND qpr.review_year = %(review_year)s"
+		values["review_year"] = filters["review_year"]
 
-    return conditions, values
+	return conditions, values

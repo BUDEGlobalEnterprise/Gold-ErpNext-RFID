@@ -9,7 +9,7 @@ import json
 
 import frappe
 from frappe import _
-from frappe.utils import flt, today, getdate, now_datetime, add_days, cint
+from frappe.utils import add_days, cint, flt, getdate, now_datetime, today
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -56,17 +56,17 @@ def _create_performance_log(
 	employee: str,
 	event_type: str,
 	event_date,
-	reference_doctype: str = None,
-	reference_document: str = None,
+	reference_doctype: str | None = None,
+	reference_document: str | None = None,
 	revenue_amount: float = 0,
 	item_count: int = 0,
-	customer: str = None,
+	customer: str | None = None,
 	commission_amount: float = 0,
 	hours_worked: float = 0,
-	store_location: str = None,
-	performance_target: str = None,
-	period_type: str = None,
-	custom_data: dict = None,
+	store_location: str | None = None,
+	performance_target: str | None = None,
+	period_type: str | None = None,
+	custom_data: dict | None = None,
 ):
 	"""Create an immutable Performance Log entry."""
 	if not employee:
@@ -299,7 +299,9 @@ def _get_commission_map(sales_invoice: str) -> dict:
 
 
 @frappe.whitelist(methods=["GET"])
-def get_employee_performance_summary(employee: str, period_start: str = None, period_end: str = None) -> dict:
+def get_employee_performance_summary(
+	employee: str, period_start: str | None = None, period_end: str | None = None
+) -> dict:
 	"""Return aggregated performance metrics for an employee in a period."""
 	frappe.only_for(["System Manager", "HR Manager", "Store Manager", "Sales Manager", "HR User"])
 
@@ -385,7 +387,7 @@ def get_employee_performance_summary(employee: str, period_start: str = None, pe
 
 
 @frappe.whitelist(methods=["GET"])
-def get_team_performance(store_location: str = None, date: str = None) -> list:
+def get_team_performance(store_location: str | None = None, date: str | None = None) -> list:
 	"""Return all employees' performance data for a store on a given date."""
 	frappe.only_for(["System Manager", "HR Manager", "Store Manager", "Sales Manager"])
 
@@ -416,7 +418,7 @@ def get_team_performance(store_location: str = None, date: str = None) -> list:
 
 
 @frappe.whitelist(methods=["GET"])
-def get_live_scoreboard(store_location: str = None) -> list:
+def get_live_scoreboard(store_location: str | None = None) -> list:
 	"""Real-time current-period scoreboard for all active associates."""
 	frappe.only_for(["System Manager", "HR Manager", "Store Manager", "Sales Manager"])
 
@@ -435,9 +437,15 @@ def get_performance_history(employee: str, limit: int = 12) -> list:
 		"Compensation Calculation",
 		filters={"employee": employee, "docstatus": 1},
 		fields=[
-			"name", "period_start", "period_end", "period_type",
-			"overall_performance_score", "effective_hourly_rate",
-			"final_calculated_pay", "commission_earned", "status",
+			"name",
+			"period_start",
+			"period_end",
+			"period_type",
+			"overall_performance_score",
+			"effective_hourly_rate",
+			"final_calculated_pay",
+			"commission_earned",
+			"status",
 		],
 		order_by="period_end desc",
 		limit=cint(limit),
@@ -538,9 +546,7 @@ def run_compensation_calculation(employee: str, period_start: str, period_end: s
 
 	# --- Hours ---
 	total_hours = sum(
-		flt(l.hours_worked)
-		for l in logs
-		if l.event_type in ("Shift Complete", "Late Arrival", "Overtime")
+		flt(l.hours_worked) for l in logs if l.event_type in ("Shift Complete", "Late Arrival", "Overtime")
 	)
 
 	# --- Commission ---
@@ -555,14 +561,16 @@ def run_compensation_calculation(employee: str, period_start: str, period_end: s
 
 	customers_served_target = cint(target_doc.customers_served_target)
 	# Approximate: total unique transactions ≈ customers served
-	customers_achievement_pct = (total_transactions / customers_served_target * 100) if customers_served_target > 0 else 100
+	customers_achievement_pct = (
+		(total_transactions / customers_served_target * 100) if customers_served_target > 0 else 100
+	)
 
 	repair_target = cint(target_doc.repair_orders_target)
 	repair_achievement_pct = (repair_count / repair_target * 100) if repair_target > 0 else 100
 
 	activity_achievement_pct = (
-		(items_achievement_pct + customers_achievement_pct + repair_achievement_pct) / 3
-	)
+		items_achievement_pct + customers_achievement_pct + repair_achievement_pct
+	) / 3
 
 	# --- Quality Metrics ---
 	return_rate = (return_count / total_transactions * 100) if total_transactions > 0 else 0
@@ -590,13 +598,17 @@ def run_compensation_calculation(employee: str, period_start: str, period_end: s
 		effective_rate = superior_rate
 	elif overall_score >= min_pct:
 		# Linear interpolation between guaranteed and target
-		effective_rate = guaranteed_rate + (overall_score - min_pct) / (100 - min_pct) * (target_rate - guaranteed_rate)
+		effective_rate = guaranteed_rate + (overall_score - min_pct) / (100 - min_pct) * (
+			target_rate - guaranteed_rate
+		)
 	else:
 		effective_rate = guaranteed_rate
 
 	guaranteed_pay = total_hours * guaranteed_rate
 	performance_bonus = max(0, total_hours * effective_rate - guaranteed_pay)
-	performance_deduction = max(0, guaranteed_pay - total_hours * effective_rate) if overall_score < 100 else 0
+	performance_deduction = (
+		max(0, guaranteed_pay - total_hours * effective_rate) if overall_score < 100 else 0
+	)
 	final_pay = total_hours * effective_rate + total_commission
 
 	# --- Create Compensation Calculation record ---
@@ -708,7 +720,7 @@ def get_quarterly_review(employee: str, quarter: str, year: int) -> dict:
 
 
 @frappe.whitelist(methods=["POST"])
-def finalize_review(review_name: str, manager_comments: str = None, recommendation: str = None):
+def finalize_review(review_name: str, manager_comments: str | None = None, recommendation: str | None = None):
 	"""Finalize a quarterly review with manager input."""
 	frappe.only_for(["System Manager", "HR Manager", "Store Manager"])
 
@@ -755,8 +767,13 @@ def get_review_history(employee: str, limit: int = 8) -> list:
 		"Quarterly Performance Review",
 		filters={"employee": employee, "docstatus": 1},
 		fields=[
-			"name", "review_period", "review_year", "overall_score",
-			"performance_tier", "recommendation", "status",
+			"name",
+			"review_period",
+			"review_year",
+			"overall_score",
+			"performance_tier",
+			"recommendation",
+			"status",
 		],
 		order_by="review_year desc, review_period desc",
 		limit=cint(limit),
@@ -774,8 +791,13 @@ def get_team_review_summary(store_location: str, quarter: str, year: int) -> lis
 		"Quarterly Performance Review",
 		filters=filters,
 		fields=[
-			"employee", "employee_name", "overall_score", "performance_tier",
-			"recommendation", "quarterly_revenue", "attendance_rate",
+			"employee",
+			"employee_name",
+			"overall_score",
+			"performance_tier",
+			"recommendation",
+			"quarterly_revenue",
+			"attendance_rate",
 		],
 		order_by="overall_score desc",
 	)
@@ -864,9 +886,14 @@ def _create_quarterly_review(employee: str, quarter: str, year: int, q_start, q_
 			"docstatus": 1,
 		},
 		fields=[
-			"overall_performance_score", "effective_hourly_rate",
-			"final_calculated_pay", "commission_earned", "revenue_achieved",
-			"total_hours_worked", "return_rate", "attendance_percentage",
+			"overall_performance_score",
+			"effective_hourly_rate",
+			"final_calculated_pay",
+			"commission_earned",
+			"revenue_achieved",
+			"total_hours_worked",
+			"return_rate",
+			"attendance_percentage",
 		],
 	)
 
@@ -884,16 +911,14 @@ def _create_quarterly_review(employee: str, quarter: str, year: int, q_start, q_
 	# Calculate overall score (average of monthly calculations or from logs)
 	if calculations:
 		avg_score = sum(flt(c.overall_performance_score) for c in calculations) / len(calculations)
-		total_pay = sum(flt(c.final_calculated_pay) for c in calculations)
-		total_commission = sum(flt(c.commission_earned) for c in calculations)
 		total_hours = sum(flt(c.total_hours_worked) for c in calculations)
-		avg_hourly = total_pay / total_hours if total_hours else 0
+		avg_hourly = (
+			sum(flt(c.final_calculated_pay) for c in calculations) / total_hours if total_hours else 0
+		)
 		avg_return_rate = sum(flt(c.return_rate) for c in calculations) / len(calculations)
 		avg_attendance = sum(flt(c.attendance_percentage) for c in calculations) / len(calculations)
 	else:
 		avg_score = 0
-		total_pay = 0
-		total_commission = 0
 		total_hours = 0
 		avg_hourly = 0
 		avg_return_rate = 0
@@ -931,8 +956,13 @@ def _create_quarterly_review(employee: str, quarter: str, year: int, q_start, q_
 
 	# Generate strengths/weaknesses text
 	strengths, improvements = _generate_review_insights(
-		employee, avg_score, total_revenue, avg_transaction,
-		avg_return_rate, avg_attendance, total_transactions
+		employee,
+		avg_score,
+		total_revenue,
+		avg_transaction,
+		avg_return_rate,
+		avg_attendance,
+		total_transactions,
 	)
 
 	# Create the review
@@ -1006,9 +1036,7 @@ def _generate_review_insights(
 		)
 
 	if attendance < 90:
-		improvements_parts.append(
-			f"Attendance rate of {attendance:.1f}% needs improvement."
-		)
+		improvements_parts.append(f"Attendance rate of {attendance:.1f}% needs improvement.")
 
 	if transactions > 0 and transactions < 30:
 		improvements_parts.append(
@@ -1018,7 +1046,9 @@ def _generate_review_insights(
 	if not improvements_parts:
 		improvements_parts.append("Continue developing product knowledge and upselling skills.")
 
-	strengths = "\n".join(f"- {s}" for s in strengths_parts) if strengths_parts else "- Meets baseline expectations."
+	strengths = (
+		"\n".join(f"- {s}" for s in strengths_parts) if strengths_parts else "- Meets baseline expectations."
+	)
 	improvements = "\n".join(f"- {s}" for s in improvements_parts)
 
 	return strengths, improvements

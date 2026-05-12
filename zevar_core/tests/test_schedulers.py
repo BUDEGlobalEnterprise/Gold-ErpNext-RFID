@@ -248,7 +248,7 @@ class TestSchedulerRegistry(FrappeTestCase):
 		from zevar_core.hooks import scheduler_events
 
 		all_jobs = []
-		for cron_key, jobs in scheduler_events.get("cron", {}).items():
+		for _cron_key, jobs in scheduler_events.get("cron", {}).items():
 			all_jobs.extend(jobs)
 
 		expected_jobs = [
@@ -281,7 +281,7 @@ class TestSchedulerRegistry(FrappeTestCase):
 		"""All scheduler functions should be importable"""
 		from zevar_core.hooks import scheduler_events
 
-		for cron_key, jobs in scheduler_events.get("cron", {}).items():
+		for _cron_key, jobs in scheduler_events.get("cron", {}).items():
 			for job_path in jobs:
 				module_path, func_name = job_path.rsplit(".", 1)
 				try:

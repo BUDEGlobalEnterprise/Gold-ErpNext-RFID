@@ -76,17 +76,23 @@ class TestGetReturnableItems(FrappeTestCase):
 		inv.pos_profile = self.pos_profile
 		inv.posting_date = today()
 		inv.due_date = today()
-		inv.append("items", {
-			"item_code": item_code,
-			"qty": qty,
-			"rate": rate,
-			"warehouse": self.warehouse,
-		})
+		inv.append(
+			"items",
+			{
+				"item_code": item_code,
+				"qty": qty,
+				"rate": rate,
+				"warehouse": self.warehouse,
+			},
+		)
 		ensure_mode_of_payment("Cash")
-		inv.append("payments", {
-			"mode_of_payment": "Cash",
-			"amount": qty * rate,
-		})
+		inv.append(
+			"payments",
+			{
+				"mode_of_payment": "Cash",
+				"amount": qty * rate,
+			},
+		)
 		inv.insert(ignore_permissions=True)
 		inv.submit()
 		self.created_invoices.append(inv.name)
@@ -145,12 +151,15 @@ class TestGetReturnableItems(FrappeTestCase):
 		inv.customer = self.customer
 		inv.posting_date = today()
 		inv.due_date = today()
-		inv.append("items", {
-			"item_code": self.item_code,
-			"qty": 1,
-			"rate": 100,
-			"warehouse": self.warehouse,
-		})
+		inv.append(
+			"items",
+			{
+				"item_code": self.item_code,
+				"qty": 1,
+				"rate": 100,
+				"warehouse": self.warehouse,
+			},
+		)
 		inv.insert(ignore_permissions=True)
 		inv.submit()
 		self.created_invoices.append(inv.name)
@@ -168,12 +177,15 @@ class TestGetReturnableItems(FrappeTestCase):
 		inv.is_pos = 1
 		inv.posting_date = today()
 		inv.due_date = today()
-		inv.append("items", {
-			"item_code": self.item_code,
-			"qty": 1,
-			"rate": 100,
-			"warehouse": self.warehouse,
-		})
+		inv.append(
+			"items",
+			{
+				"item_code": self.item_code,
+				"qty": 1,
+				"rate": 100,
+				"warehouse": self.warehouse,
+			},
+		)
 		inv.insert(ignore_permissions=True)
 		self.created_invoices.append(inv.name)
 
@@ -230,17 +242,23 @@ class TestCreateReturnInvoice(FrappeTestCase):
 		inv.pos_profile = self.pos_profile
 		inv.posting_date = today()
 		inv.due_date = today()
-		inv.append("items", {
-			"item_code": self.item_code,
-			"qty": qty,
-			"rate": rate,
-			"warehouse": self.warehouse,
-		})
+		inv.append(
+			"items",
+			{
+				"item_code": self.item_code,
+				"qty": qty,
+				"rate": rate,
+				"warehouse": self.warehouse,
+			},
+		)
 		ensure_mode_of_payment("Cash")
-		inv.append("payments", {
-			"mode_of_payment": "Cash",
-			"amount": qty * rate,
-		})
+		inv.append(
+			"payments",
+			{
+				"mode_of_payment": "Cash",
+				"amount": qty * rate,
+			},
+		)
 		inv.insert(ignore_permissions=True)
 		inv.submit()
 		self.created_invoices.append(inv.name)

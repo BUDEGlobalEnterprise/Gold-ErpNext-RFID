@@ -30,6 +30,7 @@ class TestExportSalesData(FrappeTestCase):
 	def test_export_sales_with_date_range(self):
 		"""Should accept date range"""
 		from frappe.utils import add_days, today
+
 		from zevar_core.api.export import export_sales_data
 
 		result = export_sales_data(

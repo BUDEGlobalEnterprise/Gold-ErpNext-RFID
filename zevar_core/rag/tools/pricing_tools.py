@@ -7,7 +7,7 @@ questions conversationally: "Should I increase prices on 14k gold chains?"
 
 import frappe
 from frappe import _
-from frappe.utils import flt, today, add_days, getdate
+from frappe.utils import add_days, flt, getdate, today
 
 # Tool Registry for LLM
 AGENT_TOOLS_PRICING = [
@@ -77,7 +77,14 @@ def get_item_margin_history(item_code: str, months: int = 6) -> dict:
 	item = frappe.get_cached_value(
 		"Item",
 		item_code,
-		["item_name", "custom_metal_type", "custom_purity", "custom_net_weight_g", "custom_msrp", "custom_jewelry_type"],
+		[
+			"item_name",
+			"custom_metal_type",
+			"custom_purity",
+			"custom_net_weight_g",
+			"custom_msrp",
+			"custom_jewelry_type",
+		],
 		as_dict=True,
 	)
 
@@ -156,7 +163,14 @@ def simulate_price_change(item_code: str, new_price: float, gold_rate: float | N
 	item = frappe.get_cached_value(
 		"Item",
 		item_code,
-		["item_name", "custom_metal_type", "custom_purity", "custom_net_weight_g", "custom_msrp", "custom_jewelry_type"],
+		[
+			"item_name",
+			"custom_metal_type",
+			"custom_purity",
+			"custom_net_weight_g",
+			"custom_msrp",
+			"custom_jewelry_type",
+		],
 		as_dict=True,
 	)
 
@@ -261,7 +275,15 @@ def get_slow_moving_inventory(days: int = 90, jewelry_type: str | None = None) -
 	items = frappe.get_all(
 		"Item",
 		filters=filters,
-		fields=["name", "item_name", "custom_msrp", "custom_metal_type", "custom_purity", "custom_jewelry_type", "custom_net_weight_g"],
+		fields=[
+			"name",
+			"item_name",
+			"custom_msrp",
+			"custom_metal_type",
+			"custom_purity",
+			"custom_jewelry_type",
+			"custom_net_weight_g",
+		],
 		limit=500,
 	)
 
@@ -288,16 +310,18 @@ def get_slow_moving_inventory(days: int = 90, jewelry_type: str | None = None) -
 
 		days_since = (getdate(today()) - getdate(last_sale[0][0])).days if last_sale else 999
 
-		slow_moving.append({
-			"item_code": item.name,
-			"item_name": item.item_name,
-			"msrp": flt(item.custom_msrp) if item.custom_msrp else 0,
-			"metal_type": item.custom_metal_type,
-			"jewelry_type": item.custom_jewelry_type,
-			"stock_qty": flt(qty),
-			"days_since_last_sale": days_since,
-			"suggested_action": "Clearance" if days_since > 180 else "Strategic Markdown",
-		})
+		slow_moving.append(
+			{
+				"item_code": item.name,
+				"item_name": item.item_name,
+				"msrp": flt(item.custom_msrp) if item.custom_msrp else 0,
+				"metal_type": item.custom_metal_type,
+				"jewelry_type": item.custom_jewelry_type,
+				"stock_qty": flt(qty),
+				"days_since_last_sale": days_since,
+				"suggested_action": "Clearance" if days_since > 180 else "Strategic Markdown",
+			}
+		)
 
 	# Sort by days since last sale
 	slow_moving.sort(key=lambda x: x["days_since_last_sale"], reverse=True)
@@ -352,31 +376,42 @@ def get_pricing_action_items() -> dict:
 	)
 
 	for d in declining:
-		action_items.append({
-			"type": "Declining Margin",
-			"priority": "High",
-			"item_code": d.item_code,
-			"item_name": d.item_name,
-			"detail": f"Margin dropped from {flt(d.prev_margin):.1f}% to {flt(d.recent_margin):.1f}%",
-			"action": "Review pricing — margin declining",
-		})
+		action_items.append(
+			{
+				"type": "Declining Margin",
+				"priority": "High",
+				"item_code": d.item_code,
+				"item_name": d.item_name,
+				"detail": f"Margin dropped from {flt(d.prev_margin):.1f}% to {flt(d.recent_margin):.1f}%",
+				"action": "Review pricing — margin declining",
+			}
+		)
 
 	# 2. Pending pricing recommendations
 	pending = frappe.get_all(
 		"Pricing Recommendation",
 		filters={"status": "Pending Review"},
-		fields=["name", "item_code", "item_name", "recommendation_type", "recommended_price", "confidence_level"],
+		fields=[
+			"name",
+			"item_code",
+			"item_name",
+			"recommendation_type",
+			"recommended_price",
+			"confidence_level",
+		],
 		limit=10,
 	)
 	for p in pending:
-		action_items.append({
-			"type": "Pending Recommendation",
-			"priority": "Medium",
-			"item_code": p.item_code,
-			"item_name": p.item_name,
-			"detail": f"{p.recommendation_type}: ${flt(p.recommended_price):,.2f} ({p.confidence_level})",
-			"action": "Review and approve/reject",
-		})
+		action_items.append(
+			{
+				"type": "Pending Recommendation",
+				"priority": "Medium",
+				"item_code": p.item_code,
+				"item_name": p.item_name,
+				"detail": f"{p.recommendation_type}: ${flt(p.recommended_price):,.2f} ({p.confidence_level})",
+				"action": "Review and approve/reject",
+			}
+		)
 
 	# 3. Gold rate changed significantly — items needing repricing
 	recent_gold = frappe.db.sql(
@@ -396,16 +431,20 @@ def get_pricing_action_items() -> dict:
 	)
 
 	if recent_gold and prev_gold and flt(recent_gold[0].avg_rate) > 0 and flt(prev_gold[0].avg_rate) > 0:
-		gold_change_pct = ((flt(recent_gold[0].avg_rate) - flt(prev_gold[0].avg_rate)) / flt(prev_gold[0].avg_rate)) * 100
+		gold_change_pct = (
+			(flt(recent_gold[0].avg_rate) - flt(prev_gold[0].avg_rate)) / flt(prev_gold[0].avg_rate)
+		) * 100
 		if abs(gold_change_pct) > 3:
-			action_items.append({
-				"type": "Gold Rate Alert",
-				"priority": "High" if abs(gold_change_pct) > 5 else "Medium",
-				"item_code": "",
-				"item_name": "All Gold Items",
-				"detail": f"Gold rate {'rose' if gold_change_pct > 0 else 'dropped'} {abs(gold_change_pct):.1f}% in the last week",
-				"action": "Review gold item pricing",
-			})
+			action_items.append(
+				{
+					"type": "Gold Rate Alert",
+					"priority": "High" if abs(gold_change_pct) > 5 else "Medium",
+					"item_code": "",
+					"item_name": "All Gold Items",
+					"detail": f"Gold rate {'rose' if gold_change_pct > 0 else 'dropped'} {abs(gold_change_pct):.1f}% in the last week",
+					"action": "Review gold item pricing",
+				}
+			)
 
 	message = f"Pricing Action Items: {len(action_items)} items need attention\n"
 	for item in action_items[:10]:

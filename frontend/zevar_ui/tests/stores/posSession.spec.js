@@ -8,20 +8,30 @@ import { setActivePinia, createPinia } from 'pinia'
 
 vi.mock('frappe-ui', () => ({
 	createResource: vi.fn(() => ({
-		fetch: vi.fn(() => Promise.resolve({
-			has_active_session: false,
-			session: null,
-		})),
+		fetch: vi.fn(() =>
+			Promise.resolve({
+				has_active_session: false,
+				session: null,
+			})
+		),
 		submit: vi.fn(() => Promise.resolve({ success: true, session_name: 'POS-OPEN-001' })),
 	})),
 }))
 
 const localStorageMock = {
 	store: {},
-	getItem(key) { return this.store[key] || null },
-	setItem(key, value) { this.store[key] = value },
-	removeItem(key) { delete this.store[key] },
-	clear() { this.store = {} },
+	getItem(key) {
+		return this.store[key] || null
+	},
+	setItem(key, value) {
+		this.store[key] = value
+	},
+	removeItem(key) {
+		delete this.store[key]
+	},
+	clear() {
+		this.store = {}
+	},
 }
 Object.defineProperty(global, 'localStorage', { value: localStorageMock })
 

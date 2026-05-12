@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+
 class DisplayCase(Document):
 	def validate(self):
 		self.set_zone_type_from_warehouse()
@@ -12,9 +13,11 @@ class DisplayCase(Document):
 
 	def on_trash(self):
 		if self.item_count > 0:
-			frappe.throw(_("Cannot delete display case {0} because it still has {1} items.").format(
-				frappe.bold(self.case_name), frappe.bold(self.item_count)
-			))
+			frappe.throw(
+				_("Cannot delete display case {0} because it still has {1} items.").format(
+					frappe.bold(self.case_name), frappe.bold(self.item_count)
+				)
+			)
 
 	def set_zone_type_from_warehouse(self):
 		"""Auto-populate zone_type from warehouse name pattern."""
@@ -42,13 +45,17 @@ class DisplayCase(Document):
 			self.total_value = 0.0
 			return
 
-		stats = frappe.db.sql("""
-			SELECT 
+		stats = frappe.db.sql(
+			"""
+			SELECT
 				COUNT(DISTINCT item_code) as item_count,
 				SUM(actual_qty * valuation_rate) as total_value
 			FROM `tabBin`
 			WHERE warehouse = %s AND actual_qty > 0
-		""", (self.warehouse,), as_dict=True)
+		""",
+			(self.warehouse,),
+			as_dict=True,
+		)
 
 		if stats:
 			self.item_count = stats[0].item_count or 0

@@ -58,7 +58,9 @@ class TestReportCatalog(FrappeTestCase):
 
 		group_ids = {g["id"] for g in REPORT_GROUPS}
 		for report in REPORT_CATALOG:
-			self.assertIn(report["group"], group_ids, f"Report '{report['id']}' has unknown group '{report['group']}'")
+			self.assertIn(
+				report["group"], group_ids, f"Report '{report['id']}' has unknown group '{report['group']}'"
+			)
 
 	def test_admin_sees_all_reports(self):
 		"""Administrator should have access to all reports"""

@@ -103,7 +103,9 @@ export const useProfitStore = defineStore('profit', () => {
 		Promise.all([
 			profitSummary.fetch(params),
 			marginAnalysis.fetch({ ...params, group_by: 'jewelry_type' }),
-			trends.value === null ? profitTrends.fetch({ period: 'monthly', months: 12 }) : Promise.resolve(),
+			trends.value === null
+				? profitTrends.fetch({ period: 'monthly', months: 12 })
+				: Promise.resolve(),
 			costComponentTrends.fetch({ ...params, granularity: 'weekly' }),
 			marginHeatmapResource.fetch(params),
 			recommendationsResource.fetch({ status: 'Pending Review', limit: 20 }),

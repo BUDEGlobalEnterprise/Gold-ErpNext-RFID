@@ -5,36 +5,63 @@
 			<!-- Total Revenue -->
 			<div class="premium-card !p-4">
 				<div class="flex items-center gap-2 mb-2">
-					<div class="w-8 h-8 rounded-lg flex items-center justify-center bg-emerald-500/10">
-						<span class="material-symbols-outlined !text-base text-emerald-500">payments</span>
+					<div
+						class="w-8 h-8 rounded-lg flex items-center justify-center bg-emerald-500/10"
+					>
+						<span class="material-symbols-outlined !text-base text-emerald-500"
+							>payments</span
+						>
 					</div>
-					<span class="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Revenue</span>
+					<span
+						class="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide"
+						>Revenue</span
+					>
 				</div>
-				<p class="text-lg font-bold text-gray-900 dark:text-white">{{ fmtCurrency(kpi.totalRevenue) }}</p>
+				<p class="text-lg font-bold text-gray-900 dark:text-white">
+					{{ fmtCurrency(kpi.totalRevenue) }}
+				</p>
 				<TrendIndicator :current="kpi.totalRevenue" :previous="kpi.prevRevenue" />
 			</div>
 
 			<!-- Gross Profit -->
 			<div class="premium-card !p-4">
 				<div class="flex items-center gap-2 mb-2">
-					<div class="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-500/10">
-						<span class="material-symbols-outlined !text-base text-indigo-500">trending_up</span>
+					<div
+						class="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-500/10"
+					>
+						<span class="material-symbols-outlined !text-base text-indigo-500"
+							>trending_up</span
+						>
 					</div>
-					<span class="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Gross Profit</span>
+					<span
+						class="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide"
+						>Gross Profit</span
+					>
 				</div>
-				<p class="text-lg font-bold text-gray-900 dark:text-white">{{ fmtCurrency(kpi.grossProfit) }}</p>
+				<p class="text-lg font-bold text-gray-900 dark:text-white">
+					{{ fmtCurrency(kpi.grossProfit) }}
+				</p>
 				<TrendIndicator :current="kpi.grossProfit" :previous="kpi.prevProfit" />
 			</div>
 
 			<!-- Avg Margin -->
 			<div class="premium-card !p-4">
 				<div class="flex items-center gap-2 mb-2">
-					<div class="w-8 h-8 rounded-lg flex items-center justify-center bg-amber-500/10">
-						<span class="material-symbols-outlined !text-base text-amber-500">percent</span>
+					<div
+						class="w-8 h-8 rounded-lg flex items-center justify-center bg-amber-500/10"
+					>
+						<span class="material-symbols-outlined !text-base text-amber-500"
+							>percent</span
+						>
 					</div>
-					<span class="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Avg Margin</span>
+					<span
+						class="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide"
+						>Avg Margin</span
+					>
 				</div>
-				<p class="text-lg font-bold text-gray-900 dark:text-white">{{ fmtPct(kpi.avgMargin) }}</p>
+				<p class="text-lg font-bold text-gray-900 dark:text-white">
+					{{ fmtPct(kpi.avgMargin) }}
+				</p>
 				<div class="flex items-center gap-1 mt-1">
 					<span
 						v-if="kpi.marginChange !== 0"
@@ -52,27 +79,39 @@
 			<!-- Invoice Count -->
 			<div class="premium-card !p-4">
 				<div class="flex items-center gap-2 mb-2">
-					<div class="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-500/10">
-						<span class="material-symbols-outlined !text-base text-blue-500">receipt</span>
+					<div
+						class="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-500/10"
+					>
+						<span class="material-symbols-outlined !text-base text-blue-500"
+							>receipt</span
+						>
 					</div>
-					<span class="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Invoices</span>
+					<span
+						class="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide"
+						>Invoices</span
+					>
 				</div>
-				<p class="text-lg font-bold text-gray-900 dark:text-white">{{ kpi.invoiceCount }}</p>
+				<p class="text-lg font-bold text-gray-900 dark:text-white">
+					{{ kpi.invoiceCount }}
+				</p>
 				<span class="text-[10px] text-gray-400">period total</span>
 			</div>
 		</div>
 
 		<!-- Profit Trend Chart -->
 		<div class="premium-card !p-5">
-			<h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">Monthly Profit Trend</h3>
+			<h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">
+				Monthly Profit Trend
+			</h3>
 			<div v-if="trendBars.length" class="space-y-2">
-				<div
-					v-for="bar in trendBars"
-					:key="bar.label"
-					class="flex items-center gap-3"
-				>
-					<span class="text-[10px] text-gray-500 dark:text-gray-400 w-12 text-right shrink-0">{{ bar.label }}</span>
-					<div class="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-5 overflow-hidden">
+				<div v-for="bar in trendBars" :key="bar.label" class="flex items-center gap-3">
+					<span
+						class="text-[10px] text-gray-500 dark:text-gray-400 w-12 text-right shrink-0"
+						>{{ bar.label }}</span
+					>
+					<div
+						class="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-5 overflow-hidden"
+					>
 						<div
 							class="h-full rounded-full transition-all duration-500"
 							:style="{ width: bar.width + '%' }"
@@ -109,15 +148,18 @@ function fmtPct(v) {
 	return formatPercentage(v)
 }
 
-const kpi = computed(() => store.kpiData || {
-	totalRevenue: 0,
-	grossProfit: 0,
-	avgMargin: 0,
-	marginChange: 0,
-	invoiceCount: 0,
-	prevRevenue: 0,
-	prevProfit: 0,
-})
+const kpi = computed(
+	() =>
+		store.kpiData || {
+			totalRevenue: 0,
+			grossProfit: 0,
+			avgMargin: 0,
+			marginChange: 0,
+			invoiceCount: 0,
+			prevRevenue: 0,
+			prevProfit: 0,
+		}
+)
 
 const trendBars = computed(() => {
 	const data = store.trends
@@ -146,22 +188,26 @@ const TrendIndicator = {
 				? ((props.current - props.previous) / Math.abs(props.previous)) * 100
 				: 0
 			const isUp = change >= 0
-			return h(
-				'div',
-				{ class: 'flex items-center gap-0.5 mt-1' },
-				[
-					h('span', {
-						class: `material-symbols-outlined !text-xs ${isUp ? 'text-emerald-500' : 'text-red-500'}`,
-					}, isUp ? 'arrow_upward' : 'arrow_downward'),
-					h(
-						'span',
-						{
-							class: `text-[10px] font-medium ${isUp ? 'text-emerald-500' : 'text-red-500'}`,
-						},
-						`${isUp ? '+' : ''}${change.toFixed(1)}%`
-					),
-				]
-			)
+			return h('div', { class: 'flex items-center gap-0.5 mt-1' }, [
+				h(
+					'span',
+					{
+						class: `material-symbols-outlined !text-xs ${
+							isUp ? 'text-emerald-500' : 'text-red-500'
+						}`,
+					},
+					isUp ? 'arrow_upward' : 'arrow_downward'
+				),
+				h(
+					'span',
+					{
+						class: `text-[10px] font-medium ${
+							isUp ? 'text-emerald-500' : 'text-red-500'
+						}`,
+					},
+					`${isUp ? '+' : ''}${change.toFixed(1)}%`
+				),
+			])
 		}
 	},
 }

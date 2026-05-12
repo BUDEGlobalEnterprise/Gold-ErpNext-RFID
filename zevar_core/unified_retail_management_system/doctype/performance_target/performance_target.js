@@ -11,14 +11,14 @@ frappe.ui.form.on("Performance Target", {
 
 	employee(frm) {
 		if (frm.doc.employee) {
-			frappe.db.get_value("Employee", frm.doc.employee, ["employee_name", "designation"]).then(
-				(r) => {
+			frappe.db
+				.get_value("Employee", frm.doc.employee, ["employee_name", "designation"])
+				.then((r) => {
 					if (r && r.message) {
 						frm.set_value("employee_name", r.message.employee_name);
 						frm.set_value("designation", r.message.designation);
 					}
-				}
-			);
+				});
 		}
 	},
 

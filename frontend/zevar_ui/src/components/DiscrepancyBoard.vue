@@ -39,7 +39,11 @@
 							<div
 								class="w-12 h-12 rounded-lg bg-gray-100 dark:bg-white/5 overflow-hidden shrink-0"
 							>
-								<img v-if="d.image" :src="d.image" class="w-full h-full object-cover" />
+								<img
+									v-if="d.image"
+									:src="d.image"
+									class="w-full h-full object-cover"
+								/>
 								<div
 									v-else
 									class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600 text-[10px]"
@@ -95,7 +99,11 @@
 							<div
 								class="w-12 h-12 rounded-lg bg-gray-100 dark:bg-white/5 overflow-hidden shrink-0"
 							>
-								<img v-if="d.image" :src="d.image" class="w-full h-full object-cover" />
+								<img
+									v-if="d.image"
+									:src="d.image"
+									class="w-full h-full object-cover"
+								/>
 								<div
 									v-else
 									class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600 text-[10px]"
@@ -201,7 +209,8 @@
 								<span
 									class="font-bold text-red-500"
 									v-if="selectedDiscrepancy.discrepancy_qty < 0"
-									>Missing {{ Math.abs(selectedDiscrepancy.discrepancy_qty) }} pc</span
+									>Missing
+									{{ Math.abs(selectedDiscrepancy.discrepancy_qty) }} pc</span
 								>
 								<span class="font-bold text-amber-500" v-else
 									>Surplus {{ selectedDiscrepancy.found_qty }} pc</span
@@ -314,7 +323,11 @@ const resolutionOptions = computed(() => {
 		]
 	} else {
 		return [
-			{ label: 'Transfer', value: 'Warehouse Transfer', desc: 'Move to correct physical case' },
+			{
+				label: 'Transfer',
+				value: 'Warehouse Transfer',
+				desc: 'Move to correct physical case',
+			},
 			{ label: 'Stock Entry', value: 'Stock Entry', desc: 'Add missing stock to system' },
 			{ label: 'Ignore', value: 'Ignored', desc: 'False positive, no action' },
 		]

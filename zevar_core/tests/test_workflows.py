@@ -137,7 +137,9 @@ class TestFullPOSSaleWorkflow(FrappeTestCase):
 		finally:
 			doc = frappe.get_doc("POS Opening Entry", result1["session_name"])
 			doc.cancel()
-			frappe.delete_doc("POS Opening Entry", result1["session_name"], ignore_permissions=True, force=True)
+			frappe.delete_doc(
+				"POS Opening Entry", result1["session_name"], ignore_permissions=True, force=True
+			)
 
 
 # ─── 2. RETURN / EXCHANGE FLOW ──────────────────────────────────────────────────
@@ -289,7 +291,9 @@ class TestShiftManagementWorkflow(FrappeTestCase):
 		self._cleanup()
 
 	def _cleanup(self):
-		for s in frappe.get_all("POS Opening Entry", filters={"user": "Administrator", "status": "Open"}, fields=["name"]):
+		for s in frappe.get_all(
+			"POS Opening Entry", filters={"user": "Administrator", "status": "Open"}, fields=["name"]
+		):
 			try:
 				doc = frappe.get_doc("POS Opening Entry", s.name)
 				if doc.docstatus == 1:

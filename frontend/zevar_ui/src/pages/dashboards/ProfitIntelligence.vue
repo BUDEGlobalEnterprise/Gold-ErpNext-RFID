@@ -9,12 +9,18 @@
 				>
 					<span class="material-symbols-outlined !text-lg">arrow_back</span>
 				</button>
-				<div class="w-10 h-10 rounded-xl flex items-center justify-center bg-indigo-500/10">
-					<span class="material-symbols-outlined !text-xl text-indigo-500">monitoring</span>
+				<div
+					class="w-10 h-10 rounded-xl flex items-center justify-center bg-indigo-500/10"
+				>
+					<span class="material-symbols-outlined !text-xl text-indigo-500"
+						>monitoring</span
+					>
 				</div>
 				<div class="flex-1">
 					<h2 class="premium-title !text-xl">Profit Intelligence</h2>
-					<p class="text-[10px] text-gray-400">Margins, cost analysis, pricing recommendations</p>
+					<p class="text-[10px] text-gray-400">
+						Margins, cost analysis, pricing recommendations
+					</p>
 				</div>
 				<div class="flex items-center gap-2">
 					<input
@@ -60,8 +66,13 @@
 			<!-- Content area -->
 			<div class="flex-1 overflow-auto">
 				<!-- Loading -->
-				<div v-if="store.loading" class="flex flex-col items-center justify-center py-20 gap-3">
-					<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+				<div
+					v-if="store.loading"
+					class="flex flex-col items-center justify-center py-20 gap-3"
+				>
+					<div
+						class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"
+					></div>
 					<p class="text-xs text-gray-400">Loading profit data...</p>
 				</div>
 

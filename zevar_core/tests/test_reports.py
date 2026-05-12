@@ -98,29 +98,41 @@ class TestReportExecution(FrappeTestCase):
 
 	def test_commission_summary_executes(self):
 		"""Commission Summary should execute"""
-		self._run_report("Commission Summary", {
-			"from_date": add_days(today(), -30),
-			"to_date": today(),
-		})
+		self._run_report(
+			"Commission Summary",
+			{
+				"from_date": add_days(today(), -30),
+				"to_date": today(),
+			},
+		)
 
 	def test_eod_stream_summary_executes(self):
 		"""EOD Stream Summary should execute"""
-		self._run_report("EOD Stream Summary", {
-			"date": today(),
-		})
+		self._run_report(
+			"EOD Stream Summary",
+			{
+				"date": today(),
+			},
+		)
 
 	def test_hourly_sales_executes(self):
 		"""Hourly Sales should execute"""
-		self._run_report("Hourly Sales", {
-			"date": today(),
-		})
+		self._run_report(
+			"Hourly Sales",
+			{
+				"date": today(),
+			},
+		)
 
 	def test_gold_rate_history_executes(self):
 		"""Gold Rate History should execute"""
-		self._run_report("Gold Rate History", {
-			"from_date": add_days(today(), -7),
-			"to_date": today(),
-		})
+		self._run_report(
+			"Gold Rate History",
+			{
+				"from_date": add_days(today(), -7),
+				"to_date": today(),
+			},
+		)
 
 	def test_layaway_status_executes(self):
 		"""Layaway Status should execute"""
@@ -140,23 +152,32 @@ class TestReportExecution(FrappeTestCase):
 
 	def test_payment_method_summary_executes(self):
 		"""Payment Method Summary should execute"""
-		self._run_report("Payment Method Summary", {
-			"from_date": add_days(today(), -30),
-			"to_date": today(),
-		})
+		self._run_report(
+			"Payment Method Summary",
+			{
+				"from_date": add_days(today(), -30),
+				"to_date": today(),
+			},
+		)
 
 	def test_pos_closing_summary_executes(self):
 		"""POS Closing Summary should execute"""
-		self._run_report("POS Closing Summary", {
-			"date": today(),
-		})
+		self._run_report(
+			"POS Closing Summary",
+			{
+				"date": today(),
+			},
+		)
 
 	def test_repair_revenue_executes(self):
 		"""Repair Revenue should execute"""
-		self._run_report("Repair Revenue", {
-			"from_date": add_days(today(), -30),
-			"to_date": today(),
-		})
+		self._run_report(
+			"Repair Revenue",
+			{
+				"from_date": add_days(today(), -30),
+				"to_date": today(),
+			},
+		)
 
 	def test_repair_turnaround_executes(self):
 		"""Repair Turnaround should execute"""
@@ -168,17 +189,23 @@ class TestReportExecution(FrappeTestCase):
 
 	def test_sales_by_salesperson_executes(self):
 		"""Sales by Salesperson should execute"""
-		self._run_report("Sales by Salesperson", {
-			"from_date": add_days(today(), -30),
-			"to_date": today(),
-		})
+		self._run_report(
+			"Sales by Salesperson",
+			{
+				"from_date": add_days(today(), -30),
+				"to_date": today(),
+			},
+		)
 
 	def test_tax_collected_by_county_executes(self):
 		"""Tax Collected by County should execute"""
-		self._run_report("Tax Collected by County", {
-			"from_date": add_days(today(), -30),
-			"to_date": today(),
-		})
+		self._run_report(
+			"Tax Collected by County",
+			{
+				"from_date": add_days(today(), -30),
+				"to_date": today(),
+			},
+		)
 
 	def test_technician_performance_executes(self):
 		"""Technician Performance should execute"""
@@ -186,10 +213,13 @@ class TestReportExecution(FrappeTestCase):
 
 	def test_top_selling_jewelry_executes(self):
 		"""Top Selling Jewelry should execute"""
-		self._run_report("Top Selling Jewelry", {
-			"from_date": add_days(today(), -30),
-			"to_date": today(),
-		})
+		self._run_report(
+			"Top Selling Jewelry",
+			{
+				"from_date": add_days(today(), -30),
+				"to_date": today(),
+			},
+		)
 
 	def test_trade_in_summary_executes(self):
 		"""Trade In Summary should execute"""
@@ -239,20 +269,29 @@ class TestReportEmptyData(FrappeTestCase):
 
 	def test_empty_data_gold_rate_history(self):
 		"""Gold Rate History should handle no data"""
-		self._run_report_with_empty_filters("Gold Rate History", {
-			"from_date": "2099-01-01",
-			"to_date": "2099-01-31",
-		})
+		self._run_report_with_empty_filters(
+			"Gold Rate History",
+			{
+				"from_date": "2099-01-01",
+				"to_date": "2099-01-31",
+			},
+		)
 
 	def test_empty_data_hourly_sales(self):
 		"""Hourly Sales should handle no data"""
-		self._run_report_with_empty_filters("Hourly Sales", {
-			"date": "2099-01-01",
-		})
+		self._run_report_with_empty_filters(
+			"Hourly Sales",
+			{
+				"date": "2099-01-01",
+			},
+		)
 
 	def test_empty_data_commission_summary(self):
 		"""Commission Summary should handle no data"""
-		self._run_report_with_empty_filters("Commission Summary", {
-			"from_date": "2099-01-01",
-			"to_date": "2099-01-31",
-		})
+		self._run_report_with_empty_filters(
+			"Commission Summary",
+			{
+				"from_date": "2099-01-01",
+				"to_date": "2099-01-31",
+			},
+		)

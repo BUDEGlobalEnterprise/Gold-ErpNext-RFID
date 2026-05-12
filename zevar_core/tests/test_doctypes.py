@@ -20,7 +20,7 @@ import unittest
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import today
+from frappe.utils import flt, today
 
 from zevar_core.tests.utils import ensure_customer, ensure_item, ensure_warehouse, get_test_company
 
@@ -247,7 +247,8 @@ class TestDocTypeSchemas(FrappeTestCase):
 			field_names = _get_field_names(doctype)
 			for field in config["required_fields"]:
 				self.assertIn(
-					field, field_names,
+					field,
+					field_names,
 					f"DocType '{doctype}' missing required field '{field}'",
 				)
 
@@ -259,7 +260,8 @@ class TestDocTypeSchemas(FrappeTestCase):
 			required_fields = _get_required_fields(doctype)
 			for field in config["required_fields"]:
 				self.assertIn(
-					field, required_fields,
+					field,
+					required_fields,
 					f"DocType '{doctype}' field '{field}' should be mandatory",
 				)
 
@@ -304,12 +306,15 @@ class TestDocTypeCRUD(FrappeTestCase):
 
 	def test_gold_rate_log_crud(self):
 		"""Gold Rate Log CRUD"""
-		doc = self._create_and_verify("Gold Rate Log", {
-			"metal": "Yellow Gold",
-			"purity": "14Kt",
-			"rate_per_gram": 95.50,
-			"source": "test",
-		})
+		doc = self._create_and_verify(
+			"Gold Rate Log",
+			{
+				"metal": "Yellow Gold",
+				"purity": "14Kt",
+				"rate_per_gram": 95.50,
+				"source": "test",
+			},
+		)
 		self.assertEqual(doc.metal, "Yellow Gold")
 		self.assertEqual(flt(doc.rate_per_gram), 95.50)
 
@@ -324,99 +329,135 @@ class TestDocTypeCRUD(FrappeTestCase):
 
 	def test_zevar_metal_crud(self):
 		"""Zevar Metal CRUD"""
-		doc = self._create_and_verify("Zevar Metal", {
-			"metal_name": "Test Platinum",
-		})
+		doc = self._create_and_verify(
+			"Zevar Metal",
+			{
+				"metal_name": "Test Platinum",
+			},
+		)
 		self.assertEqual(doc.metal_name, "Test Platinum")
 
 	def test_zevar_purity_crud(self):
 		"""Zevar Purity CRUD"""
-		doc = self._create_and_verify("Zevar Purity", {
-			"purity_name": "Test 22K Purity",
-		})
+		doc = self._create_and_verify(
+			"Zevar Purity",
+			{
+				"purity_name": "Test 22K Purity",
+			},
+		)
 		self.assertEqual(doc.purity_name, "Test 22K Purity")
 
 	def test_store_location_crud(self):
 		"""Store Location CRUD"""
-		doc = self._create_and_verify("Store Location", {
-			"store_name": "CRUD Test Store",
-			"store_code": "CRUD-001",
-			"is_active": 1,
-		})
+		doc = self._create_and_verify(
+			"Store Location",
+			{
+				"store_name": "CRUD Test Store",
+				"store_code": "CRUD-001",
+				"is_active": 1,
+			},
+		)
 		self.assertEqual(doc.store_name, "CRUD Test Store")
 
 	def test_commission_rule_crud(self):
 		"""Commission Rule CRUD"""
-		doc = self._create_and_verify("Commission Rule", {
-			"rule_name": "CRUD Test Commission Rule",
-			"rate": 7.5,
-		})
+		doc = self._create_and_verify(
+			"Commission Rule",
+			{
+				"rule_name": "CRUD Test Commission Rule",
+				"rate": 7.5,
+			},
+		)
 		self.assertEqual(doc.rule_name, "CRUD Test Commission Rule")
 
 	def test_gift_card_crud(self):
 		"""Gift Card CRUD"""
-		doc = self._create_and_verify("Gift Card", {
-			"card_number": "GC-CRUD-TEST-001",
-			"initial_balance": 250.00,
-			"status": "Active",
-		})
+		doc = self._create_and_verify(
+			"Gift Card",
+			{
+				"card_number": "GC-CRUD-TEST-001",
+				"initial_balance": 250.00,
+				"status": "Active",
+			},
+		)
 		self.assertEqual(doc.card_number, "GC-CRUD-TEST-001")
 
 	def test_display_case_crud(self):
 		"""Display Case CRUD"""
-		doc = self._create_and_verify("Display Case", {
-			"case_name": "CRUD Test Case",
-			"case_code": "DC-CRUD-001",
-			"is_active": 1,
-		})
+		doc = self._create_and_verify(
+			"Display Case",
+			{
+				"case_name": "CRUD Test Case",
+				"case_code": "DC-CRUD-001",
+				"is_active": 1,
+			},
+		)
 		self.assertEqual(doc.case_name, "CRUD Test Case")
 
 	def test_repair_type_crud(self):
 		"""Repair Type CRUD"""
-		doc = self._create_and_verify("Repair Type", {
-			"repair_type_name": "CRUD Test Repair Type",
-		})
+		doc = self._create_and_verify(
+			"Repair Type",
+			{
+				"repair_type_name": "CRUD Test Repair Type",
+			},
+		)
 		self.assertEqual(doc.repair_type_name, "CRUD Test Repair Type")
 
 	def test_audit_plan_crud(self):
 		"""Audit Plan CRUD"""
-		doc = self._create_and_verify("Audit Plan", {
-			"plan_name": "CRUD Test Audit Plan",
-			"status": "Draft",
-		})
+		doc = self._create_and_verify(
+			"Audit Plan",
+			{
+				"plan_name": "CRUD Test Audit Plan",
+				"status": "Draft",
+			},
+		)
 		self.assertEqual(doc.plan_name, "CRUD Test Audit Plan")
 
 	def test_audit_policy_crud(self):
 		"""Audit Policy CRUD"""
-		doc = self._create_and_verify("Audit Policy", {
-			"policy_name": "CRUD Test Audit Policy",
-		})
+		doc = self._create_and_verify(
+			"Audit Policy",
+			{
+				"policy_name": "CRUD Test Audit Policy",
+			},
+		)
 		self.assertEqual(doc.policy_name, "CRUD Test Audit Policy")
 
 	def test_pos_audit_log_crud(self):
 		"""POS Audit Log CRUD"""
-		doc = self._create_and_verify("POS Audit Log", {
-			"event_type": "crud_test_event",
-			"severity": "Info",
-		})
+		doc = self._create_and_verify(
+			"POS Audit Log",
+			{
+				"event_type": "crud_test_event",
+				"severity": "Info",
+			},
+		)
 		self.assertEqual(doc.event_type, "crud_test_event")
 
 	def test_zevar_desk_shortcut_crud(self):
 		"""Zevar Desk Shortcut CRUD"""
-		doc = self._create_and_verify("Zevar Desk Shortcut", {
-			"shortcut_name": "CRUD Test Shortcut",
-			"link_type": "Page",
-			"link_to": "pos",
-			"show_on_desk": 1,
-		})
+		doc = self._create_and_verify(
+			"Zevar Desk Shortcut",
+			{
+				"shortcut_name": "CRUD Test Shortcut",
+				"link_type": "Page",
+				"link_to": "pos",
+				"show_on_desk": 1,
+			},
+		)
 		self.assertEqual(doc.shortcut_name, "CRUD Test Shortcut")
 
 	def test_report_subscription_crud(self):
 		"""Report Subscription CRUD"""
-		doc = self._create_and_verify("Report Subscription", {
-			"report_name": "CRUD Test Report Sub",
-			"frequency": "Daily",
-		})
+		doc = self._create_and_verify(
+			"Report Subscription",
+			{
+				"report_name": "CRUD Test Report Sub",
+				"frequency": "Daily",
+			},
+		)
 		self.assertEqual(doc.report_name, "CRUD Test Report Sub")
 
 
@@ -485,12 +526,14 @@ class TestDocTypeValidation(FrappeTestCase):
 
 	def test_display_case_inactive(self):
 		"""Display Case can be set to inactive"""
-		doc = frappe.get_doc({
-			"doctype": "Display Case",
-			"case_name": "Inactive Test Case",
-			"case_code": "DC-INACT-001",
-			"is_active": 0,
-		})
+		doc = frappe.get_doc(
+			{
+				"doctype": "Display Case",
+				"case_name": "Inactive Test Case",
+				"case_code": "DC-INACT-001",
+				"is_active": 0,
+			}
+		)
 		doc.insert(ignore_permissions=True)
 		self.created_docs.append(("Display Case", doc.name))
 		self.assertEqual(doc.is_active, 0)
@@ -599,14 +642,16 @@ class TestFinanceAccountDocType(FrappeTestCase):
 
 	def test_finance_account_create(self):
 		"""Should create a finance account"""
-		doc = frappe.get_doc({
-			"doctype": "In-House Finance Account",
-			"customer": self.customer,
-			"credit_limit": 5000,
-			"current_balance": 0,
-			"interest_rate": 12.0,
-			"status": "Active",
-		})
+		doc = frappe.get_doc(
+			{
+				"doctype": "In-House Finance Account",
+				"customer": self.customer,
+				"credit_limit": 5000,
+				"current_balance": 0,
+				"interest_rate": 12.0,
+				"status": "Active",
+			}
+		)
 		doc.insert(ignore_permissions=True)
 		self.created_docs.append(("In-House Finance Account", doc.name))
 		self.assertEqual(doc.customer, self.customer)
@@ -639,13 +684,15 @@ class TestStockReservationDocType(FrappeTestCase):
 
 	def test_reservation_create(self):
 		"""Should create a stock reservation"""
-		doc = frappe.get_doc({
-			"doctype": "Stock Reservation",
-			"item_code": self.item_code,
-			"warehouse": self.warehouse,
-			"qty": 1,
-			"status": "Active",
-		})
+		doc = frappe.get_doc(
+			{
+				"doctype": "Stock Reservation",
+				"item_code": self.item_code,
+				"warehouse": self.warehouse,
+				"qty": 1,
+				"status": "Active",
+			}
+		)
 		doc.insert(ignore_permissions=True)
 		self.created_docs.append(("Stock Reservation", doc.name))
 		self.assertEqual(doc.item_code, self.item_code)
@@ -707,13 +754,15 @@ class TestIRSForm8300DocType(FrappeTestCase):
 	def test_irs_record_create(self):
 		"""Should create IRS Form 8300 Record"""
 		customer = ensure_customer("IRS Test Customer")
-		doc = frappe.get_doc({
-			"doctype": "IRS Form 8300 Record",
-			"customer": customer,
-			"status": "Triggered",
-			"total_cash_amount": 12000,
-			"recipient_name": "IRS Test Customer",
-		})
+		doc = frappe.get_doc(
+			{
+				"doctype": "IRS Form 8300 Record",
+				"customer": customer,
+				"status": "Triggered",
+				"total_cash_amount": 12000,
+				"recipient_name": "IRS Test Customer",
+			}
+		)
 		doc.insert(ignore_permissions=True)
 		self.created_docs.append(("IRS Form 8300 Record", doc.name))
 		self.assertEqual(doc.customer, customer)
@@ -740,16 +789,18 @@ class TestAMLKYCRecordDocType(FrappeTestCase):
 	def test_kyc_record_create(self):
 		"""Should create AML KYC Record"""
 		customer = ensure_customer("KYC Test Customer")
-		doc = frappe.get_doc({
-			"doctype": "AML KYC Record",
-			"customer": customer,
-			"verification_type": "High-Value Transaction",
-			"status": "Pending",
-			"id_type": "Driver License",
-			"id_number": "DL-TEST-12345",
-			"full_name": "KYC Test Customer",
-			"risk_level": "Low",
-		})
+		doc = frappe.get_doc(
+			{
+				"doctype": "AML KYC Record",
+				"customer": customer,
+				"verification_type": "High-Value Transaction",
+				"status": "Pending",
+				"id_type": "Driver License",
+				"id_number": "DL-TEST-12345",
+				"full_name": "KYC Test Customer",
+				"risk_level": "Low",
+			}
+		)
 		doc.insert(ignore_permissions=True)
 		self.created_docs.append(("AML KYC Record", doc.name))
 		self.assertEqual(doc.customer, customer)

@@ -1,7 +1,9 @@
 <template>
 	<div class="premium-card !p-5">
 		<div class="flex items-center justify-between mb-4">
-			<h3 class="text-sm font-bold text-gray-900 dark:text-white">Pricing Recommendations</h3>
+			<h3 class="text-sm font-bold text-gray-900 dark:text-white">
+				Pricing Recommendations
+			</h3>
 			<div class="flex items-center gap-2">
 				<select
 					v-model="statusFilter"
@@ -22,13 +24,27 @@
 			<table class="w-full text-[10px] border-collapse min-w-[700px]">
 				<thead>
 					<tr class="border-b border-gray-200 dark:border-gray-700">
-						<th class="text-left p-2 font-bold text-gray-500 dark:text-gray-400">Item</th>
-						<th class="text-left p-2 font-bold text-gray-500 dark:text-gray-400">Type</th>
-						<th class="text-right p-2 font-bold text-gray-500 dark:text-gray-400">Current</th>
-						<th class="text-right p-2 font-bold text-gray-500 dark:text-gray-400">Recommended</th>
-						<th class="text-right p-2 font-bold text-gray-500 dark:text-gray-400">Change</th>
-						<th class="text-center p-2 font-bold text-gray-500 dark:text-gray-400">Confidence</th>
-						<th class="text-center p-2 font-bold text-gray-500 dark:text-gray-400">Actions</th>
+						<th class="text-left p-2 font-bold text-gray-500 dark:text-gray-400">
+							Item
+						</th>
+						<th class="text-left p-2 font-bold text-gray-500 dark:text-gray-400">
+							Type
+						</th>
+						<th class="text-right p-2 font-bold text-gray-500 dark:text-gray-400">
+							Current
+						</th>
+						<th class="text-right p-2 font-bold text-gray-500 dark:text-gray-400">
+							Recommended
+						</th>
+						<th class="text-right p-2 font-bold text-gray-500 dark:text-gray-400">
+							Change
+						</th>
+						<th class="text-center p-2 font-bold text-gray-500 dark:text-gray-400">
+							Confidence
+						</th>
+						<th class="text-center p-2 font-bold text-gray-500 dark:text-gray-400">
+							Actions
+						</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -38,10 +54,14 @@
 						class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
 					>
 						<td class="p-2">
-							<p class="font-medium text-gray-900 dark:text-white truncate max-w-[150px]">
+							<p
+								class="font-medium text-gray-900 dark:text-white truncate max-w-[150px]"
+							>
 								{{ rec.item_name || rec.item_code }}
 							</p>
-							<p v-if="rec.item_name" class="text-gray-400 truncate max-w-[150px]">{{ rec.item_code }}</p>
+							<p v-if="rec.item_name" class="text-gray-400 truncate max-w-[150px]">
+								{{ rec.item_code }}
+							</p>
 						</td>
 						<td class="p-2">
 							<span
@@ -59,26 +79,36 @@
 						</td>
 						<td class="p-2 text-right">
 							<span
-								:class="changePercent(rec) >= 0 ? 'text-emerald-500' : 'text-red-500'"
+								:class="
+									changePercent(rec) >= 0 ? 'text-emerald-500' : 'text-red-500'
+								"
 								class="font-bold"
 							>
-								{{ changePercent(rec) >= 0 ? '+' : '' }}{{ changePercent(rec).toFixed(1) }}%
+								{{ changePercent(rec) >= 0 ? '+' : ''
+								}}{{ changePercent(rec).toFixed(1) }}%
 							</span>
 						</td>
 						<td class="p-2 text-center">
 							<div class="flex items-center justify-center gap-1">
-								<div class="w-12 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
+								<div
+									class="w-12 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden"
+								>
 									<div
 										class="h-full rounded-full"
 										:class="confidenceColor(rec.confidence)"
 										:style="{ width: (rec.confidence || 0) + '%' }"
 									></div>
 								</div>
-								<span class="text-gray-500 dark:text-gray-400">{{ (rec.confidence || 0).toFixed(0) }}%</span>
+								<span class="text-gray-500 dark:text-gray-400"
+									>{{ (rec.confidence || 0).toFixed(0) }}%</span
+								>
 							</div>
 						</td>
 						<td class="p-2">
-							<div v-if="rec.status === 'Pending Review'" class="flex items-center justify-center gap-1">
+							<div
+								v-if="rec.status === 'Pending Review'"
+								class="flex items-center justify-center gap-1"
+							>
 								<button
 									@click="handleReview(rec.name, 'Approved')"
 									:disabled="reviewing === rec.name"
@@ -94,7 +124,11 @@
 									Reject
 								</button>
 							</div>
-							<span v-else :class="statusClass(rec.status)" class="text-[9px] font-medium">
+							<span
+								v-else
+								:class="statusClass(rec.status)"
+								class="text-[9px] font-medium"
+							>
 								{{ rec.status }}
 							</span>
 						</td>
@@ -105,7 +139,9 @@
 
 		<!-- Empty -->
 		<div v-else class="py-8 text-center">
-			<span class="material-symbols-outlined !text-3xl text-gray-300 dark:text-gray-600">price_check</span>
+			<span class="material-symbols-outlined !text-3xl text-gray-300 dark:text-gray-600"
+				>price_check</span
+			>
 			<p class="text-xs text-gray-400 mt-2">No pricing recommendations found</p>
 		</div>
 
@@ -115,8 +151,12 @@
 			class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
 			@click.self="rejectingName = null"
 		>
-			<div class="bg-white dark:bg-gray-900 rounded-xl p-5 w-full max-w-md space-y-3 shadow-2xl">
-				<h4 class="text-sm font-bold text-gray-900 dark:text-white">Reject Recommendation</h4>
+			<div
+				class="bg-white dark:bg-gray-900 rounded-xl p-5 w-full max-w-md space-y-3 shadow-2xl"
+			>
+				<h4 class="text-sm font-bold text-gray-900 dark:text-white">
+					Reject Recommendation
+				</h4>
 				<textarea
 					v-model="rejectNotes"
 					rows="3"
@@ -169,8 +209,10 @@ function changePercent(rec) {
 
 function typeBadgeClass(type) {
 	const t = (type || '').toLowerCase()
-	if (t.includes('increase')) return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-	if (t.includes('decrease')) return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+	if (t.includes('increase'))
+		return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+	if (t.includes('decrease'))
+		return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
 	return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
 }
 

@@ -428,13 +428,20 @@ def generate_discrepancy_records(session_doc):
 	# Create records for missing items
 	for m in missing_items:
 		item_code = m["item_code"]
-		if not frappe.db.exists("Audit Discrepancy", {"audit_session": session_doc.name, "item_code": item_code}):
+		if not frappe.db.exists(
+			"Audit Discrepancy", {"audit_session": session_doc.name, "item_code": item_code}
+		):
 			doc = frappe.new_doc("Audit Discrepancy")
 			doc.audit_session = session_doc.name
 			doc.display_case = session_doc.display_case
 			doc.item_code = item_code
-			
-			bin_qty = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": session_doc.store_location}, "actual_qty") or 0
+
+			bin_qty = (
+				frappe.db.get_value(
+					"Bin", {"item_code": item_code, "warehouse": session_doc.store_location}, "actual_qty"
+				)
+				or 0
+			)
 			doc.expected_qty = bin_qty
 			doc.found_qty = bin_qty - m["qty"]
 			doc.status = "Pending"
@@ -445,11 +452,15 @@ def generate_discrepancy_records(session_doc):
 	if has_unexpected:
 		unexpected_scans = [s for s in session_doc.scans if s.match_status == "Unexpected"]
 		from collections import Counter
+
 		item_counts = Counter(s.item_code for s in unexpected_scans if s.item_code)
 
 		for item_code, qty in item_counts.items():
-			if not item_code: continue
-			if not frappe.db.exists("Audit Discrepancy", {"audit_session": session_doc.name, "item_code": item_code}):
+			if not item_code:
+				continue
+			if not frappe.db.exists(
+				"Audit Discrepancy", {"audit_session": session_doc.name, "item_code": item_code}
+			):
 				doc = frappe.new_doc("Audit Discrepancy")
 				doc.audit_session = session_doc.name
 				doc.display_case = session_doc.display_case

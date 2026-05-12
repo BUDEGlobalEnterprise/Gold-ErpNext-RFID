@@ -6,7 +6,7 @@ detect seasonal patterns, and correlate gold rate changes with margins.
 """
 
 import frappe
-from frappe.utils import flt, add_days, today, getdate
+from frappe.utils import add_days, flt, getdate, today
 
 from zevar_core.rag.config import COLLECTION_SALES_PRICING
 
@@ -67,17 +67,19 @@ def find_similar_pricing_events(
 			if rev < price_range[0] or rev > price_range[1]:
 				continue
 
-		filtered.append({
-			"id": r.get("id"),
-			"date": meta.get("posting_date", ""),
-			"revenue": flt(meta.get("revenue")),
-			"total_cost": flt(meta.get("total_cost")),
-			"margin_pct": flt(meta.get("margin_pct")),
-			"gold_rate": flt(meta.get("gold_rate")),
-			"jewelry_types": meta.get("jewelry_types", []),
-			"metal_types": meta.get("metal_types", []),
-			"similarity": r.get("similarity", 0),
-		})
+		filtered.append(
+			{
+				"id": r.get("id"),
+				"date": meta.get("posting_date", ""),
+				"revenue": flt(meta.get("revenue")),
+				"total_cost": flt(meta.get("total_cost")),
+				"margin_pct": flt(meta.get("margin_pct")),
+				"gold_rate": flt(meta.get("gold_rate")),
+				"jewelry_types": meta.get("jewelry_types", []),
+				"metal_types": meta.get("metal_types", []),
+				"similarity": r.get("similarity", 0),
+			}
+		)
 
 	return filtered
 
@@ -198,13 +200,15 @@ def get_gold_rate_correlation(months: int = 6) -> list[dict]:
 	enriched = []
 	for i, r in enumerate(results):
 		prev_margin = flt(results[i - 1]["avg_margin"]) if i > 0 else flt(r.avg_margin)
-		enriched.append({
-			"period": r.period,
-			"avg_gold_rate": flt(r.avg_gold_rate, 2),
-			"avg_margin": flt(r.avg_margin, 2),
-			"margin_change": flt(flt(r.avg_margin) - prev_margin, 2),
-			"revenue": flt(r.revenue),
-			"invoice_count": r.invoice_count,
-		})
+		enriched.append(
+			{
+				"period": r.period,
+				"avg_gold_rate": flt(r.avg_gold_rate, 2),
+				"avg_margin": flt(r.avg_margin, 2),
+				"margin_change": flt(flt(r.avg_margin) - prev_margin, 2),
+				"revenue": flt(r.revenue),
+				"invoice_count": r.invoice_count,
+			}
+		)
 
 	return enriched

@@ -1,11 +1,15 @@
 <template>
 	<div class="premium-card !p-5">
-		<h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">What-If Price Simulator</h3>
+		<h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">
+			What-If Price Simulator
+		</h3>
 
 		<!-- Input Form -->
 		<div class="flex flex-col sm:flex-row items-start sm:items-end gap-3 mb-5">
 			<div class="flex-1 w-full">
-				<label class="block text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-1">Item Code</label>
+				<label class="block text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-1"
+					>Item Code</label
+				>
 				<input
 					v-model="itemCode"
 					type="text"
@@ -14,7 +18,9 @@
 				/>
 			</div>
 			<div class="w-full sm:w-36">
-				<label class="block text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-1">New Price ($)</label>
+				<label class="block text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-1"
+					>New Price ($)</label
+				>
 				<input
 					v-model.number="newPrice"
 					type="number"
@@ -51,15 +57,21 @@
 			<div class="grid grid-cols-2 gap-3">
 				<div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3">
 					<p class="text-[10px] text-gray-500 dark:text-gray-400 mb-1">Current Price</p>
-					<p class="text-base font-bold text-gray-900 dark:text-white">{{ fmtCurrency(result.current_price) }}</p>
+					<p class="text-base font-bold text-gray-900 dark:text-white">
+						{{ fmtCurrency(result.current_price) }}
+					</p>
 				</div>
 				<div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-3">
 					<p class="text-[10px] text-indigo-500 mb-1">New Price</p>
-					<p class="text-base font-bold text-indigo-700 dark:text-indigo-300">{{ fmtCurrency(result.new_price) }}</p>
+					<p class="text-base font-bold text-indigo-700 dark:text-indigo-300">
+						{{ fmtCurrency(result.new_price) }}
+					</p>
 				</div>
 				<div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3">
 					<p class="text-[10px] text-gray-500 dark:text-gray-400 mb-1">Current Margin</p>
-					<p class="text-base font-bold text-gray-900 dark:text-white">{{ fmtPct(result.current_margin_pct) }}</p>
+					<p class="text-base font-bold text-gray-900 dark:text-white">
+						{{ fmtPct(result.current_margin_pct) }}
+					</p>
 				</div>
 				<div
 					class="rounded-xl p-3"
@@ -96,21 +108,23 @@
 			<div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-[10px] text-gray-500 dark:text-gray-400">Annual Profit Projection</p>
+						<p class="text-[10px] text-gray-500 dark:text-gray-400">
+							Annual Profit Projection
+						</p>
 						<p class="text-lg font-bold text-gray-900 dark:text-white">
 							{{ fmtCurrency(result.annual_profit_projection) }}
 						</p>
 					</div>
-					<div
-						v-if="result.profit_change_pct !== undefined"
-						class="text-right"
-					>
+					<div v-if="result.profit_change_pct !== undefined" class="text-right">
 						<p class="text-[10px] text-gray-400">Change</p>
 						<p
 							class="text-sm font-bold"
-							:class="result.profit_change_pct >= 0 ? 'text-emerald-500' : 'text-red-500'"
+							:class="
+								result.profit_change_pct >= 0 ? 'text-emerald-500' : 'text-red-500'
+							"
 						>
-							{{ result.profit_change_pct >= 0 ? '+' : '' }}{{ result.profit_change_pct.toFixed(1) }}%
+							{{ result.profit_change_pct >= 0 ? '+' : ''
+							}}{{ result.profit_change_pct.toFixed(1) }}%
 						</p>
 					</div>
 				</div>
@@ -130,8 +144,12 @@
 
 		<!-- Placeholder -->
 		<div v-if="!result && !simError" class="py-6 text-center">
-			<span class="material-symbols-outlined !text-2xl text-gray-300 dark:text-gray-600">calculate</span>
-			<p class="text-[10px] text-gray-400 mt-1">Enter an item code and price to simulate margin impact</p>
+			<span class="material-symbols-outlined !text-2xl text-gray-300 dark:text-gray-600"
+				>calculate</span
+			>
+			<p class="text-[10px] text-gray-400 mt-1">
+				Enter an item code and price to simulate margin impact
+			</p>
 		</div>
 	</div>
 </template>

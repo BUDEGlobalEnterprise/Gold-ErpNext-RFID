@@ -907,7 +907,10 @@
 			</div>
 
 			<!-- Discrepancy View -->
-			<div v-else-if="currentView === 'discrepancies'" class="flex-1 overflow-y-auto min-h-0">
+			<div
+				v-else-if="currentView === 'discrepancies'"
+				class="flex-1 overflow-y-auto min-h-0"
+			>
 				<div class="max-w-5xl mx-auto">
 					<button
 						class="flex items-center gap-2 mb-4 text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors"

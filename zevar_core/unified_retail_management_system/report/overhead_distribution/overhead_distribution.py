@@ -15,14 +15,24 @@ def get_columns():
 	return [
 		{"fieldname": "period", "label": frappe._("Date"), "fieldtype": "Date", "width": 120},
 		{"fieldname": "invoices", "label": frappe._("Invoices"), "fieldtype": "Int", "width": 100},
-		{"fieldname": "total_overhead", "label": frappe._("Total Overhead"), "fieldtype": "Currency", "width": 140},
+		{
+			"fieldname": "total_overhead",
+			"label": frappe._("Total Overhead"),
+			"fieldtype": "Currency",
+			"width": 140,
+		},
 		{
 			"fieldname": "overhead_per_invoice",
 			"label": frappe._("Overhead per Invoice"),
 			"fieldtype": "Currency",
 			"width": 160,
 		},
-		{"fieldname": "rent_portion", "label": frappe._("Rent Portion"), "fieldtype": "Currency", "width": 130},
+		{
+			"fieldname": "rent_portion",
+			"label": frappe._("Rent Portion"),
+			"fieldtype": "Currency",
+			"width": 130,
+		},
 		{
 			"fieldname": "utilities_portion",
 			"label": frappe._("Utilities Portion"),
@@ -57,9 +67,13 @@ def get_allocation_ratios():
 	alloc = frappe.get_doc("Cost Center Allocation", alloc_name)
 	ratios = {"rent": 0, "utilities": 0, "marketing": 0, "insurance": 0, "other": 0}
 
-	total = flt(alloc.get("rent_percentage", 0)) + flt(alloc.get("utilities_percentage", 0)) + \
-		flt(alloc.get("marketing_percentage", 0)) + flt(alloc.get("insurance_percentage", 0)) + \
-		flt(alloc.get("other_percentage", 0))
+	total = (
+		flt(alloc.get("rent_percentage", 0))
+		+ flt(alloc.get("utilities_percentage", 0))
+		+ flt(alloc.get("marketing_percentage", 0))
+		+ flt(alloc.get("insurance_percentage", 0))
+		+ flt(alloc.get("other_percentage", 0))
+	)
 
 	if total == 0:
 		return ratios

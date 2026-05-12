@@ -203,7 +203,9 @@
 
 		<!-- Display Case Filter -->
 		<div v-if="displayCaseOptions.length > 0" class="mb-6 pb-5 border-b border-white/5">
-			<label class="block text-[10px] font-bold text-gray-500 mb-3 px-1">Location / Case</label>
+			<label class="block text-[10px] font-bold text-gray-500 mb-3 px-1"
+				>Location / Case</label
+			>
 			<div class="flex flex-col gap-4">
 				<div v-for="(cases, zone) in groupedDisplayCases" :key="zone">
 					<span
@@ -225,7 +227,9 @@
 						>
 							<div class="flex items-center justify-between">
 								<span class="font-black">{{ c.case_code }}</span>
-								<span v-if="c.item_count" class="text-[8px] opacity-60">{{ c.item_count }}</span>
+								<span v-if="c.item_count" class="text-[8px] opacity-60">{{
+									c.item_count
+								}}</span>
 							</div>
 							<span class="text-[8px] opacity-60 truncate">{{ c.case_name }}</span>
 						</button>

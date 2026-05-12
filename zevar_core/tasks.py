@@ -900,12 +900,16 @@ def generate_pricing_recommendations():
 	try:
 		if frappe.db.exists("DocType", "RAG Settings"):
 			settings = frappe.get_single("RAG Settings")
-			if hasattr(settings, "enable_pricing_recommendations") and not settings.enable_pricing_recommendations:
+			if (
+				hasattr(settings, "enable_pricing_recommendations")
+				and not settings.enable_pricing_recommendations
+			):
 				return
 	except Exception:
 		pass
 
-	from frappe.utils import flt, today, add_days, getdate
+	from frappe.utils import add_days, flt, getdate, today
+
 	from zevar_core.api.pricing import _get_gold_rate
 
 	max_recs = 20

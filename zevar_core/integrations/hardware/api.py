@@ -34,11 +34,13 @@ def generate_receipt_content(invoice_name):
 		for row in si.custom_salesperson_splits:
 			if row.employee:
 				emp_name = frappe.get_cached_value("Employee", row.employee, "employee_name") or row.employee
-				salespersons.append({
-					"employee": row.employee,
-					"name": emp_name,
-					"split": flt(row.split_percent),
-				})
+				salespersons.append(
+					{
+						"employee": row.employee,
+						"name": emp_name,
+						"split": flt(row.split_percent),
+					}
+				)
 		if salespersons:
 			associate_name = salespersons[0]["name"]
 	elif si.get("custom_salesperson_1"):

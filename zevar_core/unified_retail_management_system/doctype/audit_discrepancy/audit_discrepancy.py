@@ -3,6 +3,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now_datetime
 
+
 class AuditDiscrepancy(Document):
 	def validate(self):
 		self.calculate_discrepancy()
@@ -31,13 +32,13 @@ class AuditDiscrepancy(Document):
 		self.resolution_action = action
 		self.notes = notes
 		self.status = "Resolving"
-		
+
 		# Placeholder for resolution logic (e.g., creating Stock Entry)
 		# We'll implement specific handlers in Phase 3
-		
+
 		self.resolved_by = frappe.session.user
 		self.resolved_at = now_datetime()
 		self.status = "Resolved"
 		self.save()
-		
+
 		return self.status

@@ -26,7 +26,12 @@ def get_columns():
 		{"fieldname": "units_sold", "label": frappe._("Units Sold"), "fieldtype": "Int", "width": 100},
 		{"fieldname": "revenue", "label": frappe._("Revenue ($)"), "fieldtype": "Currency", "width": 130},
 		{"fieldname": "cogs", "label": frappe._("COGS ($)"), "fieldtype": "Currency", "width": 120},
-		{"fieldname": "gross_profit", "label": frappe._("Gross Profit ($)"), "fieldtype": "Currency", "width": 140},
+		{
+			"fieldname": "gross_profit",
+			"label": frappe._("Gross Profit ($)"),
+			"fieldtype": "Currency",
+			"width": 140,
+		},
 		{"fieldname": "margin", "label": frappe._("Margin (%)"), "fieldtype": "Percent", "width": 100},
 	]
 

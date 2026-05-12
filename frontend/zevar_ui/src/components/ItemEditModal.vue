@@ -3,8 +3,18 @@
 		<template #header>
 			<div class="flex items-center gap-3">
 				<div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-					<svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+					<svg
+						class="w-6 h-6 text-blue-600"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+						/>
 					</svg>
 				</div>
 				<div>
@@ -14,17 +24,25 @@
 			</div>
 		</template>
 
-		<div v-if="loading" class="flex items-center justify-center py-16 text-sm text-gray-400">Loading...</div>
+		<div v-if="loading" class="flex items-center justify-center py-16 text-sm text-gray-400">
+			Loading...
+		</div>
 
 		<div v-else class="p-6 space-y-5">
 			<div class="grid grid-cols-3 gap-3">
 				<div class="col-span-2">
 					<label class="block text-xs font-medium mb-1">Item Name *</label>
-					<input v-model="form.item_name" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" />
+					<input
+						v-model="form.item_name"
+						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+					/>
 				</div>
 				<div>
 					<label class="block text-xs font-medium mb-1">Jewelry Type</label>
-					<select v-model="form.jewelry_type" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm">
+					<select
+						v-model="form.jewelry_type"
+						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+					>
 						<option value="Other">Other</option>
 						<option>Rings</option>
 						<option>Earrings</option>
@@ -39,15 +57,24 @@
 
 			<div>
 				<label class="block text-xs font-medium mb-1">Description</label>
-				<textarea v-model="form.description" rows="2" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm resize-none"></textarea>
+				<textarea
+					v-model="form.description"
+					rows="2"
+					class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm resize-none"
+				></textarea>
 			</div>
 
 			<div>
-				<div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Metal & Purity</div>
+				<div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+					Metal & Purity
+				</div>
 				<div class="grid grid-cols-4 gap-3">
 					<div>
 						<label class="block text-xs font-medium mb-1">Metal Type</label>
-						<select v-model="form.metal_type" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm">
+						<select
+							v-model="form.metal_type"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						>
 							<option value="">Select...</option>
 							<option>Yellow Gold</option>
 							<option>White Gold</option>
@@ -58,7 +85,10 @@
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1">Purity</label>
-						<select v-model="form.purity" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm">
+						<select
+							v-model="form.purity"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						>
 							<option value="">Select...</option>
 							<option>24Kt</option>
 							<option>22Kt</option>
@@ -70,11 +100,18 @@
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1">Material Color</label>
-						<input v-model="form.material_color" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" placeholder="Yellow, White, Rose..." />
+						<input
+							v-model="form.material_color"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+							placeholder="Yellow, White, Rose..."
+						/>
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1">Gender</label>
-						<select v-model="form.gender" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm">
+						<select
+							v-model="form.gender"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						>
 							<option>Unisex</option>
 							<option>Women's</option>
 							<option>Men's</option>
@@ -84,37 +121,69 @@
 			</div>
 
 			<div>
-				<div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Weight</div>
+				<div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+					Weight
+				</div>
 				<div class="grid grid-cols-3 gap-3">
 					<div>
 						<label class="block text-xs font-medium mb-1">Gross Weight (g)</label>
-						<input v-model="form.gross_weight" type="number" step="0.001" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" />
+						<input
+							v-model="form.gross_weight"
+							type="number"
+							step="0.001"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						/>
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1">Stone Weight (g)</label>
-						<input v-model="form.stone_weight" type="number" step="0.001" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" />
+						<input
+							v-model="form.stone_weight"
+							type="number"
+							step="0.001"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						/>
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1">Net Weight (g)</label>
-						<input :value="netWeight" type="number" step="0.001" class="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-warm-dark-800 text-sm text-gray-500" readonly />
+						<input
+							:value="netWeight"
+							type="number"
+							step="0.001"
+							class="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-warm-dark-800 text-sm text-gray-500"
+							readonly
+						/>
 					</div>
 				</div>
 			</div>
 
 			<div>
-				<div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Dimensions</div>
+				<div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+					Dimensions
+				</div>
 				<div class="grid grid-cols-5 gap-3">
 					<div>
 						<label class="block text-xs font-medium mb-1">Size</label>
-						<input v-model="form.size" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" placeholder="7, M, L..." />
+						<input
+							v-model="form.size"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+							placeholder="7, M, L..."
+						/>
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1">Length</label>
-						<input v-model="form.length_value" type="number" step="0.01" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" />
+						<input
+							v-model="form.length_value"
+							type="number"
+							step="0.01"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						/>
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1">Length Unit</label>
-						<select v-model="form.length_unit" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm">
+						<select
+							v-model="form.length_unit"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						>
 							<option value="">-</option>
 							<option>in</option>
 							<option>cm</option>
@@ -123,11 +192,19 @@
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1">Width</label>
-						<input v-model="form.width_value" type="number" step="0.01" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" />
+						<input
+							v-model="form.width_value"
+							type="number"
+							step="0.01"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						/>
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1">Width Unit</label>
-						<select v-model="form.width_unit" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm">
+						<select
+							v-model="form.width_unit"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						>
 							<option value="">-</option>
 							<option>in</option>
 							<option>cm</option>
@@ -138,83 +215,158 @@
 			</div>
 
 			<div>
-				<div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Chain & Clasp</div>
+				<div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+					Chain & Clasp
+				</div>
 				<div class="grid grid-cols-3 gap-3">
 					<div>
 						<label class="block text-xs font-medium mb-1">Chain Type</label>
-						<input v-model="form.chain_type" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" placeholder="Cable, Box, Rope..." />
+						<input
+							v-model="form.chain_type"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+							placeholder="Cable, Box, Rope..."
+						/>
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1">Clasp Type</label>
-						<input v-model="form.clasp_type" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" placeholder="Lobster, Spring..." />
+						<input
+							v-model="form.clasp_type"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+							placeholder="Lobster, Spring..."
+						/>
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1">Finish</label>
-						<input v-model="form.finish" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" placeholder="Polished, Matte..." />
+						<input
+							v-model="form.finish"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+							placeholder="Polished, Matte..."
+						/>
 					</div>
 				</div>
 			</div>
 
 			<div>
-				<div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Vendor & Identification</div>
+				<div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+					Vendor & Identification
+				</div>
 				<div class="grid grid-cols-4 gap-3">
 					<div>
 						<label class="block text-xs font-medium mb-1">Vendor</label>
-						<input v-model="form.vendor" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" placeholder="Supplier name" />
+						<input
+							v-model="form.vendor"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+							placeholder="Supplier name"
+						/>
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1">Vendor SKU</label>
-						<input v-model="form.vendor_sku" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm font-mono" />
+						<input
+							v-model="form.vendor_sku"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm font-mono"
+						/>
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1">Barcode</label>
-						<input v-model="form.barcode" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm font-mono" />
+						<input
+							v-model="form.barcode"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm font-mono"
+						/>
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1">RFID EPC</label>
-						<input v-model="form.rfid_epc" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm font-mono" />
+						<input
+							v-model="form.rfid_epc"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm font-mono"
+						/>
 					</div>
 				</div>
 			</div>
 
 			<div>
-				<div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Pricing</div>
+				<div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+					Pricing
+				</div>
 				<div class="grid grid-cols-4 gap-3">
 					<div>
 						<label class="block text-xs font-medium mb-1">MSRP (Retail)</label>
-						<input v-model="form.msrp" type="number" step="0.01" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" />
+						<input
+							v-model="form.msrp"
+							type="number"
+							step="0.01"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						/>
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1">Cost Price</label>
-						<input v-model="form.cost_price" type="number" step="0.01" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" />
+						<input
+							v-model="form.cost_price"
+							type="number"
+							step="0.01"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						/>
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1">Standard Rate</label>
-						<input v-model="form.standard_rate" type="number" step="0.01" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" />
+						<input
+							v-model="form.standard_rate"
+							type="number"
+							step="0.01"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						/>
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1">Origin</label>
-						<input v-model="form.country_of_origin" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm" />
+						<input
+							v-model="form.country_of_origin"
+							class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
+						/>
 					</div>
 				</div>
 			</div>
 
 			<div>
 				<div class="flex items-center justify-between mb-2">
-					<div class="text-xs font-bold text-gray-500 uppercase tracking-wider">Gemstones</div>
-					<button @click="addGemstone" class="text-xs font-bold text-blue-600 hover:text-blue-700">+ Add Gemstone</button>
+					<div class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+						Gemstones
+					</div>
+					<button
+						@click="addGemstone"
+						class="text-xs font-bold text-blue-600 hover:text-blue-700"
+					>
+						+ Add Gemstone
+					</button>
 				</div>
-				<div v-if="gemstones.length === 0" class="text-xs text-gray-400 py-3 text-center border border-dashed border-gray-200 rounded-lg">No gemstones added</div>
+				<div
+					v-if="gemstones.length === 0"
+					class="text-xs text-gray-400 py-3 text-center border border-dashed border-gray-200 rounded-lg"
+				>
+					No gemstones added
+				</div>
 				<div v-else class="space-y-2">
-					<div v-for="(gem, idx) in gemstones" :key="idx" class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-3">
+					<div
+						v-for="(gem, idx) in gemstones"
+						:key="idx"
+						class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-3"
+					>
 						<div class="flex items-center justify-between mb-2">
-							<span class="text-[10px] font-bold text-gray-500">GEMSTONE {{ idx + 1 }}</span>
-							<button @click="gemstones.splice(idx, 1)" class="text-xs text-red-500 hover:text-red-700">Remove</button>
+							<span class="text-[10px] font-bold text-gray-500"
+								>GEMSTONE {{ idx + 1 }}</span
+							>
+							<button
+								@click="gemstones.splice(idx, 1)"
+								class="text-xs text-red-500 hover:text-red-700"
+							>
+								Remove
+							</button>
 						</div>
 						<div class="grid grid-cols-7 gap-2">
 							<div>
 								<label class="block text-[10px] font-medium mb-0.5">Type</label>
-								<select v-model="gem.gem_type" class="w-full px-2 py-1.5 border rounded bg-white dark:bg-warm-dark-800 text-xs">
+								<select
+									v-model="gem.gem_type"
+									class="w-full px-2 py-1.5 border rounded bg-white dark:bg-warm-dark-800 text-xs"
+								>
 									<option value="">-</option>
 									<option>Diamond</option>
 									<option>Ruby</option>
@@ -226,15 +378,27 @@
 							</div>
 							<div>
 								<label class="block text-[10px] font-medium mb-0.5">Carat</label>
-								<input v-model="gem.carat" type="number" step="0.001" class="w-full px-2 py-1.5 border rounded bg-white dark:bg-warm-dark-800 text-xs" />
+								<input
+									v-model="gem.carat"
+									type="number"
+									step="0.001"
+									class="w-full px-2 py-1.5 border rounded bg-white dark:bg-warm-dark-800 text-xs"
+								/>
 							</div>
 							<div>
 								<label class="block text-[10px] font-medium mb-0.5">Count</label>
-								<input v-model="gem.count" type="number" class="w-full px-2 py-1.5 border rounded bg-white dark:bg-warm-dark-800 text-xs" />
+								<input
+									v-model="gem.count"
+									type="number"
+									class="w-full px-2 py-1.5 border rounded bg-white dark:bg-warm-dark-800 text-xs"
+								/>
 							</div>
 							<div>
 								<label class="block text-[10px] font-medium mb-0.5">Cut</label>
-								<select v-model="gem.cut" class="w-full px-2 py-1.5 border rounded bg-white dark:bg-warm-dark-800 text-xs">
+								<select
+									v-model="gem.cut"
+									class="w-full px-2 py-1.5 border rounded bg-white dark:bg-warm-dark-800 text-xs"
+								>
 									<option value="">-</option>
 									<option>Excellent</option>
 									<option>Very Good</option>
@@ -243,37 +407,72 @@
 							</div>
 							<div>
 								<label class="block text-[10px] font-medium mb-0.5">Color</label>
-								<select v-model="gem.color" class="w-full px-2 py-1.5 border rounded bg-white dark:bg-warm-dark-800 text-xs">
+								<select
+									v-model="gem.color"
+									class="w-full px-2 py-1.5 border rounded bg-white dark:bg-warm-dark-800 text-xs"
+								>
 									<option value="">-</option>
-									<option>D</option><option>E</option><option>F</option><option>G</option>
-									<option>H</option><option>I</option><option>J</option><option>K</option>
+									<option>D</option>
+									<option>E</option>
+									<option>F</option>
+									<option>G</option>
+									<option>H</option>
+									<option>I</option>
+									<option>J</option>
+									<option>K</option>
 								</select>
 							</div>
 							<div>
 								<label class="block text-[10px] font-medium mb-0.5">Clarity</label>
-								<select v-model="gem.clarity" class="w-full px-2 py-1.5 border rounded bg-white dark:bg-warm-dark-800 text-xs">
+								<select
+									v-model="gem.clarity"
+									class="w-full px-2 py-1.5 border rounded bg-white dark:bg-warm-dark-800 text-xs"
+								>
 									<option value="">-</option>
-									<option>FL</option><option>IF</option><option>VVS1</option><option>VVS2</option>
-									<option>VS1</option><option>VS2</option><option>SI1</option><option>SI2</option>
+									<option>FL</option>
+									<option>IF</option>
+									<option>VVS1</option>
+									<option>VVS2</option>
+									<option>VS1</option>
+									<option>VS2</option>
+									<option>SI1</option>
+									<option>SI2</option>
 								</select>
 							</div>
 							<div>
 								<label class="block text-[10px] font-medium mb-0.5">Rate</label>
-								<input v-model="gem.rate" type="number" step="0.01" class="w-full px-2 py-1.5 border rounded bg-white dark:bg-warm-dark-800 text-xs" />
+								<input
+									v-model="gem.rate"
+									type="number"
+									step="0.01"
+									class="w-full px-2 py-1.5 border rounded bg-white dark:bg-warm-dark-800 text-xs"
+								/>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 
-			<div v-if="errorMsg" class="bg-red-50 dark:bg-red-900/20 rounded-lg p-3 border border-red-100">
+			<div
+				v-if="errorMsg"
+				class="bg-red-50 dark:bg-red-900/20 rounded-lg p-3 border border-red-100"
+			>
 				<p class="text-xs text-red-700">{{ errorMsg }}</p>
 			</div>
 		</div>
 
 		<template #footer>
-			<button @click="$emit('close')" class="flex-1 py-2 border rounded-lg text-sm font-medium hover:bg-gray-50">Cancel</button>
-			<button @click="save" :disabled="saving || !form.item_name" class="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 disabled:opacity-50">
+			<button
+				@click="$emit('close')"
+				class="flex-1 py-2 border rounded-lg text-sm font-medium hover:bg-gray-50"
+			>
+				Cancel
+			</button>
+			<button
+				@click="save"
+				:disabled="saving || !form.item_name"
+				class="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 disabled:opacity-50"
+			>
 				{{ saving ? 'Saving...' : 'Save Changes' }}
 			</button>
 		</template>
@@ -330,12 +529,22 @@ const netWeight = computed(() => {
 })
 
 function addGemstone() {
-	gemstones.value.push({ gem_type: '', carat: '', count: 1, cut: '', color: '', clarity: '', rate: '' })
+	gemstones.value.push({
+		gem_type: '',
+		carat: '',
+		count: 1,
+		cut: '',
+		color: '',
+		clarity: '',
+		rate: '',
+	})
 }
 
 onMounted(async () => {
 	try {
-		const data = await call('zevar_core.services.stock_reduction.ui_get_item_for_edit', { item_code: props.itemCode })
+		const data = await call('zevar_core.services.stock_reduction.ui_get_item_for_edit', {
+			item_code: props.itemCode,
+		})
 		form.item_name = data.item_name || ''
 		form.jewelry_type = data.custom_jewelry_type || 'Other'
 		form.description = data.description || ''
@@ -402,7 +611,12 @@ async function save() {
 			country_of_origin: form.country_of_origin || undefined,
 			gemstones: gemstones.value.length > 0 ? JSON.stringify(gemstones.value) : undefined,
 		})
-		toast({ title: 'Saved', message: `${form.item_name} updated`, icon: 'check', intent: 'success' })
+		toast({
+			title: 'Saved',
+			message: `${form.item_name} updated`,
+			icon: 'check',
+			intent: 'success',
+		})
 		emit('saved')
 	} catch (e) {
 		errorMsg.value = e.messages?.[0] || e.message || 'Failed to save'
