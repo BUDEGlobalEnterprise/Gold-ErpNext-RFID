@@ -10,7 +10,17 @@ from frappe import _
 from frappe.utils import sanitize_html, validate_json_type
 
 # Tool Registry - Explicit list of functions allowed to be called by the LLM
-AGENT_TOOLS = ["create_task", "send_agent_email", "get_daily_summary"]
+AGENT_TOOLS = [
+	"create_task",
+	"send_agent_email",
+	"get_daily_summary",
+	# Pricing tools
+	"get_current_gold_rate",
+	"get_item_margin_history",
+	"simulate_price_change",
+	"get_slow_moving_inventory",
+	"get_pricing_action_items",
+]
 
 
 @frappe.whitelist(allow_guest=False)

@@ -27,8 +27,23 @@ def generate_receipt_content(invoice_name):
 		)
 		store_info = store_loc[0] if store_loc else {}
 
+	# Collect salesperson info from the splits table
+	salespersons = []
 	associate_name = ""
-	if si.get("custom_salesperson_1"):
+	if hasattr(si, "custom_salesperson_splits") and si.custom_salesperson_splits:
+		for row in si.custom_salesperson_splits:
+			if row.employee:
+				emp_name = frappe.get_cached_value("Employee", row.employee, "employee_name") or row.employee
+				salespersons.append(
+					{
+						"employee": row.employee,
+						"name": emp_name,
+						"split": flt(row.split_percent),
+					}
+				)
+		if salespersons:
+			associate_name = salespersons[0]["name"]
+	elif si.get("custom_salesperson_1"):
 		associate_name = frappe.get_cached_value("Employee", si.custom_salesperson_1, "employee_name") or ""
 
 	invoice_data = {
@@ -36,6 +51,7 @@ def generate_receipt_content(invoice_name):
 		"date": str(si.posting_date),
 		"customer": si.customer_name or si.customer,
 		"associate": associate_name,
+		"salespersons": salespersons,
 		"store_address": store_info.get("store_address", ""),
 		"store_phone": "",
 		"items": [

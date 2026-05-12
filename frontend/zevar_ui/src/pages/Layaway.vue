@@ -594,7 +594,10 @@ function closeCreateMode() {
 onMounted(() => {
 	fetchLayaways()
 	if (route.query.action === 'new') {
-		if (route.query.customer && (!cart.customer || cart.customer.name !== route.query.customer)) {
+		if (
+			route.query.customer &&
+			(!cart.customer || cart.customer.name !== route.query.customer)
+		) {
 			cart.setCustomer({ name: route.query.customer, customer_name: route.query.customer })
 		}
 		showCreateModal.value = true

@@ -27,7 +27,15 @@
   "column_break_adv1",
   "default_top_k",
   "similarity_threshold",
-  "enable_query_cache"
+  "enable_query_cache",
+  "pricing_section",
+  "enable_pricing_recommendations",
+  "margin_warning_threshold",
+  "slow_moving_days_threshold",
+  "column_break_pricing",
+  "auto_generate_recommendations",
+  "max_recommendations_per_run",
+  "recommendation_confidence_threshold"
  ],
  "fields": [
   {
@@ -165,6 +173,58 @@
    "fieldtype": "Check",
    "default": 1,
    "label": "Enable Query Cache"
+  },
+  {
+   "fieldname": "pricing_section",
+   "fieldtype": "Section Break",
+   "label": "Pricing Engine"
+  },
+  {
+   "fieldname": "enable_pricing_recommendations",
+   "fieldtype": "Check",
+   "default": 0,
+   "label": "Enable Pricing Recommendations",
+   "description": "Enable automatic pricing recommendation generation via RAG pipeline"
+  },
+  {
+   "fieldname": "margin_warning_threshold",
+   "fieldtype": "Percent",
+   "default": "30",
+   "label": "Margin Warning Threshold (%)",
+   "description": "Items below this margin trigger pricing recommendations"
+  },
+  {
+   "fieldname": "slow_moving_days_threshold",
+   "fieldtype": "Int",
+   "default": "90",
+   "label": "Slow Moving Threshold (days)",
+   "description": "Items with no sale in this many days are flagged as slow-moving"
+  },
+  {
+   "fieldname": "column_break_pricing",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "auto_generate_recommendations",
+   "fieldtype": "Check",
+   "default": 0,
+   "label": "Auto-Generate Recommendations",
+   "description": "Automatically run recommendation generation weekly via scheduler"
+  },
+  {
+   "fieldname": "max_recommendations_per_run",
+   "fieldtype": "Int",
+   "default": "20",
+   "label": "Max Recommendations per Run",
+   "description": "Maximum number of recommendations generated per scheduler run"
+  },
+  {
+   "fieldname": "recommendation_confidence_threshold",
+   "fieldtype": "Select",
+   "default": "Medium",
+   "options": "High\nMedium\nLow",
+   "label": "Minimum Confidence Threshold",
+   "description": "Only surface recommendations at or above this confidence level"
   }
  ],
  "issingle": 1,

@@ -383,12 +383,12 @@ const denominations = [
 ]
 
 const todayOpening = computed(() => {
-  const sessionDate = posSession.status.session?.opening_date
-  const today = new Date().toISOString().split('T')[0]
-  if (sessionDate === today) {
-    return posSession.status.session?.opening_balance || 0
-  }
-  return 0
+	const sessionDate = posSession.status.session?.opening_date
+	const today = new Date().toISOString().split('T')[0]
+	if (sessionDate === today) {
+		return posSession.status.session?.opening_balance || 0
+	}
+	return 0
 })
 const todaySalesTotal = computed(() => posSession.status.session?.today_sales_total || 0)
 const sessionSalesTotal = computed(() => posSession.status.session?.sales_total || 0)

@@ -906,6 +906,34 @@
 				</div>
 			</div>
 
+			<!-- Discrepancy View -->
+			<div
+				v-else-if="currentView === 'discrepancies'"
+				class="flex-1 overflow-y-auto min-h-0"
+			>
+				<div class="max-w-5xl mx-auto">
+					<button
+						class="flex items-center gap-2 mb-4 text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors"
+						@click="currentView = 'history'"
+					>
+						<svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+							<path
+								d="M19 12H5M12 19l-7-7 7-7"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
+						Back to History
+					</button>
+					<DiscrepancyBoard
+						v-if="auditStore.activeSession"
+						:audit-session="auditStore.activeSession.name"
+						@resolved="onDiscrepancyResolved"
+					/>
+				</div>
+			</div>
+
 			<!-- Approve Variance Dialog -->
 			<div
 				v-if="showApproveDialog"
@@ -957,6 +985,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import AppLayout from '../components/AppLayout.vue'
+import DiscrepancyBoard from '../components/DiscrepancyBoard.vue'
 import { useAuditStore } from '../stores/audit'
 import { useSessionStore } from '../stores/session'
 import { useFormatters } from '../composables/useFormatters'
@@ -1243,9 +1272,9 @@ function handleApproveVariance() {
 }
 
 function viewSessionResults(session) {
-	if (session.status === 'Pending Manager Review') {
-		pendingApproveSession.value = session.name
-		showApproveDialog.value = true
+	if (session.status === 'Pending Manager Review' || session.status === 'Discrepancy') {
+		auditStore.activeSession = session
+		currentView.value = 'discrepancies'
 		return
 	}
 	if (['Draft', 'In Progress'].includes(session.status)) {
@@ -1255,6 +1284,10 @@ function viewSessionResults(session) {
 		auditStore.refreshProgress()
 		currentView.value = 'scanning'
 	}
+}
+
+function onDiscrepancyResolved() {
+	loadHistory()
 }
 
 function exportPDF() {

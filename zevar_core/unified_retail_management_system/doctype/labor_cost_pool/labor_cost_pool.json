@@ -1,0 +1,141 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:LCP-{#####}",
+ "creation": "2026-05-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "pool_name",
+  "employee",
+  "role",
+  "column_break_1",
+  "hourly_rate",
+  "hours_per_week",
+  "is_active",
+  "section_break_alloc",
+  "allocation_method",
+  "default_minutes_per_sale"
+ ],
+ "fields": [
+  {
+   "fieldname": "pool_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Pool Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "description": "Leave blank for role-based allocation"
+  },
+  {
+   "fieldname": "role",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Role",
+   "options": "\nSales Associate\nBench Jeweler\nStore Manager\nAppraiser\nManager"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "hourly_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Hourly Rate (Fully Loaded)",
+   "reqd": 1,
+   "description": "Include payroll taxes and benefits"
+  },
+  {
+   "fieldname": "hours_per_week",
+   "fieldtype": "Float",
+   "label": "Hours per Week",
+   "default": "40"
+  },
+  {
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Active",
+   "default": "1"
+  },
+  {
+   "fieldname": "section_break_alloc",
+   "fieldtype": "Section Break",
+   "label": "Allocation Rules"
+  },
+  {
+   "fieldname": "allocation_method",
+   "fieldtype": "Select",
+   "label": "Allocation Method",
+   "options": "Per Hour Worked\nPer Sale\nPer Repair\nSalary Spread",
+   "default": "Per Sale",
+   "description": "How labor cost is attributed to transactions"
+  },
+  {
+   "fieldname": "default_minutes_per_sale",
+   "fieldtype": "Int",
+   "label": "Default Minutes per Sale",
+   "default": "30",
+   "description": "Average time spent per sales interaction (used for Per Sale allocation)"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-05-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Unified Retail Management System",
+ "name": "Labor Cost Pool",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Store Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "pool_name",
+ "sort_order": "ASC",
+ "states": [],
+ "title_field": "pool_name"
+}

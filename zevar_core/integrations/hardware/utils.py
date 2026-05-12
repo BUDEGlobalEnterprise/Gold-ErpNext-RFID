@@ -60,6 +60,16 @@ def generate_escpos_receipt(invoice_data, settings=None):
 	lines.append(_esc_center("Thank you for shopping"))
 	lines.append(_esc_center("with Zevar Jewelers!"))
 	lines.append("")
+	# Salesperson split info
+	salespersons = invoice_data.get("salespersons", [])
+	if salespersons:
+		lines.append(_esc_center("-" * 32))
+		lines.append("Sales Associates:")
+		for sp in salespersons:
+			name = sp.get("name", "")[:20]
+			split = sp.get("split", 0)
+			lines.append(f"  {name} ({split:.0f}%)")
+		lines.append("")
 	lines.append("")
 	lines.append("")
 	return "\n".join(lines)

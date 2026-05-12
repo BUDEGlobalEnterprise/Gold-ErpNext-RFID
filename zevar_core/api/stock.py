@@ -653,3 +653,37 @@ def get_suppliers(search=None, page=1, page_size=20):
 	total = frappe.db.count("Supplier", filters)
 
 	return {"success": True, "suppliers": suppliers, "total": total}
+
+
+@frappe.whitelist(allow_guest=False)
+def get_items_by_case(display_case: str) -> list:
+	"""Return full item list for a specific display case."""
+	if not frappe.db.exists("Display Case", display_case):
+		frappe.throw(frappe._("Display Case {0} not found").format(display_case))
+
+	warehouse = frappe.db.get_value("Display Case", display_case, "warehouse")
+	if not warehouse:
+		return []
+
+	items = frappe.db.sql(
+		"""
+		SELECT
+			b.item_code,
+			i.item_name,
+			b.actual_qty,
+			b.valuation_rate,
+			(b.actual_qty * b.valuation_rate) as value,
+			i.image,
+			i.custom_metal_type as metal,
+			i.custom_purity as purity,
+			i.custom_jewelry_type as jewelry_type
+		FROM `tabBin` b
+		JOIN `tabItem` i ON b.item_code = i.name
+		WHERE b.warehouse = %s AND b.actual_qty > 0
+		ORDER BY i.custom_jewelry_type, b.item_code
+	""",
+		(warehouse,),
+		as_dict=True,
+	)
+
+	return items

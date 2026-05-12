@@ -853,7 +853,9 @@ def get_all_active_sessions() -> dict:
 			as_dict=True,
 		)
 		session_dict["today_sales_count"] = today_sales_data[0].get("count", 0) if today_sales_data else 0
-		session_dict["today_sales_total"] = flt(today_sales_data[0].get("total", 0)) if today_sales_data else 0
+		session_dict["today_sales_total"] = (
+			flt(today_sales_data[0].get("total", 0)) if today_sales_data else 0
+		)
 
 		session_dict["duration_hours"] = round(
 			time_diff_in_hours(now_datetime(), get_datetime(session.period_start_date)), 2

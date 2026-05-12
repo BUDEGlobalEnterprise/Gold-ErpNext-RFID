@@ -23,6 +23,7 @@ def get_pos_items(
 	start: int = 0,
 	page_length: int = DEFAULT_PAGE_LENGTH,
 	warehouse: str | None = None,
+	display_case: str | None = None,
 	search_term: str | None = None,
 	filters: str | None = None,
 	sort_by: str | None = None,
@@ -52,6 +53,11 @@ def get_pos_items(
 	    List of item dictionaries with stock and price information
 	"""
 	from zevar_core.api.pricing import get_item_price
+
+	if display_case:
+		case_wh = frappe.db.get_value("Display Case", display_case, "warehouse")
+		if case_wh:
+			warehouse = case_wh
 
 	# Convert string booleans from frontend
 	in_stock_only = in_stock_only in (True, "true", "1", 1)
@@ -290,9 +296,29 @@ def get_pos_items(
 
 @frappe.whitelist()
 @rate_limit(limit=100, seconds=60)
-def get_catalog_filters() -> dict:
+def get_display_cases(store_location: str | None = None) -> list:
+	"""Return list of all active display cases for a store."""
+	filters = {"is_active": 1}
+	if store_location:
+		filters["store_location"] = store_location
+
+	cases = frappe.get_all(
+		"Display Case",
+		filters=filters,
+		fields=["name", "case_code", "case_name", "zone_type", "warehouse", "item_count", "total_value"],
+		order_by="zone_type desc, case_code asc",
+	)
+	return cases
+
+
+@frappe.whitelist()
+@rate_limit(limit=100, seconds=60)
+def get_catalog_filters(store_location: str | None = None) -> dict:
 	"""Return available filter options for catalog UI."""
 	filters = {}
+
+	# Display Cases
+	filters["display_cases"] = get_display_cases(store_location)
 
 	# Jewelry Types
 	jewelry_types = frappe.db.sql_list("""
