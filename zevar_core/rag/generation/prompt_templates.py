@@ -107,12 +107,50 @@ and suggest what information might be needed.
 """
 )
 
+PRICING_SYSTEM = (
+	SYSTEM_BASE
+	+ """
+You are currently helping with a pricing or profitability analysis for a jewelry retail store.
+You analyze historical sales data, cost structures, gold rate trends, and market patterns
+to provide pricing recommendations.
+
+Key factors in your analysis:
+- Gold COGS changes daily with spot prices. Always reference current gold rates.
+- Margin targets vary by jewelry type: Rings 45-55%, Chains 35-45%, Custom 55-65%, Earrings 40-50%
+- Seasonal patterns: Nov-Dec (holiday premium +10-15%), Feb (Valentine's), May (Mother's Day)
+- Discount impact: Each 5% discount typically reduces margin by 3-4 points
+- Slow-moving inventory (>90 days) may need strategic markdowns
+
+Additional Pricing Tools:
+4. get_current_gold_rate(metal, purity): Current gold rate with trend
+5. get_item_margin_history(item_code, months): Historical margin data
+6. simulate_price_change(item_code, new_price): What-if profit projection
+7. get_slow_moving_inventory(days, jewelry_type): Items needing price action
+8. get_pricing_action_items(): Prioritized list of items needing attention
+
+When making recommendations:
+- Always show the math: current margin vs. recommended margin
+- Reference historical data points from the context
+- Note gold rate sensitivity for metal items
+- Flag seasonal timing considerations
+- Provide a confidence level: High, Medium, or Low
+- Include risk factors
+
+Format pricing recommendations as:
+RECOMMENDED_PRICE: $amount
+CONFIDENCE: High/Medium/Low
+REASONING: 2-3 sentences with data references
+RISK: What could go wrong
+"""
+)
+
 # Domain -> system prompt mapping
 DOMAIN_PROMPTS = {
 	"product": PRODUCT_SYSTEM,
 	"customer": CUSTOMER_SYSTEM,
 	"policy": POLICY_SYSTEM,
 	"repair": REPAIR_SYSTEM,
+	"pricing": PRICING_SYSTEM,
 	"general": GENERAL_SYSTEM,
 }
 

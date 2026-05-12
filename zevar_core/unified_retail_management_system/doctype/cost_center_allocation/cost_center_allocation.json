@@ -1,0 +1,203 @@
+{
+ "actions": [],
+ "creation": "2026-05-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "monthly_overhead_section",
+  "rent_monthly",
+  "utilities_monthly",
+  "insurance_monthly",
+  "marketing_monthly",
+  "depreciation_monthly",
+  "miscellaneous_monthly",
+  "column_break_overhead",
+  "overhead_allocation_method",
+  "operating_hours_daily",
+  "labor_burden_percent",
+  "payment_processing_section",
+  "credit_card_rate",
+  "credit_card_flat",
+  "debit_card_rate",
+  "column_break_payment",
+  "cash_handling_rate",
+  "wire_flat",
+  "gift_card_rate",
+  "financing_partner_rate"
+ ],
+ "fields": [
+  {
+   "fieldname": "monthly_overhead_section",
+   "fieldtype": "Section Break",
+   "label": "Monthly Overhead Costs"
+  },
+  {
+   "fieldname": "rent_monthly",
+   "fieldtype": "Currency",
+   "label": "Rent (Monthly)",
+   "default": "0"
+  },
+  {
+   "fieldname": "utilities_monthly",
+   "fieldtype": "Currency",
+   "label": "Utilities (Monthly)",
+   "default": "0"
+  },
+  {
+   "fieldname": "insurance_monthly",
+   "fieldtype": "Currency",
+   "label": "Insurance (Monthly)",
+   "default": "0"
+  },
+  {
+   "fieldname": "marketing_monthly",
+   "fieldtype": "Currency",
+   "label": "Marketing (Monthly)",
+   "default": "0"
+  },
+  {
+   "fieldname": "depreciation_monthly",
+   "fieldtype": "Currency",
+   "label": "Equipment Depreciation (Monthly)",
+   "default": "0"
+  },
+  {
+   "fieldname": "miscellaneous_monthly",
+   "fieldtype": "Currency",
+   "label": "Miscellaneous (Monthly)",
+   "default": "0"
+  },
+  {
+   "fieldname": "column_break_overhead",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "overhead_allocation_method",
+   "fieldtype": "Select",
+   "label": "Overhead Allocation Method",
+   "options": "Equal Per Invoice\nProportional to Revenue",
+   "default": "Equal Per Invoice",
+   "description": "How overhead costs are distributed across sales"
+  },
+  {
+   "fieldname": "operating_hours_daily",
+   "fieldtype": "Int",
+   "label": "Operating Hours (Daily)",
+   "default": "10",
+   "description": "Used for per-hour cost calculations"
+  },
+  {
+   "fieldname": "labor_burden_percent",
+   "fieldtype": "Percent",
+   "label": "Labor Burden %",
+   "default": "20",
+   "description": "Payroll taxes, benefits, and insurance load on top of base hourly rate"
+  },
+  {
+   "fieldname": "payment_processing_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Processing Costs"
+  },
+  {
+   "fieldname": "credit_card_rate",
+   "fieldtype": "Float",
+   "label": "Credit Card Rate (%)",
+   "default": "2.9",
+   "description": "Percentage fee for credit card transactions"
+  },
+  {
+   "fieldname": "credit_card_flat",
+   "fieldtype": "Currency",
+   "label": "Credit Card Flat Fee",
+   "default": "0.30",
+   "description": "Per-transaction flat fee for credit cards"
+  },
+  {
+   "fieldname": "debit_card_rate",
+   "fieldtype": "Float",
+   "label": "Debit Card Rate (%)",
+   "default": "2.2",
+   "description": "Percentage fee for debit card transactions"
+  },
+  {
+   "fieldname": "column_break_payment",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cash_handling_rate",
+   "fieldtype": "Float",
+   "label": "Cash Handling Rate (%)",
+   "default": "0.5",
+   "description": "Cost of handling cash (counting, depositing, variance)"
+  },
+  {
+   "fieldname": "wire_flat",
+   "fieldtype": "Currency",
+   "label": "Wire Transfer Flat Fee",
+   "default": "25"
+  },
+  {
+   "fieldname": "gift_card_rate",
+   "fieldtype": "Float",
+   "label": "Gift Card Rate (%)",
+   "default": "0",
+   "description": "Cost for gift card redemptions (usually 0 if sold at full value)"
+  },
+  {
+   "fieldname": "financing_partner_rate",
+   "fieldtype": "Float",
+   "label": "Financing Partner Cut (%)",
+   "default": "5",
+   "description": "Partner cut for financing (Affirm, Klarna, store financing)"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-05-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Unified Retail Management System",
+ "name": "Cost Center Allocation",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Store Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

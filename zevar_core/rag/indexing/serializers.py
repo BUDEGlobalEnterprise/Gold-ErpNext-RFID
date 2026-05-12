@@ -224,4 +224,13 @@ SERIALIZERS = {
 	"Item": serialize_item,
 	"Customer": serialize_customer,
 	"RAG Knowledge Article": serialize_knowledge_article,
+	"Sale Cost Breakdown": None,  # Registered below to avoid circular import
 }
+
+# Late import for sales pricing indexer (depends on Sale Cost Breakdown DocType)
+try:
+	from zevar_core.rag.indexing.sales_pricing_indexer import serialize_sale_cost_breakdown
+
+	SERIALIZERS["Sale Cost Breakdown"] = serialize_sale_cost_breakdown
+except ImportError:
+	pass

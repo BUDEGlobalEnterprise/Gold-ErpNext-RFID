@@ -152,6 +152,12 @@ const routes = [
 		meta: { requiresAuth: true, requiresManagement: true },
 	},
 	{
+		path: '/reports/dashboards/profit',
+		name: 'ProfitIntelligence',
+		component: () => import('./pages/dashboards/ProfitIntelligence.vue'),
+		meta: { requiresAuth: true, requiresManagement: true },
+	},
+	{
 		path: '/contacts',
 		name: 'Contacts',
 		component: () => import('./pages/Contacts.vue'),

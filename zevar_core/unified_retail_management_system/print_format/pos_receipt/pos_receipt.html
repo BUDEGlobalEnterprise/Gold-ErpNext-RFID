@@ -260,6 +260,13 @@
         <div>{{ sp.name }} ({{ sp.split }}%)</div>
         {% endfor %}
     </div>
+    {% elif doc and doc.custom_salesperson_splits %}
+    <div class="salesperson-info">
+        <div>Sales Associates:</div>
+        {% for row in doc.custom_salesperson_splits %}
+        <div>{{ frappe.db.get_value('Employee', row.employee, 'employee_name') or row.employee }} ({{ row.split_percent }}%)</div>
+        {% endfor %}
+    </div>
     {% endif %}
 
     <div style="margin-top: 16px; text-align: center; font-size: 9px;">

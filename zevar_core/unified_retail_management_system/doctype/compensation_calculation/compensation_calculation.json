@@ -1,0 +1,431 @@
+{
+ "actions": [],
+ "autoname": "format:CC-{YY}{MM}-{#####}",
+ "creation": "2026-05-12 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_reference",
+  "performance_target",
+  "employee",
+  "employee_name",
+  "period_type",
+  "period_start",
+  "period_end",
+  "column_break_ref",
+  "calculation_date",
+  "status",
+  "calculated_by",
+  "section_hours",
+  "total_hours_worked",
+  "scheduled_hours",
+  "attendance_percentage",
+  "section_revenue",
+  "revenue_achieved",
+  "revenue_target",
+  "revenue_achievement_pct",
+  "average_transaction_value",
+  "column_break_revenue",
+  "high_ticket_sales",
+  "layaway_conversions",
+  "section_activity",
+  "customers_served",
+  "items_sold",
+  "repair_orders_completed",
+  "upsells",
+  "column_break_activity",
+  "activity_achievement_pct",
+  "section_quality",
+  "return_rate",
+  "customer_satisfaction",
+  "layaway_default_rate",
+  "column_break_quality",
+  "quality_achievement_pct",
+  "section_pay",
+  "overall_performance_score",
+  "effective_hourly_rate",
+  "column_break_pay",
+  "guaranteed_pay",
+  "performance_bonus",
+  "performance_deduction",
+  "section_commission",
+  "commission_earned",
+  "column_break_commission",
+  "commission_details",
+  "section_final",
+  "final_calculated_pay",
+  "column_break_final",
+  "calculation_notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_reference",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "performance_target",
+   "fieldtype": "Link",
+   "label": "Performance Target",
+   "options": "Performance Target",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "period_type",
+   "fieldtype": "Select",
+   "label": "Period Type",
+   "options": "Weekly\nMonthly\nQuarterly\nAnnually",
+   "read_only": 1
+  },
+  {
+   "fieldname": "period_start",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Period Start",
+   "read_only": 1
+  },
+  {
+   "fieldname": "period_end",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Period End",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ref",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "calculation_date",
+   "fieldtype": "Date",
+   "label": "Calculation Date",
+   "read_only": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Draft\nCalculated\nFinalized",
+   "read_only": 1
+  },
+  {
+   "fieldname": "calculated_by",
+   "fieldtype": "Link",
+   "label": "Calculated By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_hours",
+   "fieldtype": "Section Break",
+   "label": "Hours Worked"
+  },
+  {
+   "fieldname": "total_hours_worked",
+   "fieldtype": "Float",
+   "label": "Total Hours Worked",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scheduled_hours",
+   "fieldtype": "Float",
+   "label": "Scheduled Hours",
+   "read_only": 1
+  },
+  {
+   "fieldname": "attendance_percentage",
+   "fieldtype": "Percent",
+   "label": "Attendance %",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_revenue",
+   "fieldtype": "Section Break",
+   "label": "Revenue Metrics"
+  },
+  {
+   "fieldname": "revenue_achieved",
+   "fieldtype": "Currency",
+   "label": "Revenue Achieved",
+   "read_only": 1
+  },
+  {
+   "fieldname": "revenue_target",
+   "fieldtype": "Currency",
+   "label": "Revenue Target",
+   "read_only": 1
+  },
+  {
+   "fieldname": "revenue_achievement_pct",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Revenue Achievement %",
+   "read_only": 1
+  },
+  {
+   "fieldname": "average_transaction_value",
+   "fieldtype": "Currency",
+   "label": "Avg Transaction Value",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_revenue",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "high_ticket_sales",
+   "fieldtype": "Int",
+   "label": "High-Ticket Sales",
+   "read_only": 1
+  },
+  {
+   "fieldname": "layaway_conversions",
+   "fieldtype": "Int",
+   "label": "Layaway Conversions",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_activity",
+   "fieldtype": "Section Break",
+   "label": "Activity Metrics"
+  },
+  {
+   "fieldname": "customers_served",
+   "fieldtype": "Int",
+   "label": "Customers Served",
+   "read_only": 1
+  },
+  {
+   "fieldname": "items_sold",
+   "fieldtype": "Int",
+   "label": "Items Sold",
+   "read_only": 1
+  },
+  {
+   "fieldname": "repair_orders_completed",
+   "fieldtype": "Int",
+   "label": "Repair Orders Completed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "upsells",
+   "fieldtype": "Int",
+   "label": "Upsells",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_activity",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "activity_achievement_pct",
+   "fieldtype": "Percent",
+   "label": "Activity Achievement %",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_quality",
+   "fieldtype": "Section Break",
+   "label": "Quality Metrics"
+  },
+  {
+   "fieldname": "return_rate",
+   "fieldtype": "Percent",
+   "label": "Return Rate %",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer_satisfaction",
+   "fieldtype": "Percent",
+   "label": "Customer Satisfaction %",
+   "read_only": 1
+  },
+  {
+   "fieldname": "layaway_default_rate",
+   "fieldtype": "Percent",
+   "label": "Layaway Default Rate %",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_quality",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "quality_achievement_pct",
+   "fieldtype": "Percent",
+   "label": "Quality Achievement %",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_pay",
+   "fieldtype": "Section Break",
+   "label": "Compensation Calculation"
+  },
+  {
+   "fieldname": "overall_performance_score",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Overall Performance Score",
+   "read_only": 1
+  },
+  {
+   "fieldname": "effective_hourly_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Effective Hourly Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_pay",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "guaranteed_pay",
+   "fieldtype": "Currency",
+   "label": "Guaranteed Pay",
+   "read_only": 1
+  },
+  {
+   "fieldname": "performance_bonus",
+   "fieldtype": "Currency",
+   "label": "Performance Bonus",
+   "read_only": 1
+  },
+  {
+   "fieldname": "performance_deduction",
+   "fieldtype": "Currency",
+   "label": "Performance Deduction",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_commission",
+   "fieldtype": "Section Break",
+   "label": "Commission"
+  },
+  {
+   "fieldname": "commission_earned",
+   "fieldtype": "Currency",
+   "label": "Commission Earned",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_commission",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "commission_details",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Commission Details (JSON)",
+   "options": "JSON",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_final",
+   "fieldtype": "Section Break",
+   "label": "Final Pay"
+  },
+  {
+   "fieldname": "final_calculated_pay",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Final Calculated Pay",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_final",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "calculation_notes",
+   "fieldtype": "Small Text",
+   "label": "Calculation Notes",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 0,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Unified Retail Management System",
+ "name": "Compensation Calculation",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Store Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "employee_name"
+}

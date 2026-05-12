@@ -200,6 +200,39 @@
 				</div>
 			</div>
 		</div>
+
+		<!-- Display Case Filter -->
+		<div v-if="displayCaseOptions.length > 0" class="mb-6 pb-5 border-b border-white/5">
+			<label class="block text-[10px] font-bold text-gray-500 mb-3 px-1">Location / Case</label>
+			<div class="flex flex-col gap-4">
+				<div v-for="(cases, zone) in groupedDisplayCases" :key="zone">
+					<span
+						class="block text-[8px] font-black uppercase tracking-[0.2em] text-[#555961] mb-2 px-1"
+					>
+						{{ zone }}
+					</span>
+					<div class="grid grid-cols-2 gap-2">
+						<button
+							v-for="c in cases"
+							:key="c.name"
+							@click="updateDisplayCase(c.name)"
+							:class="
+								ui.activeFilters.display_case === c.name
+									? 'bg-[#D4AF37] text-[#0F1115] font-bold border-[#D4AF37]'
+									: 'bg-[#1C1F26] text-gray-400 border-white/5 hover:border-gray-600 hover:text-white'
+							"
+							class="px-2 py-2 text-[10px] rounded-lg border transition-all text-left flex flex-col gap-0.5"
+						>
+							<div class="flex items-center justify-between">
+								<span class="font-black">{{ c.case_code }}</span>
+								<span v-if="c.item_count" class="text-[8px] opacity-60">{{ c.item_count }}</span>
+							</div>
+							<span class="text-[8px] opacity-60 truncate">{{ c.case_name }}</span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 </template>
 
@@ -220,12 +253,26 @@ const gemstoneOptions = ref([
 	'Kundan',
 	'No Stone',
 ])
+const displayCaseOptions = ref([])
+
+const groupedDisplayCases = computed(() => {
+	const groups = {}
+	displayCaseOptions.value.forEach((c) => {
+		const zone = c.zone_type || 'Other'
+		if (!groups[zone]) groups[zone] = []
+		groups[zone].push(c)
+	})
+	return groups
+})
 
 const filtersResource = createResource({
 	url: 'zevar_core.api.catalog.get_catalog_filters',
 	onSuccess(data) {
 		if (data && data.gemstones) {
 			gemstoneOptions.value = data.gemstones
+		}
+		if (data && data.display_cases) {
+			displayCaseOptions.value = data.display_cases
 		}
 	},
 })
@@ -307,6 +354,14 @@ function updateMetal(val) {
 
 function updateGemstone(val) {
 	ui.setFilter('custom_gemstone', val)
+}
+
+function updateDisplayCase(val) {
+	if (ui.activeFilters.display_case === val) {
+		ui.setFilter('display_case', '')
+	} else {
+		ui.setFilter('display_case', val)
+	}
 }
 
 function handleReset() {

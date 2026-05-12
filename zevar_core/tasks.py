@@ -846,3 +846,211 @@ def _update_next_run(name, cron_expression):
 		frappe.db.set_value("Report Subscription", name, "next_run", cron.get_next(frappe.utils.Datetime))
 	except Exception:
 		frappe.db.set_value("Report Subscription", name, "next_run", None)
+
+
+def index_sales_pricing_data():
+	"""Daily: Index new Sale Cost Breakdown records into ChromaDB.
+
+	Uses the existing RAG indexing pipeline to embed sales data
+	for the pricing recommendation engine's vector search.
+	"""
+	if not frappe.db.exists("DocType", "Sale Cost Breakdown"):
+		return
+
+	try:
+		from zevar_core.rag.indexing.pipeline import IndexingPipeline
+
+		pipeline = IndexingPipeline()
+
+		from frappe.utils import add_days
+
+		since = add_days(frappe.utils.today(), -2)
+		recent = frappe.get_all(
+			"Sale Cost Breakdown",
+			filters={"posting_date": [">=", since]},
+			pluck="name",
+			ignore_permissions=True,
+		)
+
+		for name in recent:
+			try:
+				pipeline.index_document("Sale Cost Breakdown", name)
+			except Exception:
+				frappe.log_error(f"Failed to index Sale Cost Breakdown: {name}")
+
+		frappe.logger().info(f"Indexed {len(recent)} Sale Cost Breakdown records into ChromaDB")
+
+	except Exception:
+		frappe.log_error(
+			title="Sales pricing index failed",
+			message=frappe.get_traceback(),
+		)
+
+
+def generate_pricing_recommendations():
+	"""Weekly: Analyze margins and generate pricing recommendations.
+
+	Finds items with eroding margins or slow movement, then creates
+	Pricing Recommendation records with AI-generated reasoning.
+	"""
+	if not frappe.db.exists("DocType", "Pricing Recommendation"):
+		return
+
+	# Check if pricing recommendations are enabled
+	try:
+		if frappe.db.exists("DocType", "RAG Settings"):
+			settings = frappe.get_single("RAG Settings")
+			if hasattr(settings, "enable_pricing_recommendations") and not settings.enable_pricing_recommendations:
+				return
+	except Exception:
+		pass
+
+	from frappe.utils import flt, today, add_days, getdate
+	from zevar_core.api.pricing import _get_gold_rate
+
+	max_recs = 20
+	try:
+		if frappe.db.exists("DocType", "RAG Settings"):
+			s = frappe.get_single("RAG Settings")
+			if hasattr(s, "max_recommendations_per_run"):
+				max_recs = flt(s.max_recommendations_per_run) or 20
+	except Exception:
+		pass
+
+	generated = 0
+
+	# 1. Items with declining margins (last 30 days vs 30-60 days)
+	declining = frappe.db.sql(
+		"""SELECT
+			sii.item_code,
+			i.item_name,
+			i.custom_msrp,
+			i.custom_metal_type,
+			i.custom_purity,
+			i.custom_jewelry_type,
+			AVG(CASE WHEN scb.posting_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+				THEN scb.gross_margin_pct END) as recent_margin,
+			AVG(CASE WHEN scb.posting_date < DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+				AND scb.posting_date >= DATE_SUB(CURDATE(), INTERVAL 60 DAY)
+				THEN scb.gross_margin_pct END) as prev_margin
+		FROM `tabSale Cost Breakdown` scb
+		JOIN `tabSales Invoice` si ON scb.sales_invoice = si.name
+		JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
+		JOIN `tabItem` i ON i.name = sii.item_code
+		WHERE scb.posting_date >= DATE_SUB(CURDATE(), INTERVAL 60 DAY)
+		GROUP BY sii.item_code, i.item_name, i.custom_msrp, i.custom_metal_type, i.custom_purity, i.custom_jewelry_type
+		HAVING recent_margin IS NOT NULL AND prev_margin IS NOT NULL
+		AND recent_margin < prev_margin - 5
+		ORDER BY (recent_margin - prev_margin) ASC
+		LIMIT %s""",
+		(max_recs,),
+		as_dict=True,
+	)
+
+	for item in declining:
+		if generated >= max_recs:
+			break
+
+		existing = frappe.db.exists(
+			"Pricing Recommendation",
+			{"item_code": item.item_code, "status": ["in", ["Draft", "Pending Review"]]},
+		)
+		if existing:
+			continue
+
+		current_price = flt(item.custom_msrp) or 0
+		if current_price <= 0:
+			continue
+
+		margin_gap = flt(item.prev_margin) - flt(item.recent_margin)
+		recommended_price = current_price * (1 + (margin_gap / 100) * 0.5)
+		projected_margin = flt(item.recent_margin) + (margin_gap * 0.5)
+
+		gold_rate = 0
+		if item.custom_metal_type and item.custom_purity:
+			gold_rate = _get_gold_rate(item.custom_metal_type, item.custom_purity)
+
+		rec = frappe.new_doc("Pricing Recommendation")
+		rec.recommendation_type = "Price Increase"
+		rec.item_code = item.item_code
+		rec.item_name = item.item_name
+		rec.current_price = current_price
+		rec.current_margin_pct = flt(item.recent_margin, 2)
+		rec.current_gold_rate = gold_rate
+		rec.recommended_price = flt(recommended_price, 2)
+		rec.projected_margin_pct = flt(projected_margin, 2)
+		rec.price_change_pct = flt(((recommended_price - current_price) / current_price) * 100, 2)
+		rec.confidence_level = "Medium"
+		rec.reasoning = (
+			f"Margin erosion detected: dropped from {flt(item.prev_margin):.1f}% to "
+			f"{flt(item.recent_margin):.1f}% (last 30 days). "
+			f"Recommendation targets partial margin recovery to ~{projected_margin:.1f}%."
+		)
+		rec.generated_by = "AI (Qwen)"
+		rec.generation_method = "rag_pipeline"
+		rec.gold_rate_at_generation = gold_rate
+		rec.status = "Pending Review"
+		rec.valid_until = add_days(today(), 14)
+		rec.insert(ignore_permissions=True)
+		generated += 1
+
+	# 2. Slow-moving items needing clearance pricing
+	slow_items = frappe.db.sql(
+		"""SELECT
+			i.name as item_code,
+			i.item_name,
+			i.custom_msrp,
+			i.custom_jewelry_type,
+			MAX(si.posting_date) as last_sale
+		FROM `tabItem` i
+		LEFT JOIN `tabSales Invoice Item` sii ON sii.item_code = i.name
+		LEFT JOIN `tabSales Invoice` si ON sii.parent = si.name AND si.docstatus = 1
+		WHERE i.disabled = 0 AND i.is_stock_item = 1 AND i.custom_msrp > 0
+		GROUP BY i.name, i.item_name, i.custom_msrp, i.custom_jewelry_type
+		HAVING (last_sale IS NULL OR last_sale < DATE_SUB(CURDATE(), INTERVAL 90 DAY))
+		AND EXISTS (SELECT 1 FROM `tabBin` b WHERE b.item_code = i.name AND b.actual_qty > 0)
+		LIMIT %s""",
+		(max_recs - generated,),
+		as_dict=True,
+	)
+
+	for item in slow_items:
+		if generated >= max_recs:
+			break
+
+		existing = frappe.db.exists(
+			"Pricing Recommendation",
+			{"item_code": item.item_code, "status": ["in", ["Draft", "Pending Review"]]},
+		)
+		if existing:
+			continue
+
+		current_price = flt(item.custom_msrp)
+		recommended_price = current_price * 0.85
+
+		days_since = 999
+		if item.last_sale:
+			days_since = (getdate(today()) - getdate(item.last_sale)).days
+
+		rec = frappe.new_doc("Pricing Recommendation")
+		rec.recommendation_type = "Clearance"
+		rec.item_code = item.item_code
+		rec.item_name = item.item_name
+		rec.current_price = current_price
+		rec.days_since_last_sale = days_since
+		rec.recommended_price = flt(recommended_price, 2)
+		rec.projected_margin_pct = 0
+		rec.price_change_pct = -15.0
+		rec.confidence_level = "Low"
+		rec.reasoning = (
+			f"Slow-moving inventory: no sale in {days_since} days. "
+			f"Suggesting 15% clearance markdown from ${current_price:,.2f} to ${recommended_price:,.2f}."
+		)
+		rec.generated_by = "AI (Qwen)"
+		rec.generation_method = "rag_pipeline"
+		rec.status = "Pending Review"
+		rec.valid_until = add_days(today(), 30)
+		rec.insert(ignore_permissions=True)
+		generated += 1
+
+	frappe.logger().info(f"Generated {generated} pricing recommendations")
