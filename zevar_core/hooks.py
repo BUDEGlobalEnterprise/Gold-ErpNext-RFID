@@ -73,6 +73,7 @@ scheduler_events = {
 		"0 8 * * *": [
 			"zevar_core.api.layaway.check_overdue_and_forfeit",
 			"zevar_core.api.layaway.send_payment_reminders",
+			"zevar_core.api.memo.check_overdue_memos",
 		],
 		"0 23 * * *": ["zevar_core.tasks.email_eod_brief"],
 		"0 6 * * *": [

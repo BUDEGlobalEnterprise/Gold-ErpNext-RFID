@@ -110,6 +110,18 @@ const routes = [
 		meta: { requiresAuth: true },
 	},
 	{
+		path: '/gold-purchase',
+		name: 'GoldPurchase',
+		component: () => import('./pages/GoldPurchase.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/memos',
+		name: 'Memos',
+		component: () => import('./pages/MemoTerminal.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
 		path: '/appraisals',
 		name: 'Appraisals',
 		component: () => import('./pages/Appraisals.vue'),

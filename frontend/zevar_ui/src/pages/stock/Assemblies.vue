@@ -33,10 +33,7 @@
 				<button
 					v-for="f in ['All', 'Manufacture', 'Repack']"
 					:key="f"
-					@click="
-						purposeFilter = f === 'All' ? '' : f
-						loadData()
-					"
+					@click="purposeFilter = f === 'All' ? '' : f; loadData()"
 					class="px-3 py-1.5 rounded-full text-xs font-bold transition"
 					:class="
 						(purposeFilter || 'All') === (f === 'All' && !purposeFilter ? 'All' : f)

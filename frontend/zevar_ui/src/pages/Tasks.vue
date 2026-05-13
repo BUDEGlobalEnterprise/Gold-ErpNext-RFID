@@ -263,10 +263,7 @@
 			<div v-if="viewMode === 'todos'" class="flex-1 overflow-y-auto min-h-0">
 				<div class="flex items-center gap-2 mb-3">
 					<button
-						@click="
-							todoFilter = 'Open'
-							store.loadTodos('Open')
-						"
+						@click="todoFilter = 'Open'; store.loadTodos('Open')"
 						class="px-3 py-1.5 rounded-full text-xs font-bold transition"
 						:class="
 							todoFilter === 'Open'
@@ -277,10 +274,7 @@
 						Open ({{ store.todoCount }})
 					</button>
 					<button
-						@click="
-							todoFilter = 'Closed'
-							store.loadTodos('Closed')
-						"
+						@click="todoFilter = 'Closed'; $1oadTodos('Closed')"
 						class="px-3 py-1.5 rounded-full text-xs font-bold transition"
 						:class="
 							todoFilter === 'Closed'

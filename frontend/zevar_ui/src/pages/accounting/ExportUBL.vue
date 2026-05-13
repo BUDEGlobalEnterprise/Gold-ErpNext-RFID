@@ -48,10 +48,7 @@
 				<button
 					v-for="tab in typeFilters"
 					:key="tab.value"
-					@click="
-						activeType = tab.value
-						loadData()
-					"
+					@click="activeType = tab.value; loadData()"
 					class="px-3 py-1.5 rounded-full text-xs font-bold transition"
 					:class="
 						activeType === tab.value
