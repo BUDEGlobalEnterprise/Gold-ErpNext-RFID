@@ -80,10 +80,7 @@
 			<div class="relative">
 				<input
 					:value="customerSearch"
-					@input="
-						$emit('update:customer-search', $event.target.value)
-						$emit('search-customers')
-					"
+					@input="$emit('update:customer-search', $event.target.value) $emit('search-customers')"
 					type="text"
 					placeholder="Search customer by name or phone..."
 					class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"

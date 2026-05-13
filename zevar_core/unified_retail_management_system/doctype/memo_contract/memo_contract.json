@@ -1,0 +1,368 @@
+{
+    "actions": [],
+    "autoname": "format:MEMO-{MM}{YY}-{#####}",
+    "creation": "2026-05-13 00:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "vendor_section",
+        "supplier",
+        "supplier_name",
+        "column_break_vendor",
+        "status",
+        "contract_date",
+        "due_date",
+        "store_location",
+        "terms_section",
+        "interest_rate",
+        "interest_period",
+        "payment_terms_days",
+        "column_break_terms",
+        "auto_dunning_days",
+        "auto_return_days",
+        "max_extension_count",
+        "items_section",
+        "items",
+        "totals_section",
+        "total_memo_value",
+        "total_sold_value",
+        "total_returned_value",
+        "column_break_totals",
+        "total_paid",
+        "balance_due",
+        "item_count",
+        "items_sold",
+        "items_returned",
+        "aging_section",
+        "aging_days",
+        "aging_category",
+        "last_dunning_date",
+        "dunning_count",
+        "column_break_aging",
+        "last_payment_date",
+        "payment_count",
+        "payments_section",
+        "payments",
+        "notes_section",
+        "notes",
+        "amended_from"
+    ],
+    "fields": [
+        {
+            "fieldname": "vendor_section",
+            "fieldtype": "Section Break",
+            "label": "Vendor / Supplier"
+        },
+        {
+            "fieldname": "supplier",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Supplier",
+            "options": "Supplier",
+            "reqd": 1
+        },
+        {
+            "fieldname": "supplier_name",
+            "fieldtype": "Data",
+            "fetch_from": "supplier.supplier_name",
+            "in_list_view": 1,
+            "label": "Supplier Name",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_vendor",
+            "fieldtype": "Column Break"
+        },
+        {
+            "default": "Draft",
+            "fieldname": "status",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Status",
+            "no_copy": 1,
+            "options": "Draft\nActive\nPartial Settlement\nSettled\nReturned\nOverdue\nForfeited",
+            "read_only": 1
+        },
+        {
+            "default": "Today",
+            "fieldname": "contract_date",
+            "fieldtype": "Date",
+            "label": "Contract Date",
+            "reqd": 1
+        },
+        {
+            "fieldname": "due_date",
+            "fieldtype": "Date",
+            "label": "Due Date",
+            "reqd": 1
+        },
+        {
+            "fieldname": "store_location",
+            "fieldtype": "Link",
+            "label": "Store Location",
+            "options": "Store Location",
+            "reqd": 1
+        },
+        {
+            "fieldname": "terms_section",
+            "fieldtype": "Section Break",
+            "label": "Memo Terms"
+        },
+        {
+            "fieldname": "interest_rate",
+            "fieldtype": "Percent",
+            "default": "0",
+            "label": "Interest Rate (%)",
+            "description": "Annual interest rate on unsold memo items"
+        },
+        {
+            "fieldname": "interest_period",
+            "fieldtype": "Select",
+            "default": "Monthly",
+            "label": "Interest Period",
+            "options": "Monthly\nQuarterly\nAnnually"
+        },
+        {
+            "fieldname": "payment_terms_days",
+            "fieldtype": "Int",
+            "default": "30",
+            "label": "Payment Terms (Days)",
+            "description": "Days after sale to remit payment to vendor"
+        },
+        {
+            "fieldname": "column_break_terms",
+            "fieldtype": "Column Break"
+        },
+        {
+            "default": "30",
+            "fieldname": "auto_dunning_days",
+            "fieldtype": "Int",
+            "label": "Auto-Dunning After (Days)"
+        },
+        {
+            "default": "90",
+            "fieldname": "auto_return_days",
+            "fieldtype": "Int",
+            "label": "Auto-Return After (Days)"
+        },
+        {
+            "default": "2",
+            "fieldname": "max_extension_count",
+            "fieldtype": "Int",
+            "label": "Max Extensions Allowed"
+        },
+        {
+            "fieldname": "items_section",
+            "fieldtype": "Section Break",
+            "label": "Memo Items"
+        },
+        {
+            "fieldname": "items",
+            "fieldtype": "Table",
+            "label": "Items",
+            "options": "Memo Contract Item",
+            "reqd": 1
+        },
+        {
+            "fieldname": "totals_section",
+            "fieldtype": "Section Break",
+            "label": "Totals"
+        },
+        {
+            "fieldname": "total_memo_value",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Total Memo Value",
+            "read_only": 1
+        },
+        {
+            "fieldname": "total_sold_value",
+            "fieldtype": "Currency",
+            "label": "Total Sold Value",
+            "read_only": 1
+        },
+        {
+            "fieldname": "total_returned_value",
+            "fieldtype": "Currency",
+            "label": "Total Returned Value",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_totals",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "total_paid",
+            "fieldtype": "Currency",
+            "label": "Total Paid to Vendor",
+            "read_only": 1
+        },
+        {
+            "fieldname": "balance_due",
+            "fieldtype": "Currency",
+            "label": "Balance Due",
+            "read_only": 1
+        },
+        {
+            "fieldname": "item_count",
+            "fieldtype": "Int",
+            "label": "Total Items",
+            "read_only": 1
+        },
+        {
+            "fieldname": "items_sold",
+            "fieldtype": "Int",
+            "label": "Items Sold",
+            "read_only": 1
+        },
+        {
+            "fieldname": "items_returned",
+            "fieldtype": "Int",
+            "label": "Items Returned",
+            "read_only": 1
+        },
+        {
+            "fieldname": "aging_section",
+            "fieldtype": "Section Break",
+            "label": "Aging & Dunning"
+        },
+        {
+            "fieldname": "aging_days",
+            "fieldtype": "Int",
+            "label": "Aging (Days)",
+            "read_only": 1
+        },
+        {
+            "fieldname": "aging_category",
+            "fieldtype": "Select",
+            "label": "Aging Category",
+            "options": "Current\n1-30 Days\n31-60 Days\n61-90 Days\n90+ Days",
+            "read_only": 1
+        },
+        {
+            "fieldname": "last_dunning_date",
+            "fieldtype": "Date",
+            "label": "Last Dunning Date",
+            "read_only": 1
+        },
+        {
+            "fieldname": "dunning_count",
+            "fieldtype": "Int",
+            "default": "0",
+            "label": "Dunning Count",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_aging",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "last_payment_date",
+            "fieldtype": "Date",
+            "label": "Last Payment Date",
+            "read_only": 1
+        },
+        {
+            "fieldname": "payment_count",
+            "fieldtype": "Int",
+            "default": "0",
+            "label": "Payments Made",
+            "read_only": 1
+        },
+        {
+            "fieldname": "payments_section",
+            "fieldtype": "Section Break",
+            "label": "Payments"
+        },
+        {
+            "fieldname": "payments",
+            "fieldtype": "Table",
+            "label": "Payments",
+            "options": "Memo Payment"
+        },
+        {
+            "fieldname": "notes_section",
+            "fieldtype": "Section Break",
+            "label": "Notes"
+        },
+        {
+            "fieldname": "notes",
+            "fieldtype": "Text Editor",
+            "label": "Notes"
+        },
+        {
+            "fieldname": "amended_from",
+            "fieldtype": "Link",
+            "label": "Amended From",
+            "no_copy": 1,
+            "options": "Memo Contract",
+            "print_hide": 1,
+            "read_only": 1
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "is_submittable": 1,
+    "links": [],
+    "modified": "2026-05-13 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Unified Retail Management System",
+    "name": "Memo Contract",
+    "naming_rule": "Expression (old style)",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "cancel": 1,
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        },
+        {
+            "create": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "POS Manager",
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        },
+        {
+            "create": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "role": "Purchase User",
+            "write": 1
+        },
+        {
+            "create": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Purchase Manager",
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        }
+    ],
+    "row_format": "Dynamic",
+    "sort_field": "contract_date",
+    "sort_order": "DESC",
+    "states": [],
+    "title_field": "supplier_name",
+    "track_changes": 1
+}

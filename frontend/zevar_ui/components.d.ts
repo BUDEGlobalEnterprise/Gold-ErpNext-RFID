@@ -37,6 +37,7 @@ declare module 'vue' {
     DiscrepancyBoard: typeof import('./src/components/DiscrepancyBoard.vue')['default']
     FilterSidebar: typeof import('./src/components/FilterSidebar.vue')['default']
     FinancingApplicationModal: typeof import('./src/components/FinancingApplicationModal.vue')['default']
+    GoldPurchaseModal: typeof import('./src/components/GoldPurchaseModal.vue')['default']
     Header: typeof import('./src/components/Header.vue')['default']
     HeroSection: typeof import('./src/components/HeroSection.vue')['default']
     IDScannerPanel: typeof import('./src/components/IDScannerPanel.vue')['default']

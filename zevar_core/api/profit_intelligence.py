@@ -461,7 +461,7 @@ def _allocate_overhead(invoice_revenue, invoice_date):
 # ---------------------------------------------------------------------------
 
 
-@frappe.whitelist(methods=["GET"])
+@frappe.whitelist()
 def get_profit_summary(from_date=None, to_date=None):
 	"""Return aggregated profit KPIs for a date range."""
 	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
@@ -534,7 +534,7 @@ def get_profit_summary(from_date=None, to_date=None):
 	}
 
 
-@frappe.whitelist(methods=["GET"])
+@frappe.whitelist()
 def get_margin_analysis(from_date=None, to_date=None, group_by="jewelry_type"):
 	"""Group margins by jewelry_type, metal_type, purity, or salesperson."""
 	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
@@ -627,7 +627,7 @@ def get_margin_analysis(from_date=None, to_date=None, group_by="jewelry_type"):
 	return {"group_by": group_by, "data": results, "period": {"from_date": from_date, "to_date": to_date}}
 
 
-@frappe.whitelist(methods=["GET"])
+@frappe.whitelist()
 def get_cost_breakdown_detail(sales_invoice):
 	"""Return full cost breakdown for a single Sales Invoice."""
 	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
@@ -680,7 +680,7 @@ def get_cost_breakdown_detail(sales_invoice):
 	return bd
 
 
-@frappe.whitelist(methods=["GET"])
+@frappe.whitelist()
 def get_profit_trends(period="monthly", months=12):
 	"""Return time-series data for profit trends."""
 	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
@@ -716,7 +716,7 @@ def get_profit_trends(period="monthly", months=12):
 	return {"period": period, "months": int(months), "data": results}
 
 
-@frappe.whitelist(methods=["POST"])
+@frappe.whitelist()
 def recalculate_breakdown(sales_invoice):
 	"""Force recalculation of a Sale Cost Breakdown. System Manager only."""
 	frappe.only_for("System Manager")
@@ -735,7 +735,7 @@ def recalculate_breakdown(sales_invoice):
 	return {"success": True, "message": f"Breakdown recalculated for {sales_invoice}"}
 
 
-@frappe.whitelist(methods=["GET"])
+@frappe.whitelist()
 def get_margin_heatmap(from_date=None, to_date=None):
 	"""Return margin data structured for heatmap: jewelry_type x metal_type."""
 	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
@@ -772,7 +772,7 @@ def get_margin_heatmap(from_date=None, to_date=None):
 	return {"data": results, "period": {"from_date": from_date, "to_date": to_date}}
 
 
-@frappe.whitelist(methods=["GET"])
+@frappe.whitelist()
 def get_cost_component_trends(from_date=None, to_date=None, granularity="weekly"):
 	"""Return cost component time series for stacked bar charts."""
 	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
@@ -811,7 +811,7 @@ def get_cost_component_trends(from_date=None, to_date=None, granularity="weekly"
 	}
 
 
-@frappe.whitelist(methods=["GET"])
+@frappe.whitelist()
 def get_recommendations(status="Pending Review", limit=20):
 	"""Get pricing recommendations for the dashboard."""
 	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
@@ -841,7 +841,7 @@ def get_recommendations(status="Pending Review", limit=20):
 	return {"recommendations": recommendations, "total": len(recommendations)}
 
 
-@frappe.whitelist(methods=["POST"])
+@frappe.whitelist()
 def review_recommendation(recommendation, action, notes=None):
 	"""Approve or reject a pricing recommendation."""
 	frappe.only_for(["System Manager", "Store Manager", "Sales Manager"])
