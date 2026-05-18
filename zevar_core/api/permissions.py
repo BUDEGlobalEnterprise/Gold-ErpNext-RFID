@@ -24,7 +24,22 @@ POS_PERMISSIONS = {
 	"override_trade_in_2x": {"roles": ["Sales Manager", "System Manager"]},
 	"create_layaway": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
 	"cancel_layaway": {"roles": ["Sales Manager", "System Manager"]},
+	"record_cash_movement": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
 }
+
+# Roles that may operate against any warehouse without a POS profile
+# assignment. These are the roles that need cross-store access for
+# management, audit, transfers, and central inventory operations.
+CROSS_STORE_ROLES = frozenset(
+	{
+		"System Manager",
+		"Administrator",
+		"Sales Manager",
+		"Store Manager",
+		"POS Manager",
+		"Stock Manager",
+	}
+)
 
 
 @frappe.whitelist()
@@ -214,7 +229,7 @@ def approve_manager_override(
 
 
 @frappe.whitelist()
-def verify_manager_pin(pin: str) -> dict | None:
+def verify_manager_pin(pin):
 	"""
 	Verify a manager's PIN code using bcrypt.
 
@@ -366,3 +381,102 @@ def _get_category_for_action(action: str) -> str:
 	elif any(x in action_lower for x in ["stock", "inventory"]):
 		return "Inventory"
 	return "Sales"
+
+
+
+# ---------------------------------------------------------------------------
+# Multi-store warehouse access enforcement
+# ---------------------------------------------------------------------------
+
+
+def get_user_allowed_warehouses(user: str | None = None) -> list[str] | None:
+	"""Return the warehouses a user may transact against in the POS.
+
+	Returns:
+	    None  — user is unrestricted (manager-class role; can use any warehouse).
+	    list  — explicit allow-list of warehouse names. Empty list means the
+	            user has no POS profile assignment and is locked out of any
+	            warehouse-scoped POS operation.
+
+	The allow-list is built from every POS Profile assigned to the user via
+	the POS Profile User child table. Each profile contributes its
+	`.warehouse` plus all descendant warehouses in the warehouse tree, so a
+	cashier whose profile points at a store-root group can also operate
+	against the showcase / safe / back-stock zones beneath it.
+	"""
+	user = user or frappe.session.user
+
+	user_roles = set(frappe.get_roles(user))
+	if user_roles & CROSS_STORE_ROLES:
+		return None
+
+	# Profiles assigned to this user via POS Profile User
+	assigned = frappe.get_all(
+		"POS Profile User",
+		filters={"user": user},
+		pluck="parent",
+	)
+	if not assigned:
+		return []
+
+	profiles = frappe.get_all(
+		"POS Profile",
+		filters={"name": ["in", assigned], "disabled": 0},
+		fields=["warehouse"],
+	)
+
+	roots = {p.warehouse for p in profiles if p.warehouse}
+	if not roots:
+		return []
+
+	allowed: set[str] = set(roots)
+	for wh in roots:
+		# Warehouse is a NestedSet; expand to children. We use a defensive
+		# try/except because get_descendants does not exist on every Frappe
+		# version and the lft/rgt cols are not guaranteed on all sites.
+		try:
+			descendants = frappe.db.get_descendants("Warehouse", wh) or []
+			allowed.update(descendants)
+		except Exception:
+			try:
+				lft, rgt = frappe.db.get_value("Warehouse", wh, ["lft", "rgt"]) or (None, None)
+				if lft is not None and rgt is not None:
+					rows = frappe.db.get_all(
+						"Warehouse",
+						filters={"lft": [">=", lft], "rgt": ["<=", rgt]},
+						pluck="name",
+					)
+					allowed.update(rows)
+			except Exception:
+				# Tree fields not present — fall back to just the root.
+				pass
+
+	return sorted(allowed)
+
+
+def assert_pos_warehouse_access(warehouse: str | None, user: str | None = None) -> None:
+	"""Throw PermissionError if `warehouse` is outside the user's POS scope.
+
+	No-op when:
+	    - `warehouse` is falsy (caller hasn't pinned one yet),
+	    - the user has a manager-class role (CROSS_STORE_ROLES),
+	    - or the warehouse is on/under one of the user's assigned POS profiles.
+
+	Used by both the catalog read path (`get_pos_items`) and the sale write
+	path (`create_pos_invoice`) so a cashier in one store cannot read or
+	deduct stock from another store.
+	"""
+	if not warehouse:
+		return
+
+	allowed = get_user_allowed_warehouses(user)
+	if allowed is None:
+		return  # manager-class, unrestricted
+
+	if warehouse in allowed:
+		return
+
+	frappe.throw(
+		_("You are not authorized to operate against warehouse {0}.").format(warehouse),
+		frappe.PermissionError,
+	)

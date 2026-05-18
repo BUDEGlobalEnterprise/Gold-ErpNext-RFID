@@ -84,11 +84,19 @@ def get_pos_items(
 	    List of item dictionaries with stock and price information
 	"""
 	from zevar_core.api.pricing import get_item_price
+	from zevar_core.api.permissions import assert_pos_warehouse_access
 
 	if display_case:
 		case_wh = frappe.db.get_value("Display Case", display_case, "warehouse")
 		if case_wh:
 			warehouse = case_wh
+
+	# Multi-store enforcement: if the caller pinned a warehouse, verify the
+	# user is actually allowed to read from it. Manager-class roles bypass.
+	# This runs before the omni-search so we fail fast on cross-store access
+	# attempts and never leak Bin counts from another store.
+	if warehouse:
+		assert_pos_warehouse_access(warehouse)
 
 	# Convert string booleans from frontend
 	in_stock_only = in_stock_only in (True, "true", "1", 1)
@@ -131,6 +139,10 @@ def get_pos_items(
 				case_wh = _resolve_display_case_warehouse(search_term)
 				if case_wh:
 					warehouse = case_wh
+					# Newly-resolved warehouse must also pass the multi-store
+					# check — a cashier scanning another store's case label
+					# should not see that store's catalog.
+					assert_pos_warehouse_access(warehouse)
 
 	if source_filter:
 		query_filters.append(["custom_source", "=", source_filter])

@@ -79,6 +79,49 @@ def create_pos_invoice(
 	if not payments_list:
 		checkout_bouncer(_("At least one payment mode is required."), "invoice_failed")
 
+	# Resolve warehouse BEFORE per-item validation so the stock and serial
+	# checks below run against the final warehouse, not a stale or
+	# unvalidated client value. Order is:
+	#   1. caller-supplied (after multi-store check)
+	#   2. user's active POS Opening Entry profile
+	#   3. first active Store Location's default warehouse
+	if not warehouse:
+		active_pos_profile = frappe.db.get_value(
+			"POS Opening Entry",
+			filters={"user": frappe.session.user, "docstatus": 1, "status": "Open"},
+			fieldname="pos_profile",
+			order_by="creation desc",
+		)
+		if active_pos_profile:
+			warehouse = frappe.db.get_value("POS Profile", active_pos_profile, "warehouse")
+
+		if not warehouse:
+			store_loc = frappe.db.get_value("Store Location", {"is_active": 1}, "default_warehouse")
+			if store_loc:
+				warehouse = store_loc
+
+	if not warehouse:
+		checkout_bouncer(
+			_("Warehouse is required. Please select a store location or configure a default warehouse."),
+			"invoice_failed",
+		)
+
+	if not frappe.db.exists("Warehouse", warehouse):
+		checkout_bouncer(
+			_("Warehouse '{0}' not found. Please ensure a valid warehouse is configured.").format(warehouse),
+			"invoice_failed",
+		)
+
+	# Multi-store enforcement: a cashier in store A must not be able to
+	# pass store B's warehouse name and deduct stock from store B.
+	# Manager-class roles bypass via assert_pos_warehouse_access.
+	from zevar_core.api.permissions import assert_pos_warehouse_access
+
+	try:
+		assert_pos_warehouse_access(warehouse)
+	except frappe.PermissionError as exc:
+		checkout_bouncer(str(exc), "permission_denied", details={"warehouse": warehouse})
+
 	# Validate all items before creating invoice
 	for item in items_list:
 		item_code = item.get("item_code")
@@ -96,30 +139,64 @@ def create_pos_invoice(
 		if not frappe.db.exists("Item", item_code):
 			checkout_bouncer(_("Item '{0}' not found in the system.").format(item_code), "invoice_failed")
 
-	if not warehouse:
-		# Try to get warehouse from active store location
-		store_loc = frappe.db.get_value("Store Location", {"is_active": 1}, "default_warehouse")
-		if store_loc:
-			warehouse = store_loc
-		else:
-			# Try to get default warehouse from company
-			company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value(
-				"Global Defaults", "default_company"
+		# Validate Serial Number
+		serial_no = item.get("serial_no")
+		if serial_no:
+			sn_doc = frappe.db.get_value(
+				"Serial No", serial_no, ["status", "warehouse", "item_code"], as_dict=True
 			)
-			if company:
-				warehouse = frappe.db.get_value("Company", company, "default_warehouse")
+			if not sn_doc:
+				checkout_bouncer(
+					_("Serial Number '{0}' not found in the system.").format(serial_no), "invoice_failed"
+				)
+			if sn_doc.item_code != item_code:
+				checkout_bouncer(
+					_("Serial Number '{0}' does not belong to Item '{1}'.").format(serial_no, item_code),
+					"invoice_failed",
+				)
+			if sn_doc.status != "Active":
+				checkout_bouncer(
+					_(
+						"Serial Number '{0}' is not active or available for sale (Status: {1})."
+					).format(serial_no, sn_doc.status),
+					"invoice_failed",
+				)
+			if not sn_doc.warehouse:
+				checkout_bouncer(
+					_("Serial Number '{0}' is not in any warehouse.").format(serial_no), "invoice_failed"
+				)
+			# A serial sitting in another store's safe must not be sellable
+			# from this register — both for honest mistakes (cashier scans
+			# the wrong tag) and for cross-store leakage attempts.
+			try:
+				assert_pos_warehouse_access(sn_doc.warehouse)
+			except frappe.PermissionError:
+				checkout_bouncer(
+					_(
+						"Serial Number '{0}' belongs to warehouse '{1}', which is outside your store."
+					).format(serial_no, sn_doc.warehouse),
+					"permission_denied",
+					details={"serial_no": serial_no, "sn_warehouse": sn_doc.warehouse},
+				)
 
-	if not warehouse:
-		checkout_bouncer(
-			_("Warehouse is required. Please select a store location or configure a default warehouse."),
-			"invoice_failed",
+		# Validate actual stock availability to handle edge cases where items
+		# sell out while in the cart. Now safe because `warehouse` is
+		# resolved and access-checked.
+		is_stock_item, has_serial_no = frappe.db.get_value(
+			"Item", item_code, ["is_stock_item", "has_serial_no"]
 		)
-
-	if not frappe.db.exists("Warehouse", warehouse):
-		checkout_bouncer(
-			_("Warehouse '{0}' not found. Please ensure a valid warehouse is configured.").format(warehouse),
-			"invoice_failed",
-		)
+		if is_stock_item and not has_serial_no:
+			actual_qty = (
+				frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
+				or 0
+			)
+			if actual_qty < flt(item.get("qty", 1)):
+				checkout_bouncer(
+					_(
+						"Item '{0}' does not have enough stock in warehouse '{1}'. Available: {2}"
+					).format(item_code, warehouse, actual_qty),
+					"invoice_failed",
+				)
 
 	# Validate active POS session exists (managers bypass)
 	active_session = frappe.db.get_value(
@@ -266,6 +343,7 @@ def create_pos_invoice(
 					"rate": flt(item.get("rate")),
 					"warehouse": warehouse,
 					"allow_zero_valuation_rate": 1,
+					"serial_no": item.get("serial_no"),
 				},
 			)
 
@@ -413,6 +491,7 @@ def create_pos_invoice(
 				"grand_total": flt(si.grand_total),
 				"outstanding_amount": flt(si.outstanding_amount),
 				"item_count": len(si.items),
+				"warehouse": warehouse,
 				"payment_modes": [
 					{
 						"mode_of_payment": payment.mode_of_payment,
@@ -764,3 +843,30 @@ def get_pending_overrides() -> dict:
 		"overrides": overrides,
 		"count": len(overrides),
 	}
+
+@frappe.whitelist(methods=["GET", "POST"])
+def validate_cart_items(item_codes: str) -> dict:
+	"""
+	Takes a list of item_codes (JSON string), and returns their current state
+	(price, active, name) so the frontend cart can update prices and remove inactive items.
+	"""
+	try:
+		items = frappe.parse_json(item_codes)
+	except Exception:
+		items = []
+	
+	if not items:
+		return {}
+
+	results = {}
+	for item_code in items:
+		item = frappe.db.get_value("Item", item_code, ["item_name", "standard_rate", "disabled"], as_dict=True)
+		if item:
+			results[item_code] = {
+				"item_name": item.item_name,
+				"rate": flt(item.standard_rate),
+				"disabled": item.disabled
+			}
+		else:
+			results[item_code] = None
+	return results
