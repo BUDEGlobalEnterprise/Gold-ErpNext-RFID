@@ -81,14 +81,44 @@ export const useCartStore = defineStore('cart', () => {
 	// ==========================================================================
 
 	function addItem(item) {
+		// Return a structured status so callers can show a clear UI message
+		// (e.g. "already in cart") without parsing magic strings or relying
+		// on cart-length deltas. Existing callers that ignore the return
+		// value still work because successful adds keep their old behavior.
 		if (!item.item_code) {
-			return
+			return { status: 'invalid', message: 'Item is missing item_code.' }
+		}
+
+		const incomingSerial = item.serial_no || null
+
+		// Duplicate-scan guard: a serial number identifies a unique physical
+		// piece. Scanning the same one twice is almost always a slip — show
+		// a warning and don't double-add. The cashier can deliberately add
+		// other serials of the same item_code without conflict.
+		if (incomingSerial) {
+			const dupe = items.value.find((i) => i.serial_no && i.serial_no === incomingSerial)
+			if (dupe) {
+				return {
+					status: 'duplicate_serial',
+					serial_no: incomingSerial,
+					item_code: item.item_code,
+					message: `Serial ${incomingSerial} is already in the cart.`,
+				}
+			}
 		}
 
 		const priceToUse = item.final_price || item.price || item.amount || 0
-		const existingItem = items.value.find((i) => i.item_code === item.item_code)
+		// Match by item_code AND serial_no so a non-serialized line and a
+		// serialized line for the same item_code stay separate.
+		const existingItem = items.value.find(
+			(i) => i.item_code === item.item_code && (i.serial_no || null) === incomingSerial
+		)
 
 		if (existingItem) {
+			// Two cases reach here:
+			//   - non-serialized item scanned again -> qty++
+			//   - serialized item with matching serial -> blocked above
+			// So this only ever runs for non-serialized lines.
 			existingItem.qty++
 		} else {
 			items.value.push({
@@ -100,9 +130,11 @@ export const useCartStore = defineStore('cart', () => {
 				amount: priceToUse,
 				weight: item.gross_weight || item.custom_gross_weight_g,
 				qty: 1,
+				serial_no: incomingSerial,
 			})
 		}
 		saveToStorage()
+		return { status: 'added', item_code: item.item_code, serial_no: incomingSerial }
 	}
 
 	function removeItem(index) {
@@ -173,6 +205,116 @@ export const useCartStore = defineStore('cart', () => {
 		saveToStorage()
 	}
 
+	async function validateItems() {
+		if (items.value.length === 0) return
+
+		const itemCodes = items.value.map(i => i.item_code)
+		const resource = createResource({
+			url: 'zevar_core.api.pos.validate_cart_items',
+			makeParams() {
+				return { item_codes: JSON.stringify(itemCodes) }
+			}
+		})
+
+		try {
+			const results = await resource.fetch()
+			const validData = results.message || results || {}
+
+			// Update the cart state
+			const updatedItems = []
+			let changed = false
+			
+			for (const item of items.value) {
+				const serverItem = validData[item.item_code]
+				if (!serverItem || serverItem.disabled) {
+					changed = true
+					continue // Item removed
+				}
+				
+				if (item.amount !== serverItem.rate) {
+					item.amount = serverItem.rate
+					changed = true
+				}
+				updatedItems.push(item)
+			}
+
+			if (changed) {
+				items.value = updatedItems
+				saveToStorage()
+			}
+		} catch (e) {
+			console.error('Failed to validate cart items:', e)
+		}
+	}
+
+	/**
+	 * Pre-submit gate. Calls zevar_core.api.pos.validate_pos_cart and
+	 * returns its structured response so the caller (POS.vue / CartSidebar)
+	 * can render blocking errors and price-drift warnings before the
+	 * cashier presses "Submit".
+	 *
+	 * Shape of the resolved value:
+	 *   {
+	 *     ok: boolean,           // true iff there are no blocking issues
+	 *     blocking: boolean,     // any issue with blocking=true
+	 *     issues: Array<{
+	 *       item_code: string,
+	 *       type: string,        // 'out_of_stock' | 'price_drift' | ...
+	 *       message: string,
+	 *       blocking: boolean,
+	 *       details?: object,
+	 *     }>,
+	 *   }
+	 *
+	 * On network/transport failure resolves to { ok: false, blocking: true,
+	 * issues: [{ type: 'network_error', ... }] } so callers can fail
+	 * closed and refuse to submit instead of guessing.
+	 */
+	async function validateForSubmit(warehouse) {
+		if (items.value.length === 0) {
+			return { ok: true, blocking: false, issues: [] }
+		}
+
+		const payload = items.value.map((i) => ({
+			item_code: i.item_code,
+			qty: i.qty || 1,
+			rate: i.amount || 0,
+			serial_no: i.serial_no || null,
+		}))
+
+		try {
+			const resource = createResource({
+				url: 'zevar_core.api.pos.validate_pos_cart',
+				method: 'POST',
+				params: {
+					items: JSON.stringify(payload),
+					warehouse: warehouse || '',
+				},
+			})
+			const result = await resource.fetch()
+			const data = result?.message ?? result ?? {}
+			return {
+				ok: !!data.ok,
+				blocking: !!data.blocking,
+				issues: Array.isArray(data.issues) ? data.issues : [],
+			}
+		} catch (e) {
+			console.error('validate_pos_cart failed:', e)
+			return {
+				ok: false,
+				blocking: true,
+				issues: [
+					{
+						item_code: '',
+						type: 'network_error',
+						message: 'Could not reach the cart validator. Please check your connection.',
+						blocking: true,
+					},
+				],
+			}
+		}
+	}
+
 	function updateItemQuantity(index, qty) {
 		if (qty <= 0) {
 			items.value.splice(index, 1)
@@ -229,6 +371,7 @@ export const useCartStore = defineStore('cart', () => {
 			item_code: i.item_code,
 			qty: i.qty || 1,
 			rate: i.amount || 0,
+			serial_no: i.serial_no || null,
 		}))
 
 		const paymentsPayload = payments.map((p) => ({
@@ -302,6 +445,7 @@ export const useCartStore = defineStore('cart', () => {
 			item_code: i.item_code,
 			qty: i.qty || 1,
 			rate: i.amount || 0,
+			serial_no: i.serial_no || null,
 		}))
 
 		const customerName =
@@ -342,6 +486,8 @@ export const useCartStore = defineStore('cart', () => {
 		removeItem,
 		updateItemQuantity,
 		clearCart,
+		validateItems,
+		validateForSubmit,
 		submitOrder,
 		submitLayaway,
 		customer,
