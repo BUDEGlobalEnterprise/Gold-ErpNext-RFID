@@ -17,6 +17,37 @@ def _sanitize_search(term):
 	return re.sub(r'[%_\\;\'"]', "", str(term).strip())[:100]
 
 
+def _resolve_display_case_warehouse(term: str) -> str | None:
+	"""Return the warehouse for an active Display Case whose code/name matches `term`.
+
+	Used by `get_pos_items` so that scanning or typing a Display Case identifier
+	(e.g. "CASE-A1") in the search box automatically scopes the catalog to that
+	case's warehouse. Returns None if no active case matches exactly.
+
+	Match is case-insensitive against `case_code` first, then the document `name`
+	(which equals `case_name` per the DocType's autoname rule).
+	"""
+	if not term:
+		return None
+
+	# Try case_code first — that is what is typically printed on the physical
+	# case label and most likely to be scanned.
+	case = frappe.db.get_value(
+		"Display Case",
+		{"case_code": term, "is_active": 1},
+		["warehouse"],
+		as_dict=True,
+	)
+	if not case:
+		case = frappe.db.get_value(
+			"Display Case",
+			{"name": term, "is_active": 1},
+			["warehouse"],
+			as_dict=True,
+		)
+	return case.warehouse if case else None
+
+
 @frappe.whitelist()
 @rate_limit(limit=100, seconds=60)
 def get_pos_items(
@@ -76,10 +107,30 @@ def get_pos_items(
 
 	# Build filters
 	query_filters = [["disabled", "=", 0], ["has_variants", "=", 0]]
+	or_filters = None
 
 	if search_term:
 		search_term = _sanitize_search(search_term)
-		query_filters.append(["item_name", "like", f"%{search_term}%"])
+		if search_term:
+			# Omni-search: match item_code (name), item_name, or vendor SKU.
+			# We use or_filters so this is OR'd internally but AND'd with the
+			# disabled/has_variants/source/etc filters above.
+			like = f"%{search_term}%"
+			or_filters = [
+				["name", "like", like],
+				["item_name", "like", like],
+				["custom_vendor_sku", "like", like],
+			]
+
+			# If the search term matches a Display Case identifier, auto-scope
+			# the catalog to that case's warehouse so a cashier can scan a case
+			# label (e.g. "CASE-A1") and see only its contents. We only do this
+			# when the caller hasn't already pinned a warehouse/case to avoid
+			# silently overriding explicit context.
+			if not warehouse and not display_case:
+				case_wh = _resolve_display_case_warehouse(search_term)
+				if case_wh:
+					warehouse = case_wh
 
 	if source_filter:
 		query_filters.append(["custom_source", "=", source_filter])
@@ -158,6 +209,7 @@ def get_pos_items(
 	items = frappe.get_list(
 		"Item",
 		filters=query_filters,
+		or_filters=or_filters,
 		fields=_get_item_fields(),
 		order_by="custom_is_featured desc, custom_is_trending desc, custom_jewelry_type asc, item_name asc",
 		start=int(start),
