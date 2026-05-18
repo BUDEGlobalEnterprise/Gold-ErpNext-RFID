@@ -870,3 +870,269 @@ def validate_cart_items(item_codes: str) -> dict:
 		else:
 			results[item_code] = None
 	return results
+
+
+
+# ---------------------------------------------------------------------------
+# Pre-submit cart validation (Fix #3)
+# ---------------------------------------------------------------------------
+#
+# These helpers and the validate_pos_cart endpoint give the frontend a single
+# call to make right before "Submit" so the cashier can be told *exactly* why
+# a sale would fail (sold out, serial inactive, foreign warehouse, price
+# changed, etc.) without having to attempt and roll back a full Sales Invoice.
+#
+# Issue types are stable strings so the UI can branch on them:
+#
+#   item_missing            — item_code does not exist in the system
+#   item_disabled           — Item.disabled = 1
+#   qty_invalid             — qty <= 0 or non-numeric
+#   rate_invalid            — rate <= 0 or non-numeric
+#   out_of_stock            — Bin.actual_qty < requested qty (non-serialized)
+#   serial_not_found        — Serial No record missing
+#   serial_wrong_item       — serial belongs to a different item
+#   serial_inactive         — Serial No.status != "Active"
+#   serial_no_warehouse     — Serial No.warehouse is empty
+#   serial_wrong_warehouse  — serial sits in a foreign / inaccessible warehouse
+#   price_drift             — current canonical price differs from cart rate
+#                             (informational only; submission is not blocked)
+#
+# `blocking` flag on each issue is True for everything except price_drift, so
+# callers can decide whether to refuse submission or just warn the user.
+
+
+# Tolerance below which a price difference is considered floating-point noise
+# rather than a real price change. 0.5 cents.
+_PRICE_DRIFT_TOLERANCE_USD = 0.005
+
+
+def _make_issue(item_code: str, type_: str, message: str, *, blocking: bool = True, **details) -> dict:
+	"""Build a structured issue dict. Keep the schema stable for the UI."""
+	issue = {
+		"item_code": item_code,
+		"type": type_,
+		"message": message,
+		"blocking": blocking,
+	}
+	if details:
+		issue["details"] = details
+	return issue
+
+
+def _check_cart_item_availability(item_dict: dict, warehouse: str | None) -> list[dict]:
+	"""Return a list of blocking-availability issues for one cart line.
+
+	Covers item existence, qty/rate sanity, stock availability for non-
+	serialized items, and serial number state for serialized items. Cross-
+	store serial leakage is caught via assert_pos_warehouse_access from
+	Fix #2.
+	"""
+	from zevar_core.api.permissions import assert_pos_warehouse_access
+
+	issues: list[dict] = []
+	item_code = item_dict.get("item_code")
+
+	if not item_code:
+		return [_make_issue("", "item_missing", _("Each cart line must have an item_code."))]
+
+	qty = flt(item_dict.get("qty", 0))
+	rate = flt(item_dict.get("rate", 0))
+
+	if qty <= 0:
+		issues.append(
+			_make_issue(item_code, "qty_invalid", _("Quantity must be greater than zero."), qty=qty)
+		)
+	if rate <= 0:
+		issues.append(
+			_make_issue(item_code, "rate_invalid", _("Rate must be greater than zero."), rate=rate)
+		)
+
+	if not frappe.db.exists("Item", item_code):
+		issues.append(
+			_make_issue(item_code, "item_missing", _("Item '{0}' not found.").format(item_code))
+		)
+		return issues
+
+	item_meta = frappe.db.get_value(
+		"Item", item_code, ["disabled", "is_stock_item", "has_serial_no"], as_dict=True
+	)
+	if item_meta and item_meta.disabled:
+		issues.append(
+			_make_issue(item_code, "item_disabled", _("Item '{0}' is disabled.").format(item_code))
+		)
+		return issues
+
+	serial_no = item_dict.get("serial_no")
+	if serial_no:
+		sn_doc = frappe.db.get_value(
+			"Serial No", serial_no, ["status", "warehouse", "item_code"], as_dict=True
+		)
+		if not sn_doc:
+			issues.append(
+				_make_issue(
+					item_code,
+					"serial_not_found",
+					_("Serial Number '{0}' not found.").format(serial_no),
+					serial_no=serial_no,
+				)
+			)
+			return issues
+		if sn_doc.item_code != item_code:
+			issues.append(
+				_make_issue(
+					item_code,
+					"serial_wrong_item",
+					_(
+						"Serial Number '{0}' belongs to item '{1}', not '{2}'."
+					).format(serial_no, sn_doc.item_code, item_code),
+					serial_no=serial_no,
+					expected_item=item_code,
+					actual_item=sn_doc.item_code,
+				)
+			)
+		if sn_doc.status != "Active":
+			issues.append(
+				_make_issue(
+					item_code,
+					"serial_inactive",
+					_(
+						"Serial Number '{0}' is no longer available (status: {1})."
+					).format(serial_no, sn_doc.status),
+					serial_no=serial_no,
+					serial_status=sn_doc.status,
+				)
+			)
+		if not sn_doc.warehouse:
+			issues.append(
+				_make_issue(
+					item_code,
+					"serial_no_warehouse",
+					_("Serial Number '{0}' is not in any warehouse.").format(serial_no),
+					serial_no=serial_no,
+				)
+			)
+		else:
+			# Cross-store guard from Fix #2.
+			try:
+				assert_pos_warehouse_access(sn_doc.warehouse)
+			except frappe.PermissionError:
+				issues.append(
+					_make_issue(
+						item_code,
+						"serial_wrong_warehouse",
+						_(
+							"Serial Number '{0}' is in warehouse '{1}', which is outside your store."
+						).format(serial_no, sn_doc.warehouse),
+						serial_no=serial_no,
+						sn_warehouse=sn_doc.warehouse,
+					)
+				)
+		# Serial-numbered: no Bin qty check needed.
+		return issues
+
+	# Non-serialized stock-item flow: confirm Bin has enough on hand.
+	if item_meta and item_meta.is_stock_item and warehouse:
+		actual_qty = (
+			flt(
+				frappe.db.get_value(
+					"Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty"
+				)
+			)
+			or 0
+		)
+		if actual_qty < qty:
+			issues.append(
+				_make_issue(
+					item_code,
+					"out_of_stock",
+					_(
+						"Item '{0}' has {1} available in warehouse '{2}' but the cart requested {3}."
+					).format(item_code, actual_qty, warehouse, qty),
+					available=actual_qty,
+					requested=qty,
+					warehouse=warehouse,
+				)
+			)
+
+	return issues
+
+
+def _check_cart_item_price_drift(item_dict: dict) -> list[dict]:
+	"""Return a `price_drift` issue if current canonical price differs from cart rate.
+
+	Non-blocking — the cashier may have legitimately applied a discount or a
+	manager override. The frontend uses this to surface a "price changed"
+	warning so the customer/cashier can confirm.
+	"""
+	item_code = item_dict.get("item_code")
+	cart_rate = flt(item_dict.get("rate", 0))
+	if not item_code or cart_rate <= 0:
+		return []
+
+	try:
+		from zevar_core.api.pricing import get_item_price
+
+		price_data = get_item_price(item_code) or {}
+		current_price = flt(price_data.get("final_price") or 0)
+	except Exception:
+		# Pricing failures must not block availability checks.
+		return []
+
+	if current_price <= 0:
+		return []
+
+	if abs(current_price - cart_rate) <= _PRICE_DRIFT_TOLERANCE_USD:
+		return []
+
+	return [
+		_make_issue(
+			item_code,
+			"price_drift",
+			_(
+				"Item '{0}' price changed: cart had {1}, current price is {2}."
+			).format(item_code, cart_rate, current_price),
+			blocking=False,
+			cart_rate=cart_rate,
+			current_price=current_price,
+		)
+	]
+
+
+@frappe.whitelist(methods=["POST"])
+def validate_pos_cart(items: str, warehouse: str | None = None) -> dict:
+	"""Pre-submit cart gate. Returns structured issues for every cart line.
+
+	Args:
+	    items: JSON string of cart lines, each at minimum
+	           {item_code, qty, rate, serial_no?}.
+	    warehouse: Warehouse the sale will be booked from. Required for
+	               non-serialized stock checks; optional for serialized-only
+	               carts.
+
+	Returns:
+	    {
+	        "ok": bool,           # True iff there are no blocking issues
+	        "blocking": bool,     # convenience: any issue with blocking=True
+	        "issues": [ ... ],    # list of issue dicts, see module docstring
+	    }
+	"""
+	from zevar_core.api.permissions import assert_pos_warehouse_access
+
+	try:
+		items_list = frappe.parse_json(items) if isinstance(items, str) else (items or [])
+	except Exception:
+		items_list = []
+
+	# A foreign warehouse should fail before any item walk so we don't leak
+	# Bin counts. Non-serialized lines without a warehouse yield no stock
+	# issue (frontend may be checking serial-only carts pre-checkout).
+	if warehouse:
+		assert_pos_warehouse_access(warehouse)
+
+	issues: list[dict] = []
+	for line in items_list:
+		issues.extend(_check_cart_item_availability(line, warehouse))
+		issues.extend(_check_cart_item_price_drift(line))
+
+	blocking = any(i.get("blocking", True) for i in issues)
+	return {"ok": not blocking, "blocking": blocking, "issues": issues}
