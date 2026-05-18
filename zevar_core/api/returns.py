@@ -77,6 +77,13 @@ def get_returnable_items(invoice_name: str) -> dict:
 		remaining_qty = flt(item.qty) - flt(returned_qty)
 
 		if remaining_qty > 0:
+			# Serials originally sold on this line, parsed from the
+			# newline-separated serial_no field. The UI uses these to let
+			# the cashier pick which physical piece is being returned.
+			line_serials = [
+				sn.strip() for sn in (item.get("serial_no") or "").splitlines() if sn.strip()
+			]
+
 			items.append(
 				{
 					"item_code": item.item_code,
@@ -87,6 +94,7 @@ def get_returnable_items(invoice_name: str) -> dict:
 					"rate": flt(item.rate),
 					"amount": flt(item.amount),
 					"warehouse": item.warehouse,
+					"serial_nos": line_serials,
 				}
 			)
 
@@ -109,16 +117,24 @@ def create_return_invoice(
 	reason: str,
 	return_type: str = "refund",
 	refund_mode: str | None = None,
+	return_warehouse: str | None = None,
 ) -> dict:
 	"""
 	Create a return invoice for a POS transaction.
 
 	Args:
 		original_invoice: Original Sales Invoice name
-		items: JSON string of items to return [{item_code, qty, rate}]
+		items: JSON string of items to return [{item_code, qty, rate, serial_no?}]
 		reason: Reason for return
 		return_type: Type of return ('refund', 'store_credit', 'exchange')
 		refund_mode: Payment mode for refund
+		return_warehouse: Warehouse the returned stock lands back into. If
+			omitted, falls back to each original line's warehouse so same-
+			store returns keep their pre-Fix-#7 behaviour. When set, every
+			returned line will use this warehouse — used by cross-store
+			returns where a cashier in store B accepts a return that was
+			originally sold by store A and the piece must end up in B's
+			available inventory.
 
 	Returns:
 		Created return invoice details
@@ -143,6 +159,31 @@ def create_return_invoice(
 	if original.docstatus != 1:
 		frappe.throw(_("Only submitted invoices can be returned."))
 
+	# Multi-store guard: if the cashier is sending the stock back into a
+	# specific warehouse, make sure they're allowed to operate there. Empty
+	# return_warehouse keeps the original-line warehouse (same-store return)
+	# and is unconditionally allowed.
+	if return_warehouse:
+		from zevar_core.api.permissions import assert_pos_warehouse_access
+
+		assert_pos_warehouse_access(return_warehouse)
+
+	# Build a quick lookup of the original lines keyed by (item_code,
+	# serial_no). Same-item-code lines with different serials are distinct
+	# physical pieces and need to be matched precisely.
+	original_lines_by_serial: dict[tuple, Any] = {}
+	original_lines_by_code: dict[str, Any] = {}
+	original_serials_for_item: dict[str, set] = {}
+	for orig_line in original.items:
+		original_lines_by_code.setdefault(orig_line.item_code, orig_line)
+		serial_set = original_serials_for_item.setdefault(orig_line.item_code, set())
+		# An ERPNext SI item can carry multiple serials newline-separated.
+		for sn in (orig_line.get("serial_no") or "").splitlines():
+			sn = sn.strip()
+			if sn:
+				serial_set.add(sn)
+				original_lines_by_serial[(orig_line.item_code, sn)] = orig_line
+
 	try:
 		meta = frappe.get_meta("Sales Invoice")
 
@@ -165,32 +206,73 @@ def create_return_invoice(
 		return_invoice.items = []
 
 		for return_item in items_list:
-			# Find original item
-			original_item = next(
-				(i for i in original.items if i.item_code == return_item.get("item_code")), None
-			)
+			item_code = return_item.get("item_code")
+			serial_no = (return_item.get("serial_no") or "").strip() or None
+
+			# Resolve the original line — preferring an exact serial match
+			# when one is supplied, falling back to first-line-by-item-code
+			# for non-serialized items.
+			original_item = None
+			if serial_no:
+				original_item = original_lines_by_serial.get((item_code, serial_no))
+				if not original_item:
+					sold_serials = original_serials_for_item.get(item_code, set())
+					if sold_serials:
+						frappe.throw(
+							_(
+								"Serial Number '{0}' was not sold on invoice {1}. "
+								"Sold serials for {2}: {3}."
+							).format(
+								serial_no,
+								original_invoice,
+								item_code,
+								", ".join(sorted(sold_serials)),
+							)
+						)
+					# Item exists on the invoice but had no serials recorded
+					# (legacy / non-serialized line). Fall through to the
+					# code-based lookup below.
+			if not original_item:
+				original_item = original_lines_by_code.get(item_code)
 
 			if not original_item:
 				frappe.throw(
-					_("Item {0} not found in original invoice.").format(return_item.get("item_code"))
+					_("Item {0} not found in original invoice.").format(item_code)
 				)
 
 			return_qty = flt(return_item.get("qty", 0))
 			if return_qty <= 0:
 				continue
 
-			# Add with negative quantity
-			return_invoice.append(
-				"items",
-				{
-					"item_code": original_item.item_code,
-					"item_name": original_item.item_name,
-					"qty": -return_qty,  # Negative for return
-					"rate": flt(return_item.get("rate", original_item.rate)),
-					"warehouse": original_item.warehouse,
-					"allow_zero_valuation_rate": 1,
-				},
-			)
+			# A serialized item must come back one piece at a time so the
+			# returning serial maps unambiguously to a stock movement.
+			if serial_no and abs(return_qty) > 1:
+				frappe.throw(
+					_(
+						"Serial Number '{0}' is a single physical piece — "
+						"return qty must be 1."
+					).format(serial_no)
+				)
+
+			# Where does the returned stock land?
+			# - explicit return_warehouse (cross-store) wins
+			# - otherwise the original line's warehouse (same-store)
+			line_warehouse = return_warehouse or original_item.warehouse
+
+			# Add with negative quantity. Passing serial_no through is
+			# what lets ERPNext's Stock Ledger flip the Serial No back to
+			# Active and put the piece in line_warehouse.
+			return_line: dict = {
+				"item_code": original_item.item_code,
+				"item_name": original_item.item_name,
+				"qty": -return_qty,
+				"rate": flt(return_item.get("rate", original_item.rate)),
+				"warehouse": line_warehouse,
+				"allow_zero_valuation_rate": 1,
+			}
+			if serial_no:
+				return_line["serial_no"] = serial_no
+			return_invoice.append("items", return_line)
 
 		# Clear payments and add refund payment
 		return_invoice.payments = []
