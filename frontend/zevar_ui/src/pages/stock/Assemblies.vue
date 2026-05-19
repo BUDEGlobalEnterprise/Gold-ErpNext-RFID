@@ -11,7 +11,26 @@
 				</button>
 			</div>
 			<div class="flex flex-wrap gap-2 mb-4">
+<<<<<<< Updated upstream
 				<button v-for="f in ['All','Manufacture','Repack']" :key="f" @click="purposeFilter=f==='All'?'':f; loadData()" class="px-3 py-1.5 rounded-full text-xs font-bold transition" :class="(purposeFilter||'All')===(f==='All'&&!purposeFilter?'All':f)?'bg-[#D4AF37] text-white':'bg-gray-100 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-300'">{{ f }}</button>
+=======
+				<button
+					v-for="f in ['All', 'Manufacture', 'Repack']"
+					:key="f"
+					@click="
+						purposeFilter = f === 'All' ? '' : f;
+						loadData();
+					"
+					class="px-3 py-1.5 rounded-full text-xs font-bold transition"
+					:class="
+						(purposeFilter || 'All') === (f === 'All' && !purposeFilter ? 'All' : f)
+							? 'bg-[#D4AF37] text-white'
+							: 'bg-gray-100 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-300'
+					"
+				>
+					{{ f }}
+				</button>
+>>>>>>> Stashed changes
 			</div>
 			<div class="flex-1 overflow-y-auto min-h-0">
 				<div v-if="stock.assembliesResource.loading && !stock.assemblies.length" class="flex items-center justify-center py-20"><div class="animate-spin w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full"></div></div>

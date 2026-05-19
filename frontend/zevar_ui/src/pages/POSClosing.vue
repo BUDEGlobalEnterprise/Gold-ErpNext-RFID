@@ -110,6 +110,78 @@
 					</div>
 				</div>
 
+				<!-- Cash Movements -->
+				<div v-if="cashMovements.length > 0" class="premium-card p-5">
+					<div class="flex items-center justify-between mb-4">
+						<h3 class="premium-title !text-base">Cash Movements</h3>
+						<span class="text-xs text-gray-500">Mid-shift adjustments</span>
+					</div>
+					<div class="space-y-2 mb-4">
+						<div
+							v-for="m in cashMovements"
+							:key="m.name"
+							class="flex items-center justify-between p-3 rounded-lg text-sm"
+							:class="{
+								'bg-emerald-500/10': m.movement_type === 'Cash In',
+								'bg-red-500/10': m.movement_type === 'Cash Out',
+							}"
+						>
+							<div class="flex items-center gap-3">
+								<span
+									class="font-bold text-xs px-2 py-0.5 rounded-full"
+									:class="{
+										'bg-emerald-500 text-white': m.movement_type === 'Cash In',
+										'bg-red-500 text-white': m.movement_type === 'Cash Out',
+									}"
+								>
+									{{ m.movement_type === 'Cash In' ? '+ IN' : '- OUT' }}
+								</span>
+								<div>
+									<p class="font-medium text-gray-900 dark:text-white">
+										{{ m.reason }}
+									</p>
+									<p class="text-xs text-gray-500">
+										{{ formatTime(m.creation) }}
+										<span v-if="m.notes"> · {{ m.notes }}</span>
+									</p>
+								</div>
+							</div>
+							<span
+								class="font-mono font-bold"
+								:class="{
+									'text-emerald-600': m.movement_type === 'Cash In',
+									'text-red-500': m.movement_type === 'Cash Out',
+								}"
+							>
+								{{ m.movement_type === 'Cash In' ? '+' : '-' }}${{ formatAmount(m.amount) }}
+							</span>
+						</div>
+					</div>
+					<div class="grid grid-cols-3 gap-4 pt-3 border-t border-gray-200 dark:border-warm-border/50">
+						<div class="text-center">
+							<p class="text-xs text-gray-500">Total In</p>
+							<p class="text-sm font-bold text-emerald-600 font-mono">
+								+${{ formatAmount(cashMovementsTotal.in) }}
+							</p>
+						</div>
+						<div class="text-center">
+							<p class="text-xs text-gray-500">Total Out</p>
+							<p class="text-sm font-bold text-red-500 font-mono">
+								-${{ formatAmount(cashMovementsTotal.out) }}
+							</p>
+						</div>
+						<div class="text-center">
+							<p class="text-xs text-gray-500">Net</p>
+							<p
+								class="text-sm font-bold font-mono"
+								:class="cashMovementsTotal.net >= 0 ? 'text-emerald-600' : 'text-red-500'"
+							>
+								{{ cashMovementsTotal.net >= 0 ? '+' : '' }}${{ formatAmount(Math.abs(cashMovementsTotal.net)) }}
+							</p>
+						</div>
+					</div>
+				</div>
+
 				<div class="premium-card p-6">
 					<form @submit.prevent="submitClosing" class="space-y-6">
 						<div>
@@ -362,6 +434,8 @@ const overrideRequired = ref(false)
 const showOverrideModal = ref(false)
 const alertThreshold = ref(5)
 const managerOverride = ref(null)
+const cashMovements = ref([])
+const cashMovementsTotal = ref({ in: 0, out: 0, net: 0 })
 
 const form = ref({
 	closing_balance: 0,
@@ -438,6 +512,11 @@ const previewCloseResource = createResource({
 	auto: false,
 })
 
+const cashMovementsResource = createResource({
+	url: 'zevar_core.api.pos_session.get_cash_movements',
+	auto: false,
+})
+
 const closeSessionResource = createResource({
 	url: 'zevar_core.api.pos_session.close_pos_session_v2',
 	auto: false,
@@ -446,6 +525,29 @@ const closeSessionResource = createResource({
 function formatAmount(amount) {
 	if (amount === null || amount === undefined) return '0.00'
 	return Number(amount).toFixed(2)
+}
+
+function formatTime(timestamp) {
+	if (!timestamp) return ''
+	const d = new Date(timestamp)
+	return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+async function fetchCashMovements() {
+	if (!posSession.status.session?.name) return
+	try {
+		const res = await cashMovementsResource.submit({
+			session_name: posSession.status.session.name,
+		})
+		cashMovements.value = res.movements || []
+		cashMovementsTotal.value = {
+			in: res.total_in || 0,
+			out: res.total_out || 0,
+			net: res.net || 0,
+		}
+	} catch (err) {
+		console.error('Failed to fetch cash movements:', err)
+	}
 }
 
 function getSubtotal(denom) {
@@ -548,5 +650,6 @@ onMounted(() => {
 			form.value.cash_breakdown[d.value] = 0
 		}
 	})
+	fetchCashMovements()
 })
 </script>

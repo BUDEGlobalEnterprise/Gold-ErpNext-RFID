@@ -52,6 +52,7 @@ self.addEventListener('fetch', (event) => {
 	// Handle API calls separately
 	if (url.pathname.includes('/api/method/')) {
 		// Do not cache sensitive auth methods
+<<<<<<< Updated upstream
 		const sensitiveMethods = [
 			'get_user_info',
 			'get_logged_user',
@@ -63,6 +64,14 @@ self.addEventListener('fetch', (event) => {
 			return
 		}
 		
+=======
+		const sensitiveMethods = ['get_user_info', 'get_logged_user', 'logout', 'login']
+		if (sensitiveMethods.some((m) => url.pathname.includes(m))) {
+			event.respondWith(fetch(request))
+			return
+		}
+
+>>>>>>> Stashed changes
 		event.respondWith(handleAPIRequest(request))
 		return
 	}

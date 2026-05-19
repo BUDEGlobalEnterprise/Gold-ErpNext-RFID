@@ -143,7 +143,7 @@ def _mark_opening_entry_closed(session_name: str, closing_entry_name: str) -> No
 	opening_entry.set_status(update=True, update_modified=False)
 
 
-def _normalize_cash_breakdown(cash_breakdown: str | list | dict | None) -> list[dict]:
+def _normalize_cash_breakdown(cash_breakdown):
 	"""Convert legacy JSON breakdown payloads into payment rows."""
 	if not cash_breakdown:
 		return []
@@ -163,7 +163,7 @@ def open_pos_session(
 	pos_profile: str,
 	opening_balance: float,
 	cash_breakdown: str | list | None = None,
-	notes: str | None = None,
+	notes=None,
 ) -> dict:
 	"""
 	Open a new POS session (cash register).
@@ -333,9 +333,20 @@ def preview_close(session_name: str, total_cash_counted: float) -> dict:
 	expected_cash = sum(flt(p.amount) for p in payments if p.mode_of_payment == "Cash")
 	total_expected_sales = sum(flt(p.amount) for p in payments)
 
+	# Include cash movements in expected balance
+	cash_movements = frappe.get_all(
+		"Cash Movement",
+		filters={"session": session_name, "docstatus": 1},
+		fields=["movement_type", "amount"],
+	)
+	net_cash_movement = sum(
+		flt(m.amount) if m.movement_type == "Cash In" else -flt(m.amount)
+		for m in cash_movements
+	)
+
 	# Calculate variance against total expected (since UI has only one input)
 	total_actual = flt(total_cash_counted)
-	total_expected_balance = fixed_float + total_expected_sales
+	total_expected_balance = fixed_float + total_expected_sales + net_cash_movement
 	variance = total_actual - total_expected_balance
 
 	return {
@@ -354,7 +365,7 @@ def close_pos_session_v2(
 	session_name: str,
 	total_cash_counted: float,
 	breakdown: str | list | None = None,
-	notes: str | None = None,
+	notes=None,
 ) -> dict:
 	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
 
@@ -430,10 +441,21 @@ def close_pos_session_v2(
 			as_dict=True,
 		)
 
+		# Include cash movements
+		cash_movements = frappe.get_all(
+			"Cash Movement",
+			filters={"session": session_name, "docstatus": 1},
+			fields=["movement_type", "amount"],
+		)
+		net_cash_movement = sum(
+			flt(m.amount) if m.movement_type == "Cash In" else -flt(m.amount)
+			for m in cash_movements
+		)
+
 		# Calculate total variance to distribute to Cash
 		total_actual = flt(total_cash_counted)
 		total_sales = sum(flt(p.amount) for p in payments)
-		total_expected = fixed_float + total_sales
+		total_expected = fixed_float + total_sales + net_cash_movement
 		total_variance = total_actual - total_expected
 
 		# Sync payment reconciliation for ALL modes
@@ -556,7 +578,7 @@ def close_pos_session(
 	session_name: str,
 	closing_balance: float,
 	cash_breakdown: str | list | None = None,
-	notes: str | None = None,
+	notes=None,
 ) -> dict:
 	"""
 	Close an active POS session with reconciliation.
@@ -610,8 +632,19 @@ def close_pos_session(
 		as_dict=True,
 	)
 
+	# Include cash movements
+	cash_movements = frappe.get_all(
+		"Cash Movement",
+		filters={"session": session_name, "docstatus": 1},
+		fields=["movement_type", "amount"],
+	)
+	net_cash_movement = sum(
+		flt(m.amount) if m.movement_type == "Cash In" else -flt(m.amount)
+		for m in cash_movements
+	)
+
 	total_sales = flt(sales_data[0].get("total", 0)) if sales_data else 0
-	expected_balance = opening_balance + total_sales
+	expected_balance = opening_balance + total_sales + net_cash_movement
 	variance = flt(closing_balance) - expected_balance
 
 	try:
@@ -1004,4 +1037,70 @@ def get_live_sales_feed(hours: int = 24) -> dict:
 			"open_session_count": len(open_sessions),
 			"hours": int(hours or 24),
 		},
+	}
+
+@frappe.whitelist(methods=["POST"])
+def record_cash_movement(
+	session_name: str,
+	movement_type: str,
+	amount: float,
+	reason: str,
+	notes=None,
+	manager_pin=None,
+) -> dict:
+	"""Record a cash in/out movement during an active POS session."""
+	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
+	session = frappe.get_doc("POS Opening Entry", session_name)
+	if session.status != "Open":
+		frappe.throw(_("Session is not open"))
+	authorized_by = None
+	if movement_type == "Cash Out" and flt(amount) > 100:
+		if not manager_pin:
+			frappe.throw(_("Manager PIN required for cash out over $100"))
+		from zevar_core.api.permissions import verify_manager_pin
+		manager = verify_manager_pin(manager_pin)
+		if not manager:
+			frappe.throw(_("Invalid manager PIN"))
+		authorized_by = manager["user"]
+	movement = frappe.new_doc("Cash Movement")
+	movement.session = session_name
+	movement.movement_type = movement_type
+	movement.amount = flt(amount)
+	movement.reason = reason
+	movement.notes = notes
+	movement.authorized_by = authorized_by
+	movement.insert(ignore_permissions=True)
+	movement.submit()
+	return {
+		"success": True,
+		"movement_name": movement.name,
+		"message": _("Cash {0} of ${1} recorded").format(
+			"in" if movement_type == "Cash In" else "out", flt(amount)
+		),
+	}
+@frappe.whitelist()
+def get_cash_movements(session_name: str) -> dict:
+	"""Get all cash movements for a session."""
+	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
+	movements = frappe.get_all(
+		"Cash Movement",
+		filters={"session": session_name, "docstatus": 1},
+		fields=[
+			"name",
+			"movement_type",
+			"amount",
+			"reason",
+			"notes",
+			"authorized_by",
+			"creation",
+		],
+		order_by="creation asc",
+	)
+	total_in = sum(flt(m.amount) for m in movements if m.movement_type == "Cash In")
+	total_out = sum(flt(m.amount) for m in movements if m.movement_type == "Cash Out")
+	return {
+		"movements": movements,
+		"total_in": total_in,
+		"total_out": total_out,
+		"net": total_in - total_out,
 	}

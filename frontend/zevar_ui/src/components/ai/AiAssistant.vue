@@ -113,7 +113,14 @@
 							:key="chat.id"
 							class="ai-history__item"
 							:class="{ 'ai-history__item--active': chat.id === currentChatId }"
+<<<<<<< Updated upstream
 							@click="loadFromHistory(chat.id); isHistoryOpen = false"
+=======
+							@click="
+								loadFromHistory(chat.id);
+								isHistoryOpen = false;
+							"
+>>>>>>> Stashed changes
 						>
 							<div class="ai-history__item-title">{{ chat.title }}</div>
 							<div class="ai-history__item-date">
