@@ -57,11 +57,18 @@
 		<div v-if="lastScan" class="mt-1 text-xs text-green-600 dark:text-green-400">
 			Last scan: {{ lastScan }}
 		</div>
+
+		<CameraScanner 
+			v-if="showCameraScanner" 
+			@close="showCameraScanner = false" 
+			@scan="handleCameraScan" 
+		/>
 	</div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import CameraScanner from './CameraScanner.vue'
 
 const props = defineProps({
 	placeholder: { type: String, default: 'Scan barcode or RFID tag...' },
@@ -74,6 +81,7 @@ const emit = defineEmits(['scan', 'camera-open'])
 const inputRef = ref(null)
 const inputValue = ref('')
 const lastScan = ref('')
+const showCameraScanner = ref(false)
 
 let hidDevice = null
 let buffer = ''
@@ -119,7 +127,13 @@ function processScan(value) {
 	emit('scan', value)
 }
 
+function handleCameraScan(value) {
+	processScan(value)
+	showCameraScanner.value = false
+}
+
 function openCamera() {
+	showCameraScanner.value = true
 	emit('camera-open')
 }
 

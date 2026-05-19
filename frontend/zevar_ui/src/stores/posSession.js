@@ -7,6 +7,7 @@ export const usePosSessionStore = defineStore('posSession', () => {
 	const error = ref(null)
 
 	const hasActiveSession = computed(() => status.value.has_active_session === true)
+	const activeSession = computed(() => status.value.session || null)
 	const sessionName = computed(() => status.value.session?.name || '')
 	const sessionDuration = computed(() => status.value.session?.duration_hours || 0)
 
@@ -34,6 +35,7 @@ export const usePosSessionStore = defineStore('posSession', () => {
 		loading,
 		error,
 		hasActiveSession,
+		activeSession,
 		sessionName,
 		sessionDuration,
 		fetchStatus,

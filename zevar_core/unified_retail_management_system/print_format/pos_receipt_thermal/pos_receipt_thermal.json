@@ -1,0 +1,19 @@
+{
+ "creation": "2024-05-18 10:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Print Format",
+ "doc_type": "Sales Invoice",
+ "font_size": 12,
+ "format_data": "[]",
+ "is_default": 0,
+ "module": "Unified Retail Management System",
+ "name": "pos_receipt_thermal",
+ "print_format_builder": 0,
+ "print_format_type": "Jinja",
+ "align_labels_right": 0,
+ "show_empty_items": 0,
+ "show_section_headings": 0,
+ "line_breaks": 0,
+ "custom_format": 1,
+ "disabled": 0
+}

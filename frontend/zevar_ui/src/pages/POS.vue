@@ -31,21 +31,12 @@
 
 		<div v-else class="flex flex-col">
 			<div
-				class="flex items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-8 flex-shrink-0"
+				class="flex items-center justify-between gap-4 mb-6 flex-shrink-0"
 			>
-				<div class="flex items-center gap-2 sm:gap-4">
+				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">
 						{{ viewMode === 'catalog' ? 'Catalogue' : 'Collection' }}
 					</h2>
-					<span
-						class="status-label !mb-0 !bg-gray-100 dark:!bg-white/5 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-white/10"
-					>
-						{{
-							viewMode === 'catalog'
-								? categories.length + ' Categories'
-								: catalog.length + ' Pieces'
-						}}
-					</span>
 
 					<router-link
 						v-if="posSession.hasActiveSession"
@@ -92,36 +83,32 @@
 					</div>
 				</div>
 
-				<!-- Inline Filter Bar - Occupies the central "blank space" -->
+				<!-- Cash In/Out - only when session is active -->
+				<button
+					v-if="posSession.hasActiveSession"
+					@click="showCashModal = true"
+					class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition"
+				>
+					<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+					</svg>
+					Cash In/Out
+				</button>
+
+				<!-- Inline Filter Bar -->
 				<div class="flex-1 hidden md:flex justify-center px-4">
 					<ItemFilterBar context="pos" />
 				</div>
 
-				<div class="flex gap-2">
-					<button
-						@click="viewMode = 'pos'"
-						class="px-3 py-1.5 rounded-lg text-xs font-bold border transition"
-						:class="
-							viewMode === 'pos'
-								? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#D4AF37]'
-								: 'border-gray-200 dark:border-warm-border text-gray-600 dark:text-gray-400 hover:border-gray-300'
-						"
-					>
-						POS
-					</button>
-					<button
-						@click="showCatalogView"
-						class="px-3 py-1.5 rounded-lg text-xs font-bold border transition"
-						:class="
-							viewMode === 'catalog'
-								? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#D4AF37]'
-								: 'border-gray-200 dark:border-warm-border text-gray-600 dark:text-gray-400 hover:border-gray-300'
-						"
-					>
-						Catalogue
-					</button>
-				</div>
 			</div>
+
+			<!-- Cash In/Out Modal -->
+			<CashMovementModal
+				v-if="showCashModal"
+				:session-name="posSession.sessionName"
+				@close="showCashModal = false"
+				@recorded="onCashMovementSaved"
+			/>
 
 			<div class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
 				<!-- POS View -->
@@ -224,6 +211,7 @@ import AppLayout from '@/components/AppLayout.vue'
 import ItemFilterBar from '@/components/ItemFilterBar.vue'
 import ItemCard from '@/components/ItemCard.vue'
 import ProductModal from '@/components/POSProductModal.vue'
+import CashMovementModal from '@/components/CashMovementModal.vue'
 import { useSessionStore } from '@/stores/session.js'
 import { useUIStore } from '@/stores/ui.js'
 import { useCartStore } from '@/stores/cart.js'
@@ -249,6 +237,7 @@ const catalogLoading = ref(false)
 // Modal State - only used on desktop
 const showModal = ref(false)
 const selectedItemCode = ref(null)
+const showCashModal = ref(false)
 
 // Detect mobile/tablet viewport via shared composable
 const isMobile = computed(() => isMobileBP.value)
@@ -371,6 +360,11 @@ function openItemDetails(itemCode) {
 
 function handleQuickAdd(item) {
 	cart.addItem(item)
+}
+
+function onCashMovementSaved() {
+	showCashModal.value = false
+	posSession.fetchStatus()
 }
 
 function viewCategory(cat) {

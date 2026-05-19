@@ -23,6 +23,7 @@ class HardwareService {
 			console.log('Hardware bridge disconnected')
 			this.connected = false
 			this.ws = null
+			// Attempt to reconnect every 10 seconds
 			this.reconnectTimer = setTimeout(() => this.connect(), 10000)
 		}
 
@@ -50,6 +51,7 @@ class HardwareService {
 
 	async printReceipt(invoiceName) {
 		try {
+			// 1. Generate ESC/POS content from backend
 			const r = await call('zevar_core.integrations.hardware.api.generate_receipt_content', {
 				invoice_name: invoiceName,
 			})
@@ -57,12 +59,12 @@ class HardwareService {
 			if (r && this._send({ action: 'print', payload: r })) {
 				return true
 			}
-			// Fallback to browser print
-			window.open(`/printview?doctype=Sales Invoice&name=${invoiceName}`, '_blank')
+			// Fallback to browser print if bridge not connected
+			window.open(`/printview?doctype=Sales Invoice&name=${invoiceName}&format=pos_receipt_thermal`, '_blank')
 			return false
 		} catch (e) {
 			console.error('Failed to print receipt', e)
-			window.open(`/printview?doctype=Sales Invoice&name=${invoiceName}`, '_blank')
+			window.open(`/printview?doctype=Sales Invoice&name=${invoiceName}&format=pos_receipt_thermal`, '_blank')
 			return false
 		}
 	}
