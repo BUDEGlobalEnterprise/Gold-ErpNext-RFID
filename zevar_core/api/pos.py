@@ -185,16 +185,19 @@ def create_pos_invoice(
 		is_stock_item, has_serial_no = frappe.db.get_value(
 			"Item", item_code, ["is_stock_item", "has_serial_no"]
 		)
-		if is_stock_item and not has_serial_no:
-			actual_qty = (
+		if is_stock_item and not has_serial_no and warehouse:
+			# Use flt() on the DB result so None → 0.0 explicitly.
+			# A missing Bin row means 0 stock — never allow the sale.
+			actual_qty = flt(
 				frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
-				or 0
 			)
-			if actual_qty < flt(item.get("qty", 1)):
+			requested_qty = flt(item.get("qty", 1))
+			if actual_qty < requested_qty:
 				checkout_bouncer(
 					_(
-						"Item '{0}' does not have enough stock in warehouse '{1}'. Available: {2}"
-					).format(item_code, warehouse, actual_qty),
+						"Item '{0}' does not have enough stock in warehouse '{1}'. "
+						"Available: {2}, Requested: {3}"
+					).format(item_code, warehouse, actual_qty, requested_qty),
 					"invoice_failed",
 				)
 
