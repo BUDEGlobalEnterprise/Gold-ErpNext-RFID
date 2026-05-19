@@ -3,12 +3,24 @@
 		<template #header>
 			<div class="flex items-center gap-3">
 				<div class="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-					<svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+					<svg
+						class="w-6 h-6 text-emerald-600"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+						/>
 					</svg>
 				</div>
 				<div>
-					<h3 class="text-lg font-bold text-gray-900 dark:text-white">Quick Stock Adjust</h3>
+					<h3 class="text-lg font-bold text-gray-900 dark:text-white">
+						Quick Stock Adjust
+					</h3>
 					<p class="text-xs text-gray-500">Add, remove, or move stock</p>
 				</div>
 			</div>
@@ -48,7 +60,11 @@
 						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
 					>
 						<option value="">Select warehouse...</option>
-						<optgroup v-for="(store, code) in storeWarehouses" :key="code" :label="`${code} - ${store.name}`">
+						<optgroup
+							v-for="(store, code) in storeWarehouses"
+							:key="code"
+							:label="`${code} - ${store.name}`"
+						>
 							<option v-for="wh in store.warehouses" :key="wh.name" :value="wh.name">
 								{{ wh.warehouse_name }}
 							</option>
@@ -97,7 +113,10 @@
 						placeholder="Scan or enter serial number"
 					/>
 				</div>
-				<div v-if="removeLookup && removeLookup.found" class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-3 space-y-1">
+				<div
+					v-if="removeLookup && removeLookup.found"
+					class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-3 space-y-1"
+				>
 					<div class="text-xs">
 						<span class="text-gray-500">Item:</span>
 						<span class="font-bold ml-1">{{ removeLookup.item_code }}</span>
@@ -112,7 +131,9 @@
 					</div>
 					<div class="text-xs">
 						<span class="text-gray-500">Value:</span>
-						<span class="font-bold ml-1">${{ (removeLookup.valuation_rate || 0).toFixed(2) }}</span>
+						<span class="font-bold ml-1"
+							>${{ (removeLookup.valuation_rate || 0).toFixed(2) }}</span
+						>
 					</div>
 				</div>
 				<div>
@@ -136,7 +157,10 @@
 						placeholder="Scan or enter serial number"
 					/>
 				</div>
-				<div v-if="moveLookup && moveLookup.found" class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-3 space-y-1">
+				<div
+					v-if="moveLookup && moveLookup.found"
+					class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-3 space-y-1"
+				>
 					<div class="text-xs">
 						<span class="text-gray-500">Current:</span>
 						<span class="font-bold ml-1">{{ moveLookup.warehouse }}</span>
@@ -153,7 +177,11 @@
 						class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900 text-sm"
 					>
 						<option value="">Select target warehouse...</option>
-						<optgroup v-for="(store, code) in storeWarehouses" :key="code" :label="`${code} - ${store.name}`">
+						<optgroup
+							v-for="(store, code) in storeWarehouses"
+							:key="code"
+							:label="`${code} - ${store.name}`"
+						>
 							<option v-for="wh in store.warehouses" :key="wh.name" :value="wh.name">
 								{{ wh.warehouse_name }}
 							</option>
@@ -162,10 +190,16 @@
 				</div>
 			</div>
 
-			<div v-if="errorMsg" class="mt-3 bg-red-50 dark:bg-red-900/20 rounded-lg p-3 border border-red-100">
+			<div
+				v-if="errorMsg"
+				class="mt-3 bg-red-50 dark:bg-red-900/20 rounded-lg p-3 border border-red-100"
+			>
 				<p class="text-xs text-red-700">{{ errorMsg }}</p>
 			</div>
-			<div v-if="successMsg" class="mt-3 bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-100">
+			<div
+				v-if="successMsg"
+				class="mt-3 bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-100"
+			>
 				<p class="text-xs text-green-700">{{ successMsg }}</p>
 			</div>
 		</div>
@@ -222,7 +256,8 @@ const moveTarget = ref('')
 const moveLookup = ref(null)
 
 const canSubmit = computed(() => {
-	if (activeTab.value === 'add') return addItemCode.value && addWarehouse.value && addQty.value > 0
+	if (activeTab.value === 'add')
+		return addItemCode.value && addWarehouse.value && addQty.value > 0
 	if (activeTab.value === 'remove') return removeSerial.value
 	if (activeTab.value === 'move') return moveSerial.value && moveTarget.value
 	return false
@@ -236,24 +271,40 @@ const submitLabel = computed(() => {
 })
 
 watch(removeSerial, async (val) => {
-	if (!val) { removeLookup.value = null; return }
+	if (!val) {
+		removeLookup.value = null
+		return
+	}
 	try {
-		const res = await call('zevar_core.services.stock_reduction.ui_lookup_piece', { query: val })
+		const res = await call('zevar_core.services.stock_reduction.ui_lookup_piece', {
+			query: val,
+		})
 		removeLookup.value = res
-	} catch { removeLookup.value = null }
+	} catch {
+		removeLookup.value = null
+	}
 })
 
 watch(moveSerial, async (val) => {
-	if (!val) { moveLookup.value = null; return }
+	if (!val) {
+		moveLookup.value = null
+		return
+	}
 	try {
-		const res = await call('zevar_core.services.stock_reduction.ui_lookup_piece', { query: val })
+		const res = await call('zevar_core.services.stock_reduction.ui_lookup_piece', {
+			query: val,
+		})
 		moveLookup.value = res
-	} catch { moveLookup.value = null }
+	} catch {
+		moveLookup.value = null
+	}
 })
 
 onMounted(async () => {
 	try {
-		storeWarehouses.value = await call('zevar_core.services.stock_reduction.ui_get_store_warehouses')
+		storeWarehouses.value = await call(
+			'zevar_core.services.stock_reduction.ui_get_store_warehouses'
+		)
 	} catch {}
 })
 

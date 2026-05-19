@@ -110,6 +110,18 @@ const routes = [
 		meta: { requiresAuth: true },
 	},
 	{
+		path: '/gold-purchase',
+		name: 'GoldPurchase',
+		component: () => import('./pages/GoldPurchase.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/memos',
+		name: 'Memos',
+		component: () => import('./pages/MemoTerminal.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
 		path: '/appraisals',
 		name: 'Appraisals',
 		component: () => import('./pages/Appraisals.vue'),
@@ -149,6 +161,12 @@ const routes = [
 		path: '/reports/dashboards/admin',
 		name: 'AdminMonitor',
 		component: () => import('./pages/dashboards/AdminMonitor.vue'),
+		meta: { requiresAuth: true, requiresManagement: true },
+	},
+	{
+		path: '/reports/dashboards/profit',
+		name: 'ProfitIntelligence',
+		component: () => import('./pages/dashboards/ProfitIntelligence.vue'),
 		meta: { requiresAuth: true, requiresManagement: true },
 	},
 	{

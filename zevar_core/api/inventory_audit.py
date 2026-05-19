@@ -553,3 +553,44 @@ def export_audit_results(session):
 	file_doc.insert()
 
 	return {"success": True, "file_url": file_doc.file_url}
+
+
+@frappe.whitelist(allow_guest=False)
+def get_audit_discrepancies(audit_session):
+	"""Get all discrepancies for a specific audit session."""
+	frappe.has_permission("Audit Discrepancy", ptype="read", throw=True)
+
+	discrepancies = frappe.get_all(
+		"Audit Discrepancy",
+		filters={"audit_session": audit_session},
+		fields=[
+			"name",
+			"item_code",
+			"expected_qty",
+			"found_qty",
+			"discrepancy_qty",
+			"discrepancy_type",
+			"status",
+			"resolution_action",
+			"resolution_ref",
+			"notes",
+		],
+	)
+
+	# Enrich with item data
+	for d in discrepancies:
+		item_data = frappe.db.get_value("Item", d.item_code, ["item_name", "image"], as_dict=True)
+		if item_data:
+			d.item_name = item_data.item_name
+			d.image = item_data.image
+
+	return discrepancies
+
+
+@frappe.whitelist(allow_guest=False)
+def resolve_discrepancy(discrepancy_name, action, notes=None):
+	"""Resolve a specific discrepancy."""
+	doc = frappe.get_doc("Audit Discrepancy", discrepancy_name)
+	frappe.has_permission("Audit Discrepancy", ptype="write", doc=doc, throw=True)
+
+	return doc.resolve(action, notes)

@@ -116,6 +116,45 @@
 					</svg>
 				</button>
 			</div>
+
+			<!-- Display Case -->
+			<div ref="displayCaseDropdownRef" class="relative flex-shrink-0">
+				<button
+					@click.stop="toggleDropdown('displayCase')"
+					:class="
+						activeFilters.display_case
+							? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/50'
+							: 'bg-gray-50 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-warm-border hover:border-gray-300 dark:hover:border-white/20'
+					"
+					class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all"
+				>
+					<svg
+						class="w-3 h-3"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+						<polyline points="9 22 9 12 15 12 15 22" />
+					</svg>
+					Case
+					<svg
+						class="w-3 h-3 transition-transform"
+						:class="{ 'rotate-180': openDropdown === 'displayCase' }"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 9l-7 7-7-7"
+						/>
+					</svg>
+				</button>
+			</div>
 		</template>
 
 		<template #sort>
@@ -311,6 +350,55 @@
 					</button>
 				</div>
 
+				<!-- Display Case Dropdown -->
+				<div
+					v-if="openDropdown === 'displayCase'"
+					ref="displayCaseDropdown"
+					class="fixed bg-white dark:bg-warm-card border border-gray-200 dark:border-warm-border rounded-xl shadow-2xl p-2 z-[99999] flex flex-col gap-1 text-gray-700 dark:text-white max-h-[400px] overflow-y-auto"
+					:style="dropdownStyle.displayCase"
+				>
+					<button
+						@click="toggleDisplayCase('')"
+						:class="
+							!activeFilters.display_case
+								? 'bg-[#D4AF37] text-white font-bold'
+								: 'hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-500 dark:text-gray-300'
+						"
+						class="px-3 py-2 text-[11px] rounded-lg text-left transition-colors"
+					>
+						All Cases
+					</button>
+					<template v-for="(cases, zone) in groupedDisplayCases" :key="zone">
+						<div
+							class="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 bg-gray-50/50 dark:bg-white/5 rounded-md mt-1 mb-0.5"
+						>
+							{{ zone }}
+						</div>
+						<button
+							v-for="c in cases"
+							:key="c.name"
+							@click="toggleDisplayCase(c.name)"
+							:class="
+								activeFilters.display_case === c.name
+									? 'bg-[#D4AF37] text-white font-bold'
+									: 'hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-500 dark:text-gray-300'
+							"
+							class="px-3 py-2 text-[11px] rounded-lg text-left transition-colors flex items-center justify-between"
+						>
+							<div class="flex flex-col">
+								<span class="font-bold">{{ c.case_code }}</span>
+								<span class="text-[9px] opacity-70">{{ c.case_name }}</span>
+							</div>
+							<span
+								v-if="c.item_count > 0"
+								class="text-[9px] bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded-full"
+							>
+								{{ c.item_count }}
+							</span>
+						</button>
+					</template>
+				</div>
+
 				<!-- Sort Dropdown -->
 				<div
 					v-if="openDropdown === 'sort'"
@@ -361,6 +449,7 @@ const priceDropdownRef = ref(null)
 const categoryDropdownRef = ref(null)
 const metalDropdownRef = ref(null)
 const gemstoneDropdownRef = ref(null)
+const displayCaseDropdownRef = ref(null)
 const sortDropdownRef = ref(null)
 
 // Panel refs (teleported)
@@ -368,6 +457,7 @@ const priceDropdown = ref(null)
 const categoryDropdown = ref(null)
 const metalDropdown = ref(null)
 const gemstoneDropdown = ref(null)
+const displayCaseDropdown = ref(null)
 const sortDropdown = ref(null)
 
 const dropdownStyle = ref({
@@ -375,6 +465,7 @@ const dropdownStyle = ref({
 	category: { display: 'none' },
 	metal: { display: 'none' },
 	gemstone: { display: 'none' },
+	displayCase: { display: 'none' },
 	sort: { display: 'none' },
 })
 
@@ -397,6 +488,17 @@ const gemstoneOptions = ref([
 	'Kundan',
 	'No Stone',
 ])
+const displayCaseOptions = ref([])
+
+const groupedDisplayCases = computed(() => {
+	const groups = {}
+	displayCaseOptions.value.forEach((c) => {
+		const zone = c.zone_type || 'Other'
+		if (!groups[zone]) groups[zone] = []
+		groups[zone].push(c)
+	})
+	return groups
+})
 
 function toggleDropdown(key) {
 	if (openDropdown.value === key) {
@@ -415,6 +517,7 @@ function updateDropdownPosition(key) {
 		category: { button: categoryDropdownRef, panel: categoryDropdown, width: 256 },
 		metal: { button: metalDropdownRef, panel: metalDropdown, width: 192 },
 		gemstone: { button: gemstoneDropdownRef, panel: gemstoneDropdown, width: 192 },
+		displayCase: { button: displayCaseDropdownRef, panel: displayCaseDropdown, width: 220 },
 		sort: { button: sortDropdownRef, panel: sortDropdown, width: 192 },
 	}
 
@@ -446,6 +549,7 @@ function handleGlobalClick(event) {
 		categoryDropdown,
 		metalDropdown,
 		gemstoneDropdown,
+		displayCaseDropdown,
 		sortDropdown,
 	]
 
@@ -485,6 +589,9 @@ const filtersResource = createResource({
 		}
 		if (Array.isArray(data?.gemstones) && data.gemstones.length > 0) {
 			gemstoneOptions.value = data.gemstones
+		}
+		if (Array.isArray(data?.display_cases)) {
+			displayCaseOptions.value = data.display_cases
 		}
 	},
 })
@@ -588,6 +695,15 @@ function toggleSort(value) {
 		ui.setSort(props.context, '')
 	} else {
 		ui.setSort(props.context, value)
+	}
+	openDropdown.value = null
+}
+
+function toggleDisplayCase(val) {
+	if (activeFilters.value.display_case === val) {
+		ui.setFilter(props.context, 'display_case', null)
+	} else {
+		ui.setFilter(props.context, 'display_case', val || null)
 	}
 	openDropdown.value = null
 }

@@ -196,7 +196,12 @@ export const useStockStore = defineStore('stock', () => {
 	}
 
 	function createAssembly(items_json, source_warehouse, target_warehouse, purpose) {
-		return createAssemblyResource.submit({ items_json, source_warehouse, target_warehouse, purpose })
+		return createAssemblyResource.submit({
+			items_json,
+			source_warehouse,
+			target_warehouse,
+			purpose,
+		})
 	}
 
 	function disassemble(name) {

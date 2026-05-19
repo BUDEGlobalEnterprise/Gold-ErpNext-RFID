@@ -90,7 +90,7 @@ let bufferTimer = null
 function onInput(e) {
 	clearTimeout(bufferTimer)
 	buffer = inputValue.value
-	
+
 	// If the buffer contains multiple newlines, process them immediately
 	if (buffer.includes('\n')) {
 		const lines = buffer.split('\n')

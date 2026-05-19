@@ -1,0 +1,351 @@
+{
+ "actions": [],
+ "autoname": "format:PT-{YY}{MM}-{#####}",
+ "creation": "2026-05-12 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_employee",
+  "employee",
+  "employee_name",
+  "designation",
+  "store_location",
+  "column_break_employee",
+  "period_type",
+  "period_start",
+  "period_end",
+  "status",
+  "section_revenue_targets",
+  "revenue_target",
+  "average_transaction_target",
+  "high_ticket_target",
+  "layaway_conversion_target",
+  "column_break_revenue",
+  "revenue_weight",
+  "high_ticket_threshold",
+  "section_activity_targets",
+  "customers_served_target",
+  "items_sold_target",
+  "repair_orders_target",
+  "upsell_target",
+  "column_break_activity",
+  "activity_weight",
+  "section_quality_targets",
+  "return_rate_max",
+  "customer_satisfaction_target",
+  "layaway_default_rate_max",
+  "column_break_quality",
+  "quality_weight",
+  "section_compensation",
+  "guaranteed_hourly_rate",
+  "target_hourly_rate",
+  "superior_hourly_rate",
+  "column_break_compensation",
+  "minimum_performance_pct",
+  "termination_threshold_pct",
+  "section_calculation",
+  "calculation_method",
+  "seasonal_adjustment_pct"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_employee",
+   "fieldtype": "Section Break",
+   "label": "Employee & Period"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Data",
+   "label": "Designation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "store_location",
+   "fieldtype": "Link",
+   "label": "Store Location",
+   "options": "Store Location"
+  },
+  {
+   "fieldname": "column_break_employee",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Monthly",
+   "fieldname": "period_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Period Type",
+   "options": "Weekly\nMonthly\nQuarterly\nAnnually",
+   "reqd": 1
+  },
+  {
+   "fieldname": "period_start",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Period Start",
+   "reqd": 1
+  },
+  {
+   "fieldname": "period_end",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Period End",
+   "reqd": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Draft\nActive\nCompleted\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_revenue_targets",
+   "fieldtype": "Section Break",
+   "label": "Revenue Targets"
+  },
+  {
+   "fieldname": "revenue_target",
+   "fieldtype": "Currency",
+   "label": "Revenue Target ($)"
+  },
+  {
+   "fieldname": "average_transaction_target",
+   "fieldtype": "Currency",
+   "label": "Avg Transaction Target ($)"
+  },
+  {
+   "fieldname": "high_ticket_target",
+   "fieldtype": "Int",
+   "label": "High-Ticket Sales Target (count)"
+  },
+  {
+   "fieldname": "layaway_conversion_target",
+   "fieldtype": "Int",
+   "label": "Layaway Conversion Target (count)"
+  },
+  {
+   "fieldname": "column_break_revenue",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "50",
+   "fieldname": "revenue_weight",
+   "fieldtype": "Percent",
+   "label": "Revenue Weight (%)"
+  },
+  {
+   "fieldname": "high_ticket_threshold",
+   "fieldtype": "Currency",
+   "label": "High-Ticket Threshold ($)",
+   "description": "Sales above this amount count as high-ticket"
+  },
+  {
+   "fieldname": "section_activity_targets",
+   "fieldtype": "Section Break",
+   "label": "Activity Targets"
+  },
+  {
+   "fieldname": "customers_served_target",
+   "fieldtype": "Int",
+   "label": "Customers Served Target"
+  },
+  {
+   "fieldname": "items_sold_target",
+   "fieldtype": "Int",
+   "label": "Items Sold Target"
+  },
+  {
+   "fieldname": "repair_orders_target",
+   "fieldtype": "Int",
+   "label": "Repair Orders Target"
+  },
+  {
+   "fieldname": "upsell_target",
+   "fieldtype": "Percent",
+   "label": "Upsell Rate Target (%)"
+  },
+  {
+   "fieldname": "column_break_activity",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "30",
+   "fieldname": "activity_weight",
+   "fieldtype": "Percent",
+   "label": "Activity Weight (%)"
+  },
+  {
+   "fieldname": "section_quality_targets",
+   "fieldtype": "Section Break",
+   "label": "Quality Targets"
+  },
+  {
+   "fieldname": "return_rate_max",
+   "fieldtype": "Percent",
+   "label": "Max Return Rate (%)"
+  },
+  {
+   "default": "100",
+   "fieldname": "customer_satisfaction_target",
+   "fieldtype": "Percent",
+   "label": "Customer Satisfaction Target (%)"
+  },
+  {
+   "fieldname": "layaway_default_rate_max",
+   "fieldtype": "Percent",
+   "label": "Max Layaway Default Rate (%)"
+  },
+  {
+   "fieldname": "column_break_quality",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "20",
+   "fieldname": "quality_weight",
+   "fieldtype": "Percent",
+   "label": "Quality Weight (%)"
+  },
+  {
+   "fieldname": "section_compensation",
+   "fieldtype": "Section Break",
+   "label": "Compensation Parameters"
+  },
+  {
+   "fieldname": "guaranteed_hourly_rate",
+   "fieldtype": "Currency",
+   "label": "Guaranteed Hourly Rate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "target_hourly_rate",
+   "fieldtype": "Currency",
+   "label": "Target Hourly Rate (at 100%)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "superior_hourly_rate",
+   "fieldtype": "Currency",
+   "label": "Superior Hourly Rate (overperformance)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_compensation",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "60",
+   "fieldname": "minimum_performance_pct",
+   "fieldtype": "Percent",
+   "label": "Minimum Performance % (floor threshold)"
+  },
+  {
+   "default": "40",
+   "fieldname": "termination_threshold_pct",
+   "fieldtype": "Percent",
+   "label": "Termination Threshold % (counseling trigger)"
+  },
+  {
+   "fieldname": "section_calculation",
+   "fieldtype": "Section Break",
+   "label": "Target Calculation Method"
+  },
+  {
+   "default": "Fixed Amount",
+   "fieldname": "calculation_method",
+   "fieldtype": "Select",
+   "label": "Calculation Method",
+   "options": "Fixed Amount\nHistorical Average Based\nStore Average Based\nSeasonal Adjusted"
+  },
+  {
+   "depends_on": "eval:doc.calculation_method == 'Seasonal Adjusted'",
+   "fieldname": "seasonal_adjustment_pct",
+   "fieldtype": "Percent",
+   "label": "Seasonal Adjustment (%)"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Unified Retail Management System",
+ "name": "Performance Target",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Store Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "employee_name"
+}

@@ -22,6 +22,7 @@ export const useAuditStore = defineStore('audit', () => {
 	const isPolling = ref(false)
 	const dashboard = ref(null)
 	const auditPlans = ref([])
+	const discrepancies = ref([])
 	let pollTimer = null
 
 	// --- Computed ---
@@ -142,6 +143,10 @@ export const useAuditStore = defineStore('audit', () => {
 		url: 'zevar_core.api.inventory_audit.approve_variance',
 	})
 
+	const discrepanciesResource = createResource({
+		url: 'zevar_core.api.inventory_audit.get_audit_discrepancies',
+	})
+
 	// --- Actions ---
 	function startAudit(warehouse, notes, scope, auditPlan) {
 		return startAuditResource.submit({
@@ -219,6 +224,13 @@ export const useAuditStore = defineStore('audit', () => {
 		})
 	}
 
+	function loadDiscrepancies(sessionName) {
+		return discrepanciesResource.submit({ audit_session: sessionName }).then((data) => {
+			discrepancies.value = data
+			return data
+		})
+	}
+
 	function addToScanFeed(result) {
 		scanFeed.value.unshift({
 			...result,
@@ -272,6 +284,7 @@ export const useAuditStore = defineStore('audit', () => {
 		isPolling,
 		dashboard,
 		auditPlans,
+		discrepancies,
 
 		// Computed
 		isActive,
@@ -292,6 +305,7 @@ export const useAuditStore = defineStore('audit', () => {
 		dashboardResource,
 		auditPlansResource,
 		approveVarianceResource,
+		discrepanciesResource,
 
 		// Actions
 		startAudit,
@@ -306,6 +320,7 @@ export const useAuditStore = defineStore('audit', () => {
 		loadHistory,
 		loadDashboard,
 		loadAuditPlans,
+		loadDiscrepancies,
 		addToScanFeed,
 		clearSession,
 		startPolling,

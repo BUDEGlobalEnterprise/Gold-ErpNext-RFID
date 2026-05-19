@@ -1056,7 +1056,8 @@ async function handlePayment() {
 			'System Manager',
 		])
 		if (!session.hasActiveSession && !canBypassSession) {
-			error.value = 'You must open a POS session before making sales. Please open a register first.'
+			error.value =
+				'You must open a POS session before making sales. Please open a register first.'
 			return
 		}
 
@@ -1160,8 +1161,8 @@ function onFinancingApproved(result) {
 	// Add financing as a payment mode
 	const mode = result.provider
 	const amount = result.approval_amount || totalAmount.value
-	
-	const existing = selectedPayments.value.findIndex(p => p.mode === mode)
+
+	const existing = selectedPayments.value.findIndex((p) => p.mode === mode)
 	if (existing >= 0) {
 		selectedPayments.value[existing].amount = amount
 	} else {

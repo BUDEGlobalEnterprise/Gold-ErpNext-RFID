@@ -1,0 +1,147 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-05-12 06:10:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "audit_session",
+  "display_case",
+  "item_code",
+  "cb0",
+  "expected_qty",
+  "found_qty",
+  "discrepancy_qty",
+  "cb1",
+  "discrepancy_type",
+  "status",
+  "cb2",
+  "resolution_action",
+  "resolution_ref",
+  "resolved_by",
+  "resolved_at",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "audit_session",
+   "fieldtype": "Link",
+   "label": "Audit Session",
+   "options": "Case Audit Session",
+   "reqd": 1
+  },
+  {
+   "fieldname": "display_case",
+   "fieldtype": "Link",
+   "label": "Display Case",
+   "options": "Display Case",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expected_qty",
+   "fieldtype": "Float",
+   "label": "Expected Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "found_qty",
+   "fieldtype": "Float",
+   "label": "Found Qty",
+   "reqd": 1
+  },
+  {
+   "fieldname": "discrepancy_qty",
+   "fieldtype": "Float",
+   "label": "Discrepancy Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Pending\nResolving\nResolved\nIgnored"
+  },
+  {
+   "fieldname": "discrepancy_type",
+   "fieldtype": "Select",
+   "label": "Discrepancy Type",
+   "options": "Missing\nSurplus\nDamaged\nWrong Location"
+  },
+  {
+   "fieldname": "cb2",
+   "fieldtype": "Section Break",
+   "label": "Resolution"
+  },
+  {
+   "fieldname": "resolution_action",
+   "fieldtype": "Select",
+   "label": "Resolution Action",
+   "options": "Stock Entry\nWarehouse Transfer\nWrite-off\nManual Correction"
+  },
+  {
+   "fieldname": "resolution_ref",
+   "fieldtype": "Dynamic Link",
+   "label": "Resolution Ref",
+   "options": "resolution_action"
+  },
+  {
+   "fieldname": "resolved_by",
+   "fieldtype": "Link",
+   "label": "Resolved By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "resolved_at",
+   "fieldtype": "Datetime",
+   "label": "Resolved At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-05-12 06:10:00",
+ "modified_by": "Administrator",
+ "module": "Unified Retail Management System",
+ "name": "Audit Discrepancy",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,320 @@
+{
+    "actions": [],
+    "autoname": "naming_series:",
+    "creation": "2026-05-13 00:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "naming_series",
+        "purchase_date",
+        "customer_section",
+        "customer",
+        "customer_name",
+        "customer_phone",
+        "column_break_customer",
+        "store_location",
+        "cashier",
+        "identification_section",
+        "id_type",
+        "id_number",
+        "column_break_id",
+        "id_image",
+        "items_section",
+        "items",
+        "totals_section",
+        "total_gross_weight",
+        "total_net_weight",
+        "column_break_totals",
+        "total_calculated_value",
+        "total_agreed_value",
+        "payment_section",
+        "payment_method",
+        "reference_number",
+        "column_break_payment",
+        "payment_status",
+        "accounting_section",
+        "purchase_account",
+        "payment_entry",
+        "column_break_accounting",
+        "stock_entry",
+        "status_section",
+        "status",
+        "amended_from"
+    ],
+    "fields": [
+        {
+            "fieldname": "naming_series",
+            "fieldtype": "Select",
+            "default": "GP-.YYYY.-",
+            "label": "Naming Series",
+            "no_copy": 1,
+            "print_hide": 1,
+            "reqd": 1,
+            "set_only_once": 1
+        },
+        {
+            "fieldname": "purchase_date",
+            "fieldtype": "Datetime",
+            "in_list_view": 1,
+            "label": "Purchase Date & Time",
+            "reqd": 1,
+            "default": "Today"
+        },
+        {
+            "fieldname": "customer_section",
+            "fieldtype": "Section Break",
+            "label": "Customer / Seller"
+        },
+        {
+            "fieldname": "customer",
+            "fieldtype": "Link",
+            "label": "Customer",
+            "options": "Customer",
+            "reqd": 1
+        },
+        {
+            "fieldname": "customer_name",
+            "fieldtype": "Data",
+            "fetch_from": "customer.customer_name",
+            "label": "Customer Name",
+            "read_only": 1
+        },
+        {
+            "fieldname": "customer_phone",
+            "fieldtype": "Data",
+            "fetch_from": "customer.mobile_no",
+            "label": "Phone"
+        },
+        {
+            "fieldname": "column_break_customer",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "store_location",
+            "fieldtype": "Link",
+            "label": "Store Location",
+            "options": "Store Location",
+            "reqd": 1
+        },
+        {
+            "fieldname": "cashier",
+            "fieldtype": "Link",
+            "label": "Processed By",
+            "options": "User",
+            "default": "__user",
+            "read_only": 1
+        },
+        {
+            "fieldname": "identification_section",
+            "fieldtype": "Section Break",
+            "label": "Seller Identification"
+        },
+        {
+            "fieldname": "id_type",
+            "fieldtype": "Select",
+            "label": "ID Type",
+            "options": "\nDrivers License\nPassport\nState ID\nMilitary ID\nOther"
+        },
+        {
+            "fieldname": "id_number",
+            "fieldtype": "Data",
+            "label": "ID Number"
+        },
+        {
+            "fieldname": "column_break_id",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "id_image",
+            "fieldtype": "Attach Image",
+            "label": "ID Image"
+        },
+        {
+            "fieldname": "items_section",
+            "fieldtype": "Section Break",
+            "label": "Scrap Items"
+        },
+        {
+            "fieldname": "items",
+            "fieldtype": "Table",
+            "label": "Items",
+            "options": "Gold Purchase Item",
+            "reqd": 1
+        },
+        {
+            "fieldname": "totals_section",
+            "fieldtype": "Section Break",
+            "label": "Totals"
+        },
+        {
+            "fieldname": "total_gross_weight",
+            "fieldtype": "Float",
+            "label": "Total Gross Weight (g)",
+            "read_only": 1
+        },
+        {
+            "fieldname": "total_net_weight",
+            "fieldtype": "Float",
+            "label": "Total Net Weight (g)",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_totals",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "total_calculated_value",
+            "fieldtype": "Currency",
+            "label": "Total Calculated Value",
+            "read_only": 1
+        },
+        {
+            "fieldname": "total_agreed_value",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Total Purchase Amount",
+            "read_only": 1
+        },
+        {
+            "fieldname": "payment_section",
+            "fieldtype": "Section Break",
+            "label": "Payment"
+        },
+        {
+            "fieldname": "payment_method",
+            "fieldtype": "Select",
+            "default": "Cash",
+            "label": "Payment Method",
+            "options": "Cash\nCheck\nWire Transfer\nZelle",
+            "reqd": 1
+        },
+        {
+            "fieldname": "reference_number",
+            "fieldtype": "Data",
+            "label": "Reference / Check Number",
+            "depends_on": "eval:doc.payment_method !== 'Cash'"
+        },
+        {
+            "fieldname": "column_break_payment",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "payment_status",
+            "fieldtype": "Select",
+            "default": "Unpaid",
+            "label": "Payment Status",
+            "options": "Unpaid\nPaid",
+            "read_only": 1
+        },
+        {
+            "fieldname": "accounting_section",
+            "fieldtype": "Section Break",
+            "label": "Accounting",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "purchase_account",
+            "fieldtype": "Link",
+            "label": "Purchase Account",
+            "options": "Account"
+        },
+        {
+            "fieldname": "payment_entry",
+            "fieldtype": "Link",
+            "label": "Payment Entry",
+            "options": "Payment Entry",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_accounting",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "stock_entry",
+            "fieldtype": "Link",
+            "label": "Stock Entry",
+            "options": "Stock Entry",
+            "read_only": 1
+        },
+        {
+            "fieldname": "status_section",
+            "fieldtype": "Section Break",
+            "label": "Status"
+        },
+        {
+            "fieldname": "status",
+            "fieldtype": "Select",
+            "default": "Draft",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Status",
+            "no_copy": 1,
+            "options": "Draft\nSubmitted\nCancelled",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "amended_from",
+            "fieldtype": "Link",
+            "label": "Amended From",
+            "no_copy": 1,
+            "options": "Gold Purchase",
+            "print_hide": 1,
+            "read_only": 1
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "is_submittable": 1,
+    "links": [],
+    "modified": "2026-05-13 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Unified Retail Management System",
+    "name": "Gold Purchase",
+    "naming_rule": "By \"Naming Series\" field",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1,
+            "submit": 1,
+            "cancel": 1,
+            "amend": 1
+        },
+        {
+            "create": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "POS Manager",
+            "share": 1,
+            "write": 1,
+            "submit": 1,
+            "cancel": 1
+        },
+        {
+            "create": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "role": "POS User",
+            "write": 1
+        }
+    ],
+    "row_format": "Dynamic",
+    "sort_field": "purchase_date",
+    "sort_order": "DESC",
+    "states": [],
+    "title_field": "customer_name",
+    "track_changes": 1
+}

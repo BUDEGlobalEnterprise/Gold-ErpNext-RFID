@@ -43,6 +43,12 @@ class HardwareService {
 		}
 	}
 
+	_send(payload) {
+		if (!this.connected || !this.ws) return false
+		this.ws.send(JSON.stringify(payload))
+		return true
+	}
+
 	async printReceipt(invoiceName) {
 		try {
 			// 1. Generate ESC/POS content from backend
@@ -50,20 +56,12 @@ class HardwareService {
 				invoice_name: invoiceName,
 			})
 
-			if (r && this.connected) {
-				// 2. Send to local bridge
-				this.ws.send(
-					JSON.stringify({
-						action: 'print',
-						payload: r,
-					})
-				)
+			if (r && this._send({ action: 'print', payload: r })) {
 				return true
-			} else {
-				// Fallback to browser printing if bridge not connected
-				window.open(`/printview?doctype=Sales Invoice&name=${invoiceName}&format=pos_receipt_thermal`, '_blank')
-				return false
 			}
+			// Fallback to browser print if bridge not connected
+			window.open(`/printview?doctype=Sales Invoice&name=${invoiceName}&format=pos_receipt_thermal`, '_blank')
+			return false
 		} catch (e) {
 			console.error('Failed to print receipt', e)
 			window.open(`/printview?doctype=Sales Invoice&name=${invoiceName}&format=pos_receipt_thermal`, '_blank')
@@ -77,13 +75,7 @@ class HardwareService {
 				item_code: itemCode,
 			})
 
-			if (r && this.connected) {
-				this.ws.send(
-					JSON.stringify({
-						action: 'print',
-						payload: r.print_payload,
-					})
-				)
+			if (r && this._send({ action: 'print', payload: r.print_payload })) {
 				return true
 			}
 			return false
@@ -91,6 +83,52 @@ class HardwareService {
 			console.error('Failed to print tag', e)
 			return false
 		}
+	}
+
+	async printZplTag(tagData) {
+		/** Print a jewelry tag using ZPL (Zebra printers).
+		 *  tagData: { item_code, item_name, rate, metal_type, weight_grams }
+		 */
+		if (this._send({ action: 'print_tag_zpl', tag_data: tagData })) {
+			return true
+		}
+		// Fallback: generate ZPL and open in new window for manual send
+		console.log('Bridge not connected. ZPL tag data:', tagData)
+		return false
+	}
+
+	openCashDrawer() {
+		/** Trigger cash drawer via receipt printer kick-out signal. */
+		return this._send({ action: 'cash_drawer' })
+	}
+
+	async getStatus() {
+		/** Query bridge for printer connection status. */
+		return new Promise((resolve) => {
+			if (!this.connected) {
+				resolve({ receipt_printer: false, tag_printer: false })
+				return
+			}
+
+			const handler = (msg) => {
+				try {
+					const data = JSON.parse(msg.data)
+					if (data.status === 'ok') {
+						this.ws.removeEventListener('message', handler)
+						resolve(data)
+					}
+				} catch (e) { /* ignore */ }
+			}
+
+			this.ws.addEventListener('message', handler)
+			this._send({ action: 'status' })
+
+			// Timeout after 3s
+			setTimeout(() => {
+				this.ws.removeEventListener('message', handler)
+				resolve({ receipt_printer: false, tag_printer: false })
+			}, 3000)
+		})
 	}
 }
 

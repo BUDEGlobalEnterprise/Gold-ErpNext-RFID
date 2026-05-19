@@ -156,7 +156,7 @@
 						</div>
 						<div class="flex items-center justify-center gap-1">
 							<button
-								@click="form.allocation[store.code] = Math.max(0, (form.allocation[store.code] || 0) - 1)"
+								@click="form.allocation[store.code] = Math.max( 0, (form.allocation[store.code] || 0) - 1 )"
 								class="w-7 h-7 rounded bg-gray-100 dark:bg-warm-dark-700 text-xs font-bold hover:bg-gray-200"
 							>
 								−

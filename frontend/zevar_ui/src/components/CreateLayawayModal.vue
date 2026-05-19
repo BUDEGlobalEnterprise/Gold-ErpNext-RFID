@@ -1305,7 +1305,10 @@ watch(
 
 			// Try to set customer from cart if selected
 			if (cartStore.customer) {
-				console.log('CreateLayawayModal: Auto-filling customer from cart:', cartStore.customer.name)
+				console.log(
+					'CreateLayawayModal: Auto-filling customer from cart:',
+					cartStore.customer.name
+				)
 				selectedCustomer.value = cartStore.customer
 				isNewCustomerMode.value = false
 				autoFillCustomerFromCart(cartStore.customer)
@@ -1356,11 +1359,11 @@ async function autoFillCustomerFromCart(cust) {
 		const customerName = cust.name || cust.customer_name
 		console.log('CreateLayawayModal: Fetching full details for:', customerName)
 		const result = await customerDetailsResource.submit({ customer_name: customerName })
-		
+
 		// Handle both unwrapped and wrapped responses
 		const details = result?.message ?? result
 		console.log('CreateLayawayModal: Full customer details received:', details)
-		
+
 		if (details) {
 			form.value.phone = details.mobile_no || form.value.phone
 			form.value.email = details.email_id || form.value.email

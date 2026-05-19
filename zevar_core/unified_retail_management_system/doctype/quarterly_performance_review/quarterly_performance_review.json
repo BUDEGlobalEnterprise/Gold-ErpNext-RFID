@@ -1,0 +1,430 @@
+{
+ "actions": [],
+ "autoname": "format:QPR-{YY}{MM}-{#####}",
+ "creation": "2026-05-12 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_review",
+  "employee",
+  "employee_name",
+  "review_period",
+  "review_year",
+  "column_break_review",
+  "review_date",
+  "status",
+  "reviewer",
+  "section_summary",
+  "overall_score",
+  "performance_tier",
+  "qoq_change",
+  "column_break_scores",
+  "revenue_score",
+  "activity_score",
+  "quality_score",
+  "section_revenue_summary",
+  "quarterly_revenue",
+  "quarterly_target",
+  "revenue_achievement_pct",
+  "avg_transaction_value",
+  "column_break_revenue_summary",
+  "total_transactions",
+  "high_ticket_count",
+  "layaway_conversions",
+  "section_behavioral",
+  "attendance_rate",
+  "punctuality_score",
+  "average_hours_per_week",
+  "column_break_behavioral",
+  "team_contribution_notes",
+  "section_intelligence",
+  "auto_identified_strengths",
+  "column_break_strengths",
+  "auto_identified_improvements",
+  "section_recommendation",
+  "recommendation",
+  "recommendation_rationale",
+  "section_compensation_impact",
+  "current_hourly_rate",
+  "recommended_rate",
+  "bonus_recommendation",
+  "column_break_comp_impact",
+  "compensation_notes",
+  "section_manager",
+  "manager_comments",
+  "column_break_manager",
+  "development_plan",
+  "section_acknowledgment",
+  "acknowledged_by_employee",
+  "acknowledgment_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_review",
+   "fieldtype": "Section Break",
+   "label": "Review Reference"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "review_period",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Review Period",
+   "options": "Q1\nQ2\nQ3\nQ4",
+   "reqd": 1
+  },
+  {
+   "fieldname": "review_year",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Review Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_review",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "review_date",
+   "fieldtype": "Date",
+   "label": "Review Date"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Draft\nGenerated\nReviewed\nFinalized\nAcknowledged",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reviewer",
+   "fieldtype": "Link",
+   "label": "Reviewer",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_summary",
+   "fieldtype": "Section Break",
+   "label": "Performance Summary"
+  },
+  {
+   "fieldname": "overall_score",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Overall Score",
+   "read_only": 1
+  },
+  {
+   "fieldname": "performance_tier",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Performance Tier",
+   "options": "Exceptional\nStrong\nMeets Expectations\nBelow Expectations\nUnsatisfactory",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qoq_change",
+   "fieldtype": "Percent",
+   "label": "QoQ Change",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_scores",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "revenue_score",
+   "fieldtype": "Percent",
+   "label": "Revenue Score",
+   "read_only": 1
+  },
+  {
+   "fieldname": "activity_score",
+   "fieldtype": "Percent",
+   "label": "Activity Score",
+   "read_only": 1
+  },
+  {
+   "fieldname": "quality_score",
+   "fieldtype": "Percent",
+   "label": "Quality Score",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_revenue_summary",
+   "fieldtype": "Section Break",
+   "label": "Revenue Summary"
+  },
+  {
+   "fieldname": "quarterly_revenue",
+   "fieldtype": "Currency",
+   "label": "Quarterly Revenue",
+   "read_only": 1
+  },
+  {
+   "fieldname": "quarterly_target",
+   "fieldtype": "Currency",
+   "label": "Quarterly Target",
+   "read_only": 1
+  },
+  {
+   "fieldname": "revenue_achievement_pct",
+   "fieldtype": "Percent",
+   "label": "Revenue Achievement %",
+   "read_only": 1
+  },
+  {
+   "fieldname": "avg_transaction_value",
+   "fieldtype": "Currency",
+   "label": "Avg Transaction Value",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_revenue_summary",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_transactions",
+   "fieldtype": "Int",
+   "label": "Total Transactions",
+   "read_only": 1
+  },
+  {
+   "fieldname": "high_ticket_count",
+   "fieldtype": "Int",
+   "label": "High-Ticket Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "layaway_conversions",
+   "fieldtype": "Int",
+   "label": "Layaway Conversions",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_behavioral",
+   "fieldtype": "Section Break",
+   "label": "Behavioral Metrics"
+  },
+  {
+   "fieldname": "attendance_rate",
+   "fieldtype": "Percent",
+   "label": "Attendance Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "punctuality_score",
+   "fieldtype": "Percent",
+   "label": "Punctuality Score",
+   "read_only": 1
+  },
+  {
+   "fieldname": "average_hours_per_week",
+   "fieldtype": "Float",
+   "label": "Avg Hours/Week",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_behavioral",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "team_contribution_notes",
+   "fieldtype": "Small Text",
+   "label": "Team Contribution Notes",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_intelligence",
+   "fieldtype": "Section Break",
+   "label": "Intelligence — Auto-Generated"
+  },
+  {
+   "fieldname": "auto_identified_strengths",
+   "fieldtype": "Text Editor",
+   "label": "Auto-Identified Strengths",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_strengths",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "auto_identified_improvements",
+   "fieldtype": "Text Editor",
+   "label": "Auto-Identified Improvements",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_recommendation",
+   "fieldtype": "Section Break",
+   "label": "Recommendation"
+  },
+  {
+   "fieldname": "recommendation",
+   "fieldtype": "Select",
+   "label": "Recommendation",
+   "options": "Retain & Promote\nRetain & Develop\nPerformance Improvement Plan\nCounsel Out"
+  },
+  {
+   "fieldname": "recommendation_rationale",
+   "fieldtype": "Text Editor",
+   "label": "Recommendation Rationale",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_compensation_impact",
+   "fieldtype": "Section Break",
+   "label": "Compensation Impact"
+  },
+  {
+   "fieldname": "current_hourly_rate",
+   "fieldtype": "Currency",
+   "label": "Current Hourly Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "recommended_rate",
+   "fieldtype": "Currency",
+   "label": "Recommended Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bonus_recommendation",
+   "fieldtype": "Currency",
+   "label": "Bonus Recommendation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_comp_impact",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "compensation_notes",
+   "fieldtype": "Small Text",
+   "label": "Compensation Notes",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_manager",
+   "fieldtype": "Section Break",
+   "label": "Manager Notes"
+  },
+  {
+   "fieldname": "manager_comments",
+   "fieldtype": "Text Editor",
+   "label": "Manager Comments"
+  },
+  {
+   "fieldname": "column_break_manager",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "development_plan",
+   "fieldtype": "Text Editor",
+   "label": "Development Plan"
+  },
+  {
+   "fieldname": "section_acknowledgment",
+   "fieldtype": "Section Break",
+   "label": "Employee Acknowledgment"
+  },
+  {
+   "default": "0",
+   "fieldname": "acknowledged_by_employee",
+   "fieldtype": "Check",
+   "label": "Acknowledged by Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "acknowledgment_date",
+   "fieldtype": "Datetime",
+   "label": "Acknowledgment Date",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 0,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Unified Retail Management System",
+ "name": "Quarterly Performance Review",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Store Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "employee_name"
+}

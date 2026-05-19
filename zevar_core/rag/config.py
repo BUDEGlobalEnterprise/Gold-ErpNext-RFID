@@ -32,6 +32,7 @@ CHROMA_PERSIST_DIR = os.path.join(
 COLLECTION_PRODUCTS = "zevar_products"
 COLLECTION_CUSTOMERS = "zevar_customers"
 COLLECTION_KNOWLEDGE = "zevar_knowledge"
+COLLECTION_SALES_PRICING = "zevar_sales_pricing"
 
 # Indexing defaults
 BATCH_SIZE = 100  # Number of documents to embed per batch
@@ -137,6 +138,27 @@ QUERY_DOMAINS = {
 		"rule",
 	],
 	"general": [],
+	"pricing": [
+		"price",
+		"pricing",
+		"margin",
+		"profit",
+		"markup",
+		"discount",
+		"cogs",
+		"cost of goods",
+		"overhead",
+		"gold cost",
+		"recommend",
+		"what if",
+		"scenario",
+		"elasticity",
+		"seasonal",
+		"slow moving",
+		"clearance",
+		"premium",
+		"bundling",
+	],
 }
 
 # ---------------------------------------------------------------------------
@@ -146,4 +168,5 @@ DOCTYPE_COLLECTION_MAP = {
 	"Item": COLLECTION_PRODUCTS,
 	"Customer": COLLECTION_CUSTOMERS,
 	"RAG Knowledge Article": COLLECTION_KNOWLEDGE,
+	"Sale Cost Breakdown": COLLECTION_SALES_PRICING,
 }

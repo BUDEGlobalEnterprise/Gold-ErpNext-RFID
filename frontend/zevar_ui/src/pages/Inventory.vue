@@ -9,6 +9,22 @@
 					>
 						{{ totalItems }} Items
 					</span>
+
+					<div
+						v-if="ui.activeFilters.inventory?.display_case"
+						class="flex items-center gap-1.5 px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 rounded-full text-[10px] font-bold animate-in fade-in slide-in-from-left-2"
+					>
+						<svg
+							class="w-3 h-3"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+						</svg>
+						Case: {{ ui.activeFilters.inventory.display_case }}
+					</div>
 				</div>
 
 				<div class="flex items-center gap-2">
@@ -691,7 +707,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { createResource, toast } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
 import ItemFilterBar from '@/components/ItemFilterBar.vue'
@@ -739,7 +755,12 @@ const pushItemCode = ref('')
 const inventoryResource = createResource({
 	url: 'zevar_core.api.catalog.get_pos_items',
 	makeParams() {
-		return { warehouse: session.currentWarehouse, page_length: 500 }
+		const f = ui.activeFilters.inventory || {}
+		return {
+			warehouse: session.currentWarehouse,
+			display_case: f.display_case || undefined,
+			page_length: 500,
+		}
 	},
 	onSuccess(data) {
 		inventoryData.value = data.map((i) => ({
@@ -778,6 +799,9 @@ const filteredItems = computed(() => {
 	if (f.price_min) items = items.filter((i) => i.price >= f.price_min)
 	if (f.price_max) items = items.filter((i) => i.price <= f.price_max)
 	if (f.custom_purity) items = items.filter((i) => i.purity === f.custom_purity)
+	// Display case filtering is handled by API but we can keep it for safety if local data is larger
+	// However, the API returns display_case as a field? No, I didn't add it to get_pos_items select.
+	// Actually get_pos_items for Inventory uses stock_qty, etc.
 
 	if (ui.searchQuery) {
 		const q = ui.searchQuery.toLowerCase()
@@ -852,6 +876,13 @@ function formatCurrency(val) {
 		maximumFractionDigits: 0,
 	}).format(val)
 }
+
+watch(
+	() => [session.currentWarehouse, ui.activeFilters.inventory?.display_case],
+	() => {
+		inventoryResource.fetch()
+	}
+)
 
 if (route.name === 'InventoryAdd') {
 	showQuickAdd.value = true

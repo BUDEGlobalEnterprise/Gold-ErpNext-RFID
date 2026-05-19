@@ -57,6 +57,7 @@ self.addEventListener('fetch', (event) => {
 			event.respondWith(fetch(request))
 			return
 		}
+
 		event.respondWith(handleAPIRequest(request))
 		return
 	}
