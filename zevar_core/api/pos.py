@@ -526,6 +526,22 @@ def create_pos_invoice(
 		except Exception:
 			frappe.log_error("POS Sale Notification Failed", frappe.get_traceback())
 
+		# Broadcast stock update to all POS terminals for real-time catalog refresh
+		try:
+			affected_items = [item.item_code for item in si.items]
+			frappe.publish_realtime(
+				"stock_update",
+				{
+					"item_codes": affected_items,
+					"warehouse": warehouse,
+					"invoice": si.name,
+					"timestamp": str(frappe.utils.now_datetime()),
+				},
+				after_commit=True,
+			)
+		except Exception:
+			pass  # Non-critical — catalog will refresh on next poll
+
 		if gc_payment_amount > 0 and gift_card_number:
 			log_gift_card_used(gc_doc, gc_payment_amount, source_reference=si.name)
 
@@ -1136,3 +1152,116 @@ def validate_pos_cart(items: str, warehouse: str | None = None) -> dict:
 
 	blocking = any(i.get("blocking", True) for i in issues)
 	return {"ok": not blocking, "blocking": blocking, "issues": issues}
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Held (parked) carts
+# ──────────────────────────────────────────────────────────────────────────────
+
+HELD_CARTS_KEY = "pos_held_carts:{user}"
+
+
+@frappe.whitelist(methods=["POST"])
+def hold_cart(
+	items: str,
+	customer: str | None = None,
+	customer_name: str | None = None,
+	note: str | None = None,
+	warehouse: str | None = None,
+) -> dict:
+	"""
+	Park the current cart so it can be recalled later.
+
+	Stores a snapshot in frappe.cache keyed by user. Each user can hold
+	up to 10 carts at a time.
+
+	Args:
+		items: JSON-encoded list of cart items
+		customer: Customer docname (optional)
+		customer_name: Display name for the customer
+		note: Short label for the held cart (e.g. "Mrs. Johnson - ring resize")
+		warehouse: Current warehouse context
+	"""
+	from zevar_core.api.permissions import assert_pos_warehouse_access, check_permission
+
+	# Same RBAC envelope as create_pos_invoice — Sales User and up.
+	check_permission("pos_access")
+
+	# Multi-store enforcement (Fix #2 contract): a cashier in store A
+	# cannot park a cart against store B's warehouse. Skipped when no
+	# warehouse is supplied (held carts are warehouse-agnostic).
+	if warehouse:
+		assert_pos_warehouse_access(warehouse)
+
+	items_list = frappe.parse_json(items) if isinstance(items, str) else items
+	if not items_list:
+		frappe.throw(_("Cannot hold an empty cart."))
+
+	cart_id = frappe.generate_hash(length=8)
+	held_cart = {
+		"id": cart_id,
+		"items": items_list,
+		"customer": customer,
+		"customer_name": customer_name or customer,
+		"note": note or "",
+		"warehouse": warehouse,
+		"user": frappe.session.user,
+		"held_at": str(frappe.utils.now_datetime()),
+		"item_count": len(items_list),
+		"total": sum(flt(i.get("amount", 0)) * flt(i.get("qty", 1)) for i in items_list),
+	}
+
+	cache_key = HELD_CARTS_KEY.format(user=frappe.session.user)
+	existing = frappe.cache().get_value(cache_key) or []
+
+	if len(existing) >= 10:
+		frappe.throw(_("Maximum 10 held carts allowed. Please recall or discard one first."))
+
+	existing.append(held_cart)
+	frappe.cache().set_value(cache_key, existing, expires_in_sec=86400)  # 24h TTL
+
+	return {"success": True, "cart_id": cart_id, "held_count": len(existing)}
+
+
+@frappe.whitelist()
+def get_held_carts() -> dict:
+	"""Return all held carts for the current user."""
+	cache_key = HELD_CARTS_KEY.format(user=frappe.session.user)
+	carts = frappe.cache().get_value(cache_key) or []
+	return {"carts": carts, "count": len(carts)}
+
+
+@frappe.whitelist(methods=["POST"])
+def recall_cart(cart_id: str) -> dict:
+	"""
+	Retrieve a held cart and remove it from the held list.
+
+	Args:
+		cart_id: The unique ID assigned when the cart was held
+	"""
+	cache_key = HELD_CARTS_KEY.format(user=frappe.session.user)
+	existing = frappe.cache().get_value(cache_key) or []
+
+	target = None
+	remaining = []
+	for c in existing:
+		if c.get("id") == cart_id:
+			target = c
+		else:
+			remaining.append(c)
+
+	if not target:
+		frappe.throw(_("Held cart not found or already recalled."))
+
+	frappe.cache().set_value(cache_key, remaining, expires_in_sec=86400)
+	return {"success": True, "cart": target}
+
+
+@frappe.whitelist(methods=["POST"])
+def discard_held_cart(cart_id: str) -> dict:
+	"""Remove a held cart without recalling it."""
+	cache_key = HELD_CARTS_KEY.format(user=frappe.session.user)
+	existing = frappe.cache().get_value(cache_key) or []
+	remaining = [c for c in existing if c.get("id") != cart_id]
+	frappe.cache().set_value(cache_key, remaining, expires_in_sec=86400)
+	return {"success": True, "remaining": len(remaining)}
