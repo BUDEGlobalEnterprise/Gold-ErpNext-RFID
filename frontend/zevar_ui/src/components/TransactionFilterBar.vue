@@ -288,6 +288,11 @@ onMounted(() => {
 	document.addEventListener('click', handleGlobalClick)
 	window.addEventListener('scroll', handleScroll, true)
 	window.addEventListener('resize', handleScroll)
+
+	// G9 Fix: Default to "Today" if no date filter is active on first load
+	if (!activeFilters.value.date_preset && !activeFilters.value.from_date) {
+		applyDatePreset({ label: 'Today', days: 0 })
+	}
 })
 
 onUnmounted(() => {

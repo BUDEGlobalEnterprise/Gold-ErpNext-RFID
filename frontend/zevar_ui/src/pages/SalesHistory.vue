@@ -15,7 +15,20 @@
 						</span>
 					</p>
 				</div>
-				<ViewToggle v-model="viewMode" storage-key="zevar_sales_view" />
+				<div class="flex items-center gap-2">
+					<button
+						v-if="sales.length > 0"
+						@click="exportCSV"
+						class="px-3 py-1.5 text-xs font-bold text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition flex items-center gap-1.5"
+						title="Export to CSV"
+					>
+						<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+						</svg>
+						Export
+					</button>
+					<ViewToggle v-model="viewMode" storage-key="zevar_sales_view" />
+				</div>
 			</div>
 
 			<!-- Filters -->
@@ -562,33 +575,90 @@
 					</div>
 
 					<div
-						class="flex justify-end gap-3 p-4 border-t border-gray-100 dark:border-warm-border/50"
+						class="flex items-center justify-between gap-3 p-4 border-t border-gray-100 dark:border-warm-border/50"
 					>
-						<button
-							@click="printInvoice(selectedTransaction.invoice.name)"
-							class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition flex items-center gap-2"
-						>
-							<svg
-								class="w-4 h-4"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
+						<!-- Return/Void Actions (left side) -->
+						<div class="flex items-center gap-2" v-if="selectedTransaction.invoice.status === 'Paid'">
+							<button
+								@click="initiateReturn(selectedTransaction.invoice.name)"
+								:disabled="returnProcessing"
+								class="px-3 py-2 text-xs font-bold text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800/30 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 transition flex items-center gap-1.5 disabled:opacity-50"
 							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-								/>
-							</svg>
-							Print
-						</button>
-						<button
-							@click="selectedTransaction = null"
-							class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition"
-						>
-							Close
-						</button>
+								<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+								</svg>
+								Return
+							</button>
+							<button
+								@click="showVoidConfirm = true"
+								:disabled="returnProcessing"
+								class="px-3 py-2 text-xs font-bold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/30 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition flex items-center gap-1.5 disabled:opacity-50"
+							>
+								<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+								</svg>
+								Void
+							</button>
+						</div>
+						<div v-else></div>
+
+						<!-- Print/Close (right side) -->
+						<div class="flex items-center gap-2">
+							<button
+								@click="printInvoice(selectedTransaction.invoice.name)"
+								class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition flex items-center gap-2"
+							>
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+								</svg>
+								Print
+							</button>
+							<button
+								@click="selectedTransaction = null"
+								class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition"
+							>
+								Close
+							</button>
+						</div>
+					</div>
+
+					<!-- Void Confirmation Mini-Modal -->
+					<div v-if="showVoidConfirm" class="absolute inset-0 bg-white/95 dark:bg-warm-card/95 backdrop-blur-sm flex items-center justify-center z-10 rounded-2xl">
+						<div class="text-center p-8 max-w-sm">
+							<div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
+								<svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+								</svg>
+							</div>
+							<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Void Invoice?</h3>
+							<p class="text-sm text-gray-500 dark:text-gray-400 mb-4">This will cancel the invoice and reverse stock. Requires manager PIN.</p>
+							<input
+								v-model="voidReason"
+								type="text"
+								placeholder="Reason for void..."
+								class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border rounded-lg text-sm mb-3"
+							/>
+							<input
+								v-model="voidPin"
+								type="password"
+								maxlength="6"
+								placeholder="Manager PIN"
+								class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border rounded-lg text-sm mb-4 font-mono"
+							/>
+							<p v-if="voidError" class="text-xs text-red-500 mb-3">{{ voidError }}</p>
+							<div class="flex gap-3">
+								<button @click="showVoidConfirm = false; voidReason = ''; voidPin = ''; voidError = ''" class="flex-1 py-2 text-sm font-medium border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-warm-dark-700">
+									Cancel
+								</button>
+								<button
+									@click="executeVoid"
+									:disabled="!voidReason || !voidPin || returnProcessing"
+									class="flex-1 py-2 text-sm font-bold bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 transition"
+								>
+									{{ returnProcessing ? 'Voiding...' : 'Confirm Void' }}
+								</button>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -617,6 +687,13 @@ const sales = ref([])
 const summary = ref(null)
 const selectedTransaction = ref(null)
 const pagination = ref({ page: 1, total_pages: 1, total_count: 0 })
+
+// Return/Void state
+const returnProcessing = ref(false)
+const showVoidConfirm = ref(false)
+const voidReason = ref('')
+const voidPin = ref('')
+const voidError = ref('')
 
 const filters = computed(() => ui.activeFilters.transactions || {})
 
@@ -746,6 +823,68 @@ function printInvoice(invoiceName) {
 function goToPage(page) {
 	pagination.value.page = page
 	fetchSales()
+}
+
+// Return initiation — opens Frappe's return form in a new tab
+function initiateReturn(invoiceName) {
+	window.open(`/app/sales-invoice/${invoiceName}?is_return=1`, '_blank')
+}
+
+// Void invoice with manager PIN
+async function executeVoid() {
+	if (!voidReason.value || !voidPin.value) return
+	voidError.value = ''
+	returnProcessing.value = true
+	try {
+		const res = await fetch('/api/method/zevar_core.api.returns.void_invoice', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-Frappe-CSRF-Token': window.csrf_token || '',
+			},
+			body: JSON.stringify({
+				invoice_name: selectedTransaction.value.invoice.name,
+				reason: voidReason.value,
+				manager_pin: voidPin.value,
+			}),
+		})
+		const data = await res.json()
+		if (data.message?.success) {
+			showVoidConfirm.value = false
+			selectedTransaction.value = null
+			voidReason.value = ''
+			voidPin.value = ''
+			fetchSales() // Refresh list
+		} else {
+			voidError.value = data.message?.message || data._server_messages || 'Void failed'
+		}
+	} catch (e) {
+		voidError.value = 'Network error'
+	} finally {
+		returnProcessing.value = false
+	}
+}
+
+// CSV Export
+function exportCSV() {
+	if (!sales.value.length) return
+	const headers = ['Invoice #', 'Date', 'Customer', 'Items', 'Total', 'Status']
+	const rows = sales.value.map(s => [
+		s.name,
+		s.posting_date,
+		s.customer || 'Walk-In',
+		s.item_count || 1,
+		formatAmount(s.grand_total),
+		s.status,
+	])
+	const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
+	const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+	const url = URL.createObjectURL(blob)
+	const link = document.createElement('a')
+	link.href = url
+	link.download = `sales_history_${new Date().toISOString().split('T')[0]}.csv`
+	link.click()
+	URL.revokeObjectURL(url)
 }
 
 onMounted(() => {
