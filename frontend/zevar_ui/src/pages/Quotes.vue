@@ -19,9 +19,6 @@
 
 			<!-- Status Filter Pills -->
 			<div class="flex flex-wrap gap-2 mb-4 flex-shrink-0">
-<<<<<<< Updated upstream
-				<button v-for="s in statusFilters" :key="s.value" @click="activeStatus = s.value; loadData()" class="px-3 py-1.5 rounded-full text-xs font-bold transition" :class="activeStatus === s.value ? 'bg-[#D4AF37] text-white' : 'bg-gray-100 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-warm-dark-600'">
-=======
 				<button
 					v-for="s in statusFilters"
 					:key="s.value"
@@ -36,7 +33,6 @@
 							: 'bg-gray-100 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-warm-dark-600'
 					"
 				>
->>>>>>> Stashed changes
 					{{ s.label }}
 				</button>
 			</div>

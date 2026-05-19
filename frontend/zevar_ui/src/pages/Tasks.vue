@@ -81,10 +81,6 @@
 			<!-- Todos View -->
 			<div v-if="viewMode === 'todos'" class="flex-1 overflow-y-auto min-h-0">
 				<div class="flex items-center gap-2 mb-3">
-<<<<<<< Updated upstream
-					<button @click="todoFilter = 'Open'; store.loadTodos('Open')" class="px-3 py-1.5 rounded-full text-xs font-bold transition" :class="todoFilter === 'Open' ? 'bg-[#D4AF37] text-white' : 'bg-gray-100 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-300'">Open ({{ store.todoCount }})</button>
-					<button @click="todoFilter = 'Closed'; store.loadTodos('Closed')" class="px-3 py-1.5 rounded-full text-xs font-bold transition" :class="todoFilter === 'Closed' ? 'bg-[#D4AF37] text-white' : 'bg-gray-100 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-300'">Closed</button>
-=======
 					<button
 						@click="
 							todoFilter = 'Open';
@@ -126,11 +122,7 @@
 					v-else-if="!store.todos.length"
 					class="text-center py-20 text-gray-400 text-sm"
 				>
-					No todos
->>>>>>> Stashed changes
-				</div>
-				<div v-if="store.todosResource.loading && !store.todos.length" class="flex items-center justify-center py-20"><div class="animate-spin w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full"></div></div>
-				<div v-else-if="!store.todos.length" class="text-center py-20 text-gray-400 text-sm">No todos</div>
+					No todos</div>
 				<div v-else class="space-y-2">
 					<div v-for="todo in store.todos" :key="todo.id" class="premium-card !p-3 flex items-start gap-3">
 						<button @click="toggleTodo(todo)" class="mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center transition shrink-0" :class="todo.status === 'Closed' ? 'bg-emerald-500 border-emerald-500' : 'border-gray-300 dark:border-gray-600 hover:border-[#D4AF37]'">

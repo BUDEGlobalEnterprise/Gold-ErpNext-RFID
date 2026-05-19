@@ -84,14 +84,10 @@
 									? 'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300'
 									: 'bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-warm-dark-800'
 							"
-<<<<<<< Updated upstream
-							@click="selectedCategory = cat; loadArticles()"
-=======
 							@click="
 								selectedCategory = cat;
 								loadArticles();
 							"
->>>>>>> Stashed changes
 						>
 							{{ cat }}
 						</button>
@@ -102,14 +98,10 @@
 									? 'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300'
 									: 'bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-400'
 							"
-<<<<<<< Updated upstream
-							@click="selectedCategory = null; loadArticles()"
-=======
 							@click="
 								selectedCategory = null;
 								loadArticles();
 							"
->>>>>>> Stashed changes
 						>
 							All
 						</button>

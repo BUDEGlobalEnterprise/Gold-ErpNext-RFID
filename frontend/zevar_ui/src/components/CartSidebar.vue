@@ -409,14 +409,10 @@
 							</router-link>
 							<button
 								v-else
-<<<<<<< Updated upstream
-								@click="showCheckout = true; ui.closeLayawayPayment()"
-=======
 								@click="
 									showCheckout = true;
 									ui.closeLayawayPayment();
 								"
->>>>>>> Stashed changes
 								:disabled="!isCheckoutReady"
 								class="w-full py-3 rounded-lg font-bold shadow-lg transition-all flex items-center justify-center gap-2"
 								:class="

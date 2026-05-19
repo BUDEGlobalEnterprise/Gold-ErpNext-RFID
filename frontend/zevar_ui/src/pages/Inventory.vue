@@ -128,79 +128,55 @@
 
 			<div v-if="mobileMenuOpen" class="md:hidden grid grid-cols-2 gap-2 mb-4">
 				<button
-<<<<<<< Updated upstream
-					@click="showStockAdjust = true; mobileMenuOpen = false"
-=======
 					@click="
 						showStockAdjust = true;
 						mobileMenuOpen = false;
 					"
->>>>>>> Stashed changes
 					class="py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold"
 				>
 					Adjust Stock
 				</button>
 				<button
-<<<<<<< Updated upstream
-					@click="showReductions = true; mobileMenuOpen = false"
-=======
 					@click="
 						showReductions = true;
 						mobileMenuOpen = false;
 					"
->>>>>>> Stashed changes
 					class="py-2 bg-amber-50 text-amber-700 border border-amber-300 rounded-lg text-xs font-bold"
 				>
 					Reductions
 				</button>
 				<button
-<<<<<<< Updated upstream
-					@click="showQuickAdd = true; mobileMenuOpen = false"
-=======
 					@click="
 						showQuickAdd = true;
 						mobileMenuOpen = false;
 					"
->>>>>>> Stashed changes
 					class="py-2 bg-[#D4AF37] text-white rounded-lg text-xs font-bold"
 				>
 					Quick Add
 				</button>
 				<button
-<<<<<<< Updated upstream
-					@click="openPushForSelected(); mobileMenuOpen = false"
-=======
 					@click="
 						openPushForSelected();
 						mobileMenuOpen = false;
 					"
->>>>>>> Stashed changes
 					class="py-2 bg-blue-600 text-white rounded-lg text-xs font-bold"
 				>
 					Push
 				</button>
 				<button
-<<<<<<< Updated upstream
-					@click="showTransferModal = true; mobileMenuOpen = false"
-=======
 					@click="
 						showTransferModal = true;
 						mobileMenuOpen = false;
 					"
->>>>>>> Stashed changes
 					class="py-2 border rounded-lg text-xs font-bold"
 				>
 					Transfer
 				</button>
 				<button
-<<<<<<< Updated upstream
-					@click="showConsignment = true; mobileMenuOpen = false"
-=======
 					@click="
 						showConsignment = true;
 						mobileMenuOpen = false;
 					"
->>>>>>> Stashed changes
 					class="py-2 border rounded-lg text-xs font-bold"
 				>
 					Consignment
@@ -631,14 +607,6 @@
 				v-if="selectedItem"
 				:item="selectedItem"
 				@close="selectedItem = null"
-<<<<<<< Updated upstream
-				@reserve="openReserve(selectedItem); selectedItem = null"
-				@damage="openDamage(selectedItem); selectedItem = null"
-				@lifecycle="openLifecycle(selectedItem); selectedItem = null"
-				@push="openPushForItem(selectedItem); selectedItem = null"
-				@transfer="showTransferModal = true; selectedItem = null"
-				@edit="openEdit(selectedItem); selectedItem = null"
-=======
 				@reserve="
 					openReserve(selectedItem);
 					selectedItem = null;
@@ -663,7 +631,6 @@
 					openEdit(selectedItem);
 					selectedItem = null;
 				"
->>>>>>> Stashed changes
 			/>
 		</div>
 
