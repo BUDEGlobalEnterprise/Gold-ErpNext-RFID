@@ -1,5 +1,12 @@
 <template>
 	<router-view />
+	<ToastNotification ref="toast" />
 </template>
 
-<script setup></script>
+<script setup>
+import { provide, ref } from 'vue'
+import ToastNotification from '@/components/ToastNotification.vue'
+
+const toast = ref(null)
+provide('toast', toast)
+</script>
