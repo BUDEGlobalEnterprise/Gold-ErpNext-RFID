@@ -5,6 +5,7 @@
 		:no-max-height="step !== 'success'"
 		:show-close="true"
 		@close="close"
+		data-testid="checkout-modal"
 	>
 		<!-- ============ PAYMENT FORM ============ -->
 		<template v-if="step === 'review'">
@@ -86,17 +87,28 @@
 							</div>
 						</div>
 
-						<!-- Tax Exempt Toggle -->
-						<div class="pt-3 border-t border-gray-200 dark:border-warm-border">
-							<label class="flex items-center justify-between cursor-pointer group">
-								<div>
-									<span
-										class="font-medium text-gray-700 dark:text-gray-300 text-sm"
-										>Tax Exempt</span
-									>
-									<span class="text-xs text-gray-400 block"
-										>For resellers or tax-free sales</span
-									>
+								<!-- Tax Exempt Toggle -->
+								<div class="pt-3 border-t border-gray-200 dark:border-warm-border">
+									<label class="flex items-center justify-between cursor-pointer group">
+										<div>
+											<span
+												class="font-medium text-gray-700 dark:text-gray-300 text-sm"
+												>Tax Exempt</span
+											>
+											<span class="text-xs text-gray-400 block"
+												>For resellers or tax-free sales</span
+											>
+										</div>
+										<input
+											v-model="taxExempt"
+											type="checkbox"
+											class="sr-only peer"
+											data-testid="tax-exempt-checkbox"
+										/>
+										<div
+											class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#D4AF37]/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D4AF37]"
+										></div>
+									</label>
 								</div>
 								<button
 									@click="taxExempt = !taxExempt"
@@ -226,19 +238,21 @@
 								</span>
 							</div>
 						</div>
-						<div
-							v-else
-							class="flex-1 flex items-center justify-center text-gray-400 dark:text-gray-600 text-sm"
-						>
-							Select a payment method to begin
-						</div>
+							<div
+								v-else
+								class="flex-1 flex items-center justify-center text-gray-400 dark:text-gray-600 text-sm"
+								data-testid="payment-error"
+							>
+								Select a payment method to begin
+							</div>
 					</template>
 
-					<!-- Error -->
-					<div
-						v-if="error"
-						class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-xl p-3 mt-3"
-					>
+									<!-- Error -->
+									<div
+										v-if="error"
+										class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-xl p-3 mt-3"
+										data-testid="payment-error"
+									>
 						<p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>
 					</div>
 				</div>
@@ -735,17 +749,18 @@
 
 					<!-- Confirm Button -->
 					<div class="flex-shrink-0">
-						<button
-							type="button"
-							@click="handlePayment"
-							:disabled="!canSubmit || processing"
-							class="w-full py-4 rounded-xl font-bold text-lg shadow-xl transition-all flex items-center justify-center gap-2 transform active:scale-95"
-							:class="
-								!canSubmit || processing
-									? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-warm-dark-700 dark:text-gray-600'
-									: 'bg-gray-900 text-white hover:bg-black dark:bg-[#D4AF37] dark:text-black dark:hover:bg-[#b5952f]'
-							"
-						>
+							<button
+								v-for="pm in standardModes"
+								:key="pm.value"
+								@click="togglePayment(pm.value)"
+								class="flex items-center justify-between p-3 rounded-xl border-2 transition-all"
+								:class="
+									isPaymentSelected(pm.value)
+										? 'border-[#D4AF37] bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]'
+										: 'border-gray-200 hover:border-gray-400 dark:border-warm-border dark:hover:border-white/30'
+								"
+								data-testid="payment-mode-select"
+							>
 							<span
 								v-if="processing"
 								class="animate-spin rounded-full h-5 w-5 border-2 border-gray-400 border-t-white"
@@ -760,12 +775,13 @@
 			</div>
 		</template>
 
-		<!-- ============ SUCCESS STATE ============ -->
-		<template v-if="step === 'success'">
-			<div
-				class="p-12 flex flex-col items-center justify-center text-center w-full"
-				style="min-height: 400px"
-			>
+							<!-- ============ SUCCESS STATE ============ -->
+							<template v-if="step === 'success'">
+								<div
+									class="p-12 flex flex-col items-center justify-center text-center w-full"
+									style="min-height: 400px"
+									data-testid="success-message"
+								>
 				<div
 					class="w-20 h-20 rounded-full flex items-center justify-center mb-6"
 					:class="isOfflineOrder ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-green-100 dark:bg-green-900/30'"
@@ -815,10 +831,11 @@
 							formatCurrency(successBreakdown.reduce((s, p) => s + p.amount, 0))
 						}}</span>
 					</div>
-					<div
-						v-if="successInvoiceId"
-						class="flex justify-between text-sm pt-3 mt-2 border-t border-gray-200 dark:border-warm-border"
-					>
+									<div
+										v-if="successInvoiceId"
+										class="flex justify-between text-sm pt-3 mt-2 border-t border-gray-200 dark:border-warm-border"
+										data-testid="invoice-id"
+									>
 						<span class="text-gray-500 dark:text-gray-400">Transaction ID</span>
 						<span class="font-mono font-bold text-gray-900 dark:text-white">{{
 							successInvoiceId

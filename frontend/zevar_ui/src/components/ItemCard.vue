@@ -2,6 +2,7 @@
 	<div
 		class="premium-card !p-0 shadow-sm hover:shadow-xl transition-all cursor-pointer flex flex-col h-full group relative overflow-hidden"
 		@click="emit('open-details', item.item_code)"
+		data-testid="item-card"
 	>
 		<div class="aspect-square bg-gray-100 dark:bg-warm-dark-900 relative">
 			<img
@@ -105,6 +106,7 @@
 					@click.stop="quickAdd"
 					class="bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black w-8 h-8 rounded-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-md"
 					title="Add to Cart"
+					data-testid="add-to-cart-btn"
 				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"

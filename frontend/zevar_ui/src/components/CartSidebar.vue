@@ -42,7 +42,7 @@
 							class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2"
 						>
 							<span>💎</span> Selection Tray
-							<span class="text-xs font-normal text-gray-500 dark:text-gray-400"
+							<span class="text-xs font-normal text-gray-500 dark:text-gray-400" data-testid="cart-item-count"
 								>({{ cart.totalItems }}
 								{{ cart.totalItems === 1 ? 'piece' : 'pieces' }})</span
 							>
@@ -400,7 +400,7 @@
 								class="flex justify-between text-lg font-bold text-gray-900 dark:text-white pt-2 border-t border-gray-200 dark:border-warm-border"
 							>
 								<span>Total</span>
-								<span>{{ formatCurrency(cart.grandTotal) }}</span>
+								<span data-testid="grand-total">{{ formatCurrency(cart.grandTotal) }}</span>
 							</div>
 						</div>
 
@@ -432,6 +432,7 @@
 										? 'bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black hover:bg-gray-800 dark:hover:bg-[#b5952f] active:scale-95'
 										: 'bg-gray-200 dark:bg-warm-dark-700 text-gray-400 dark:text-gray-600 cursor-not-allowed'
 								"
+								data-testid="checkout-btn"
 							>
 								{{ checkoutButtonText }}
 							</button>

@@ -487,7 +487,7 @@ export const useCartStore = defineStore('cart', () => {
 	// ==========================================================================
 
 	const fetchSettings = createResource({
-		url: 'zevar_core.api.get_pos_settings',
+		url: 'zevar_core.api.pos.get_pos_settings',
 		onSuccess(data) {
 			if (data) {
 				taxRate.value = data.tax_rate || 0
