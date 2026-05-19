@@ -1,18 +1,26 @@
 /**
  * Service Worker for Zevar POS - Offline Support
  *
- * Caches assets and API responses for offline functionality
+ * Caches assets and API responses for offline functionality.
+ * Uses IndexedDB for reliable offline order queuing.
  */
 
-const CACHE_NAME = 'zevar-pos-v3'
-const API_CACHE = 'zevar-api-v3'
+const CACHE_NAME = 'zevar-pos-v4'
+const API_CACHE = 'zevar-api-v4'
 
 // Assets to cache immediately on install
 const STATIC_ASSETS = ['/pos/', '/pos/index.html', '/pos/manifest.json']
 
+// API routes that should be cached for offline catalog browsing
+const CACHEABLE_API_ROUTES = [
+	'zevar_core.api.pos.get_pos_items',
+	'zevar_core.api.get_pos_settings',
+	'zevar_core.api.pos.get_pos_profile',
+]
+
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
-	console.log('[SW] Installing service worker...')
+	console.log('[SW] Installing service worker v4...')
 	event.waitUntil(
 		caches
 			.open(CACHE_NAME)
@@ -26,7 +34,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-	console.log('[SW] Activating service worker...')
+	console.log('[SW] Activating service worker v4...')
 	event.waitUntil(
 		caches
 			.keys()
@@ -68,11 +76,9 @@ self.addEventListener('fetch', (event) => {
 			.match(request)
 			.then((response) => {
 				if (response) {
-					console.log('[SW] Serving from cache:', request.url)
 					return response
 				}
 
-				console.log('[SW] Fetching from network:', request.url)
 				return fetch(request).then((response) => {
 					// Cache successful responses
 					if (!response || response.status !== 200 || response.type === 'error') {
@@ -90,7 +96,7 @@ self.addEventListener('fetch', (event) => {
 			.catch(() => {
 				// Fallback for offline navigation
 				if (request.destination === 'document') {
-					return caches.match('/index.html')
+					return caches.match('/pos/index.html')
 				}
 			})
 	)
@@ -98,11 +104,14 @@ self.addEventListener('fetch', (event) => {
 
 // Handle API requests with network-first strategy
 async function handleAPIRequest(request) {
+	const url = new URL(request.url)
+	const isCacheableRoute = CACHEABLE_API_ROUTES.some((route) => url.pathname.includes(route))
+
 	try {
 		const response = await fetch(request)
 
-		// Cache successful API responses
-		if (response.ok) {
+		// Cache successful API responses for cacheable routes
+		if (response.ok && (isCacheableRoute || request.method === 'GET')) {
 			const cache = await caches.open(API_CACHE)
 			cache.put(request, response.clone())
 		}
@@ -120,19 +129,35 @@ async function handleAPIRequest(request) {
 
 		// If GET request (read-only), return offline error
 		if (request.method === 'GET') {
-			return new Response(JSON.stringify({ error: 'Offline - cached data not available' }), {
-				status: 503,
-				headers: { 'Content-Type': 'application/json' },
-			})
+			return new Response(
+				JSON.stringify({ error: 'Offline - cached data not available' }),
+				{
+					status: 503,
+					headers: { 'Content-Type': 'application/json' },
+				}
+			)
 		}
 
-		// For POST requests (mutations), queue for background sync
-		if ('sync' in self.registration && request.method === 'POST') {
-			console.log('[SW] Queuing POST request for background sync')
-			await queueRequest(request)
+		// For POST requests (mutations), queue in IndexedDB
+		if (request.method === 'POST') {
+			console.log('[SW] Queuing POST request for offline sync')
+			const body = await request.clone().text()
+			await queueRequestInIDB({
+				url: request.url,
+				method: request.method,
+				headers: Object.fromEntries(request.headers.entries()),
+				body: body,
+				timestamp: Date.now(),
+			})
+
+			// Register background sync if available
+			if ('sync' in self.registration) {
+				await self.registration.sync.register('sync-pos-transactions')
+			}
+
 			return new Response(
 				JSON.stringify({
-					message: 'Request queued for sync when online',
+					message: 'Order queued for sync when online',
 					queued: true,
 				}),
 				{
@@ -146,25 +171,56 @@ async function handleAPIRequest(request) {
 	}
 }
 
-// Queue failed requests for background sync
-async function queueRequest(request) {
-	const requestData = {
-		url: request.url,
-		method: request.method,
-		headers: Object.fromEntries(request.headers.entries()),
-		body: await request.text(),
-		timestamp: Date.now(),
-	}
+// ── IndexedDB helpers for the service worker context ──
 
-	// Store in IndexedDB (would need idb library for production)
-	// For now, register sync event
-	await self.registration.sync.register('sync-pos-transactions')
+const SW_DB_NAME = 'zevar_pos_sw'
+const SW_DB_VERSION = 1
 
-	// Store request data in a simple way (would use IndexedDB in production)
-	console.log('[SW] Queued request:', requestData)
+function openSWDB() {
+	return new Promise((resolve, reject) => {
+		const request = indexedDB.open(SW_DB_NAME, SW_DB_VERSION)
+		request.onupgradeneeded = (event) => {
+			const db = event.target.result
+			if (!db.objectStoreNames.contains('requestQueue')) {
+				db.createObjectStore('requestQueue', { keyPath: 'id', autoIncrement: true })
+			}
+		}
+		request.onsuccess = () => resolve(request.result)
+		request.onerror = () => reject(request.error)
+	})
 }
 
-// Background sync event - retry failed requests
+async function queueRequestInIDB(requestData) {
+	const db = await openSWDB()
+	const tx = db.transaction('requestQueue', 'readwrite')
+	tx.objectStore('requestQueue').add(requestData)
+	return new Promise((resolve, reject) => {
+		tx.oncomplete = () => resolve()
+		tx.onerror = () => reject(tx.error)
+	})
+}
+
+async function getQueuedRequests() {
+	const db = await openSWDB()
+	const tx = db.transaction('requestQueue', 'readonly')
+	const request = tx.objectStore('requestQueue').getAll()
+	return new Promise((resolve, reject) => {
+		request.onsuccess = () => resolve(request.result)
+		request.onerror = () => reject(request.error)
+	})
+}
+
+async function removeQueuedRequest(id) {
+	const db = await openSWDB()
+	const tx = db.transaction('requestQueue', 'readwrite')
+	tx.objectStore('requestQueue').delete(id)
+	return new Promise((resolve, reject) => {
+		tx.oncomplete = () => resolve()
+		tx.onerror = () => reject(tx.error)
+	})
+}
+
+// Background sync event - retry queued requests
 self.addEventListener('sync', (event) => {
 	if (event.tag === 'sync-pos-transactions') {
 		console.log('[SW] Background sync triggered')
@@ -173,11 +229,36 @@ self.addEventListener('sync', (event) => {
 })
 
 async function syncPendingTransactions() {
-	// In production, retrieve queued requests from IndexedDB
-	// and retry them
-	console.log('[SW] Syncing pending transactions...')
-	// TODO: Implement IndexedDB retrieval and retry logic
-	return Promise.resolve()
+	const requests = await getQueuedRequests()
+	console.log(`[SW] Syncing ${requests.length} pending transactions...`)
+
+	for (const reqData of requests) {
+		try {
+			const response = await fetch(reqData.url, {
+				method: reqData.method,
+				headers: reqData.headers,
+				body: reqData.body,
+			})
+
+			if (response.ok) {
+				await removeQueuedRequest(reqData.id)
+				console.log('[SW] Synced queued request:', reqData.url)
+			} else {
+				console.error('[SW] Sync failed for:', reqData.url, response.status)
+			}
+		} catch (e) {
+			console.error('[SW] Sync network error for:', reqData.url, e.message)
+			// Leave in queue for next sync attempt
+		}
+	}
+
+	// Notify clients of sync completion
+	const clients = await self.clients.matchAll()
+	const remaining = await getQueuedRequests()
+	const remainingCount = remaining.length
+	clients.forEach((client) => {
+		client.postMessage({ type: 'SYNC_COMPLETE', remaining: remainingCount })
+	})
 }
 
 // Message handling for manual sync triggers
@@ -187,8 +268,15 @@ self.addEventListener('message', (event) => {
 	}
 
 	if (event.data && event.data.type === 'SYNC_NOW') {
-		syncPendingTransactions().then(() => {
-			event.ports[0].postMessage({ success: true })
+		syncPendingTransactions().then(async () => {
+			const remaining = await getQueuedRequests()
+			event.ports[0]?.postMessage({ success: true, remaining: remaining.length })
+		})
+	}
+
+	if (event.data && event.data.type === 'GET_QUEUE_COUNT') {
+		getQueuedRequests().then((requests) => {
+			event.ports[0]?.postMessage({ count: requests.length })
 		})
 	}
 })

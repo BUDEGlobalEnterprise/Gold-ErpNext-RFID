@@ -66,6 +66,9 @@
 						No Register Session
 					</router-link>
 
+					<!-- Online/Offline Indicator -->
+					<OfflineIndicator />
+
 					<div
 						v-if="ui.activeFilters.pos?.display_case"
 						class="flex items-center gap-1.5 px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 rounded-full text-[10px] font-bold animate-in fade-in slide-in-from-left-2"
@@ -94,6 +97,78 @@
 					</svg>
 					Cash In/Out
 				</button>
+
+				<!-- Held Carts Button -->
+				<button
+					v-if="posSession.hasActiveSession"
+					@click="toggleHeldCarts"
+					class="flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg border transition-all"
+					:class="heldCarts.length > 0
+						? 'text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700/50 dark:text-amber-400'
+						: 'text-gray-500 border-gray-200 dark:border-warm-border dark:text-gray-400 hover:border-gray-300'"
+				>
+					<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+					Held
+					<span v-if="heldCarts.length > 0" class="ml-0.5 w-5 h-5 flex items-center justify-center rounded-full bg-amber-500 text-white text-[10px] font-black">
+						{{ heldCarts.length }}
+					</span>
+				</button>
+
+				<!-- Held Carts Dropdown -->
+				<Teleport to="body">
+					<Transition name="fade">
+						<div v-if="showHeldDrawer" class="fixed inset-0 z-[100] flex items-start justify-center pt-20">
+							<div @click="showHeldDrawer = false" class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"></div>
+							<div class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full max-w-md border dark:border-warm-border overflow-hidden">
+								<div class="p-4 border-b border-gray-100 dark:border-warm-border/50 flex items-center justify-between">
+									<h3 class="text-sm font-bold text-gray-900 dark:text-white">Held Carts ({{ heldCarts.length }})</h3>
+									<button @click="showHeldDrawer = false" class="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full">
+										<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+										</svg>
+									</button>
+								</div>
+								<div v-if="heldCarts.length === 0" class="p-8 text-center text-gray-400 text-sm">
+									No held carts
+								</div>
+								<div v-else class="max-h-80 overflow-y-auto">
+									<div
+										v-for="hc in heldCarts"
+										:key="hc.id"
+										class="p-4 border-b border-gray-50 dark:border-warm-border/30 hover:bg-gray-50 dark:hover:bg-white/5 transition"
+									>
+										<div class="flex items-center justify-between">
+											<div class="min-w-0 flex-1">
+												<div class="font-bold text-sm text-gray-900 dark:text-white truncate">
+													{{ hc.note || hc.customer_name || 'Unnamed cart' }}
+												</div>
+												<div class="text-xs text-gray-400 mt-0.5">
+													{{ hc.item_count }} item{{ hc.item_count !== 1 ? 's' : '' }} · ${{ Number(hc.total || 0).toFixed(2) }}
+												</div>
+											</div>
+											<div class="flex items-center gap-2 ml-3">
+												<button
+													@click="recallHeldCart(hc.id)"
+													class="px-3 py-1.5 text-xs font-bold bg-[#D4AF37] text-black rounded-lg hover:bg-[#b5952f] transition"
+												>
+													Recall
+												</button>
+												<button
+													@click="discardHeldCart(hc.id)"
+													class="px-2 py-1.5 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition"
+												>
+													Discard
+												</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</Transition>
+				</Teleport>
 
 				<!-- Inline Filter Bar -->
 				<div class="flex-1 hidden md:flex justify-center px-4">
@@ -212,10 +287,12 @@ import ItemFilterBar from '@/components/ItemFilterBar.vue'
 import ItemCard from '@/components/ItemCard.vue'
 import ProductModal from '@/components/POSProductModal.vue'
 import CashMovementModal from '@/components/CashMovementModal.vue'
+import OfflineIndicator from '@/components/OfflineIndicator.vue'
 import { useSessionStore } from '@/stores/session.js'
 import { useUIStore } from '@/stores/ui.js'
 import { useCartStore } from '@/stores/cart.js'
 import { usePosSessionStore } from '@/stores/posSession.js'
+import { useOfflineStore } from '@/stores/offline.js'
 import { useBreakpoint } from '@/composables/useBreakpoint.js'
 import { createResource } from 'frappe-ui'
 import { watch, ref, computed, onMounted, onUnmounted } from 'vue'
@@ -227,6 +304,7 @@ const session = useSessionStore()
 const ui = useUIStore()
 const cart = useCartStore()
 const posSession = usePosSessionStore()
+const offlineStore = useOfflineStore()
 const { isMobile: isMobileBP, productGridCols } = useBreakpoint()
 
 // View mode toggle
@@ -238,6 +316,8 @@ const catalogLoading = ref(false)
 const showModal = ref(false)
 const selectedItemCode = ref(null)
 const showCashModal = ref(false)
+const showHeldDrawer = ref(false)
+const heldCarts = ref([])
 
 // Detect mobile/tablet viewport via shared composable
 const isMobile = computed(() => isMobileBP.value)
@@ -303,6 +383,8 @@ const items = createResource({
 		}
 		if (start.value === 0) {
 			catalog.value = data
+			// Cache catalog for offline browsing
+			offlineStore.updateCatalogCache(data).catch(() => {})
 		} else {
 			catalog.value.push(...data)
 		}
@@ -367,6 +449,74 @@ function onCashMovementSaved() {
 	posSession.fetchStatus()
 }
 
+// ── Held Carts ──
+async function fetchHeldCarts() {
+	try {
+		const res = await fetch('/api/method/zevar_core.api.pos.get_held_carts', {
+			method: 'GET',
+			headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
+		})
+		const data = await res.json()
+		heldCarts.value = data.message?.carts || []
+	} catch (e) {
+		heldCarts.value = []
+	}
+}
+
+function toggleHeldCarts() {
+	fetchHeldCarts()
+	showHeldDrawer.value = !showHeldDrawer.value
+}
+
+async function recallHeldCart(cartId) {
+	try {
+		const res = await fetch('/api/method/zevar_core.api.pos.recall_cart', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-Frappe-CSRF-Token': window.csrf_token || '',
+			},
+			body: JSON.stringify({ cart_id: cartId }),
+		})
+		const data = await res.json()
+		if (data.message?.success) {
+			const recalledCart = data.message.cart
+			// Clear current cart and restore held items
+			cart.clearCart()
+			cart.clearCustomer()
+			for (const item of (recalledCart.items || [])) {
+				cart.addItem(item)
+			}
+			if (recalledCart.customer) {
+				cart.setCustomer({
+					name: recalledCart.customer,
+					customer_name: recalledCart.customer_name,
+				})
+			}
+			showHeldDrawer.value = false
+			fetchHeldCarts()
+		}
+	} catch (e) {
+		console.error('Recall failed:', e)
+	}
+}
+
+async function discardHeldCart(cartId) {
+	try {
+		await fetch('/api/method/zevar_core.api.pos.discard_held_cart', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-Frappe-CSRF-Token': window.csrf_token || '',
+			},
+			body: JSON.stringify({ cart_id: cartId }),
+		})
+		fetchHeldCarts()
+	} catch (e) {
+		console.error('Discard failed:', e)
+	}
+}
+
 function viewCategory(cat) {
 	router.push(`/pos-catalogue/${encodeURIComponent(cat.name)}`)
 }
@@ -405,12 +555,56 @@ watch(
 )
 
 let sessionPollInterval = null
+
+// Debounced catalog refresh for stock updates from other terminals
+let stockRefreshTimeout = null
+function handleStockUpdate(data) {
+	// Only refresh if the update affects our warehouse or is a broadcast
+	if (data?.warehouse && session.currentWarehouse && data.warehouse !== session.currentWarehouse) {
+		return
+	}
+	// Debounce: wait 2s to batch rapid-fire updates
+	if (stockRefreshTimeout) clearTimeout(stockRefreshTimeout)
+	stockRefreshTimeout = setTimeout(() => {
+		start.value = 0
+		hasMore.value = true
+		items.fetch()
+	}, 2000)
+}
+
 onMounted(() => {
 	posSession.fetchStatus()
 	sessionPollInterval = setInterval(() => posSession.fetchStatus(), 60000)
+	fetchHeldCarts() // Load held carts count on mount
+	offlineStore.init() // Start online/offline event listeners
+
+	// Listen for real-time stock updates from other POS terminals
+	if (window.frappe?.realtime) {
+		window.frappe.realtime.on('stock_update', handleStockUpdate)
+	} else if (window.frappe?.socketio) {
+		window.frappe.socketio.socket?.on('stock_update', handleStockUpdate)
+	}
+
+	// Listen for service worker sync completion to refresh pending count
+	if ('serviceWorker' in navigator) {
+		navigator.serviceWorker.addEventListener('message', (event) => {
+			if (event.data?.type === 'SYNC_COMPLETE') {
+				offlineStore.refreshPendingCount()
+			}
+		})
+	}
 })
 onUnmounted(() => {
 	if (sessionPollInterval) clearInterval(sessionPollInterval)
+	if (stockRefreshTimeout) clearTimeout(stockRefreshTimeout)
+	offlineStore.destroy() // Remove online/offline listeners
+
+	// Clean up realtime listener
+	if (window.frappe?.realtime) {
+		window.frappe.realtime.off('stock_update', handleStockUpdate)
+	} else if (window.frappe?.socketio) {
+		window.frappe.socketio.socket?.off('stock_update', handleStockUpdate)
+	}
 })
 </script>
 

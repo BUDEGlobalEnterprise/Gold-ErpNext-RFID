@@ -1,5 +1,27 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+// Role tier definitions — must match backend reports.py constants
+const ROLE_TIERS = {
+	admin: ['Administrator', 'System Manager', 'Accounts Manager'],
+	manager: ['Store Manager', 'Sales Manager', 'Stock Manager', 'Inventory Manager', 'HR Manager', 'HR User'],
+	employee: ['Sales User', 'Employee', 'Employee Self Service'],
+}
+
+function getAccessTier(roles) {
+	if (roles.some((r) => ROLE_TIERS.admin.includes(r))) return 'admin'
+	if (roles.some((r) => ROLE_TIERS.manager.includes(r))) return 'manager'
+	if (roles.some((r) => ROLE_TIERS.employee.includes(r))) return 'employee'
+	return null
+}
+
+const TIER_LEVELS = { employee: 1, manager: 2, admin: 3 }
+
+function canAccess(requiredTiers, userTier) {
+	if (requiredTiers.includes('all')) return true
+	const level = TIER_LEVELS[userTier] || 0
+	return requiredTiers.some((t) => (TIER_LEVELS[t] || 0) <= level)
+}
+
 const routes = [
 	{
 		path: '/login',
@@ -110,28 +132,17 @@ const routes = [
 		meta: { requiresAuth: true },
 	},
 	{
-		path: '/gold-purchase',
-		name: 'GoldPurchase',
-		component: () => import('./pages/GoldPurchase.vue'),
-		meta: { requiresAuth: true },
-	},
-	{
-		path: '/memos',
-		name: 'Memos',
-		component: () => import('./pages/MemoTerminal.vue'),
-		meta: { requiresAuth: true },
-	},
-	{
 		path: '/appraisals',
 		name: 'Appraisals',
 		component: () => import('./pages/Appraisals.vue'),
 		meta: { requiresAuth: true },
 	},
+	// ── Reports Hub — all authenticated users can open it; content is role-filtered ──
 	{
 		path: '/reports',
 		name: 'Reports',
 		component: () => import('./pages/ReportsHub.vue'),
-		meta: { requiresAuth: true, requiresManagement: true },
+		meta: { requiresAuth: true },
 	},
 	{
 		path: '/reports/viewer/:reportId',
@@ -139,35 +150,30 @@ const routes = [
 		component: () => import('./pages/ReportViewer.vue'),
 		meta: { requiresAuth: true, requiresManagement: true },
 	},
+	// ── Dashboards — granular RBAC by access tier ──
 	{
 		path: '/reports/dashboards/revenue',
 		name: 'RevenueDashboard',
 		component: () => import('./pages/dashboards/Revenue.vue'),
-		meta: { requiresAuth: true, requiresManagement: true },
+		meta: { requiresAuth: true, reportRoles: ['employee', 'manager', 'admin'] },
 	},
 	{
 		path: '/reports/dashboards/inventory',
 		name: 'InventoryDashboard',
 		component: () => import('./pages/dashboards/Inventory.vue'),
-		meta: { requiresAuth: true, requiresManagement: true },
+		meta: { requiresAuth: true, reportRoles: ['manager', 'admin'] },
 	},
 	{
 		path: '/reports/dashboards/customer',
 		name: 'CustomerDashboard',
 		component: () => import('./pages/dashboards/Customer.vue'),
-		meta: { requiresAuth: true, requiresManagement: true },
+		meta: { requiresAuth: true, reportRoles: ['manager', 'admin'] },
 	},
 	{
 		path: '/reports/dashboards/admin',
 		name: 'AdminMonitor',
 		component: () => import('./pages/dashboards/AdminMonitor.vue'),
-		meta: { requiresAuth: true, requiresManagement: true },
-	},
-	{
-		path: '/reports/dashboards/profit',
-		name: 'ProfitIntelligence',
-		component: () => import('./pages/dashboards/ProfitIntelligence.vue'),
-		meta: { requiresAuth: true, requiresManagement: true },
+		meta: { requiresAuth: true, reportRoles: ['admin'] },
 	},
 	{
 		path: '/contacts',
@@ -335,6 +341,13 @@ const routes = [
 		component: () => import('./pages/Settings.vue'),
 		meta: { requiresAuth: true },
 	},
+	// Profit Intelligence — Admin only (contains pricing engine, AI predictions)
+	{
+		path: '/reports/dashboards/profit',
+		name: 'ProfitIntelligence',
+		component: () => import('./pages/dashboards/ProfitIntelligence.vue'),
+		meta: { requiresAuth: true, reportRoles: ['admin'] },
+	},
 	// Catch-all → Dashboard
 	{
 		path: '/:pathMatch(.*)*',
@@ -347,66 +360,57 @@ const router = createRouter({
 	routes,
 })
 
-// Check if user has any role that can open the Reports hub.
-async function checkUserRole() {
+let _cachedUserInfo = null
+
+async function getUserInfo() {
+	if (_cachedUserInfo) return _cachedUserInfo
 	try {
 		const res = await fetch('/api/method/zevar_core.api.user_info.get_user_info', {
 			headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
 		})
-		if (!res.ok) return false
+		if (!res.ok) return null
 		const data = await res.json()
 		const userInfo = data?.message || data
-		if (!userInfo || userInfo === 'Guest' || !Array.isArray(userInfo.roles)) return false
-
-		const reportRoles = [
-			'System Manager',
-			'Administrator',
-			'Store Manager',
-			'Sales Manager',
-			'Accounts Manager',
-			'Sales User',
-			'Stock Manager',
-			'Inventory Manager',
-			'HR User',
-			'HR Manager',
-			'Employee',
-			'Employee Self Service',
-		]
-		return userInfo.roles.some((role) => reportRoles.includes(role))
+		if (!userInfo || userInfo === 'Guest' || !Array.isArray(userInfo.roles)) return null
+		_cachedUserInfo = userInfo
+		return userInfo
 	} catch {
-		return false
+		return null
 	}
 }
 
-// Auth guard — redirect unauthenticated users to login
+export function clearUserCache() {
+	_cachedUserInfo = null
+}
+
+// Expose tier helpers for components
+export { getAccessTier, canAccess, ROLE_TIERS, TIER_LEVELS }
+
 router.beforeEach(async (to, _from, next) => {
-	// Skip guard for guest routes
-	if (to.meta.guest) {
-		return next()
-	}
+	if (to.meta.guest) return next()
 
-	// Check if user is logged in via Frappe session
 	if (to.meta.requiresAuth) {
-		try {
-			const res = await fetch('/api/method/zevar_core.api.user_info.get_user_info', {
-				headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
-			})
-			if (!res.ok) throw new Error('Not authenticated')
-			const data = await res.json()
-			if (!data.message || data.message === 'Guest') {
-				return next({ name: 'Login' })
-			}
+		const userInfo = await getUserInfo()
+		if (!userInfo) return next({ name: 'Login' })
 
-			// Role-based access check for Reports page
-			if (to.meta.requiresManagement) {
-				const hasManagementAccess = await checkUserRole()
-				if (!hasManagementAccess) {
-					// Redirect to dashboard with access denied message
-					return next({ name: 'Dashboard', query: { accessDenied: 'true' } })
-				}
+		// Legacy requiresManagement check
+		if (to.meta.requiresManagement) {
+			const reportRoles = [
+				'System Manager', 'Administrator', 'Store Manager', 'Sales Manager',
+				'Accounts Manager', 'Sales User', 'Stock Manager', 'Inventory Manager',
+				'HR User', 'HR Manager', 'Employee', 'Employee Self Service',
+			]
+			if (!userInfo.roles.some((r) => reportRoles.includes(r))) {
+				return next({ name: 'Dashboard', query: { accessDenied: 'true' } })
 			}
-		} catch {
-			return next({ name: 'Login' })
+		}
+
+		// Granular role-tier check for report routes
+		if (to.meta.reportRoles) {
+			const tier = getAccessTier(userInfo.roles)
+			if (!tier || !canAccess(to.meta.reportRoles, tier)) {
+				return next({ name: 'Dashboard', query: { accessDenied: 'true' } })
+			}
 		}
 	}
 

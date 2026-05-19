@@ -5,6 +5,7 @@
 		:no-max-height="step !== 'success'"
 		:show-close="true"
 		@close="close"
+		data-testid="checkout-modal"
 	>
 		<!-- ============ PAYMENT FORM ============ -->
 		<template v-if="step === 'review'">
@@ -86,17 +87,28 @@
 							</div>
 						</div>
 
-						<!-- Tax Exempt Toggle -->
-						<div class="pt-3 border-t border-gray-200 dark:border-warm-border">
-							<label class="flex items-center justify-between cursor-pointer group">
-								<div>
-									<span
-										class="font-medium text-gray-700 dark:text-gray-300 text-sm"
-										>Tax Exempt</span
-									>
-									<span class="text-xs text-gray-400 block"
-										>For resellers or tax-free sales</span
-									>
+								<!-- Tax Exempt Toggle -->
+								<div class="pt-3 border-t border-gray-200 dark:border-warm-border">
+									<label class="flex items-center justify-between cursor-pointer group">
+										<div>
+											<span
+												class="font-medium text-gray-700 dark:text-gray-300 text-sm"
+												>Tax Exempt</span
+											>
+											<span class="text-xs text-gray-400 block"
+												>For resellers or tax-free sales</span
+											>
+										</div>
+										<input
+											v-model="taxExempt"
+											type="checkbox"
+											class="sr-only peer"
+											data-testid="tax-exempt-checkbox"
+										/>
+										<div
+											class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#D4AF37]/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D4AF37]"
+										></div>
+									</label>
 								</div>
 								<button
 									@click="taxExempt = !taxExempt"
@@ -226,19 +238,21 @@
 								</span>
 							</div>
 						</div>
-						<div
-							v-else
-							class="flex-1 flex items-center justify-center text-gray-400 dark:text-gray-600 text-sm"
-						>
-							Select a payment method to begin
-						</div>
+							<div
+								v-else
+								class="flex-1 flex items-center justify-center text-gray-400 dark:text-gray-600 text-sm"
+								data-testid="payment-error"
+							>
+								Select a payment method to begin
+							</div>
 					</template>
 
-					<!-- Error -->
-					<div
-						v-if="error"
-						class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-xl p-3 mt-3"
-					>
+									<!-- Error -->
+									<div
+										v-if="error"
+										class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-xl p-3 mt-3"
+										data-testid="payment-error"
+									>
 						<p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>
 					</div>
 				</div>
@@ -453,7 +467,20 @@
 							</button>
 						</div>
 
-						<!-- Digital Wallets -->
+						<!-- Show More Toggle -->
+						<button
+							v-if="mode === 'sale'"
+							@click="showMoreModes = !showMoreModes"
+							class="w-full py-2 text-xs font-bold text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition flex items-center justify-center gap-1"
+						>
+							<svg class="w-3 h-3 transition-transform" :class="showMoreModes ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+							</svg>
+							{{ showMoreModes ? 'Show fewer options' : 'More payment options' }}
+						</button>
+
+						<!-- Digital Wallets (collapsible) -->
+						<template v-if="showMoreModes">
 						<h4
 							v-if="mode === 'sale'"
 							class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2"
@@ -503,8 +530,7 @@
 							</button>
 						</div>
 
-						<!-- Stored Value (Gift Card, Trade-In) -->
-						<h4
+								<h4
 							v-if="mode === 'sale'"
 							class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2"
 						>
@@ -553,7 +579,7 @@
 							</button>
 						</div>
 
-						<!-- Financing Options -->
+							<!-- Financing Options -->
 						<h4
 							v-if="mode === 'sale'"
 							class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2"
@@ -628,6 +654,7 @@
 								<span class="font-medium text-sm">Quick Apply (Waterfall)</span>
 							</button>
 						</div>
+					</template>
 					</div>
 
 					<!-- Gift Card Number Input (sale mode only) -->
@@ -722,17 +749,18 @@
 
 					<!-- Confirm Button -->
 					<div class="flex-shrink-0">
-						<button
-							type="button"
-							@click="handlePayment"
-							:disabled="!canSubmit || processing"
-							class="w-full py-4 rounded-xl font-bold text-lg shadow-xl transition-all flex items-center justify-center gap-2 transform active:scale-95"
-							:class="
-								!canSubmit || processing
-									? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-warm-dark-700 dark:text-gray-600'
-									: 'bg-gray-900 text-white hover:bg-black dark:bg-[#D4AF37] dark:text-black dark:hover:bg-[#b5952f]'
-							"
-						>
+							<button
+								v-for="pm in standardModes"
+								:key="pm.value"
+								@click="togglePayment(pm.value)"
+								class="flex items-center justify-between p-3 rounded-xl border-2 transition-all"
+								:class="
+									isPaymentSelected(pm.value)
+										? 'border-[#D4AF37] bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]'
+										: 'border-gray-200 hover:border-gray-400 dark:border-warm-border dark:hover:border-white/30'
+								"
+								data-testid="payment-mode-select"
+							>
 							<span
 								v-if="processing"
 								class="animate-spin rounded-full h-5 w-5 border-2 border-gray-400 border-t-white"
@@ -747,17 +775,19 @@
 			</div>
 		</template>
 
-		<!-- ============ SUCCESS STATE ============ -->
-		<template v-if="step === 'success'">
-			<div
-				class="p-12 flex flex-col items-center justify-center text-center w-full"
-				style="min-height: 400px"
-			>
+							<!-- ============ SUCCESS STATE ============ -->
+							<template v-if="step === 'success'">
+								<div
+									class="p-12 flex flex-col items-center justify-center text-center w-full"
+									style="min-height: 400px"
+									data-testid="success-message"
+								>
 				<div
-					class="w-20 h-20 rounded-full flex items-center justify-center mb-6 bg-green-100 dark:bg-green-900/30"
+					class="w-20 h-20 rounded-full flex items-center justify-center mb-6"
+					:class="isOfflineOrder ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-green-100 dark:bg-green-900/30'"
 				>
 					<svg
-						class="w-10 h-10 text-green-600 dark:text-green-400"
+						:class="isOfflineOrder ? 'w-10 h-10 text-amber-600 dark:text-amber-400' : 'w-10 h-10 text-green-600 dark:text-green-400'"
 						fill="none"
 						stroke="currentColor"
 						viewBox="0 0 24 24"
@@ -801,10 +831,11 @@
 							formatCurrency(successBreakdown.reduce((s, p) => s + p.amount, 0))
 						}}</span>
 					</div>
-					<div
-						v-if="successInvoiceId"
-						class="flex justify-between text-sm pt-3 mt-2 border-t border-gray-200 dark:border-warm-border"
-					>
+									<div
+										v-if="successInvoiceId"
+										class="flex justify-between text-sm pt-3 mt-2 border-t border-gray-200 dark:border-warm-border"
+										data-testid="invoice-id"
+									>
 						<span class="text-gray-500 dark:text-gray-400">Transaction ID</span>
 						<span class="font-mono font-bold text-gray-900 dark:text-white">{{
 							successInvoiceId
@@ -856,6 +887,7 @@ import { ref, watch, computed } from 'vue'
 import { createResource, call } from 'frappe-ui'
 import { useCartStore } from '@/stores/cart.js'
 import { useSessionStore } from '@/stores/session.js'
+import { useOfflineStore } from '@/stores/offline.js'
 import { hardwareService } from '@/services/HardwareService.js'
 import BaseModal from './BaseModal.vue'
 import FinancingApplicationModal from './FinancingApplicationModal.vue'
@@ -875,8 +907,10 @@ const emit = defineEmits(['close', 'success'])
 
 const cart = useCartStore()
 const session = useSessionStore()
+const offlineStore = useOfflineStore()
 
 const processing = ref(false)
+const showMoreModes = ref(false)
 const error = ref('')
 const step = ref('review')
 const selectedPayments = ref([])
@@ -981,13 +1015,17 @@ const confirmButtonLabel = computed(() => {
 	return `Record ${formatCurrency(totalAmount.value)}`
 })
 
+const isOfflineOrder = computed(() => successInvoiceId.value === 'QUEUED-OFFLINE')
+
 const successTitle = computed(() => {
+	if (isOfflineOrder.value) return 'Order Saved Offline'
 	if (props.mode === 'sale') return 'Payment Successful!'
 	if (props.mode === 'layaway') return 'Layaway Payment Recorded!'
 	return 'Repair Payment Recorded!'
 })
 
 const successSubtext = computed(() => {
+	if (isOfflineOrder.value) return 'This order will be synced automatically when you\'re back online.'
 	if (props.mode === 'sale') return 'Invoice has been generated successfully.'
 	if (props.mode === 'layaway') return 'Layaway payment has been processed.'
 	return 'Repair payment has been recorded.'
@@ -1088,7 +1126,10 @@ async function handlePayment() {
 
 		if (props.mode === 'sale') {
 			const gcPayment = selectedPayments.value.find((p) => p.mode === 'Gift Card')
-			const result = await cart.submitOrder(selectedPayments.value, {
+			// Use submitOrderSafe so auth-expiry errors come back with a
+			// stable {code: 'session_expired'} shape and DON'T fall through
+			// to the offline-queue branch (which would mask the real issue).
+			const result = await cart.submitOrderSafe(selectedPayments.value, {
 				taxExempt: taxExempt.value,
 				warehouse: session.currentWarehouse,
 				giftCardNumber: gcPayment ? giftCardNumber.value : undefined,
@@ -1129,8 +1170,63 @@ async function handlePayment() {
 			emit('success', result)
 		}
 	} catch (e) {
+		// Detect network failures and offer offline queuing
+		const isNetworkError = (
+			e instanceof TypeError && (e.message.includes('fetch') || e.message.includes('network')) ||
+			e?.message?.includes('ERR_INTERNET_DISCONNECTED') ||
+			e?.message?.includes('NetworkError') ||
+			!navigator.onLine
+		)
+
+		// Auth-expired error from submitOrderSafe (Fix #8): bubble a clear
+		// message and DO NOT fall through to the offline-queue branch —
+		// queueing here would silently retry on reconnect against an
+		// already-expired session and surface as a confusing failure later.
+		// The cart is preserved either way (Fix #8 never clears it on
+		// failure).
+		if (e?.code === 'session_expired') {
+			error.value =
+				'Your session has expired. Please log in again — your cart is saved.'
+			return
+		}
+
+		if (isNetworkError && props.mode === 'sale') {
+			// Queue for offline sync
+			try {
+				const payments = selectedPayments.value
+					.filter((sp) => sp.amount > 0)
+					.map((sp) => ({ mode_of_payment: sp.mode, amount: sp.amount }))
+
+				await offlineStore.addPendingOrder({
+					payload: {
+						items: JSON.stringify(cart.items.map(i => ({
+							item_code: i.item_code,
+							qty: i.qty || 1,
+							rate: i.amount || 0,
+							serial_no: i.serial_no || null,
+						}))),
+						payments: JSON.stringify(payments),
+						customer: cart.customer?.name || 'Walk-In Customer',
+						warehouse: session.currentWarehouse || '',
+						tax_exempt: taxExempt.value,
+					},
+				})
+
+				successBreakdown.value = payments
+				successInvoiceId.value = 'QUEUED-OFFLINE'
+				step.value = 'success'
+				emit('success', { success: true, offline: true })
+				return
+			} catch (queueError) {
+				error.value = 'Network unavailable and failed to save offline. Please try again.'
+				return
+			}
+		}
+
 		let errorMsg = ''
-		if (e?.exc_type === 'ValidationError' && e?.message) {
+		if (isNetworkError) {
+			errorMsg = 'Network connection lost. Please check your internet and try again.'
+		} else if (e?.exc_type === 'ValidationError' && e?.message) {
 			errorMsg = e.message
 		} else if (e?._server_messages) {
 			try {

@@ -111,6 +111,7 @@
 				/>
 				<Dashboards
 					v-else-if="activeTab === 'dashboards'"
+					:role-context="roleContext"
 					@open-dashboard="openDashboard"
 				/>
 				<ScheduledTab v-else-if="activeTab === 'scheduled'" :role-context="roleContext" />

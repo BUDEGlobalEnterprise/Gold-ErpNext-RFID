@@ -42,13 +42,25 @@
 							class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2"
 						>
 							<span>💎</span> Selection Tray
-							<span class="text-xs font-normal text-gray-500 dark:text-gray-400"
+							<span class="text-xs font-normal text-gray-500 dark:text-gray-400" data-testid="cart-item-count"
 								>({{ cart.totalItems }}
 								{{ cart.totalItems === 1 ? 'piece' : 'pieces' }})</span
 							>
 						</h2>
 
 						<div class="flex items-center gap-2">
+							<button
+								v-if="cart.items.length > 0"
+								@click="holdCurrentCart"
+								:disabled="holdingCart"
+								class="text-xs font-bold text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/20 px-2 py-1 rounded transition-colors flex items-center gap-1"
+								title="Park this cart for later"
+							>
+								<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+								</svg>
+								{{ holdingCart ? 'Holding...' : 'Hold' }}
+							</button>
 							<button
 								v-if="cart.items.length > 0"
 								@click="cart.clearCart()"
@@ -388,7 +400,7 @@
 								class="flex justify-between text-lg font-bold text-gray-900 dark:text-white pt-2 border-t border-gray-200 dark:border-warm-border"
 							>
 								<span>Total</span>
-								<span>{{ formatCurrency(cart.grandTotal) }}</span>
+								<span data-testid="grand-total">{{ formatCurrency(cart.grandTotal) }}</span>
 							</div>
 						</div>
 
@@ -420,6 +432,7 @@
 										? 'bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black hover:bg-gray-800 dark:hover:bg-[#b5952f] active:scale-95'
 										: 'bg-gray-200 dark:bg-warm-dark-700 text-gray-400 dark:text-gray-600 cursor-not-allowed'
 								"
+								data-testid="checkout-btn"
 							>
 								{{ checkoutButtonText }}
 							</button>
@@ -452,6 +465,46 @@ const posSession = usePosSessionStore()
 const ui = useUIStore()
 const router = useRouter()
 const showCheckout = ref(false)
+const holdingCart = ref(false)
+
+async function holdCurrentCart() {
+	if (cart.items.length === 0 || holdingCart.value) return
+	holdingCart.value = true
+	try {
+		const note = prompt('Label for held cart (optional):', cart.customer?.customer_name || '')
+		if (note === null) { holdingCart.value = false; return } // cancelled
+
+		const res = await fetch('/api/method/zevar_core.api.pos.hold_cart', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-Frappe-CSRF-Token': window.csrf_token || '',
+			},
+			body: JSON.stringify({
+				items: JSON.stringify(cart.items.map(i => ({
+					item_code: i.item_code,
+					item_name: i.item_name,
+					qty: i.qty || 1,
+					amount: i.amount || 0,
+					serial_no: i.serial_no || null,
+					image: i.image || null,
+				}))),
+				customer: cart.customer?.name || null,
+				customer_name: cart.customer?.customer_name || null,
+				note: note || undefined,
+			}),
+		})
+		const data = await res.json()
+		if (data.message?.success) {
+			cart.clearCart()
+			cart.clearCustomer()
+		}
+	} catch (e) {
+		console.error('Hold cart failed:', e)
+	} finally {
+		holdingCart.value = false
+	}
+}
 
 function startLayaway() {
 	emit('close')

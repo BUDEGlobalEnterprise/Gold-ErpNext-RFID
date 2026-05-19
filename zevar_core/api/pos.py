@@ -79,6 +79,49 @@ def create_pos_invoice(
 	if not payments_list:
 		checkout_bouncer(_("At least one payment mode is required."), "invoice_failed")
 
+	# Resolve warehouse BEFORE per-item validation so the stock and serial
+	# checks below run against the final warehouse, not a stale or
+	# unvalidated client value. Order is:
+	#   1. caller-supplied (after multi-store check)
+	#   2. user's active POS Opening Entry profile
+	#   3. first active Store Location's default warehouse
+	if not warehouse:
+		active_pos_profile = frappe.db.get_value(
+			"POS Opening Entry",
+			filters={"user": frappe.session.user, "docstatus": 1, "status": "Open"},
+			fieldname="pos_profile",
+			order_by="creation desc",
+		)
+		if active_pos_profile:
+			warehouse = frappe.db.get_value("POS Profile", active_pos_profile, "warehouse")
+
+		if not warehouse:
+			store_loc = frappe.db.get_value("Store Location", {"is_active": 1}, "default_warehouse")
+			if store_loc:
+				warehouse = store_loc
+
+	if not warehouse:
+		checkout_bouncer(
+			_("Warehouse is required. Please select a store location or configure a default warehouse."),
+			"invoice_failed",
+		)
+
+	if not frappe.db.exists("Warehouse", warehouse):
+		checkout_bouncer(
+			_("Warehouse '{0}' not found. Please ensure a valid warehouse is configured.").format(warehouse),
+			"invoice_failed",
+		)
+
+	# Multi-store enforcement: a cashier in store A must not be able to
+	# pass store B's warehouse name and deduct stock from store B.
+	# Manager-class roles bypass via assert_pos_warehouse_access.
+	from zevar_core.api.permissions import assert_pos_warehouse_access
+
+	try:
+		assert_pos_warehouse_access(warehouse)
+	except frappe.PermissionError as exc:
+		checkout_bouncer(str(exc), "permission_denied", details={"warehouse": warehouse})
+
 	# Validate all items before creating invoice
 	for item in items_list:
 		item_code = item.get("item_code")
@@ -96,30 +139,67 @@ def create_pos_invoice(
 		if not frappe.db.exists("Item", item_code):
 			checkout_bouncer(_("Item '{0}' not found in the system.").format(item_code), "invoice_failed")
 
-	if not warehouse:
-		# Try to get warehouse from active store location
-		store_loc = frappe.db.get_value("Store Location", {"is_active": 1}, "default_warehouse")
-		if store_loc:
-			warehouse = store_loc
-		else:
-			# Try to get default warehouse from company
-			company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value(
-				"Global Defaults", "default_company"
+		# Validate Serial Number
+		serial_no = item.get("serial_no")
+		if serial_no:
+			sn_doc = frappe.db.get_value(
+				"Serial No", serial_no, ["status", "warehouse", "item_code"], as_dict=True
 			)
-			if company:
-				warehouse = frappe.db.get_value("Company", company, "default_warehouse")
+			if not sn_doc:
+				checkout_bouncer(
+					_("Serial Number '{0}' not found in the system.").format(serial_no), "invoice_failed"
+				)
+			if sn_doc.item_code != item_code:
+				checkout_bouncer(
+					_("Serial Number '{0}' does not belong to Item '{1}'.").format(serial_no, item_code),
+					"invoice_failed",
+				)
+			if sn_doc.status != "Active":
+				checkout_bouncer(
+					_(
+						"Serial Number '{0}' is not active or available for sale (Status: {1})."
+					).format(serial_no, sn_doc.status),
+					"invoice_failed",
+				)
+			if not sn_doc.warehouse:
+				checkout_bouncer(
+					_("Serial Number '{0}' is not in any warehouse.").format(serial_no), "invoice_failed"
+				)
+			# A serial sitting in another store's safe must not be sellable
+			# from this register — both for honest mistakes (cashier scans
+			# the wrong tag) and for cross-store leakage attempts.
+			try:
+				assert_pos_warehouse_access(sn_doc.warehouse)
+			except frappe.PermissionError:
+				checkout_bouncer(
+					_(
+						"Serial Number '{0}' belongs to warehouse '{1}', which is outside your store."
+					).format(serial_no, sn_doc.warehouse),
+					"permission_denied",
+					details={"serial_no": serial_no, "sn_warehouse": sn_doc.warehouse},
+				)
 
-	if not warehouse:
-		checkout_bouncer(
-			_("Warehouse is required. Please select a store location or configure a default warehouse."),
-			"invoice_failed",
+		# Validate actual stock availability to handle edge cases where items
+		# sell out while in the cart. Now safe because `warehouse` is
+		# resolved and access-checked.
+		is_stock_item, has_serial_no = frappe.db.get_value(
+			"Item", item_code, ["is_stock_item", "has_serial_no"]
 		)
-
-	if not frappe.db.exists("Warehouse", warehouse):
-		checkout_bouncer(
-			_("Warehouse '{0}' not found. Please ensure a valid warehouse is configured.").format(warehouse),
-			"invoice_failed",
-		)
+		if is_stock_item and not has_serial_no and warehouse:
+			# Use flt() on the DB result so None → 0.0 explicitly.
+			# A missing Bin row means 0 stock — never allow the sale.
+			actual_qty = flt(
+				frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
+			)
+			requested_qty = flt(item.get("qty", 1))
+			if actual_qty < requested_qty:
+				checkout_bouncer(
+					_(
+						"Item '{0}' does not have enough stock in warehouse '{1}'. "
+						"Available: {2}, Requested: {3}"
+					).format(item_code, warehouse, actual_qty, requested_qty),
+					"invoice_failed",
+				)
 
 	# Validate active POS session exists (managers bypass)
 	active_session = frappe.db.get_value(
@@ -266,6 +346,7 @@ def create_pos_invoice(
 					"rate": flt(item.get("rate")),
 					"warehouse": warehouse,
 					"allow_zero_valuation_rate": 1,
+					"serial_no": item.get("serial_no"),
 				},
 			)
 
@@ -413,6 +494,7 @@ def create_pos_invoice(
 				"grand_total": flt(si.grand_total),
 				"outstanding_amount": flt(si.outstanding_amount),
 				"item_count": len(si.items),
+				"warehouse": warehouse,
 				"payment_modes": [
 					{
 						"mode_of_payment": payment.mode_of_payment,
@@ -446,6 +528,22 @@ def create_pos_invoice(
 				frappe.publish_realtime("pos_sale_event", sale_event, user=mgr.parent)
 		except Exception:
 			frappe.log_error("POS Sale Notification Failed", frappe.get_traceback())
+
+		# Broadcast stock update to all POS terminals for real-time catalog refresh
+		try:
+			affected_items = [item.item_code for item in si.items]
+			frappe.publish_realtime(
+				"stock_update",
+				{
+					"item_codes": affected_items,
+					"warehouse": warehouse,
+					"invoice": si.name,
+					"timestamp": str(frappe.utils.now_datetime()),
+				},
+				after_commit=True,
+			)
+		except Exception:
+			pass  # Non-critical — catalog will refresh on next poll
 
 		if gc_payment_amount > 0 and gift_card_number:
 			log_gift_card_used(gc_doc, gc_payment_amount, source_reference=si.name)
@@ -764,3 +862,409 @@ def get_pending_overrides() -> dict:
 		"overrides": overrides,
 		"count": len(overrides),
 	}
+
+@frappe.whitelist(methods=["GET", "POST"])
+def validate_cart_items(item_codes: str) -> dict:
+	"""
+	Takes a list of item_codes (JSON string), and returns their current state
+	(price, active, name) so the frontend cart can update prices and remove inactive items.
+	"""
+	try:
+		items = frappe.parse_json(item_codes)
+	except Exception:
+		items = []
+	
+	if not items:
+		return {}
+
+	results = {}
+	for item_code in items:
+		item = frappe.db.get_value("Item", item_code, ["item_name", "standard_rate", "disabled"], as_dict=True)
+		if item:
+			results[item_code] = {
+				"item_name": item.item_name,
+				"rate": flt(item.standard_rate),
+				"disabled": item.disabled
+			}
+		else:
+			results[item_code] = None
+	return results
+
+
+
+# ---------------------------------------------------------------------------
+# Pre-submit cart validation (Fix #3)
+# ---------------------------------------------------------------------------
+#
+# These helpers and the validate_pos_cart endpoint give the frontend a single
+# call to make right before "Submit" so the cashier can be told *exactly* why
+# a sale would fail (sold out, serial inactive, foreign warehouse, price
+# changed, etc.) without having to attempt and roll back a full Sales Invoice.
+#
+# Issue types are stable strings so the UI can branch on them:
+#
+#   item_missing            — item_code does not exist in the system
+#   item_disabled           — Item.disabled = 1
+#   qty_invalid             — qty <= 0 or non-numeric
+#   rate_invalid            — rate <= 0 or non-numeric
+#   out_of_stock            — Bin.actual_qty < requested qty (non-serialized)
+#   serial_not_found        — Serial No record missing
+#   serial_wrong_item       — serial belongs to a different item
+#   serial_inactive         — Serial No.status != "Active"
+#   serial_no_warehouse     — Serial No.warehouse is empty
+#   serial_wrong_warehouse  — serial sits in a foreign / inaccessible warehouse
+#   price_drift             — current canonical price differs from cart rate
+#                             (informational only; submission is not blocked)
+#
+# `blocking` flag on each issue is True for everything except price_drift, so
+# callers can decide whether to refuse submission or just warn the user.
+
+
+# Tolerance below which a price difference is considered floating-point noise
+# rather than a real price change. 0.5 cents.
+_PRICE_DRIFT_TOLERANCE_USD = 0.005
+
+
+def _make_issue(item_code: str, type_: str, message: str, *, blocking: bool = True, **details) -> dict:
+	"""Build a structured issue dict. Keep the schema stable for the UI."""
+	issue = {
+		"item_code": item_code,
+		"type": type_,
+		"message": message,
+		"blocking": blocking,
+	}
+	if details:
+		issue["details"] = details
+	return issue
+
+
+def _check_cart_item_availability(item_dict: dict, warehouse: str | None) -> list[dict]:
+	"""Return a list of blocking-availability issues for one cart line.
+
+	Covers item existence, qty/rate sanity, stock availability for non-
+	serialized items, and serial number state for serialized items. Cross-
+	store serial leakage is caught via assert_pos_warehouse_access from
+	Fix #2.
+	"""
+	from zevar_core.api.permissions import assert_pos_warehouse_access
+
+	issues: list[dict] = []
+	item_code = item_dict.get("item_code")
+
+	if not item_code:
+		return [_make_issue("", "item_missing", _("Each cart line must have an item_code."))]
+
+	qty = flt(item_dict.get("qty", 0))
+	rate = flt(item_dict.get("rate", 0))
+
+	if qty <= 0:
+		issues.append(
+			_make_issue(item_code, "qty_invalid", _("Quantity must be greater than zero."), qty=qty)
+		)
+	if rate <= 0:
+		issues.append(
+			_make_issue(item_code, "rate_invalid", _("Rate must be greater than zero."), rate=rate)
+		)
+
+	if not frappe.db.exists("Item", item_code):
+		issues.append(
+			_make_issue(item_code, "item_missing", _("Item '{0}' not found.").format(item_code))
+		)
+		return issues
+
+	item_meta = frappe.db.get_value(
+		"Item", item_code, ["disabled", "is_stock_item", "has_serial_no"], as_dict=True
+	)
+	if item_meta and item_meta.disabled:
+		issues.append(
+			_make_issue(item_code, "item_disabled", _("Item '{0}' is disabled.").format(item_code))
+		)
+		return issues
+
+	serial_no = item_dict.get("serial_no")
+	if serial_no:
+		sn_doc = frappe.db.get_value(
+			"Serial No", serial_no, ["status", "warehouse", "item_code"], as_dict=True
+		)
+		if not sn_doc:
+			issues.append(
+				_make_issue(
+					item_code,
+					"serial_not_found",
+					_("Serial Number '{0}' not found.").format(serial_no),
+					serial_no=serial_no,
+				)
+			)
+			return issues
+		if sn_doc.item_code != item_code:
+			issues.append(
+				_make_issue(
+					item_code,
+					"serial_wrong_item",
+					_(
+						"Serial Number '{0}' belongs to item '{1}', not '{2}'."
+					).format(serial_no, sn_doc.item_code, item_code),
+					serial_no=serial_no,
+					expected_item=item_code,
+					actual_item=sn_doc.item_code,
+				)
+			)
+		if sn_doc.status != "Active":
+			issues.append(
+				_make_issue(
+					item_code,
+					"serial_inactive",
+					_(
+						"Serial Number '{0}' is no longer available (status: {1})."
+					).format(serial_no, sn_doc.status),
+					serial_no=serial_no,
+					serial_status=sn_doc.status,
+				)
+			)
+		if not sn_doc.warehouse:
+			issues.append(
+				_make_issue(
+					item_code,
+					"serial_no_warehouse",
+					_("Serial Number '{0}' is not in any warehouse.").format(serial_no),
+					serial_no=serial_no,
+				)
+			)
+		else:
+			# Cross-store guard from Fix #2.
+			try:
+				assert_pos_warehouse_access(sn_doc.warehouse)
+			except frappe.PermissionError:
+				issues.append(
+					_make_issue(
+						item_code,
+						"serial_wrong_warehouse",
+						_(
+							"Serial Number '{0}' is in warehouse '{1}', which is outside your store."
+						).format(serial_no, sn_doc.warehouse),
+						serial_no=serial_no,
+						sn_warehouse=sn_doc.warehouse,
+					)
+				)
+		# Serial-numbered: no Bin qty check needed.
+		return issues
+
+	# Non-serialized stock-item flow: confirm Bin has enough on hand.
+	if item_meta and item_meta.is_stock_item and warehouse:
+		actual_qty = (
+			flt(
+				frappe.db.get_value(
+					"Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty"
+				)
+			)
+			or 0
+		)
+		if actual_qty < qty:
+			issues.append(
+				_make_issue(
+					item_code,
+					"out_of_stock",
+					_(
+						"Item '{0}' has {1} available in warehouse '{2}' but the cart requested {3}."
+					).format(item_code, actual_qty, warehouse, qty),
+					available=actual_qty,
+					requested=qty,
+					warehouse=warehouse,
+				)
+			)
+
+	return issues
+
+
+def _check_cart_item_price_drift(item_dict: dict) -> list[dict]:
+	"""Return a `price_drift` issue if current canonical price differs from cart rate.
+
+	Non-blocking — the cashier may have legitimately applied a discount or a
+	manager override. The frontend uses this to surface a "price changed"
+	warning so the customer/cashier can confirm.
+	"""
+	item_code = item_dict.get("item_code")
+	cart_rate = flt(item_dict.get("rate", 0))
+	if not item_code or cart_rate <= 0:
+		return []
+
+	try:
+		from zevar_core.api.pricing import get_item_price
+
+		price_data = get_item_price(item_code) or {}
+		current_price = flt(price_data.get("final_price") or 0)
+	except Exception:
+		# Pricing failures must not block availability checks.
+		return []
+
+	if current_price <= 0:
+		return []
+
+	if abs(current_price - cart_rate) <= _PRICE_DRIFT_TOLERANCE_USD:
+		return []
+
+	return [
+		_make_issue(
+			item_code,
+			"price_drift",
+			_(
+				"Item '{0}' price changed: cart had {1}, current price is {2}."
+			).format(item_code, cart_rate, current_price),
+			blocking=False,
+			cart_rate=cart_rate,
+			current_price=current_price,
+		)
+	]
+
+
+@frappe.whitelist(methods=["POST"])
+def validate_pos_cart(items: str, warehouse: str | None = None) -> dict:
+	"""Pre-submit cart gate. Returns structured issues for every cart line.
+
+	Args:
+	    items: JSON string of cart lines, each at minimum
+	           {item_code, qty, rate, serial_no?}.
+	    warehouse: Warehouse the sale will be booked from. Required for
+	               non-serialized stock checks; optional for serialized-only
+	               carts.
+
+	Returns:
+	    {
+	        "ok": bool,           # True iff there are no blocking issues
+	        "blocking": bool,     # convenience: any issue with blocking=True
+	        "issues": [ ... ],    # list of issue dicts, see module docstring
+	    }
+	"""
+	from zevar_core.api.permissions import assert_pos_warehouse_access
+
+	try:
+		items_list = frappe.parse_json(items) if isinstance(items, str) else (items or [])
+	except Exception:
+		items_list = []
+
+	# A foreign warehouse should fail before any item walk so we don't leak
+	# Bin counts. Non-serialized lines without a warehouse yield no stock
+	# issue (frontend may be checking serial-only carts pre-checkout).
+	if warehouse:
+		assert_pos_warehouse_access(warehouse)
+
+	issues: list[dict] = []
+	for line in items_list:
+		issues.extend(_check_cart_item_availability(line, warehouse))
+		issues.extend(_check_cart_item_price_drift(line))
+
+	blocking = any(i.get("blocking", True) for i in issues)
+	return {"ok": not blocking, "blocking": blocking, "issues": issues}
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Held (parked) carts
+# ──────────────────────────────────────────────────────────────────────────────
+
+HELD_CARTS_KEY = "pos_held_carts:{user}"
+
+
+@frappe.whitelist(methods=["POST"])
+def hold_cart(
+	items: str,
+	customer: str | None = None,
+	customer_name: str | None = None,
+	note: str | None = None,
+	warehouse: str | None = None,
+) -> dict:
+	"""
+	Park the current cart so it can be recalled later.
+
+	Stores a snapshot in frappe.cache keyed by user. Each user can hold
+	up to 10 carts at a time.
+
+	Args:
+		items: JSON-encoded list of cart items
+		customer: Customer docname (optional)
+		customer_name: Display name for the customer
+		note: Short label for the held cart (e.g. "Mrs. Johnson - ring resize")
+		warehouse: Current warehouse context
+	"""
+	from zevar_core.api.permissions import assert_pos_warehouse_access, check_permission
+
+	# Same RBAC envelope as create_pos_invoice — Sales User and up.
+	check_permission("pos_access")
+
+	# Multi-store enforcement (Fix #2 contract): a cashier in store A
+	# cannot park a cart against store B's warehouse. Skipped when no
+	# warehouse is supplied (held carts are warehouse-agnostic).
+	if warehouse:
+		assert_pos_warehouse_access(warehouse)
+
+	items_list = frappe.parse_json(items) if isinstance(items, str) else items
+	if not items_list:
+		frappe.throw(_("Cannot hold an empty cart."))
+
+	cart_id = frappe.generate_hash(length=8)
+	held_cart = {
+		"id": cart_id,
+		"items": items_list,
+		"customer": customer,
+		"customer_name": customer_name or customer,
+		"note": note or "",
+		"warehouse": warehouse,
+		"user": frappe.session.user,
+		"held_at": str(frappe.utils.now_datetime()),
+		"item_count": len(items_list),
+		"total": sum(flt(i.get("amount", 0)) * flt(i.get("qty", 1)) for i in items_list),
+	}
+
+	cache_key = HELD_CARTS_KEY.format(user=frappe.session.user)
+	existing = frappe.cache().get_value(cache_key) or []
+
+	if len(existing) >= 10:
+		frappe.throw(_("Maximum 10 held carts allowed. Please recall or discard one first."))
+
+	existing.append(held_cart)
+	frappe.cache().set_value(cache_key, existing, expires_in_sec=86400)  # 24h TTL
+
+	return {"success": True, "cart_id": cart_id, "held_count": len(existing)}
+
+
+@frappe.whitelist()
+def get_held_carts() -> dict:
+	"""Return all held carts for the current user."""
+	cache_key = HELD_CARTS_KEY.format(user=frappe.session.user)
+	carts = frappe.cache().get_value(cache_key) or []
+	return {"carts": carts, "count": len(carts)}
+
+
+@frappe.whitelist(methods=["POST"])
+def recall_cart(cart_id: str) -> dict:
+	"""
+	Retrieve a held cart and remove it from the held list.
+
+	Args:
+		cart_id: The unique ID assigned when the cart was held
+	"""
+	cache_key = HELD_CARTS_KEY.format(user=frappe.session.user)
+	existing = frappe.cache().get_value(cache_key) or []
+
+	target = None
+	remaining = []
+	for c in existing:
+		if c.get("id") == cart_id:
+			target = c
+		else:
+			remaining.append(c)
+
+	if not target:
+		frappe.throw(_("Held cart not found or already recalled."))
+
+	frappe.cache().set_value(cache_key, remaining, expires_in_sec=86400)
+	return {"success": True, "cart": target}
+
+
+@frappe.whitelist(methods=["POST"])
+def discard_held_cart(cart_id: str) -> dict:
+	"""Remove a held cart without recalling it."""
+	cache_key = HELD_CARTS_KEY.format(user=frappe.session.user)
+	existing = frappe.cache().get_value(cache_key) or []
+	remaining = [c for c in existing if c.get("id") != cart_id]
+	frappe.cache().set_value(cache_key, remaining, expires_in_sec=86400)
+	return {"success": True, "remaining": len(remaining)}
