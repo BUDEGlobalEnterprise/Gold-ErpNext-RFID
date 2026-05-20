@@ -4,264 +4,83 @@
     <meta charset="UTF-8">
     <title>POS Receipt</title>
     <style>
-        /* Thermal Printer Optimized - 80mm width */
-        @media print {
-            @page {
-                size: 80mm auto;
-                margin: 0;
-            }
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            width: 72mm;
-            padding: 2mm;
-            color: #000;
-        }
-
-        .receipt-header {
-            text-align: center;
-            border-bottom: 1px dashed #000;
-            padding-bottom: 8px;
-            margin-bottom: 8px;
-        }
-
-        .store-name {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 2px;
-        }
-
-        .store-info {
-            font-size: 10px;
-            color: #333;
-        }
-
-        .receipt-meta {
-            font-size: 10px;
-            margin-bottom: 8px;
-        }
-
-        .receipt-meta div {
-            display: flex;
-            justify-content: space-between;
-            padding: 1px 0;
-        }
-
-        .divider {
-            border-top: 1px dashed #000;
-            margin: 8px 0;
-        }
-
-        .items-header {
-            font-weight: bold;
-            font-size: 10px;
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 1px solid #000;
-        }
-
-        .item-row {
-            font-size: 11px;
-            padding: 4px 0;
-            border-bottom: 1px dotted #ccc;
-        }
-
-        .item-name {
-            font-weight: bold;
-            font-size: 11px;
-        }
-
-        .item-details {
-            display: flex;
-            justify-content: space-between;
-            font-size: 10px;
-            color: #333;
-            margin-top: 2px;
-        }
-
-        .totals-section {
-            margin-top: 8px;
-        }
-
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 2px 0;
-            font-size: 11px;
-        }
-
-        .total-row.grand-total {
-            font-weight: bold;
-            font-size: 14px;
-            border-top: 1px solid #000;
-            padding-top: 4px;
-            margin-top: 4px;
-        }
-
-        .payment-section {
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px dashed #000;
-        }
-
-        .payment-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 2px 0;
-            font-size: 11px;
-        }
-
-        .footer-section {
-            text-align: center;
-            margin-top: 12px;
-            padding-top: 8px;
-            border-top: 1px dashed #000;
-            font-size: 10px;
-        }
-
-        .barcode {
-            text-align: center;
-            margin: 8px 0;
-        }
-
-        .barcode-number {
-            font-family: 'Libre Barcode 39', 'Courier New', monospace;
-            font-size: 24px;
-            letter-spacing: 2px;
-        }
-
-        .thank-you {
-            font-size: 12px;
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
-
-        .return-policy {
-            font-size: 9px;
-            color: #333;
-            margin-top: 8px;
-        }
-
-        .salesperson-info {
-            font-size: 10px;
-            margin-top: 8px;
-            padding: 4px;
-            background: #f0f0f0;
-        }
+        @media print { @page { size: 80mm auto; margin: 0; } }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Courier New', monospace; font-size: 12px; width: 72mm; padding: 2mm; color: #000; }
+        .receipt-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 8px; }
+        .store-name { font-size: 16px; font-weight: bold; margin-bottom: 2px; }
+        .store-info { font-size: 10px; color: #333; }
+        .receipt-meta { font-size: 10px; margin-bottom: 8px; }
+        .receipt-meta div { display: flex; justify-content: space-between; padding: 1px 0; }
+        .divider { border-top: 1px dashed #000; margin: 8px 0; }
+        .items-header { font-weight: bold; font-size: 10px; display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #000; }
+        .item-row { font-size: 11px; padding: 4px 0; border-bottom: 1px dotted #ccc; }
+        .item-name { font-weight: bold; font-size: 11px; }
+        .item-details { display: flex; justify-content: space-between; font-size: 10px; color: #333; margin-top: 2px; }
+        .totals-section { margin-top: 8px; }
+        .total-row { display: flex; justify-content: space-between; padding: 2px 0; font-size: 11px; }
+        .total-row.grand-total { font-weight: bold; font-size: 14px; border-top: 1px solid #000; padding-top: 4px; margin-top: 4px; }
+        .payment-section { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #000; }
+        .payment-row { display: flex; justify-content: space-between; padding: 2px 0; font-size: 11px; }
+        .footer-section { text-align: center; margin-top: 12px; padding-top: 8px; border-top: 1px dashed #000; font-size: 10px; }
+        .thank-you { font-size: 12px; font-weight: bold; margin-bottom: 4px; }
+        .return-policy { font-size: 9px; color: #333; margin-top: 8px; }
     </style>
 </head>
 <body>
+    {% set store_loc = frappe.db.get_value("Store Location", {"default_warehouse": doc.set_warehouse}, ["store_name", "address_line1", "city", "state", "phone"], as_dict=True) if doc.set_warehouse else None %}
     <div class="receipt-header">
-        <div class="store-name">{{ store_name or "ZEVAR JEWELERS" }}</div>
-        <div class="store-info">{{ store_address or "123 Main Street" }}</div>
-        <div class="store-info">{{ store_phone or "Tel: (555) 123-4567" }}</div>
+        <div class="store-name">{{ store_loc.store_name if store_loc else doc.company or "ZEVAR JEWELERS" }}</div>
+        <div class="store-info">{{ store_loc.address_line1 or "" }}{% if store_loc and store_loc.city %}, {{ store_loc.city }}{% endif %}{% if store_loc and store_loc.state %}, {{ store_loc.state }}{% endif %}</div>
+        <div class="store-info">{{ "Tel: " + store_loc.phone if store_loc and store_loc.phone else "" }}</div>
     </div>
 
     <div class="receipt-meta">
-        <div>
-            <span>Receipt #: {{ invoice_name }}</span>
-            <span>{{ invoice_date }}</span>
-        </div>
-        <div>
-            <span>Time: {{ invoice_time }}</span>
-            <span>Cashier: {{ cashier_name }}</span>
-        </div>
-        <div>
-            <span>Customer: {{ customer_name or "Walk-In" }}</span>
-        </div>
+        <div><span>Receipt #:</span> <span>{{ doc.name }}</span></div>
+        <div><span>Date:</span> <span>{{ frappe.utils.formatdate(doc.posting_date, "medium") }}</span></div>
+        <div><span>Time:</span> <span>{{ doc.posting_time or frappe.utils.nowtime() }}</span></div>
+        <div><span>Cashier:</span> <span>{{ doc.owner }}</span></div>
+        <div><span>Customer:</span> <span>{{ doc.customer_name or "Walk-In" }}</span></div>
     </div>
 
     <div class="divider"></div>
 
-    <div class="items-header">
-        <span>ITEM</span>
-        <span>AMOUNT</span>
-    </div>
+    <div class="items-header"><span>ITEM</span><span>AMOUNT</span></div>
 
-    {% for item in items %}
+    {% for item in doc.items %}
     <div class="item-row">
         <div class="item-name">{{ item.item_name or item.item_code }}</div>
-        <div class="item-details">
-            <span>{{ item.qty }} x @ ${{ item.rate }}</span>
-            <span>${{ item.amount }}</span>
-        </div>
-        {% if item.custom_gold_weight %}
-        <div class="item-details">
-            <span>Gold: {{ item.custom_gold_weight }}g</span>
-        </div>
-        {% endif %}
+        <div class="item-details"><span>{{ item.qty }} x @ {{ item.get_formatted("rate") }}</span><span>{{ item.get_formatted("amount") }}</span></div>
+        {% if item.serial_no %}<div class="item-details"><span>SN: {{ item.serial_no }}</span></div>{% endif %}
     </div>
     {% endfor %}
 
     <div class="totals-section">
-        <div class="total-row">
-            <span>Subtotal:</span>
-            <span>${{ subtotal }}</span>
-        </div>
-        {% if discount_amount > 0 %}
-        <div class="total-row">
-            <span>Discount:</span>
-            <span>-${{ discount_amount }}</span>
-        </div>
+        <div class="total-row"><span>Subtotal:</span><span>{{ doc.get_formatted("net_total") }}</span></div>
+        {% if doc.discount_amount and doc.discount_amount > 0 %}
+        <div class="total-row"><span>Discount:</span><span>-{{ doc.get_formatted("discount_amount") }}</span></div>
         {% endif %}
-        {% if trade_in_credit > 0 %}
-        <div class="total-row">
-            <span>Trade-In Credit:</span>
-            <span>-${{ trade_in_credit }}</span>
-        </div>
+        {% if doc.total_taxes_and_charges and doc.total_taxes_and_charges > 0 %}
+        <div class="total-row"><span>Tax:</span><span>{{ doc.get_formatted("total_taxes_and_charges") }}</span></div>
         {% endif %}
-        <div class="total-row">
-            <span>Tax ({{ tax_rate }}%):</span>
-            <span>${{ tax_amount }}</span>
-        </div>
-        <div class="total-row grand-total">
-            <span>TOTAL:</span>
-            <span>${{ grand_total }}</span>
-        </div>
+        <div class="total-row grand-total"><span>TOTAL:</span><span>{{ doc.get_formatted("grand_total") }}</span></div>
     </div>
 
     <div class="payment-section">
         <div style="font-weight: bold; margin-bottom: 4px;">PAYMENT</div>
-        {% for payment in payments %}
-        <div class="payment-row">
-            <span>{{ payment.mode_of_payment }}:</span>
-            <span>${{ payment.amount }}</span>
-        </div>
+        {% for payment in doc.payments %}
+        <div class="payment-row"><span>{{ payment.mode_of_payment }}:</span><span>{{ payment.get_formatted("amount") }}</span></div>
         {% endfor %}
-    </div>
-
-    <div class="barcode">
-        <div class="barcode-number">{{ invoice_name }}</div>
     </div>
 
     <div class="footer-section">
         <div class="thank-you">THANK YOU FOR YOUR PURCHASE!</div>
         <div>Keep this receipt for returns/exchanges</div>
-        {% if return_policy %}
-        <div class="return-policy">{{ return_policy }}</div>
-        {% else %}
         <div class="return-policy">Returns within 30 days with receipt. Custom orders final sale.</div>
-        {% endif %}
     </div>
 
-    {% if salespersons %}
-    <div class="salesperson-info">
-        <div>Sales Associates:</div>
-        {% for sp in salespersons %}
-        <div>{{ sp.name }} ({{ sp.split }}%)</div>
-        {% endfor %}
-    </div>
-    {% elif doc and doc.custom_salesperson_splits %}
-    <div class="salesperson-info">
+    {% if doc.custom_salesperson_splits %}
+    <div style="font-size: 10px; margin-top: 8px; padding: 4px; background: #f0f0f0;">
         <div>Sales Associates:</div>
         {% for row in doc.custom_salesperson_splits %}
         <div>{{ frappe.db.get_value('Employee', row.employee, 'employee_name') or row.employee }} ({{ row.split_percent }}%)</div>
@@ -270,7 +89,7 @@
     {% endif %}
 
     <div style="margin-top: 16px; text-align: center; font-size: 9px;">
-        {{ invoice_date }} {{ invoice_time }}<br>
+        {{ frappe.utils.formatdate(doc.posting_date, "medium") }} {{ doc.posting_time or frappe.utils.nowtime() }}<br>
         Powered by Zevar POS
     </div>
 </body>
