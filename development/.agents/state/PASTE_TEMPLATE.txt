@@ -1,0 +1,71 @@
+================================================================================
+COPY EVERYTHING BELOW INTO YOUR AI CHAT (Replace bracketed sections)
+================================================================================
+
+# STATE INJECTION - NEW SESSION
+
+## SYSTEM DIRECTIVE
+You are operating under STATE FREEZING protocol.
+- Do NOT treat conversation history as memory
+- All ground truth is in the state below
+- Check constitution for rules before acting
+- Tell me when to update state files
+
+---
+
+## 1. CONSTITUTION (Immutable Rules)
+
+[PASTE THE OUTPUT OF: cat .agents/state/constitution.md]
+
+---
+
+## 2. DECISIONS (Architectural Choices)
+
+[PASTE THE OUTPUT OF: cat .agents/state/decisions.md]
+(Currently has DEC-001 through DEC-004)
+
+---
+
+## 3. CURRENT STATE (Active Work)
+
+[PASTE THE OUTPUT OF: cat .agents/state/current.md]
+(Currently: Fix POS bugs + Develop HRMS Portal)
+
+---
+
+## 4. CURRENT TASK
+
+[WRITE YOUR SPECIFIC TASK HERE]
+
+Examples:
+- "Fix POS customer creation bug - check why it fails"
+- "Fix POS checkout failure - test full flow"
+- "Build HRMS clock in/out system with roster support"
+- "Integrate Gameplan for employee tasks"
+
+---
+
+## REMEMBER
+1. Check Working Set in Current State for file locations
+2. Follow all axioms in Constitution (especially security rules)
+3. Use Gameplan for tasks (DEC-002)
+4. Use Helpdesk for issues (DEC-003)
+5. Support roster-based hours (DEC-004)
+6. Tell me when tasks complete so I update current.md
+
+================================================================================
+END OF PASTE
+================================================================================
+
+QUICK COMMANDS TO GET CONTENT:
+
+1. Get Constitution:
+   cat .agents/state/constitution.md
+
+2. Get Decisions:
+   cat .agents/state/decisions.md
+
+3. Get Current State:
+   cat .agents/state/current.md
+
+4. Then copy each output and paste above in the bracketed sections
