@@ -116,6 +116,6 @@ def process_gift_card_payment(gift_card_number: str, amount: float) -> dict:
 			"status": doc.status,
 			"message": "Gift Card Payment processed successfully",
 		}
-	except Exception as e:
+	except Exception:
 		frappe.log_error("Gift Card Payment Error", frappe.get_traceback())
-		raise frappe.ValidationError(f"Failed to process Gift Card payment: {e!s}")
+		frappe.throw(_("Unable to process the Gift Card payment. Please check the card number and try again, or ask a manager for help."))

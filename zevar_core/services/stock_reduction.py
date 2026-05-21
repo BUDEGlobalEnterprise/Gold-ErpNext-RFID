@@ -339,9 +339,13 @@ def ui_get_item_for_edit(item_code):
 		"custom_length_unit": item.get("custom_length_unit"),
 		"custom_width_value": flt(item.get("custom_width_value", 0), 2),
 		"custom_width_unit": item.get("custom_width_unit"),
-		"gemstones": gemstones,
+		
+	"gemstones": gemstones,
 	}
 
+
+@frappe.whitelist(allow_guest=False)
+def ui_get_item_inventory(item_code):
 	frappe.has_permission("Item", ptype="read", throw=True)
 
 	if not frappe.db.exists("Item", item_code):
@@ -416,6 +420,7 @@ def ui_get_item_for_edit(item_code):
 		"store_breakdown": store_breakdown,
 		"reservations": reservations,
 	}
+
 
 
 @frappe.whitelist(allow_guest=False)

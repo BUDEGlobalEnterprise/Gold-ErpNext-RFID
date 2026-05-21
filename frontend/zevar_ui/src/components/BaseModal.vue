@@ -17,7 +17,7 @@
 				<!-- Content -->
 				<div
 					:class="[
-						maxWidthClass,
+						maxWidth,
 						'relative bg-white dark:bg-warm-card rounded-2xl shadow-2xl w-full overflow-hidden border border-transparent dark:border-warm-border flex flex-col',
 						noMaxHeight ? '' : 'max-h-[90vh]',
 						fixedHeight ? '' : '',
@@ -104,8 +104,6 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'update:show'])
 const overlayRef = ref(null)
-
-const maxWidthClass = props.maxWidth
 
 function close() {
 	emit('close')

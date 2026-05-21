@@ -85,6 +85,7 @@ declare module 'vue' {
     ScheduledTab: typeof import('./src/components/reports/ScheduledTab.vue')['default']
     SplitDetailView: typeof import('./src/components/SplitDetailView.vue')['default']
     StockAdjustModal: typeof import('./src/components/StockAdjustModal.vue')['default']
+    StockAlertDrawer: typeof import('./src/components/StockAlertDrawer.vue')['default']
     StockReductionsPanel: typeof import('./src/components/StockReductionsPanel.vue')['default']
     StoreTransferModal: typeof import('./src/components/StoreTransferModal.vue')['default']
     SubscribeModal: typeof import('./src/components/reports/SubscribeModal.vue')['default']

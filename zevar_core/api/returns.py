@@ -281,6 +281,10 @@ def create_return_invoice(
 			if not refund_mode:
 				refund_mode = "Cash"
 
+			# Validate refund_mode exists and is a real Mode of Payment
+			if not frappe.db.exists("Mode of Payment", refund_mode):
+				frappe.throw(_("Refund mode '{0}' is not a valid payment method.").format(refund_mode))
+
 			# Calculate refund amount
 			refund_amount = sum(flt(item.get("qty", 0)) * flt(item.get("rate", 0)) for item in items_list)
 			refund_account = frappe.db.get_value(
@@ -336,7 +340,11 @@ def create_return_invoice(
 	except Exception as e:
 		frappe.db.rollback()
 		frappe.log_error("Return Invoice Creation Failed", frappe.get_traceback())
-		frappe.throw(_("Failed to create return invoice: {0}").format(str(e)))
+		# Hide raw technical details from end users
+		raw = str(e)
+		if "permission" in raw.lower():
+			frappe.throw(_("You do not have permission to create this return. Please ask a manager for help."))
+		frappe.throw(_("Unable to process the return at this time. Please check the details and try again, or ask a manager for help."))
 
 
 @frappe.whitelist(methods=["POST"])

@@ -372,7 +372,7 @@
 							</button>
 							<div
 								v-if="
-									cart.salespersons.length > 0 && salespersonSplitTotal !== 100
+									cart.salespersons.length > 0 && Math.abs(salespersonSplitTotal - 100) > 0.01
 								"
 								class="text-xs text-red-500 font-medium"
 							>
@@ -734,26 +734,23 @@
 					</div>
 
 					<!-- Confirm Button -->
-					<div class="flex-shrink-0">
-							<button
-								v-for="pm in standardModes"
-								:key="pm.value"
-								@click="togglePayment(pm.value)"
-								class="flex items-center justify-between p-3 rounded-xl border-2 transition-all"
-								:class="
-									isPaymentSelected(pm.value)
-										? 'border-[#D4AF37] bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]'
-										: 'border-gray-200 hover:border-gray-400 dark:border-warm-border dark:hover:border-white/30'
-								"
-								data-testid="payment-mode-select"
-							>
+					<div class="flex-shrink-0 mt-6">
+						<button
+							type="button"
+							@click="handlePayment"
+							:disabled="!canSubmit || processing"
+							class="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold transition-all shadow-md"
+							:class="
+								canSubmit && !processing
+									? 'bg-[#D4AF37] text-black hover:bg-[#b5952f] cursor-pointer'
+									: 'bg-gray-100 text-gray-400 dark:bg-warm-dark-700 dark:text-gray-500 cursor-not-allowed'
+							"
+							data-testid="confirm-payment-btn"
+						>
 							<span
 								v-if="processing"
 								class="animate-spin rounded-full h-5 w-5 border-2 border-gray-400 border-t-white"
 							></span>
-							<span v-else-if="!canSubmit">{{
-								selectedPayments.length === 0 ? 'Select Payment' : 'Enter Amounts'
-							}}</span>
 							<span v-else>{{ confirmButtonLabel }}</span>
 						</button>
 					</div>

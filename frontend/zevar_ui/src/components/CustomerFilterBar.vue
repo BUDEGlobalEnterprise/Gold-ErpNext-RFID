@@ -250,11 +250,18 @@ function updateDropdownPosition(key) {
 	if (!ref || !ref.button.value || !ref.panel.value) return
 
 	const buttonRect = ref.button.value.getBoundingClientRect()
+	
+	// Prevent horizontal overflow on smaller screens
+	let left = buttonRect.left
+	if (left + ref.width > window.innerWidth) {
+		left = Math.max(8, buttonRect.right - ref.width)
+	}
 
 	dropdownStyle.value[key] = {
 		top: `${buttonRect.bottom + 8}px`,
-		left: `${buttonRect.left}px`,
+		left: `${left}px`,
 		width: `${ref.width}px`,
+		maxWidth: 'calc(100vw - 16px)',
 		display: 'block',
 	}
 }

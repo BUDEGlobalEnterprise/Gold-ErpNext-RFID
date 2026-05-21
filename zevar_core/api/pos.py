@@ -8,6 +8,132 @@ from frappe.utils import flt
 
 from zevar_core.constants import DEFAULT_TAX_RATES, PAYMENT_MODES
 
+# ---------------------------------------------------------------------------
+# Payment validation helpers
+# ---------------------------------------------------------------------------
+
+_PAYMENT_ERROR_MAP = {
+    "total payment amount must be equal to grand total": _(
+        "The payment amount does not match the invoice total. Please check the amounts and try again."
+    ),
+    "payments amount must be negative": _(
+        "Invalid payment amount. Please check the amounts and try again."
+    ),
+    "account is mandatory": _(
+        "A payment account is missing. Please ask a manager to check the payment setup."
+    ),
+    "cannot pay more than": _(
+        "Payment amount is more than the invoice total. Please check the amounts and try again."
+    ),
+    "serial no": _(
+        "There is an issue with a serial number. Please ask a manager for help."
+    ),
+    "stock": _(
+        "There is a stock issue with one of the items. Please ask a manager for help."
+    ),
+}
+
+
+def _friendly_payment_error(raw_message: str) -> str:
+    """Map internal ERPNext / framework errors to cashier-friendly text."""
+    if not raw_message:
+        return _(
+            "There was a problem processing your payment. Please check the details and try again, or ask a manager for help."
+        )
+    lowered = raw_message.lower()
+    for pattern, friendly in _PAYMENT_ERROR_MAP.items():
+        if pattern in lowered:
+            return friendly
+    return _(
+        "There was a problem processing your payment. Please check the details and try again, or ask a manager for help."
+    )
+
+
+def _validate_payments(payments_list, trade_in_list, discount_amount, tax_exempt, warehouse, items_list):
+    """
+    Proactive payment validation before we build the Sales Invoice.
+
+    Returns:
+        tuple: (validated_payments_list, trade_in_credit, computed_grand_total)
+
+    Raises:
+        frappe.ValidationError via checkout_bouncer on any issue.
+    """
+    from frappe.utils import flt
+
+    if not payments_list:
+        return [], 0, 0
+
+    # 1. Basic per-payment sanity
+    seen_modes = set()
+    cleaned_payments = []
+    for idx, pay in enumerate(payments_list):
+        mode = (pay.get("mode_of_payment") or pay.get("mode", "")).strip()
+        amount = flt(pay.get("amount", 0))
+
+        if not mode:
+            raise frappe.ValidationError(
+                _("Payment #{0} is missing a payment mode. Please select a payment method.").format(idx + 1)
+            )
+        if amount <= 0:
+            raise frappe.ValidationError(
+                _("Payment mode '{0}' must have an amount greater than zero.").format(mode)
+            )
+        if mode in seen_modes:
+            raise frappe.ValidationError(
+                _("Payment mode '{0}' appears more than once. Please combine the amounts or remove the duplicate.").format(mode)
+            )
+        seen_modes.add(mode)
+        cleaned_payments.append({"mode_of_payment": mode, "amount": amount})
+
+    # 2. Compute expected grand total (same logic as calculate_invoice_totals)
+    subtotal = sum(flt(i.get("rate", 0)) * flt(i.get("qty", 1)) for i in (items_list or []))
+    discount = max(0.0, flt(discount_amount))
+    subtotal_after_discount = max(0.0, subtotal - discount)
+
+    tax = 0.0
+    if not tax_exempt:
+        settings = get_pos_settings(warehouse)
+        tax_rate = flt(settings.get("tax_rate", 0))
+        tax = (subtotal_after_discount * tax_rate) / 100
+
+    computed_grand_total = subtotal_after_discount + tax
+
+    # 3. Trade-in credit
+    total_trade_in_credit = sum(flt(ti.get("trade_in_value")) for ti in (trade_in_list or []))
+
+    # 4. If cashier already included Trade-In in payments, merge / de-duplicate
+    trade_in_in_payments = False
+    for pay in cleaned_payments:
+        if pay["mode_of_payment"] == "Trade-In":
+            trade_in_in_payments = True
+            break
+
+    if total_trade_in_credit > 0 and trade_in_in_payments:
+        # Replace the manual Trade-In line with the computed one so they match
+        cleaned_payments = [p for p in cleaned_payments if p["mode_of_payment"] != "Trade-In"]
+        seen_modes.discard("Trade-In")
+
+    total_payments = sum(p["amount"] for p in cleaned_payments)
+
+    # After removing any manual Trade-In, add the computed credit back
+    if total_trade_in_credit > 0:
+        cleaned_payments.append({"mode_of_payment": "Trade-In", "amount": flt(total_trade_in_credit)})
+        total_payments += total_trade_in_credit
+
+    # 5. Validate payment total covers grand total (within 1-cent tolerance)
+    if abs(total_payments - computed_grand_total) > 0.01:
+        raise frappe.ValidationError(
+            _(
+                "Total payments ({0}) do not match the invoice total ({1}). "
+                "Please adjust the payment amounts and try again."
+            ).format(total_payments, computed_grand_total)
+        )
+
+    return cleaned_payments, total_trade_in_credit, computed_grand_total
+
+
+# ---------------------------------------------------------------------------
 
 @frappe.whitelist(methods=["POST"])
 def create_pos_invoice(
@@ -263,6 +389,21 @@ def create_pos_invoice(
 		else:
 			checkout_bouncer(_("Customer '{0}' not found.").format(customer), "invoice_failed")
 
+	# ------------------------------------------------------------------
+	# Payment validation (covers amounts, duplicates, totals, trade-in)
+	# ------------------------------------------------------------------
+	try:
+		payments_list, total_trade_in_credit, computed_grand_total = _validate_payments(
+			payments_list,
+			trade_in_list,
+			discount_amount,
+			is_tax_exempt,
+			warehouse,
+			items_list,
+		)
+	except frappe.ValidationError as ve:
+		checkout_bouncer(str(ve), "invoice_failed")
+
 	# Validate gift card before creating invoice
 	gc_payment_amount = 0
 	for pay in payments_list:
@@ -290,9 +431,18 @@ def create_pos_invoice(
 			checkout_bouncer(_("Gift Card has expired."), "invoice_failed")
 		if gc_payment_amount > flt(gc_doc.balance):
 			checkout_bouncer(
-				_("Gift Card balance insufficient. Available: {0}, Requested: {1}").format(
+				_(
+					"Gift Card balance insufficient. Available: {0}, Requested: {1}"
+				).format(
 					flt(gc_doc.balance), gc_payment_amount
 				),
+				"invoice_failed",
+			)
+		# Prevent gift card from being used more than once in the same invoice
+		# (e.g., split into two Gift Card lines with the same number).
+		if len([p for p in payments_list if (p.get("mode_of_payment") or p.get("mode", "")) == "Gift Card"]) > 1:
+			checkout_bouncer(
+				_("Gift Card payment can only be used once per invoice. Please combine the amounts."),
 				"invoice_failed",
 			)
 
@@ -449,19 +599,7 @@ def create_pos_invoice(
 			if has_trade_ins:
 				si.append("custom_trade_ins", trade_in_item)
 
-		# Add trade-in credit as a payment entry
-		total_trade_in_credit = (
-			sum(flt(ti.get("trade_in_value")) for ti in trade_in_list) if trade_in_list else 0
-		)
-		if total_trade_in_credit > 0:
-			si.append(
-				"payments",
-				{
-					"mode_of_payment": "Trade-In",
-					"amount": flt(total_trade_in_credit),
-				},
-			)
-
+		# payments_list already includes Trade-In (if any) from _validate_payments.
 		for pay in payments_list:
 			si.append(
 				"payments",
@@ -560,18 +698,15 @@ def create_pos_invoice(
 	except frappe.ValidationError as e:
 		frappe.db.rollback()
 		frappe.log_error("POS Invoice Validation Error", frappe.get_traceback())
-		# Re-raise with clear message
-		frappe.throw(
-			str(e) or _("Validation error occurred. Please check the form data."), frappe.ValidationError
-		)
+		# Never expose raw internal messages to cashiers / employees.
+		friendly = _friendly_payment_error(str(e))
+		frappe.throw(friendly, frappe.ValidationError)
 	except Exception as e:
 		frappe.db.rollback()
 		frappe.log_error("POS Invoice Creation Failed", frappe.get_traceback())
-		# Extract meaningful error message
-		error_msg = str(e)
-		if "ValidationError" in error_msg or "validation" in error_msg.lower():
-			frappe.throw(_("Validation error: {0}").format(error_msg), frappe.ValidationError)
-		frappe.throw(_("Failed to create POS Invoice: {0}").format(error_msg))
+		# Catch-all: hide technical details from end users.
+		friendly = _friendly_payment_error(str(e))
+		frappe.throw(friendly)
 
 
 @frappe.whitelist()

@@ -3,7 +3,7 @@
 		<!-- ===== DESKTOP SIDEBAR (>= lg) ===== -->
 		<aside
 			ref="sidebarRef"
-			class="hidden lg:flex bg-white/40 dark:bg-warm-dark-900/60 backdrop-blur-xl border-r border-gray-200 dark:border-warm-border/50 flex-col z-30 relative min-h-0"
+			class="hidden lg:flex bg-[#FFEDD5] dark:bg-warm-dark-900/60 border-r border-orange-200 dark:border-warm-border/50 flex-col z-30 relative min-h-0"
 			:class="isResizing ? 'transition-none' : 'transition-all duration-300'"
 			:style="
 				isSidebarCollapsed
@@ -135,7 +135,7 @@
 		<div class="app-shell-content-col">
 			<!-- Header -->
 			<header
-				class="h-14 md:h-16 lg:h-20 bg-white/70 dark:bg-warm-dark-950/80 backdrop-blur-md border-b border-gray-200 dark:border-warm-border/50 flex items-center justify-between px-3 sm:px-4 lg:px-6 z-20 sticky top-0 shadow-sm transition-colors duration-300 shrink-0"
+				class="h-14 md:h-16 lg:h-20 bg-[#FFEDD5] dark:bg-warm-dark-950/80 border-b border-orange-200 dark:border-warm-border/50 flex items-center justify-between px-3 sm:px-4 lg:px-6 z-20 sticky top-0 shadow-sm transition-colors duration-300 shrink-0"
 			>
 				<!-- Mobile Left: Hamburger + Logo + Store -->
 				<div class="flex lg:hidden items-center gap-2 flex-1 min-w-0">
@@ -163,7 +163,7 @@
 						<select
 							v-model="session.currentWarehouse"
 							@change="session.setWarehouse($event.target.value)"
-							class="h-8 w-full bg-gray-50/50 dark:bg-warm-dark-900/50 border border-gray-200 dark:border-warm-border/50 pl-2 pr-6 rounded-lg text-xs font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] cursor-pointer appearance-none truncate"
+							class="h-8 w-full bg-white/60 dark:bg-warm-dark-900/50 border border-orange-200/60 dark:border-warm-border/50 pl-2 pr-6 rounded-lg text-xs font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] cursor-pointer appearance-none truncate"
 						>
 							<option :value="null" disabled>Store...</option>
 							<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
@@ -181,7 +181,7 @@
 						<select
 							v-model="session.currentWarehouse"
 							@change="session.setWarehouse($event.target.value)"
-							class="h-11 bg-gray-50/50 dark:bg-warm-dark-900/50 border border-gray-200 dark:border-warm-border/50 pl-4 pr-10 rounded-lg text-sm font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] cursor-pointer min-w-[200px] shadow-sm outline-none"
+							class="h-11 bg-white/60 dark:bg-warm-dark-900/50 border border-orange-200/60 dark:border-warm-border/50 pl-4 pr-10 rounded-lg text-sm font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] cursor-pointer min-w-[200px] shadow-sm outline-none"
 						>
 							<option :value="null" disabled>Select Store Location</option>
 							<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
@@ -207,7 +207,7 @@
 							type="text"
 							v-model="ui.searchQuery"
 							placeholder="Search collection..."
-							class="h-11 w-full bg-gray-50/50 dark:bg-warm-dark-900/50 border border-gray-200 dark:border-warm-border rounded-lg text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-[#D4AF37] text-sm font-medium pl-11 transition-all"
+							class="h-11 w-full bg-white/60 dark:bg-warm-dark-900/50 border border-orange-200/60 dark:border-warm-border rounded-lg text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-[#D4AF37] text-sm font-medium pl-11 transition-all"
 						/>
 					</div>
 				</div>
@@ -245,10 +245,10 @@
 
 					<!-- Live Rates (desktop only) -->
 					<div
-						class="hidden xl:flex items-center h-11 bg-gray-50/50 dark:bg-warm-dark-900/50 border border-gray-200 dark:border-warm-border rounded-lg shadow-sm max-w-2xl overflow-x-auto custom-scrollbar-hide"
+						class="hidden xl:flex items-center h-11 bg-white/60 dark:bg-warm-dark-900/50 border border-orange-200 dark:border-warm-border rounded-lg shadow-sm max-w-2xl overflow-x-auto custom-scrollbar-hide"
 					>
 						<div
-							class="flex items-center gap-2 border-r border-gray-200 dark:border-warm-border pr-3 pl-4 bg-gray-100/50 dark:bg-warm-dark-700 h-full sticky left-0 z-10 backdrop-blur-md"
+							class="flex items-center gap-2 border-r border-orange-200/60 dark:border-warm-border pr-3 pl-4 bg-orange-50/30 dark:bg-warm-dark-700 h-full sticky left-0 z-10 backdrop-blur-md"
 						>
 							<span class="relative flex h-2 w-2"
 								><span
@@ -304,7 +304,7 @@
 					<div class="relative" ref="userMenuRef">
 						<button
 							@click.stop="isUserMenuOpen = !isUserMenuOpen"
-							class="flex items-center gap-2 p-1.5 pr-3 rounded-full hover:bg-gray-100 dark:hover:bg-warm-dark-700 border border-transparent hover:border-gray-200 dark:border-warm-border"
+							class="flex items-center gap-2 p-1.5 pr-3 rounded-full hover:bg-white/60 dark:hover:bg-warm-dark-700 border border-transparent hover:border-orange-200 dark:border-warm-border"
 						>
 							<div
 								class="w-8 h-8 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] flex items-center justify-center text-[#0F1115] font-bold text-xs"
@@ -464,7 +464,7 @@
 					<button
 						v-if="!showPersistentCart"
 						@click="isCartOpen = true"
-						class="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group shrink-0 touch-target"
+						class="relative p-2 rounded-full hover:bg-white/60 dark:hover:bg-gray-800 transition-colors group shrink-0 touch-target"
 					>
 						<svg
 							class="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 dark:text-gray-300"
@@ -505,7 +505,7 @@
 				>
 					<div
 						v-if="showPersistentCart"
-						class="flex flex-col shrink-0 bg-white/40 dark:bg-warm-dark-900/60 backdrop-blur-xl border-l border-gray-200 dark:border-warm-border/50 min-h-0 overflow-hidden relative"
+						class="flex flex-col shrink-0 bg-[#FFEDD5] dark:bg-warm-dark-900/60 border-l border-orange-200 dark:border-warm-border/50 min-h-0 overflow-hidden relative"
 						:class="{ 'transition-all duration-300': !isRightResizing }"
 						:style="{ width: rightSidebarWidth + 'px' }"
 					>
@@ -637,7 +637,7 @@
 
 		<!-- ===== MOBILE DRAWER ===== -->
 		<aside
-			class="fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[320px] bg-white/90 dark:bg-warm-dark-900/90 backdrop-blur-xl shadow-2xl transform transition-transform duration-300 lg:hidden flex flex-col"
+			class="fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[320px] bg-[#FFEDD5] dark:bg-warm-dark-900/90 shadow-2xl transform transition-transform duration-300 lg:hidden flex flex-col"
 			:class="isMobileDrawerOpen ? 'translate-x-0' : '-translate-x-full'"
 		>
 			<div

@@ -1,10 +1,10 @@
 <template>
 	<div
-		class="premium-card !p-0 shadow-sm hover:shadow-xl transition-all cursor-pointer flex flex-col h-full group relative overflow-hidden"
+		class="premium-card !p-0 shadow-sm hover:shadow-xl transition-all cursor-pointer flex flex-col h-full group relative overflow-hidden border border-gray-100 dark:border-warm-border/30 hover:border-[#D4AF37]/50"
 		@click="emit('open-details', item.item_code)"
 		data-testid="item-card"
 	>
-		<div class="aspect-square bg-gray-100 dark:bg-warm-dark-900 relative">
+		<div class="aspect-[4/3] bg-gray-50 dark:bg-warm-dark-900 relative overflow-hidden flex items-center justify-center shrink-0">
 			<img
 				v-if="item.image"
 				:src="item.image"
@@ -18,7 +18,7 @@
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
-					class="h-12 w-12"
+					class="h-8 w-8"
 					fill="none"
 					viewBox="0 0 24 24"
 					stroke="currentColor"
@@ -32,79 +32,81 @@
 				</svg>
 			</div>
 
-			<div class="absolute top-2 right-2 flex flex-col gap-1 items-end">
+			<div class="absolute top-2 right-2 flex flex-col gap-1 items-end z-10">
 				<span
 					v-if="item.stock_qty <= 0"
-					class="bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+					class="bg-red-500/10 text-red-600 dark:text-red-400 text-[8px] font-extrabold px-1.5 py-0.5 rounded-full border border-red-500/20 shadow-sm backdrop-blur-md"
 				>
 					Out of Stock
 				</span>
 				<span
 					v-else-if="item.stock_qty < 5"
-					class="bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+					class="bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[8px] font-extrabold px-1.5 py-0.5 rounded-full border border-orange-500/20 shadow-sm backdrop-blur-md"
 				>
 					Only {{ item.stock_qty }} left
 				</span>
 			</div>
 		</div>
 
-		<div class="p-3 flex-1 flex flex-col">
-			<div class="flex items-start justify-between mb-2">
-				<h3
-					class="font-bold text-gray-900 dark:text-white line-clamp-2 text-xs leading-snug min-h-[2.25rem]"
-				>
-					{{ item.item_name }}
-				</h3>
-			</div>
-
-			<div class="flex flex-wrap gap-1 mb-2">
-				<span
-					class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-				>
-					{{ item.metal || 'Gold' }}
-				</span>
-				<span
-					class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-800 dark:bg-warm-dark-900 dark:text-gray-300"
-				>
-					{{ item.purity || 'Standard' }}
-				</span>
-			</div>
-
-			<!-- Weight Breakdown -->
-			<div
-				v-if="item.net_weight > 0 || item.gross_weight > 0"
-				class="hidden lg:block text-[9px] text-gray-500 dark:text-white/40 mb-3 space-y-0.5 bg-gray-50 dark:bg-warm-dark-700 p-2 rounded-xl border border-gray-100 dark:border-warm-border/50"
-			>
-				<div v-if="item.gross_weight > 0" class="flex justify-between">
-					<span>Gross:</span>
-					<span class="font-bold text-gray-700 dark:text-white/80"
-						>{{ item.gross_weight }}g</span
+		<div class="p-2.5 flex-1 flex flex-col justify-between">
+			<div>
+				<div class="flex items-start justify-between mb-1">
+					<h3
+						class="font-semibold text-gray-900 dark:text-white line-clamp-1 text-xs leading-snug group-hover:text-[#D4AF37] transition-colors duration-200"
 					>
+						{{ item.item_name }}
+					</h3>
 				</div>
-				<div v-if="item.stone_weight > 0" class="flex justify-between text-red-500/80">
-					<span>Stone:</span> <span class="font-bold">-{{ item.stone_weight }}g</span>
+
+				<div class="flex flex-wrap gap-1 mb-2">
+					<span
+						class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold bg-yellow-100/60 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border border-yellow-200/30"
+					>
+						{{ item.metal || 'Gold' }}
+					</span>
+					<span
+						class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-semibold bg-gray-100/80 text-gray-800 dark:bg-warm-dark-900 dark:text-gray-300 border border-gray-200/20"
+					>
+						{{ item.purity || 'Standard' }}
+					</span>
 				</div>
+
+				<!-- Weight Breakdown -->
 				<div
-					v-if="item.net_weight > 0"
-					class="flex justify-between font-bold text-gray-900 dark:text-white border-t border-gray-100 dark:border-warm-border pt-1 mt-1"
+					v-if="item.net_weight > 0 || item.gross_weight > 0"
+					class="hidden lg:block text-[9px] text-gray-500 dark:text-white/40 mb-2 space-y-0.5 bg-gray-50 dark:bg-warm-dark-700/30 p-1.5 rounded-lg border border-gray-100 dark:border-warm-border/20"
 				>
-					<span>Net Weight:</span> <span>{{ item.net_weight }}g</span>
+					<div v-if="item.gross_weight > 0" class="flex justify-between">
+						<span>Gross:</span>
+						<span class="font-bold text-gray-700 dark:text-white/80"
+							>{{ item.gross_weight }}g</span
+						>
+					</div>
+					<div v-if="item.stone_weight > 0" class="flex justify-between text-red-500/80">
+						<span>Stone:</span> <span class="font-bold">-{{ item.stone_weight }}g</span>
+					</div>
+					<div
+						v-if="item.net_weight > 0"
+						class="flex justify-between font-bold text-gray-900 dark:text-white border-t border-gray-100 dark:border-warm-border pt-0.5 mt-0.5"
+					>
+						<span>Net Weight:</span> <span>{{ item.net_weight }}g</span>
+					</div>
 				</div>
 			</div>
 
 			<div
-				class="mt-auto pt-2 border-t border-gray-50 dark:border-gray-800 flex items-center justify-between"
+				class="mt-auto pt-1.5 border-t border-gray-50 dark:border-gray-800 flex items-center justify-between"
 			>
 				<div class="flex flex-col">
-					<span class="text-[10px] text-gray-500 dark:text-gray-400">Price</span>
-					<span class="text-base font-bold text-gray-900 dark:text-white leading-tight">
+					<span class="text-[9px] text-gray-500 dark:text-gray-400">Price</span>
+					<span class="text-xs font-extrabold text-[#D4AF37] font-mono leading-tight">
 						{{ formatCurrency(item.price) }}
 					</span>
 				</div>
 
 				<button
 					@click.stop="quickAdd"
-					class="bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black w-8 h-8 rounded-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-md"
+					class="bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black w-7 h-7 rounded-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-md"
 					title="Add to Cart"
 					data-testid="add-to-cart-btn"
 				>
