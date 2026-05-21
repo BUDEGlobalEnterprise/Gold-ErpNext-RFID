@@ -436,8 +436,8 @@
 							<button
 								v-else
 								@click="
-									showCheckout = true;
-									ui.closeLayawayPayment();
+									showCheckout = true
+									ui.closeLayawayPayment()
 								"
 								:disabled="!isCheckoutReady"
 								class="w-full py-3 rounded-lg font-bold shadow-lg transition-all flex items-center justify-center gap-2"

@@ -167,9 +167,9 @@ def _generate_zpl(data):
 	zpl += "^PW400\n"
 	zpl += "^LL200\n"
 	zpl += "^FO20,10^A0N,25,25^FDZEVAR^FS\n"
-	zpl += "^FO20,40^A0N,18,18^FD{}^FS\n".format(desc)
-	zpl += "^FO20,65^A0N,18,18^FD{}^FS\n".format(item_name)
-	zpl += "^FO20,90^A0N,30,30^FD{}^FS\n".format(price_str)
-	zpl += "^FO20,130^BY2^BCN,40,Y,N,N^FD{}^FS\n".format(item_code)
+	zpl += f"^FO20,40^A0N,18,18^FD{desc}^FS\n"
+	zpl += f"^FO20,65^A0N,18,18^FD{item_name}^FS\n"
+	zpl += f"^FO20,90^A0N,30,30^FD{price_str}^FS\n"
+	zpl += f"^FO20,130^BY2^BCN,40,Y,N,N^FD{item_code}^FS\n"
 	zpl += "^XZ\n"
 	return zpl

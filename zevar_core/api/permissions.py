@@ -6,7 +6,7 @@ Provides permission checks and manager override functionality for POS operations
 
 import frappe
 from frappe import _
-from frappe.utils import now_datetime
+from frappe.utils import flt, now_datetime
 
 # Permission levels for POS operations
 POS_PERMISSIONS = {

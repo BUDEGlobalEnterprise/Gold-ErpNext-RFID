@@ -266,7 +266,7 @@ def parse_drivers_license(barcode: str) -> dict:
 	the Customer doc is built by quick_create_customer using those fields.
 	"""
 	# Defensive guard against absurdly long payloads. A real AAMVA barcode
-	# is typically 400–700 bytes; allow some slack.
+	# is typically 400-700 bytes; allow some slack.
 	if not barcode:
 		frappe.throw(_("No barcode data provided."))
 	if len(barcode) > 8000:

@@ -714,10 +714,10 @@
 							<div class="flex gap-3">
 								<button
 									@click="
-										showVoidConfirm = false;
-										voidReason = '';
-										voidPin = '';
-										voidError = '';
+										showVoidConfirm = false
+										voidReason = ''
+										voidPin = ''
+										voidError = ''
 									"
 									class="flex-1 py-2 text-sm font-medium border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-warm-dark-700"
 								>

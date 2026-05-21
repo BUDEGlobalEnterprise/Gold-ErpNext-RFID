@@ -161,7 +161,7 @@ class GoldPurchase(Document):
 
 		from zevar_core.constants import PURITY_VALUES
 
-		purity_pct = PURITY_VALUES.get(item.purity, 0)
+		PURITY_VALUES.get(item.purity, 0)
 		scrap_item = frappe.get_doc(
 			{
 				"doctype": "Item",

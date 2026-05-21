@@ -85,8 +85,8 @@
 									: 'bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-warm-dark-800'
 							"
 							@click="
-								selectedCategory = cat;
-								loadArticles();
+								selectedCategory = cat
+								loadArticles()
 							"
 						>
 							{{ cat }}
@@ -99,8 +99,8 @@
 									: 'bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-400'
 							"
 							@click="
-								selectedCategory = null;
-								loadArticles();
+								selectedCategory = null
+								loadArticles()
 							"
 						>
 							All

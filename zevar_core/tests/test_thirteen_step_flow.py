@@ -106,7 +106,7 @@ class TestThirteenStepFlow(FrappeTestCase):
 		frappe.set_user("Administrator")
 
 	# ------------------------------------------------------------------
-	# Step 2: omni-search (Fix #1) – item findable by item_code AND vendor SKU
+	# Step 2: omni-search (Fix #1) - item findable by item_code AND vendor SKU
 	# ------------------------------------------------------------------
 
 	def test_step02_omnisearch_finds_item_by_multiple_keys(self):
@@ -223,7 +223,7 @@ class TestThirteenStepFlow(FrappeTestCase):
 			top_selling_jewelry,
 		)
 
-		si = self._build_and_submit_sale()
+		self._build_and_submit_sale()
 
 		# Step 11a: top_selling_jewelry — surfaces the sold item with
 		# jewelry custom fields (Fix #6 enrichment).

@@ -30,7 +30,7 @@ def log_fail(msg):
 
 
 def log_info(msg):
-	print(f"  ℹ️  {msg}")
+	print(f"  [INFO]  {msg}")
 
 
 def test_backend_api_health():
@@ -91,7 +91,7 @@ def test_backend_api_health():
 					f"{BASE_URL}/api/method/frappe.client.delete",
 					json={"doctype": "Customer", "name": test_name},
 				)
-			except:
+			except Exception:
 				pass
 		else:
 			log_fail(f"Customer creation returned failure: {data}")
@@ -132,7 +132,7 @@ def test_backend_api_health():
 		elif "Server Error" in r.text:
 			log_fail("Receipt preview returns Server Error")
 		else:
-			log_info(f"Receipt preview returned 200 but content unclear")
+			log_info("Receipt preview returned 200 but content unclear")
 	elif r.status_code == 417:
 		log_fail("Receipt preview error 417 — Jinja template has undefined variables")
 	else:
@@ -279,7 +279,7 @@ def test_database_consistency():
 			if rate > 0:
 				log_pass(f"DB: Active store '{stores[0].name}' has tax_rate={rate}%, warehouse={wh}")
 			else:
-				log_fail(f"DB: Active store has zero tax rate")
+				log_fail("DB: Active store has zero tax rate")
 		else:
 			log_fail("DB: No active store locations")
 

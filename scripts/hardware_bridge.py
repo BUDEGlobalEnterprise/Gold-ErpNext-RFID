@@ -175,13 +175,13 @@ def generate_zpl_jewelry_tag(data):
 	# Store name
 	zpl += "^FO20,10^A0N,25,25^FDZEVAR^FS\n"
 	# Item description
-	zpl += "^FO20,40^A0N,20,20^FD{0}^FS\n".format(desc)
+	zpl += f"^FO20,40^A0N,20,20^FD{desc}^FS\n"
 	# SKU
-	zpl += "^FO20,70^A0N,18,18^FDSKU: {0}^FS\n".format(item_code)
+	zpl += f"^FO20,70^A0N,18,18^FDSKU: {item_code}^FS\n"
 	# Price
-	zpl += "^FO20,100^A0N,30,30^FD{0}^FS\n".format(price_str)
+	zpl += f"^FO20,100^A0N,30,30^FD{price_str}^FS\n"
 	# Barcode
-	zpl += "^FO20,140^BY2^BCN,40,Y,N,N^FD{0}^FS\n".format(item_code)
+	zpl += f"^FO20,140^BY2^BCN,40,Y,N,N^FD{item_code}^FS\n"
 	zpl += "^XZ\n"
 
 	return zpl

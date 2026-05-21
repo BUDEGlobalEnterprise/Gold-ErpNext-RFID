@@ -32,7 +32,7 @@ def _ensure_pos_user(email: str, role: str = "Sales User") -> str:
 		user.insert(ignore_permissions=True)
 
 	user_doc = frappe.get_doc("User", email)
-	existing_roles = {r.role for r in (user_doc.roles or [])}
+	{r.role for r in (user_doc.roles or [])}
 	# Remove System Manager / Sales Manager / Store Manager / etc that would
 	# bypass our check; ensure only the intended single role is present.
 	user_doc.roles = []

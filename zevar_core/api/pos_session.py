@@ -643,7 +643,7 @@ def submit_blind_close_step1(
 def submit_blind_close_step2(
 	session_name: str,
 	variance_reason_code: str,
-	notes: str = None,
+	notes: str | None = None,
 ) -> dict:
 	"""Step 2 of the Blind Close process: select variance reason code, perform overrides, post GL Journal Entries, and close POS session."""
 	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
@@ -703,7 +703,7 @@ def submit_blind_close_step2(
 				)
 			)
 
-	breakdown_list = _normalize_cash_breakdown(breakdown)
+	_normalize_cash_breakdown(breakdown)
 
 	try:
 		from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
@@ -1330,7 +1330,7 @@ def get_session_sales(session_name: str) -> dict:
 
 	session = frappe.get_doc("POS Opening Entry", session_name)
 
-	start_date = (
+	(
 		session.period_start_date.date()
 		if hasattr(session.period_start_date, "date")
 		else session.period_start_date

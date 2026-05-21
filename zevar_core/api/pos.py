@@ -390,7 +390,7 @@ def create_pos_invoice(
 	# Payment validation (covers amounts, duplicates, totals, trade-in)
 	# ------------------------------------------------------------------
 	try:
-		payments_list, total_trade_in_credit, computed_grand_total = _validate_payments(
+		payments_list, _total_trade_in_credit, _computed_grand_total = _validate_payments(
 			payments_list,
 			trade_in_list,
 			discount_amount,
