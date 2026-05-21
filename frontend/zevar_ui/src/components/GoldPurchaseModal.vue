@@ -3,7 +3,12 @@
 		<template #header>
 			<div class="flex items-center gap-3">
 				<div class="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
-					<svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg
+						class="w-6 h-6 text-amber-600"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -13,8 +18,12 @@
 					</svg>
 				</div>
 				<div>
-					<h3 class="text-lg font-bold text-gray-900 dark:text-white">Gold Scrap Purchase</h3>
-					<p class="text-xs text-gray-500">Buy scrap gold from customers at live rates</p>
+					<h3 class="text-lg font-bold text-gray-900 dark:text-white">
+						Gold Scrap Purchase
+					</h3>
+					<p class="text-xs text-gray-500">
+						Buy scrap gold from customers at live rates
+					</p>
 				</div>
 			</div>
 		</template>
@@ -24,7 +33,7 @@
 			<div class="grid grid-cols-2 gap-4">
 				<div>
 					<label class="block text-sm font-medium mb-1">Customer / Seller *</label>
-	<customer-selector v-model="form.customer" @select="onCustomerSelect" />
+					<customer-selector v-model="form.customer" @select="onCustomerSelect" />
 				</div>
 				<div>
 					<label class="block text-sm font-medium mb-1">Store Location *</label>
@@ -209,7 +218,9 @@
 					</div>
 					<div class="flex justify-between text-base font-bold border-t pt-2">
 						<span>Purchase Amount:</span>
-						<span class="text-amber-600 font-mono">{{ fmtCurrency(totalAgreedValue) }}</span>
+						<span class="text-amber-600 font-mono">{{
+							fmtCurrency(totalAgreedValue)
+						}}</span>
 					</div>
 				</div>
 			</div>
@@ -227,7 +238,11 @@
 				:disabled="submitting || !canSubmit"
 				class="flex-1 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 disabled:opacity-50"
 			>
-				{{ submitting ? 'Processing...' : `Purchase Gold — ${fmtCurrency(totalAgreedValue)}` }}
+				{{
+					submitting
+						? 'Processing...'
+						: `Purchase Gold — ${fmtCurrency(totalAgreedValue)}`
+				}}
 			</button>
 		</template>
 	</BaseModal>

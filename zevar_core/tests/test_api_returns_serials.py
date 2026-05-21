@@ -43,7 +43,6 @@ from zevar_core.tests.utils import (
 	get_test_company,
 )
 
-
 erpnext_required = unittest.skipUnless(
 	frappe.db and frappe.db.exists("DocType", "Sales Invoice"),
 	"ERPNext required (Sales Invoice DocType not found)",

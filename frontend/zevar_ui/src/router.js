@@ -3,7 +3,14 @@ import { createRouter, createWebHistory } from 'vue-router'
 // Role tier definitions — must match backend reports.py constants
 const ROLE_TIERS = {
 	admin: ['Administrator', 'System Manager', 'Accounts Manager'],
-	manager: ['Store Manager', 'Sales Manager', 'Stock Manager', 'Inventory Manager', 'HR Manager', 'HR User'],
+	manager: [
+		'Store Manager',
+		'Sales Manager',
+		'Stock Manager',
+		'Inventory Manager',
+		'HR Manager',
+		'HR User',
+	],
 	employee: ['Sales User', 'Employee', 'Employee Self Service'],
 }
 
@@ -396,9 +403,18 @@ router.beforeEach(async (to, _from, next) => {
 		// Legacy requiresManagement check
 		if (to.meta.requiresManagement) {
 			const reportRoles = [
-				'System Manager', 'Administrator', 'Store Manager', 'Sales Manager',
-				'Accounts Manager', 'Sales User', 'Stock Manager', 'Inventory Manager',
-				'HR User', 'HR Manager', 'Employee', 'Employee Self Service',
+				'System Manager',
+				'Administrator',
+				'Store Manager',
+				'Sales Manager',
+				'Accounts Manager',
+				'Sales User',
+				'Stock Manager',
+				'Inventory Manager',
+				'HR User',
+				'HR Manager',
+				'Employee',
+				'Employee Self Service',
 			]
 			if (!userInfo.roles.some((r) => reportRoles.includes(r))) {
 				return next({ name: 'Dashboard', query: { accessDenied: 'true' } })

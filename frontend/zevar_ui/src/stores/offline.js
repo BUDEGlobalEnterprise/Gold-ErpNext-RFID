@@ -77,20 +77,26 @@ export const useOfflineStore = defineStore('offline', () => {
 
 			for (const order of orders) {
 				try {
-					const response = await fetch('/api/method/zevar_core.api.pos.create_pos_invoice', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							'X-Frappe-CSRF-Token': window.csrf_token || '',
-						},
-						body: JSON.stringify(order.payload),
-					})
+					const response = await fetch(
+						'/api/method/zevar_core.api.pos.create_pos_invoice',
+						{
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+								'X-Frappe-CSRF-Token': window.csrf_token || '',
+							},
+							body: JSON.stringify(order.payload),
+						}
+					)
 
 					if (response.ok) {
 						await markOrderSynced(order.id)
 					} else {
 						const errData = await response.json().catch(() => ({}))
-						await markOrderFailed(order.id, errData.message || `HTTP ${response.status}`)
+						await markOrderFailed(
+							order.id,
+							errData.message || `HTTP ${response.status}`
+						)
 					}
 				} catch (e) {
 					await markOrderFailed(order.id, e.message)

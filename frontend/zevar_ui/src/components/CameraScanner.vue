@@ -6,12 +6,7 @@
 				@click="$emit('close')"
 				class="p-2 bg-gray-800 hover:bg-gray-700 rounded-full transition-colors"
 			>
-				<svg
-					class="w-6 h-6"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
+				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -30,18 +25,27 @@
 				playsinline
 				muted
 			></video>
-			
+
 			<!-- Scanner Target Overlay -->
-			<div class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
-				<div class="w-64 h-32 border-2 border-[#D4AF37] rounded-xl relative shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]">
-					<div class="absolute top-1/2 left-0 right-0 h-0.5 bg-red-500/50 animate-pulse -translate-y-1/2"></div>
+			<div
+				class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center"
+			>
+				<div
+					class="w-64 h-32 border-2 border-[#D4AF37] rounded-xl relative shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]"
+				>
+					<div
+						class="absolute top-1/2 left-0 right-0 h-0.5 bg-red-500/50 animate-pulse -translate-y-1/2"
+					></div>
 				</div>
 				<p class="mt-4 text-white text-sm font-medium tracking-wide drop-shadow-md">
 					Position barcode within frame
 				</p>
 			</div>
 
-			<div v-if="errorMsg" class="absolute bottom-10 left-4 right-4 bg-red-500/90 text-white p-3 rounded-lg text-center text-sm font-medium">
+			<div
+				v-if="errorMsg"
+				class="absolute bottom-10 left-4 right-4 bg-red-500/90 text-white p-3 rounded-lg text-center text-sm font-medium"
+			>
 				{{ errorMsg }}
 			</div>
 		</div>
@@ -62,9 +66,9 @@ let codeReader = null
 onMounted(async () => {
 	try {
 		codeReader = new BrowserMultiFormatReader()
-		
+
 		const videoInputDevices = await codeReader.listVideoInputDevices()
-		
+
 		if (!videoInputDevices || videoInputDevices.length === 0) {
 			errorMsg.value = 'No camera found on this device.'
 			return
@@ -72,8 +76,9 @@ onMounted(async () => {
 
 		// Prefer back camera
 		const backCamera = videoInputDevices.find(
-			device => device.label.toLowerCase().includes('back') || 
-					  device.label.toLowerCase().includes('environment')
+			(device) =>
+				device.label.toLowerCase().includes('back') ||
+				device.label.toLowerCase().includes('environment')
 		)
 		const selectedDeviceId = backCamera ? backCamera.deviceId : videoInputDevices[0].deviceId
 

@@ -1,11 +1,13 @@
 <template>
 	<AppLayout>
 		<div class="flex flex-col h-full">
-			<div class="flex items-center justify-between gap-4 mb-4 flex-shrink-0">
+			<div
+				class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-4 flex-shrink-0 pb-3 border-b border-gray-100 dark:border-warm-border/30"
+			>
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Inventory</h2>
 					<span
-						class="status-label !mb-0 !bg-gray-100 dark:!bg-warm-dark-700 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-warm-border"
+						class="px-3 py-0.5 text-xs font-extrabold bg-gray-100 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-warm-border/50 rounded-full flex-shrink-0 self-center"
 					>
 						{{ totalItems }} Items
 					</span>
@@ -15,11 +17,11 @@
 						class="flex items-center gap-1.5 px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 rounded-full text-[10px] font-bold animate-in fade-in slide-in-from-left-2"
 					>
 						<svg
-							class="w-3 h-3"
+							class="w-3.5 h-3.5"
 							viewBox="0 0 24 24"
 							fill="none"
 							stroke="currentColor"
-							stroke-width="2"
+							stroke-width="2.5"
 						>
 							<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
 						</svg>
@@ -27,10 +29,10 @@
 					</div>
 				</div>
 
-				<div class="flex items-center gap-2">
+				<div class="flex flex-wrap items-center gap-2 sm:gap-3">
 					<button
 						@click="refreshData"
-						class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700"
+						class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 flex-shrink-0"
 						title="Refresh"
 					>
 						<svg
@@ -50,9 +52,14 @@
 					</button>
 					<button
 						@click="showStockAdjust = true"
-						class="hidden sm:flex items-center gap-1.5 px-3 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition"
+						class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] text-white rounded-lg text-xs font-bold hover:bg-[#047857] transition whitespace-nowrap flex-shrink-0"
 					>
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<svg
+							class="w-4 h-4 flex-shrink-0"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -64,9 +71,14 @@
 					</button>
 					<button
 						@click="showReductions = true"
-						class="hidden sm:flex items-center gap-1.5 px-3 py-2 border border-amber-300 bg-amber-50 text-amber-700 rounded-lg text-xs font-bold hover:bg-amber-100 transition"
+						class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 border border-amber-300 bg-amber-50 text-amber-700 rounded-lg text-xs font-bold hover:bg-amber-100 transition whitespace-nowrap flex-shrink-0"
 					>
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<svg
+							class="w-4 h-4 flex-shrink-0"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -78,9 +90,14 @@
 					</button>
 					<button
 						@click="showQuickAdd = true"
-						class="hidden sm:flex items-center gap-1.5 px-3 py-2 bg-[#D4AF37] text-white rounded-lg text-xs font-bold hover:bg-[#C4A030] transition"
+						class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#D4AF37] text-white rounded-lg text-xs font-bold hover:bg-[#C4A030] transition whitespace-nowrap flex-shrink-0"
 					>
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<svg
+							class="w-4 h-4 flex-shrink-0"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -92,9 +109,14 @@
 					</button>
 					<button
 						@click="openPushForSelected"
-						class="hidden sm:flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition"
+						class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition whitespace-nowrap flex-shrink-0"
 					>
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<svg
+							class="w-4 h-4 flex-shrink-0"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -106,13 +128,13 @@
 					</button>
 					<button
 						@click="showTransferModal = true"
-						class="hidden sm:flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-lg text-xs font-bold hover:bg-gray-50 transition"
+						class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 dark:border-warm-border/50 rounded-lg text-xs font-bold hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition whitespace-nowrap flex-shrink-0"
 					>
 						Transfer
 					</button>
 					<button
 						@click="showConsignment = true"
-						class="hidden sm:flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-lg text-xs font-bold hover:bg-gray-50 transition"
+						class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 dark:border-warm-border/50 rounded-lg text-xs font-bold hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition whitespace-nowrap flex-shrink-0"
 					>
 						Consignment
 					</button>
@@ -145,17 +167,17 @@
 			<div v-if="mobileMenuOpen" class="md:hidden grid grid-cols-2 gap-2 mb-4">
 				<button
 					@click="
-						showStockAdjust = true;
-						mobileMenuOpen = false;
+						showStockAdjust = true
+						mobileMenuOpen = false
 					"
-					class="py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold"
+					class="py-2 bg-[#059669] text-white rounded-lg text-xs font-bold hover:bg-[#047857]"
 				>
 					Adjust Stock
 				</button>
 				<button
 					@click="
-						showReductions = true;
-						mobileMenuOpen = false;
+						showReductions = true
+						mobileMenuOpen = false
 					"
 					class="py-2 bg-amber-50 text-amber-700 border border-amber-300 rounded-lg text-xs font-bold"
 				>
@@ -163,8 +185,8 @@
 				</button>
 				<button
 					@click="
-						showQuickAdd = true;
-						mobileMenuOpen = false;
+						showQuickAdd = true
+						mobileMenuOpen = false
 					"
 					class="py-2 bg-[#D4AF37] text-white rounded-lg text-xs font-bold"
 				>
@@ -172,8 +194,8 @@
 				</button>
 				<button
 					@click="
-						openPushForSelected();
-						mobileMenuOpen = false;
+						openPushForSelected()
+						mobileMenuOpen = false
 					"
 					class="py-2 bg-blue-600 text-white rounded-lg text-xs font-bold"
 				>
@@ -181,8 +203,8 @@
 				</button>
 				<button
 					@click="
-						showTransferModal = true;
-						mobileMenuOpen = false;
+						showTransferModal = true
+						mobileMenuOpen = false
 					"
 					class="py-2 border rounded-lg text-xs font-bold"
 				>
@@ -190,8 +212,8 @@
 				</button>
 				<button
 					@click="
-						showConsignment = true;
-						mobileMenuOpen = false;
+						showConsignment = true
+						mobileMenuOpen = false
 					"
 					class="py-2 border rounded-lg text-xs font-bold"
 				>
@@ -225,7 +247,10 @@
 					</div>
 					<div class="text-[10px] text-gray-500 font-bold mt-1">Retail value</div>
 				</div>
-				<div class="premium-card !p-4">
+				<div
+					@click="openStockAlert('low')"
+					class="premium-card !p-4 cursor-pointer hover:ring-2 hover:ring-amber-500/50 hover:border-amber-500/50 dark:hover:ring-amber-500/30 transition-all duration-200"
+				>
 					<div
 						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
 					>
@@ -234,7 +259,10 @@
 					<div class="text-2xl font-bold text-amber-500">{{ lowStockItems.length }}</div>
 					<div class="text-[10px] text-amber-500 font-bold mt-1">Need reorder</div>
 				</div>
-				<div class="premium-card !p-4">
+				<div
+					@click="openStockAlert('out')"
+					class="premium-card !p-4 cursor-pointer hover:ring-2 hover:ring-red-500/50 hover:border-red-500/50 dark:hover:ring-red-500/30 transition-all duration-200"
+				>
 					<div
 						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
 					>
@@ -469,20 +497,29 @@
 
 				<div
 					v-else
-					class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3"
+					class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3.5"
 				>
 					<div
 						v-for="item in filteredItems"
 						:key="item.code"
-						class="premium-card !p-0 overflow-hidden group cursor-pointer"
+						class="premium-card !p-0 overflow-hidden group cursor-pointer border border-gray-100 dark:border-warm-border/30 hover:border-[#D4AF37]/50 hover:shadow-lg dark:hover:shadow-[#D4AF37]/5 transition-all duration-300 flex flex-col"
 						@click="selectedItem = item"
 					>
-						<div class="aspect-square bg-gray-100 dark:bg-warm-dark-900 relative">
+						<div
+							class="aspect-[4/3] bg-gray-50 dark:bg-warm-dark-900 relative overflow-hidden flex items-center justify-center shrink-0"
+						>
+							<img
+								v-if="item.image"
+								:src="item.image"
+								class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+								alt="product"
+							/>
 							<div
-								class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600"
+								v-else
+								class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600 shrink-0"
 							>
 								<svg
-									class="w-10 h-10"
+									class="w-8 h-8"
 									fill="none"
 									stroke="currentColor"
 									viewBox="0 0 24 24"
@@ -495,124 +532,124 @@
 									/>
 								</svg>
 							</div>
-							<div class="absolute top-2 right-2">
+							<div class="absolute top-2 right-2 z-10">
 								<span
-									class="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+									class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full border shadow-sm backdrop-blur-md"
 									:class="
 										item.stock <= 0
-											? 'bg-red-100 text-red-700'
+											? 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
 											: item.stock < 5
-											? 'bg-amber-100 text-amber-700'
-											: 'bg-green-100 text-green-700'
+											? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+											: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
 									"
 									>{{ item.stock }} pcs</span
 								>
 							</div>
 							<div
-								class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition flex items-center justify-center opacity-0 group-hover:opacity-100"
+								class="absolute inset-0 bg-black/40 backdrop-blur-[2px] transition-all duration-300 flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 z-20"
 							>
-								<div class="flex gap-1">
-									<button
-										@click.stop="openEdit(item)"
-										class="p-1.5 bg-white/90 rounded-full hover:bg-white"
-										title="Edit"
+								<button
+									@click.stop="openEdit(item)"
+									class="p-1.5 bg-white dark:bg-warm-dark-800 rounded-full hover:bg-[#D4AF37] hover:text-black transition shadow-md"
+									title="Edit"
+								>
+									<svg
+										class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
 									>
-										<svg
-											class="w-3.5 h-3.5 text-blue-600"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-											/>
-										</svg>
-									</button>
-									<button
-										@click.stop="openLifecycle(item)"
-										class="p-1.5 bg-white/90 rounded-full hover:bg-white"
-										title="Lifecycle"
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+										/>
+									</svg>
+								</button>
+								<button
+									@click.stop="openLifecycle(item)"
+									class="p-1.5 bg-white dark:bg-warm-dark-800 rounded-full hover:bg-[#D4AF37] hover:text-black transition shadow-md"
+									title="Lifecycle"
+								>
+									<svg
+										class="w-3.5 h-3.5 text-gray-700 dark:text-gray-300"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
 									>
-										<svg
-											class="w-3.5 h-3.5 text-gray-700"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-											/>
-										</svg>
-									</button>
-									<button
-										@click.stop="openReserve(item)"
-										class="p-1.5 bg-white/90 rounded-full hover:bg-white"
-										title="Reserve"
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+										/>
+									</svg>
+								</button>
+								<button
+									@click.stop="openReserve(item)"
+									class="p-1.5 bg-white dark:bg-warm-dark-800 rounded-full hover:bg-[#D4AF37] hover:text-black transition shadow-md"
+									title="Reserve"
+								>
+									<svg
+										class="w-3.5 h-3.5 text-gray-700 dark:text-gray-300"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
 									>
-										<svg
-											class="w-3.5 h-3.5 text-gray-700"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-											/>
-										</svg>
-									</button>
-									<button
-										@click.stop="openDamage(item)"
-										class="p-1.5 bg-white/90 rounded-full hover:bg-white"
-										title="Damage"
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+										/>
+									</svg>
+								</button>
+								<button
+									@click.stop="openDamage(item)"
+									class="p-1.5 bg-white dark:bg-warm-dark-800 rounded-full hover:bg-[#D4AF37] hover:text-black transition shadow-md"
+									title="Damage"
+								>
+									<svg
+										class="w-3.5 h-3.5 text-gray-700 dark:text-gray-300"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
 									>
-										<svg
-											class="w-3.5 h-3.5 text-gray-700"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
-											/>
-										</svg>
-									</button>
-								</div>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+										/>
+									</svg>
+								</button>
 							</div>
 						</div>
-						<div class="p-3">
+						<div class="p-2.5 flex flex-col justify-between flex-1">
 							<div
-								class="text-xs font-bold text-gray-900 dark:text-white truncate mb-1"
+								class="text-xs font-semibold text-gray-900 dark:text-white truncate mb-1.5 group-hover:text-[#D4AF37] transition-colors duration-200"
 							>
 								{{ item.name }}
 							</div>
-							<div class="flex items-center gap-1 mb-2">
+							<div class="flex items-center gap-1.5 mb-2.5">
 								<span
-									class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400"
+									class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-yellow-100/60 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 border border-yellow-200/30"
 									>{{ item.metal }}</span
 								>
 								<span
-									class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-400"
+									class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-gray-100/80 dark:bg-warm-dark-800 text-gray-600 dark:text-gray-400 border border-gray-200/20"
 									>{{ item.purity }}</span
 								>
 							</div>
-							<div class="flex items-center justify-between">
+							<div class="flex items-baseline justify-between mt-auto">
+								<span class="text-xs font-extrabold text-[#D4AF37] font-mono">{{
+									formatCurrency(item.price)
+								}}</span>
 								<span
-									class="text-sm font-bold text-gray-900 dark:text-white font-mono"
-									>{{ formatCurrency(item.price) }}</span
+									class="text-[9px] font-bold text-gray-400 dark:text-gray-500 font-mono"
+									>{{ item.weight }}g</span
 								>
-								<span class="text-[10px] text-gray-500">{{ item.weight }}g</span>
 							</div>
 						</div>
 					</div>
@@ -624,28 +661,28 @@
 				:item="selectedItem"
 				@close="selectedItem = null"
 				@reserve="
-					openReserve(selectedItem);
-					selectedItem = null;
+					openReserve(selectedItem)
+					selectedItem = null
 				"
 				@damage="
-					openDamage(selectedItem);
-					selectedItem = null;
+					openDamage(selectedItem)
+					selectedItem = null
 				"
 				@lifecycle="
-					openLifecycle(selectedItem);
-					selectedItem = null;
+					openLifecycle(selectedItem)
+					selectedItem = null
 				"
 				@push="
-					openPushForItem(selectedItem);
-					selectedItem = null;
+					openPushForItem(selectedItem)
+					selectedItem = null
 				"
 				@transfer="
-					showTransferModal = true;
-					selectedItem = null;
+					showTransferModal = true
+					selectedItem = null
 				"
 				@edit="
-					openEdit(selectedItem);
-					selectedItem = null;
+					openEdit(selectedItem)
+					selectedItem = null
 				"
 			/>
 		</div>
@@ -703,6 +740,14 @@
 			@close="showEditItem = false"
 			@saved="onDataChanged"
 		/>
+		<StockAlertDrawer
+			:show="showStockAlertDrawer"
+			:type="stockAlertDrawerType"
+			:items="stockAlertDrawerType === 'out' ? outOfStockItems : lowStockItems"
+			@close="showStockAlertDrawer = false"
+			@select-item="onStockAlertSelectItem"
+			@action-all="onStockAlertActionAll"
+		/>
 	</AppLayout>
 </template>
 
@@ -725,6 +770,7 @@ import StockAdjustModal from '@/components/StockAdjustModal.vue'
 import StockReductionsPanel from '@/components/StockReductionsPanel.vue'
 import ItemActionDrawer from '@/components/ItemActionDrawer.vue'
 import ItemEditModal from '@/components/ItemEditModal.vue'
+import StockAlertDrawer from '@/components/StockAlertDrawer.vue'
 import { useRoute } from 'vue-router'
 
 const ui = useUIStore()
@@ -751,6 +797,8 @@ const damageSerialNo = ref('')
 const lifecycleSerialNo = ref('')
 const editItemCode = ref('')
 const pushItemCode = ref('')
+const showStockAlertDrawer = ref(false)
+const stockAlertDrawerType = ref('low')
 
 const inventoryResource = createResource({
 	url: 'zevar_core.api.catalog.get_pos_items',
@@ -875,6 +923,29 @@ function formatCurrency(val) {
 		currency: 'USD',
 		maximumFractionDigits: 0,
 	}).format(val)
+}
+
+function openStockAlert(type) {
+	stockAlertDrawerType.value = type
+	showStockAlertDrawer.value = true
+}
+
+function onStockAlertSelectItem(item) {
+	selectedItem.value = item
+	showStockAlertDrawer.value = false
+}
+
+function onStockAlertActionAll() {
+	showStockAlertDrawer.value = false
+	if (stockAlertDrawerType.value === 'out') {
+		showStockAdjust.value = true
+	} else {
+		toast({
+			title: 'Reorder workflow initiated',
+			message: `Created procurement request for ${lowStockItems.value.length} low stock items.`,
+			intent: 'success',
+		})
+	}
 }
 
 watch(

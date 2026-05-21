@@ -87,29 +87,29 @@
 							</div>
 						</div>
 
-								<!-- Tax Exempt Toggle -->
-								<div class="pt-3 border-t border-gray-200 dark:border-warm-border">
-									<label class="flex items-center justify-between cursor-pointer group">
-										<div>
-											<span
-												class="font-medium text-gray-700 dark:text-gray-300 text-sm"
-												>Tax Exempt</span
-											>
-											<span class="text-xs text-gray-400 block"
-												>For resellers or tax-free sales</span
-											>
-										</div>
-										<input
-											v-model="taxExempt"
-											type="checkbox"
-											class="sr-only peer"
-											data-testid="tax-exempt-checkbox"
-										/>
-										<div
-											class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#D4AF37]/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D4AF37]"
-										></div>
-									</label>
+						<!-- Tax Exempt Toggle -->
+						<div class="pt-3 border-t border-gray-200 dark:border-warm-border">
+							<label class="flex items-center justify-between cursor-pointer group">
+								<div>
+									<span
+										class="font-medium text-gray-700 dark:text-gray-300 text-sm"
+										>Tax Exempt</span
+									>
+									<span class="text-xs text-gray-400 block"
+										>For resellers or tax-free sales</span
+									>
 								</div>
+								<input
+									v-model="taxExempt"
+									type="checkbox"
+									class="sr-only peer"
+									data-testid="tax-exempt-checkbox"
+								/>
+								<div
+									class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#D4AF37]/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D4AF37]"
+								></div>
+							</label>
+						</div>
 
 						<!-- Totals -->
 						<div
@@ -224,21 +224,21 @@
 								</span>
 							</div>
 						</div>
-							<div
-								v-else
-								class="flex-1 flex items-center justify-center text-gray-400 dark:text-gray-600 text-sm"
-								data-testid="payment-error"
-							>
-								Select a payment method to begin
-							</div>
+						<div
+							v-else
+							class="flex-1 flex items-center justify-center text-gray-400 dark:text-gray-600 text-sm"
+							data-testid="payment-error"
+						>
+							Select a payment method to begin
+						</div>
 					</template>
 
-									<!-- Error -->
-									<div
-										v-if="error"
-										class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-xl p-3 mt-3"
-										data-testid="payment-error"
-									>
+					<!-- Error -->
+					<div
+						v-if="error"
+						class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-xl p-3 mt-3"
+						data-testid="payment-error"
+					>
 						<p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>
 					</div>
 				</div>
@@ -372,7 +372,8 @@
 							</button>
 							<div
 								v-if="
-									cart.salespersons.length > 0 && salespersonSplitTotal !== 100
+									cart.salespersons.length > 0 &&
+									Math.abs(salespersonSplitTotal - 100) > 0.01
 								"
 								class="text-xs text-red-500 font-medium"
 							>
@@ -459,188 +460,201 @@
 							@click="showMoreModes = !showMoreModes"
 							class="w-full py-2 text-xs font-bold text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition flex items-center justify-center gap-1"
 						>
-							<svg class="w-3 h-3 transition-transform" :class="showMoreModes ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+							<svg
+								class="w-3 h-3 transition-transform"
+								:class="showMoreModes ? 'rotate-180' : ''"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M19 9l-7 7-7-7"
+								/>
 							</svg>
 							{{ showMoreModes ? 'Show fewer options' : 'More payment options' }}
 						</button>
 
 						<!-- Digital Wallets (collapsible) -->
 						<template v-if="showMoreModes">
-						<h4
-							v-if="mode === 'sale'"
-							class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2"
-						>
-							Digital Wallets
-						</h4>
-						<div class="space-y-2 mb-4">
-							<button
-								type="button"
-								v-for="pm in digitalWalletModes"
-								:key="pm.value"
-								@click="togglePaymentMode(pm.value)"
-								class="w-full flex items-center justify-between p-3.5 border rounded-xl transition-all"
-								:class="
-									isPaymentSelected(pm.value)
-										? 'border-[#D4AF37] bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]'
-										: 'border-gray-200 hover:border-gray-400 dark:border-warm-border dark:hover:border-white/30'
-								"
+							<h4
+								v-if="mode === 'sale'"
+								class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2"
 							>
-								<div class="flex items-center gap-3">
-									<div
-										class="w-8 h-8 rounded-full flex items-center justify-center bg-purple-100 text-purple-600"
-									>
-										<svg
-											class="w-4 h-4"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
+								Digital Wallets
+							</h4>
+							<div class="space-y-2 mb-4">
+								<button
+									type="button"
+									v-for="pm in digitalWalletModes"
+									:key="pm.value"
+									@click="togglePaymentMode(pm.value)"
+									class="w-full flex items-center justify-between p-3.5 border rounded-xl transition-all"
+									:class="
+										isPaymentSelected(pm.value)
+											? 'border-[#D4AF37] bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]'
+											: 'border-gray-200 hover:border-gray-400 dark:border-warm-border dark:hover:border-white/30'
+									"
+								>
+									<div class="flex items-center gap-3">
+										<div
+											class="w-8 h-8 rounded-full flex items-center justify-center bg-purple-100 text-purple-600"
 										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
-											></path>
-										</svg>
-									</div>
-									<span
-										class="font-medium text-gray-900 dark:text-white text-sm"
-										>{{ pm.label }}</span
-									>
-								</div>
-								<div
-									v-if="isPaymentSelected(pm.value)"
-									class="w-2.5 h-2.5 rounded-full bg-green-500"
-								></div>
-							</button>
-						</div>
-
-								<h4
-							v-if="mode === 'sale'"
-							class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2"
-						>
-							Stored Value
-						</h4>
-						<div class="space-y-2 mb-4">
-							<button
-								type="button"
-								v-for="pm in storedValueModes"
-								:key="pm.value"
-								@click="togglePaymentMode(pm.value)"
-								class="w-full flex items-center justify-between p-3.5 border rounded-xl transition-all"
-								:class="
-									isPaymentSelected(pm.value)
-										? 'border-[#D4AF37] bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]'
-										: 'border-gray-200 hover:border-gray-400 dark:border-warm-border dark:hover:border-white/30'
-								"
-							>
-								<div class="flex items-center gap-3">
-									<div
-										class="w-8 h-8 rounded-full flex items-center justify-center bg-orange-100 text-orange-600"
-									>
-										<svg
-											class="w-4 h-4"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-											></path>
-										</svg>
-									</div>
-									<span
-										class="font-medium text-gray-900 dark:text-white text-sm"
-										>{{ pm.label }}</span
-									>
-								</div>
-								<div
-									v-if="isPaymentSelected(pm.value)"
-									class="w-2.5 h-2.5 rounded-full bg-green-500"
-								></div>
-							</button>
-						</div>
-
-							<!-- Financing Options -->
-						<h4
-							v-if="mode === 'sale'"
-							class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2"
-						>
-							Financing
-						</h4>
-						<div class="space-y-2 mb-4">
-							<button
-								type="button"
-								v-for="pm in financingModes"
-								:key="pm.value"
-								@click="togglePaymentMode(pm.value)"
-								class="w-full flex items-center justify-between p-3.5 border rounded-xl transition-all"
-								:class="
-									isPaymentSelected(pm.value)
-										? 'border-[#D4AF37] bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]'
-										: 'border-gray-200 hover:border-gray-400 dark:border-warm-border dark:hover:border-white/30'
-								"
-							>
-								<div class="flex items-center gap-3">
-									<div
-										class="w-8 h-8 rounded-full flex items-center justify-center bg-indigo-100 text-indigo-600"
-									>
-										<svg
-											class="w-4 h-4"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-											></path>
-										</svg>
-									</div>
-									<div class="text-left">
+											<svg
+												class="w-4 h-4"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+												></path>
+											</svg>
+										</div>
 										<span
 											class="font-medium text-gray-900 dark:text-white text-sm"
 											>{{ pm.label }}</span
 										>
+									</div>
+									<div
+										v-if="isPaymentSelected(pm.value)"
+										class="w-2.5 h-2.5 rounded-full bg-green-500"
+									></div>
+								</button>
+							</div>
+
+							<h4
+								v-if="mode === 'sale'"
+								class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2"
+							>
+								Stored Value
+							</h4>
+							<div class="space-y-2 mb-4">
+								<button
+									type="button"
+									v-for="pm in storedValueModes"
+									:key="pm.value"
+									@click="togglePaymentMode(pm.value)"
+									class="w-full flex items-center justify-between p-3.5 border rounded-xl transition-all"
+									:class="
+										isPaymentSelected(pm.value)
+											? 'border-[#D4AF37] bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]'
+											: 'border-gray-200 hover:border-gray-400 dark:border-warm-border dark:hover:border-white/30'
+									"
+								>
+									<div class="flex items-center gap-3">
+										<div
+											class="w-8 h-8 rounded-full flex items-center justify-center bg-orange-100 text-orange-600"
+										>
+											<svg
+												class="w-4 h-4"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+												></path>
+											</svg>
+										</div>
 										<span
-											v-if="pm.value !== 'In-House Finance'"
-											class="text-xs text-gray-400 block"
-											>Apply for financing</span
+											class="font-medium text-gray-900 dark:text-white text-sm"
+											>{{ pm.label }}</span
 										>
 									</div>
-								</div>
-								<div
-									v-if="isPaymentSelected(pm.value)"
-									class="w-2.5 h-2.5 rounded-full bg-green-500"
-								></div>
-							</button>
-							<button
-								@click="showFinancingWaterfall = true"
-								class="w-full flex items-center justify-center gap-2 p-3 border-2 border-dashed border-indigo-300 dark:border-indigo-700 rounded-xl text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all"
+									<div
+										v-if="isPaymentSelected(pm.value)"
+										class="w-2.5 h-2.5 rounded-full bg-green-500"
+									></div>
+								</button>
+							</div>
+
+							<!-- Financing Options -->
+							<h4
+								v-if="mode === 'sale'"
+								class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2"
 							>
-								<svg
-									class="w-4 h-4"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
+								Financing
+							</h4>
+							<div class="space-y-2 mb-4">
+								<button
+									type="button"
+									v-for="pm in financingModes"
+									:key="pm.value"
+									@click="togglePaymentMode(pm.value)"
+									class="w-full flex items-center justify-between p-3.5 border rounded-xl transition-all"
+									:class="
+										isPaymentSelected(pm.value)
+											? 'border-[#D4AF37] bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]'
+											: 'border-gray-200 hover:border-gray-400 dark:border-warm-border dark:hover:border-white/30'
+									"
 								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M13 10V3L4 14h7v7l9-11h-7z"
-									></path>
-								</svg>
-								<span class="font-medium text-sm">Quick Apply (Waterfall)</span>
-							</button>
-						</div>
-					</template>
+									<div class="flex items-center gap-3">
+										<div
+											class="w-8 h-8 rounded-full flex items-center justify-center bg-indigo-100 text-indigo-600"
+										>
+											<svg
+												class="w-4 h-4"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+												></path>
+											</svg>
+										</div>
+										<div class="text-left">
+											<span
+												class="font-medium text-gray-900 dark:text-white text-sm"
+												>{{ pm.label }}</span
+											>
+											<span
+												v-if="pm.value !== 'In-House Finance'"
+												class="text-xs text-gray-400 block"
+												>Apply for financing</span
+											>
+										</div>
+									</div>
+									<div
+										v-if="isPaymentSelected(pm.value)"
+										class="w-2.5 h-2.5 rounded-full bg-green-500"
+									></div>
+								</button>
+								<button
+									@click="showFinancingWaterfall = true"
+									class="w-full flex items-center justify-center gap-2 p-3 border-2 border-dashed border-indigo-300 dark:border-indigo-700 rounded-xl text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all"
+								>
+									<svg
+										class="w-4 h-4"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M13 10V3L4 14h7v7l9-11h-7z"
+										></path>
+									</svg>
+									<span class="font-medium text-sm"
+										>Quick Apply (Waterfall)</span
+									>
+								</button>
+							</div>
+						</template>
 					</div>
 
 					<!-- Gift Card Number Input (sale mode only) -->
@@ -734,26 +748,23 @@
 					</div>
 
 					<!-- Confirm Button -->
-					<div class="flex-shrink-0">
-							<button
-								v-for="pm in standardModes"
-								:key="pm.value"
-								@click="togglePayment(pm.value)"
-								class="flex items-center justify-between p-3 rounded-xl border-2 transition-all"
-								:class="
-									isPaymentSelected(pm.value)
-										? 'border-[#D4AF37] bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]'
-										: 'border-gray-200 hover:border-gray-400 dark:border-warm-border dark:hover:border-white/30'
-								"
-								data-testid="payment-mode-select"
-							>
+					<div class="flex-shrink-0 mt-6">
+						<button
+							type="button"
+							@click="handlePayment"
+							:disabled="!canSubmit || processing"
+							class="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold transition-all shadow-md"
+							:class="
+								canSubmit && !processing
+									? 'bg-[#D4AF37] text-black hover:bg-[#b5952f] cursor-pointer'
+									: 'bg-gray-100 text-gray-400 dark:bg-warm-dark-700 dark:text-gray-500 cursor-not-allowed'
+							"
+							data-testid="confirm-payment-btn"
+						>
 							<span
 								v-if="processing"
 								class="animate-spin rounded-full h-5 w-5 border-2 border-gray-400 border-t-white"
 							></span>
-							<span v-else-if="!canSubmit">{{
-								selectedPayments.length === 0 ? 'Select Payment' : 'Enter Amounts'
-							}}</span>
 							<span v-else>{{ confirmButtonLabel }}</span>
 						</button>
 					</div>
@@ -761,19 +772,27 @@
 			</div>
 		</template>
 
-							<!-- ============ SUCCESS STATE ============ -->
-							<template v-if="step === 'success'">
-								<div
-									class="p-12 flex flex-col items-center justify-center text-center w-full"
-									style="min-height: 400px"
-									data-testid="success-message"
-								>
+		<!-- ============ SUCCESS STATE ============ -->
+		<template v-if="step === 'success'">
+			<div
+				class="p-12 flex flex-col items-center justify-center text-center w-full"
+				style="min-height: 400px"
+				data-testid="success-message"
+			>
 				<div
 					class="w-20 h-20 rounded-full flex items-center justify-center mb-6"
-					:class="isOfflineOrder ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-green-100 dark:bg-green-900/30'"
+					:class="
+						isOfflineOrder
+							? 'bg-amber-100 dark:bg-amber-900/30'
+							: 'bg-green-100 dark:bg-green-900/30'
+					"
 				>
 					<svg
-						:class="isOfflineOrder ? 'w-10 h-10 text-amber-600 dark:text-amber-400' : 'w-10 h-10 text-green-600 dark:text-green-400'"
+						:class="
+							isOfflineOrder
+								? 'w-10 h-10 text-amber-600 dark:text-amber-400'
+								: 'w-10 h-10 text-green-600 dark:text-green-400'
+						"
 						fill="none"
 						stroke="currentColor"
 						viewBox="0 0 24 24"
@@ -817,11 +836,11 @@
 							formatCurrency(successBreakdown.reduce((s, p) => s + p.amount, 0))
 						}}</span>
 					</div>
-									<div
-										v-if="successInvoiceId"
-										class="flex justify-between text-sm pt-3 mt-2 border-t border-gray-200 dark:border-warm-border"
-										data-testid="invoice-id"
-									>
+					<div
+						v-if="successInvoiceId"
+						class="flex justify-between text-sm pt-3 mt-2 border-t border-gray-200 dark:border-warm-border"
+						data-testid="invoice-id"
+					>
 						<span class="text-gray-500 dark:text-gray-400">Transaction ID</span>
 						<span class="font-mono font-bold text-gray-900 dark:text-white">{{
 							successInvoiceId
@@ -1011,7 +1030,8 @@ const successTitle = computed(() => {
 })
 
 const successSubtext = computed(() => {
-	if (isOfflineOrder.value) return 'This order will be synced automatically when you\'re back online.'
+	if (isOfflineOrder.value)
+		return "This order will be synced automatically when you're back online."
 	if (props.mode === 'sale') return 'Invoice has been generated successfully.'
 	if (props.mode === 'layaway') return 'Layaway payment has been processed.'
 	return 'Repair payment has been recorded.'
@@ -1157,12 +1177,12 @@ async function handlePayment() {
 		}
 	} catch (e) {
 		// Detect network failures and offer offline queuing
-		const isNetworkError = (
-			e instanceof TypeError && (e.message.includes('fetch') || e.message.includes('network')) ||
+		const isNetworkError =
+			(e instanceof TypeError &&
+				(e.message.includes('fetch') || e.message.includes('network'))) ||
 			e?.message?.includes('ERR_INTERNET_DISCONNECTED') ||
 			e?.message?.includes('NetworkError') ||
 			!navigator.onLine
-		)
 
 		// Auth-expired error from submitOrderSafe (Fix #8): bubble a clear
 		// message and DO NOT fall through to the offline-queue branch —
@@ -1171,8 +1191,7 @@ async function handlePayment() {
 		// The cart is preserved either way (Fix #8 never clears it on
 		// failure).
 		if (e?.code === 'session_expired') {
-			error.value =
-				'Your session has expired. Please log in again — your cart is saved.'
+			error.value = 'Your session has expired. Please log in again — your cart is saved.'
 			return
 		}
 
@@ -1185,12 +1204,14 @@ async function handlePayment() {
 
 				await offlineStore.addPendingOrder({
 					payload: {
-						items: JSON.stringify(cart.items.map(i => ({
-							item_code: i.item_code,
-							qty: i.qty || 1,
-							rate: i.amount || 0,
-							serial_no: i.serial_no || null,
-						}))),
+						items: JSON.stringify(
+							cart.items.map((i) => ({
+								item_code: i.item_code,
+								qty: i.qty || 1,
+								rate: i.amount || 0,
+								serial_no: i.serial_no || null,
+							}))
+						),
 						payments: JSON.stringify(payments),
 						customer: cart.customer?.name || 'Walk-In Customer',
 						warehouse: session.currentWarehouse || '',

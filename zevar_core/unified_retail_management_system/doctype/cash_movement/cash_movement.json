@@ -28,15 +28,15 @@
    "options": "POS Opening Entry",
    "reqd": 1
   },
-  {
-   "default": "Cash Out",
-   "fieldname": "movement_type",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Movement Type",
-   "options": "Cash In\nCash Out",
-   "reqd": 1
-  },
+   {
+    "default": "Cash Out",
+    "fieldname": "movement_type",
+    "fieldtype": "Select",
+    "in_list_view": 1,
+    "label": "Movement Type",
+    "options": "Cash In\nCash Out\nSafe Drop\nBank Drop\nFloat Entry\nTender Removal",
+    "reqd": 1
+   },
   {
    "fieldname": "amount",
    "fieldtype": "Currency",

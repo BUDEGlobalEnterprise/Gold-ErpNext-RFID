@@ -69,6 +69,29 @@ export const useCartStore = defineStore('cart', () => {
 	// Salespersons attached to the current sale (up to 4)
 	const salespersons = ref(storedSalespersons)
 
+	// Self-heal old/invalid salespersons splits on load
+	if (salespersons.value.length > 0) {
+		const hasInvalidSplit = salespersons.value.some(
+			(sp) => sp.split === null || sp.split === undefined || isNaN(sp.split)
+		)
+		const totalSplit = salespersons.value.reduce((sum, sp) => sum + (Number(sp.split) || 0), 0)
+		if (hasInvalidSplit || Math.abs(totalSplit - 100) > 0.01) {
+			// Auto distribute equally to heal the local storage state
+			const count = salespersons.value.length
+			const equalShare = Number((100 / count).toFixed(2))
+			let sum = 0
+			salespersons.value.forEach((sp, idx) => {
+				if (idx === count - 1) {
+					sp.split = Number((100 - sum).toFixed(2))
+				} else {
+					sp.split = equalShare
+					sum += equalShare
+				}
+			})
+			_writeJson(LS.salespersons, salespersons.value)
+		}
+	}
+
 	// Trade-in items attached to the current sale
 	const tradeIns = ref(storedTradeIns)
 
@@ -231,30 +254,70 @@ export const useCartStore = defineStore('cart', () => {
 		_writeJson(LS.tradeIns, tradeIns.value)
 	}
 
-	function addSalesperson(employee, split) {
-		if (salespersons.value.length >= 4) return
-		salespersons.value.push({ employee, split: split })
+	function autoDistributeSplits() {
+		const count = salespersons.value.length
+		if (count === 0) return
+
+		const equalShare = Number((100 / count).toFixed(2))
+		let sum = 0
+
+		salespersons.value.forEach((sp, idx) => {
+			if (idx === count - 1) {
+				sp.split = Number((100 - sum).toFixed(2))
+			} else {
+				sp.split = equalShare
+				sum += equalShare
+			}
+		})
 		_persistSalespersons()
 	}
 
+	function addSalesperson(employee, split) {
+		if (salespersons.value.length >= 4) return
+		salespersons.value.push({ employee, split: split || 0 })
+		autoDistributeSplits()
+	}
+
 	function recalculateSalespersonSplit(changedIndex) {
-		const changed = salespersons.value[changedIndex]
-		if (changed) {
-			changed.split = Number(Number(changed.split || 0).toFixed(2))
+		const count = salespersons.value.length
+		if (count <= 1) {
+			autoDistributeSplits()
+			return
 		}
 
-		if (salespersons.value.length === 2 && changed) {
-			const otherIndex = changedIndex === 0 ? 1 : 0
-			const other = salespersons.value[otherIndex]
-			const newSplit = 100 - changed.split
-			other.split = Number(newSplit.toFixed(2))
-		}
+		const changed = salespersons.value[changedIndex]
+		if (!changed) return
+
+		// Clamp the entered split between 0 and 100
+		let val = Number(changed.split)
+		if (isNaN(val)) val = 0
+		val = Math.max(0, Math.min(100, val))
+		changed.split = Number(val.toFixed(2))
+
+		const remaining = 100 - changed.split
+		const otherCount = count - 1
+
+		const equalShare = Number((remaining / otherCount).toFixed(2))
+		let sum = 0
+
+		let processedOtherCount = 0
+		salespersons.value.forEach((sp, idx) => {
+			if (idx === changedIndex) return
+			processedOtherCount++
+			if (processedOtherCount === otherCount) {
+				sp.split = Number((remaining - sum).toFixed(2))
+			} else {
+				sp.split = equalShare
+				sum += equalShare
+			}
+		})
+
 		_persistSalespersons()
 	}
 
 	function removeSalesperson(index) {
 		salespersons.value.splice(index, 1)
-		_persistSalespersons()
+		autoDistributeSplits()
 	}
 
 	function clearSalespersons() {
@@ -307,12 +370,12 @@ export const useCartStore = defineStore('cart', () => {
 	async function validateItems() {
 		if (items.value.length === 0) return
 
-		const itemCodes = items.value.map(i => i.item_code)
+		const itemCodes = items.value.map((i) => i.item_code)
 		const resource = createResource({
 			url: 'zevar_core.api.pos.validate_cart_items',
 			makeParams() {
 				return { item_codes: JSON.stringify(itemCodes) }
-			}
+			},
 		})
 
 		try {
@@ -322,14 +385,14 @@ export const useCartStore = defineStore('cart', () => {
 			// Update the cart state
 			const updatedItems = []
 			let changed = false
-			
+
 			for (const item of items.value) {
 				const serverItem = validData[item.item_code]
 				if (!serverItem || serverItem.disabled) {
 					changed = true
 					continue // Item removed
 				}
-				
+
 				if (item.amount !== serverItem.rate) {
 					item.amount = serverItem.rate
 					changed = true
@@ -406,7 +469,8 @@ export const useCartStore = defineStore('cart', () => {
 					{
 						item_code: '',
 						type: 'network_error',
-						message: 'Could not reach the cart validator. Please check your connection.',
+						message:
+							'Could not reach the cart validator. Please check your connection.',
 						blocking: true,
 					},
 				],
@@ -447,7 +511,10 @@ export const useCartStore = defineStore('cart', () => {
 			return true
 		}
 		const exc = err.exc_type || err?.response?.data?.exc_type
-		if (exc && /AuthenticationError|SessionExpiredError|InvalidAuthorizationToken/i.test(exc)) {
+		if (
+			exc &&
+			/AuthenticationError|SessionExpiredError|InvalidAuthorizationToken/i.test(exc)
+		) {
 			return true
 		}
 		const msg = (err.message || err._server_messages || '').toString()

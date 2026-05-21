@@ -109,9 +109,7 @@ class TestParseDriversLicenseRobustness(FrappeTestCase):
 	def test_handles_crlf_line_endings(self):
 		from zevar_core.api.id_scan import parse_drivers_license_payload
 
-		payload = _build_aamva_payload(
-			elements=[("DCS", "SMITH"), ("DAC", "JANE")]
-		).replace("\n", "\r\n")
+		payload = _build_aamva_payload(elements=[("DCS", "SMITH"), ("DAC", "JANE")]).replace("\n", "\r\n")
 		result = parse_drivers_license_payload(payload)
 		self.assertTrue(result["success"])
 		self.assertEqual(result["last_name"], "Smith")
@@ -121,9 +119,11 @@ class TestParseDriversLicenseRobustness(FrappeTestCase):
 		"""Some scanners send "\\n" literal instead of an actual newline."""
 		from zevar_core.api.id_scan import parse_drivers_license_payload
 
-		payload = _build_aamva_payload(
-			elements=[("DCS", "SMITH"), ("DAC", "JANE")]
-		).replace("\n", "\\n").replace("\x1e", "\\u001e")
+		payload = (
+			_build_aamva_payload(elements=[("DCS", "SMITH"), ("DAC", "JANE")])
+			.replace("\n", "\\n")
+			.replace("\x1e", "\\u001e")
+		)
 		result = parse_drivers_license_payload(payload)
 		self.assertTrue(result["success"])
 		self.assertEqual(result["first_name"], "Jane")
@@ -181,9 +181,7 @@ class TestParseDriversLicenseRobustness(FrappeTestCase):
 		"""A scanner that emits 00000000 for DBB shouldn't bubble garbage up."""
 		from zevar_core.api.id_scan import parse_drivers_license_payload
 
-		payload = _build_aamva_payload(
-			elements=[("DCS", "DOE"), ("DAC", "JOHN"), ("DBB", "00000000")]
-		)
+		payload = _build_aamva_payload(elements=[("DCS", "DOE"), ("DAC", "JOHN"), ("DBB", "00000000")])
 		result = parse_drivers_license_payload(payload)
 		self.assertTrue(result["success"])
 		self.assertNotIn("date_of_birth", result)

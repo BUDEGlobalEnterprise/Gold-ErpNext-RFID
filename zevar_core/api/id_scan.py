@@ -56,7 +56,6 @@ import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit
 
-
 # ---------------------------------------------------------------------------
 # Element ID → canonical key mapping. Order matters: the first non-empty
 # match wins, so newer codes come first.
@@ -95,12 +94,7 @@ def _normalize_input(raw: str) -> str:
 		return ""
 	# Some scanners replace control characters with their literal escape
 	# sequences ("\\n", "\\r", "\\u001e"). Translate those back.
-	text = (
-		raw.replace("\\n", "\n")
-		.replace("\\r", "\r")
-		.replace("\\u001e", "\x1e")
-		.replace("\\u001c", "\x1c")
-	)
+	text = raw.replace("\\n", "\n").replace("\\r", "\r").replace("\\u001e", "\x1e").replace("\\u001c", "\x1c")
 	# Many scanners terminate every line with \r\n; collapse to \n.
 	text = text.replace("\r\n", "\n").replace("\r", "\n")
 	return text.strip()
@@ -272,7 +266,7 @@ def parse_drivers_license(barcode: str) -> dict:
 	the Customer doc is built by quick_create_customer using those fields.
 	"""
 	# Defensive guard against absurdly long payloads. A real AAMVA barcode
-	# is typically 400–700 bytes; allow some slack.
+	# is typically 400-700 bytes; allow some slack.
 	if not barcode:
 		frappe.throw(_("No barcode data provided."))
 	if len(barcode) > 8000:

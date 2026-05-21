@@ -1,9 +1,16 @@
 <template>
 	<div class="h-full flex flex-col">
-		<div class="flex items-center justify-between px-4 py-3 border-b dark:border-warm-dark-600">
+		<div
+			class="flex items-center justify-between px-4 py-3 border-b dark:border-warm-dark-600"
+		>
 			<div class="flex items-center gap-3">
 				<div class="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
-					<svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg
+						class="w-5 h-5 text-amber-600"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -13,8 +20,12 @@
 					</svg>
 				</div>
 				<div>
-					<h1 class="text-lg font-bold text-gray-900 dark:text-white">Gold Scrap Purchase</h1>
-					<p class="text-xs text-gray-500">Buy scrap gold from customers at live market rates</p>
+					<h1 class="text-lg font-bold text-gray-900 dark:text-white">
+						Gold Scrap Purchase
+					</h1>
+					<p class="text-xs text-gray-500">
+						Buy scrap gold from customers at live market rates
+					</p>
 				</div>
 			</div>
 			<button
@@ -47,23 +58,35 @@
 					<div class="flex justify-between">
 						<div>
 							<span class="font-mono text-sm text-amber-600">{{ p.name }}</span>
-							<span class="text-gray-400 text-xs ml-2">{{ formatDate(p.purchase_date) }}</span>
+							<span class="text-gray-400 text-xs ml-2">{{
+								formatDate(p.purchase_date)
+							}}</span>
 						</div>
 						<div class="text-right">
-							<div class="font-bold text-amber-600">{{ fmtCurrency(p.total_agreed_value) }}</div>
+							<div class="font-bold text-amber-600">
+								{{ fmtCurrency(p.total_agreed_value) }}
+							</div>
 							<div class="text-xs text-gray-400">{{ p.customer_name }}</div>
 						</div>
 					</div>
 					<div class="flex gap-2 mt-1">
 						<span
 							class="px-2 py-0.5 text-xs rounded-full"
-							:class="p.status === 'Submitted' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
+							:class="
+								p.status === 'Submitted'
+									? 'bg-green-100 text-green-700'
+									: 'bg-gray-100 text-gray-600'
+							"
 						>
 							{{ p.status }}
 						</span>
 						<span
 							class="px-2 py-0.5 text-xs rounded-full"
-							:class="p.payment_status === 'Paid' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'"
+							:class="
+								p.payment_status === 'Paid'
+									? 'bg-blue-100 text-blue-700'
+									: 'bg-yellow-100 text-yellow-700'
+							"
 						>
 							{{ p.payment_status }}
 						</span>

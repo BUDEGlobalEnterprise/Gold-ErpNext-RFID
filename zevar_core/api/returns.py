@@ -80,9 +80,7 @@ def get_returnable_items(invoice_name: str) -> dict:
 			# Serials originally sold on this line, parsed from the
 			# newline-separated serial_no field. The UI uses these to let
 			# the cashier pick which physical piece is being returned.
-			line_serials = [
-				sn.strip() for sn in (item.get("serial_no") or "").splitlines() if sn.strip()
-			]
+			line_serials = [sn.strip() for sn in (item.get("serial_no") or "").splitlines() if sn.strip()]
 
 			items.append(
 				{
@@ -236,9 +234,7 @@ def create_return_invoice(
 				original_item = original_lines_by_code.get(item_code)
 
 			if not original_item:
-				frappe.throw(
-					_("Item {0} not found in original invoice.").format(item_code)
-				)
+				frappe.throw(_("Item {0} not found in original invoice.").format(item_code))
 
 			return_qty = flt(return_item.get("qty", 0))
 			if return_qty <= 0:
@@ -248,10 +244,9 @@ def create_return_invoice(
 			# returning serial maps unambiguously to a stock movement.
 			if serial_no and abs(return_qty) > 1:
 				frappe.throw(
-					_(
-						"Serial Number '{0}' is a single physical piece — "
-						"return qty must be 1."
-					).format(serial_no)
+					_("Serial Number '{0}' is a single physical piece — " "return qty must be 1.").format(
+						serial_no
+					)
 				)
 
 			# Where does the returned stock land?
@@ -280,6 +275,10 @@ def create_return_invoice(
 		if return_type == "refund":
 			if not refund_mode:
 				refund_mode = "Cash"
+
+			# Validate refund_mode exists and is a real Mode of Payment
+			if not frappe.db.exists("Mode of Payment", refund_mode):
+				frappe.throw(_("Refund mode '{0}' is not a valid payment method.").format(refund_mode))
 
 			# Calculate refund amount
 			refund_amount = sum(flt(item.get("qty", 0)) * flt(item.get("rate", 0)) for item in items_list)
@@ -336,7 +335,17 @@ def create_return_invoice(
 	except Exception as e:
 		frappe.db.rollback()
 		frappe.log_error("Return Invoice Creation Failed", frappe.get_traceback())
-		frappe.throw(_("Failed to create return invoice: {0}").format(str(e)))
+		# Hide raw technical details from end users
+		raw = str(e)
+		if "permission" in raw.lower():
+			frappe.throw(
+				_("You do not have permission to create this return. Please ask a manager for help.")
+			)
+		frappe.throw(
+			_(
+				"Unable to process the return at this time. Please check the details and try again, or ask a manager for help."
+			)
+		)
 
 
 @frappe.whitelist(methods=["POST"])

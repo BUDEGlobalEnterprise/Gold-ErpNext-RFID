@@ -22,8 +22,18 @@
 						class="px-3 py-1.5 text-xs font-bold text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition flex items-center gap-1.5"
 						title="Export to CSV"
 					>
-						<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+						<svg
+							class="w-3.5 h-3.5"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+							/>
 						</svg>
 						Export
 					</button>
@@ -578,14 +588,27 @@
 						class="flex items-center justify-between gap-3 p-4 border-t border-gray-100 dark:border-warm-border/50"
 					>
 						<!-- Return/Void Actions (left side) -->
-						<div class="flex items-center gap-2" v-if="selectedTransaction.invoice.status === 'Paid'">
+						<div
+							class="flex items-center gap-2"
+							v-if="selectedTransaction.invoice.status === 'Paid'"
+						>
 							<button
 								@click="initiateReturn(selectedTransaction.invoice.name)"
 								:disabled="returnProcessing"
 								class="px-3 py-2 text-xs font-bold text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800/30 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 transition flex items-center gap-1.5 disabled:opacity-50"
 							>
-								<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+								<svg
+									class="w-3.5 h-3.5"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+									/>
 								</svg>
 								Return
 							</button>
@@ -594,8 +617,18 @@
 								:disabled="returnProcessing"
 								class="px-3 py-2 text-xs font-bold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/30 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition flex items-center gap-1.5 disabled:opacity-50"
 							>
-								<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+								<svg
+									class="w-3.5 h-3.5"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+									/>
 								</svg>
 								Void
 							</button>
@@ -608,8 +641,18 @@
 								@click="printInvoice(selectedTransaction.invoice.name)"
 								class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition flex items-center gap-2"
 							>
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+								<svg
+									class="w-4 h-4"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+									/>
 								</svg>
 								Print
 							</button>
@@ -623,15 +666,35 @@
 					</div>
 
 					<!-- Void Confirmation Mini-Modal -->
-					<div v-if="showVoidConfirm" class="absolute inset-0 bg-white/95 dark:bg-warm-card/95 backdrop-blur-sm flex items-center justify-center z-10 rounded-2xl">
+					<div
+						v-if="showVoidConfirm"
+						class="absolute inset-0 bg-white/95 dark:bg-warm-card/95 backdrop-blur-sm flex items-center justify-center z-10 rounded-2xl"
+					>
 						<div class="text-center p-8 max-w-sm">
-							<div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
-								<svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+							<div
+								class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4"
+							>
+								<svg
+									class="w-6 h-6 text-red-500"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+									/>
 								</svg>
 							</div>
-							<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Void Invoice?</h3>
-							<p class="text-sm text-gray-500 dark:text-gray-400 mb-4">This will cancel the invoice and reverse stock. Requires manager PIN.</p>
+							<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">
+								Void Invoice?
+							</h3>
+							<p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+								This will cancel the invoice and reverse stock. Requires manager
+								PIN.
+							</p>
 							<input
 								v-model="voidReason"
 								type="text"
@@ -645,9 +708,19 @@
 								placeholder="Manager PIN"
 								class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border rounded-lg text-sm mb-4 font-mono"
 							/>
-							<p v-if="voidError" class="text-xs text-red-500 mb-3">{{ voidError }}</p>
+							<p v-if="voidError" class="text-xs text-red-500 mb-3">
+								{{ voidError }}
+							</p>
 							<div class="flex gap-3">
-								<button @click="showVoidConfirm = false; voidReason = ''; voidPin = ''; voidError = ''" class="flex-1 py-2 text-sm font-medium border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-warm-dark-700">
+								<button
+									@click="
+										showVoidConfirm = false
+										voidReason = ''
+										voidPin = ''
+										voidError = ''
+									"
+									class="flex-1 py-2 text-sm font-medium border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-warm-dark-700"
+								>
 									Cancel
 								</button>
 								<button
@@ -869,7 +942,7 @@ async function executeVoid() {
 function exportCSV() {
 	if (!sales.value.length) return
 	const headers = ['Invoice #', 'Date', 'Customer', 'Items', 'Total', 'Status']
-	const rows = sales.value.map(s => [
+	const rows = sales.value.map((s) => [
 		s.name,
 		s.posting_date,
 		s.customer || 'Walk-In',
@@ -877,7 +950,9 @@ function exportCSV() {
 		formatAmount(s.grand_total),
 		s.status,
 	])
-	const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
+	const csv = [headers, ...rows]
+		.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))
+		.join('\n')
 	const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
 	const url = URL.createObjectURL(blob)
 	const link = document.createElement('a')

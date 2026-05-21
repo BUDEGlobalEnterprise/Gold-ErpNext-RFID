@@ -1,16 +1,29 @@
 <template>
 	<div class="h-full flex flex-col">
-		<div class="flex items-center justify-between px-4 py-3 border-b dark:border-warm-dark-600">
+		<div
+			class="flex items-center justify-between px-4 py-3 border-b dark:border-warm-dark-600"
+		>
 			<div class="flex items-center gap-3">
 				<div class="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-					<svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-							d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+					<svg
+						class="w-5 h-5 text-indigo-600"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+						/>
 					</svg>
 				</div>
 				<div>
 					<h1 class="text-lg font-bold text-gray-900 dark:text-white">Memo Contracts</h1>
-					<p class="text-xs text-gray-500">Vendor consignment tracking with aging &amp; dunning</p>
+					<p class="text-xs text-gray-500">
+						Vendor consignment tracking with aging &amp; dunning
+					</p>
 				</div>
 			</div>
 			<div class="flex gap-2">
@@ -24,15 +37,26 @@
 		</div>
 
 		<!-- Filter tabs -->
-		<div class="flex gap-1 px-4 py-2 bg-gray-50 dark:bg-warm-dark-800 border-b dark:border-warm-dark-600">
+		<div
+			class="flex gap-1 px-4 py-2 bg-gray-50 dark:bg-warm-dark-800 border-b dark:border-warm-dark-600"
+		>
 			<button
-				v-for="tab in ['All', 'Active', 'Overdue', 'Partial Settlement', 'Settled', 'Returned']"
+				v-for="tab in [
+					'All',
+					'Active',
+					'Overdue',
+					'Partial Settlement',
+					'Settled',
+					'Returned',
+				]"
 				:key="tab"
 				@click="filterStatus = tab === 'All' ? null : tab"
 				class="px-3 py-1 rounded-full text-xs font-medium"
-				:class="activeTab === tab
-					? 'bg-indigo-600 text-white'
-					: 'bg-white dark:bg-warm-dark-700 text-gray-600 hover:bg-gray-100'"
+				:class="
+					activeTab === tab
+						? 'bg-indigo-600 text-white'
+						: 'bg-white dark:bg-warm-dark-700 text-gray-600 hover:bg-gray-100'
+				"
 			>
 				{{ tab }}
 			</button>
@@ -98,7 +122,11 @@
 						</span>
 					</div>
 					<div v-if="group.length === 0" class="py-2 text-sm text-gray-400">None</div>
-					<div v-for="m in group" :key="m.name" class="py-1 text-sm flex justify-between">
+					<div
+						v-for="m in group"
+						:key="m.name"
+						class="py-1 text-sm flex justify-between"
+					>
 						<span>{{ m.name }} — {{ m.supplier_name }}</span>
 						<span class="font-mono">{{ fmtCurrency(m.balance_due) }}</span>
 					</div>
@@ -159,7 +187,11 @@ function statusClass(status) {
 
 function formatDate(dt) {
 	if (!dt) return '--'
-	return new Date(dt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+	return new Date(dt).toLocaleDateString('en-US', {
+		month: 'short',
+		day: 'numeric',
+		year: 'numeric',
+	})
 }
 
 function fmtCurrency(val) {

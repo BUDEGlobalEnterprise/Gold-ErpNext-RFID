@@ -6,7 +6,7 @@ Provides permission checks and manager override functionality for POS operations
 
 import frappe
 from frappe import _
-from frappe.utils import now_datetime
+from frappe.utils import flt, now_datetime
 
 # Permission levels for POS operations
 POS_PERMISSIONS = {
@@ -25,6 +25,25 @@ POS_PERMISSIONS = {
 	"create_layaway": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
 	"cancel_layaway": {"roles": ["Sales Manager", "System Manager"]},
 	"record_cash_movement": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
+	"cash_in": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
+	"cash_out": {"roles": ["Sales User", "Sales Manager", "System Manager"], "limit": 100},
+	"cash_out_unlimited": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
+	"safe_drop": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
+	"bank_drop": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
+	"float_entry": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
+	"tender_removal": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
+	"open_session": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
+	"close_session": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
+	"suspend_session": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
+	"resume_session": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
+	"force_close_session": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
+	"view_x_report": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
+	"view_z_report": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
+	"view_variance_report": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
+	"view_all_sessions": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
+	"view_own_sessions": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
+	"blind_close": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
+	"verify_opening_count": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
 }
 
 # Roles that may operate against any warehouse without a POS profile
@@ -97,6 +116,50 @@ def get_user_permissions() -> dict:
 			permissions[f"{action}_limit"] = config["limit"] if permissions[action] else 0
 
 	return permissions
+
+
+@frappe.whitelist()
+def check_cash_permission(movement_type: str, amount: float) -> dict:
+	"""Check if user can perform a specific cash movement type and amount."""
+	user_roles = frappe.get_roles(frappe.session.user)
+
+	if movement_type == "Cash In":
+		allowed = any(r in user_roles for r in POS_PERMISSIONS["cash_in"]["roles"])
+		return {"allowed": allowed, "needs_override": False}
+
+	if movement_type == "Cash Out":
+		limit = POS_PERMISSIONS["cash_out"].get("limit", 100)
+		if any(r in user_roles for r in POS_PERMISSIONS["cash_out_unlimited"]["roles"]):
+			return {"allowed": True, "needs_override": False}
+		if any(r in user_roles for r in POS_PERMISSIONS["cash_out"]["roles"]):
+			if flt(amount) <= limit:
+				return {"allowed": True, "needs_override": False}
+			return {
+				"allowed": False,
+				"needs_override": True,
+				"message": _("Cash out of ${0} exceeds ${1} limit. Manager PIN required.").format(
+					amount, limit
+				),
+			}
+		return {"allowed": False, "needs_override": True, "message": _("No permission for cash out.")}
+
+	if movement_type == "Safe Drop":
+		allowed = any(r in user_roles for r in POS_PERMISSIONS["safe_drop"]["roles"])
+		return {"allowed": allowed, "needs_override": False}
+
+	if movement_type == "Bank Drop":
+		allowed = any(r in user_roles for r in POS_PERMISSIONS["bank_drop"]["roles"])
+		return {"allowed": allowed, "needs_override": False}
+
+	if movement_type == "Float Entry":
+		allowed = any(r in user_roles for r in POS_PERMISSIONS["float_entry"]["roles"])
+		return {"allowed": allowed, "needs_override": False}
+
+	if movement_type == "Tender Removal":
+		allowed = any(r in user_roles for r in POS_PERMISSIONS["tender_removal"]["roles"])
+		return {"allowed": allowed, "needs_override": False}
+
+	return {"allowed": False, "needs_override": True, "message": _("Unknown movement type.")}
 
 
 @frappe.whitelist()
@@ -381,7 +444,6 @@ def _get_category_for_action(action: str) -> str:
 	elif any(x in action_lower for x in ["stock", "inventory"]):
 		return "Inventory"
 	return "Sales"
-
 
 
 # ---------------------------------------------------------------------------

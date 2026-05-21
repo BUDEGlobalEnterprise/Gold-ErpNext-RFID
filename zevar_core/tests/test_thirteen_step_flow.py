@@ -106,7 +106,7 @@ class TestThirteenStepFlow(FrappeTestCase):
 		frappe.set_user("Administrator")
 
 	# ------------------------------------------------------------------
-	# Step 2: omni-search (Fix #1) – item findable by item_code AND vendor SKU
+	# Step 2: omni-search (Fix #1) - item findable by item_code AND vendor SKU
 	# ------------------------------------------------------------------
 
 	def test_step02_omnisearch_finds_item_by_multiple_keys(self):
@@ -144,9 +144,7 @@ class TestThirteenStepFlow(FrappeTestCase):
 	def test_step06_pre_submit_validator_passes_for_in_stock_item(self):
 		from zevar_core.api.pos import validate_pos_cart
 
-		payload = json.dumps([
-			{"item_code": self.item_code, "qty": 1, "rate": 300.0}
-		])
+		payload = json.dumps([{"item_code": self.item_code, "qty": 1, "rate": 300.0}])
 		result = validate_pos_cart(items=payload, warehouse=self.warehouse)
 		self.assertTrue(result["ok"])
 		# Price might be 'standard_rate' = 300 → no drift.
@@ -156,9 +154,7 @@ class TestThirteenStepFlow(FrappeTestCase):
 	def test_step06_pre_submit_validator_blocks_unknown_item(self):
 		from zevar_core.api.pos import validate_pos_cart
 
-		payload = json.dumps([
-			{"item_code": "ZEVAR-DOES-NOT-EXIST", "qty": 1, "rate": 100.0}
-		])
+		payload = json.dumps([{"item_code": "ZEVAR-DOES-NOT-EXIST", "qty": 1, "rate": 100.0}])
 		result = validate_pos_cart(items=payload, warehouse=self.warehouse)
 		self.assertFalse(result["ok"])
 		types = {i["type"] for i in result["issues"]}
@@ -197,9 +193,7 @@ class TestThirteenStepFlow(FrappeTestCase):
 		# Step 5: salesperson splits — exercise the custom_salesperson_splits
 		# child table that calculate_commissions reads on submit.
 		if salespersons:
-			has_splits = frappe.get_meta("Sales Invoice").get_field(
-				"custom_salesperson_splits"
-			)
+			has_splits = frappe.get_meta("Sales Invoice").get_field("custom_salesperson_splits")
 			if has_splits:
 				for sp in salespersons:
 					si.append(
@@ -219,23 +213,21 @@ class TestThirteenStepFlow(FrappeTestCase):
 
 	def test_step07_full_sale_appears_in_priority_reports(self):
 		"""Steps 7-10: submit SI → reports show the sale today."""
-		from zevar_core.unified_retail_management_system.report.top_selling_jewelry import (
-			top_selling_jewelry,
-		)
 		from zevar_core.unified_retail_management_system.report.hourly_sales import (
 			hourly_sales,
 		)
 		from zevar_core.unified_retail_management_system.report.payment_method_summary import (
 			payment_method_summary,
 		)
+		from zevar_core.unified_retail_management_system.report.top_selling_jewelry import (
+			top_selling_jewelry,
+		)
 
-		si = self._build_and_submit_sale()
+		self._build_and_submit_sale()
 
 		# Step 11a: top_selling_jewelry — surfaces the sold item with
 		# jewelry custom fields (Fix #6 enrichment).
-		_, ts_data, *_ = top_selling_jewelry.execute(
-			{"from_date": today(), "to_date": today(), "limit": 50}
-		)
+		_, ts_data, *_ = top_selling_jewelry.execute({"from_date": today(), "to_date": today(), "limit": 50})
 		ts_codes = {row["item_code"] for row in ts_data}
 		self.assertIn(self.item_code, ts_codes)
 		hit = next(r for r in ts_data if r["item_code"] == self.item_code)
@@ -243,17 +235,11 @@ class TestThirteenStepFlow(FrappeTestCase):
 		self.assertEqual(hit["jewelry_type"], "Rings")
 
 		# Step 11b: hourly_sales — sale lights up at least one hour bucket.
-		_, hs_data = hourly_sales.execute(
-			{"from_date": today(), "to_date": today()}
-		)
-		self.assertGreater(
-			sum(row.get("total_sales", 0) for row in hs_data), 0
-		)
+		_, hs_data = hourly_sales.execute({"from_date": today(), "to_date": today()})
+		self.assertGreater(sum(row.get("total_sales", 0) for row in hs_data), 0)
 
 		# Step 11c: payment_method_summary — Cash bucket exists.
-		_, pm_data = payment_method_summary.execute(
-			{"from_date": today(), "to_date": today()}
-		)
+		_, pm_data = payment_method_summary.execute({"from_date": today(), "to_date": today()})
 		modes = {row["mode_of_payment"] for row in pm_data}
 		self.assertIn("Cash", modes)
 
@@ -278,14 +264,16 @@ class TestThirteenStepFlow(FrappeTestCase):
 		)
 		frappe.db.commit()
 
-		bogus_payload = json.dumps([
-			{
-				"item_code": self.item_code,
-				"qty": 1,
-				"rate": 300.0,
-				"serial_no": "SN-E2E-NOT-ON-INVOICE",
-			}
-		])
+		bogus_payload = json.dumps(
+			[
+				{
+					"item_code": self.item_code,
+					"qty": 1,
+					"rate": 300.0,
+					"serial_no": "SN-E2E-NOT-ON-INVOICE",
+				}
+			]
+		)
 
 		with self.assertRaises(frappe.ValidationError) as ctx:
 			create_return_invoice(

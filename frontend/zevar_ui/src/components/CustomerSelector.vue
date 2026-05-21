@@ -560,18 +560,18 @@
 					</div>
 				</Transition>
 			</Teleport>
-				<!-- Search Input -->
-				<div class="relative">
-					<input
-						ref="searchInput"
-						v-model="searchQuery"
-						type="text"
-						:placeholder="placeholder"
-						@input="debouncedSearch"
-						@focus="showDropdown = true"
-						class="w-full px-4 py-3 pl-10 bg-white dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37]"
-						data-testid="customer-search"
-					/>
+			<!-- Search Input -->
+			<div class="relative">
+				<input
+					ref="searchInput"
+					v-model="searchQuery"
+					type="text"
+					:placeholder="placeholder"
+					@input="debouncedSearch"
+					@focus="showDropdown = true"
+					class="w-full px-4 py-3 pl-10 bg-white dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37]"
+					data-testid="customer-search"
+				/>
 				<svg
 					class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
 					fill="none"
@@ -636,13 +636,13 @@
 					</div>
 
 					<!-- Search Results -->
-							<button
-								v-for="result in searchResults"
-								:key="result.customer_name"
-								@click="selectCustomer(result)"
-								class="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-warm-dark-700 flex items-center gap-3 border-b border-gray-100 dark:border-warm-border/50 last:border-0"
-								data-testid="customer-option"
-							>
+					<button
+						v-for="result in searchResults"
+						:key="result.customer_name"
+						@click="selectCustomer(result)"
+						class="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-warm-dark-700 flex items-center gap-3 border-b border-gray-100 dark:border-warm-border/50 last:border-0"
+						data-testid="customer-option"
+					>
 						<div
 							class="w-8 h-8 rounded-full bg-gray-100 dark:bg-warm-dark-900 flex items-center justify-center text-gray-500"
 						>

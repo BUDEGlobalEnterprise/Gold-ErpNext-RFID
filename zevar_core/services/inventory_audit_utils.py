@@ -421,7 +421,7 @@ def execute_batch_scan(session_doc, epcs):
 
 def generate_discrepancy_records(session_doc):
 	"""Generate Audit Discrepancy records based on scan results."""
-	missing_items, missing_count, total_value_scanned, total_value_discrepancy, has_unexpected = (
+	missing_items, _missing_count, _total_value_scanned, _total_value_discrepancy, has_unexpected = (
 		_reconcile_audit(session_doc)
 	)
 

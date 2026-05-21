@@ -2,7 +2,6 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
-
 # Hard cap so a malicious / malformed `limit` filter cannot make the report
 # return arbitrary amounts of data or generate a runaway query.
 _MAX_LIMIT = 200

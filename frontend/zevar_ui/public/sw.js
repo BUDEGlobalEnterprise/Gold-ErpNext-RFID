@@ -129,13 +129,10 @@ async function handleAPIRequest(request) {
 
 		// If GET request (read-only), return offline error
 		if (request.method === 'GET') {
-			return new Response(
-				JSON.stringify({ error: 'Offline - cached data not available' }),
-				{
-					status: 503,
-					headers: { 'Content-Type': 'application/json' },
-				}
-			)
+			return new Response(JSON.stringify({ error: 'Offline - cached data not available' }), {
+				status: 503,
+				headers: { 'Content-Type': 'application/json' },
+			})
 		}
 
 		// For POST requests (mutations), queue in IndexedDB

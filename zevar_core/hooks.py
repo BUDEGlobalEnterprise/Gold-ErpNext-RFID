@@ -104,6 +104,7 @@ after_migrate = [
 	"zevar_core.install.import_desktop_icons",
 	"zevar_core.install.import_workspaces",
 	"zevar_core.install.create_default_desk_shortcuts",
+	"zevar_core.install.setup_pos_opening_entry_suspended_status",
 ]
 
 # Bench Commands

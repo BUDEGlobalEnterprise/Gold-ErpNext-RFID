@@ -37,7 +37,17 @@ class POSAuditLog(Document):
 				"gift_card_issued",
 			],
 			"Discount": ["discount_applied", "large_discount_applied", "discount_override_approved"],
-			"Session": ["session_opened", "session_closed", "cash_variance_detected"],
+			"Session": [
+				"session_opened",
+				"session_closed",
+				"cash_variance_detected",
+				"blind_close_step1",
+				"blind_close_sealed_final",
+				"blind_close_finalized",
+				"session_suspended",
+				"session_resumed",
+				"opening_count_verified",
+			],
 			"Security": [
 				"login_success",
 				"login_failed",

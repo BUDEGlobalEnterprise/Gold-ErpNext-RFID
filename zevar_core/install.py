@@ -333,3 +333,50 @@ def create_default_desk_shortcuts():
 	frappe.cache.delete_key("zevar_shortcuts_registry")
 	frappe.cache.delete_key("zevar_desk_shortcuts")
 	frappe.db.commit()  # nosemgrep
+
+
+def setup_pos_opening_entry_suspended_status():
+	"""Add 'Suspended' to POS Opening Entry status options via Property Setter."""
+	if not frappe.db.exists("DocType", "POS Opening Entry"):
+		return
+
+	existing = frappe.db.exists(
+		"Property Setter",
+		{"doc_type": "POS Opening Entry", "field_name": "status", "property": "options"},
+	)
+	if existing:
+		ps = frappe.get_doc("Property Setter", existing)
+		if "Suspended" not in ps.value:
+			ps.value = "Draft\nOpen\nClosed\nCancelled\nSuspended"
+			ps.save(ignore_permissions=True)
+	else:
+		ps = frappe.new_doc("Property Setter")
+		ps.doctype_or_field = "DocField"
+		ps.doc_type = "POS Opening Entry"
+		ps.field_name = "status"
+		ps.property = "options"
+		ps.property_type = "Text"
+		ps.value = "Draft\nOpen\nClosed\nCancelled\nSuspended"
+		ps.insert(ignore_permissions=True)
+
+	create_pos_closing_entry_custom_fields()
+	frappe.db.commit()  # nosemgrep
+
+
+def create_pos_closing_entry_custom_fields():
+	"""Add custom_variance_reason_code to POS Closing Entry."""
+	from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+
+	fields = {
+		"POS Closing Entry": [
+			{
+				"fieldname": "custom_variance_reason_code",
+				"label": "Variance Reason Code",
+				"fieldtype": "Select",
+				"options": "\nCounting Error\nSystem Error\nSuspected Theft",
+				"insert_after": "remarks",
+				"allow_on_submit": 1,
+			}
+		]
+	}
+	create_custom_fields(fields)

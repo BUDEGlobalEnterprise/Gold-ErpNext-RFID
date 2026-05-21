@@ -124,7 +124,7 @@ html, body {
 body {
   font-family: var(--font-body);
   @apply text-gray-900 dark:text-gray-100;
-  background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 30%, #FED7AA 70%, #FDBA74 100%);
+  background: linear-gradient(135deg, #FFFDF9 0%, #FFF9F2 30%, #FFF3E5 70%, #FFEBE0 100%);
   background-attachment: fixed;
   min-height: 100dvh;
 }
