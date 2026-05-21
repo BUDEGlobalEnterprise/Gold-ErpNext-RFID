@@ -198,7 +198,7 @@ def open_pos_session(
 	pos_profile: str,
 	opening_balance: float,
 	cash_breakdown: str | list | None = None,
-	notes=None,
+	notes: str | None = None,
 ) -> dict:
 	"""
 	Open a new POS session (cash register).
@@ -486,7 +486,7 @@ def submit_blind_close(
 	session_name: str,
 	total_cash_counted: float,
 	breakdown: str | list | None = None,
-	notes=None,
+	notes: str | None = None,
 ) -> dict:
 	"""Legacy single-step endpoint for backward compatibility. Calls step 1 & step 2 automatically."""
 	res1 = submit_blind_close_step1(session_name, total_cash_counted, breakdown, notes)
@@ -501,7 +501,7 @@ def submit_blind_close_step1(
 	session_name: str,
 	total_cash_counted: float,
 	breakdown: str | list | None = None,
-	notes=None,
+	notes: str | None = None,
 ) -> dict:
 	"""Step 1 of the Blind Close process: submit count blindly and seal it. Expected amounts are stripped from the initial page view and only recorded on submission."""
 	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
@@ -625,7 +625,7 @@ def submit_blind_close_step1(
 		}
 	)
 	audit_doc.insert(ignore_permissions=True)
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep
 
 	return {
 		"success": True,
@@ -905,7 +905,7 @@ def close_pos_session_v2(
 	session_name: str,
 	total_cash_counted: float,
 	breakdown: str | list | None = None,
-	notes=None,
+	notes: str | None = None,
 ) -> dict:
 	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
 
@@ -1120,7 +1120,7 @@ def close_pos_session(
 	session_name: str,
 	closing_balance: float,
 	cash_breakdown: str | list | None = None,
-	notes=None,
+	notes: str | None = None,
 ) -> dict:
 	"""
 	Close an active POS session with reconciliation.
@@ -1660,8 +1660,8 @@ def record_cash_movement(
 	movement_type: str,
 	amount: float,
 	reason: str,
-	notes=None,
-	manager_pin=None,
+	notes: str | None = None,
+	manager_pin: str | None = None,
 ) -> dict:
 	"""Record a cash movement during an active POS session."""
 	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])

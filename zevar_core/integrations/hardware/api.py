@@ -124,7 +124,7 @@ def generate_zpl_tag(item_code):
 
 
 @frappe.whitelist()
-def generate_zpl_tags_batch(item_codes):
+def generate_zpl_tags_batch(item_codes: str | list):
 	"""Generate ZPL for multiple tags (batch printing for received shipments)."""
 	import json
 

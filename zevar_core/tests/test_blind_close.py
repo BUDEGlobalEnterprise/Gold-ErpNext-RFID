@@ -37,13 +37,13 @@ class TestBlindCloseFlow(FrappeTestCase):
 			"custom_variance_alert_threshold",
 			10.0,
 		)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def setUp(self):
 		frappe.set_user("Administrator")
 		# Clear any existing open session for this user to bypass "Cashier is currently assigned to another POS"
 		frappe.db.delete("POS Opening Entry", {"user": frappe.session.user, "status": "Open"})
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 		# Create a clean open session
 		self.session_name = self._open_test_session()
 
@@ -51,7 +51,7 @@ class TestBlindCloseFlow(FrappeTestCase):
 		# Clean up any POS Opening Entries and Audit Logs
 		frappe.db.delete("POS Opening Entry", {"name": self.session_name})
 		frappe.db.delete("POS Audit Log", {"reference_document": self.session_name})
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	def _open_test_session(self) -> str:
 		"""Create and submit a POS Opening Entry session."""

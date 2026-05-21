@@ -276,7 +276,7 @@ def ui_lookup_piece(query):
 
 
 @frappe.whitelist(allow_guest=False)
-def ui_get_item_for_edit(item_code):
+def ui_get_item_for_edit(item_code: str):
 	frappe.has_permission("Item", ptype="read", throw=True)
 
 	if not frappe.db.exists("Item", item_code):
@@ -344,7 +344,7 @@ def ui_get_item_for_edit(item_code):
 
 
 @frappe.whitelist(allow_guest=False)
-def ui_get_item_inventory(item_code):
+def ui_get_item_inventory(item_code: str):
 	frappe.has_permission("Item", ptype="read", throw=True)
 
 	if not frappe.db.exists("Item", item_code):

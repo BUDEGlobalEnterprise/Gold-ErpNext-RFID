@@ -12,20 +12,21 @@ from zevar_core.constants import DEFAULT_TAX_RATES, PAYMENT_MODES
 # Payment validation helpers
 # ---------------------------------------------------------------------------
 
-_PAYMENT_ERROR_MAP = {
-	"total payment amount must be equal to grand total": _(
-		"The payment amount does not match the invoice total. Please check the amounts and try again."
-	),
-	"payments amount must be negative": _("Invalid payment amount. Please check the amounts and try again."),
-	"account is mandatory": _(
-		"A payment account is missing. Please ask a manager to check the payment setup."
-	),
-	"cannot pay more than": _(
-		"Payment amount is more than the invoice total. Please check the amounts and try again."
-	),
-	"serial no": _("There is an issue with a serial number. Please ask a manager for help."),
-	"stock": _("There is a stock issue with one of the items. Please ask a manager for help."),
-}
+def _get_payment_error_map() -> dict:
+	return {
+		"total payment amount must be equal to grand total": _(
+			"The payment amount does not match the invoice total. Please check the amounts and try again."
+		),
+		"payments amount must be negative": _("Invalid payment amount. Please check the amounts and try again."),
+		"account is mandatory": _(
+			"A payment account is missing. Please ask a manager to check the payment setup."
+		),
+		"cannot pay more than": _(
+			"Payment amount is more than the invoice total. Please check the amounts and try again."
+		),
+		"serial no": _("There is an issue with a serial number. Please ask a manager for help."),
+		"stock": _("There is a stock issue with one of the items. Please ask a manager for help."),
+	}
 
 
 def _friendly_payment_error(raw_message: str) -> str:
@@ -35,7 +36,7 @@ def _friendly_payment_error(raw_message: str) -> str:
 			"There was a problem processing your payment. Please check the details and try again, or ask a manager for help."
 		)
 	lowered = raw_message.lower()
-	for pattern, friendly in _PAYMENT_ERROR_MAP.items():
+	for pattern, friendly in _get_payment_error_map().items():
 		if pattern in lowered:
 			return friendly
 	return _(
