@@ -206,14 +206,25 @@
 							</div>
 
 							<!-- Dual Count Verification Form -->
-							<div v-if="!verificationData" class="mt-6 border-t border-gray-100 dark:border-warm-border/50 pt-6 text-left">
-								<h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Dual Count Verification</h3>
+							<div
+								v-if="!verificationData"
+								class="mt-6 border-t border-gray-100 dark:border-warm-border/50 pt-6 text-left"
+							>
+								<h3
+									class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2"
+								>
+									Dual Count Verification
+								</h3>
 								<p class="text-xs text-gray-400 mb-4 leading-relaxed">
-									An authorized manager can verify and log the initial cash register float count now.
+									An authorized manager can verify and log the initial cash
+									register float count now.
 								</p>
 								<div class="space-y-3">
 									<div>
-										<label class="block text-[10px] font-bold uppercase text-gray-500 mb-1">Verifier User/Email</label>
+										<label
+											class="block text-[10px] font-bold uppercase text-gray-500 mb-1"
+											>Verifier User/Email</label
+										>
 										<input
 											type="text"
 											v-model="verifyForm.verified_by"
@@ -222,7 +233,10 @@
 										/>
 									</div>
 									<div>
-										<label class="block text-[10px] font-bold uppercase text-gray-500 mb-1">Counted Amount ($)</label>
+										<label
+											class="block text-[10px] font-bold uppercase text-gray-500 mb-1"
+											>Counted Amount ($)</label
+										>
 										<input
 											type="number"
 											v-model.number="verifyForm.counted_amount"
@@ -242,14 +256,30 @@
 									</button>
 								</div>
 							</div>
-							<div v-else class="mt-6 border-t border-gray-100 dark:border-warm-border/50 pt-6 text-center text-xs">
-								<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 font-bold mb-2">
+							<div
+								v-else
+								class="mt-6 border-t border-gray-100 dark:border-warm-border/50 pt-6 text-center text-xs"
+							>
+								<div
+									class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 font-bold mb-2"
+								>
 									✓ Count Verified
 								</div>
 								<p class="text-gray-400">
 									Verified by <strong>{{ verificationData.verified_by }}</strong>
-									<span v-if="verificationData.match" class="text-emerald-500 font-bold"> (Exact Match)</span>
-									<span v-else class="text-red-500 font-bold"> (Mismatch: expected ${{ Number(verificationData.recorded_amount || 0).toFixed(2) }})</span>
+									<span
+										v-if="verificationData.match"
+										class="text-emerald-500 font-bold"
+									>
+										(Exact Match)</span
+									>
+									<span v-else class="text-red-500 font-bold">
+										(Mismatch: expected ${{
+											Number(verificationData.recorded_amount || 0).toFixed(
+												2
+											)
+										}})</span
+									>
 								</p>
 							</div>
 						</div>

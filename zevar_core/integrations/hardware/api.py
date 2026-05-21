@@ -81,7 +81,6 @@ def generate_receipt_content(invoice_name):
 	return hw_utils.format_print_payload(receipt_text)
 
 
-
 @frappe.whitelist()
 def generate_tag_content(item_code):
 	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
@@ -128,6 +127,7 @@ def generate_zpl_tag(item_code):
 def generate_zpl_tags_batch(item_codes):
 	"""Generate ZPL for multiple tags (batch printing for received shipments)."""
 	import json
+
 	if isinstance(item_codes, str):
 		item_codes = json.loads(item_codes)
 	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])

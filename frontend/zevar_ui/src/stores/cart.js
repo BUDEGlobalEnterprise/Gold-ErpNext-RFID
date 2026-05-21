@@ -370,12 +370,12 @@ export const useCartStore = defineStore('cart', () => {
 	async function validateItems() {
 		if (items.value.length === 0) return
 
-		const itemCodes = items.value.map(i => i.item_code)
+		const itemCodes = items.value.map((i) => i.item_code)
 		const resource = createResource({
 			url: 'zevar_core.api.pos.validate_cart_items',
 			makeParams() {
 				return { item_codes: JSON.stringify(itemCodes) }
-			}
+			},
 		})
 
 		try {
@@ -385,14 +385,14 @@ export const useCartStore = defineStore('cart', () => {
 			// Update the cart state
 			const updatedItems = []
 			let changed = false
-			
+
 			for (const item of items.value) {
 				const serverItem = validData[item.item_code]
 				if (!serverItem || serverItem.disabled) {
 					changed = true
 					continue // Item removed
 				}
-				
+
 				if (item.amount !== serverItem.rate) {
 					item.amount = serverItem.rate
 					changed = true
@@ -469,7 +469,8 @@ export const useCartStore = defineStore('cart', () => {
 					{
 						item_code: '',
 						type: 'network_error',
-						message: 'Could not reach the cart validator. Please check your connection.',
+						message:
+							'Could not reach the cart validator. Please check your connection.',
 						blocking: true,
 					},
 				],
@@ -510,7 +511,10 @@ export const useCartStore = defineStore('cart', () => {
 			return true
 		}
 		const exc = err.exc_type || err?.response?.data?.exc_type
-		if (exc && /AuthenticationError|SessionExpiredError|InvalidAuthorizationToken/i.test(exc)) {
+		if (
+			exc &&
+			/AuthenticationError|SessionExpiredError|InvalidAuthorizationToken/i.test(exc)
+		) {
 			return true
 		}
 		const msg = (err.message || err._server_messages || '').toString()

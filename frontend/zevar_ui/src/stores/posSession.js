@@ -91,11 +91,14 @@ export const usePosSessionStore = defineStore('posSession', () => {
 		error.value = null
 		try {
 			const name = sessionNameVal || sessionName.value
-			const res = await fetch(`/api/method/zevar_core.api.pos_session.get_session_payment_breakdown?session_name=${name}`, {
-				headers: {
-					'X-Frappe-CSRF-Token': window.csrf_token || '',
-				},
-			})
+			const res = await fetch(
+				`/api/method/zevar_core.api.pos_session.get_session_payment_breakdown?session_name=${name}`,
+				{
+					headers: {
+						'X-Frappe-CSRF-Token': window.csrf_token || '',
+					},
+				}
+			)
 			if (!res.ok) throw new Error('Failed to fetch payment breakdown')
 			const data = await res.json()
 			return data.message || data
@@ -112,11 +115,14 @@ export const usePosSessionStore = defineStore('posSession', () => {
 		error.value = null
 		try {
 			const name = sessionNameVal || sessionName.value
-			const res = await fetch(`/api/method/zevar_core.api.pos_session.get_session_layaway_activity?session_name=${name}`, {
-				headers: {
-					'X-Frappe-CSRF-Token': window.csrf_token || '',
-				},
-			})
+			const res = await fetch(
+				`/api/method/zevar_core.api.pos_session.get_session_layaway_activity?session_name=${name}`,
+				{
+					headers: {
+						'X-Frappe-CSRF-Token': window.csrf_token || '',
+					},
+				}
+			)
 			if (!res.ok) throw new Error('Failed to fetch layaway activity')
 			const data = await res.json()
 			return data.message || data
@@ -133,11 +139,14 @@ export const usePosSessionStore = defineStore('posSession', () => {
 		error.value = null
 		try {
 			const name = sessionNameVal || sessionName.value
-			const res = await fetch(`/api/method/zevar_core.api.pos_session.get_session_repair_activity?session_name=${name}`, {
-				headers: {
-					'X-Frappe-CSRF-Token': window.csrf_token || '',
-				},
-			})
+			const res = await fetch(
+				`/api/method/zevar_core.api.pos_session.get_session_repair_activity?session_name=${name}`,
+				{
+					headers: {
+						'X-Frappe-CSRF-Token': window.csrf_token || '',
+					},
+				}
+			)
 			if (!res.ok) throw new Error('Failed to fetch repair activity')
 			const data = await res.json()
 			return data.message || data
@@ -154,11 +163,14 @@ export const usePosSessionStore = defineStore('posSession', () => {
 		error.value = null
 		try {
 			const name = sessionNameVal || sessionName.value
-			const res = await fetch(`/api/method/zevar_core.api.pos_session.get_session_sales?session_name=${name}`, {
-				headers: {
-					'X-Frappe-CSRF-Token': window.csrf_token || '',
-				},
-			})
+			const res = await fetch(
+				`/api/method/zevar_core.api.pos_session.get_session_sales?session_name=${name}`,
+				{
+					headers: {
+						'X-Frappe-CSRF-Token': window.csrf_token || '',
+					},
+				}
+			)
 			if (!res.ok) throw new Error('Failed to fetch sales activity')
 			const data = await res.json()
 			return data.message || data

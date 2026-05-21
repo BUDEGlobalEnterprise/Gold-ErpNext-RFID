@@ -99,9 +99,7 @@ class TestValidatePosCart(FrappeTestCase):
 	# ------------------------------------------------------------------
 
 	def test_out_of_stock_is_flagged_blocking(self):
-		result = self._validate(
-			[{"item_code": self.out_of_stock, "qty": 1, "rate": 100.0}]
-		)
+		result = self._validate([{"item_code": self.out_of_stock, "qty": 1, "rate": 100.0}])
 		self.assertFalse(result["ok"])
 		types = {i["type"] for i in result["issues"] if i.get("blocking")}
 		self.assertIn("out_of_stock", types)
@@ -113,18 +111,14 @@ class TestValidatePosCart(FrappeTestCase):
 		self.assertIn("item_missing", types)
 
 	def test_disabled_item_is_flagged(self):
-		result = self._validate(
-			[{"item_code": self.disabled_item, "qty": 1, "rate": 80.0}]
-		)
+		result = self._validate([{"item_code": self.disabled_item, "qty": 1, "rate": 80.0}])
 		self.assertFalse(result["ok"])
 		types = {i["type"] for i in result["issues"]}
 		self.assertIn("item_disabled", types)
 
 	def test_qty_zero_is_flagged(self):
 		current_rate = frappe.db.get_value("Item", self.in_stock, "standard_rate")
-		result = self._validate(
-			[{"item_code": self.in_stock, "qty": 0, "rate": current_rate}]
-		)
+		result = self._validate([{"item_code": self.in_stock, "qty": 0, "rate": current_rate}])
 		self.assertFalse(result["ok"])
 		types = {i["type"] for i in result["issues"]}
 		self.assertIn("qty_invalid", types)
@@ -153,9 +147,7 @@ class TestValidatePosCart(FrappeTestCase):
 
 	def test_no_price_drift_within_floating_point_tolerance(self):
 		# 150.001 vs canonical 150 — within 0.005 tolerance.
-		result = self._validate(
-			[{"item_code": self.in_stock, "qty": 1, "rate": 150.001}]
-		)
+		result = self._validate([{"item_code": self.in_stock, "qty": 1, "rate": 150.001}])
 		drift_types = {i["type"] for i in result["issues"]}
 		self.assertNotIn("price_drift", drift_types)
 

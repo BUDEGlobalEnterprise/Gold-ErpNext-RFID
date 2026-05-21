@@ -2,17 +2,18 @@
 # License: GNU General Public License v3.0
 
 import json
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt, today
 
+from zevar_core.api.pos_session import submit_blind_close_step1, submit_blind_close_step2
 from zevar_core.tests.utils import (
 	ensure_customer,
 	ensure_pos_profile,
 	ensure_warehouse,
 	get_test_company,
 )
-from zevar_core.api.pos_session import submit_blind_close_step1, submit_blind_close_step2
 
 
 class TestBlindCloseFlow(FrappeTestCase):
@@ -55,6 +56,7 @@ class TestBlindCloseFlow(FrappeTestCase):
 	def _open_test_session(self) -> str:
 		"""Create and submit a POS Opening Entry session."""
 		from frappe.utils import now_datetime
+
 		session = frappe.new_doc("POS Opening Entry")
 		session.pos_profile = self.pos_profile
 		session.company = self.company
@@ -69,8 +71,9 @@ class TestBlindCloseFlow(FrappeTestCase):
 	def _get_test_expected_cash(self) -> float:
 		"""Calculate the exact server-side expected balance for this session."""
 		start_date = today()
-		payments = frappe.db.sql(
-			"""
+		payments = (
+			frappe.db.sql(
+				"""
 			SELECT SUM(sip.amount) as amount
 			FROM `tabSales Invoice Payment` sip
 			JOIN `tabSales Invoice` si ON sip.parent = si.name
@@ -78,8 +81,10 @@ class TestBlindCloseFlow(FrappeTestCase):
 			AND si.docstatus = 1
 			AND si.posting_date >= %s
 			""",
-			(frappe.session.user, start_date),
-		)[0][0] or 0.0
+				(frappe.session.user, start_date),
+			)[0][0]
+			or 0.0
+		)
 		# POS Profile default custom_fixed_opening_float is 300.0
 		return 300.0 + flt(payments)
 
@@ -157,7 +162,7 @@ class TestBlindCloseFlow(FrappeTestCase):
 		# Step 1: Seal with mismatch (variance is non-zero)
 		submit_blind_close_step1(
 			session_name=self.session_name,
-			total_cash_counted=expected_cash + 5.0, # $5 excess
+			total_cash_counted=expected_cash + 5.0,  # $5 excess
 			breakdown=[],
 			notes="With variance",
 		)
@@ -166,7 +171,7 @@ class TestBlindCloseFlow(FrappeTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			submit_blind_close_step2(
 				session_name=self.session_name,
-				variance_reason_code="", # Empty reason code
+				variance_reason_code="",  # Empty reason code
 				notes="Closing with discrepancy",
 			)
 
@@ -181,8 +186,8 @@ class TestBlindCloseFlow(FrappeTestCase):
 	def test_session_reporting_apis(self):
 		"""Test the new and enhanced session reporting and activity endpoints."""
 		from zevar_core.api.pos_session import (
-			get_session_payment_breakdown,
 			get_session_layaway_activity,
+			get_session_payment_breakdown,
 			get_session_repair_activity,
 			get_session_sales,
 			get_session_status,
@@ -236,6 +241,7 @@ class TestBlindCloseFlow(FrappeTestCase):
 
 def run_manual_test():
 	import unittest
+
 	suite = unittest.TestLoader().loadTestsFromTestCase(TestBlindCloseFlow)
 	runner = unittest.TextTestRunner(verbosity=2)
 	runner.run(suite)

@@ -54,13 +54,7 @@
 			stroke="currentColor"
 			viewBox="0 0 24 24"
 		>
-			<circle
-				cx="12"
-				cy="12"
-				r="10"
-				stroke-width="3"
-				class="opacity-25"
-			></circle>
+			<circle cx="12" cy="12" r="10" stroke-width="3" class="opacity-25"></circle>
 			<path
 				stroke-width="3"
 				class="opacity-75"

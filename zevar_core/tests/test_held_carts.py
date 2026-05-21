@@ -48,9 +48,7 @@ class TestHeldCarts(FrappeTestCase):
 	def test_hold_cart_returns_cart_id(self):
 		from zevar_core.api.pos import hold_cart
 
-		items = json.dumps(
-			[{"item_code": "X", "qty": 1, "amount": 100}]
-		)
+		items = json.dumps([{"item_code": "X", "qty": 1, "amount": 100}])
 		result = hold_cart(items=items, customer="Walk-In Customer", note="Test")
 		self.assertTrue(result["success"])
 		self.assertIsNotNone(result.get("cart_id"))
@@ -58,7 +56,7 @@ class TestHeldCarts(FrappeTestCase):
 		self.assertEqual(result["held_count"], 1)
 
 	def test_get_held_carts_returns_held_list(self):
-		from zevar_core.api.pos import hold_cart, get_held_carts
+		from zevar_core.api.pos import get_held_carts, hold_cart
 
 		hold_cart(
 			items=json.dumps([{"item_code": "A", "qty": 1, "amount": 50}]),
@@ -74,7 +72,7 @@ class TestHeldCarts(FrappeTestCase):
 		self.assertEqual(notes, {"Cart A", "Cart B"})
 
 	def test_held_cart_payload_includes_totals(self):
-		from zevar_core.api.pos import hold_cart, get_held_carts
+		from zevar_core.api.pos import get_held_carts, hold_cart
 
 		hold_cart(
 			items=json.dumps([{"item_code": "X", "qty": 2, "amount": 100}]),
@@ -86,7 +84,7 @@ class TestHeldCarts(FrappeTestCase):
 		self.assertEqual(carts[0]["total"], 200.0)  # 2 * 100
 
 	def test_recall_cart_removes_and_returns(self):
-		from zevar_core.api.pos import hold_cart, recall_cart, get_held_carts
+		from zevar_core.api.pos import get_held_carts, hold_cart, recall_cart
 
 		held = hold_cart(
 			items=json.dumps([{"item_code": "Y", "qty": 1, "amount": 30}]),
@@ -103,7 +101,7 @@ class TestHeldCarts(FrappeTestCase):
 		self.assertEqual(get_held_carts()["count"], 0)
 
 	def test_discard_held_cart_removes_without_payload(self):
-		from zevar_core.api.pos import hold_cart, discard_held_cart, get_held_carts
+		from zevar_core.api.pos import discard_held_cart, get_held_carts, hold_cart
 
 		hold_cart(
 			items=json.dumps([{"item_code": "Z", "qty": 1, "amount": 10}]),

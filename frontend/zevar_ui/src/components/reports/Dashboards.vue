@@ -43,7 +43,9 @@
 				<span class="material-symbols-outlined !text-lg text-[#D4AF37]">{{
 					section.icon
 				}}</span>
-				<h3 class="text-sm font-bold text-gray-900 dark:text-white">{{ section.label }}</h3>
+				<h3 class="text-sm font-bold text-gray-900 dark:text-white">
+					{{ section.label }}
+				</h3>
 				<span
 					class="text-[10px] font-medium px-2 py-0.5 rounded-full"
 					:class="section.badgeClass"
@@ -110,7 +112,9 @@ const accessTier = computed(() => {
 	const role = props.roleContext?.primary_role
 	if (!role) return 'employee'
 	if (['System Manager', 'Accounts Manager'].includes(role)) return 'admin'
-	if (['Store Manager', 'Sales Manager', 'Stock Manager', 'HR Manager', 'HR User'].includes(role))
+	if (
+		['Store Manager', 'Sales Manager', 'Stock Manager', 'HR Manager', 'HR User'].includes(role)
+	)
 		return 'manager'
 	return 'employee'
 })

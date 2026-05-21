@@ -18,9 +18,7 @@ const mocks = vi.hoisted(() => {
 			const id = dbState.pending.length + 1
 			dbState.pending.push({ id, ...order, status: 'pending' })
 		}),
-		getPendingOrders: vi.fn(async () =>
-			dbState.pending.filter((o) => o.status === 'pending')
-		),
+		getPendingOrders: vi.fn(async () => dbState.pending.filter((o) => o.status === 'pending')),
 		markOrderSynced: vi.fn(async (id) => {
 			const o = dbState.pending.find((x) => x.id === id)
 			if (o) o.status = 'synced'
@@ -115,9 +113,7 @@ describe('offline store — pending orders', () => {
 describe('offline store — syncPendingOrders', () => {
 	it('posts to zevar_core.api.pos.create_pos_invoice (NOT submit_invoice)', async () => {
 		// Bug Fix 2 regression test.
-		mocks.dbState.pending = [
-			{ id: 1, status: 'pending', payload: { items: '[]' } },
-		]
+		mocks.dbState.pending = [{ id: 1, status: 'pending', payload: { items: '[]' } }]
 		const store = useOfflineStore()
 		await store.syncPendingOrders()
 		expect(lastFetchUrl).toBe('/api/method/zevar_core.api.pos.create_pos_invoice')

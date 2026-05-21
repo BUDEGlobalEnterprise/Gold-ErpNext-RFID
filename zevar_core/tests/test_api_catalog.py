@@ -131,9 +131,7 @@ class TestGetPOSItemsOmniSearch(FrappeTestCase):
 		# stores the value because Frappe stores non-stale custom fields via the
 		# generic value path.
 		try:
-			frappe.db.set_value(
-				"Item", cls.item_by_vsku_code, "custom_vendor_sku", cls.unique_vendor_sku
-			)
+			frappe.db.set_value("Item", cls.item_by_vsku_code, "custom_vendor_sku", cls.unique_vendor_sku)
 		except Exception:  # custom field not present on this site
 			cls.unique_vendor_sku = None
 		frappe.db.commit()

@@ -1,7 +1,9 @@
 <template>
 	<AppLayout>
 		<div class="flex flex-col h-full">
-			<div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-4 flex-shrink-0 pb-3 border-b border-gray-100 dark:border-warm-border/30">
+			<div
+				class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-4 flex-shrink-0 pb-3 border-b border-gray-100 dark:border-warm-border/30"
+			>
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Inventory</h2>
 					<span
@@ -52,7 +54,12 @@
 						@click="showStockAdjust = true"
 						class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] text-white rounded-lg text-xs font-bold hover:bg-[#047857] transition whitespace-nowrap flex-shrink-0"
 					>
-						<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<svg
+							class="w-4 h-4 flex-shrink-0"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -66,7 +73,12 @@
 						@click="showReductions = true"
 						class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 border border-amber-300 bg-amber-50 text-amber-700 rounded-lg text-xs font-bold hover:bg-amber-100 transition whitespace-nowrap flex-shrink-0"
 					>
-						<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<svg
+							class="w-4 h-4 flex-shrink-0"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -80,7 +92,12 @@
 						@click="showQuickAdd = true"
 						class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#D4AF37] text-white rounded-lg text-xs font-bold hover:bg-[#C4A030] transition whitespace-nowrap flex-shrink-0"
 					>
-						<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<svg
+							class="w-4 h-4 flex-shrink-0"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -94,7 +111,12 @@
 						@click="openPushForSelected"
 						class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition whitespace-nowrap flex-shrink-0"
 					>
-						<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<svg
+							class="w-4 h-4 flex-shrink-0"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -483,7 +505,9 @@
 						class="premium-card !p-0 overflow-hidden group cursor-pointer border border-gray-100 dark:border-warm-border/30 hover:border-[#D4AF37]/50 hover:shadow-lg dark:hover:shadow-[#D4AF37]/5 transition-all duration-300 flex flex-col"
 						@click="selectedItem = item"
 					>
-						<div class="aspect-[4/3] bg-gray-50 dark:bg-warm-dark-900 relative overflow-hidden flex items-center justify-center shrink-0">
+						<div
+							class="aspect-[4/3] bg-gray-50 dark:bg-warm-dark-900 relative overflow-hidden flex items-center justify-center shrink-0"
+						>
 							<img
 								v-if="item.image"
 								:src="item.image"
@@ -619,11 +643,13 @@
 								>
 							</div>
 							<div class="flex items-baseline justify-between mt-auto">
+								<span class="text-xs font-extrabold text-[#D4AF37] font-mono">{{
+									formatCurrency(item.price)
+								}}</span>
 								<span
-									class="text-xs font-extrabold text-[#D4AF37] font-mono"
-									>{{ formatCurrency(item.price) }}</span
+									class="text-[9px] font-bold text-gray-400 dark:text-gray-500 font-mono"
+									>{{ item.weight }}g</span
 								>
-								<span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 font-mono">{{ item.weight }}g</span>
 							</div>
 						</div>
 					</div>

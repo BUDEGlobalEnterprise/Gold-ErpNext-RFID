@@ -4,7 +4,9 @@
 		@click="emit('open-details', item.item_code)"
 		data-testid="item-card"
 	>
-		<div class="aspect-[4/3] bg-gray-50 dark:bg-warm-dark-900 relative overflow-hidden flex items-center justify-center shrink-0">
+		<div
+			class="aspect-[4/3] bg-gray-50 dark:bg-warm-dark-900 relative overflow-hidden flex items-center justify-center shrink-0"
+		>
 			<img
 				v-if="item.image"
 				:src="item.image"
@@ -83,7 +85,8 @@
 						>
 					</div>
 					<div v-if="item.stone_weight > 0" class="flex justify-between text-red-500/80">
-						<span>Stone:</span> <span class="font-bold">-{{ item.stone_weight }}g</span>
+						<span>Stone:</span>
+						<span class="font-bold">-{{ item.stone_weight }}g</span>
 					</div>
 					<div
 						v-if="item.net_weight > 0"

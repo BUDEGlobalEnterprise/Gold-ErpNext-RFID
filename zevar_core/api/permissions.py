@@ -137,7 +137,9 @@ def check_cash_permission(movement_type: str, amount: float) -> dict:
 			return {
 				"allowed": False,
 				"needs_override": True,
-				"message": _("Cash out of ${0} exceeds ${1} limit. Manager PIN required.").format(amount, limit),
+				"message": _("Cash out of ${0} exceeds ${1} limit. Manager PIN required.").format(
+					amount, limit
+				),
 			}
 		return {"allowed": False, "needs_override": True, "message": _("No permission for cash out.")}
 
@@ -442,7 +444,6 @@ def _get_category_for_action(action: str) -> str:
 	elif any(x in action_lower for x in ["stock", "inventory"]):
 		return "Inventory"
 	return "Sales"
-
 
 
 # ---------------------------------------------------------------------------

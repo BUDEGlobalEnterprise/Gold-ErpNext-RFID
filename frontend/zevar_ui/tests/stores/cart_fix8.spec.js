@@ -226,9 +226,7 @@ describe('Fix #8 — isAuthExpiredError', () => {
 
 	it('returns false for ordinary validation errors', () => {
 		const cart = useCartStore()
-		expect(
-			cart.isAuthExpiredError({ status: 400, message: 'Item out of stock' })
-		).toBe(false)
+		expect(cart.isAuthExpiredError({ status: 400, message: 'Item out of stock' })).toBe(false)
 	})
 
 	it('returns false for network errors so the UI can retry', () => {

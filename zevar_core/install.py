@@ -366,6 +366,7 @@ def setup_pos_opening_entry_suspended_status():
 def create_pos_closing_entry_custom_fields():
 	"""Add custom_variance_reason_code to POS Closing Entry."""
 	from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+
 	fields = {
 		"POS Closing Entry": [
 			{
@@ -379,4 +380,3 @@ def create_pos_closing_entry_custom_fields():
 		]
 	}
 	create_custom_fields(fields)
-

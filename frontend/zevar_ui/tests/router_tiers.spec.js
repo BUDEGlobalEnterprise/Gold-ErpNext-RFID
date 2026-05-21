@@ -44,9 +44,7 @@ describe('router tier helpers — getAccessTier', () => {
 
 	it('picks highest tier when multiple roles overlap tiers', () => {
 		// Admin + manager + employee → admin should win.
-		expect(
-			getAccessTier(['System Manager', 'Sales Manager', 'Sales User'])
-		).toBe('admin')
+		expect(getAccessTier(['System Manager', 'Sales Manager', 'Sales User'])).toBe('admin')
 		// Manager + employee → manager wins.
 		expect(getAccessTier(['Sales Manager', 'Sales User'])).toBe('manager')
 	})

@@ -19,20 +19,64 @@
 				<!-- Icon -->
 				<div class="flex-shrink-0 mt-0.5">
 					<!-- Success -->
-					<svg v-if="toast.type === 'success'" class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+					<svg
+						v-if="toast.type === 'success'"
+						class="w-5 h-5 text-green-500"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
 					</svg>
 					<!-- Error -->
-					<svg v-else-if="toast.type === 'error'" class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+					<svg
+						v-else-if="toast.type === 'error'"
+						class="w-5 h-5 text-red-500"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
 					</svg>
 					<!-- Warning -->
-					<svg v-else-if="toast.type === 'warning'" class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+					<svg
+						v-else-if="toast.type === 'warning'"
+						class="w-5 h-5 text-amber-500"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+						/>
 					</svg>
 					<!-- Info -->
-					<svg v-else class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+					<svg
+						v-else
+						class="w-5 h-5 text-blue-500"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
 					</svg>
 				</div>
 				<!-- Content -->
@@ -46,7 +90,12 @@
 					class="flex-shrink-0 p-1 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition opacity-60 hover:opacity-100"
 				>
 					<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
 					</svg>
 				</button>
 			</div>
@@ -86,10 +135,18 @@ function dismiss(id) {
 	toasts.value = toasts.value.filter((t) => t.id !== id)
 }
 
-function success(message, title = '') { return show({ type: 'success', title, message }) }
-function error(message, title = '') { return show({ type: 'error', title, message, duration: 8000 }) }
-function warning(message, title = '') { return show({ type: 'warning', title, message }) }
-function info(message, title = '') { return show({ type: 'info', title, message }) }
+function success(message, title = '') {
+	return show({ type: 'success', title, message })
+}
+function error(message, title = '') {
+	return show({ type: 'error', title, message, duration: 8000 })
+}
+function warning(message, title = '') {
+	return show({ type: 'warning', title, message })
+}
+function info(message, title = '') {
+	return show({ type: 'info', title, message })
+}
 
 defineExpose({ show, dismiss, success, error, warning, info })
 </script>

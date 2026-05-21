@@ -169,9 +169,7 @@ describe('validateForSubmit', () => {
 		expect(validateCall.method).toBe('POST')
 		expect(validateCall.params.warehouse).toBe('WH-1')
 		const sentItems = JSON.parse(validateCall.params.items)
-		expect(sentItems).toEqual([
-			{ item_code: 'A1', qty: 1, rate: 500, serial_no: null },
-		])
+		expect(sentItems).toEqual([{ item_code: 'A1', qty: 1, rate: 500, serial_no: null }])
 	})
 
 	it('treats a price_drift issue as non-blocking even though the API may say ok=true', async () => {

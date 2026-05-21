@@ -26,7 +26,6 @@ from frappe.utils import add_days, today
 
 from zevar_core.tests.utils import ensure_item, ensure_warehouse
 
-
 # ---------------------------------------------------------------------------
 # SQL-injection / parameter-binding hardening
 # ---------------------------------------------------------------------------
@@ -49,9 +48,7 @@ class TestReportsAreParameterized(FrappeTestCase):
 		# as a literal date and either matches nothing or surfaces a
 		# clean DB error — never an OR-1=1 bypass.
 		try:
-			result = pos_closing_summary.execute(
-				{"from_date": "2099-01-01' OR 1=1 --"}
-			)
+			result = pos_closing_summary.execute({"from_date": "2099-01-01' OR 1=1 --"})
 		except Exception as e:
 			# A real DB error is fine — it proves the value reached the
 			# DB as data, not as SQL. What we never want is a silent
@@ -68,9 +65,7 @@ class TestReportsAreParameterized(FrappeTestCase):
 		)
 
 		try:
-			result = top_selling_jewelry.execute(
-				{"warehouse": "x' OR 1=1; --"}
-			)
+			result = top_selling_jewelry.execute({"warehouse": "x' OR 1=1; --"})
 		except Exception as e:
 			self.assertNotIn("OR 1=1", str(e))
 			return
@@ -187,9 +182,7 @@ class TestReportDataLineage(FrappeTestCase):
 		ensure_mode_of_payment("Cash", payment_type="Cash")
 		cls.customer = ensure_customer("Zevar Reports Test Customer")
 		cls.warehouse = ensure_warehouse("Zevar Reports Test Warehouse")
-		cls.item = ensure_item(
-			"ZEVAR-REPORT-RING-001", "Test 14K Yellow Gold Ring", rate=250.0
-		)
+		cls.item = ensure_item("ZEVAR-REPORT-RING-001", "Test 14K Yellow Gold Ring", rate=250.0)
 		# Tag the item with jewelry custom fields so top_selling_jewelry
 		# returns meaningful values.
 		try:
@@ -248,9 +241,7 @@ class TestReportDataLineage(FrappeTestCase):
 		si = self._build_si()
 		self._try_submit(si)
 
-		columns, data = hourly_sales.execute(
-			{"from_date": today(), "to_date": today()}
-		)
+		columns, data = hourly_sales.execute({"from_date": today(), "to_date": today()})
 		self.assertGreater(len(data), 0)
 		# Sum across hours must include this sale's grand_total.
 		total = sum(row.get("total_sales", 0) for row in data)
@@ -264,9 +255,7 @@ class TestReportDataLineage(FrappeTestCase):
 		si = self._build_si()
 		self._try_submit(si)
 
-		columns, data = payment_method_summary.execute(
-			{"from_date": today(), "to_date": today()}
-		)
+		columns, data = payment_method_summary.execute({"from_date": today(), "to_date": today()})
 		modes = {row["mode_of_payment"] for row in data}
 		self.assertIn("Cash", modes)
 
@@ -276,9 +265,7 @@ class TestReportDataLineage(FrappeTestCase):
 			pos_closing_summary,
 		)
 
-		columns, data = pos_closing_summary.execute(
-			{"from_date": add_days(today(), -7), "to_date": today()}
-		)
+		columns, data = pos_closing_summary.execute({"from_date": add_days(today(), -7), "to_date": today()})
 		self.assertIsInstance(data, list)
 
 	def _build_si(self):

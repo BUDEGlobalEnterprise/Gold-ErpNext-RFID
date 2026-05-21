@@ -83,8 +83,8 @@ def get_pos_items(
 	Returns:
 	    List of item dictionaries with stock and price information
 	"""
-	from zevar_core.api.pricing import get_item_price
 	from zevar_core.api.permissions import assert_pos_warehouse_access
+	from zevar_core.api.pricing import get_item_price
 
 	if display_case:
 		case_wh = frappe.db.get_value("Display Case", display_case, "warehouse")

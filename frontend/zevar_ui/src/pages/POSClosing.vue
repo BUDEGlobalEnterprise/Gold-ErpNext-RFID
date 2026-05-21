@@ -29,12 +29,15 @@
 				v-else-if="posSession.activeSession?.status === 'Suspended'"
 				class="flex flex-col items-center justify-center text-center p-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl"
 			>
-				<div class="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-full flex items-center justify-center mb-4 text-amber-500 text-3xl animate-pulse">
+				<div
+					class="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-full flex items-center justify-center mb-4 text-amber-500 text-3xl animate-pulse"
+				>
 					🔒
 				</div>
 				<h3 class="premium-title !text-xl mb-2">Register Suspended</h3>
 				<p class="premium-subtitle max-w-md mb-6">
-					This register session is suspended. To reconcile cash and close the till, please resume the session first.
+					This register session is suspended. To reconcile cash and close the till,
+					please resume the session first.
 				</p>
 				<button
 					@click="handleResume"
@@ -116,7 +119,9 @@
 							<div
 								class="col-span-2 sm:col-span-1 bg-green-500/10 p-3 rounded-lg flex flex-col gap-1"
 							>
-								<span class="text-xs text-green-400">Expected Balance (Today)</span>
+								<span class="text-xs text-green-400"
+									>Expected Balance (Today)</span
+								>
 								<span class="text-lg font-bold text-green-500 font-mono">
 									${{ formatAmount(todayExpectedBalance) }}
 								</span>
@@ -124,7 +129,9 @@
 							<div
 								class="col-span-2 sm:col-span-1 bg-blue-500/10 p-3 rounded-lg flex flex-col gap-1"
 							>
-								<span class="text-xs text-blue-400">Expected Balance (Session)</span>
+								<span class="text-xs text-blue-400"
+									>Expected Balance (Session)</span
+								>
 								<span class="text-sm font-bold text-blue-500 font-mono">
 									${{ formatAmount(sessionExpectedBalance) }}
 								</span>
@@ -176,11 +183,15 @@
 									'text-red-500': m.movement_type === 'Cash Out',
 								}"
 							>
-								{{ m.movement_type === 'Cash In' ? '+' : '-' }}${{ formatAmount(m.amount) }}
+								{{ m.movement_type === 'Cash In' ? '+' : '-' }}${{
+									formatAmount(m.amount)
+								}}
 							</span>
 						</div>
 					</div>
-					<div class="grid grid-cols-3 gap-4 pt-3 border-t border-gray-200 dark:border-warm-border/50">
+					<div
+						class="grid grid-cols-3 gap-4 pt-3 border-t border-gray-200 dark:border-warm-border/50"
+					>
 						<div class="text-center">
 							<p class="text-xs text-gray-500">Total In</p>
 							<p class="text-sm font-bold text-emerald-600 font-mono">
@@ -197,9 +208,15 @@
 							<p class="text-xs text-gray-500">Net</p>
 							<p
 								class="text-sm font-bold font-mono"
-								:class="cashMovementsTotal.net >= 0 ? 'text-emerald-600' : 'text-red-500'"
+								:class="
+									cashMovementsTotal.net >= 0
+										? 'text-emerald-600'
+										: 'text-red-500'
+								"
 							>
-								{{ cashMovementsTotal.net >= 0 ? '+' : '' }}${{ formatAmount(Math.abs(cashMovementsTotal.net)) }}
+								{{ cashMovementsTotal.net >= 0 ? '+' : '' }}${{
+									formatAmount(Math.abs(cashMovementsTotal.net))
+								}}
 							</p>
 						</div>
 					</div>
@@ -207,35 +224,65 @@
 
 				<div class="premium-card p-6">
 					<!-- Step Indicator Header -->
-					<div class="flex items-center justify-between mb-6 pb-6 border-b border-gray-100 dark:border-warm-border/50">
+					<div
+						class="flex items-center justify-between mb-6 pb-6 border-b border-gray-100 dark:border-warm-border/50"
+					>
 						<div class="flex items-center gap-2">
-							<span class="flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold transition-all duration-300"
-								:class="currentStep === 1 ? 'bg-[#D4AF37] text-black font-extrabold ring-4 ring-[#D4AF37]/20' : 'bg-green-500 text-white'">
+							<span
+								class="flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold transition-all duration-300"
+								:class="
+									currentStep === 1
+										? 'bg-[#D4AF37] text-black font-extrabold ring-4 ring-[#D4AF37]/20'
+										: 'bg-green-500 text-white'
+								"
+							>
 								<span v-if="currentStep === 1">1</span>
 								<span v-else>✓</span>
 							</span>
-							<span class="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">Count Entry</span>
+							<span
+								class="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white"
+								>Count Entry</span
+							>
 						</div>
-						<div class="h-0.5 flex-1 bg-gray-200 dark:bg-warm-border mx-4 max-w-[80px]"></div>
+						<div
+							class="h-0.5 flex-1 bg-gray-200 dark:bg-warm-border mx-4 max-w-[80px]"
+						></div>
 						<div class="flex items-center gap-2">
-							<span class="flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold transition-all duration-300"
-								:class="currentStep === 2 ? 'bg-[#D4AF37] text-black font-extrabold ring-4 ring-[#D4AF37]/20' : 'bg-gray-200 dark:bg-warm-dark-700 text-gray-500'">
+							<span
+								class="flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold transition-all duration-300"
+								:class="
+									currentStep === 2
+										? 'bg-[#D4AF37] text-black font-extrabold ring-4 ring-[#D4AF37]/20'
+										: 'bg-gray-200 dark:bg-warm-dark-700 text-gray-500'
+								"
+							>
 								2
 							</span>
-							<span class="text-xs font-bold uppercase tracking-wider"
-								:class="currentStep === 2 ? 'text-gray-900 dark:text-white' : 'text-gray-400'">Reconcile & Close</span>
+							<span
+								class="text-xs font-bold uppercase tracking-wider"
+								:class="
+									currentStep === 2
+										? 'text-gray-900 dark:text-white'
+										: 'text-gray-400'
+								"
+								>Reconcile & Close</span
+							>
 						</div>
 					</div>
 
 					<form @submit.prevent="submitClosing" class="space-y-6">
-						
 						<!-- STEP 1: COUNT ENTRY -->
 						<div v-if="currentStep === 1" class="space-y-6">
-
 							<div>
-								<label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Actual Closing Balance</label>
+								<label
+									class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+									>Actual Closing Balance</label
+								>
 								<div class="relative">
-									<span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">$</span>
+									<span
+										class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium"
+										>$</span
+									>
 									<input
 										type="number"
 										v-model.number="form.closing_balance"
@@ -251,14 +298,20 @@
 							</div>
 
 							<div>
-								<label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Cash Breakdown (Optional)</label>
+								<label
+									class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+									>Cash Breakdown (Optional)</label
+								>
 								<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
 									<div
 										v-for="denom in denominations"
 										:key="denom.value"
 										class="flex flex-col gap-1"
 									>
-										<span class="text-xs font-medium text-gray-500 dark:text-gray-500">${{ denom.value }}</span>
+										<span
+											class="text-xs font-medium text-gray-500 dark:text-gray-500"
+											>${{ denom.value }}</span
+										>
 										<input
 											type="number"
 											v-model.number="form.cash_breakdown[denom.value]"
@@ -268,12 +321,18 @@
 											:disabled="loading"
 											class="w-full px-3 py-2 bg-white dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border rounded-lg text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] outline-none font-mono"
 										/>
-										<span class="text-xs text-gray-500">${{ getSubtotal(denom.value) }}</span>
+										<span class="text-xs text-gray-500"
+											>${{ getSubtotal(denom.value) }}</span
+										>
 									</div>
 								</div>
-								<div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-warm-dark-700/50 rounded-lg mt-3 text-sm text-gray-700 dark:text-gray-300">
+								<div
+									class="flex justify-between items-center p-3 bg-gray-50 dark:bg-warm-dark-700/50 rounded-lg mt-3 text-sm text-gray-700 dark:text-gray-300"
+								>
 									<span>Calculated Total:</span>
-									<strong class="font-mono">${{ calculatedTotal.toFixed(2) }}</strong>
+									<strong class="font-mono"
+										>${{ calculatedTotal.toFixed(2) }}</strong
+									>
 								</div>
 							</div>
 
@@ -282,12 +341,17 @@
 								v-if="!isBlindClose"
 								class="text-center p-5 rounded-xl"
 								:class="{
-									'bg-green-500/10 border border-green-500/30': varianceClass === 'balanced',
-									'bg-blue-500/10 border border-blue-500/30': varianceClass === 'excess',
-									'bg-red-500/10 border border-red-500/30': varianceClass === 'shortage',
+									'bg-green-500/10 border border-green-500/30':
+										varianceClass === 'balanced',
+									'bg-blue-500/10 border border-blue-500/30':
+										varianceClass === 'excess',
+									'bg-red-500/10 border border-red-500/30':
+										varianceClass === 'shortage',
 								}"
 							>
-								<div class="text-xs text-gray-500 dark:text-gray-500 mb-1">Variance (Today)</div>
+								<div class="text-xs text-gray-500 dark:text-gray-500 mb-1">
+									Variance (Today)
+								</div>
 								<div
 									class="text-3xl font-bold font-mono"
 									:class="{
@@ -296,24 +360,34 @@
 										'text-red-500': varianceClass === 'shortage',
 									}"
 								>
-									<span v-if="variance > 0">+</span>${{ formatAmount(Math.abs(variance)) }}
+									<span v-if="variance > 0">+</span>${{
+										formatAmount(Math.abs(variance))
+									}}
 								</div>
-								<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ varianceStatus }}</div>
+								<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+									{{ varianceStatus }}
+								</div>
 							</div>
 							<div
 								v-else
 								class="text-center p-5 rounded-xl bg-amber-500/5 border border-amber-500/20"
 							>
-								<div class="text-xs text-amber-500 font-bold uppercase tracking-wider mb-1">
+								<div
+									class="text-xs text-amber-500 font-bold uppercase tracking-wider mb-1"
+								>
 									🔒 Blind Reconcile Mode
 								</div>
 								<p class="text-xs text-gray-400 max-w-xs mx-auto leading-relaxed">
-									Cashier variance and expectations are hidden. The server will calculate and record discrepancies securely upon closing.
+									Cashier variance and expectations are hidden. The server will
+									calculate and record discrepancies securely upon closing.
 								</p>
 							</div>
 
 							<div>
-								<label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Closing Notes</label>
+								<label
+									class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+									>Closing Notes</label
+								>
 								<textarea
 									v-model="form.notes"
 									placeholder="Any notes about discrepancies or issues..."
@@ -337,28 +411,49 @@
 
 						<!-- STEP 2: RECONCILE & CLOSE -->
 						<div v-else class="space-y-6">
-							<div class="bg-gray-50 dark:bg-warm-dark-700/30 border border-gray-100 dark:border-warm-border rounded-xl p-5 space-y-4">
-								<h4 class="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">🔒 Count Sealed Successfully</h4>
+							<div
+								class="bg-gray-50 dark:bg-warm-dark-700/30 border border-gray-100 dark:border-warm-border rounded-xl p-5 space-y-4"
+							>
+								<h4
+									class="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider"
+								>
+									🔒 Count Sealed Successfully
+								</h4>
 								<div class="grid grid-cols-2 gap-4 text-sm">
 									<div class="flex flex-col">
-										<span class="text-xs text-gray-500">Your Counted Cash</span>
-										<span class="text-lg font-bold text-gray-900 dark:text-white font-mono">${{ formatAmount(form.closing_balance) }}</span>
+										<span class="text-xs text-gray-500"
+											>Your Counted Cash</span
+										>
+										<span
+											class="text-lg font-bold text-gray-900 dark:text-white font-mono"
+											>${{ formatAmount(form.closing_balance) }}</span
+										>
 									</div>
 									<div class="flex flex-col">
-										<span class="text-xs text-gray-500">Expected Cash Balance</span>
-										<span class="text-lg font-bold text-gray-900 dark:text-white font-mono">${{ formatAmount(sessionExpectedBalance) }}</span>
+										<span class="text-xs text-gray-500"
+											>Expected Cash Balance</span
+										>
+										<span
+											class="text-lg font-bold text-gray-900 dark:text-white font-mono"
+											>${{ formatAmount(sessionExpectedBalance) }}</span
+										>
 									</div>
 								</div>
 
 								<div
 									class="text-center p-4 rounded-lg mt-2"
 									:class="{
-										'bg-green-500/10 border border-green-500/20': varianceClass === 'balanced',
-										'bg-blue-500/10 border border-blue-500/20': varianceClass === 'excess',
-										'bg-red-500/10 border border-red-500/20': varianceClass === 'shortage',
+										'bg-green-500/10 border border-green-500/20':
+											varianceClass === 'balanced',
+										'bg-blue-500/10 border border-blue-500/20':
+											varianceClass === 'excess',
+										'bg-red-500/10 border border-red-500/20':
+											varianceClass === 'shortage',
 									}"
 								>
-									<div class="text-xs text-gray-500 mb-1">Variance (Difference)</div>
+									<div class="text-xs text-gray-500 mb-1">
+										Variance (Difference)
+									</div>
 									<div
 										class="text-2xl font-bold font-mono"
 										:class="{
@@ -367,15 +462,21 @@
 											'text-red-500': varianceClass === 'shortage',
 										}"
 									>
-										<span v-if="variance > 0">+</span>${{ formatAmount(variance) }}
+										<span v-if="variance > 0">+</span>${{
+											formatAmount(variance)
+										}}
 									</div>
-									<div class="text-xs text-gray-500 mt-1">{{ varianceStatus }}</div>
+									<div class="text-xs text-gray-500 mt-1">
+										{{ varianceStatus }}
+									</div>
 								</div>
 							</div>
 
 							<!-- Variance Reason Code Dropdown (Required if variance exists) -->
 							<div v-if="Math.abs(variance) > 0.01">
-								<label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+								<label
+									class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
+								>
 									Variance Reason Code <span class="text-red-500">*</span>
 								</label>
 								<select
@@ -385,31 +486,61 @@
 									class="w-full px-4 py-3 bg-white dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border rounded-lg text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] outline-none"
 								>
 									<option value="" disabled>-- Select a Reason Code --</option>
-									<option value="Counting Error">Counting Error (Cashier mistake)</option>
-									<option value="System Error">System Error (POS reconciliation mismatch)</option>
+									<option value="Counting Error">
+										Counting Error (Cashier mistake)
+									</option>
+									<option value="System Error">
+										System Error (POS reconciliation mismatch)
+									</option>
 									<option value="Suspected Theft">Suspected Theft</option>
 								</select>
-								<p class="text-[11px] text-gray-400 mt-1">Structured reason code is mandatory for all overages/shortages.</p>
+								<p class="text-[11px] text-gray-400 mt-1">
+									Structured reason code is mandatory for all overages/shortages.
+								</p>
 							</div>
 
 							<!-- Manager Override Banner if variance exceeds threshold -->
-							<div v-if="overrideRequired" class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl space-y-2">
+							<div
+								v-if="overrideRequired"
+								class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl space-y-2"
+							>
 								<div class="flex items-start gap-2.5">
 									<span class="text-lg leading-none">⚠️</span>
 									<div>
-										<h5 class="text-xs font-bold text-red-500 uppercase tracking-wider">Manager Authorization Required</h5>
+										<h5
+											class="text-xs font-bold text-red-500 uppercase tracking-wider"
+										>
+											Manager Authorization Required
+										</h5>
 										<p class="text-xs text-gray-400 mt-0.5">
-											The variance of ${{ formatAmount(Math.abs(variance)) }} exceeds your profile's alert threshold of ${{ formatAmount(alertThreshold) }}.
+											The variance of ${{
+												formatAmount(Math.abs(variance))
+											}}
+											exceeds your profile's alert threshold of ${{
+												formatAmount(alertThreshold)
+											}}.
 										</p>
 									</div>
 								</div>
-								<div v-if="managerOverride" class="text-xs text-green-500 font-bold flex items-center gap-1.5 pt-1">
-									<span>✓ Approved by: {{ managerOverride.manager_email || managerOverride.approved_by }}</span>
+								<div
+									v-if="managerOverride"
+									class="text-xs text-green-500 font-bold flex items-center gap-1.5 pt-1"
+								>
+									<span
+										>✓ Approved by:
+										{{
+											managerOverride.manager_email ||
+											managerOverride.approved_by
+										}}</span
+									>
 								</div>
 							</div>
 
 							<div>
-								<label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Closing Notes</label>
+								<label
+									class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+									>Closing Notes</label
+								>
 								<textarea
 									v-model="form.notes"
 									placeholder="Any additional closing notes or comments..."
@@ -426,12 +557,13 @@
 									class="px-12 py-4 bg-[#D4AF37] text-black font-bold rounded-lg hover:bg-[#b5952f] transition text-base disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
 								>
 									<span v-if="loading">Finalizing Closing...</span>
-									<span v-else-if="overrideRequired && !managerOverride">Request Manager Approval</span>
+									<span v-else-if="overrideRequired && !managerOverride"
+										>Request Manager Approval</span
+									>
 									<span v-else>Confirm & Finalize Closing (Step 2)</span>
 								</button>
 							</div>
 						</div>
-
 					</form>
 				</div>
 			</div>
@@ -766,7 +898,7 @@ async function submitStep1() {
 		if (res.success) {
 			previewData.value = res
 			alertThreshold.value = res.alert_threshold || 5
-			
+
 			if (Math.abs(res.variance) > alertThreshold.value) {
 				overrideRequired.value = true
 			} else {

@@ -60,11 +60,17 @@ class HardwareService {
 				return true
 			}
 			// Fallback to browser print if bridge not connected
-			window.open(`/printview?doctype=Sales Invoice&name=${invoiceName}&format=pos_receipt_thermal`, '_blank')
+			window.open(
+				`/printview?doctype=Sales Invoice&name=${invoiceName}&format=pos_receipt_thermal`,
+				'_blank'
+			)
 			return false
 		} catch (e) {
 			console.error('Failed to print receipt', e)
-			window.open(`/printview?doctype=Sales Invoice&name=${invoiceName}&format=pos_receipt_thermal`, '_blank')
+			window.open(
+				`/printview?doctype=Sales Invoice&name=${invoiceName}&format=pos_receipt_thermal`,
+				'_blank'
+			)
 			return false
 		}
 	}
@@ -117,7 +123,9 @@ class HardwareService {
 						this.ws.removeEventListener('message', handler)
 						resolve(data)
 					}
-				} catch (e) { /* ignore */ }
+				} catch (e) {
+					/* ignore */
+				}
 			}
 
 			this.ws.addEventListener('message', handler)

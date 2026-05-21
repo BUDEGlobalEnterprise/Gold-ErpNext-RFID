@@ -246,7 +246,7 @@ function updateDropdownPosition(key) {
 	if (!ref || !ref.button.value || !ref.panel.value) return
 
 	const buttonRect = ref.button.value.getBoundingClientRect()
-	
+
 	// Prevent horizontal overflow on smaller screens
 	let left = buttonRect.left
 	if (left + ref.width > window.innerWidth) {

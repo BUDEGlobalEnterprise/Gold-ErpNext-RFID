@@ -30,9 +30,7 @@
 		</div>
 
 		<div v-else class="flex flex-col">
-			<div
-				class="flex flex-wrap items-center justify-between gap-4 mb-4 flex-shrink-0"
-			>
+			<div class="flex flex-wrap items-center justify-between gap-4 mb-4 flex-shrink-0">
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">
 						{{ viewMode === 'catalog' ? 'Catalogue' : 'Collection' }}
@@ -58,8 +56,18 @@
 								@click="handleSuspend"
 								class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition"
 							>
-								<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+								<svg
+									class="w-3 h-3"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"
+									/>
 								</svg>
 								Suspend
 							</button>
@@ -75,7 +83,9 @@
 								class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/30"
 							>
 								<span class="relative flex h-1.5 w-1.5">
-									<span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
+									<span
+										class="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"
+									></span>
 								</span>
 								Session Suspended
 							</span>
@@ -121,8 +131,18 @@
 						@click="showCashModal = true"
 						class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition"
 					>
-						<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+						<svg
+							class="w-3.5 h-3.5"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+							></path>
 						</svg>
 						Cash In/Out
 					</button>
@@ -132,15 +152,30 @@
 						v-if="posSession.hasActiveSession"
 						@click="toggleHeldCarts"
 						class="flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg border transition-all"
-						:class="heldCarts.length > 0
-							? 'text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700/50 dark:text-amber-400'
-							: 'text-gray-500 border-gray-200 dark:border-warm-border dark:text-gray-400 hover:border-gray-300'"
+						:class="
+							heldCarts.length > 0
+								? 'text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700/50 dark:text-amber-400'
+								: 'text-gray-500 border-gray-200 dark:border-warm-border dark:text-gray-400 hover:border-gray-300'
+						"
 					>
-						<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+						<svg
+							class="w-3.5 h-3.5"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
 						</svg>
 						Held
-						<span v-if="heldCarts.length > 0" class="ml-0.5 w-5 h-5 flex items-center justify-center rounded-full bg-amber-500 text-white text-[10px] font-black">
+						<span
+							v-if="heldCarts.length > 0"
+							class="ml-0.5 w-5 h-5 flex items-center justify-center rounded-full bg-amber-500 text-white text-[10px] font-black"
+						>
 							{{ heldCarts.length }}
 						</span>
 					</button>
@@ -149,18 +184,46 @@
 				<!-- Held Carts Dropdown -->
 				<Teleport to="body">
 					<Transition name="fade">
-						<div v-if="showHeldDrawer" class="fixed inset-0 z-[100] flex items-start justify-center pt-20">
-							<div @click="showHeldDrawer = false" class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"></div>
-							<div class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full max-w-md border dark:border-warm-border overflow-hidden">
-								<div class="p-4 border-b border-gray-100 dark:border-warm-border/50 flex items-center justify-between">
-									<h3 class="text-sm font-bold text-gray-900 dark:text-white">Held Carts ({{ heldCarts.length }})</h3>
-									<button @click="showHeldDrawer = false" class="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full">
-										<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						<div
+							v-if="showHeldDrawer"
+							class="fixed inset-0 z-[100] flex items-start justify-center pt-20"
+						>
+							<div
+								@click="showHeldDrawer = false"
+								class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"
+							></div>
+							<div
+								class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full max-w-md border dark:border-warm-border overflow-hidden"
+							>
+								<div
+									class="p-4 border-b border-gray-100 dark:border-warm-border/50 flex items-center justify-between"
+								>
+									<h3 class="text-sm font-bold text-gray-900 dark:text-white">
+										Held Carts ({{ heldCarts.length }})
+									</h3>
+									<button
+										@click="showHeldDrawer = false"
+										class="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full"
+									>
+										<svg
+											class="w-4 h-4 text-gray-400"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M6 18L18 6M6 6l12 12"
+											/>
 										</svg>
 									</button>
 								</div>
-								<div v-if="heldCarts.length === 0" class="p-8 text-center text-gray-400 text-sm">
+								<div
+									v-if="heldCarts.length === 0"
+									class="p-8 text-center text-gray-400 text-sm"
+								>
 									No held carts
 								</div>
 								<div v-else class="max-h-80 overflow-y-auto">
@@ -171,11 +234,20 @@
 									>
 										<div class="flex items-center justify-between">
 											<div class="min-w-0 flex-1">
-												<div class="font-bold text-sm text-gray-900 dark:text-white truncate">
-													{{ hc.note || hc.customer_name || 'Unnamed cart' }}
+												<div
+													class="font-bold text-sm text-gray-900 dark:text-white truncate"
+												>
+													{{
+														hc.note ||
+														hc.customer_name ||
+														'Unnamed cart'
+													}}
 												</div>
 												<div class="text-xs text-gray-400 mt-0.5">
-													{{ hc.item_count }} item{{ hc.item_count !== 1 ? 's' : '' }} · ${{ Number(hc.total || 0).toFixed(2) }}
+													{{ hc.item_count }} item{{
+														hc.item_count !== 1 ? 's' : ''
+													}}
+													· ${{ Number(hc.total || 0).toFixed(2) }}
 												</div>
 											</div>
 											<div class="flex items-center gap-2 ml-3">
@@ -202,7 +274,9 @@
 			</div>
 
 			<!-- Inline Filter Bar - Beautiful, full-width glassmorphic container -->
-			<div class="w-full mb-6 bg-white/40 dark:bg-warm-dark-900/60 backdrop-blur-xl px-4 py-2.5 rounded-2xl border border-gray-200/50 dark:border-warm-border/30 shadow-sm flex-shrink-0">
+			<div
+				class="w-full mb-6 bg-white/40 dark:bg-warm-dark-900/60 backdrop-blur-xl px-4 py-2.5 rounded-2xl border border-gray-200/50 dark:border-warm-border/30 shadow-sm flex-shrink-0"
+			>
 				<ItemFilterBar context="pos" />
 			</div>
 
@@ -312,18 +386,25 @@
 				leave-to-class="opacity-0"
 			>
 				<div
-					v-if="posSession.hasActiveSession && posSession.activeSession?.status === 'Suspended'"
+					v-if="
+						posSession.hasActiveSession &&
+						posSession.activeSession?.status === 'Suspended'
+					"
 					class="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center z-[9999]"
 				>
 					<div
 						class="bg-white dark:bg-warm-dark-800 p-10 rounded-2xl text-center max-w-md mx-4 shadow-2xl border border-amber-500/20"
 					>
-						<div class="w-20 h-20 bg-amber-500/10 border border-amber-500/30 rounded-full flex items-center justify-center mx-auto mb-6 text-amber-500 text-4xl animate-pulse">
+						<div
+							class="w-20 h-20 bg-amber-500/10 border border-amber-500/30 rounded-full flex items-center justify-center mx-auto mb-6 text-amber-500 text-4xl animate-pulse"
+						>
 							🔒
 						</div>
 						<h2 class="premium-title !text-2xl mb-3">Register Suspended</h2>
 						<p class="text-gray-500 dark:text-gray-400 text-sm mb-8 leading-relaxed">
-							This cash register session is currently suspended (Floating Till). Please click the button below to resume your session and continue transactions.
+							This cash register session is currently suspended (Floating Till).
+							Please click the button below to resume your session and continue
+							transactions.
 						</p>
 						<div class="flex flex-col gap-3">
 							<button
@@ -365,10 +446,18 @@
 						class="absolute right-0 top-0 bottom-0 w-full max-w-lg bg-white dark:bg-warm-dark-800 shadow-2xl p-6 overflow-y-auto flex flex-col gap-6"
 						@click.stop
 					>
-						<div class="flex items-center justify-between pb-4 border-b dark:border-warm-border/50">
+						<div
+							class="flex items-center justify-between pb-4 border-b dark:border-warm-border/50"
+						>
 							<div>
-								<h2 class="text-lg font-bold text-gray-900 dark:text-white uppercase tracking-wider">Register Controls</h2>
-								<p class="text-xs text-gray-400 mt-0.5 font-mono">Session: {{ posSession.activeSession?.name }}</p>
+								<h2
+									class="text-lg font-bold text-gray-900 dark:text-white uppercase tracking-wider"
+								>
+									Register Controls
+								</h2>
+								<p class="text-xs text-gray-400 mt-0.5 font-mono">
+									Session: {{ posSession.activeSession?.name }}
+								</p>
 							</div>
 							<button
 								@click="showRegisterActions = false"
@@ -381,7 +470,11 @@
 						<!-- Drawer Status & Threshold Alert -->
 						<div class="premium-card p-5 bg-gray-50/50 dark:bg-warm-dark-700/30">
 							<div class="flex items-center justify-between mb-4">
-								<h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Expected Drawer Balance</h3>
+								<h3
+									class="text-xs font-bold text-gray-500 uppercase tracking-wider"
+								>
+									Expected Drawer Balance
+								</h3>
 								<button
 									@click="refreshDrawerBalance"
 									:disabled="drawerLoading"
@@ -392,33 +485,62 @@
 							</div>
 							<div v-if="drawerBalance">
 								<div class="flex justify-between items-baseline mb-2">
-									<span class="text-2xl font-bold font-mono text-gray-950 dark:text-white">
-										${{ Number(drawerBalance.expected_drawer_balance || 0).toFixed(2) }}
+									<span
+										class="text-2xl font-bold font-mono text-gray-950 dark:text-white"
+									>
+										${{
+											Number(
+												drawerBalance.expected_drawer_balance || 0
+											).toFixed(2)
+										}}
 									</span>
 									<span class="text-xs text-gray-400">
-										Limit: ${{ Number(drawerBalance.drawer_threshold || 0).toFixed(2) }}
+										Limit: ${{
+											Number(drawerBalance.drawer_threshold || 0).toFixed(2)
+										}}
 									</span>
 								</div>
-								<div v-if="drawerBalance.exceeds_threshold" class="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500 text-xs mb-3 flex items-start gap-2">
+								<div
+									v-if="drawerBalance.exceeds_threshold"
+									class="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500 text-xs mb-3 flex items-start gap-2"
+								>
 									<span>⚠️</span>
 									<div>
 										<p class="font-bold">Drawer Cash Limit Exceeded</p>
 										<p class="mt-0.5">{{ drawerBalance.alert_message }}</p>
 									</div>
 								</div>
-								<div class="grid grid-cols-3 gap-2 text-xs text-gray-400 border-t dark:border-warm-border/50 pt-3 mt-2">
+								<div
+									class="grid grid-cols-3 gap-2 text-xs text-gray-400 border-t dark:border-warm-border/50 pt-3 mt-2"
+								>
 									<div>
-										<p class="text-[10px] uppercase font-bold text-gray-500">Opening</p>
-										<p class="font-mono mt-0.5 font-bold">${{ Number(drawerBalance.opening_float || 0).toFixed(2) }}</p>
+										<p class="text-[10px] uppercase font-bold text-gray-500">
+											Opening
+										</p>
+										<p class="font-mono mt-0.5 font-bold">
+											${{
+												Number(drawerBalance.opening_float || 0).toFixed(2)
+											}}
+										</p>
 									</div>
 									<div>
-										<p class="text-[10px] uppercase font-bold text-gray-500">Sales</p>
-										<p class="font-mono mt-0.5 font-bold text-green-500">+${{ Number(drawerBalance.cash_sales || 0).toFixed(2) }}</p>
+										<p class="text-[10px] uppercase font-bold text-gray-500">
+											Sales
+										</p>
+										<p class="font-mono mt-0.5 font-bold text-green-500">
+											+${{
+												Number(drawerBalance.cash_sales || 0).toFixed(2)
+											}}
+										</p>
 									</div>
 									<div>
-										<p class="text-[10px] uppercase font-bold text-gray-500">Movements</p>
+										<p class="text-[10px] uppercase font-bold text-gray-500">
+											Movements
+										</p>
 										<p class="font-mono mt-0.5 font-bold text-blue-500">
-											{{ drawerBalance.net_movements >= 0 ? '+' : '' }}${{ Number(drawerBalance.net_movements || 0).toFixed(2) }}
+											{{ drawerBalance.net_movements >= 0 ? '+' : '' }}${{
+												Number(drawerBalance.net_movements || 0).toFixed(2)
+											}}
 										</p>
 									</div>
 								</div>
@@ -429,7 +551,11 @@
 						<!-- X Report Section -->
 						<div class="border-t dark:border-warm-border/50 pt-4">
 							<div class="flex items-center justify-between mb-3">
-								<h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Mid-Shift Snapshots (X-Report)</h3>
+								<h3
+									class="text-xs font-bold text-gray-500 uppercase tracking-wider"
+								>
+									Mid-Shift Snapshots (X-Report)
+								</h3>
 								<button
 									@click="triggerXReport"
 									:disabled="xReportLoading"
@@ -440,39 +566,92 @@
 							</div>
 
 							<!-- Display X Report -->
-							<div v-if="xReport" class="p-4 bg-gray-50 dark:bg-warm-dark-700/20 border border-gray-100 dark:border-warm-border rounded-xl text-xs space-y-4 font-sans max-h-80 overflow-y-auto">
-								<div class="flex justify-between border-b dark:border-warm-border/50 pb-2">
-									<strong class="uppercase text-amber-500">MID-SHIFT X-REPORT</strong>
-									<span class="text-gray-400">Time: {{ formatDateTime(xReport.generated_at) }}</span>
+							<div
+								v-if="xReport"
+								class="p-4 bg-gray-50 dark:bg-warm-dark-700/20 border border-gray-100 dark:border-warm-border rounded-xl text-xs space-y-4 font-sans max-h-80 overflow-y-auto"
+							>
+								<div
+									class="flex justify-between border-b dark:border-warm-border/50 pb-2"
+								>
+									<strong class="uppercase text-amber-500"
+										>MID-SHIFT X-REPORT</strong
+									>
+									<span class="text-gray-400"
+										>Time: {{ formatDateTime(xReport.generated_at) }}</span
+									>
 								</div>
-								
+
 								<div class="grid grid-cols-2 gap-4">
 									<div>
-										<p class="text-gray-400 uppercase text-[9px] font-bold">Total Mid-Shift Sales</p>
-										<p class="text-base font-bold font-mono text-gray-900 dark:text-white mt-0.5">${{ Number(xReport.total_sales || 0).toFixed(2) }} ({{ xReport.sales_count }} sales)</p>
+										<p class="text-gray-400 uppercase text-[9px] font-bold">
+											Total Mid-Shift Sales
+										</p>
+										<p
+											class="text-base font-bold font-mono text-gray-900 dark:text-white mt-0.5"
+										>
+											${{ Number(xReport.total_sales || 0).toFixed(2) }} ({{
+												xReport.sales_count
+											}}
+											sales)
+										</p>
 									</div>
 									<div>
-										<p class="text-gray-400 uppercase text-[9px] font-bold">Expected Drawer Balance</p>
-										<p class="text-base font-bold font-mono text-green-500 mt-0.5">${{ Number(xReport.expected_drawer_balance || 0).toFixed(2) }}</p>
+										<p class="text-gray-400 uppercase text-[9px] font-bold">
+											Expected Drawer Balance
+										</p>
+										<p
+											class="text-base font-bold font-mono text-green-500 mt-0.5"
+										>
+											${{
+												Number(
+													xReport.expected_drawer_balance || 0
+												).toFixed(2)
+											}}
+										</p>
 									</div>
 								</div>
 
 								<div class="border-t dark:border-warm-border/50 pt-3">
-									<h4 class="font-bold text-gray-800 dark:text-gray-200 uppercase text-[10px] mb-2">Payment Breakdown</h4>
+									<h4
+										class="font-bold text-gray-800 dark:text-gray-200 uppercase text-[10px] mb-2"
+									>
+										Payment Breakdown
+									</h4>
 									<div class="space-y-1.5">
-										<div v-for="p in xReport.payment_summary" :key="p.mode_of_payment" class="flex justify-between border-b dark:border-warm-border/20 pb-1">
+										<div
+											v-for="p in xReport.payment_summary"
+											:key="p.mode_of_payment"
+											class="flex justify-between border-b dark:border-warm-border/20 pb-1"
+										>
 											<span>{{ p.mode_of_payment }} (x{{ p.count }})</span>
-											<span class="font-mono font-bold">${{ Number(p.amount || 0).toFixed(2) }}</span>
+											<span class="font-mono font-bold"
+												>${{ Number(p.amount || 0).toFixed(2) }}</span
+											>
 										</div>
 									</div>
 								</div>
 
-								<div v-if="xReport.cash_movements?.length > 0" class="border-t dark:border-warm-border/50 pt-3">
-									<h4 class="font-bold text-gray-800 dark:text-gray-200 uppercase text-[10px] mb-2">Cash Movements</h4>
+								<div
+									v-if="xReport.cash_movements?.length > 0"
+									class="border-t dark:border-warm-border/50 pt-3"
+								>
+									<h4
+										class="font-bold text-gray-800 dark:text-gray-200 uppercase text-[10px] mb-2"
+									>
+										Cash Movements
+									</h4>
 									<div class="space-y-1.5">
-										<div v-for="m in xReport.cash_movements" :key="m.name" class="flex justify-between text-gray-400">
+										<div
+											v-for="m in xReport.cash_movements"
+											:key="m.name"
+											class="flex justify-between text-gray-400"
+										>
 											<span>{{ m.movement_type }}: {{ m.reason }}</span>
-											<span class="font-mono font-bold">{{ m.movement_type === 'Cash In' ? '+' : '-' }}${{ Number(m.amount || 0).toFixed(2) }}</span>
+											<span class="font-mono font-bold"
+												>{{ m.movement_type === 'Cash In' ? '+' : '-' }}${{
+													Number(m.amount || 0).toFixed(2)
+												}}</span
+											>
 										</div>
 									</div>
 								</div>
@@ -490,8 +669,14 @@
 						<div v-if="isManager" class="border-t dark:border-warm-border/50 pt-4">
 							<div class="flex items-center justify-between mb-3">
 								<div>
-									<h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Variance Audit & History</h3>
-									<p class="text-[10px] text-gray-400 mt-0.5">Dual manager controls & pattern detection</p>
+									<h3
+										class="text-xs font-bold text-gray-500 uppercase tracking-wider"
+									>
+										Variance Audit & History
+									</h3>
+									<p class="text-[10px] text-gray-400 mt-0.5">
+										Dual manager controls & pattern detection
+									</p>
 								</div>
 								<button
 									@click="fetchVarianceReport"
@@ -502,46 +687,111 @@
 								</button>
 							</div>
 
-							<div v-if="varianceReport" class="p-4 bg-gray-50 dark:bg-warm-dark-700/20 border border-gray-100 dark:border-warm-border rounded-xl text-xs space-y-4">
+							<div
+								v-if="varianceReport"
+								class="p-4 bg-gray-50 dark:bg-warm-dark-700/20 border border-gray-100 dark:border-warm-border rounded-xl text-xs space-y-4"
+							>
 								<div class="grid grid-cols-3 gap-2 text-center text-gray-400">
-									<div class="p-2 bg-emerald-500/5 rounded-lg border border-emerald-500/10">
-										<p class="text-[9px] uppercase font-bold text-gray-500">Balanced Closes</p>
-										<p class="text-sm font-bold font-mono text-emerald-500 mt-0.5">{{ varianceReport.balanced_count }}</p>
+									<div
+										class="p-2 bg-emerald-500/5 rounded-lg border border-emerald-500/10"
+									>
+										<p class="text-[9px] uppercase font-bold text-gray-500">
+											Balanced Closes
+										</p>
+										<p
+											class="text-sm font-bold font-mono text-emerald-500 mt-0.5"
+										>
+											{{ varianceReport.balanced_count }}
+										</p>
 									</div>
-									<div class="p-2 bg-red-500/5 rounded-lg border border-red-500/10">
-										<p class="text-[9px] uppercase font-bold text-gray-500">Shortage Closes</p>
-										<p class="text-sm font-bold font-mono text-red-500 mt-0.5">{{ varianceReport.shortage_count }}</p>
+									<div
+										class="p-2 bg-red-500/5 rounded-lg border border-red-500/10"
+									>
+										<p class="text-[9px] uppercase font-bold text-gray-500">
+											Shortage Closes
+										</p>
+										<p class="text-sm font-bold font-mono text-red-500 mt-0.5">
+											{{ varianceReport.shortage_count }}
+										</p>
 									</div>
-									<div class="p-2 bg-blue-500/5 rounded-lg border border-blue-500/10">
-										<p class="text-[9px] uppercase font-bold text-gray-500">Excess Closes</p>
-										<p class="text-sm font-bold font-mono text-blue-500 mt-0.5">{{ varianceReport.excess_count }}</p>
-									</div>
-								</div>
-
-								<div class="flex justify-between items-center text-xs p-3 bg-gray-100/50 dark:bg-warm-dark-700/40 rounded-lg">
-									<span>Discrepancy Rate:</span>
-									<span class="font-bold font-mono" :class="varianceReport.variance_rate_percent > 30 ? 'text-red-500 font-black' : 'text-gray-400'">
-										{{ varianceReport.variance_rate_percent }}%
-									</span>
-								</div>
-
-								<div v-if="varianceReport.pattern !== 'normal'" class="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500 text-xs flex items-center gap-2">
-									<span>🚨</span>
-									<div>
-										<p class="font-bold">Variance Pattern Alert!</p>
-										<p class="mt-0.5">
-											Cashier has <strong class="underline">{{ varianceReport.pattern === 'consistent_shortages' ? 'consistent shortages' : 'consistent excess amount' }}</strong> pattern across past closes.
+									<div
+										class="p-2 bg-blue-500/5 rounded-lg border border-blue-500/10"
+									>
+										<p class="text-[9px] uppercase font-bold text-gray-500">
+											Excess Closes
+										</p>
+										<p
+											class="text-sm font-bold font-mono text-blue-500 mt-0.5"
+										>
+											{{ varianceReport.excess_count }}
 										</p>
 									</div>
 								</div>
 
-								<div v-if="varianceReport.variance_history?.length > 0" class="space-y-2 border-t dark:border-warm-border/30 pt-3">
-									<p class="text-[9px] uppercase font-bold text-gray-500 mb-1">Recent Closes</p>
+								<div
+									class="flex justify-between items-center text-xs p-3 bg-gray-100/50 dark:bg-warm-dark-700/40 rounded-lg"
+								>
+									<span>Discrepancy Rate:</span>
+									<span
+										class="font-bold font-mono"
+										:class="
+											varianceReport.variance_rate_percent > 30
+												? 'text-red-500 font-black'
+												: 'text-gray-400'
+										"
+									>
+										{{ varianceReport.variance_rate_percent }}%
+									</span>
+								</div>
+
+								<div
+									v-if="varianceReport.pattern !== 'normal'"
+									class="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500 text-xs flex items-center gap-2"
+								>
+									<span>🚨</span>
+									<div>
+										<p class="font-bold">Variance Pattern Alert!</p>
+										<p class="mt-0.5">
+											Cashier has
+											<strong class="underline">{{
+												varianceReport.pattern === 'consistent_shortages'
+													? 'consistent shortages'
+													: 'consistent excess amount'
+											}}</strong>
+											pattern across past closes.
+										</p>
+									</div>
+								</div>
+
+								<div
+									v-if="varianceReport.variance_history?.length > 0"
+									class="space-y-2 border-t dark:border-warm-border/30 pt-3"
+								>
+									<p class="text-[9px] uppercase font-bold text-gray-500 mb-1">
+										Recent Closes
+									</p>
 									<div class="max-h-28 overflow-y-auto space-y-1">
-										<div v-for="h in varianceReport.variance_history" :key="h.closing_entry" class="flex justify-between border-b dark:border-warm-border/10 pb-1 text-[11px]">
-											<span class="text-gray-400 font-mono">{{ h.date }}</span>
-											<span class="font-mono font-bold" :class="h.variance < 0 ? 'text-red-500' : (h.variance > 0 ? 'text-blue-500' : 'text-green-500')">
-												{{ h.variance >= 0 ? '+' : '' }}${{ Number(h.variance || 0).toFixed(2) }}
+										<div
+											v-for="h in varianceReport.variance_history"
+											:key="h.closing_entry"
+											class="flex justify-between border-b dark:border-warm-border/10 pb-1 text-[11px]"
+										>
+											<span class="text-gray-400 font-mono">{{
+												h.date
+											}}</span>
+											<span
+												class="font-mono font-bold"
+												:class="
+													h.variance < 0
+														? 'text-red-500'
+														: h.variance > 0
+														? 'text-blue-500'
+														: 'text-green-500'
+												"
+											>
+												{{ h.variance >= 0 ? '+' : '' }}${{
+													Number(h.variance || 0).toFixed(2)
+												}}
 											</span>
 										</div>
 									</div>
@@ -612,7 +862,12 @@ const varianceLoading = ref(false)
 
 const isManager = computed(() => {
 	const roles = session.userRoles || []
-	return roles.includes('Sales Manager') || roles.includes('Store Manager') || roles.includes('System Manager') || roles.includes('Administrator')
+	return (
+		roles.includes('Sales Manager') ||
+		roles.includes('Store Manager') ||
+		roles.includes('System Manager') ||
+		roles.includes('Administrator')
+	)
 })
 
 // Detect mobile/tablet viewport via shared composable
@@ -787,9 +1042,12 @@ async function refreshDrawerBalance() {
 	if (!posSession.activeSession?.name) return
 	drawerLoading.value = true
 	try {
-		const res = await fetch(`/api/method/zevar_core.api.pos_session.get_drawer_balance?session_name=${posSession.activeSession.name}`, {
-			headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' }
-		})
+		const res = await fetch(
+			`/api/method/zevar_core.api.pos_session.get_drawer_balance?session_name=${posSession.activeSession.name}`,
+			{
+				headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
+			}
+		)
 		const json = await res.json()
 		if (json.message) {
 			drawerBalance.value = json.message
@@ -805,9 +1063,12 @@ async function triggerXReport() {
 	if (!posSession.activeSession?.name) return
 	xReportLoading.value = true
 	try {
-		const res = await fetch(`/api/method/zevar_core.api.pos_session.generate_x_report?session_name=${posSession.activeSession.name}`, {
-			headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' }
-		})
+		const res = await fetch(
+			`/api/method/zevar_core.api.pos_session.generate_x_report?session_name=${posSession.activeSession.name}`,
+			{
+				headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
+			}
+		)
 		const json = await res.json()
 		if (json.message) {
 			xReport.value = json.message
@@ -822,25 +1083,37 @@ async function triggerXReport() {
 function formatDateTime(val) {
 	if (!val) return ''
 	const d = new Date(val)
-	return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+	return (
+		d.toLocaleDateString() +
+		' ' +
+		d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+	)
 }
 
 function printXReport() {
 	if (!xReport.value) return
 	const p = xReport.value
 	const printWindow = window.open('', '_blank')
-	
+
 	let paymentsHtml = ''
 	if (p.payment_summary) {
-		p.payment_summary.forEach(pymt => {
-			paymentsHtml += `<tr><td style="padding:6px 0;">${pymt.mode_of_payment} (x${pymt.count})</td><td style="text-align:right; font-family:monospace;">$${Number(pymt.amount || 0).toFixed(2)}</td></tr>`
+		p.payment_summary.forEach((pymt) => {
+			paymentsHtml += `<tr><td style="padding:6px 0;">${pymt.mode_of_payment} (x${
+				pymt.count
+			})</td><td style="text-align:right; font-family:monospace;">$${Number(
+				pymt.amount || 0
+			).toFixed(2)}</td></tr>`
 		})
 	}
 
 	let movementsHtml = ''
 	if (p.cash_movements) {
-		p.cash_movements.forEach(m => {
-			movementsHtml += `<tr><td style="padding:6px 0;">${m.movement_type}: ${m.reason}</td><td style="text-align:right; font-family:monospace;">${m.movement_type === 'Cash In' ? '+' : '-'}$${Number(m.amount || 0).toFixed(2)}</td></tr>`
+		p.cash_movements.forEach((m) => {
+			movementsHtml += `<tr><td style="padding:6px 0;">${m.movement_type}: ${
+				m.reason
+			}</td><td style="text-align:right; font-family:monospace;">${
+				m.movement_type === 'Cash In' ? '+' : '-'
+			}$${Number(m.amount || 0).toFixed(2)}</td></tr>`
 		})
 	}
 
@@ -908,9 +1181,12 @@ function printXReport() {
 async function fetchVarianceReport() {
 	varianceLoading.value = true
 	try {
-		const res = await fetch(`/api/method/zevar_core.api.pos_session.get_cashier_variance_report`, {
-			headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' }
-		})
+		const res = await fetch(
+			`/api/method/zevar_core.api.pos_session.get_cashier_variance_report`,
+			{
+				headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
+			}
+		)
 		const json = await res.json()
 		if (json.message) {
 			varianceReport.value = json.message
@@ -957,7 +1233,7 @@ async function recallHeldCart(cartId) {
 			// Clear current cart and restore held items
 			cart.clearCart()
 			cart.clearCustomer()
-			for (const item of (recalledCart.items || [])) {
+			for (const item of recalledCart.items || []) {
 				cart.addItem(item)
 			}
 			if (recalledCart.customer) {
@@ -1033,7 +1309,11 @@ let sessionPollInterval = null
 let stockRefreshTimeout = null
 function handleStockUpdate(data) {
 	// Only refresh if the update affects our warehouse or is a broadcast
-	if (data?.warehouse && session.currentWarehouse && data.warehouse !== session.currentWarehouse) {
+	if (
+		data?.warehouse &&
+		session.currentWarehouse &&
+		data.warehouse !== session.currentWarehouse
+	) {
 		return
 	}
 	// Debounce: wait 2s to batch rapid-fire updates

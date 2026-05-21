@@ -14,15 +14,22 @@
 						class="sticky top-0 bg-white dark:bg-warm-card border-b border-gray-100 dark:border-warm-border/50 p-4 flex items-center justify-between z-10"
 					>
 						<div>
-							<h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+							<h3
+								class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2"
+							>
 								<span
 									class="w-2.5 h-2.5 rounded-full"
-									:class="type === 'out' ? 'bg-red-500 animate-pulse' : 'bg-amber-500'"
+									:class="
+										type === 'out'
+											? 'bg-red-500 animate-pulse'
+											: 'bg-amber-500'
+									"
 								></span>
 								{{ type === 'out' ? 'Out of Stock Alert' : 'Low Stock Alert' }}
 							</h3>
 							<p class="text-[10px] text-gray-500 font-medium mt-0.5">
-								{{ items.length }} {{ items.length === 1 ? 'item' : 'items' }} require attention
+								{{ items.length }}
+								{{ items.length === 1 ? 'item' : 'items' }} require attention
 							</p>
 						</div>
 						<button
@@ -54,7 +61,9 @@
 							class="p-3 bg-gray-50 dark:bg-warm-dark-900 rounded-xl border border-transparent hover:border-gray-200 dark:hover:border-warm-border/50 hover:bg-gray-100/50 dark:hover:bg-warm-dark-800/50 cursor-pointer transition-all duration-200 flex items-center justify-between group"
 						>
 							<div class="min-w-0 flex-1 pr-3">
-								<div class="font-bold text-xs text-gray-900 dark:text-white truncate group-hover:text-[#D4AF37] transition-colors">
+								<div
+									class="font-bold text-xs text-gray-900 dark:text-white truncate group-hover:text-[#D4AF37] transition-colors"
+								>
 									{{ item.name }}
 								</div>
 								<div class="text-[10px] text-gray-500 font-mono mt-0.5">
@@ -84,7 +93,9 @@
 								>
 									{{ item.stock }} pcs
 								</span>
-								<span class="text-xs font-mono font-bold text-gray-900 dark:text-white">
+								<span
+									class="text-xs font-mono font-bold text-gray-900 dark:text-white"
+								>
 									{{ fmtCur(item.price) }}
 								</span>
 							</div>
@@ -92,7 +103,9 @@
 					</div>
 
 					<!-- Global Action Button at the bottom -->
-					<div class="p-4 border-t border-gray-100 dark:border-warm-border/50 sticky bottom-0 bg-white dark:bg-warm-card z-10">
+					<div
+						class="p-4 border-t border-gray-100 dark:border-warm-border/50 sticky bottom-0 bg-white dark:bg-warm-card z-10"
+					>
 						<button
 							@click="triggerGlobalAction"
 							class="w-full flex items-center justify-center gap-2 py-3 text-xs font-bold text-white rounded-xl shadow-md transition-all duration-200"
@@ -102,7 +115,12 @@
 									: 'bg-amber-600 hover:bg-amber-700 shadow-amber-500/10'
 							"
 						>
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg
+								class="w-4 h-4"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -110,7 +128,11 @@
 									d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
 								/>
 							</svg>
-							{{ type === 'out' ? 'Create Adjustment Entry for All' : 'Initiate Reorder for All' }}
+							{{
+								type === 'out'
+									? 'Create Adjustment Entry for All'
+									: 'Initiate Reorder for All'
+							}}
 						</button>
 					</div>
 				</div>

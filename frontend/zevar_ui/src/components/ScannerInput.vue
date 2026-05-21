@@ -58,10 +58,10 @@
 			Last scan: {{ lastScan }}
 		</div>
 
-		<CameraScanner 
-			v-if="showCameraScanner" 
-			@close="showCameraScanner = false" 
-			@scan="handleCameraScan" 
+		<CameraScanner
+			v-if="showCameraScanner"
+			@close="showCameraScanner = false"
+			@scan="handleCameraScan"
 		/>
 	</div>
 </template>
