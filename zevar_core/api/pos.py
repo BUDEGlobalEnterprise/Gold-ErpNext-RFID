@@ -59,7 +59,7 @@ def _validate_payments(payments_list, trade_in_list, discount_amount, tax_exempt
 	"""
 	from frappe.utils import flt
 
-	if not payments_list:
+	if not payments_list and not trade_in_list:
 		return [], 0, 0
 
 	# 1. Basic per-payment sanity
@@ -74,9 +74,7 @@ def _validate_payments(payments_list, trade_in_list, discount_amount, tax_exempt
 				_("Payment #{0} is missing a payment mode. Please select a payment method.").format(idx + 1)
 			)
 		if amount <= 0:
-			raise frappe.ValidationError(
-				_("Payment mode '{0}' must have an amount greater than zero.").format(mode)
-			)
+			continue
 		if mode in seen_modes:
 			raise frappe.ValidationError(
 				_(
@@ -100,7 +98,19 @@ def _validate_payments(payments_list, trade_in_list, discount_amount, tax_exempt
 	computed_grand_total = subtotal_after_discount + tax
 
 	# 3. Trade-in credit
-	total_trade_in_credit = sum(flt(ti.get("trade_in_value")) for ti in (trade_in_list or []))
+	total_trade_in_credit = 0
+	for ti in (trade_in_list or []):
+		ti_val = flt(ti.get("trade_in_value"))
+		if ti_val <= 0:
+			continue
+		
+		# 2x Rule check: Trade in value should not exceed 50% of the subtotal
+		if not ti.get("manager_override"):
+			if subtotal < ti_val * 2:
+				raise frappe.ValidationError(
+					_("Trade-In value ({0}) cannot exceed 50% of the new purchase amount ({1}). Manager override required.").format(ti_val, subtotal)
+				)
+		total_trade_in_credit += ti_val
 
 	# 4. If cashier already included Trade-In in payments, merge / de-duplicate
 	trade_in_in_payments = False
@@ -118,8 +128,13 @@ def _validate_payments(payments_list, trade_in_list, discount_amount, tax_exempt
 
 	# After removing any manual Trade-In, add the computed credit back
 	if total_trade_in_credit > 0:
-		cleaned_payments.append({"mode_of_payment": "Trade-In", "amount": flt(total_trade_in_credit)})
-		total_payments += total_trade_in_credit
+		remaining_balance = computed_grand_total - total_payments
+		trade_in_to_apply = total_trade_in_credit
+		if remaining_balance < trade_in_to_apply:
+			trade_in_to_apply = remaining_balance
+		if trade_in_to_apply > 0:
+			cleaned_payments.append({"mode_of_payment": "Trade-In", "amount": flt(trade_in_to_apply)})
+			total_payments += trade_in_to_apply
 
 	# 5. Validate payment total covers grand total (within 1-cent tolerance)
 	if abs(total_payments - computed_grand_total) > 0.01:
@@ -203,7 +218,7 @@ def create_pos_invoice(
 	if not items_list:
 		checkout_bouncer(_("At least one item is required."), "invoice_failed")
 
-	if not payments_list:
+	if not payments_list and not trade_in_list:
 		checkout_bouncer(_("At least one payment mode is required."), "invoice_failed")
 
 	# Resolve warehouse BEFORE per-item validation so the stock and serial
@@ -522,22 +537,30 @@ def create_pos_invoice(
 
 			if not customer_is_exempt:
 				# Non-exempt customer requires manager override
-				if not override_reference:
+				manager_roles = {"Sales Manager", "Store Manager", "System Manager"}
+				user_is_manager = bool(manager_roles & set(frappe.get_roles()))
+				
+				if not user_is_manager and not override_reference:
 					checkout_bouncer(
 						_(
 							"Tax exemption requires manager approval. Customer '{0}' is not marked as tax exempt."
 						).format(customer),
 						"invoice_failed",
 					)
-				_validate_tax_override(override_reference, customer)
+				elif override_reference:
+					_validate_tax_override(override_reference, customer)
 
 			si.taxes = []
 			if has_no_tax_field:
 				si.custom_no_tax_override = 1
-			if has_tax_override_fields and not customer_is_exempt and override_reference:
-				override_doc = frappe.get_doc("POS Manager Override", override_reference)
-				si.custom_tax_override_approved_by = override_doc.approved_by or frappe.session.user
-				si.custom_tax_override_reason = override_doc.reason or ""
+			if has_tax_override_fields and not customer_is_exempt:
+				if override_reference:
+					override_doc = frappe.get_doc("POS Manager Override", override_reference)
+					si.custom_tax_override_approved_by = override_doc.approved_by or frappe.session.user
+					si.custom_tax_override_reason = override_doc.reason or ""
+				else:
+					si.custom_tax_override_approved_by = frappe.session.user
+					si.custom_tax_override_reason = "Manager self-override during checkout"
 		elif tax_template:
 			si.taxes_and_charges = tax_template
 			if has_no_tax_field:
