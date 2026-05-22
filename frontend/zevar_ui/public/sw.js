@@ -5,8 +5,8 @@
  * Uses IndexedDB for reliable offline order queuing.
  */
 
-const CACHE_NAME = 'zevar-pos-v4'
-const API_CACHE = 'zevar-api-v4'
+const CACHE_NAME = 'zevar-pos-v8'
+const API_CACHE = 'zevar-api-v8'
 
 // Assets to cache immediately on install
 const STATIC_ASSETS = ['/pos/', '/pos/index.html', '/pos/manifest.json']
@@ -20,7 +20,7 @@ const CACHEABLE_API_ROUTES = [
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
-	console.log('[SW] Installing service worker v4...')
+	console.log('[SW] Installing service worker v8...')
 	event.waitUntil(
 		caches
 			.open(CACHE_NAME)
@@ -34,7 +34,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-	console.log('[SW] Activating service worker v4...')
+	console.log('[SW] Activating service worker v8...')
 	event.waitUntil(
 		caches
 			.keys()
@@ -56,6 +56,11 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
 	const { request } = event
 	const url = new URL(request.url)
+
+	if (request.mode === 'navigate' || request.destination === 'document') {
+		event.respondWith(handleNavigationRequest(request))
+		return
+	}
 
 	// Handle API calls separately
 	if (url.pathname.includes('/api/method/')) {
@@ -101,6 +106,19 @@ self.addEventListener('fetch', (event) => {
 			})
 	)
 })
+
+async function handleNavigationRequest(request) {
+	try {
+		const response = await fetch(request)
+		if (response && response.status === 200) {
+			const cache = await caches.open(CACHE_NAME)
+			cache.put('/pos/index.html', response.clone())
+		}
+		return response
+	} catch (error) {
+		return caches.match('/pos/index.html')
+	}
+}
 
 // Handle API requests with network-first strategy
 async function handleAPIRequest(request) {

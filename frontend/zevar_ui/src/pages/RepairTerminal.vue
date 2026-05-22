@@ -2,7 +2,7 @@
 	<AppLayout>
 		<div class="h-full flex flex-col min-h-0">
 			<!-- Page Header - consistent with other pages -->
-			<div class="flex items-center justify-between gap-4 mb-4 flex-shrink-0">
+			<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4 flex-shrink-0">
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Repair Terminal</h2>
 					<span
@@ -11,7 +11,7 @@
 						{{ orders.length }} Orders
 					</span>
 				</div>
-				<div class="flex items-center gap-2">
+				<div class="flex flex-wrap lg:flex-nowrap items-center gap-2 w-full lg:w-auto self-end lg:self-auto justify-end">
 					<!-- Store Selector (inline) -->
 					<select
 						v-model="selectedStore"
@@ -111,6 +111,21 @@
 						<option :value="30000">30s</option>
 						<option :value="60000">1m</option>
 					</select>
+					<!-- Workload Toggle -->
+					<button
+						@click="showWorkloadPanel = !showWorkloadPanel"
+						class="hidden md:flex px-3 py-2 rounded-lg text-sm font-medium transition items-center gap-1.5"
+						:class="showWorkloadPanel
+							? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30'
+							: 'bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-700 border border-transparent'"
+						title="Technician Workload"
+					>
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+						</svg>
+						<span class="hidden lg:inline">Workload</span>
+					</button>
 					<button
 						@click="showNewModal = true"
 						class="px-4 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] transition flex items-center gap-2"
@@ -376,7 +391,15 @@
 			</div>
 
 			<!-- Main Content Area -->
-			<div class="flex-1 flex min-h-0 overflow-hidden">
+			<div class="flex-1 flex min-h-0 overflow-hidden gap-4">
+				<!-- Workload Panel (collapsible sidebar) -->
+				<div
+					v-if="showWorkloadPanel"
+					class="w-72 flex-shrink-0 overflow-y-auto"
+				>
+					<TechnicianWorkloadPanel />
+				</div>
+
 				<!-- Grid View -->
 				<div v-if="viewMode === 'grid'" class="flex-1 overflow-y-auto pb-20">
 					<div v-if="ordersResource.loading && !orders.length" class="py-20 text-center">
@@ -393,7 +416,7 @@
 					</div>
 					<div
 						v-else
-						class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
+						class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5"
 					>
 						<RepairCard
 							v-for="order in orders"
@@ -653,9 +676,11 @@ import QRCodeModal from '@/components/QRCodeModal.vue'
 import CameraModal from '@/components/CameraModal.vue'
 import StoreTransferModal from '@/components/StoreTransferModal.vue'
 import PaymentModal from '@/components/PaymentModal.vue'
+import TechnicianWorkloadPanel from '@/components/TechnicianWorkloadPanel.vue'
 
 const session = useSessionStore()
 const viewMode = ref('grid') // grid, kanban, split
+const showWorkloadPanel = ref(false)
 const statusFilter = ref('')
 const searchTerm = ref('')
 const selectedStore = ref('all')

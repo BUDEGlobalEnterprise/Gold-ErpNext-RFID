@@ -133,55 +133,54 @@
 					</div>
 
 					<div v-else class="flex-1 flex flex-col min-h-0 overflow-hidden">
-						<!-- Customer Selector -->
-						<div
-							class="p-4 border-b border-gray-100 dark:border-warm-border/50 bg-white dark:bg-warm-card flex-shrink-0 z-10"
-						>
-							<div class="mb-3">
-								<label
-									class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-2"
-									>Customer <span class="text-red-500">*</span></label
-								>
-								<div class="flex bg-gray-100 dark:bg-warm-dark-700 p-1 rounded-lg">
-									<button
-										class="flex-1 text-xs font-medium py-1.5 rounded-md transition-colors"
-										:class="
-											cart.customerType === 'Individual'
-												? 'bg-white dark:bg-warm-card shadow-sm text-gray-900 dark:text-white'
-												: 'text-gray-500'
-										"
-										@click="setCustomerType('Individual')"
-									>
-										Individual
-									</button>
-									<button
-										class="flex-1 text-xs font-medium py-1.5 rounded-md transition-colors"
-										:class="
-											cart.customerType === 'Company'
-												? 'bg-white dark:bg-warm-card shadow-sm text-gray-900 dark:text-white'
-												: 'text-gray-500'
-										"
-										@click="setCustomerType('Company')"
-									>
-										Company
-									</button>
-									<button
-										class="flex-1 text-xs font-medium py-1.5 rounded-md transition-colors"
-										:class="
-											cart.customerType === 'Walkin'
-												? 'bg-white dark:bg-warm-card shadow-sm text-gray-900 dark:text-white'
-												: 'text-gray-500'
-										"
-										@click="setCustomerType('Walkin')"
-									>
-										Walk-In
-									</button>
-								</div>
-							</div>
-							<CustomerSelector v-if="cart.customerType !== 'Walkin'" />
-						</div>
-
 						<div class="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+							<!-- Customer Selector (moved inside scrollable area) -->
+							<div
+								class="p-4 border border-orange-100 dark:border-warm-border/50 rounded-xl bg-orange-50/20 dark:bg-warm-dark-800/40 z-10"
+							>
+								<div class="mb-3">
+									<label
+										class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-2"
+										>Customer <span class="text-red-500">*</span></label
+									>
+									<div class="flex bg-gray-100 dark:bg-warm-dark-700 p-1 rounded-lg">
+										<button
+											class="flex-1 text-xs font-medium py-1.5 rounded-md transition-colors"
+											:class="
+												cart.customerType === 'Individual'
+													? 'bg-white dark:bg-warm-card shadow-sm text-gray-900 dark:text-white'
+													: 'text-gray-500'
+											"
+											@click="setCustomerType('Individual')"
+										>
+											Individual
+										</button>
+										<button
+											class="flex-1 text-xs font-medium py-1.5 rounded-md transition-colors"
+											:class="
+												cart.customerType === 'Company'
+													? 'bg-white dark:bg-warm-card shadow-sm text-gray-900 dark:text-white'
+													: 'text-gray-500'
+											"
+											@click="setCustomerType('Company')"
+										>
+											Company
+										</button>
+										<button
+											class="flex-1 text-xs font-medium py-1.5 rounded-md transition-colors"
+											:class="
+												cart.customerType === 'Walkin'
+													? 'bg-white dark:bg-warm-card shadow-sm text-gray-900 dark:text-white'
+													: 'text-gray-500'
+											"
+											@click="setCustomerType('Walkin')"
+										>
+											Walk-In
+										</button>
+									</div>
+								</div>
+								<CustomerSelector v-if="cart.customerType !== 'Walkin'" />
+							</div>
 							<div
 								v-for="(item, index) in cart.items"
 								:key="index"
@@ -436,8 +435,8 @@
 							<button
 								v-else
 								@click="
-									showCheckout = true
-									ui.closeLayawayPayment()
+									showCheckout = true;
+									ui.closeLayawayPayment();
 								"
 								:disabled="!isCheckoutReady"
 								class="w-full py-3 rounded-lg font-bold shadow-lg transition-all flex items-center justify-center gap-2"

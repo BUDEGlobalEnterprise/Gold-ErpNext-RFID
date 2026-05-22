@@ -254,7 +254,6 @@ function loadMore() {
 }
 
 function openItemDetails(itemCode) {
-	if (isMobile.value) return
 	selectedItemCode.value = itemCode
 	showModal.value = true
 }

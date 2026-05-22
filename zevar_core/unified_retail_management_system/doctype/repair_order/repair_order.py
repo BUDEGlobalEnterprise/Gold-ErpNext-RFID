@@ -26,6 +26,7 @@ class PaymentMethod:
 class RepairOrder(Document):  # nosemgrep
 	def validate(self):
 		self.track_critical_changes()
+		self.log_status_to_timeline()
 		self.set_total_cost()
 		self.update_payment_and_balance()
 		self.calculate_metal_weight_difference()
@@ -36,6 +37,49 @@ class RepairOrder(Document):  # nosemgrep
 		self.validate_warranty_repair()
 		self.calculate_warranty_expiry()  # nosemgrep  # nosemgrep
 		self.track_id_verification()
+
+	def log_status_to_timeline(self):
+		"""Append status change events to the status_log child table for timeline tracking."""
+		from frappe.utils import now as now_dt
+
+		# On new document, seed the initial 'Received' entry
+		if self.is_new():
+			if not any(row.status == "Received" for row in (self.status_log or [])):
+				self.append("status_log", {
+					"status": self.status or "Received",
+					"timestamp": now_dt(),
+					"changed_by": frappe.session.user,
+					"notes": "Repair order created",
+				})
+			return
+
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+
+	# Only log when the status actually changed
+		if doc_before_save.status != self.status:
+			self.append("status_log", {
+				"status": self.status,
+				"timestamp": now_dt(),
+				"changed_by": frappe.session.user,
+				"notes": "",
+			})
+			# Broadcast realtime event for Live Monitor
+			try:
+				from zevar_core.api.live_monitor import publish_repair_event
+				publish_repair_event("status_change", {
+					"repair": self.name,
+					"customer": self.customer_name,
+					"old_status": doc_before_save.status,
+					"new_status": self.status,
+					"warehouse": self.warehouse,
+					"repair_type": self.repair_type_name,
+				})
+			except Exception:
+				pass  # Never block save for realtime failures
+
+
 
 	def auto_set_receiving_store(self):
 		if not self.receiving_store and self.warehouse:

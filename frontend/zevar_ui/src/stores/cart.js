@@ -7,6 +7,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { createResource, call } from 'frappe-ui'
+import { useOfflineStore } from './offline.js'
 
 export const useCartStore = defineStore('cart', () => {
 	// ==========================================================================
@@ -559,15 +560,39 @@ export const useCartStore = defineStore('cart', () => {
 			if (data) {
 				taxRate.value = data.tax_rate || 0
 				currency.value = data.currency || 'USD'
+				const offlineStore = useOfflineStore()
+				offlineStore.cacheSettingValue('pos_settings', data)
 			}
 		},
 	})
 
-	function loadTaxForWarehouse(warehouse) {
+	async function loadTaxForWarehouse(warehouse) {
 		if (warehouse) {
-			fetchSettings.fetch({ warehouse })
+			const offlineStore = useOfflineStore()
+			if (!offlineStore.isOnline) {
+				try {
+					const cached = await offlineStore.getCachedSettingValue('pos_settings')
+					if (cached) {
+						taxRate.value = cached.tax_rate || 0
+						currency.value = cached.currency || 'USD'
+					}
+				} catch (err) {
+					console.error('Failed to load cached settings offline', err)
+				}
+			} else {
+				fetchSettings.fetch({ warehouse })
+			}
 		}
 	}
+
+	// Load cached settings immediately on store init in case we start offline
+	const offlineStore = useOfflineStore()
+	offlineStore.getCachedSettingValue('pos_settings').then(cached => {
+		if (cached) {
+			taxRate.value = cached.tax_rate || 0
+			currency.value = cached.currency || 'USD'
+		}
+	}).catch(() => {})
 
 	// ==========================================================================
 	// ORDER SUBMISSION

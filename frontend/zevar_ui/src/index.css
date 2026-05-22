@@ -38,7 +38,7 @@
 }
 
 .premium-card {
-    background: white;
+    @apply bg-white;
     border: 1.5px solid transparent;
     border-radius: 18px;
     padding: 1.5rem;

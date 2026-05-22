@@ -1,19 +1,23 @@
 <template>
 	<AppLayout>
 		<div class="h-full flex flex-col min-h-0">
-			<div class="flex items-center justify-between gap-4 mb-6 flex-shrink-0">
-				<div class="flex items-center gap-3">
-					<h2 class="premium-title !text-xl sm:!text-2xl">Contacts</h2>
-					<span
-						class="status-label !mb-0 !bg-gray-100 dark:!bg-warm-dark-700 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-warm-border"
-					>
-						{{ pagination.total_count }} Vendors
-					</span>
+			<div class="flex flex-col gap-3 mb-6 flex-shrink-0">
+				<!-- Title & Display controls Row (Always single-line) -->
+				<div class="flex items-center justify-between gap-4 w-full">
+					<div class="flex items-center gap-3">
+						<h2 class="premium-title !text-xl sm:!text-2xl">Contacts</h2>
+						<span
+							class="status-label !mb-0 !bg-gray-100 dark:!bg-warm-dark-700 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-warm-border"
+						>
+							{{ pagination.total_count }} Vendors
+						</span>
+					</div>
+					<ViewToggle v-model="viewMode" storage-key="zevar_contacts_view" class="shrink-0" />
 				</div>
 
-				<div class="flex items-center gap-2">
-					<ViewToggle v-model="viewMode" storage-key="zevar_contacts_view" />
-					<div class="relative">
+				<!-- Actions Row (Search) -->
+				<div class="flex items-center gap-2 w-full">
+					<div class="relative flex-1">
 						<svg
 							class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
 							fill="none"
@@ -32,7 +36,7 @@
 							v-model="searchQuery"
 							@input="onSearchInput"
 							placeholder="Search by name, phone, email..."
-							class="pl-9 pr-4 py-2 bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-64"
+							class="pl-9 pr-4 py-2 bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-full text-ellipsis"
 						/>
 					</div>
 				</div>
@@ -336,34 +340,29 @@
 					<!-- Grid cards -->
 					<div
 						v-else
-						class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-6"
+						class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3.5 pb-6"
 					>
 						<div
 							v-for="supplier in suppliers"
 							:key="supplier.name"
-							class="group bg-white dark:bg-warm-dark-800 rounded-2xl border border-gray-100 dark:border-warm-border/50 overflow-hidden hover:border-[#D4AF37]/40 dark:hover:border-[#D4AF37]/30 transition-all duration-200 cursor-pointer hover:shadow-lg hover:shadow-[#D4AF37]/5 dark:hover:shadow-none hover:-translate-y-0.5"
+							class="group bg-white dark:bg-warm-dark-800 rounded-xl border border-gray-100 dark:border-warm-border/50 overflow-hidden hover:border-[#D4AF37]/40 dark:hover:border-[#D4AF37]/30 transition-all duration-200 cursor-pointer flex flex-col group min-w-0"
 						>
-							<!-- Card accent bar -->
-							<div
-								class="h-1 bg-gradient-to-r from-[#D4AF37] via-[#F2E6A0] to-[#D4AF37] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-							></div>
-
-							<div class="p-4">
+							<div class="p-3 flex flex-col flex-1 min-w-0">
 								<!-- Header: avatar + name + group badge -->
-								<div class="flex items-start gap-3 mb-3">
+								<div class="flex items-start gap-2.5 mb-2.5 min-w-0">
 									<div
-										class="w-11 h-11 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] text-[#0F1115] shadow-sm"
+										class="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] text-[#0F1115] shadow-sm"
 									>
 										{{ getInitials(supplier.supplier_name || supplier.name) }}
 									</div>
 									<div class="min-w-0 flex-1">
 										<div
-											class="font-bold text-gray-900 dark:text-white text-sm truncate leading-tight"
+											class="font-bold text-gray-900 dark:text-white text-xs truncate leading-tight"
 										>
 											{{ supplier.supplier_name || supplier.name }}
 										</div>
 										<div
-											class="text-[10px] text-gray-400 dark:text-gray-500 font-mono mt-0.5"
+											class="text-[9px] text-gray-400 dark:text-gray-500 font-mono mt-0.5 truncate"
 										>
 											{{ supplier.name }}
 										</div>
@@ -371,12 +370,12 @@
 								</div>
 
 								<!-- Supplier group badge -->
-								<div class="mb-3">
+								<div class="mb-2.5">
 									<span
-										class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#D4AF37]/10 text-[#B8960C] dark:bg-[#D4AF37]/15 dark:text-[#F2E6A0]"
+										class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold bg-[#D4AF37]/10 text-[#B8960C] dark:bg-[#D4AF37]/15 dark:text-[#F2E6A0]"
 									>
 										<svg
-											class="w-3 h-3"
+											class="w-2.5 h-2.5 shrink-0"
 											fill="none"
 											stroke="currentColor"
 											viewBox="0 0 24 24"
@@ -394,55 +393,47 @@
 
 								<!-- Divider -->
 								<div
-									class="border-t border-gray-100 dark:border-warm-border/50 mb-3"
+									class="border-t border-gray-100 dark:border-warm-border/30 mb-2.5"
 								></div>
 
 								<!-- Contact details -->
-								<div class="space-y-2">
+								<div class="space-y-1.5 min-w-0">
 									<!-- Phone -->
-									<div class="flex items-center gap-2 text-xs">
-										<div
-											class="w-6 h-6 rounded-md bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center shrink-0"
+									<div class="flex items-center gap-2 text-[10px] min-w-0">
+										<svg
+											class="w-3.5 h-3.5 text-blue-500 shrink-0"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
 										>
-											<svg
-												class="w-3.5 h-3.5 text-blue-500"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-												/>
-											</svg>
-										</div>
-										<span class="text-gray-700 dark:text-gray-300 truncate">{{
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+											/>
+										</svg>
+										<span class="text-gray-600 dark:text-gray-400 truncate">{{
 											supplier.mobile_no || 'No Phone'
 										}}</span>
 									</div>
 
 									<!-- Email -->
-									<div class="flex items-center gap-2 text-xs">
-										<div
-											class="w-6 h-6 rounded-md bg-green-50 dark:bg-green-900/30 flex items-center justify-center shrink-0"
+									<div class="flex items-center gap-2 text-[10px] min-w-0">
+										<svg
+											class="w-3.5 h-3.5 text-green-500 shrink-0"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
 										>
-											<svg
-												class="w-3.5 h-3.5 text-green-500"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-												/>
-											</svg>
-										</div>
-										<span class="text-gray-700 dark:text-gray-300 truncate">{{
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+											/>
+										</svg>
+										<span class="text-gray-600 dark:text-gray-400 truncate">{{
 											supplier.email_id || 'No Email'
 										}}</span>
 									</div>
@@ -450,26 +441,22 @@
 									<!-- Supplier type -->
 									<div
 										v-if="supplier.supplier_type"
-										class="flex items-center gap-2 text-xs"
+										class="flex items-center gap-2 text-[10px] min-w-0"
 									>
-										<div
-											class="w-6 h-6 rounded-md bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center shrink-0"
+										<svg
+											class="w-3.5 h-3.5 text-purple-500 shrink-0"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
 										>
-											<svg
-												class="w-3.5 h-3.5 text-purple-500"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-												/>
-											</svg>
-										</div>
-										<span class="text-gray-600 dark:text-gray-400">{{
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+											/>
+										</svg>
+										<span class="text-gray-600 dark:text-gray-400 truncate">{{
 											supplier.supplier_type
 										}}</span>
 									</div>
@@ -477,26 +464,22 @@
 									<!-- Country -->
 									<div
 										v-if="supplier.country"
-										class="flex items-center gap-2 text-xs"
+										class="flex items-center gap-2 text-[10px] min-w-0"
 									>
-										<div
-											class="w-6 h-6 rounded-md bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center shrink-0"
+										<svg
+											class="w-3.5 h-3.5 text-orange-500 shrink-0"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
 										>
-											<svg
-												class="w-3.5 h-3.5 text-orange-500"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-												/>
-											</svg>
-										</div>
-										<span class="text-gray-600 dark:text-gray-400">{{
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+											/>
+										</svg>
+										<span class="text-gray-600 dark:text-gray-400 truncate">{{
 											supplier.country
 										}}</span>
 									</div>
@@ -504,13 +487,13 @@
 
 								<!-- Quick action (shown on hover) -->
 								<div
-									class="mt-3 pt-3 border-t border-gray-50 dark:border-warm-border/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+									class="mt-auto pt-2 border-t border-gray-50 dark:border-warm-border/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
 								>
 									<button
-										class="w-full flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-bold text-[#D4AF37] hover:bg-[#D4AF37]/10 transition"
+										class="w-full flex items-center justify-center gap-1.5 py-1 rounded text-[10px] font-bold text-[#D4AF37] hover:bg-[#D4AF37]/10 transition"
 									>
 										<svg
-											class="w-3.5 h-3.5"
+											class="w-3 h-3"
 											fill="none"
 											stroke="currentColor"
 											viewBox="0 0 24 24"

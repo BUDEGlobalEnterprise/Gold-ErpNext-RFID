@@ -35,6 +35,7 @@ class TestStockReductionDetection(FrappeTestCase):
 			doc.item_group = "All Item Groups"
 			doc.stock_uom = "Nos"
 			doc.is_stock_item = 1
+			doc.has_serial_no = 1
 			doc.insert(ignore_permissions=True)
 
 		abbr = _get_abbr()
@@ -64,16 +65,6 @@ class TestStockReductionDetection(FrappeTestCase):
 
 	def _create_serial_no(self, item_code=None, warehouse=None):
 		sn_name = frappe.generate_hash("SRN", 10).upper()
-		if frappe.db.exists("Serial No", sn_name):
-			sn_name = frappe.generate_hash("SRN", 12).upper()
-
-		sn = frappe.new_doc("Serial No")
-		sn.name = sn_name
-		sn.serial_number = sn_name
-		sn.item_code = item_code or self.item_code
-		sn.warehouse = warehouse or self.warehouse
-		sn.status = "Active"
-		sn.insert(ignore_permissions=True)
 		return sn_name
 
 	def _create_test_stock(self, qty=1):
@@ -85,6 +76,8 @@ class TestStockReductionDetection(FrappeTestCase):
 			self.item_code,
 			self.warehouse,
 			qty=qty,
+			serial_no="\n".join(serials),
+			valuation_rate=100.0,
 		)
 		return serials
 
@@ -99,7 +92,7 @@ class TestStockReductionDetection(FrappeTestCase):
 		if not frappe.db.exists("Customer", invoice.customer):
 			cust = frappe.new_doc("Customer")
 			cust.customer_name = invoice.customer
-			cust.customer_group = "All Customer Groups"
+			cust.customer_group = "Individual"
 			cust.territory = "All Territories"
 			cust.insert(ignore_permissions=True)
 			invoice.customer = cust.name

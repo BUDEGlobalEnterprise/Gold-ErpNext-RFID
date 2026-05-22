@@ -3,6 +3,37 @@ import json
 import frappe
 from frappe.utils import cint, cstr, flt, today
 
+QUOTE_STATUSES = {"Draft", "Open", "Replied", "Ordered", "Lost", "Cancelled", "Expired"}
+
+
+def _parse_status_filter(status):
+	if not status:
+		return None
+
+	if isinstance(status, str):
+		value = cstr(status).strip()
+		if not value:
+			return None
+		if value.startswith("["):
+			try:
+				status = json.loads(value)
+			except json.JSONDecodeError:
+				frappe.throw("Invalid quotation status filter")
+		else:
+			if value not in QUOTE_STATUSES:
+				frappe.throw("Invalid quotation status")
+			return value
+
+	if isinstance(status, (list, tuple)):
+		if len(status) != 2 or status[0] != "in" or not isinstance(status[1], (list, tuple)):
+			frappe.throw("Invalid quotation status filter")
+		statuses = [cstr(value).strip() for value in status[1]]
+		if not statuses or any(value not in QUOTE_STATUSES for value in statuses):
+			frappe.throw("Invalid quotation status")
+		return ["in", statuses]
+
+	frappe.throw("Invalid quotation status filter")
+
 
 @frappe.whitelist(allow_guest=False)
 def get_quotations(status=None, customer=None, from_date=None, to_date=None, page=1, page_size=20):
@@ -10,8 +41,9 @@ def get_quotations(status=None, customer=None, from_date=None, to_date=None, pag
 	frappe.has_permission("Quotation", ptype="read", throw=True)
 
 	filters = {"docstatus": ["!=", 2]}
-	if status:
-		filters["status"] = status
+	status_filter = _parse_status_filter(status)
+	if status_filter:
+		filters["status"] = status_filter
 	if customer:
 		filters["party_name"] = customer
 	if from_date and to_date:

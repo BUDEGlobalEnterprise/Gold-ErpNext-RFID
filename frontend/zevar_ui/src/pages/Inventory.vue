@@ -1,55 +1,84 @@
 <template>
 	<AppLayout>
 		<div class="flex flex-col h-full">
-			<div
-				class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-4 flex-shrink-0 pb-3 border-b border-gray-100 dark:border-warm-border/30"
-			>
-				<div class="flex items-center gap-3">
-					<h2 class="premium-title !text-xl sm:!text-2xl">Inventory</h2>
-					<span
-						class="px-3 py-0.5 text-xs font-extrabold bg-gray-100 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-warm-border/50 rounded-full flex-shrink-0 self-center"
-					>
-						{{ totalItems }} Items
-					</span>
-
-					<div
-						v-if="ui.activeFilters.inventory?.display_case"
-						class="flex items-center gap-1.5 px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 rounded-full text-[10px] font-bold animate-in fade-in slide-in-from-left-2"
-					>
-						<svg
-							class="w-3.5 h-3.5"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2.5"
+			<div class="flex flex-col gap-3 mb-4 flex-shrink-0 pb-3 border-b border-gray-100 dark:border-warm-border/30">
+				<!-- Title & Display Controls Row (Always single-line, fits perfectly) -->
+				<div class="flex items-center justify-between gap-4 w-full">
+					<div class="flex items-center gap-3">
+						<h2 class="premium-title !text-xl sm:!text-2xl">Inventory</h2>
+						<span
+							class="px-3 py-0.5 text-xs font-extrabold bg-gray-100 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-warm-border/50 rounded-full flex-shrink-0 self-center"
 						>
-							<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-						</svg>
-						Case: {{ ui.activeFilters.inventory.display_case }}
+							{{ totalItems }} Items
+						</span>
+
+						<div
+							v-if="ui.activeFilters.inventory?.display_case"
+							class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 rounded-full text-[10px] font-bold"
+						>
+							<svg
+								class="w-3.5 h-3.5"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2.5"
+							>
+								<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+							</svg>
+							Case: {{ ui.activeFilters.inventory.display_case }}
+						</div>
+					</div>
+
+					<!-- View & Refresh Controls -->
+					<div class="flex items-center gap-2">
+						<button
+							@click="refreshData"
+							class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 flex-shrink-0 transition-colors"
+							title="Refresh"
+						>
+							<svg
+								class="w-4 h-4 text-gray-500"
+								:class="{ 'animate-spin': inventoryResource.loading }"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357 2m15.357 2H15"
+								/>
+							</svg>
+						</button>
+						<ViewToggle v-model="viewMode" storage-key="zevar_inventory_view" class="flex-shrink-0" />
+
+						<!-- Mobile Menu Toggle -->
+						<div class="md:hidden">
+							<button
+								@click="mobileMenuOpen = !mobileMenuOpen"
+								class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 transition-colors"
+							>
+								<svg
+									class="w-5 h-5 text-gray-600 dark:text-gray-300"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+									/>
+								</svg>
+							</button>
+						</div>
 					</div>
 				</div>
 
-				<div class="flex flex-wrap items-center gap-2 sm:gap-3">
-					<button
-						@click="refreshData"
-						class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 flex-shrink-0"
-						title="Refresh"
-					>
-						<svg
-							class="w-4 h-4 text-gray-500"
-							:class="{ 'animate-spin': inventoryResource.loading }"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357 2m15.357 2H15"
-							/>
-						</svg>
-					</button>
+				<!-- Actions Toolbar (Left-aligned, wrapping beautifully and intentionally) -->
+				<div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full">
 					<button
 						@click="showStockAdjust = true"
 						class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] text-white rounded-lg text-xs font-bold hover:bg-[#047857] transition whitespace-nowrap flex-shrink-0"
@@ -107,68 +136,36 @@
 						</svg>
 						Quick Add
 					</button>
-					<button
-						@click="openPushForSelected"
-						class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition whitespace-nowrap flex-shrink-0"
-					>
-						<svg
-							class="w-4 h-4 flex-shrink-0"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-							/>
-						</svg>
-						Push
-					</button>
-					<button
-						@click="showTransferModal = true"
-						class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 dark:border-warm-border/50 rounded-lg text-xs font-bold hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition whitespace-nowrap flex-shrink-0"
-					>
-						Transfer
-					</button>
-					<button
-						@click="showConsignment = true"
-						class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 dark:border-warm-border/50 rounded-lg text-xs font-bold hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition whitespace-nowrap flex-shrink-0"
-					>
-						Consignment
-					</button>
 
-					<div class="md:hidden">
+					<!-- Bulk Actions Button Group -->
+					<div class="hidden sm:inline-flex rounded-lg border border-gray-200 dark:border-warm-border/50 shadow-sm bg-white dark:bg-warm-dark-800 overflow-hidden flex-shrink-0">
 						<button
-							@click="mobileMenuOpen = !mobileMenuOpen"
-							class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700"
+							@click="openPushForSelected"
+							class="flex items-center gap-1 px-2.5 py-1.5 border-r border-gray-200 dark:border-warm-border/50 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition whitespace-nowrap"
 						>
-							<svg
-								class="w-5 h-5 text-gray-600 dark:text-gray-300"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-								/>
-							</svg>
+							Push
+						</button>
+						<button
+							@click="showTransferModal = true"
+							class="flex items-center gap-1 px-2.5 py-1.5 border-r border-gray-200 dark:border-warm-border/50 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition whitespace-nowrap"
+						>
+							Transfer
+						</button>
+						<button
+							@click="showConsignment = true"
+							class="flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition whitespace-nowrap"
+						>
+							Consignment
 						</button>
 					</div>
-
-					<ViewToggle v-model="viewMode" storage-key="zevar_inventory_view" />
 				</div>
 			</div>
 
 			<div v-if="mobileMenuOpen" class="md:hidden grid grid-cols-2 gap-2 mb-4">
 				<button
 					@click="
-						showStockAdjust = true
-						mobileMenuOpen = false
+						showStockAdjust = true;
+						mobileMenuOpen = false;
 					"
 					class="py-2 bg-[#059669] text-white rounded-lg text-xs font-bold hover:bg-[#047857]"
 				>
@@ -176,8 +173,8 @@
 				</button>
 				<button
 					@click="
-						showReductions = true
-						mobileMenuOpen = false
+						showReductions = true;
+						mobileMenuOpen = false;
 					"
 					class="py-2 bg-amber-50 text-amber-700 border border-amber-300 rounded-lg text-xs font-bold"
 				>
@@ -185,8 +182,8 @@
 				</button>
 				<button
 					@click="
-						showQuickAdd = true
-						mobileMenuOpen = false
+						showQuickAdd = true;
+						mobileMenuOpen = false;
 					"
 					class="py-2 bg-[#D4AF37] text-white rounded-lg text-xs font-bold"
 				>
@@ -194,8 +191,8 @@
 				</button>
 				<button
 					@click="
-						openPushForSelected()
-						mobileMenuOpen = false
+						openPushForSelected();
+						mobileMenuOpen = false;
 					"
 					class="py-2 bg-blue-600 text-white rounded-lg text-xs font-bold"
 				>
@@ -203,8 +200,8 @@
 				</button>
 				<button
 					@click="
-						showTransferModal = true
-						mobileMenuOpen = false
+						showTransferModal = true;
+						mobileMenuOpen = false;
 					"
 					class="py-2 border rounded-lg text-xs font-bold"
 				>
@@ -212,8 +209,8 @@
 				</button>
 				<button
 					@click="
-						showConsignment = true
-						mobileMenuOpen = false
+						showConsignment = true;
+						mobileMenuOpen = false;
 					"
 					class="py-2 border rounded-lg text-xs font-bold"
 				>
@@ -221,56 +218,36 @@
 				</button>
 			</div>
 
-			<div class="hidden md:flex justify-center px-4 mb-4">
+			<div class="flex justify-center px-4 mb-4">
 				<ItemFilterBar context="inventory" />
 			</div>
 
 			<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4 flex-shrink-0">
-				<div class="premium-card !p-4">
-					<div
-						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
-					>
-						Total Items
-					</div>
-					<div class="text-2xl font-bold text-gray-900 dark:text-white">
-						{{ totalItems }}
-					</div>
-				</div>
-				<div class="premium-card !p-4">
-					<div
-						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
-					>
-						Total Value
-					</div>
-					<div class="text-2xl font-bold text-[#D4AF37]">
-						{{ formatCurrency(totalValue) }}
-					</div>
-					<div class="text-[10px] text-gray-500 font-bold mt-1">Retail value</div>
-				</div>
-				<div
+				<StatCard label="Total Items" :value="totalItems" clickable @click="openStockAlert('all')" />
+				<StatCard
+					label="Total Value"
+					:value="formatCurrency(totalValue)"
+					variant="gold"
+					subtext="Retail value"
+					clickable
+					@click="openStockAlert('value')"
+				/>
+				<StatCard
+					label="Low Stock"
+					:value="lowStockItems.length"
+					variant="warning"
+					subtext="Need reorder"
+					clickable
 					@click="openStockAlert('low')"
-					class="premium-card !p-4 cursor-pointer hover:ring-2 hover:ring-amber-500/50 hover:border-amber-500/50 dark:hover:ring-amber-500/30 transition-all duration-200"
-				>
-					<div
-						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
-					>
-						Low Stock
-					</div>
-					<div class="text-2xl font-bold text-amber-500">{{ lowStockItems.length }}</div>
-					<div class="text-[10px] text-amber-500 font-bold mt-1">Need reorder</div>
-				</div>
-				<div
+				/>
+				<StatCard
+					label="Out of Stock"
+					:value="outOfStockItems.length"
+					variant="danger"
+					subtext="Requires action"
+					clickable
 					@click="openStockAlert('out')"
-					class="premium-card !p-4 cursor-pointer hover:ring-2 hover:ring-red-500/50 hover:border-red-500/50 dark:hover:ring-red-500/30 transition-all duration-200"
-				>
-					<div
-						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
-					>
-						Out of Stock
-					</div>
-					<div class="text-2xl font-bold text-red-500">{{ outOfStockItems.length }}</div>
-					<div class="text-[10px] text-red-500 font-bold mt-1">Requires action</div>
-				</div>
+				/>
 			</div>
 
 			<div class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
@@ -661,28 +638,28 @@
 				:item="selectedItem"
 				@close="selectedItem = null"
 				@reserve="
-					openReserve(selectedItem)
-					selectedItem = null
+					openReserve(selectedItem);
+					selectedItem = null;
 				"
 				@damage="
-					openDamage(selectedItem)
-					selectedItem = null
+					openDamage(selectedItem);
+					selectedItem = null;
 				"
 				@lifecycle="
-					openLifecycle(selectedItem)
-					selectedItem = null
+					openLifecycle(selectedItem);
+					selectedItem = null;
 				"
 				@push="
-					openPushForItem(selectedItem)
-					selectedItem = null
+					openPushForItem(selectedItem);
+					selectedItem = null;
 				"
 				@transfer="
-					showTransferModal = true
-					selectedItem = null
+					showTransferModal = true;
+					selectedItem = null;
 				"
 				@edit="
-					openEdit(selectedItem)
-					selectedItem = null
+					openEdit(selectedItem);
+					selectedItem = null;
 				"
 			/>
 		</div>
@@ -741,12 +718,14 @@
 			@saved="onDataChanged"
 		/>
 		<StockAlertDrawer
-			:show="showStockAlertDrawer"
-			:type="stockAlertDrawerType"
-			:items="stockAlertDrawerType === 'out' ? outOfStockItems : lowStockItems"
-			@close="showStockAlertDrawer = false"
-			@select-item="onStockAlertSelectItem"
-			@action-all="onStockAlertActionAll"
+			v-if="stockAlertType"
+			:title="stockAlertMeta.title"
+			:subtitle="stockAlertMeta.subtitle"
+			:items="stockAlertMeta.items"
+			:quick-action="stockAlertMeta.quickAction"
+			@close="closeStockAlert"
+			@item-click="handleStockAlertItem"
+			@quick-action="handleStockAlertAction"
 		/>
 	</AppLayout>
 </template>
@@ -771,6 +750,7 @@ import StockReductionsPanel from '@/components/StockReductionsPanel.vue'
 import ItemActionDrawer from '@/components/ItemActionDrawer.vue'
 import ItemEditModal from '@/components/ItemEditModal.vue'
 import StockAlertDrawer from '@/components/StockAlertDrawer.vue'
+import StatCard from '@/components/StatCard.vue'
 import { useRoute } from 'vue-router'
 
 const ui = useUIStore()
@@ -797,8 +777,7 @@ const damageSerialNo = ref('')
 const lifecycleSerialNo = ref('')
 const editItemCode = ref('')
 const pushItemCode = ref('')
-const showStockAlertDrawer = ref(false)
-const stockAlertDrawerType = ref('low')
+const stockAlertType = ref('')
 
 const inventoryResource = createResource({
 	url: 'zevar_core.api.catalog.get_pos_items',
@@ -926,27 +905,82 @@ function formatCurrency(val) {
 }
 
 function openStockAlert(type) {
-	stockAlertDrawerType.value = type
-	showStockAlertDrawer.value = true
+	if (type === 'low' && lowStockItems.value.length === 0) return
+	if (type === 'out' && outOfStockItems.value.length === 0) return
+	if ((type === 'all' || type === 'value') && inventoryData.value.length === 0) return
+	stockAlertType.value = type
 }
 
-function onStockAlertSelectItem(item) {
+function closeStockAlert() {
+	stockAlertType.value = ''
+}
+
+function handleStockAlertItem(item) {
+	stockAlertType.value = ''
 	selectedItem.value = item
-	showStockAlertDrawer.value = false
 }
 
-function onStockAlertActionAll() {
-	showStockAlertDrawer.value = false
-	if (stockAlertDrawerType.value === 'out') {
-		showStockAdjust.value = true
-	} else {
-		toast({
-			title: 'Reorder workflow initiated',
-			message: `Created procurement request for ${lowStockItems.value.length} low stock items.`,
-			intent: 'success',
-		})
+function handleStockAlertAction(key) {
+	stockAlertType.value = ''
+	if (key === 'add') {
+		showQuickAdd.value = true
+		return
 	}
+	showStockAdjust.value = true
 }
+
+const stockAlertMeta = computed(() => {
+	if (stockAlertType.value === 'all') {
+		return {
+			title: 'All Inventory Items',
+			subtitle: `${inventoryData.value.length} items across all categories`,
+			items: inventoryData.value,
+			quickAction: {
+				key: 'add',
+				label: 'Quick Add Item',
+				icon: 'add',
+				btnClass: 'bg-[#D4AF37] text-white hover:bg-[#C4A030]',
+			},
+		}
+	}
+
+	if (stockAlertType.value === 'value') {
+		return {
+			title: 'Inventory by Value',
+			subtitle: `Total value: ${formatCurrency(totalValue.value)}`,
+			items: [...inventoryData.value].sort(
+				(a, b) => b.price * Math.max(b.stock, 0) - a.price * Math.max(a.stock, 0)
+			),
+			quickAction: null,
+		}
+	}
+
+	if (stockAlertType.value === 'low') {
+		return {
+			title: 'Low Stock Items',
+			subtitle: 'Items below 5 units - consider reordering',
+			items: lowStockItems.value,
+			quickAction: {
+				key: 'reorder',
+				label: 'Adjust Stock',
+				icon: 'adjust',
+				btnClass: 'bg-amber-600 text-white hover:bg-amber-700',
+			},
+		}
+	}
+
+	return {
+		title: 'Out of Stock Items',
+		subtitle: 'Items with zero stock - immediate reorder needed',
+		items: outOfStockItems.value,
+		quickAction: {
+			key: 'reorder',
+			label: 'Reorder All',
+			icon: 'cart',
+			btnClass: 'bg-red-600 text-white hover:bg-red-700',
+		},
+	}
+})
 
 watch(
 	() => [session.currentWarehouse, ui.activeFilters.inventory?.display_case],

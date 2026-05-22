@@ -8,11 +8,12 @@
 			class="aspect-[4/3] bg-gray-50 dark:bg-warm-dark-900 relative overflow-hidden flex items-center justify-center shrink-0"
 		>
 			<img
-				v-if="item.image"
+				v-if="item.image && !imageFailed"
 				:src="item.image"
 				alt="Item"
 				class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
 				loading="lazy"
+				@error="imageFailed = true"
 			/>
 			<div
 				v-else
@@ -134,6 +135,8 @@
 </template>
 
 <script setup>
+import { ref, watch } from 'vue'
+
 const props = defineProps({
 	item: {
 		type: Object,
@@ -143,6 +146,14 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['quick-add', 'open-details'])
+
+const imageFailed = ref(false)
+watch(
+	() => props.item.image,
+	() => {
+		imageFailed.value = false
+	}
+)
 
 function quickAdd() {
 	emit('quick-add', props.item)

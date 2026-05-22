@@ -245,7 +245,7 @@ def _do_lookup(query):
 	sn = frappe.db.get_value(
 		"Serial No",
 		query,
-		["name", "item_code", "item_name", "warehouse", "status", "valuation_rate"],
+		["name", "item_code", "item_name", "warehouse", "status", "purchase_rate"],
 		as_dict=True,
 	)
 	if sn:
@@ -265,7 +265,7 @@ def _do_lookup(query):
 			"warehouse": sn.warehouse,
 			"warehouse_name": wh_name,
 			"status": sn.status,
-			"valuation_rate": flt(sn.valuation_rate, 2),
+			"valuation_rate": flt(sn.purchase_rate, 2),
 			"reserved": bool(reservations),
 			"reservation": reservations[0] if reservations else None,
 		}
@@ -286,7 +286,7 @@ def _do_lookup(query):
 		serials = frappe.get_all(
 			"Serial No",
 			filters={"item_code": item.name, "warehouse": ["is", "set"]},
-			fields=["name", "warehouse", "status", "valuation_rate"],
+			fields=["name", "warehouse", "status", "purchase_rate as valuation_rate"],
 		)
 		return {
 			"found": True,

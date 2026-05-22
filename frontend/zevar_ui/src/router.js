@@ -183,6 +183,18 @@ const routes = [
 		meta: { requiresAuth: true, reportRoles: ['admin'] },
 	},
 	{
+		path: '/reports/dashboards/repairs',
+		name: 'RepairAnalytics',
+		component: () => import('./pages/dashboards/RepairAnalytics.vue'),
+		meta: { requiresAuth: true, reportRoles: ['manager', 'admin'] },
+	},
+	{
+		path: '/reports/dashboards/command-center',
+		name: 'CommandCenter',
+		component: () => import('./pages/dashboards/CommandCenter.vue'),
+		meta: { requiresAuth: true, reportRoles: ['admin'] },
+	},
+	{
 		path: '/contacts',
 		name: 'Contacts',
 		component: () => import('./pages/Contacts.vue'),
