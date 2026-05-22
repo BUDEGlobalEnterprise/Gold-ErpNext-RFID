@@ -42,7 +42,7 @@ def _detect_item_reduction(invoice, item_row):
 
 def _log_serial_reduction(invoice, item_code, serial_no, warehouse):
 	item_name = frappe.db.get_value("Item", item_code, "item_name") or item_code
-	valuation = frappe.db.get_value("Serial No", serial_no, "valuation_rate") or 0
+	valuation = frappe.db.get_value("Serial No", serial_no, "purchase_rate") or 0
 	sn_wh = frappe.db.get_value("Serial No", serial_no, "warehouse") or warehouse or "Unknown"
 
 	details = {
@@ -256,7 +256,7 @@ def ui_lookup_piece(query):
 	sn = frappe.db.get_value(
 		"Serial No",
 		query,
-		["name", "item_code", "item_name", "warehouse", "status", "valuation_rate"],
+		["name", "item_code", "item_name", "warehouse", "status", "purchase_rate"],
 		as_dict=True,
 	)
 	if sn:
@@ -270,7 +270,7 @@ def ui_lookup_piece(query):
 			"warehouse": sn.warehouse,
 			"warehouse_name": wh_name,
 			"status": sn.status,
-			"valuation_rate": flt(sn.valuation_rate, 2),
+			"valuation_rate": flt(sn.purchase_rate, 2),
 		}
 	return result
 
@@ -361,7 +361,7 @@ def ui_get_item_inventory(item_code: str):
 	serials = frappe.get_all(
 		"Serial No",
 		filters={"item_code": item_code, "warehouse": ["is", "set"]},
-		fields=["name", "warehouse", "status", "valuation_rate"],
+		fields=["name", "warehouse", "status", "purchase_rate as valuation_rate"],
 		order_by="name",
 	)
 

@@ -33,7 +33,7 @@ export function useTheme() {
 
 	const updateDocumentClass = () => {
 		document.documentElement.classList.toggle('dark', isDark.value)
-		document.body.style.backgroundColor = isDark.value ? '#08080a' : '#ffffff'
+		document.body.style.backgroundColor = isDark.value ? '#0F1115' : '#FFFDF9'
 	}
 
 	onMounted(() => {

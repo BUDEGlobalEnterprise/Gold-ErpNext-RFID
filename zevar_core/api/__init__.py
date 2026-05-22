@@ -78,6 +78,19 @@ from zevar_core.api.tasks import (
 	get_task_stats,
 	update_todo_status,
 )
+from zevar_core.api.repair_timeline import (
+	get_repair_timeline,
+	get_technician_workload,
+	log_status_change,
+	predict_repair_eta,
+	suggest_technician,
+)
+from zevar_core.api.repair_analytics import get_ai_insights, get_repair_analytics
+from zevar_core.api.live_monitor import (
+	get_command_center_data,
+	get_repair_live_feed,
+	run_anomaly_detection,
+)
 from zevar_core.api.trending import get_trending_items, track_trending_click
 
 __all__ = [
@@ -145,4 +158,14 @@ __all__ = [
 	"track_trending_click",
 	"update_repair_status",
 	"update_todo_status",
+	"get_repair_timeline",
+	"predict_repair_eta",
+	"get_technician_workload",
+	"suggest_technician",
+	"log_status_change",
+	"get_repair_analytics",
+	"get_ai_insights",
+	"get_command_center_data",
+	"get_repair_live_feed",
+	"run_anomaly_detection",
 ]

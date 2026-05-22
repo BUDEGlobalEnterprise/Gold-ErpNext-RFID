@@ -185,6 +185,15 @@ const sections = [
 				description:
 					'New vs returning, avg lifetime value, layaway cohort retention, repair NPS.',
 			},
+			{
+				id: 'repairs',
+				label: 'Repair Analytics',
+				icon: 'build',
+				bg: 'bg-amber-500/10',
+				text: 'text-amber-500',
+				description:
+					'Repair volume, revenue trends, SLA compliance, technician leaderboard, AI insights.',
+			},
 		],
 	},
 	{
@@ -213,6 +222,16 @@ const sections = [
 				text: 'text-blue-500',
 				description:
 					'Real-time sales feed, active registers, tax override approvals, employee activity audit log.',
+				restricted: 'Admin',
+			},
+			{
+				id: 'command-center',
+				label: 'Command Center',
+				icon: 'cell_tower',
+				bg: 'bg-cyan-500/10',
+				text: 'text-cyan-500',
+				description:
+					'Multi-store repair ops, anomaly alerts, live WebSocket feed, store health monitoring.',
 				restricted: 'Admin',
 			},
 		],

@@ -1,7 +1,7 @@
 <template>
 	<AppLayout>
 		<div class="flex flex-col">
-			<div class="flex items-center justify-between gap-4 mb-6 flex-shrink-0">
+			<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 flex-shrink-0">
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Appraisals</h2>
 					<span
@@ -10,10 +10,10 @@
 						{{ filteredAppraisals.length }} Records
 					</span>
 				</div>
-				<div class="flex items-center gap-2">
+				<div class="flex items-center gap-2 self-end sm:self-auto">
 					<ViewToggle v-model="viewMode" storage-key="zevar_appraisals_view" />
 					<button
-						class="px-4 py-2 bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black text-xs font-bold rounded-lg hover:bg-gray-800 dark:hover:bg-[#b5952f] transition-all shadow-sm"
+						class="px-4 py-2 bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black text-xs font-bold rounded-lg hover:bg-gray-800 dark:hover:bg-[#b5952f] transition-all shadow-sm whitespace-nowrap"
 					>
 						+ New Appraisal
 					</button>
@@ -76,19 +76,19 @@
 			<div class="flex-1 overflow-auto min-h-0 pr-2 custom-scrollbar">
 				<div
 					v-if="viewMode === 'grid'"
-					class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+					class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5"
 				>
 					<div
 						v-for="item in filteredAppraisals"
 						:key="item.id"
-						class="premium-card !p-0 overflow-hidden cursor-pointer group"
+						class="premium-card !p-0 overflow-hidden cursor-pointer border border-gray-100 dark:border-warm-border/30 hover:border-[#D4AF37]/50 hover:shadow-md transition-all duration-200 group flex flex-col min-w-0"
 					>
-						<div class="aspect-[4/3] bg-gray-100 dark:bg-warm-dark-900 relative">
+						<div class="aspect-[4/3] bg-gray-50 dark:bg-warm-dark-900 relative shrink-0">
 							<div
 								class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600"
 							>
 								<svg
-									class="w-12 h-12"
+									class="w-10 h-10"
 									fill="none"
 									stroke="currentColor"
 									viewBox="0 0 24 24"
@@ -103,7 +103,7 @@
 							</div>
 							<div class="absolute top-2 left-2">
 								<span
-									class="text-[9px] font-bold px-2 py-1 rounded-full"
+									class="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
 									:class="
 										item.status === 'Pending'
 											? 'bg-amber-100 text-amber-700'
@@ -117,51 +117,51 @@
 							</div>
 							<div v-if="item.certification" class="absolute top-2 right-2">
 								<span
-									class="text-[9px] font-bold px-2 py-1 rounded-full bg-white/90 dark:bg-warm-dark-950/80 text-gray-800 dark:text-white border border-gray-200 dark:border-warm-border"
+									class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-white/90 dark:bg-warm-dark-950/80 text-gray-800 dark:text-white border border-gray-200 dark:border-warm-border"
 								>
 									{{ item.certification }}
 								</span>
 							</div>
 						</div>
-						<div class="p-4">
+						<div class="p-3 flex flex-col flex-1 min-w-0">
 							<div
-								class="font-bold text-gray-900 dark:text-white text-sm mb-1 truncate"
+								class="font-bold text-gray-900 dark:text-white text-xs mb-0.5 truncate leading-tight"
 							>
 								{{ item.description }}
 							</div>
-							<div class="text-[10px] text-gray-500 mb-3">
+							<div class="text-[10px] text-gray-500 mb-2 truncate">
 								{{ item.customer }} · {{ item.date }}
 							</div>
-							<div class="flex items-center gap-1.5 mb-3">
+							<div class="flex items-center gap-1.5 mb-2.5 min-w-0">
 								<span
-									class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400"
+									class="text-[8px] font-bold px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 inline-block truncate"
 									>{{ item.metal }}</span
 								>
 								<span
-									class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-400"
+									class="text-[8px] font-bold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-400 inline-block truncate"
 									>{{ item.purity }}</span
 								>
-								<span class="text-[9px] text-gray-500 ml-auto font-mono"
+								<span class="text-[9px] text-gray-500 ml-auto font-mono font-bold shrink-0"
 									>{{ item.weight }}g</span
 								>
 							</div>
 							<div
-								class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-warm-border/50"
+								class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-warm-border/30 mt-auto min-w-0"
 							>
 								<div>
-									<div class="text-[9px] text-gray-500 uppercase font-bold">
-										Estimated Value
+									<div class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5">
+										Est. Value
 									</div>
-									<div class="text-lg font-bold text-[#D4AF37] font-mono">
+									<div class="text-xs font-bold text-[#D4AF37] font-mono leading-none">
 										{{ formatCurrency(item.estimatedValue) }}
 									</div>
 								</div>
-								<div v-if="item.certification" class="text-right">
-									<div class="text-[9px] text-gray-500 uppercase font-bold">
+								<div v-if="item.certification" class="text-right min-w-0 ml-1">
+									<div class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5">
 										Cert #
 									</div>
 									<div
-										class="text-xs font-mono text-gray-700 dark:text-gray-300"
+										class="text-[10px] font-mono text-gray-600 dark:text-gray-400 truncate leading-none"
 									>
 										{{ item.certNumber }}
 									</div>

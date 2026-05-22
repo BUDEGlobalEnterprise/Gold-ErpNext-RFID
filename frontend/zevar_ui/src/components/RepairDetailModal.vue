@@ -93,6 +93,27 @@
 				</button>
 			</div>
 
+			<!-- ═══ Repair Timeline ═══ -->
+			<div class="bg-gradient-to-r from-gray-50 to-white dark:from-warm-dark-900/50 dark:to-warm-dark-900 rounded-xl p-4 border border-gray-100 dark:border-warm-border">
+				<div class="flex items-center justify-between mb-3">
+					<h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Repair Progress</h4>
+					<span v-if="etaData?.predicted_date && etaData.method === 'predicted'" class="text-[10px] px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full flex items-center gap-1">
+						<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+						</svg>
+						ETA: {{ formatDate(etaData.predicted_date) }}
+						<span class="text-[8px] opacity-70">({{ etaData.confidence }})</span>
+					</span>
+				</div>
+				<RepairTimeline
+					:currentStatus="order.status"
+					:events="timelineEvents"
+					orientation="horizontal"
+					variant="full"
+					:predictedDate="etaData?.predicted_date || ''"
+				/>
+			</div>
+
 			<!-- Estimate Section -->
 			<div
 				v-if="order.estimate_status"
@@ -153,36 +174,14 @@
 				</div>
 			</div>
 
-			<!-- Photos Section -->
-			<div
-				v-if="order.before_photos?.length || order.after_photos?.length"
-				class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-3"
-			>
-				<h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Photos</h4>
-				<div class="grid grid-cols-4 gap-2">
-					<div v-if="order.before_photos?.length" class="col-span-2">
-						<p class="text-xs text-blue-600 font-medium mb-1">Before Repair</p>
-						<div class="grid grid-cols-2 gap-1">
-							<img
-								v-for="(photo, idx) in order.before_photos"
-								:key="'before-' + idx"
-								:src="photo"
-								class="w-full h-20 object-cover rounded border"
-							/>
-						</div>
-					</div>
-					<div v-if="order.after_photos?.length" class="col-span-2">
-						<p class="text-xs text-green-600 font-medium mb-1">After Repair</p>
-						<div class="grid grid-cols-2 gap-1">
-							<img
-								v-for="(photo, idx) in order.after_photos"
-								:key="'after-' + idx"
-								:src="photo"
-								class="w-full h-20 object-cover rounded border"
-							/>
-						</div>
-					</div>
-				</div>
+			<!-- Photo Gallery -->
+			<div class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-3">
+				<RepairPhotoGallery
+					:beforePhotos="order.before_photos || []"
+					:afterPhotos="order.after_photos || []"
+					:canAddPhotos="order.status !== 'Delivered' && order.status !== 'Cancelled'"
+					@add-photo="$emit('open-camera')"
+				/>
 			</div>
 
 			<!-- Customer Section -->
@@ -485,6 +484,8 @@ import { ref, onMounted, defineProps, defineEmits } from 'vue'
 import { call, toast } from 'frappe-ui'
 import { formatDate, formatDateTime } from '@/utils/dates.js'
 import BaseModal from './BaseModal.vue'
+import RepairTimeline from './RepairTimeline.vue'
+import RepairPhotoGallery from './RepairPhotoGallery.vue'
 
 const props = defineProps({
 	order: { type: Object, required: true },
@@ -514,6 +515,8 @@ const statusOptions = [
 const communications = ref([])
 const showCommunicationForm = ref(false)
 const newComm = ref({ type: 'Phone Call', direction: 'Outgoing', content: '' })
+const timelineEvents = ref([])
+const etaData = ref(null)
 
 function formatNum(n) {
 	return n ? Number(n).toFixed(2) : '0.00'
@@ -687,5 +690,29 @@ async function loadCommunications() {
 
 onMounted(() => {
 	loadCommunications()
+	loadTimeline()
+	loadETA()
 })
+
+async function loadTimeline() {
+	try {
+		const data = await call('zevar_core.api.repair_timeline.get_repair_timeline', {
+			repair_order: props.order.name,
+		})
+		timelineEvents.value = data || []
+	} catch (e) {
+		console.error('Failed to load timeline:', e)
+	}
+}
+
+async function loadETA() {
+	try {
+		const data = await call('zevar_core.api.repair_timeline.predict_repair_eta', {
+			repair_order: props.order.name,
+		})
+		etaData.value = data || null
+	} catch (e) {
+		console.error('Failed to load ETA:', e)
+	}
+}
 </script>

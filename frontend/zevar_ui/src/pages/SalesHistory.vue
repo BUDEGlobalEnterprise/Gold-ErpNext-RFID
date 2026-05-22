@@ -2,7 +2,7 @@
 	<AppLayout>
 		<div class="flex flex-col">
 			<!-- Page Header -->
-			<div class="flex items-center justify-between mb-6 flex-shrink-0">
+			<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 flex-shrink-0">
 				<div>
 					<h1 class="premium-title !text-2xl">Sales History</h1>
 					<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
@@ -15,11 +15,11 @@
 						</span>
 					</p>
 				</div>
-				<div class="flex items-center gap-2">
+				<div class="flex items-center gap-2 self-end sm:self-auto">
 					<button
 						v-if="sales.length > 0"
 						@click="exportCSV"
-						class="px-3 py-1.5 text-xs font-bold text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition flex items-center gap-1.5"
+						class="px-3 py-1.5 text-xs font-bold text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition flex items-center gap-1.5 whitespace-nowrap"
 						title="Export to CSV"
 					>
 						<svg
@@ -100,58 +100,63 @@
 				<div v-else-if="sales.length === 0" class="flex items-center justify-center py-20">
 					<p class="text-gray-400 text-sm">No transactions found</p>
 				</div>
-				<div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+				<div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5">
 					<div
 						v-for="sale in sales"
 						:key="sale.name"
-						class="bg-white dark:bg-warm-dark-800 rounded-2xl border border-gray-100 dark:border-warm-border/50 p-4 hover:shadow-md hover:border-gray-300 dark:hover:border-warm-border transition cursor-pointer"
+						class="bg-white dark:bg-warm-dark-800 rounded-xl border border-gray-100 dark:border-warm-border/50 p-3.5 hover:shadow-md hover:border-[#D4AF37]/40 dark:hover:border-[#D4AF37]/30 transition-all duration-200 cursor-pointer flex flex-col group min-w-0"
 						@click="viewDetails(sale.name)"
 					>
-						<div class="flex items-start justify-between mb-3">
-							<div>
-								<span class="font-mono text-xs font-bold text-[#D4AF37]">{{
+						<!-- Header -->
+						<div class="flex items-start justify-between gap-1 mb-2.5 min-w-0">
+							<div class="min-w-0">
+								<span class="font-mono text-[10px] font-bold text-[#D4AF37]">{{
 									sale.name
 								}}</span>
-								<p class="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
+								<p class="text-xs font-bold text-gray-900 dark:text-white mt-0.5 truncate leading-tight">
 									{{ sale.customer || 'Walk-In' }}
 								</p>
 							</div>
 							<span
-								class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold shrink-0"
+								class="inline-flex px-1.5 py-0.5 rounded-full text-[9px] font-bold shrink-0"
 								:class="getStatusClass(sale.status)"
 							>
 								{{ sale.status }}
 							</span>
 						</div>
-						<div class="grid grid-cols-2 gap-3 mb-3">
+
+						<!-- Details grid -->
+						<div class="grid grid-cols-2 gap-2 mb-2.5">
 							<div>
-								<span class="text-[10px] text-gray-500 uppercase font-bold"
+								<span class="text-[9px] uppercase font-bold text-gray-400 dark:text-gray-500"
 									>Date</span
 								>
-								<p class="text-xs text-gray-700 dark:text-gray-300">
+								<p class="text-xs text-gray-700 dark:text-gray-300 truncate">
 									{{ formatDate(sale.posting_date) }}
 								</p>
 							</div>
 							<div>
-								<span class="text-[10px] text-gray-500 uppercase font-bold"
+								<span class="text-[9px] uppercase font-bold text-gray-400 dark:text-gray-500"
 									>Items</span
 								>
-								<p class="text-xs text-gray-700 dark:text-gray-300">
+								<p class="text-xs font-mono font-bold text-gray-700 dark:text-gray-300">
 									{{ sale.item_count || 1 }}
 								</p>
 							</div>
 						</div>
+
+						<!-- Footer -->
 						<div
-							class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-warm-border/50"
+							class="flex items-center justify-between mt-auto pt-2 border-t border-gray-50 dark:border-warm-border/30 min-w-0"
 						>
-							<span class="text-lg font-bold text-green-600 dark:text-green-400"
+							<span class="text-base font-mono font-extrabold text-green-600 dark:text-green-400"
 								>${{ formatAmount(sale.grand_total) }}</span
 							>
 							<button
-								class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition"
+								class="p-1 rounded hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition opacity-0 group-hover:opacity-100 shrink-0"
 							>
 								<svg
-									class="w-4 h-4"
+									class="w-3.5 h-3.5"
 									fill="none"
 									stroke="currentColor"
 									viewBox="0 0 24 24"
@@ -714,10 +719,10 @@
 							<div class="flex gap-3">
 								<button
 									@click="
-										showVoidConfirm = false
-										voidReason = ''
-										voidPin = ''
-										voidError = ''
+										showVoidConfirm = false;
+										voidReason = '';
+										voidPin = '';
+										voidError = '';
 									"
 									class="flex-1 py-2 text-sm font-medium border border-gray-200 dark:border-warm-border rounded-lg hover:bg-gray-50 dark:hover:bg-warm-dark-700"
 								>

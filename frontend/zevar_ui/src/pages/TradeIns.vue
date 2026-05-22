@@ -1,7 +1,7 @@
 <template>
 	<AppLayout>
 		<div class="flex flex-col">
-			<div class="flex items-center justify-between gap-4 mb-6 flex-shrink-0">
+			<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 flex-shrink-0">
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Trade-Ins</h2>
 					<span
@@ -10,10 +10,10 @@
 						{{ filteredRecords.length }} Records
 					</span>
 				</div>
-				<div class="flex items-center gap-2">
+				<div class="flex items-center gap-2 self-end sm:self-auto">
 					<ViewToggle v-model="viewMode" storage-key="zevar_tradeins_view" />
 					<button
-						class="px-4 py-2 bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black text-xs font-bold rounded-lg hover:bg-gray-800 dark:hover:bg-[#b5952f] transition-all shadow-sm"
+						class="px-4 py-2 bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black text-xs font-bold rounded-lg hover:bg-gray-800 dark:hover:bg-[#b5952f] transition-all shadow-sm whitespace-nowrap"
 					>
 						+ New Trade-In
 					</button>
@@ -76,20 +76,21 @@
 			<div class="flex-1 overflow-auto min-h-0">
 				<div
 					v-if="viewMode === 'grid'"
-					class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
+					class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5"
 				>
 					<div
 						v-for="record in filteredRecords"
 						:key="record.id"
-						class="premium-card !p-4 cursor-pointer"
+						class="bg-white dark:bg-warm-dark-800 rounded-xl border border-gray-100 dark:border-warm-border/50 p-3.5 hover:shadow-md hover:border-[#D4AF37]/40 dark:hover:border-[#D4AF37]/30 transition-all duration-200 cursor-pointer flex flex-col group min-w-0"
 					>
-						<div class="flex items-start justify-between mb-3">
-							<div class="flex items-start gap-3 min-w-0">
+						<!-- Header -->
+						<div class="flex items-start justify-between gap-1 mb-2.5 min-w-0">
+							<div class="flex items-start gap-2 min-w-0">
 								<div
-									class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
+									class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
 								>
 									<svg
-										class="w-5 h-5"
+										class="w-4 h-4"
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -104,17 +105,17 @@
 								</div>
 								<div class="min-w-0">
 									<div
-										class="font-bold text-gray-900 dark:text-white text-sm truncate"
+										class="font-bold text-gray-900 dark:text-white text-xs truncate leading-tight"
 									>
 										{{ record.description }}
 									</div>
-									<div class="text-[10px] text-gray-500">
+									<div class="text-[10px] text-gray-500 mt-0.5 truncate">
 										{{ record.customer }} · {{ record.date }}
 									</div>
 								</div>
 							</div>
 							<span
-								class="text-[9px] font-bold px-2 py-1 rounded-full shrink-0 ml-2"
+								class="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ml-1"
 								:class="
 									record.status === 'Pending Review'
 										? 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400'
@@ -128,42 +129,44 @@
 								{{ record.status }}
 							</span>
 						</div>
+
+						<!-- Details Block -->
 						<div
-							class="grid grid-cols-2 gap-3 p-3 bg-gray-50 dark:bg-warm-dark-700 rounded-lg border border-gray-100 dark:border-warm-border/50"
+							class="grid grid-cols-2 gap-2 p-2 bg-gray-50 dark:bg-warm-dark-900 rounded-lg border border-gray-100 dark:border-warm-border/30 mt-auto min-w-0"
 						>
 							<div>
-								<div class="text-[9px] text-gray-500 uppercase font-bold mb-0.5">
+								<div class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5">
 									Metal
 								</div>
 								<span
-									class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400"
+									class="text-[9px] font-bold px-1 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 inline-block truncate max-w-full"
 									>{{ record.metal }} {{ record.purity }}</span
 								>
 							</div>
 							<div>
-								<div class="text-[9px] text-gray-500 uppercase font-bold mb-0.5">
+								<div class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5">
 									Weight
 								</div>
 								<div
-									class="text-xs font-bold text-gray-900 dark:text-white font-mono"
+									class="text-[11px] font-bold text-gray-900 dark:text-white font-mono"
 								>
 									{{ record.weight }}g
 								</div>
 							</div>
 							<div>
-								<div class="text-[9px] text-gray-500 uppercase font-bold mb-0.5">
+								<div class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5">
 									Appraised
 								</div>
-								<div class="text-xs font-bold text-[#D4AF37] font-mono">
+								<div class="text-[11px] font-bold text-[#D4AF37] font-mono">
 									{{ formatCurrency(record.appraisedValue) }}
 								</div>
 							</div>
 							<div>
-								<div class="text-[9px] text-gray-500 uppercase font-bold mb-0.5">
-									Min Purchase (2×)
+								<div class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5">
+									Min Purc. (2×)
 								</div>
 								<div
-									class="text-xs font-bold font-mono"
+									class="text-[11px] font-bold font-mono truncate"
 									:class="
 										record.newPurchase >= record.appraisedValue * 2
 											? 'text-green-600'

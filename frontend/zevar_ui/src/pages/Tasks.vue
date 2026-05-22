@@ -264,8 +264,8 @@
 				<div class="flex items-center gap-2 mb-3">
 					<button
 						@click="
-							todoFilter = 'Open'
-							store.loadTodos('Open')
+							todoFilter = 'Open';
+							store.loadTodos('Open');
 						"
 						class="px-3 py-1.5 rounded-full text-xs font-bold transition"
 						:class="
@@ -278,8 +278,8 @@
 					</button>
 					<button
 						@click="
-							todoFilter = 'Closed'
-							store.loadTodos('Closed')
+							todoFilter = 'Closed';
+							store.loadTodos('Closed');
 						"
 						class="px-3 py-1.5 rounded-full text-xs font-bold transition"
 						:class="

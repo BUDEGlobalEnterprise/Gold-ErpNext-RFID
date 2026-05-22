@@ -1,7 +1,7 @@
 <template>
 	<AppLayout>
 		<div class="flex flex-col h-full">
-			<div class="flex items-center justify-between gap-4 mb-4 flex-shrink-0">
+			<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 flex-shrink-0">
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Quotes</h2>
 					<span
@@ -9,10 +9,10 @@
 						>{{ store.quotesTotal }} Quotes</span
 					>
 				</div>
-				<div class="flex items-center gap-2">
+				<div class="flex items-center gap-2 self-end sm:self-auto">
 					<button
 						@click="loadData"
-						class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700"
+						class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700 flex-shrink-0"
 						title="Refresh"
 					>
 						<svg
@@ -32,7 +32,7 @@
 					</button>
 					<button
 						@click="showCreate = true"
-						class="flex items-center gap-1.5 px-3 py-2 bg-[#D4AF37] text-white rounded-lg text-xs font-bold hover:bg-[#C4A030] transition"
+						class="flex items-center gap-1.5 px-3 py-2 bg-[#D4AF37] text-white rounded-lg text-xs font-bold hover:bg-[#C4A030] transition whitespace-nowrap"
 					>
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
@@ -53,8 +53,8 @@
 					v-for="s in statusFilters"
 					:key="s.value"
 					@click="
-						activeStatus = s.value
-						loadData()
+						activeStatus = s.value;
+						loadData();
 					"
 					class="px-3 py-1.5 rounded-full text-xs font-bold transition"
 					:class="
@@ -69,42 +69,33 @@
 
 			<!-- KPI Cards -->
 			<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4 flex-shrink-0">
-				<div class="premium-card !p-4">
-					<div
-						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
-					>
-						Total Quotes
-					</div>
-					<div class="text-2xl font-bold text-gray-900 dark:text-white">
-						{{ store.quotesTotal }}
-					</div>
-				</div>
-				<div class="premium-card !p-4">
-					<div
-						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
-					>
-						Open / Draft
-					</div>
-					<div class="text-2xl font-bold text-amber-500">{{ openCount }}</div>
-				</div>
-				<div class="premium-card !p-4">
-					<div
-						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
-					>
-						Ordered
-					</div>
-					<div class="text-2xl font-bold text-emerald-500">{{ orderedCount }}</div>
-				</div>
-				<div class="premium-card !p-4">
-					<div
-						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
-					>
-						Total Value
-					</div>
-					<div class="text-2xl font-bold text-[#D4AF37]">
-						{{ formatCurrency(totalValue) }}
-					</div>
-				</div>
+				<StatCard
+					label="Total Quotes"
+					:value="store.quotesTotal"
+					clickable
+					@click="filterQuotes('')"
+				/>
+				<StatCard
+					label="Open / Draft"
+					:value="openCount"
+					variant="warning"
+					clickable
+					@click="filterQuotes('OpenDraft')"
+				/>
+				<StatCard
+					label="Ordered"
+					:value="orderedCount"
+					variant="success"
+					clickable
+					@click="filterQuotes('Ordered')"
+				/>
+				<StatCard
+					label="Total Value"
+					:value="formatCurrency(totalValue)"
+					variant="gold"
+					clickable
+					@click="openValueBreakdown"
+				/>
 			</div>
 
 			<!-- Data Table -->
@@ -464,6 +455,56 @@
 					</button>
 				</div>
 			</div>
+
+			<!-- Value Breakdown Modal -->
+			<div
+				v-if="showValueBreakdown"
+				class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+				@click.self="showValueBreakdown = false"
+			>
+				<div class="premium-card !rounded-2xl w-full max-w-xl max-h-[80vh] overflow-y-auto m-4">
+					<div class="flex items-center justify-between mb-4">
+						<div>
+							<h3 class="text-lg font-bold text-gray-900 dark:text-white">Quote Value Breakdown</h3>
+							<p class="text-xs text-gray-500">{{ formatCurrency(totalValue) }} total value</p>
+						</div>
+						<button
+							@click="showValueBreakdown = false"
+							class="p-1 hover:bg-gray-100 dark:hover:bg-warm-dark-700 rounded-lg"
+						>
+							<svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M6 18L18 6M6 6l12 12"
+								/>
+							</svg>
+						</button>
+					</div>
+					<div class="space-y-2">
+						<div
+							v-for="quote in sortedQuotesByValue"
+							:key="quote.name"
+							class="flex items-center justify-between p-3 bg-gray-50 dark:bg-warm-dark-900 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-800 cursor-pointer transition"
+							@click="viewQuoteFromBreakdown(quote)"
+						>
+							<div class="min-w-0">
+								<div class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ quote.name }}</div>
+								<div class="text-[10px] text-gray-500 truncate">
+									{{ quote.customer_name || quote.party_name || 'No customer' }}
+								</div>
+							</div>
+							<div class="ml-3 text-right shrink-0">
+								<div class="text-sm font-bold text-[#D4AF37]">{{ formatCurrency(quote.grand_total) }}</div>
+								<span class="text-[9px] font-bold px-2 py-0.5 rounded-full" :class="statusClass(quote.status)">
+									{{ quote.status }}
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</AppLayout>
 </template>
@@ -472,12 +513,14 @@
 import { ref, computed, onMounted } from 'vue'
 import { toast } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
+import StatCard from '@/components/StatCard.vue'
 import { useQuotesStore } from '@/stores/quotes.js'
 
 const store = useQuotesStore()
 const activeStatus = ref('')
 const selected = ref(null)
 const showCreate = ref(false)
+const showValueBreakdown = ref(false)
 const form = ref({ customer: '', valid_till: '', items: [{ item_code: '', qty: 1, rate: 0 }] })
 
 const statusFilters = [
@@ -493,9 +536,32 @@ const openCount = computed(
 )
 const orderedCount = computed(() => store.quotes.filter((q) => q.status === 'Ordered').length)
 const totalValue = computed(() => store.quotes.reduce((s, q) => s + (q.grand_total || 0), 0))
+const sortedQuotesByValue = computed(() =>
+	[...store.quotes].sort((a, b) => (b.grand_total || 0) - (a.grand_total || 0))
+)
 
 function loadData() {
-	store.loadQuotes({ status: activeStatus.value || undefined })
+	store.loadQuotes({ status: quoteStatusParam.value, page_size: 100 })
+}
+
+const quoteStatusParam = computed(() => {
+	if (activeStatus.value === 'OpenDraft') return ['in', ['Draft', 'Open']]
+	return activeStatus.value || undefined
+})
+
+function filterQuotes(status) {
+	activeStatus.value = status
+	loadData()
+}
+
+function openValueBreakdown() {
+	if (!store.quotes.length) return
+	showValueBreakdown.value = true
+}
+
+function viewQuoteFromBreakdown(quote) {
+	showValueBreakdown.value = false
+	viewQuote(quote)
 }
 
 function viewQuote(q) {

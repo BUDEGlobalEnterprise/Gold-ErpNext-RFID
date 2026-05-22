@@ -137,8 +137,8 @@
 			<header
 				class="h-14 md:h-16 lg:h-20 bg-[#FFEDD5] dark:bg-warm-dark-950/80 border-b border-orange-200 dark:border-warm-border/50 flex items-center justify-between px-3 sm:px-4 lg:px-6 z-20 sticky top-0 shadow-sm transition-colors duration-300 shrink-0"
 			>
-				<!-- Mobile Left: Hamburger + Logo + Store -->
-				<div class="flex lg:hidden items-center gap-2 flex-1 min-w-0">
+				<!-- Mobile Left: Hamburger + Logo + Brand (Simplified) -->
+				<div class="flex lg:hidden items-center gap-3 flex-1 min-w-0">
 					<button
 						@click="isMobileDrawerOpen = true"
 						class="p-1 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0 touch-target"
@@ -158,20 +158,9 @@
 							/>
 						</svg>
 					</button>
-					<img src="/logo.svg" alt="Zevar" class="w-7 h-7 rounded-lg shrink-0" />
-					<div class="relative ml-1 min-w-0 flex-1">
-						<select
-							v-model="session.currentWarehouse"
-							@change="session.setWarehouse($event.target.value)"
-							class="h-8 w-full bg-white/60 dark:bg-warm-dark-900/50 border border-orange-200/60 dark:border-warm-border/50 pl-2 pr-6 rounded-lg text-xs font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] cursor-pointer appearance-none truncate"
-						>
-							<option :value="null" disabled>Store...</option>
-							<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
-								{{
-									wh.name.replace('Zevar US Stores - ', '').replace(' - ZUS', '')
-								}}
-							</option>
-						</select>
+					<div class="flex items-center gap-2">
+						<img src="/logo.svg" alt="Zevar" class="w-7 h-7 rounded-lg shrink-0" />
+						<span class="text-gray-900 dark:text-white font-black text-lg tracking-tighter leading-none shrink-0">ZEVAR</span>
 					</div>
 				</div>
 
@@ -301,7 +290,7 @@
 					</div>
 
 					<!-- User menu -->
-					<div class="relative" ref="userMenuRef">
+					<div class="relative hidden lg:block" ref="userMenuRef">
 						<button
 							@click.stop="isUserMenuOpen = !isUserMenuOpen"
 							class="flex items-center gap-2 p-1.5 pr-3 rounded-full hover:bg-white/60 dark:hover:bg-warm-dark-700 border border-transparent hover:border-orange-200 dark:border-warm-border"
@@ -652,7 +641,7 @@
 				</div>
 				<button
 					@click="isMobileDrawerOpen = false"
-					class="text-gray-400 p-2 hover:text-white transition-colors touch-target"
+					class="text-gray-400 p-2 hover:text-[#D4AF37] dark:hover:text-white transition-colors touch-target"
 					aria-label="Close menu"
 				>
 					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -665,6 +654,22 @@
 					</svg>
 				</button>
 			</div>
+
+			<!-- Profile Section -->
+			<div class="px-4 py-3 bg-[#FFEDD5]/60 dark:bg-warm-dark-950/40 border-b border-gray-200 dark:border-warm-border/50 flex items-center gap-3 shrink-0">
+				<div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] flex items-center justify-center text-[#0F1115] font-bold text-sm shrink-0 shadow-sm border border-[#D4AF37]/20">
+					{{ session.user?.full_name?.[0]?.toUpperCase() || 'U' }}
+				</div>
+				<div class="min-w-0 flex-1">
+					<p class="text-sm font-bold text-gray-900 dark:text-white truncate">
+						{{ session.user?.full_name || 'Guest' }}
+					</p>
+					<p class="text-xs text-gray-500 truncate mt-0.5">
+						{{ session.user?.email }}
+					</p>
+				</div>
+			</div>
+
 			<div
 				class="p-4 space-y-3 border-b border-gray-200 dark:border-warm-border/50 shrink-0"
 			>
@@ -685,21 +690,26 @@
 					<input
 						type="text"
 						v-model="ui.searchQuery"
-						placeholder="Search..."
-						class="h-11 w-full bg-gray-800/50 border border-gray-700 text-gray-200 rounded-lg pl-10 pr-4 focus:ring-2 focus:ring-[#D4AF37] text-sm"
+						placeholder="Search collection..."
+						class="h-11 w-full bg-white/60 dark:bg-warm-dark-900/50 border border-orange-200/60 dark:border-warm-border/50 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 rounded-lg pl-10 pr-4 focus:ring-2 focus:ring-[#D4AF37] text-sm"
 					/>
 				</div>
 				<div class="relative">
 					<select
 						v-model="session.currentWarehouse"
 						@change="session.setWarehouse($event.target.value)"
-						class="h-11 w-full bg-gray-800/50 border border-gray-700 text-gray-200 rounded-lg px-3 focus:ring-2 focus:ring-[#D4AF37] text-sm appearance-none"
+						class="h-11 w-full bg-white/60 dark:bg-warm-dark-900/50 border border-orange-200/60 dark:border-warm-border/50 text-gray-800 dark:text-gray-200 rounded-lg px-3 focus:ring-2 focus:ring-[#D4AF37] text-sm appearance-none outline-none cursor-pointer font-medium"
 					>
-						<option :value="null" disabled>Store</option>
+						<option :value="null" disabled>Select Store Location</option>
 						<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
 							{{ wh.name }}
 						</option>
 					</select>
+					<div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+						</svg>
+					</div>
 				</div>
 			</div>
 			<nav class="flex-1 overflow-y-auto p-4 space-y-0.5 custom-scrollbar">
@@ -738,20 +748,105 @@
 						<span class="font-medium text-[13px]">{{ item.label }}</span>
 					</router-link>
 				</template>
-				<div class="mt-4 pt-4 border-t border-gray-200 dark:border-warm-border/50">
+				<div class="mt-4 pt-4 border-t border-gray-200 dark:border-warm-border/50 space-y-1">
+					<!-- Theme Toggle -->
 					<button
 						@click="ui.toggleTheme()"
-						class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400"
+						class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-warm-dark-800 transition-colors"
 					>
-						<span class="text-sm font-medium">{{
-							ui.isDark ? 'Light Mode' : 'Dark Mode'
-						}}</span>
+						<svg
+							v-if="ui.isDark"
+							class="w-[18px] h-[18px] text-amber-400 shrink-0"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+							/>
+						</svg>
+						<svg
+							v-else
+							class="w-[18px] h-[18px] text-indigo-500 shrink-0"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+							/>
+						</svg>
+						<span class="font-medium text-[13px]">{{ ui.isDark ? 'Light Mode' : 'Dark Mode' }}</span>
 					</button>
+
+					<!-- Employee Portal -->
+					<router-link
+						to="/employee-portal"
+						@click="isMobileDrawerOpen = false"
+						class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-warm-dark-800 transition-colors"
+					>
+						<svg
+							class="w-[18px] h-[18px] text-gray-400 shrink-0"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+							/>
+						</svg>
+						<span class="font-medium text-[13px]">Employee Portal</span>
+					</router-link>
+
+					<!-- Change Password -->
+					<button
+						@click="isMobileDrawerOpen = false; ui.showPreferencesModal = true"
+						class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-warm-dark-800 transition-colors"
+					>
+						<svg
+							class="w-[18px] h-[18px] text-gray-400 shrink-0"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M15 7a2 2 0 012 2m0 0a2 2 0 01-2 2m0 0a2 2 0 01-2-2m0 0a2 2 0 012-2m-2 4h.01M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+							/>
+						</svg>
+						<span class="font-medium text-[13px]">Change Password</span>
+					</button>
+
+					<!-- Sign Out -->
 					<button
 						@click="session.logoutResource.submit()"
-						class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10"
+						class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-500 dark:text-red-400 hover:bg-red-500/10 transition-colors"
 					>
-						<span class="text-sm font-medium">Sign Out</span>
+						<svg
+							class="w-[18px] h-[18px] shrink-0"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+							/>
+						</svg>
+						<span class="font-medium text-[13px]">Sign Out</span>
 					</button>
 				</div>
 			</nav>
@@ -1232,16 +1327,16 @@ onUnmounted(() => {
 /* ===== CSS Grid App Shell ===== */
 .app-shell-root {
 	display: grid;
-	min-height: 100dvh;
+	height: 100dvh;
 	width: 100%;
-	/* Mobile: header + content + ticker + bottom nav */
+	/* Mobile: content + ticker + bottom nav */
 	grid-template-columns: 1fr;
-	grid-template-rows: auto 1fr auto auto;
+	grid-template-rows: 1fr auto auto;
 	grid-template-areas:
-		'content'
 		'content'
 		'ticker'
 		'bottomnav';
+	overflow: hidden;
 }
 
 /* lg+: sidebar + content, no bottom nav */
@@ -1275,11 +1370,12 @@ onUnmounted(() => {
 	flex-direction: column;
 	min-width: 0;
 	min-height: 0;
+	overflow: hidden; /* Lock overflow to isolate scrolling inside main content */
 }
 
 @media (max-width: 1023px) {
 	.app-shell-content-col {
-		overflow: visible;
+		overflow: hidden; /* Lock overflow on mobile/tablet too to keep header/bottom-nav sticky */
 	}
 }
 

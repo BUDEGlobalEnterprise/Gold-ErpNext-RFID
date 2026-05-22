@@ -23,24 +23,6 @@
 						>
 							{{ leftPanelTitle }}
 						</h3>
-						<button
-							@click="close"
-							class="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition"
-						>
-							<svg
-								class="w-5 h-5 text-gray-400"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M6 18L18 6M6 6l12 12"
-								/>
-							</svg>
-						</button>
 					</div>
 
 					<!-- SALE MODE: Items + Tax + Trade-Ins -->

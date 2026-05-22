@@ -77,10 +77,16 @@ const activeCount = computed(() => {
 
 <style scoped>
 .no-scrollbar::-webkit-scrollbar {
-	display: none;
+	height: 3px;
 }
-.no-scrollbar {
-	-ms-overflow-style: none;
-	scrollbar-width: none;
+.no-scrollbar::-webkit-scrollbar-track {
+	background: transparent;
+}
+.no-scrollbar::-webkit-scrollbar-thumb {
+	background: rgba(212, 175, 55, 0.25);
+	border-radius: 10px;
+}
+.no-scrollbar:hover::-webkit-scrollbar-thumb {
+	background: rgba(212, 175, 55, 0.5);
 }
 </style>

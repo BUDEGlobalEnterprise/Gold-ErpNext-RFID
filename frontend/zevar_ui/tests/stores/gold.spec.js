@@ -6,24 +6,28 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 
+const fetchRatesMock = vi.hoisted(() =>
+	vi.fn(() =>
+		Promise.resolve({
+			success: true,
+			rates: {
+				'Yellow Gold': [
+					{ purity: '14Kt', rate_per_gram: 95.5, trend: 'up', change_pct: 0.25 },
+					{ purity: '18Kt', rate_per_gram: 110.0, trend: 'flat', change_pct: 0 },
+					{ purity: '24Kt', rate_per_gram: 150.0, trend: 'down', change_pct: -0.5 },
+				],
+			},
+			last_updated: '2026-05-12T10:00:00',
+			source: 'test',
+			is_stale: false,
+		})
+	)
+)
+
 // Mock frappe-ui before importing store
 vi.mock('frappe-ui', () => ({
 	createResource: vi.fn(() => ({
-		fetch: vi.fn(() =>
-			Promise.resolve({
-				success: true,
-				rates: {
-					'Yellow Gold': [
-						{ purity: '14Kt', rate_per_gram: 95.5, trend: 'up', change_pct: 0.25 },
-						{ purity: '18Kt', rate_per_gram: 110.0, trend: 'flat', change_pct: 0 },
-						{ purity: '24Kt', rate_per_gram: 150.0, trend: 'down', change_pct: -0.5 },
-					],
-				},
-				last_updated: '2026-05-12T10:00:00',
-				source: 'test',
-				is_stale: false,
-			})
-		),
+		fetch: fetchRatesMock,
 		submit: vi.fn(),
 	})),
 }))
@@ -50,6 +54,7 @@ describe('Gold Store', () => {
 	beforeEach(() => {
 		setActivePinia(createPinia())
 		localStorageMock.clear()
+		fetchRatesMock.mockClear()
 	})
 
 	describe('State Initialization', () => {
@@ -79,6 +84,15 @@ describe('Gold Store', () => {
 			const { useGoldStore } = await import('../../src/stores/gold.js')
 			const gold = useGoldStore()
 			expect(gold).toBeDefined()
+		})
+	})
+
+	describe('Manual refresh', () => {
+		it('should fetch rates on demand', async () => {
+			const { useGoldStore } = await import('../../src/stores/gold.js')
+			const gold = useGoldStore()
+			await gold.refreshRates()
+			expect(fetchRatesMock).toHaveBeenCalledTimes(1)
 		})
 	})
 })

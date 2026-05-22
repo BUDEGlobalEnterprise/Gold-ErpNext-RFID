@@ -37,7 +37,7 @@ module.exports = {
 				},
 				"background-light": "#f8f9fa",
 				"background-dark": "#05070a",
-				"card-bg": "#ffffff",
+				"card-bg": "#FAF8F5",
 				"emerald-glow": "#10b981",
 				"gold-accent": "#c5a059", // More metallic gold
 				"diamond-white": "#f1f5f9",

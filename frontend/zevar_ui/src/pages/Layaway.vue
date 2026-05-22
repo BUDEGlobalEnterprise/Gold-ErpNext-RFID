@@ -2,18 +2,18 @@
 	<AppLayout @layaway-created="onLayawayCreated">
 		<div v-if="!showCreateModal" class="flex flex-col">
 			<!-- Page Header -->
-			<div class="flex items-center justify-between mb-6">
+			<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
 				<div>
 					<h1 class="premium-title !text-2xl">Layaway Management</h1>
 					<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
 						Manage layaway contracts and payments
 					</p>
 				</div>
-				<div class="flex items-center gap-4">
+				<div class="flex items-center gap-4 self-end sm:self-auto">
 					<ViewToggle v-model="viewMode" storage-key="zevar_layaway_view" />
 					<button
 						@click="showCreateModal = true"
-						class="px-4 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] transition flex items-center gap-2"
+						class="px-4 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] transition flex items-center gap-2 whitespace-nowrap"
 					>
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
@@ -32,15 +32,15 @@
 			<div
 				class="bg-white dark:bg-warm-dark-900/50 rounded-xl p-4 mb-6 border border-gray-100 dark:border-warm-border/50"
 			>
-				<div class="flex flex-wrap gap-3 items-end">
-					<div class="flex flex-col gap-1">
+				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+					<div class="flex flex-col gap-1 w-full">
 						<label class="text-xs font-medium text-gray-500 dark:text-gray-400"
 							>Status</label
 						>
 						<select
 							v-model="filters.status"
 							@change="fetchLayaways"
-							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+							class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
 						>
 							<option value="">All</option>
 							<option value="Active">Active</option>
@@ -49,7 +49,7 @@
 							<option value="Defaulted">Defaulted</option>
 						</select>
 					</div>
-					<div class="flex flex-col gap-1">
+					<div class="flex flex-col gap-1 w-full">
 						<label class="text-xs font-medium text-gray-500 dark:text-gray-400"
 							>Customer</label
 						>
@@ -58,10 +58,10 @@
 							v-model="filters.customer"
 							placeholder="Search customer..."
 							@keyup.enter="fetchLayaways"
-							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-40"
+							class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
 						/>
 					</div>
-					<div class="flex flex-col gap-1">
+					<div class="flex flex-col gap-1 w-full">
 						<label class="text-xs font-medium text-gray-500 dark:text-gray-400"
 							>Search</label
 						>
@@ -70,13 +70,13 @@
 							v-model="filters.search"
 							placeholder="Contract #..."
 							@keyup.enter="fetchLayaways"
-							class="px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-36"
+							class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
 						/>
 					</div>
 					<button
 						@click="fetchLayaways"
 						:disabled="loading"
-						class="px-4 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] transition disabled:opacity-50"
+						class="w-full px-4 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c9a432] transition disabled:opacity-50"
 					>
 						Search
 					</button>
@@ -163,26 +163,26 @@
 				<div
 					v-else
 					v-if="viewMode === 'grid'"
-					class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+					class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5"
 				>
 					<div
 						v-for="layaway in layaways"
 						:key="layaway.name"
 						@click="viewDetails(layaway.name)"
-						class="bg-white dark:bg-warm-dark-800 rounded-2xl border border-gray-100 dark:border-warm-border/50 p-4 hover:shadow-md hover:border-gray-300 dark:hover:border-warm-border transition cursor-pointer"
+						class="bg-white dark:bg-warm-dark-800 rounded-xl border border-gray-100 dark:border-warm-border/50 p-3.5 hover:shadow-md hover:border-[#D4AF37]/40 dark:hover:border-[#D4AF37]/30 transition-all duration-200 cursor-pointer flex flex-col group min-w-0"
 					>
 						<!-- Header -->
-						<div class="flex items-start justify-between mb-3">
-							<div>
-								<span class="font-mono text-xs text-[#D4AF37]">{{
+						<div class="flex items-start justify-between gap-1 mb-2.5 min-w-0">
+							<div class="min-w-0">
+								<span class="font-mono text-[10px] text-[#D4AF37] font-bold">{{
 									layaway.name
 								}}</span>
-								<p class="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
+								<p class="text-xs font-bold text-gray-900 dark:text-white mt-0.5 truncate leading-tight">
 									{{ layaway.customer_name || layaway.customer || 'Unknown' }}
 								</p>
 							</div>
 							<span
-								class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold"
+								class="inline-flex px-1.5 py-0.5 rounded-full text-[9px] font-bold shrink-0"
 								:class="getStatusClass(layaway.status, layaway.is_overdue)"
 							>
 								{{ layaway.is_overdue ? 'Overdue' : layaway.status }}
@@ -190,30 +190,30 @@
 						</div>
 
 						<!-- Amounts -->
-						<div class="grid grid-cols-2 gap-3 mb-3">
+						<div class="grid grid-cols-2 gap-2 mb-2.5">
 							<div>
-								<span class="text-xs text-gray-500 dark:text-gray-400">Total</span>
-								<p class="text-sm font-bold text-gray-900 dark:text-white">
+								<span class="text-[9px] uppercase font-bold text-gray-400 dark:text-gray-500">Total</span>
+								<p class="text-xs font-mono font-bold text-gray-900 dark:text-white">
 									{{ formatCurrency(layaway.total_amount) }}
 								</p>
 							</div>
 							<div>
-								<span class="text-xs text-gray-500 dark:text-gray-400"
+								<span class="text-[9px] uppercase font-bold text-gray-400 dark:text-gray-500"
 									>Balance</span
 								>
-								<p class="text-sm font-bold text-orange-600 dark:text-orange-400">
+								<p class="text-xs font-mono font-bold text-orange-600 dark:text-orange-400">
 									{{ formatCurrency(layaway.balance_amount) }}
 								</p>
 							</div>
 						</div>
 
 						<!-- Progress Bar -->
-						<div class="mb-3">
+						<div class="mb-2.5">
 							<div
-								class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1"
+								class="flex justify-between text-[10px] text-gray-500 dark:text-gray-400 mb-1"
 							>
 								<span>Paid</span>
-								<span
+								<span class="font-mono font-bold"
 									>{{
 										Math.round(
 											(layaway.deposit_amount / layaway.total_amount) * 100
@@ -222,10 +222,10 @@
 								>
 							</div>
 							<div
-								class="h-2 bg-gray-200 dark:bg-warm-dark-800 rounded-full overflow-hidden"
+								class="h-1.5 bg-gray-100 dark:bg-warm-dark-900 rounded-full overflow-hidden"
 							>
 								<div
-									class="h-full bg-[#D4AF37] transition-all duration-300"
+									class="h-full bg-gradient-to-r from-[#D4AF37] to-[#F2E6A0] transition-all duration-300"
 									:style="{
 										width: `${
 											(layaway.deposit_amount / layaway.total_amount) * 100
@@ -237,13 +237,13 @@
 
 						<!-- Footer -->
 						<div
-							class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
+							class="flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 mt-auto pt-2 border-t border-gray-50 dark:border-warm-border/30 min-w-0"
 						>
-							<span>{{ layaway.item_count || 0 }} items</span>
-							<span v-if="layaway.next_payment_date">
+							<span class="shrink-0">{{ layaway.item_count || 0 }} items</span>
+							<span v-if="layaway.next_payment_date" class="truncate ml-1 font-mono text-[9px]">
 								Next: {{ formatDate(layaway.next_payment_date) }}
 							</span>
-							<span v-else> {{ layaway.maximum_duration_months }} months </span>
+							<span v-else class="shrink-0 font-mono text-[9px]"> {{ layaway.maximum_duration_months }} months </span>
 						</div>
 					</div>
 				</div>

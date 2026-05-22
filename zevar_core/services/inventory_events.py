@@ -87,17 +87,17 @@ def transfer_serial(
 			},
 		)
 
-	se.append(
-		"items",
-		{
-			"item_code": item_code,
-			"qty": qty,
-			"s_warehouse": from_warehouse,
-			"t_warehouse": to_warehouse,
-			"cost_center": se.cost_center,
-			"serial_and_batch_bundle": _get_or_create_sbb(serial_no, item_code, from_warehouse),
-		},
-	)
+	row = {
+		"item_code": item_code,
+		"qty": qty,
+		"s_warehouse": from_warehouse,
+		"t_warehouse": to_warehouse,
+		"cost_center": se.cost_center,
+	}
+	if serial_no:
+		row["serial_no"] = serial_no
+
+	se.append("items", row)
 
 	se.insert(ignore_permissions=True)
 	se.submit()

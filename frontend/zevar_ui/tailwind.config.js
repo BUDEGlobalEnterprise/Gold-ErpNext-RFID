@@ -26,6 +26,7 @@ module.exports = {
 		},
 		extend: {
 			colors: {
+				white: '#FAF8F5',
 				'portal-primary': '#25c0f4',
 				'portal-accent-teal': '#1de9b6',
 				'portal-accent-indigo': '#536dfe',

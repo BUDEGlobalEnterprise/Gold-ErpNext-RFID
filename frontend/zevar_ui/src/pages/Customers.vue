@@ -2,19 +2,23 @@
 	<AppLayout>
 		<div class="flex flex-col">
 			<!-- Header -->
-			<div class="flex items-center justify-between gap-4 mb-6 flex-shrink-0">
-				<div class="flex items-center gap-3">
-					<h2 class="premium-title !text-xl sm:!text-2xl">Customers</h2>
-					<span
-						class="status-label !mb-0 !bg-gray-100 dark:!bg-warm-dark-700 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-warm-border"
-					>
-						{{ pagination.total_count }} Clients
-					</span>
+			<div class="flex flex-col gap-3 mb-6 flex-shrink-0">
+				<!-- Title & Display controls Row (Always single-line) -->
+				<div class="flex items-center justify-between gap-4 w-full">
+					<div class="flex items-center gap-3">
+						<h2 class="premium-title !text-xl sm:!text-2xl">Customers</h2>
+						<span
+							class="status-label !mb-0 !bg-gray-100 dark:!bg-warm-dark-700 !text-gray-600 dark:!text-white/60 !px-4 !py-1 !rounded-full !border !border-gray-200 dark:!border-warm-border"
+						>
+							{{ pagination.total_count }} Clients
+						</span>
+					</div>
+					<ViewToggle v-model="viewMode" storage-key="zevar_customers_view" class="shrink-0" />
 				</div>
 
-				<div class="flex items-center gap-2">
-					<ViewToggle v-model="viewMode" storage-key="zevar_customers_view" />
-					<div class="relative">
+				<!-- Actions Row (Search + Add Button) -->
+				<div class="flex items-center gap-2 w-full">
+					<div class="relative flex-1">
 						<svg
 							class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
 							fill="none"
@@ -33,12 +37,12 @@
 							v-model="searchQuery"
 							@input="onSearchInput"
 							placeholder="Search by name, phone, email..."
-							class="pl-9 pr-4 py-2 bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-64"
+							class="pl-9 pr-4 py-2 bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent w-full text-ellipsis"
 						/>
 					</div>
 					<button
 						@click="createNewClient"
-						class="px-4 py-2 bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black text-xs font-bold rounded-lg hover:bg-gray-800 dark:hover:bg-[#b5952f] transition-all shadow-sm"
+						class="px-4 py-2 bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black text-xs font-bold rounded-lg hover:bg-gray-800 dark:hover:bg-[#b5952f] transition-all shadow-sm shrink-0 whitespace-nowrap"
 					>
 						+ New Client
 					</button>
@@ -284,40 +288,40 @@
 
 					<div
 						v-else
-						class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
+						class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3.5"
 					>
 						<div
 							v-for="customer in customers"
 							:key="customer.name"
-							class="bg-white dark:bg-[#15171e] rounded-2xl border border-gray-100 dark:border-warm-border/50 p-4 hover:shadow-md hover:border-gray-300 dark:hover:border-warm-border transition cursor-pointer flex flex-col"
+							class="bg-white dark:bg-warm-dark-800 rounded-xl border border-gray-100 dark:border-warm-border/50 p-3 hover:shadow-md hover:border-[#D4AF37]/40 dark:hover:border-[#D4AF37]/30 transition-all duration-200 cursor-pointer flex flex-col group min-w-0"
 							:class="
-								customer.customer_group === 'VIP' ? '!border-[#D4AF37]/30' : ''
+								customer.customer_group === 'VIP' ? '!border-[#D4AF37]/30 bg-gradient-to-b from-white to-[#D4AF37]/5 dark:from-warm-dark-800 dark:to-[#D4AF37]/5' : ''
 							"
 							@click="openCustomer(customer.name)"
 						>
-							<div class="flex items-center gap-3 mb-3">
+							<div class="flex items-start gap-2.5 mb-2.5 min-w-0">
 								<div
-									class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+									class="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
 									:class="
 										customer.customer_group === 'VIP'
 											? 'bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] text-[#0F1115]'
-											: 'bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-300'
+											: 'bg-gray-50 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-warm-border/30'
 									"
 								>
 									{{ getInitials(customer.customer_name || customer.name) }}
 								</div>
-								<div class="min-w-0">
+								<div class="min-w-0 flex-1">
 									<div
-										class="font-bold text-gray-900 dark:text-white text-sm truncate"
+										class="font-bold text-gray-900 dark:text-white text-xs truncate leading-tight mb-0.5"
 									>
 										{{ customer.customer_name || customer.name }}
 									</div>
 									<span
-										class="px-2 py-0.5 rounded-full text-[9px] font-bold"
+										class="inline-block px-1.5 py-0.5 rounded text-[8px] font-bold"
 										:class="
 											customer.customer_group === 'VIP'
 												? 'bg-[#D4AF37]/15 text-[#D4AF37]'
-												: 'bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-400'
+												: 'bg-gray-100 dark:bg-warm-dark-900 text-gray-500 dark:text-gray-400'
 										"
 									>
 										{{ customer.customer_group || 'Standard' }}
@@ -325,14 +329,14 @@
 								</div>
 							</div>
 							<div
-								class="space-y-1.5 pt-3 border-t border-gray-100 dark:border-warm-border/50"
+								class="space-y-1.5 pt-2 border-t border-gray-50 dark:border-warm-border/30 mt-auto min-w-0"
 							>
-								<div class="flex items-center justify-between">
+								<div class="flex items-center justify-between gap-1.5 min-w-0">
 									<div
-										class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400"
+										class="flex items-center gap-1.5 text-[10px] text-gray-500 dark:text-gray-400 min-w-0 truncate"
 									>
 										<svg
-											class="w-3.5 h-3.5 text-gray-400"
+											class="w-3 h-3 text-gray-400 shrink-0"
 											fill="none"
 											stroke="currentColor"
 											viewBox="0 0 24 24"
@@ -344,16 +348,16 @@
 												d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
 											/>
 										</svg>
-										{{ customer.mobile_no || 'No Phone' }}
+										<span class="truncate">{{ customer.mobile_no || 'No Phone' }}</span>
 									</div>
-									<div class="flex items-center gap-1">
+									<div class="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
 										<button
 											@click.stop="openCustomer(customer.name)"
-											class="p-1 rounded hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition"
+											class="p-0.5 rounded hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition"
 											title="View Customer"
 										>
 											<svg
-												class="w-3.5 h-3.5"
+												class="w-3 h-3"
 												fill="none"
 												stroke="currentColor"
 												viewBox="0 0 24 24"
@@ -375,11 +379,11 @@
 										<button
 											v-if="sessionStore.isManager"
 											@click.stop="editCustomer(customer.name)"
-											class="p-1 rounded hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition"
+											class="p-0.5 rounded hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition"
 											title="Edit Customer"
 										>
 											<svg
-												class="w-3.5 h-3.5"
+												class="w-3 h-3"
 												fill="none"
 												stroke="currentColor"
 												viewBox="0 0 24 24"
@@ -395,10 +399,10 @@
 									</div>
 								</div>
 								<div
-									class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400"
+									class="flex items-center gap-1.5 text-[10px] text-gray-500 dark:text-gray-400 min-w-0"
 								>
 									<svg
-										class="w-3.5 h-3.5 text-gray-400"
+										class="w-3 h-3 text-gray-400 shrink-0"
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -410,7 +414,7 @@
 											d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
 										/>
 									</svg>
-									{{ customer.email_id || 'No Email' }}
+									<span class="truncate">{{ customer.email_id || 'No Email' }}</span>
 								</div>
 							</div>
 						</div>

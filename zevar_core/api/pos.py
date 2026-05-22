@@ -636,6 +636,13 @@ def create_pos_invoice(
 
 		si.insert(ignore_permissions=True)
 
+		# Auto-adjust payments to match grand_total if they differ (e.g. due to offline tax differences)
+		total_payment_allocated = sum(flt(p.amount) for p in si.payments)
+		if abs(total_payment_allocated - si.grand_total) > 0.01 and si.payments:
+			diff = flt(si.grand_total) - flt(total_payment_allocated)
+			si.payments[0].amount = flt(si.payments[0].amount) + diff
+			si.save(ignore_permissions=True)
+
 		# Deduct gift card balance before invoice submission for atomicity (Issue #12)
 		if gc_payment_amount > 0 and gift_card_number:
 			gc_doc = frappe.get_doc("Gift Card", gift_card_number)
@@ -769,6 +776,14 @@ def get_pos_settings(warehouse: str | None = None):
 		)
 		if store_loc and store_loc.county_tax_rate:
 			tax_rate = flt(store_loc.county_tax_rate)
+		elif store_loc and store_loc.tax_template:
+			rates = frappe.db.get_all(
+				"Sales Taxes and Charges",
+				filters={"parent": store_loc.tax_template, "parenttype": "Sales Taxes and Charges Template"},
+				fields=["rate"],
+			)
+			if rates:
+				tax_rate = sum(flt(r.rate) for r in rates)
 		else:
 			warehouse_lower = warehouse.lower()
 			for location, rate in DEFAULT_TAX_RATES.items():
@@ -1352,6 +1367,22 @@ def hold_cart(
 	if not items_list:
 		frappe.throw(_("Cannot hold an empty cart."))
 
+	# Create stock reservations for serialized items to lock inventory
+	reservations = []
+	for item in items_list:
+		serial_no = item.get("serial_no")
+		if serial_no:
+			from frappe.utils import add_to_date, now_datetime
+			hold_until = add_to_date(now_datetime(), hours=24)  # 24h default hold
+			
+			res = frappe.new_doc("Stock Reservation")
+			res.customer = customer or "Walk-In Customer"
+			res.serial_no = serial_no
+			res.hold_until = hold_until
+			res.insert(ignore_permissions=True)
+			res.submit()
+			reservations.append(res.name)
+
 	cart_id = frappe.generate_hash(length=8)
 	held_cart = {
 		"id": cart_id,
@@ -1364,6 +1395,7 @@ def hold_cart(
 		"held_at": str(frappe.utils.now_datetime()),
 		"item_count": len(items_list),
 		"total": sum(flt(i.get("amount", 0)) * flt(i.get("qty", 1)) for i in items_list),
+		"reservations": reservations,
 	}
 
 	cache_key = HELD_CARTS_KEY.format(user=frappe.session.user)
@@ -1408,6 +1440,14 @@ def recall_cart(cart_id: str) -> dict:
 	if not target:
 		frappe.throw(_("Held cart not found or already recalled."))
 
+	# Cancel all associated stock reservations so the items return to the showroom for POS checkout
+	reservations = target.get("reservations", [])
+	for res_name in reservations:
+		if frappe.db.exists("Stock Reservation", res_name):
+			res = frappe.get_doc("Stock Reservation", res_name)
+			if res.docstatus == 1:
+				res.cancel()
+
 	frappe.cache().set_value(cache_key, remaining, expires_in_sec=86400)
 	return {"success": True, "cart": target}
 
@@ -1417,6 +1457,23 @@ def discard_held_cart(cart_id: str) -> dict:
 	"""Remove a held cart without recalling it."""
 	cache_key = HELD_CARTS_KEY.format(user=frappe.session.user)
 	existing = frappe.cache().get_value(cache_key) or []
-	remaining = [c for c in existing if c.get("id") != cart_id]
+	
+	target = None
+	remaining = []
+	for c in existing:
+		if c.get("id") == cart_id:
+			target = c
+		else:
+			remaining.append(c)
+
+	if target:
+		# Cancel all associated stock reservations
+		reservations = target.get("reservations", [])
+		for res_name in reservations:
+			if frappe.db.exists("Stock Reservation", res_name):
+				res = frappe.get_doc("Stock Reservation", res_name)
+				if res.docstatus == 1:
+					res.cancel()
+
 	frappe.cache().set_value(cache_key, remaining, expires_in_sec=86400)
 	return {"success": True, "remaining": len(remaining)}

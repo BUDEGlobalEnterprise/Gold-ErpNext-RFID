@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
 import frappeui from 'frappe-ui/vite'
+import Icons from 'unplugin-icons/vite'
 
 export default defineConfig({
 	base: '/assets/zevar_core/pos/',
@@ -20,7 +21,7 @@ export default defineConfig({
 			},
 		},
 	},
-	plugins: [frappeui(), vue()],
+	plugins: [frappeui(), Icons({ compiler: 'vue3' }), vue()],
 	resolve: {
 		alias: {
 			'@': path.resolve(__dirname, './src'),
@@ -33,7 +34,8 @@ export default defineConfig({
 		manifest: true,
 	},
 	optimizeDeps: {
-		include: ['frappe-ui > feather-icons', 'showdown', 'engine.io-client'],
+		exclude: ['frappe-ui'],
+		include: ['showdown', 'engine.io-client'],
 	},
 	test: {
 		globals: true,

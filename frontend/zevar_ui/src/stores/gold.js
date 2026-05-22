@@ -109,6 +109,10 @@ export const useGoldStore = defineStore('gold', () => {
 		}, 60000)
 	}
 
+	function refreshRates() {
+		return fetchRates.fetch()
+	}
+
 	function stopPolling() {
 		if (pollingInterval) {
 			clearInterval(pollingInterval)
@@ -123,6 +127,7 @@ export const useGoldStore = defineStore('gold', () => {
 		isStale,
 		rateSource,
 		lastError,
+		refreshRates,
 		startPolling,
 		stopPolling,
 	}

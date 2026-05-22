@@ -95,6 +95,9 @@ class StockReservation(Document):
 			)
 			self._log_event("reservation_expired", f"Reservation {self.name} cancelled, stock returned")
 
+		self.status = "Cancelled"
+		self.db_set("status", "Cancelled")
+
 	def _log_event(self, event_type, details):
 		log = frappe.new_doc("POS Audit Log")
 		log.user = frappe.session.user

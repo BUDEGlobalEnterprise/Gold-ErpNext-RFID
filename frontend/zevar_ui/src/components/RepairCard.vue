@@ -1,23 +1,23 @@
 <template>
 	<div
-		class="p-4 rounded-xl border bg-white dark:bg-warm-card hover:border-[#D4AF37] hover:shadow-md cursor-pointer transition-all group"
+		class="p-3.5 rounded-xl border bg-white dark:bg-warm-dark-800 hover:border-[#D4AF37] hover:shadow-md cursor-pointer transition-all duration-200 group flex flex-col min-w-0"
 		:class="getStatusBorderColor(order.status)"
 		@click="$emit('open-detail')"
 	>
 		<!-- Header -->
-		<div class="flex justify-between items-start mb-3">
-			<div>
-				<span class="font-mono text-sm font-bold text-[#D4AF37]">{{ order.name }}</span>
+		<div class="flex justify-between items-start gap-1 mb-2.5 min-w-0">
+			<div class="min-w-0 flex items-center gap-1.5 flex-wrap">
+				<span class="font-mono text-[10px] font-bold text-[#D4AF37]">{{ order.name }}</span>
 				<span
-					class="ml-2 inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold"
+					class="inline-flex px-1.5 py-0.5 rounded-full text-[8px] font-bold shrink-0"
 					:class="getStatusBadgeClass(order.status)"
 				>
 					{{ order.status }}
 				</span>
 			</div>
-			<div class="flex items-center gap-1">
+			<div class="flex items-center gap-1 shrink-0">
 				<span v-if="order.priority === 'Urgent'" class="text-red-500" title="Urgent">
-					<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+					<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
 						<path
 							fill-rule="evenodd"
 							d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -30,7 +30,7 @@
 					class="text-green-500"
 					title="Warranty Repair"
 				>
-					<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+					<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
 						<path
 							fill-rule="evenodd"
 							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -38,48 +38,48 @@
 						/>
 					</svg>
 				</span>
-				<span class="text-xs text-gray-400">{{ formatDate(order.creation) }}</span>
+				<span class="text-[9px] text-gray-400 font-mono">{{ formatDate(order.creation) }}</span>
 			</div>
 		</div>
 
 		<!-- Repair Type -->
-		<p class="font-medium text-gray-900 dark:text-white mb-2 truncate">
+		<p class="font-bold text-gray-900 dark:text-white text-xs mb-2 truncate leading-tight">
 			{{ order.repair_type_name || order.repair_type }}
 		</p>
 
 		<!-- Item Type Indicators -->
-		<div class="flex flex-wrap gap-1 mb-2">
+		<div class="flex flex-wrap gap-1 mb-2.5">
 			<span
 				v-if="order.item_type"
-				class="px-1.5 py-0.5 bg-gray-100 dark:bg-warm-dark-700 rounded text-[10px] text-gray-600"
+				class="px-1 py-0.5 bg-gray-50 dark:bg-warm-dark-900 border border-gray-100 dark:border-warm-border/30 rounded text-[9px] font-bold text-gray-500 dark:text-gray-400"
 			>
 				{{ order.item_type }}
 			</span>
 			<span
 				v-if="order.stone_weight && order.stone_weight > 0"
-				class="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 rounded text-[10px] text-purple-600"
+				class="px-1 py-0.5 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/30 rounded text-[9px] font-bold text-purple-600 dark:text-purple-400"
 			>
 				💎 {{ order.stone_weight }}ct
 			</span>
 			<span
 				v-if="order.item_brand"
-				class="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 rounded text-[10px] text-amber-600"
+				class="px-1 py-0.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 rounded text-[9px] font-bold text-amber-600 dark:text-amber-400"
 			>
 				{{ order.item_brand }}
 			</span>
 			<span
 				v-if="order.customer_id_type"
-				class="px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900/30 rounded text-[10px] text-orange-600"
+				class="px-1 py-0.5 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/30 rounded text-[9px] font-bold text-orange-600 dark:text-orange-400"
 			>
 				ID ✓
 			</span>
 		</div>
 
 		<!-- Customer Info -->
-		<div class="space-y-1 mb-3">
-			<div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+		<div class="space-y-1 mb-3.5 min-w-0">
+			<div class="flex items-center gap-2 text-[10px] text-gray-600 dark:text-gray-400 min-w-0">
 				<svg
-					class="w-4 h-4 text-gray-400"
+					class="w-3.5 h-3.5 text-gray-400 shrink-0"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -93,9 +93,9 @@
 				</svg>
 				<span class="truncate">{{ order.customer_name || order.customer }}</span>
 			</div>
-			<div v-if="order.customer_phone" class="flex items-center gap-2 text-sm text-gray-500">
+			<div v-if="order.customer_phone" class="flex items-center gap-2 text-[10px] text-gray-500 min-w-0">
 				<svg
-					class="w-4 h-4 text-gray-400"
+					class="w-3.5 h-3.5 text-gray-400 shrink-0"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -107,37 +107,45 @@
 						d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
 					/>
 				</svg>
-				<span>{{ order.customer_phone }}</span>
+				<span class="truncate">{{ order.customer_phone }}</span>
 			</div>
+		</div>
+
+		<!-- Compact Timeline Progress -->
+		<div class="mb-2">
+			<RepairTimeline
+				:currentStatus="order.status"
+				variant="compact"
+			/>
 		</div>
 
 		<!-- Footer with Quick Actions -->
 		<div
-			class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-warm-border-subtle"
+			class="flex items-center justify-between pt-2 border-t border-gray-50 dark:border-warm-border/30 mt-auto min-w-0"
 		>
-			<span class="text-xs text-gray-400"
+			<span class="text-[10px] text-gray-400 dark:text-gray-500 truncate"
 				>By: {{ order.handled_by_name || 'Unassigned' }}</span
 			>
-			<span class="text-sm font-bold text-gray-900 dark:text-white"
+			<span class="text-xs font-mono font-extrabold text-gray-900 dark:text-white shrink-0 ml-1"
 				>${{ formatNum(order.estimated_cost || order.total_cost) }}</span
 			>
 		</div>
 
 		<!-- Quick Action Buttons (visible on hover) -->
-		<div class="mt-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+		<div class="mt-2.5 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
 			<button
 				@click.stop="$emit('quick-status', order.name, getNextStatus(order.status))"
-				class="flex-1 py-1.5 text-xs font-medium bg-[#D4AF37] text-black rounded hover:bg-[#c9a432]"
+				class="flex-1 py-1 text-[10px] font-bold bg-[#D4AF37] hover:bg-[#c9a432] text-[#0F1115] rounded transition duration-150"
 				title="Advance to next status"
 			>
 				→ Next
 			</button>
 			<button
 				@click.stop="$emit('print-thermal', order)"
-				class="px-2 py-1.5 text-xs bg-gray-100 dark:bg-warm-dark-700 rounded hover:bg-gray-200"
+				class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white bg-gray-50 dark:bg-warm-dark-900 hover:bg-gray-100 border border-gray-100 dark:border-warm-border/30 rounded transition"
 				title="Print thermal receipt"
 			>
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -148,10 +156,10 @@
 			</button>
 			<button
 				@click.stop="$emit('open-qr', order)"
-				class="px-2 py-1.5 text-xs bg-gray-100 dark:bg-warm-dark-700 rounded hover:bg-gray-200"
+				class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white bg-gray-50 dark:bg-warm-dark-900 hover:bg-gray-100 border border-gray-100 dark:border-warm-border/30 rounded transition"
 				title="Show QR Code"
 			>
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -165,7 +173,7 @@
 		<!-- Overdue Warning -->
 		<div
 			v-if="isOverdue(order.promised_date) && order.status !== 'Delivered'"
-			class="mt-2 text-xs text-red-500 font-medium flex items-center gap-1"
+			class="mt-2 text-[10px] text-red-500 font-bold flex items-center gap-1 shrink-0"
 		>
 			<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
 				<path
@@ -182,6 +190,7 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue'
 import { formatDate } from '@/utils/dates.js'
+import RepairTimeline from './RepairTimeline.vue'
 
 const props = defineProps({
 	order: { type: Object, required: true },
