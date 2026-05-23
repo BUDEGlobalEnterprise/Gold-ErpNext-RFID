@@ -1310,8 +1310,18 @@ async function loadWarehouses() {
 			body: JSON.stringify({
 				doctype: 'Warehouse',
 				fields: ['name'],
-				filters: { is_group: 0 },
-				limit_page_length: 200,
+				filters: {
+					is_group: 0,
+					disabled: 0,
+					name: ['in', [
+						'Store 1 - New York - ZJ',
+						'Store 2 - Los Angeles - ZJ',
+						'Store 3 - Chicago - ZJ',
+						'Store 4 - Houston - ZJ',
+						'Store 5 - Miami - ZJ'
+					]]
+				},
+				limit_page_length: 10,
 			}),
 		})
 		const data = await res.json()

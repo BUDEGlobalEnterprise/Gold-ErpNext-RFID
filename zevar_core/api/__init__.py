@@ -46,6 +46,7 @@ from zevar_core.api.quick_layaway import (
 	get_layaway_preview as get_layaway_preview_shim,
 )
 from zevar_core.api.repair import (
+	add_repair_payment,
 	attach_repair_photo,
 	create_repair_order,
 	get_customer_repair_history,
@@ -94,6 +95,7 @@ from zevar_core.api.live_monitor import (
 from zevar_core.api.trending import get_trending_items, track_trending_click
 
 __all__ = [
+	"add_repair_payment",
 	"add_ticket_reply",
 	"attach_repair_photo",
 	"calculate_invoice_totals",

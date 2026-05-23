@@ -1116,25 +1116,21 @@ const warehouses = createResource({
 	url: 'frappe.client.get_list',
 	params: {
 		doctype: 'Warehouse',
-		filters: { is_group: 0, parent_warehouse: ['like', '%Zevar US Stores%'] },
+		filters: {
+			is_group: 0,
+			disabled: 0,
+			name: ['in', [
+				'Store 1 - New York - ZJ',
+				'Store 2 - Los Angeles - ZJ',
+				'Store 3 - Chicago - ZJ',
+				'Store 4 - Houston - ZJ',
+				'Store 5 - Miami - ZJ'
+			]]
+		},
 		fields: ['name'],
+		limit_page_length: 10,
 	},
 	auto: true,
-	onSuccess(data) {
-		if (!data || data.length === 0) warehouseFallback.fetch()
-	},
-})
-const warehouseFallback = createResource({
-	url: 'frappe.client.get_list',
-	params: {
-		doctype: 'Warehouse',
-		filters: { is_group: 0 },
-		fields: ['name'],
-		limit_page_length: 50,
-	},
-	onSuccess(data) {
-		if (data?.length > 0) warehouses.data = data
-	},
 })
 
 // Resize handlers

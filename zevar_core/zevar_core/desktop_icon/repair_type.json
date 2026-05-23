@@ -1,0 +1,16 @@
+{
+  "app": "zevar_core",
+  "color": "#8b5cf6",
+  "description": "Repair types and services with pricing and time estimates",
+  "doctype": "Desktop Icon",
+  "hidden": 0,
+  "icon": "wrench",
+  "label": "Repair Types",
+  "link_to": "Repair Type",
+  "link_type": "DocType",
+  "name": "Repair Types",
+  "module": "Unified Retail Management System",
+  "seq": 41,
+  "standard": 0,
+  "type": "Link"
+}

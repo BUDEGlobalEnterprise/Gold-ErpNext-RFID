@@ -34,7 +34,7 @@ def get_repair_dashboard_stats(warehouse: str | None = None):
 		f"""
 		SELECT COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
+		WHERE docstatus < 2
 			AND promised_date < %(today)s
 			AND status NOT IN ('Delivered', 'Cancelled')
 			{conditions}
@@ -48,7 +48,7 @@ def get_repair_dashboard_stats(warehouse: str | None = None):
 		f"""
 		SELECT COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
+		WHERE docstatus < 2
 			AND status = 'Ready for Pickup'
 			{conditions}
 		""",
@@ -62,7 +62,7 @@ def get_repair_dashboard_stats(warehouse: str | None = None):
 			f"""
 		SELECT SUM(total_cost) as revenue
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
+		WHERE docstatus < 2
 			AND received_date >= %(week_start)s
 			AND received_date <= %(today)s
 			{conditions}
@@ -80,7 +80,7 @@ def get_repair_dashboard_stats(warehouse: str | None = None):
 			f"""
 		SELECT SUM(total_cost) as revenue
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
+		WHERE docstatus < 2
 			AND received_date >= %(month_start)s
 			AND received_date <= %(today)s
 			{conditions}
@@ -98,7 +98,7 @@ def get_repair_dashboard_stats(warehouse: str | None = None):
 			f"""
 		SELECT AVG(TIMESTAMPDIFF(HOUR, received_date, delivered_date) / 24) as avg_days
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
+		WHERE docstatus < 2
 			AND status = 'Delivered'
 			AND delivered_date IS NOT NULL
 			AND received_date >= DATE_SUB(%(today)s, INTERVAL 30 DAY)
@@ -116,7 +116,7 @@ def get_repair_dashboard_stats(warehouse: str | None = None):
 		f"""
 		SELECT status, COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
+		WHERE docstatus < 2
 			AND status NOT IN ('Delivered', 'Cancelled')
 			{conditions}
 		GROUP BY status
@@ -135,7 +135,7 @@ def get_repair_dashboard_stats(warehouse: str | None = None):
 			COUNT(*) as count,
 			SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) as in_progress
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
+		WHERE docstatus < 2
 			AND assigned_to IS NOT NULL
 			AND status NOT IN ('Delivered', 'Cancelled')
 			{conditions}
@@ -159,7 +159,7 @@ def get_repair_dashboard_stats(warehouse: str | None = None):
 			status,
 			priority
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
+		WHERE docstatus < 2
 			AND promised_date < %(today)s
 			AND status NOT IN ('Delivered', 'Cancelled')
 			{conditions}
@@ -177,7 +177,7 @@ def get_repair_dashboard_stats(warehouse: str | None = None):
 			repair_type,
 			COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
+		WHERE docstatus < 2
 			AND received_date >= %(month_start)s
 			{conditions}
 		GROUP BY repair_type
@@ -196,7 +196,7 @@ def get_repair_dashboard_stats(warehouse: str | None = None):
 			SUM(balance_due) as total_pending,
 			COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
+		WHERE docstatus < 2
 			AND status IN ('Ready for Pickup', 'Delivered')
 			AND balance_due > 0
 			{conditions}
@@ -239,7 +239,7 @@ def get_repair_chart_data(warehouse: str | None = None, period: int = 30):
 			DATE(received_date) as date,
 			COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
+		WHERE docstatus < 2
 			AND received_date >= %(from_date)s
 			AND received_date <= %(to_date)s
 			{conditions}
@@ -274,7 +274,7 @@ def get_repair_chart_data(warehouse: str | None = None, period: int = 30):
 			status,
 			COUNT(*) as count
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
+		WHERE docstatus < 2
 			AND received_date >= %(from_date)s
 			AND received_date <= %(to_date)s
 			{conditions}
@@ -297,7 +297,7 @@ def get_repair_chart_data(warehouse: str | None = None, period: int = 30):
 			DATE(received_date) as date,
 			SUM(total_cost) as revenue
 		FROM `tabRepair Order`
-		WHERE docstatus = 1
+		WHERE docstatus < 2
 			AND received_date >= %(from_date)s
 			AND received_date <= %(to_date)s
 			{conditions}

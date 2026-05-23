@@ -189,7 +189,10 @@ def create_repair_order(
 
 	for key, value in kwargs.items():
 		if hasattr(doc, key):
-			setattr(doc, key, value)
+			if isinstance(value, list):
+				doc.set(key, value)
+			else:
+				setattr(doc, key, value)
 
 	doc.insert()
 
