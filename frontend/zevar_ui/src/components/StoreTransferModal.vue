@@ -162,9 +162,19 @@ const whResource = createResource({
 	url: 'frappe.client.get_list',
 	makeParams: () => ({
 		doctype: 'Warehouse',
-		filters: { is_group: 1 },
+		filters: {
+			is_group: 0,
+			disabled: 0,
+			name: ['in', [
+				'Store 1 - New York - ZJ',
+				'Store 2 - Los Angeles - ZJ',
+				'Store 3 - Chicago - ZJ',
+				'Store 4 - Houston - ZJ',
+				'Store 5 - Miami - ZJ'
+			]]
+		},
 		fields: ['name', 'warehouse_name'],
-		limit_page_length: 100,
+		limit_page_length: 10,
 	}),
 	onSuccess: (data) => {
 		storeWarehouses.value = data || []

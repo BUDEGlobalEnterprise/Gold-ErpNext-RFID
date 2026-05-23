@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Estimate - {{ repair_number }}</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            color: #333;
+            background: #f9f9f9;
+        }
+        .estimate-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #D4AF37 0%, #F4CF67 100%);
+            padding: 30px;
+            color: #1a1a1a;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .header p {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        .content {
+            padding: 30px;
+        }
+        .estimate-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #D4AF37;
+        }
+        .info-group {
+            flex: 1;
+        }
+        .info-group:first-child {
+            margin-right: 20px;
+        }
+        .info-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #888;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            font-size: 16px;
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+        .section-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            color: #888;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .detail-label {
+            color: #666;
+            font-size: 14px;
+        }
+        .detail-value {
+            color: #1a1a1a;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .cost-breakdown {
+            background: #f9f9f9;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .cost-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .cost-row:last-child {
+            border-bottom: none;
+        }
+        .cost-row.total {
+            border-top: 2px solid #D4AF37;
+            padding-top: 15px;
+            margin-top: 5px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .cost-label {
+            color: #666;
+            font-size: 14px;
+        }
+        .cost-amount {
+            color: #1a1a1a;
+            font-weight: 500;
+            font-size: 16px;
+        }
+        .total .cost-amount {
+            color: #D4AF37;
+            font-size: 20px;
+        }
+        .notes-section {
+            background: #fff8e1;
+            border-left: 4px solid #D4AF37;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+        }
+        .notes-section h4 {
+            margin: 0 0 10px 0;
+            color: #8B6914;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        .notes-section p {
+            margin: 0;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f9f9f9;
+            border-top: 1px solid #e0e0e0;
+        }
+        .footer p {
+            margin: 5px 0;
+            font-size: 12px;
+            color: #888;
+        }
+        .validity-box {
+            background: #e8f4fd;
+            border: 1px solid #b3d7ff;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .validity-box p {
+            margin: 0;
+            font-size: 13px;
+            color: #004085;
+        }
+        .validity-box strong {
+            font-weight: 600;
+        }
+        .approval-section {
+            background: #f0f9ff;
+            border: 2px dashed #3b82f6;
+            border-radius: 8px;
+            padding: 25px;
+            text-align: center;
+            margin-top: 30px;
+        }
+        .approval-section h3 {
+            margin: 0 0 10px 0;
+            color: #1e40af;
+            font-size: 16px;
+        }
+        .approval-section p {
+            margin: 5px 0;
+            font-size: 13px;
+            color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="estimate-container">
+        <div class="header">
+            <h1>REPAIR ESTIMATE</h1>
+            <p>Zevar Jewelers - Fine Jewelry Repair Services</p>
+        </div>
+
+        <div class="content">
+            <div class="estimate-info">
+                <div class="info-group">
+                    <div class="info-label">Estimate Number</div>
+                    <div class="info-value">{{ repair_number }}</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Date Issued</div>
+                    <div class="info-value">{{ estimate_sent_date }}</div>
+                </div>
+            </div>
+
+            <div class="validity-box">
+                <p><strong>Valid Until:</strong> {{ estimate_valid_until }}</p>
+            </div>
+
+            <div class="section-title">Customer Information</div>
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Customer Name</span>
+                    <span class="detail-value">{{ customer_name }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Repair Type</span>
+                    <span class="detail-value">{{ repair_type }}</span>
+                </div>
+            </div>
+
+            <div class="section-title">Repair Details</div>
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Item Description</span>
+                    <span class="detail-value">{{ item_description }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Promised Date</span>
+                    <span class="detail-value">{{ promised_date }}</span>
+                </div>
+            </div>
+
+            {% if customer_notes %}
+            <div class="notes-section">
+                <h4>Customer Notes</h4>
+                <p>{{ customer_notes }}</p>
+            </div>
+            {% endif %}
+
+            <div class="section-title">Cost Breakdown</div>
+            <div class="cost-breakdown">
+                <div class="cost-row">
+                    <span class="cost-label">Labor Cost</span>
+                    <span class="cost-amount">{{ labor_cost }}</span>
+                </div>
+                <div class="cost-row">
+                    <span class="cost-label">Material Cost</span>
+                    <span class="cost-amount">{{ material_cost }}</span>
+                </div>
+                <div class="cost-row total">
+                    <span class="cost-label">Estimated Total</span>
+                    <span class="cost-amount">{{ total_cost }}</span>
+                </div>
+            </div>
+
+            {% if estimate_notes %}
+            <div class="notes-section">
+                <h4>Additional Notes</h4>
+                <p>{{ estimate_notes }}</p>
+            </div>
+            {% endif %}
+
+            <div class="approval-section">
+                <h3>Approval Required</h3>
+                <p>Please review this estimate and approve or reject it using the link provided in your email.</p>
+                <p>Your approval is required before work can begin on your repair.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>Zevar Jewelers</strong></p>
+            <p>Fine Jewelry Repair Services</p>
+            {% if store_address %}
+            <p>{{ store_address }}</p>
+            {% endif %}
+            <p>Thank you for your business!</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -28,89 +28,11 @@
 						</option>
 					</select>
 					<!-- View Toggle -->
-					<div class="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-						<button
-							@click="viewMode = 'grid'"
-							class="px-3 py-1.5 rounded-md text-sm font-medium transition"
-							:class="
-								viewMode === 'grid'
-									? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-white'
-									: 'text-gray-500 hover:text-gray-700'
-							"
-						>
-							<svg
-								class="w-4 h-4"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-								/>
-							</svg>
-						</button>
-						<button
-							@click="viewMode = 'kanban'"
-							class="px-3 py-1.5 rounded-md text-sm font-medium transition"
-							:class="
-								viewMode === 'kanban'
-									? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-white'
-									: 'text-gray-500 hover:text-gray-700'
-							"
-						>
-							<svg
-								class="w-4 h-4"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
-								/>
-							</svg>
-						</button>
-						<button
-							v-if="isDesktop"
-							@click="viewMode = 'split'"
-							class="px-3 py-1.5 rounded-md text-sm font-medium transition"
-							:class="
-								viewMode === 'split'
-									? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-white'
-									: 'text-gray-500 hover:text-gray-700'
-							"
-						>
-							<svg
-								class="w-4 h-4"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 16a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"
-								/>
-							</svg>
-						</button>
-					</div>
-					<!-- Auto-refresh -->
-					<select
-						v-model="refreshInterval"
-						@change="setupAutoRefresh"
-						class="hidden md:block px-2 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-xs text-gray-500 dark:text-gray-400"
-					>
-						<option :value="0">Auto: Off</option>
-						<option :value="10000">10s</option>
-						<option :value="30000">30s</option>
-						<option :value="60000">1m</option>
-					</select>
+					<ViewToggle
+						v-model="viewMode"
+						storage-key="zevar_repairs_view"
+						class="shrink-0"
+					/>
 					<!-- Workload Toggle -->
 					<button
 						@click="showWorkloadPanel = !showWorkloadPanel"
@@ -430,189 +352,142 @@
 					</div>
 				</div>
 
-				<!-- Kanban View -->
-				<div v-else-if="viewMode === 'kanban'" class="flex-1 overflow-x-auto pb-4">
-					<div class="flex gap-3 min-w-max h-full">
-						<div
-							v-for="column in kanbanColumns"
-							:key="column.status"
-							class="w-72 flex-shrink-0 flex flex-col bg-gray-50 dark:bg-gray-800 rounded-xl"
-						>
-							<div class="p-3 border-b border-gray-200 dark:border-gray-700">
-								<h3
-									class="font-bold text-gray-800 dark:text-gray-200 flex items-center justify-between"
-								>
-									{{ column.label }}
-									<span
-										class="px-2 py-0.5 rounded-full text-xs font-bold"
-										:class="column.badgeClass"
-										>{{ column.count }}</span
-									>
-								</h3>
-							</div>
-							<div
-								class="flex-1 overflow-y-auto p-2 space-y-2"
-								@dragover.prevent
-								@drop="onDrop($event, column.status)"
-							>
-								<div
-									v-for="order in column.orders"
-									:key="order.name"
-									draggable="true"
-									@dragstart="onDragStart($event, order)"
-									class="p-3 bg-white dark:bg-gray-900 rounded-lg shadow-sm cursor-pointer hover:shadow-md transition"
-									:class="getStatusBorderColor(order.status)"
-								>
-									<div class="flex justify-between items-start mb-2">
-										<span class="font-mono text-xs font-bold text-[#D4AF37]">{{
-											order.name
-										}}</span>
-										<span
-											v-if="order.priority === 'Urgent'"
-											class="text-red-500"
-										>
-											<svg
-												class="w-4 h-4"
-												fill="currentColor"
-												viewBox="0 0 20 20"
-											>
-												<path
-													fill-rule="evenodd"
-													d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-													clip-rule="evenodd"
-												/>
-											</svg>
+				<!-- List View -->
+				<div v-else-if="viewMode === 'list'" class="flex-1 overflow-y-auto pb-20 bg-white dark:bg-warm-dark-900/50 rounded-xl border border-gray-100 dark:border-warm-border/50 shadow-sm custom-scrollbar">
+					<table class="w-full text-sm">
+						<thead class="bg-gray-50 dark:bg-warm-dark-900/90 border-b border-gray-100 dark:border-warm-border/50 sticky top-0 z-10 backdrop-blur-sm">
+							<tr>
+								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+									Order ID
+								</th>
+								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+									Customer
+								</th>
+								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+									Repair Type
+								</th>
+								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+									Status
+								</th>
+								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+									Priority / Dates
+								</th>
+								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+									Technician
+								</th>
+								<th class="px-4 py-3 text-right text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+									Cost
+								</th>
+								<th class="px-4 py-3 text-right text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+									Actions
+								</th>
+							</tr>
+						</thead>
+						<tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
+							<tr v-if="ordersResource.loading && !orders.length">
+								<td colspan="8" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+									<div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-[#D4AF37] mx-auto mb-3"></div>
+									Loading repairs...
+								</td>
+							</tr>
+							<tr v-else-if="!orders.length">
+								<td colspan="8" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+									No repair orders found.
+								</td>
+							</tr>
+							<tr v-for="order in orders" :key="order.name" @click="openDetail(order)" class="hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition-colors cursor-pointer">
+								<td class="px-4 py-3">
+									<div class="flex items-center gap-2">
+										<span class="font-mono text-xs font-bold text-[#D4AF37]">{{ order.name }}</span>
+										<span v-if="order.is_warranty_repair" class="px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30 rounded text-[9px] font-bold text-green-600 dark:text-green-400 shrink-0">
+											Warranty
 										</span>
 									</div>
-									<p
-										class="text-sm font-medium text-gray-800 dark:text-gray-200 truncate"
-									>
-										{{ order.repair_type_name || order.repair_type }}
-									</p>
-									<p class="text-xs text-gray-500 truncate">
-										{{ order.customer_name || order.customer }}
-									</p>
-									<div
-										class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100"
-									>
-										<span class="text-xs text-gray-400">{{
-											formatDate(order.creation)
-										}}</span>
-										<span class="text-sm font-bold"
-											>${{
-												formatNum(order.estimated_cost || order.total_cost)
-											}}</span
-										>
+									<div class="text-[10px] text-gray-400 mt-0.5">
+										{{ order.warehouse }}
 									</div>
-									<!-- Quick Actions -->
-									<div class="flex gap-1 mt-2">
-										<button
-											@click.stop="
-												quickStatusChange(
-													order.name,
-													getNextStatus(order.status)
-												)
-											"
-											class="flex-1 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
-										>
-											→ Next
+								</td>
+								<td class="px-4 py-3">
+									<div class="font-semibold text-gray-900 dark:text-white text-xs">
+										{{ order.customer_name || order.customer }}
+									</div>
+									<div class="text-[10px] text-gray-500 mt-0.5">
+										{{ order.customer_phone || 'No Phone' }}
+									</div>
+								</td>
+								<td class="px-4 py-3">
+									<div class="font-bold text-gray-900 dark:text-white text-xs">
+										{{ order.repair_type_name || order.repair_type }}
+									</div>
+									<div class="flex flex-wrap gap-1 mt-1">
+										<span v-if="order.item_type" class="px-1 py-0.5 bg-gray-50 dark:bg-warm-dark-900 border border-gray-100 dark:border-warm-border/30 rounded text-[8px] font-bold text-gray-500 dark:text-gray-400">
+											{{ order.item_type }}
+										</span>
+										<span v-if="order.stone_weight && order.stone_weight > 0" class="px-1 py-0.5 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/30 rounded text-[8px] font-bold text-purple-600 dark:text-purple-400">
+											💎 {{ order.stone_weight }}ct
+										</span>
+										<span v-if="order.item_brand" class="px-1 py-0.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 rounded text-[8px] font-bold text-amber-600 dark:text-amber-400">
+											{{ order.item_brand }}
+										</span>
+									</div>
+								</td>
+								<td class="px-4 py-3">
+									<span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold" :class="getStatusBadgeClass(order.status)">
+										{{ order.status }}
+									</span>
+								</td>
+								<td class="px-4 py-3">
+									<div class="flex items-center gap-1.5">
+										<span class="text-xs font-semibold" :class="{
+											'text-red-500': order.priority === 'Urgent',
+											'text-orange-500': order.priority === 'High',
+											'text-yellow-500': order.priority === 'Medium',
+											'text-gray-500': order.priority === 'Low',
+										}">
+											{{ order.priority }}
+										</span>
+									</div>
+									<div class="text-[10px] text-gray-400 mt-0.5">
+										Rec: {{ formatDate(order.creation) }}
+									</div>
+									<div v-if="isOverdue(order.promised_date) && order.status !== 'Delivered'" class="text-[9px] text-red-500 font-bold mt-0.5">
+										Overdue ({{ formatDate(order.promised_date) }})
+									</div>
+								</td>
+								<td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-400">
+									{{ order.handled_by_name || 'Unassigned' }}
+								</td>
+								<td class="px-4 py-3 text-right font-mono font-extrabold text-gray-900 dark:text-white">
+									${{ formatNum(order.estimated_cost || order.total_cost) }}
+								</td>
+								<td class="px-4 py-3 text-right" @click.stop>
+									<div class="flex items-center justify-end gap-1.5">
+										<button @click="openDetail(order)" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white bg-gray-50 dark:bg-warm-dark-900 hover:bg-gray-100 border border-gray-100 dark:border-warm-border/30 rounded transition" title="View Details">
+											<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+											</svg>
 										</button>
-										<button
-											@click.stop="openDetail(order)"
-											class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
-										>
-											<svg
-												class="w-3 h-3"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-												/>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-												/>
+										<button @click="quickStatusChange(order.name, getNextStatus(order.status))" class="p-1 text-[#D4AF37] hover:text-black hover:bg-[#D4AF37] border border-[#D4AF37]/30 rounded transition" title="Advance status">
+											<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+											</svg>
+										</button>
+										<button @click="printThermalReceipt(order)" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white bg-gray-50 dark:bg-warm-dark-900 hover:bg-gray-100 border border-gray-100 dark:border-warm-border/30 rounded transition" title="Print Receipt">
+											<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+											</svg>
+										</button>
+										<button @click="showQRCode(order)" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white bg-gray-50 dark:bg-warm-dark-900 hover:bg-gray-100 border border-gray-100 dark:border-warm-border/30 rounded transition" title="QR Code">
+											<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
 											</svg>
 										</button>
 									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<!-- Split View -->
-				<div v-else-if="viewMode === 'split'" class="flex-1 flex gap-4 overflow-hidden">
-					<div class="w-1/2 overflow-y-auto">
-						<div
-							v-if="ordersResource.loading && !orders.length"
-							class="py-20 text-center"
-						>
-							<div
-								class="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-[#D4AF37] mx-auto mb-4"
-							></div>
-						</div>
-						<div v-else class="space-y-2">
-							<div
-								v-for="order in orders"
-								:key="order.name"
-								@click="selectedSplitOrder = order"
-								class="p-3 rounded-lg border cursor-pointer transition hover:shadow-md"
-								:class="
-									selectedSplitOrder?.name === order.name
-										? 'bg-[#D4AF37]/10 border-[#D4AF37]'
-										: 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700'
-								"
-							>
-								<div class="flex justify-between items-start">
-									<div>
-										<span class="font-mono text-sm font-bold text-[#D4AF37]">{{
-											order.name
-										}}</span>
-										<span
-											class="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold"
-											:class="getStatusBadgeClass(order.status)"
-											>{{ order.status }}</span
-										>
-									</div>
-									<span class="text-sm font-bold"
-										>${{
-											formatNum(order.estimated_cost || order.total_cost)
-										}}</span
-									>
-								</div>
-								<p class="text-sm font-medium mt-1 truncate">
-									{{ order.repair_type_name || order.repair_type }}
-								</p>
-								<p class="text-xs text-gray-500">
-									{{ order.customer_name || order.customer }}
-								</p>
-							</div>
-						</div>
-					</div>
-					<div class="w-1/2 overflow-y-auto">
-						<div
-							v-if="selectedSplitOrder"
-							class="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
-						>
-							<SplitDetailView
-								:order="selectedSplitOrder"
-								@status-changed="onStatusChanged"
-								@print-thermal="printThermalReceipt"
-								@open-qr="showQRCode"
-							/>
-						</div>
-						<div v-else class="flex items-center justify-center h-full text-gray-400">
-							Select a repair to view details
-						</div>
-					</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>
@@ -677,15 +552,16 @@ import CameraModal from '@/components/CameraModal.vue'
 import StoreTransferModal from '@/components/StoreTransferModal.vue'
 import PaymentModal from '@/components/PaymentModal.vue'
 import TechnicianWorkloadPanel from '@/components/TechnicianWorkloadPanel.vue'
+import ViewToggle from '@/components/ViewToggle.vue'
 
 const session = useSessionStore()
-const viewMode = ref('grid') // grid, kanban, split
+const viewMode = ref(localStorage.getItem('zevar_repairs_view') || 'grid')
 const showWorkloadPanel = ref(false)
 const statusFilter = ref('')
 const searchTerm = ref('')
 const selectedStore = ref('all')
 const showAdvancedSearch = ref(false)
-const refreshInterval = ref(30000) // 30 seconds default
+const refreshInterval = ref(0) // Auto refresh off by default
 const orders = ref([])
 const stats = ref(null)
 const dashboardStats = ref(null)
@@ -901,6 +777,11 @@ function formatDate(dateStr) {
 	if (!dateStr) return ''
 	const date = new Date(dateStr)
 	return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+function isOverdue(dateStr) {
+	if (!dateStr) return false
+	return new Date(dateStr) < new Date()
 }
 
 function getStatusBorderColor(status) {

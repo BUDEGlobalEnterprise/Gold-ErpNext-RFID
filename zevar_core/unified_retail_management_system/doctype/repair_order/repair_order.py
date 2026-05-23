@@ -1265,9 +1265,13 @@ class RepairOrder(Document):  # nosemgrep
 	def set_warranty_defaults(self):
 		"""Auto-set warranty_months from Repair Type if not set"""
 		if self.repair_type and not self.warranty_months:
-			self.warranty_months = (
-				frappe.db.get_value("Repair Type", self.repair_type, "warranty_months") or 0
-			)
+			meta = frappe.get_meta("Repair Type")
+			if meta.has_field("warranty_months"):
+				self.warranty_months = (
+					frappe.db.get_value("Repair Type", self.repair_type, "warranty_months") or 0
+				)
+			else:
+				self.warranty_months = 0
 
 	def validate_warranty_repair(self):
 		"""Validate warranty repair settings"""

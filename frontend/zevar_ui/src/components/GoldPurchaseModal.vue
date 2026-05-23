@@ -389,7 +389,10 @@ onMounted(async () => {
 	const locations = await call('frappe.client.get_list', {
 		doctype: 'Store Location',
 		fields: ['name', 'store_name'],
-		limit_page_length: 50,
+		filters: {
+			name: ['in', ['NYC', 'LA', 'CHI', 'HOU', 'Miami-01']]
+		},
+		limit_page_length: 10,
 	})
 	storeLocations.value = locations
 })
