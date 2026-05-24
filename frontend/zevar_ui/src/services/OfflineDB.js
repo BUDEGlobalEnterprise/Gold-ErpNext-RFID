@@ -8,7 +8,7 @@
  */
 
 const DB_NAME = 'zevar_pos'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 let dbPromise = null
 
@@ -36,11 +36,23 @@ function openDB() {
 				})
 				orders.createIndex('created_at', 'created_at', { unique: false })
 				orders.createIndex('status', 'status', { unique: false })
+				orders.createIndex('idempotency_key', 'idempotency_key', { unique: false })
+			} else if (event.oldVersion < 2) {
+				// v1→v2 migration: add idempotency_key index to existing store
+				const orders = event.target.transaction.objectStore('pendingOrders')
+				if (!orders.indexNames.contains('idempotency_key')) {
+					orders.createIndex('idempotency_key', 'idempotency_key', { unique: false })
+				}
 			}
 
 			// Key-value settings cache
 			if (!db.objectStoreNames.contains('settings')) {
 				db.createObjectStore('settings', { keyPath: 'key' })
+			}
+
+			// Cart snapshot for service worker access
+			if (!db.objectStoreNames.contains('cartSnapshot')) {
+				db.createObjectStore('cartSnapshot', { keyPath: 'id' })
 			}
 		}
 
@@ -124,11 +136,17 @@ export async function queueOfflineOrder(orderData) {
 	const tx = db.transaction('pendingOrders', 'readwrite')
 	const store = tx.objectStore('pendingOrders')
 
+	const idempotency_key = crypto.randomUUID()
 	const record = {
 		...orderData,
+		idempotency_key,
 		status: 'pending',
+		mode: orderData.mode || 'sale',
 		created_at: Date.now(),
+		last_attempt: null,
+		next_retry: Date.now(),
 		attempts: 0,
+		max_attempts: 5,
 	}
 
 	store.add(record)
@@ -227,6 +245,142 @@ export async function getCachedSetting(key) {
 	const request = tx.objectStore('settings').get(key)
 	return new Promise((resolve, reject) => {
 		request.onsuccess = () => resolve(request.result?.value ?? null)
+		request.onerror = () => reject(request.error)
+	})
+}
+
+// ── Advanced Order Queries (for retry + conflict resolution) ──
+
+export async function getOrdersByStatus(status) {
+	const db = await openDB()
+	const tx = db.transaction('pendingOrders', 'readonly')
+	const store = tx.objectStore('pendingOrders')
+	const index = store.index('status')
+	const request = index.getAll(status)
+	return new Promise((resolve, reject) => {
+		request.onsuccess = () => resolve(request.result)
+		request.onerror = () => reject(request.error)
+	})
+}
+
+export async function markOrderConflict(id, conflictType, serverMessage) {
+	const db = await openDB()
+	const tx = db.transaction('pendingOrders', 'readwrite')
+	const store = tx.objectStore('pendingOrders')
+	const request = store.get(id)
+
+	return new Promise((resolve, reject) => {
+		request.onsuccess = () => {
+			const record = request.result
+			if (record) {
+				record.status = 'conflict'
+				record.conflict_type = conflictType
+				record.error = serverMessage
+				record.last_attempt = Date.now()
+				store.put(record)
+			}
+			tx.oncomplete = () => resolve(true)
+		}
+		tx.onerror = () => reject(tx.error)
+	})
+}
+
+export async function updateOrderForRetry(id) {
+	const db = await openDB()
+	const tx = db.transaction('pendingOrders', 'readwrite')
+	const store = tx.objectStore('pendingOrders')
+	const request = store.get(id)
+
+	return new Promise((resolve, reject) => {
+		request.onsuccess = () => {
+			const record = request.result
+			if (record) {
+				record.status = 'pending'
+				record.attempts = (record.attempts || 0) + 1
+				// Exponential backoff: 30s, 60s, 120s, 240s, 480s
+				const backoffMs = Math.pow(2, record.attempts) * 30_000
+				record.next_retry = Date.now() + backoffMs
+				record.last_attempt = Date.now()
+				store.put(record)
+			}
+			tx.oncomplete = () => resolve(record)
+		}
+		tx.onerror = () => reject(tx.error)
+	})
+}
+
+export async function markOrderDead(id) {
+	const db = await openDB()
+	const tx = db.transaction('pendingOrders', 'readwrite')
+	const store = tx.objectStore('pendingOrders')
+	const request = store.get(id)
+
+	return new Promise((resolve, reject) => {
+		request.onsuccess = () => {
+			const record = request.result
+			if (record) {
+				record.status = 'dead_letter'
+				record.last_attempt = Date.now()
+				store.put(record)
+			}
+			tx.oncomplete = () => resolve(true)
+		}
+		tx.onerror = () => reject(tx.error)
+	})
+}
+
+// ── Cart Snapshot (for service worker access) ──
+
+export async function saveCartSnapshot(cartState) {
+	const db = await openDB()
+	const tx = db.transaction('cartSnapshot', 'readwrite')
+	tx.objectStore('cartSnapshot').put({
+		id: 'current',
+		...cartState,
+		saved_at: Date.now(),
+	})
+	return new Promise((resolve, reject) => {
+		tx.oncomplete = () => resolve(true)
+		tx.onerror = () => reject(tx.error)
+	})
+}
+
+export async function loadCartSnapshot() {
+	const db = await openDB()
+	const tx = db.transaction('cartSnapshot', 'readonly')
+	const request = tx.objectStore('cartSnapshot').get('current')
+	return new Promise((resolve, reject) => {
+		request.onsuccess = () => resolve(request.result ?? null)
+		request.onerror = () => reject(request.error)
+	})
+}
+
+// ── Catalog TTL ──
+
+const CATALOG_TTL_MS = 30 * 60 * 1000 // 30 minutes
+
+export async function isCatalogStale() {
+	const db = await openDB()
+	const tx = db.transaction('catalog', 'readonly')
+	const store = tx.objectStore('catalog')
+	const request = store.openCursor()
+
+	return new Promise((resolve, reject) => {
+		let oldestCache = Infinity
+		request.onsuccess = () => {
+			const cursor = request.result
+			if (cursor) {
+				const cachedAt = cursor.value.cached_at || 0
+				if (cachedAt < oldestCache) oldestCache = cachedAt
+				cursor.continue()
+			} else {
+				if (oldestCache === Infinity) {
+					resolve(true) // no catalog at all
+				} else {
+					resolve(Date.now() - oldestCache > CATALOG_TTL_MS)
+				}
+			}
+		}
 		request.onerror = () => reject(request.error)
 	})
 }

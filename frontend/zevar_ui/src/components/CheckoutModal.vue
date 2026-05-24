@@ -1177,28 +1177,41 @@ async function handlePayment() {
 			return
 		}
 
-		if (isNetworkError && props.mode === 'sale') {
-			// Queue for offline sync
+		if (isNetworkError && (props.mode === 'sale' || props.mode === 'layaway' || props.mode === 'repair')) {
+			// Queue for offline sync — all payment modes supported
 			try {
 				const payments = selectedPayments.value
 					.filter((sp) => sp.amount > 0)
 					.map((sp) => ({ mode_of_payment: sp.mode, amount: sp.amount }))
 
+				const payload = {
+					payments: JSON.stringify(payments),
+					customer: cart.customer?.name || 'Walk-In Customer',
+					warehouse: session.currentWarehouse || '',
+					tax_exempt: taxExempt.value,
+				}
+
+				// Mode-specific payload
+				if (props.mode === 'sale') {
+					payload.items = JSON.stringify(
+						cart.items.map((i) => ({
+							item_code: i.item_code,
+							qty: i.qty || 1,
+							rate: i.amount || 0,
+							serial_no: i.serial_no || null,
+						}))
+					)
+				} else if (props.mode === 'layaway') {
+					payload.layaway_id = props.referenceId
+				} else if (props.mode === 'repair') {
+					payload.repair_order = props.referenceId
+					payload.amount = payments[0]?.amount || 0
+					payload.payment_method = payments[0]?.mode_of_payment || 'Cash'
+				}
+
 				await offlineStore.addPendingOrder({
-					payload: {
-						items: JSON.stringify(
-							cart.items.map((i) => ({
-								item_code: i.item_code,
-								qty: i.qty || 1,
-								rate: i.amount || 0,
-								serial_no: i.serial_no || null,
-							}))
-						),
-						payments: JSON.stringify(payments),
-						customer: cart.customer?.name || 'Walk-In Customer',
-						warehouse: session.currentWarehouse || '',
-						tax_exempt: taxExempt.value,
-					},
+					mode: props.mode,
+					payload,
 				})
 
 				successBreakdown.value = payments

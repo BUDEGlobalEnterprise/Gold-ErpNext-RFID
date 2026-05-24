@@ -8,6 +8,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { createResource, call } from 'frappe-ui'
 import { useOfflineStore } from './offline.js'
+import { saveCartSnapshot } from '@/services/OfflineDB.js'
 
 export const useCartStore = defineStore('cart', () => {
 	// ==========================================================================
@@ -490,6 +491,14 @@ export const useCartStore = defineStore('cart', () => {
 
 	function saveToStorage() {
 		_writeJson(LS.items, items.value)
+		// Mirror to IndexedDB so the service worker can access cart state
+		saveCartSnapshot({
+			items: items.value,
+			customer: customer.value,
+			customerType: customerType.value,
+			salespersons: salespersons.value,
+			tradeIns: tradeIns.value,
+		}).catch(() => {}) // Non-critical — localStorage is the primary store
 	}
 
 	/**

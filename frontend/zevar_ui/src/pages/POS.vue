@@ -1337,6 +1337,16 @@ onMounted(() => {
 		window.frappe.socketio.socket?.on('stock_update', handleStockUpdate)
 	}
 
+	// Refresh catalog when offline store detects staleness (30-min TTL)
+	window.addEventListener('zevar:catalog-stale', () => {
+		if (offlineStore.isOnline) {
+			catalog.value = []
+			start.value = 0
+			hasMore.value = true
+			fetchItems.fetch({ start: 0 })
+		}
+	})
+
 	// Listen for service worker sync completion to refresh pending count
 	if ('serviceWorker' in navigator) {
 		navigator.serviceWorker.addEventListener('message', (event) => {

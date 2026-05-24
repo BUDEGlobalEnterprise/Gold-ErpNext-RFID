@@ -122,9 +122,14 @@ def verify_webhook_signature(payload, sig_header, notification_url=None):
 		frappe.log_error("Square webhook signature key not configured", "Square Terminal")
 		return False
 	try:
-		combined = sig_header + payload
-		_computed = hmac.new(sig_key.encode("utf-8"), combined.encode("utf-8"), hashlib.sha256).hexdigest()
-		return True
+		# Square signs: notification_url + request body, HMAC-SHA256 with webhook sig key
+		url = notification_url or ""
+		combined = url + payload
+		computed = hmac.new(
+			sig_key.encode("utf-8"), combined.encode("utf-8"), hashlib.sha256
+		).hexdigest()
+		# Square sends signature in header — compare using constant-time digest
+		return hmac.compare_digest(computed, sig_header)
 	except Exception as e:
 		frappe.log_error(f"Square webhook verification failed: {e}", "Square Terminal")
 		return False
