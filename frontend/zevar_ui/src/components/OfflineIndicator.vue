@@ -1,7 +1,8 @@
 <template>
 	<div
-		class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-300"
+		class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer"
 		:class="indicatorClass"
+		@click="handleClick"
 	>
 		<!-- Status dot -->
 		<span class="relative flex h-2 w-2">
@@ -27,6 +28,14 @@
 			class="ml-0.5 w-4 h-4 flex items-center justify-center rounded-full bg-amber-500 text-white text-[9px] font-black"
 		>
 			{{ offline.pendingCount }}
+		</span>
+
+		<!-- Conflict badge -->
+		<span
+			v-if="offline.conflictCount > 0"
+			class="ml-0.5 w-4 h-4 flex items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-black"
+		>
+			{{ offline.conflictCount }}
 		</span>
 
 		<!-- Sync button (visible when pending + online) -->
@@ -59,16 +68,18 @@
 				stroke-width="3"
 				class="opacity-75"
 				d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-			></path>
+			/>
 		</svg>
 	</div>
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { computed } from 'vue'
 import { useOfflineStore } from '@/stores/offline.js'
 
 const offline = useOfflineStore()
+const emit = defineEmits(['show-conflicts'])
 
 const indicatorClass = computed(() => {
 	switch (offline.statusColor) {
@@ -80,4 +91,10 @@ const indicatorClass = computed(() => {
 			return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800/30'
 	}
 })
+
+function handleClick() {
+	if (offline.conflictCount > 0) {
+		emit('show-conflicts')
+	}
+}
 </script>

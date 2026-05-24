@@ -1,0 +1,138 @@
+{
+  "actions": [],
+  "autoname": "DR-.#####",
+  "creation": "2026-05-24 14:00:00",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "rule_name",
+    "rule_type",
+    "discount_method",
+    "column_break_1",
+    "max_discount_pct",
+    "max_discount_amt",
+    "is_active",
+    "priority",
+    "target_section",
+    "customer",
+    "item_group",
+    "role"
+  ],
+  "fields": [
+    {
+      "fieldname": "rule_name",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Rule Name",
+      "reqd": 1
+    },
+    {
+      "fieldname": "rule_type",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Rule Type",
+      "options": "Global\nPer Customer\nPer Category\nPer Employee Role",
+      "reqd": 1,
+      "default": "Global"
+    },
+    {
+      "fieldname": "discount_method",
+      "fieldtype": "Select",
+      "label": "Discount Method",
+      "options": "Percentage\nFlat Amount",
+      "default": "Percentage"
+    },
+    {
+      "fieldname": "column_break_1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "max_discount_pct",
+      "fieldtype": "Percent",
+      "label": "Max Discount %",
+      "depends_on": "eval:doc.discount_method=='Percentage'"
+    },
+    {
+      "fieldname": "max_discount_amt",
+      "fieldtype": "Currency",
+      "label": "Max Discount Amount",
+      "depends_on": "eval:doc.discount_method=='Flat Amount'"
+    },
+    {
+      "fieldname": "is_active",
+      "fieldtype": "Check",
+      "in_list_view": 1,
+      "label": "Is Active",
+      "default": 1
+    },
+    {
+      "fieldname": "priority",
+      "fieldtype": "Int",
+      "label": "Priority",
+      "default": 0,
+      "description": "Higher priority rules take precedence"
+    },
+    {
+      "fieldname": "target_section",
+      "fieldtype": "Section Break",
+      "label": "Applies To"
+    },
+    {
+      "fieldname": "customer",
+      "fieldtype": "Link",
+      "label": "Customer",
+      "options": "Customer",
+      "depends_on": "eval:doc.rule_type=='Per Customer'"
+    },
+    {
+      "fieldname": "item_group",
+      "fieldtype": "Link",
+      "label": "Item Group",
+      "options": "Item Group",
+      "depends_on": "eval:doc.rule_type=='Per Category'"
+    },
+    {
+      "fieldname": "role",
+      "fieldtype": "Link",
+      "label": "Role",
+      "options": "Role",
+      "depends_on": "eval:doc.rule_type=='Per Employee Role'"
+    }
+  ],
+  "links": [],
+  "modified": "2026-05-24 14:00:00",
+  "module": "Unified Retail Management System",
+  "name": "Discount Rule",
+  "permissions": [
+    {
+      "create": 1,
+      "read": 1,
+      "role": "Sales Manager",
+      "write": 1,
+      "delete": 1
+    },
+    {
+      "create": 1,
+      "read": 1,
+      "role": "Store Manager",
+      "write": 1,
+      "delete": 1
+    },
+    {
+      "create": 1,
+      "read": 1,
+      "role": "System Manager",
+      "write": 1,
+      "delete": 1
+    },
+    {
+      "read": 1,
+      "role": "Sales User"
+    }
+  ],
+  "sort_field": "priority",
+  "sort_order": "DESC",
+  "states": [],
+  "title_field": "rule_name",
+  "track_changes": 1
+}

@@ -1,0 +1,139 @@
+{
+ "actions": [],
+ "autoname": "POS-CONFLICT-.#####",
+ "creation": "2026-05-24 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "conflict_details_section",
+  "idempotency_key",
+  "conflict_type",
+  "server_error",
+  "column_break_1",
+  "offline_order",
+  "created_at",
+  "resolution_section",
+  "resolution",
+  "resolved_by",
+  "column_break_2",
+  "resolution_notes",
+  "resolved_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "conflict_details_section",
+   "fieldtype": "Section Break",
+   "label": "Conflict Details"
+  },
+  {
+   "fieldname": "idempotency_key",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Idempotency Key"
+  },
+  {
+   "fieldname": "conflict_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Conflict Type",
+   "options": "\nstock_unavailable\nprice_changed\nsession_expired\ncustomer_modified\nduplicate_detected\nserial_conflict\nunknown"
+  },
+  {
+   "fieldname": "server_error",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Server Error Message"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "offline_order",
+   "fieldtype": "Code",
+   "label": "Offline Order Payload",
+   "options": "JSON"
+  },
+  {
+   "fieldname": "created_at",
+   "fieldtype": "Datetime",
+   "label": "Created At"
+  },
+  {
+   "fieldname": "resolution_section",
+   "fieldtype": "Section Break",
+   "label": "Resolution"
+  },
+  {
+   "fieldname": "resolution",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Resolution",
+   "options": "\npending\nresolved_remove_item\nresolved_substitute\nresolved_cancel\nresolved_force\nescalated"
+  },
+  {
+   "fieldname": "resolved_by",
+   "fieldtype": "Link",
+   "label": "Resolved By",
+   "options": "User"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "resolution_notes",
+   "fieldtype": "Small Text",
+   "label": "Resolution Notes"
+  },
+  {
+   "fieldname": "resolved_at",
+   "fieldtype": "Datetime",
+   "label": "Resolved At"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-05-24 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Unified Retail Management System",
+ "name": "POS Sync Conflict",
+ "naming_rule": "POS-CONFLICT-.#####",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Sales Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Store Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "POS Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "conflict_type"
+}

@@ -2,11 +2,15 @@
  * Service Worker for Zevar POS - Offline Support
  *
  * Caches assets and API responses for offline functionality.
- * Uses IndexedDB for reliable offline order queuing.
+ * Uses IndexedDB for reliable offline order queuing with:
+ * - Idempotency keys (prevents duplicate invoices)
+ * - Exponential backoff retry
+ * - Conflict detection
+ * - Status tracking (pending/synced/failed/conflict/dead_letter)
  */
 
-const CACHE_NAME = 'zevar-pos-v8'
-const API_CACHE = 'zevar-api-v8'
+const CACHE_NAME = 'zevar-pos-v9'
+const API_CACHE = 'zevar-api-v9'
 
 // Assets to cache immediately on install
 const STATIC_ASSETS = ['/pos/', '/pos/index.html', '/pos/manifest.json']
@@ -18,9 +22,11 @@ const CACHEABLE_API_ROUTES = [
 	'zevar_core.api.pos.get_pos_profile',
 ]
 
+const MAX_RETRY_ATTEMPTS = 5
+
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
-	console.log('[SW] Installing service worker v8...')
+	console.log('[SW] Installing service worker v9...')
 	event.waitUntil(
 		caches
 			.open(CACHE_NAME)
@@ -34,7 +40,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-	console.log('[SW] Activating service worker v8...')
+	console.log('[SW] Activating service worker v9...')
 	event.waitUntil(
 		caches
 			.keys()
@@ -157,12 +163,19 @@ async function handleAPIRequest(request) {
 		if (request.method === 'POST') {
 			console.log('[SW] Queuing POST request for offline sync')
 			const body = await request.clone().text()
+			const idempotency_key = crypto.randomUUID()
+
 			await queueRequestInIDB({
 				url: request.url,
 				method: request.method,
 				headers: Object.fromEntries(request.headers.entries()),
 				body: body,
+				idempotency_key: idempotency_key,
 				timestamp: Date.now(),
+				status: 'pending',
+				attempts: 0,
+				max_attempts: MAX_RETRY_ATTEMPTS,
+				next_retry: Date.now(),
 			})
 
 			// Register background sync if available
@@ -174,6 +187,7 @@ async function handleAPIRequest(request) {
 				JSON.stringify({
 					message: 'Order queued for sync when online',
 					queued: true,
+					idempotency_key: idempotency_key,
 				}),
 				{
 					status: 202,
@@ -189,7 +203,7 @@ async function handleAPIRequest(request) {
 // ── IndexedDB helpers for the service worker context ──
 
 const SW_DB_NAME = 'zevar_pos_sw'
-const SW_DB_VERSION = 1
+const SW_DB_VERSION = 2
 
 function openSWDB() {
 	return new Promise((resolve, reject) => {
@@ -197,7 +211,18 @@ function openSWDB() {
 		request.onupgradeneeded = (event) => {
 			const db = event.target.result
 			if (!db.objectStoreNames.contains('requestQueue')) {
-				db.createObjectStore('requestQueue', { keyPath: 'id', autoIncrement: true })
+				const store = db.createObjectStore('requestQueue', { keyPath: 'id', autoIncrement: true })
+				store.createIndex('status', 'status', { unique: false })
+				store.createIndex('idempotency_key', 'idempotency_key', { unique: false })
+			} else if (event.oldVersion < 2) {
+				// v1→v2 migration
+				const store = event.target.transaction.objectStore('requestQueue')
+				if (!store.indexNames.contains('status')) {
+					store.createIndex('status', 'status', { unique: false })
+				}
+				if (!store.indexNames.contains('idempotency_key')) {
+					store.createIndex('idempotency_key', 'idempotency_key', { unique: false })
+				}
 			}
 		}
 		request.onsuccess = () => resolve(request.result)
@@ -218,10 +243,30 @@ async function queueRequestInIDB(requestData) {
 async function getQueuedRequests() {
 	const db = await openSWDB()
 	const tx = db.transaction('requestQueue', 'readonly')
-	const request = tx.objectStore('requestQueue').getAll()
+	const index = tx.objectStore('requestQueue').index('status')
+	const request = index.getAll('pending')
 	return new Promise((resolve, reject) => {
 		request.onsuccess = () => resolve(request.result)
 		request.onerror = () => reject(request.error)
+	})
+}
+
+async function updateQueuedRequest(id, updates) {
+	const db = await openSWDB()
+	const tx = db.transaction('requestQueue', 'readwrite')
+	const store = tx.objectStore('requestQueue')
+	const getRequest = store.get(id)
+
+	return new Promise((resolve, reject) => {
+		getRequest.onsuccess = () => {
+			const record = getRequest.result
+			if (record) {
+				Object.assign(record, updates)
+				store.put(record)
+			}
+			tx.oncomplete = () => resolve(record)
+		}
+		tx.onerror = () => reject(tx.error)
 	})
 }
 
@@ -232,6 +277,25 @@ async function removeQueuedRequest(id) {
 	return new Promise((resolve, reject) => {
 		tx.oncomplete = () => resolve()
 		tx.onerror = () => reject(tx.error)
+	})
+}
+
+async function cleanupSyncedRequests() {
+	const db = await openSWDB()
+	const tx = db.transaction('requestQueue', 'readwrite')
+	const store = tx.objectStore('requestQueue')
+	const request = store.getAll()
+
+	return new Promise((resolve, reject) => {
+		request.onsuccess = () => {
+			for (const record of request.result) {
+				if (record.status === 'synced') {
+					store.delete(record.id)
+				}
+			}
+			tx.oncomplete = () => resolve()
+		}
+		request.onerror = () => reject(request.error)
 	})
 }
 
@@ -247,32 +311,107 @@ async function syncPendingTransactions() {
 	const requests = await getQueuedRequests()
 	console.log(`[SW] Syncing ${requests.length} pending transactions...`)
 
+	if (requests.length === 0) return
+
 	for (const reqData of requests) {
 		try {
+			// Exponential backoff check
+			if (reqData.next_retry && Date.now() < reqData.next_retry) {
+				continue
+			}
+
+			const headers = { ...reqData.headers }
+			if (reqData.idempotency_key) {
+				headers['X-Idempotency-Key'] = reqData.idempotency_key
+			}
+
 			const response = await fetch(reqData.url, {
 				method: reqData.method,
-				headers: reqData.headers,
+				headers: headers,
 				body: reqData.body,
 			})
 
 			if (response.ok) {
-				await removeQueuedRequest(reqData.id)
+				await updateQueuedRequest(reqData.id, {
+					status: 'synced',
+					synced_at: Date.now(),
+				})
 				console.log('[SW] Synced queued request:', reqData.url)
+			} else if (response.status === 409) {
+				// Conflict — server already processed or stock issue
+				const errData = await response.json().catch(() => ({}))
+				await updateQueuedRequest(reqData.id, {
+					status: 'conflict',
+					error: errData.message || `Conflict: HTTP ${response.status}`,
+					conflict_type: errData._conflict_type || 'unknown',
+					last_attempt: Date.now(),
+				})
+				console.warn('[SW] Conflict for:', reqData.url, errData.message)
+			} else if (response.status >= 400 && response.status < 500) {
+				// Client error — retry won't help, mark dead
+				const errData = await response.json().catch(() => ({}))
+				await updateQueuedRequest(reqData.id, {
+					status: 'dead_letter',
+					error: errData.message || `Client error: HTTP ${response.status}`,
+					last_attempt: Date.now(),
+				})
+				console.error('[SW] Dead letter:', reqData.url, response.status)
 			} else {
-				console.error('[SW] Sync failed for:', reqData.url, response.status)
+				// Server error — retry with backoff
+				const attempts = (reqData.attempts || 0) + 1
+				if (attempts >= MAX_RETRY_ATTEMPTS) {
+					await updateQueuedRequest(reqData.id, {
+						status: 'dead_letter',
+						attempts: attempts,
+						error: `Max retries reached`,
+						last_attempt: Date.now(),
+					})
+				} else {
+					const backoffMs = Math.pow(2, attempts) * 1000 // 1s, 2s, 4s, 8s
+					await updateQueuedRequest(reqData.id, {
+						status: 'pending',
+						attempts: attempts,
+						next_retry: Date.now() + backoffMs,
+						last_attempt: Date.now(),
+					})
+					// Re-throw to signal sync manager to retry
+					throw new Error(`Server error ${response.status}, will retry`)
+				}
 			}
 		} catch (e) {
 			console.error('[SW] Sync network error for:', reqData.url, e.message)
-			// Leave in queue for next sync attempt
+			// Leave in queue with incremented attempts
+			const attempts = (reqData.attempts || 0) + 1
+			if (attempts < MAX_RETRY_ATTEMPTS) {
+				const backoffMs = Math.pow(2, attempts) * 1000
+				await updateQueuedRequest(reqData.id, {
+					attempts: attempts,
+					next_retry: Date.now() + backoffMs,
+					last_attempt: Date.now(),
+				}).catch(() => {})
+			} else {
+				await updateQueuedRequest(reqData.id, {
+					status: 'dead_letter',
+					error: `Max retries: ${e.message}`,
+					last_attempt: Date.now(),
+				}).catch(() => {})
+			}
+			// Re-throw so the sync manager retries the event
+			throw e
 		}
 	}
+
+	// Cleanup synced records
+	await cleanupSyncedRequests()
 
 	// Notify clients of sync completion
 	const clients = await self.clients.matchAll()
 	const remaining = await getQueuedRequests()
-	const remainingCount = remaining.length
 	clients.forEach((client) => {
-		client.postMessage({ type: 'SYNC_COMPLETE', remaining: remainingCount })
+		client.postMessage({
+			type: 'SYNC_COMPLETE',
+			remaining: remaining.length,
+		})
 	})
 }
 
