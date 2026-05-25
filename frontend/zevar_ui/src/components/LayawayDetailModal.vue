@@ -531,8 +531,8 @@
 		v-if="showPaymentModal"
 		:show="showPaymentModal"
 		mode="layaway"
-		:referenceId="layawayId"
-		:balanceAmount="layaway?.balance_amount || 0"
+		:reference-id="props.layawayId"
+		:balance-amount="layaway?.balance_amount || 0"
 		@close="showPaymentModal = false"
 		@success="handlePaymentSuccess"
 	/>

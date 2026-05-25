@@ -10,42 +10,9 @@
 				</button>
 				<div>
 					<h2 class="premium-title !text-xl">{{ reportTitle }}</h2>
+					<p v-if="reportMeta.group" class="text-[10px] text-gray-400 mt-0.5">{{ reportMeta.group }}</p>
 				</div>
 				<div class="ml-auto flex gap-2">
-					<button
-						v-if="rowActions.length > 0"
-						class="h-9 px-3 rounded-lg bg-[#D4AF37] text-black text-xs font-bold hover:bg-[#c9a432] flex items-center gap-1.5"
-					>
-						<span class="material-symbols-outlined !text-sm">bolt</span>
-						Actions Available
-					</button>
-				</div>
-			</div>
-
-			<div class="flex-1 overflow-auto">
-				<iframe
-					v-if="frappeReportUrl"
-					:src="frappeReportUrl"
-					class="w-full h-full min-h-[600px] border-0"
-					@load="onIframeLoad"
-				></iframe>
-				<div v-else class="premium-card text-center py-20">
-					<span
-						class="material-symbols-outlined text-4xl text-gray-300 dark:text-gray-600 mb-3"
-						>report_off</span
-					>
-					<p class="text-sm text-gray-500 dark:text-gray-400">Report not available.</p>
-				</div>
-			</div>
-
-			<div
-				v-if="rowActions.length > 0"
-				class="flex-shrink-0 border-t border-gray-200 dark:border-warm-border bg-white dark:bg-[#1C1F26] p-3"
-			>
-				<p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">
-					Row Actions
-				</p>
-				<div class="flex gap-2 flex-wrap">
 					<button
 						v-for="action in rowActions"
 						:key="action.action"
@@ -57,50 +24,100 @@
 					</button>
 				</div>
 			</div>
+
+			<div class="flex-1 overflow-auto">
+				<div v-if="loading" class="flex items-center justify-center h-64">
+					<span class="material-symbols-outlined animate-spin text-gray-300 text-3xl">progress_activity</span>
+				</div>
+				<iframe
+					v-else-if="frappeReportUrl"
+					:src="frappeReportUrl"
+					class="w-full h-full min-h-[600px] border-0"
+				></iframe>
+				<div v-else class="premium-card text-center py-20">
+					<span
+						class="material-symbols-outlined text-4xl text-gray-300 dark:text-gray-600 mb-3"
+						>report_off</span
+					>
+					<p class="text-sm text-gray-500 dark:text-gray-400">Report not available.</p>
+					<p class="text-xs text-gray-400 mt-1">Report ID: {{ reportId }}</p>
+				</div>
+			</div>
 		</div>
 	</AppLayout>
 </template>
 
 <script setup>
 import AppLayout from '@/components/AppLayout.vue'
-import { createResource } from 'frappe-ui'
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const reportId = computed(() => route.params.reportId || '')
 const reportTitle = ref('')
+const reportMeta = ref({})
 const rowActions = ref([])
+const loading = ref(true)
+const frappeReportName = ref('')
 
 const frappeReportUrl = computed(() => {
-	if (!reportTitle.value) return ''
-	return `/app/query-report/${encodeURIComponent(reportTitle.value)}`
+	if (!frappeReportName.value) return ''
+	return `/app/query-report/${encodeURIComponent(frappeReportName.value)}`
 })
 
-const actionsResource = createResource({
-	url: 'zevar_core.api.reports.get_row_actions',
-	onSuccess(data) {
-		rowActions.value = data || []
-	},
-})
+async function loadReportData(id) {
+	if (!id) return
+	loading.value = true
+	reportTitle.value = ''
+	frappeReportName.value = ''
+	rowActions.value = []
 
-onMounted(() => {
-	if (reportId.value) {
-		actionsResource.fetch({ report_id: reportId.value })
-		const titleMap = {
-			reorder_suggestions: 'Reorder Suggestions',
-			overdue_layaway_payments: 'Overdue Layaway Payments',
-			overdue_repairs: 'Overdue Repairs Report',
-			low_stock_alert: 'Low Stock Alert',
-			reservation_aging: 'Reservation Aging',
+	try {
+		const [catalogRes, actionsRes] = await Promise.all([
+			fetch('/api/method/zevar_core.api.reports.get_report_catalog', {
+				headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
+			}),
+			fetch(`/api/method/zevar_core.api.reports.get_row_actions?report_id=${encodeURIComponent(id)}`, {
+				headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
+			}),
+		])
+
+		if (catalogRes.ok) {
+			const catalogData = await catalogRes.json()
+			const catalog = catalogData.message?.reports || catalogData.message || []
+			const found = catalog.find(r => r.id === id)
+			if (found) {
+				reportTitle.value = found.title || found.report_name || id
+				frappeReportName.value = found.report_name || found.title || ''
+				reportMeta.value = { group: found.group || '' }
+			} else {
+				reportTitle.value = id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+			}
 		}
-		reportTitle.value = titleMap[reportId.value] || reportId.value
-	}
-})
 
-function onIframeLoad() {}
+		if (actionsRes.ok) {
+			const actionsData = await actionsRes.json()
+			rowActions.value = actionsData.message || []
+		}
+	} catch (e) {
+		console.error('Report viewer error:', e)
+		reportTitle.value = id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+	} finally {
+		loading.value = false
+	}
+}
 
 function handleAction(action) {
-	alert(`Action: ${action.label} — select a row in the report above first.`)
+	// Navigate to the report with action context, or show instruction
+	const msg = `Select a row in the report above, then click "${action.label}" to ${action.description || 'perform this action'}.`
+	alert(msg)
 }
+
+onMounted(() => {
+	loadReportData(reportId.value)
+})
+
+watch(reportId, (newId) => {
+	if (newId) loadReportData(newId)
+})
 </script>

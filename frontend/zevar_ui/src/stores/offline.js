@@ -22,6 +22,7 @@ import {
 	getCachedSetting,
 	getOrdersByStatus,
 	isCatalogStale,
+	deleteOfflineOrder,
 } from '@/services/OfflineDB.js'
 
 const MAX_RETRY_ATTEMPTS = 5
@@ -32,9 +33,10 @@ export const useOfflineStore = defineStore('offline', () => {
 	const pendingCount = ref(0)
 	const failedCount = ref(0)
 	const conflictCount = ref(0)
+	const syncedCount = ref(0)
+	const catalogCachedCount = ref(0)
 	const syncing = ref(false)
 	const lastSyncTime = ref(null)
-	const catalogCachedCount = ref(0)
 	const lastSyncResults = ref([])
 
 	let retryInterval = null
@@ -69,18 +71,21 @@ export const useOfflineStore = defineStore('offline', () => {
 
 	async function refreshCounts() {
 		try {
-			const [pending, failed, conflicts] = await Promise.all([
+			const [pending, failed, conflicts, synced] = await Promise.all([
 				getOrdersByStatus('pending'),
 				getOrdersByStatus('failed'),
 				getOrdersByStatus('conflict'),
+				getOrdersByStatus('synced'),
 			])
 			pendingCount.value = pending.length
 			failedCount.value = failed.length
 			conflictCount.value = conflicts.length
+			syncedCount.value = synced.length
 		} catch {
 			pendingCount.value = 0
 			failedCount.value = 0
 			conflictCount.value = 0
+			syncedCount.value = 0
 		}
 	}
 
@@ -94,13 +99,23 @@ export const useOfflineStore = defineStore('offline', () => {
 		return record
 	}
 
-	async function syncPendingOrders() {
+	async function syncPendingOrders(force = false) {
 		if (syncing.value || !isOnline.value) return
 
 		syncing.value = true
 		lastSyncResults.value = []
 
 		try {
+			if (force) {
+				const db = await import('@/services/OfflineDB.js')
+				const failed = await db.getOrdersByStatus('failed')
+				for (const order of failed) {
+					if ((order.attempts || 0) < MAX_RETRY_ATTEMPTS) {
+						await db.updateOrderForRetry(order.id)
+					}
+				}
+			}
+
 			const orders = await getPendingOrders()
 			if (orders.length === 0) {
 				syncing.value = false
@@ -132,6 +147,18 @@ export const useOfflineStore = defineStore('offline', () => {
 		const apiUrl = _getSyncEndpoint(mode)
 		const syncPayload = _buildSyncPayload(order, mode)
 
+		// Pre-validation to prevent junk requests
+		if (mode === 'layaway' && !syncPayload.layaway_id) {
+			const errMessage = 'Missing layaway contract identifier.'
+			await markOrderConflict(order.id, 'missing_reference', errMessage)
+			return { status: 'conflict', conflictType: 'missing_reference', message: errMessage }
+		}
+		if (mode === 'repair' && !syncPayload.repair_order) {
+			const errMessage = 'Missing repair order reference.'
+			await markOrderConflict(order.id, 'missing_reference', errMessage)
+			return { status: 'conflict', conflictType: 'missing_reference', message: errMessage }
+		}
+
 		try {
 			const response = await fetch(apiUrl, {
 				method: 'POST',
@@ -149,7 +176,21 @@ export const useOfflineStore = defineStore('offline', () => {
 			}
 
 			const errData = await response.json().catch(() => ({}))
-			const errMessage = errData.message || `HTTP ${response.status}`
+			let errMessage = `HTTP ${response.status}`
+			
+			if (errData._server_messages) {
+				try {
+					const msgs = JSON.parse(errData._server_messages)
+					if (msgs.length > 0) {
+						const nested = JSON.parse(msgs[0])
+						if (nested.message) errMessage = nested.message
+					}
+				} catch(e) {}
+			} else if (errData.exc_type || errData.exception) {
+				errMessage = errData.exception || errData.exc_type
+			} else if (errData.message) {
+				errMessage = errData.message
+			}
 
 			// Detect structured conflict responses (409 Conflict)
 			if (response.status === 409 || _isConflictError(errData)) {
@@ -259,6 +300,8 @@ export const useOfflineStore = defineStore('offline', () => {
 				const waitMs = Math.pow(2, order.attempts || 1) * 30_000
 				const lastAttempt = order.last_attempt || order.created_at || 0
 				if (Date.now() - lastAttempt >= waitMs) {
+					const { updateOrderForRetry } = await import('@/services/OfflineDB.js')
+					await updateOrderForRetry(order.id)
 					needsRetry = true
 				}
 			}
@@ -318,6 +361,56 @@ export const useOfflineStore = defineStore('offline', () => {
 
 	async function getConflicts() {
 		return getOrdersByStatus('conflict')
+	}
+
+	async function getFailedOrders() {
+		const [failed, dead] = await Promise.all([
+			getOrdersByStatus('failed'),
+			getOrdersByStatus('dead_letter'),
+		])
+		return [...failed, ...dead]
+	}
+
+	async function getPendingOrdersList() {
+		return getOrdersByStatus('pending')
+	}
+
+	async function getSyncedOrders() {
+		const db = await import('@/services/OfflineDB.js')
+		const all = await db.getAllOfflineOrders()
+		return all.filter(o => o.status === 'synced').sort((a,b) => (b.synced_at || 0) - (a.synced_at || 0))
+	}
+
+	async function deleteOrder(id) {
+		await deleteOfflineOrder(id)
+		await refreshCounts()
+	}
+
+	async function retryOrder(orderId) {
+		const db = await import('@/services/OfflineDB.js')
+		const dbInstance = await db.openDB()
+		const tx = dbInstance.transaction('pendingOrders', 'readwrite')
+		const store = tx.objectStore('pendingOrders')
+		const request = store.get(orderId)
+		await new Promise((resolve, reject) => {
+			request.onsuccess = () => {
+				const record = request.result
+				if (record) {
+					record.status = 'pending'
+					record.attempts = 0
+					record.next_retry = Date.now()
+					store.put(record)
+				}
+				resolve()
+			}
+			request.onerror = () => reject(request.error)
+		})
+		await new Promise((resolve, reject) => {
+			tx.oncomplete = () => resolve()
+			tx.onerror = () => reject(tx.error)
+		})
+		await refreshCounts()
+		await syncPendingOrders()
 	}
 
 	// ── Catalog Cache ──
@@ -388,9 +481,10 @@ export const useOfflineStore = defineStore('offline', () => {
 		pendingCount,
 		failedCount,
 		conflictCount,
+		syncedCount,
+		catalogCachedCount,
 		syncing,
 		lastSyncTime,
-		catalogCachedCount,
 		lastSyncResults,
 		totalUnresolved,
 		// Computed
@@ -405,6 +499,11 @@ export const useOfflineStore = defineStore('offline', () => {
 		syncPendingOrders,
 		resolveConflict,
 		getConflicts,
+		getFailedOrders,
+		getPendingOrdersList,
+		getSyncedOrders,
+		deleteOrder,
+		retryOrder,
 		updateCatalogCache,
 		getOfflineCatalog,
 		refreshCatalogCount,

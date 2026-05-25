@@ -3,14 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 // Role tier definitions — must match backend reports.py constants
 const ROLE_TIERS = {
 	admin: ['Administrator', 'System Manager', 'Accounts Manager'],
-	manager: [
-		'Store Manager',
-		'Sales Manager',
-		'Stock Manager',
-		'Inventory Manager',
-		'HR Manager',
-		'HR User',
-	],
+	manager: ['Store Manager', 'Sales Manager', 'Stock Manager', 'Inventory Manager', 'HR Manager', 'HR User'],
 	employee: ['Sales User', 'Employee', 'Employee Self Service'],
 }
 
@@ -76,6 +69,12 @@ const routes = [
 		path: '/customers',
 		name: 'Customers',
 		component: () => import('./pages/Customers.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/special-orders',
+		name: 'SpecialOrders',
+		component: () => import('./pages/SpecialOrders.vue'),
 		meta: { requiresAuth: true },
 	},
 	{
@@ -183,16 +182,17 @@ const routes = [
 		meta: { requiresAuth: true, reportRoles: ['admin'] },
 	},
 	{
-		path: '/reports/dashboards/repairs',
-		name: 'RepairAnalytics',
-		component: () => import('./pages/dashboards/RepairAnalytics.vue'),
-		meta: { requiresAuth: true, reportRoles: ['manager', 'admin'] },
+		path: '/live-monitor',
+		name: 'LiveMonitor',
+		component: () => import('./pages/LiveMonitor.vue'),
+		meta: { requiresAuth: true, reportRoles: ['admin', 'manager'] },
 	},
+	// Employee Live Monitor - accessible to all authenticated users
 	{
-		path: '/reports/dashboards/command-center',
-		name: 'CommandCenter',
-		component: () => import('./pages/dashboards/CommandCenter.vue'),
-		meta: { requiresAuth: true, reportRoles: ['admin'] },
+		path: '/my-dashboard',
+		name: 'EmployeeLiveMonitor',
+		component: () => import('./pages/dashboards/EmployeeLiveMonitor.vue'),
+		meta: { requiresAuth: true },
 	},
 	{
 		path: '/contacts',
@@ -360,6 +360,19 @@ const routes = [
 		component: () => import('./pages/Settings.vue'),
 		meta: { requiresAuth: true },
 	},
+	// Workforce Intelligence — Manager+ only
+	{
+		path: '/reports/dashboards/workforce',
+		name: 'WorkforceIntelligence',
+		component: () => import('./pages/dashboards/WorkforceIntelligence.vue'),
+		meta: { requiresAuth: true, reportRoles: ['manager', 'admin'] },
+	},
+	{
+		path: '/reports/dashboards/workforce/associate/:employeeId',
+		name: 'AssociateDetailPerformance',
+		component: () => import('./pages/dashboards/AssociateDetailPerformance.vue'),
+		meta: { requiresAuth: true, reportRoles: ['manager', 'admin'] },
+	},
 	// Profit Intelligence — Admin only (contains pricing engine, AI predictions)
 	{
 		path: '/reports/dashboards/profit',
@@ -415,18 +428,9 @@ router.beforeEach(async (to, _from, next) => {
 		// Legacy requiresManagement check
 		if (to.meta.requiresManagement) {
 			const reportRoles = [
-				'System Manager',
-				'Administrator',
-				'Store Manager',
-				'Sales Manager',
-				'Accounts Manager',
-				'Sales User',
-				'Stock Manager',
-				'Inventory Manager',
-				'HR User',
-				'HR Manager',
-				'Employee',
-				'Employee Self Service',
+				'System Manager', 'Administrator', 'Store Manager', 'Sales Manager',
+				'Accounts Manager', 'Sales User', 'Stock Manager', 'Inventory Manager',
+				'HR User', 'HR Manager', 'Employee', 'Employee Self Service',
 			]
 			if (!userInfo.roles.some((r) => reportRoles.includes(r))) {
 				return next({ name: 'Dashboard', query: { accessDenied: 'true' } })

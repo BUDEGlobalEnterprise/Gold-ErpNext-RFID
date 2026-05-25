@@ -79,7 +79,7 @@ import { computed } from 'vue'
 import { useOfflineStore } from '@/stores/offline.js'
 
 const offline = useOfflineStore()
-const emit = defineEmits(['show-conflicts'])
+const emit = defineEmits(['show-sync-logs'])
 
 const indicatorClass = computed(() => {
 	switch (offline.statusColor) {
@@ -93,8 +93,6 @@ const indicatorClass = computed(() => {
 })
 
 function handleClick() {
-	if (offline.conflictCount > 0) {
-		emit('show-conflicts')
-	}
+	emit('show-sync-logs')
 }
 </script>

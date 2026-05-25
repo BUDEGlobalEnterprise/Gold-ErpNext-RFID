@@ -13,45 +13,39 @@
 		<aside
 			class="shrink-0 flex flex-col bg-white dark:bg-[#0a0c1a] border-r border-gray-200 dark:border-white/5 z-50 transition-all duration-300 fixed lg:relative h-full"
 			:class="[
-				sidebarCollapsed ? 'lg:w-20 lg:items-center' : 'lg:w-64',
+				sidebarCollapsed ? 'lg:w-20' : 'lg:w-64',
 				mobileMenuOpen ? 'w-64 translate-x-0' : '-translate-x-full lg:translate-x-0',
 			]"
 		>
 			<!-- Branding -->
 			<div
-				class="h-32 flex items-center px-10 gap-4 shrink-0"
+				class="h-32 flex items-center px-10 gap-4 shrink-0 transition-all duration-300"
 				:class="sidebarCollapsed ? 'lg:px-4 justify-center' : 'justify-between'"
 			>
-				<div
-					v-if="!sidebarCollapsed"
-					class="flex items-center gap-5 overflow-hidden group cursor-pointer"
-				>
+				<div class="flex items-center gap-5 overflow-hidden w-full transition-all duration-300" :class="sidebarCollapsed ? 'justify-center' : ''">
 					<div
-						class="w-12 h-12 rounded-2xl bg-emerald-950 flex items-center justify-center text-white shadow-glow-emerald shrink-0 transition-transform duration-500"
+						class="w-12 h-12 rounded-2xl bg-emerald-950 dark:bg-emerald-900 flex items-center justify-center text-white shadow-glow-emerald shrink-0 transition-all duration-300"
 					>
 						<span class="material-symbols-outlined text-2xl">diamond</span>
 					</div>
-					<div class="flex flex-col leading-none">
+					<div 
+						class="flex flex-col leading-none transition-all duration-300" 
+						:class="sidebarCollapsed ? 'w-0 opacity-0 pointer-events-none' : 'w-auto opacity-100'"
+					>
 						<span
-							class="font-black text-gray-900 dark:text-white tracking-tighter text-2xl uppercase mb-1"
+							class="font-black text-gray-900 dark:text-white tracking-tighter text-2xl uppercase mb-1 whitespace-nowrap"
 							>Zevar</span
 						>
 						<span
-							class="text-[9px] text-gray-400 font-black uppercase tracking-[0.4em] whitespace-nowrap"
+							class="text-[9px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.4em] whitespace-nowrap"
 							>The Curated Atelier</span
 						>
 					</div>
 				</div>
-				<div
-					v-else
-					class="w-12 h-12 rounded-2xl bg-emerald-950 flex items-center justify-center text-white shadow-glow-emerald shrink-0 transition-transform duration-500 cursor-pointer"
-				>
-					<span class="material-symbols-outlined text-2xl">diamond</span>
-				</div>
 			</div>
 
 			<!-- Nav Items -->
-			<nav class="flex-1 px-8 space-y-2.5 overflow-y-auto no-scrollbar pb-10 pt-4">
+			<nav class="flex-1 px-8 space-y-2.5 overflow-y-auto no-scrollbar pb-10 pt-4 transition-all duration-300" :class="sidebarCollapsed ? 'lg:px-4' : 'lg:px-8'">
 				<router-link
 					v-for="item in navItems"
 					:key="item.to"
@@ -60,8 +54,8 @@
 					class="flex items-center rounded-2xl transition-all duration-300 group relative"
 					:class="[
 						route.path === item.to
-							? 'bg-emerald-950 text-white shadow-glow-emerald'
-							: 'text-gray-500 dark:text-white/70 hover:bg-gray-100/80 dark:hover:bg-white/5',
+							? 'bg-emerald-950 dark:bg-emerald-900/80 text-white shadow-glow-emerald font-semibold'
+							: 'text-gray-600 dark:text-white/70 hover:bg-gray-100/80 dark:hover:bg-white/5 hover:text-emerald-950 dark:hover:text-white',
 						sidebarCollapsed
 							? 'lg:justify-center lg:px-0 lg:py-4'
 							: 'justify-between px-6 py-4',
@@ -72,37 +66,42 @@
 							item.icon
 						}}</span>
 						<span
-							v-show="!sidebarCollapsed"
-							class="text-[11px] font-black uppercase tracking-[0.25em]"
+							class="text-[11px] font-black uppercase tracking-[0.25em] transition-all duration-300 whitespace-nowrap"
+							:class="sidebarCollapsed ? 'lg:w-0 lg:opacity-0 lg:pointer-events-none' : 'w-auto opacity-100'"
 							>{{ item.label }}</span
 						>
 					</div>
 					<div
-						v-if="route.path === item.to && !sidebarCollapsed"
-						class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgb(52,211,153)]"
+						v-if="route.path === item.to"
+						class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgb(52,211,153)] transition-all duration-300"
+						:class="sidebarCollapsed ? 'lg:absolute lg:right-2 lg:top-1/2 lg:-translate-y-1/2 lg:w-1 lg:h-1' : ''"
 					></div>
 				</router-link>
 			</nav>
 
 			<!-- Bottom Section (Manager Info) -->
 			<div
-				class="p-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-black/20"
-				v-if="!sidebarCollapsed"
+				class="p-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-black/20 transition-all duration-300 w-full"
+				:class="sidebarCollapsed ? 'flex justify-center' : ''"
 			>
 				<div
-					class="flex items-center gap-3 bg-white dark:bg-white/5 p-3 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm"
+					class="flex items-center gap-3 bg-white dark:bg-white/5 p-3 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm transition-all duration-300 w-full"
+					:class="sidebarCollapsed ? 'justify-center !p-1 border-transparent dark:border-transparent bg-transparent dark:bg-transparent shadow-none' : ''"
 				>
 					<div
-						class="w-9 h-9 rounded-full overflow-hidden border border-gray-100 shrink-0"
+						class="w-9 h-9 rounded-full overflow-hidden border border-gray-100 dark:border-white/10 shrink-0 shadow-sm"
 					>
 						<img
 							src="https://i.pravatar.cc/150?u=julian"
 							class="w-full h-full object-cover"
 						/>
 					</div>
-					<div class="flex flex-col min-w-0">
+					<div 
+						class="flex flex-col min-w-0 transition-all duration-300"
+						:class="sidebarCollapsed ? 'w-0 opacity-0 pointer-events-none' : 'w-auto opacity-100'"
+					>
 						<span
-							class="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1"
+							class="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none mb-1 whitespace-nowrap"
 							>Manager</span
 						>
 						<span
@@ -118,25 +117,35 @@
 		<main class="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
 			<!-- Header -->
 			<header
-				class="flex items-center px-4 md:px-10 h-20 bg-white/10 dark:bg-transparent backdrop-blur-md shrink-0"
+				class="flex items-center px-4 md:px-10 h-20 bg-white/10 dark:bg-transparent backdrop-blur-md shrink-0 border-b border-gray-200/20 dark:border-white/5"
 			>
+				<!-- Sidebar Collapse Toggle (Desktop) -->
+				<button
+					@click="sidebarCollapsed = !sidebarCollapsed"
+					class="hidden lg:flex w-10 h-10 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 items-center justify-center text-gray-500 dark:text-gray-400 mr-6 transition-all border border-gray-200/50 dark:border-white/10 shadow-sm active:scale-95"
+				>
+					<span class="material-symbols-outlined text-[20px] transition-transform duration-300" :class="sidebarCollapsed ? 'rotate-180' : ''">
+						menu_open
+					</span>
+				</button>
+
 				<!-- Search Bar -->
 				<div class="relative w-full max-w-lg hidden md:block">
 					<span
-						class="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 text-lg"
+						class="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-lg"
 						>search</span
 					>
 					<input
 						type="search"
 						placeholder="Search orders, gemstones, or team..."
-						class="w-full bg-gray-50/80 dark:bg-white/5 border border-transparent focus:bg-white focus:border-gray-100 dark:focus:border-white/10 rounded-2xl py-3 pl-14 pr-6 text-[13px] focus:outline-none transition-all placeholder-gray-400 font-medium"
+						class="w-full bg-gray-50/80 dark:bg-white/5 border border-transparent focus:bg-white focus:border-gray-100 dark:focus:border-white/10 rounded-2xl py-3 pl-14 pr-6 text-[13px] focus:outline-none transition-all placeholder-gray-400 dark:placeholder-gray-500 font-medium text-gray-900 dark:text-white"
 					/>
 				</div>
 
-				<!-- Header Actions (Mobile) -->
+				<!-- Header Actions (Mobile Menu Toggle) -->
 				<button
 					@click="mobileMenuOpen = !mobileMenuOpen"
-					class="lg:hidden w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-500"
+					class="lg:hidden w-10 h-10 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 active:scale-95"
 				>
 					<span class="material-symbols-outlined">{{
 						mobileMenuOpen ? "close" : "menu"
@@ -145,16 +154,16 @@
 
 				<div class="ml-auto flex items-center gap-6">
 					<!-- Notification & Settings Icons -->
-					<div class="flex items-center gap-3 text-gray-400">
+					<div class="flex items-center gap-3 text-gray-400 dark:text-white/40">
 						<button
-							class="w-10 h-10 rounded-full flex items-center justify-center transition-all"
+							class="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:bg-gray-100 dark:hover:bg-white/5 hover:text-emerald-950 dark:hover:text-white active:scale-95"
 						>
 							<span class="material-symbols-outlined text-[22px]"
 								>notifications</span
 							>
 						</button>
 						<button
-							class="w-10 h-10 rounded-full flex items-center justify-center transition-all"
+							class="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:bg-gray-100 dark:hover:bg-white/5 hover:text-emerald-950 dark:hover:text-white active:scale-95"
 						>
 							<span class="material-symbols-outlined text-[22px]">settings</span>
 						</button>
@@ -171,13 +180,13 @@
 								{{ auth.user?.full_name || "Marcus Sterling" }}
 							</p>
 							<p
-								class="text-[9px] text-gray-400 font-bold uppercase tracking-[0.2em]"
+								class="text-[9px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-[0.2em]"
 							>
 								Master Setter
 							</p>
 						</div>
 						<button
-							class="w-11 h-11 rounded-2xl bg-gray-100 dark:bg-white/5 p-0.5 overflow-hidden group relative border border-gray-100 dark:border-white/10"
+							class="w-11 h-11 rounded-2xl bg-gray-100 dark:bg-white/5 p-0.5 overflow-hidden group relative border border-gray-100 dark:border-white/10 active:scale-95 transition-transform"
 							@click="userMenuOpen = !userMenuOpen"
 						>
 							<img
@@ -193,7 +202,7 @@
 					<!-- User Menu Dropdown -->
 					<div
 						v-show="userMenuOpen"
-						class="absolute right-8 top-20 mt-2 w-64 bg-white dark:bg-[#0a0c1a] border border-gray-200 dark:border-white/10 rounded-3xl shadow-2xl py-3 z-[60] flex flex-col font-medium overflow-hidden"
+						class="absolute right-8 top-20 mt-2 w-64 bg-white dark:bg-[#0a0c1a] border border-gray-200 dark:border-white/10 rounded-3xl shadow-2xl py-3 z-[60] flex flex-col font-medium overflow-hidden animate-fade-in"
 					>
 						<div
 							class="px-6 py-4 border-b border-gray-50 dark:border-white/5 mb-1 bg-gray-50/50 dark:bg-white/5"
@@ -210,7 +219,7 @@
 
 						<button
 							@click="toggleDarkMode"
-							class="w-full text-left px-6 py-3 text-gray-600 dark:text-gray-400 transition-colors flex items-center justify-between group"
+							class="w-full text-left px-6 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-emerald-950 dark:hover:text-white transition-colors flex items-center justify-between group"
 						>
 							<div class="flex items-center gap-4">
 								<span class="material-symbols-outlined text-[20px]">{{
@@ -224,7 +233,7 @@
 
 						<button
 							@click="auth.logout()"
-							class="w-full text-left px-6 py-3 text-red-500 transition-colors flex items-center gap-4 group"
+							class="w-full text-left px-6 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors flex items-center gap-4 group"
 						>
 							<span class="material-symbols-outlined text-[20px]">logout</span>
 							<span class="text-xs font-bold uppercase tracking-widest text-red-500"
