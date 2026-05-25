@@ -1,0 +1,142 @@
+{
+  "actions": [],
+  "autoname": "WO-.#####",
+  "creation": "2026-05-25 10:00:00",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "finance_account",
+    "customer",
+    "customer_name",
+    "column_break_1",
+    "write_off_amount",
+    "remaining_balance",
+    "write_off_date",
+    "section_reason",
+    "reason",
+    "notes",
+    "column_break_reason",
+    "approved_by",
+    "approval_date",
+    "section_result",
+    "account_status_before",
+    "account_status_after"
+  ],
+  "fields": [
+    {
+      "fieldname": "finance_account",
+      "fieldtype": "Link",
+      "label": "Finance Account",
+      "options": "In-House Finance Account",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "customer",
+      "fieldtype": "Link",
+      "label": "Customer",
+      "options": "Customer",
+      "in_list_view": 1,
+      "read_only": 1
+    },
+    {
+      "fieldname": "customer_name",
+      "fieldtype": "Data",
+      "label": "Customer Name",
+      "in_list_view": 1,
+      "read_only": 1
+    },
+    {
+      "fieldname": "column_break_1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "write_off_amount",
+      "fieldtype": "Currency",
+      "label": "Write-Off Amount",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "remaining_balance",
+      "fieldtype": "Currency",
+      "label": "Remaining Balance After Write-Off",
+      "read_only": 1
+    },
+    {
+      "fieldname": "write_off_date",
+      "fieldtype": "Date",
+      "label": "Write-Off Date",
+      "default": "Today",
+      "reqd": 1
+    },
+    {
+      "fieldname": "section_reason",
+      "fieldtype": "Section Break",
+      "label": "Reason & Approval"
+    },
+    {
+      "fieldname": "reason",
+      "fieldtype": "Select",
+      "label": "Reason",
+      "options": "\nBankruptcy\nUnreachable Customer\nDisputed - Resolved in Customer Favor\nStatute of Limitations\nSmall Balance Clearance\nOther",
+      "reqd": 1
+    },
+    {
+      "fieldname": "notes",
+      "fieldtype": "Small Text",
+      "label": "Notes"
+    },
+    {
+      "fieldname": "column_break_reason",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "approved_by",
+      "fieldtype": "Link",
+      "label": "Approved By",
+      "options": "User",
+      "reqd": 1
+    },
+    {
+      "fieldname": "approval_date",
+      "fieldtype": "Date",
+      "label": "Approval Date"
+    },
+    {
+      "fieldname": "section_result",
+      "fieldtype": "Section Break",
+      "label": "Result",
+      "collapsible": 1
+    },
+    {
+      "fieldname": "account_status_before",
+      "fieldtype": "Data",
+      "label": "Account Status Before",
+      "read_only": 1
+    },
+    {
+      "fieldname": "account_status_after",
+      "fieldtype": "Data",
+      "label": "Account Status After",
+      "read_only": 1
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "is_submittable": 1,
+  "links": [],
+  "modified": "2026-05-25 10:00:00",
+  "module": "Unified Retail Management System",
+  "name": "Finance Account Write Off",
+  "naming_rule": "Expression (old style)",
+  "owner": "Administrator",
+  "permissions": [
+    {"role": "Sales Manager", "create": 1, "read": 1, "write": 1, "submit": 0},
+    {"role": "Accounts Manager", "create": 1, "read": 1, "write": 1, "submit": 1, "cancel": 1, "delete": 1},
+    {"role": "System Manager", "create": 1, "read": 1, "write": 1, "submit": 1, "cancel": 1, "delete": 1}
+  ],
+  "sort_field": "creation",
+  "sort_order": "DESC",
+  "title_field": "customer_name",
+  "track_changes": 1
+}

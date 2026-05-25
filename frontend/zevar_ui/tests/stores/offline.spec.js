@@ -16,9 +16,10 @@ const mocks = vi.hoisted(() => {
 		dbState,
 		queueOfflineOrder: vi.fn(async (order) => {
 			const id = dbState.pending.length + 1
-			dbState.pending.push({ id, ...order, status: 'pending' })
+			dbState.pending.push({ id, ...order, status: 'pending', idempotency_key: 'test-key-' + id })
 		}),
 		getPendingOrders: vi.fn(async () => dbState.pending.filter((o) => o.status === 'pending')),
+		getOrdersByStatus: vi.fn(async (status) => dbState.pending.filter((o) => o.status === status)),
 		markOrderSynced: vi.fn(async (id) => {
 			const o = dbState.pending.find((x) => x.id === id)
 			if (o) o.status = 'synced'
@@ -29,6 +30,18 @@ const mocks = vi.hoisted(() => {
 				o.status = 'failed'
 				o.error = err
 			}
+		}),
+		markOrderConflict: vi.fn(async (id, type, msg) => {
+			const o = dbState.pending.find((x) => x.id === id)
+			if (o) { o.status = 'conflict'; o.conflict_type = type; o.error = msg }
+		}),
+		updateOrderForRetry: vi.fn(async (id) => {
+			const o = dbState.pending.find((x) => x.id === id)
+			if (o) { o.status = 'pending'; o.attempts = (o.attempts || 0) + 1 }
+		}),
+		markOrderDead: vi.fn(async (id) => {
+			const o = dbState.pending.find((x) => x.id === id)
+			if (o) o.status = 'dead_letter'
 		}),
 		clearSyncedOrders: vi.fn(async () => {
 			dbState.pending = dbState.pending.filter((o) => o.status !== 'synced')
@@ -43,20 +56,26 @@ const mocks = vi.hoisted(() => {
 			dbState.settings[k] = v
 		}),
 		getCachedSetting: vi.fn(async (k) => dbState.settings[k] ?? null),
+		isCatalogStale: vi.fn(async () => false),
 	}
 })
 
 vi.mock('@/services/OfflineDB.js', () => ({
 	queueOfflineOrder: mocks.queueOfflineOrder,
 	getPendingOrders: mocks.getPendingOrders,
+	getOrdersByStatus: mocks.getOrdersByStatus,
 	markOrderSynced: mocks.markOrderSynced,
 	markOrderFailed: mocks.markOrderFailed,
+	markOrderConflict: mocks.markOrderConflict,
+	updateOrderForRetry: mocks.updateOrderForRetry,
+	markOrderDead: mocks.markOrderDead,
 	clearSyncedOrders: mocks.clearSyncedOrders,
 	cacheCatalog: mocks.cacheCatalog,
 	getCachedCatalog: mocks.getCachedCatalog,
 	getCatalogCount: mocks.getCatalogCount,
 	cacheSetting: mocks.cacheSetting,
 	getCachedSetting: mocks.getCachedSetting,
+	isCatalogStale: mocks.isCatalogStale,
 }))
 
 // Mock fetch globally — each test can override.
@@ -120,29 +139,48 @@ describe('offline store — syncPendingOrders', () => {
 		expect(mocks.markOrderSynced).toHaveBeenCalledWith(1)
 	})
 
-	it('marks failed orders as failed without aborting the rest', async () => {
-		mocks.dbState.pending = [
-			{ id: 1, status: 'pending', payload: { items: '[]' } },
-			{ id: 2, status: 'pending', payload: { items: '[]' } },
-		]
-		// First call succeeds, second fails.
-		let calls = 0
-		global.fetch = vi.fn(async () => {
-			calls++
-			return {
-				ok: calls === 1,
-				status: calls === 1 ? 200 : 500,
-				json: async () =>
-					calls === 1 ? { message: { invoice_name: 'INV-1' } } : { message: 'boom' },
-			}
+	it('retries server errors and marks client errors as failed without aborting the rest', async () => {
+			mocks.dbState.pending = [
+				{ id: 1, status: 'pending', payload: { items: '[]' } },
+				{ id: 2, status: 'pending', payload: { items: '[]' } },
+			]
+			// First call succeeds, second returns a client error (422).
+			let calls = 0
+			global.fetch = vi.fn(async () => {
+				calls++
+				return {
+					ok: calls === 1,
+					status: calls === 1 ? 200 : 422,
+					json: async () =>
+						calls === 1 ? { message: { invoice_name: 'INV-1' } } : { message: 'validation error' },
+				}
+			})
+
+			const store = useOfflineStore()
+			await store.syncPendingOrders()
+
+			expect(mocks.markOrderSynced).toHaveBeenCalledWith(1)
+			// Client errors (4xx) mark the order as failed
+			expect(mocks.markOrderFailed).toHaveBeenCalledWith(2, expect.any(String))
 		})
 
-		const store = useOfflineStore()
-		await store.syncPendingOrders()
+		it('retries server errors with exponential backoff', async () => {
+			mocks.dbState.pending = [
+				{ id: 1, status: 'pending', payload: { items: '[]' }, attempts: 0 },
+			]
+			global.fetch = vi.fn(async () => ({
+				ok: false,
+				status: 500,
+				json: async () => ({ message: 'server error' }),
+			}))
 
-		expect(mocks.markOrderSynced).toHaveBeenCalledWith(1)
-		expect(mocks.markOrderFailed).toHaveBeenCalledWith(2, expect.any(String))
-	})
+			const store = useOfflineStore()
+			await store.syncPendingOrders()
+
+			// Server errors (5xx) trigger retry with backoff, not immediate failure
+			expect(mocks.updateOrderForRetry).toHaveBeenCalledWith(1)
+			expect(mocks.markOrderFailed).not.toHaveBeenCalled()
+		})
 
 	it('is a no-op when offline', async () => {
 		const store = useOfflineStore()

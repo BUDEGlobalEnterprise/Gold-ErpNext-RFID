@@ -3,7 +3,7 @@
 		<!-- ===== DESKTOP SIDEBAR (>= lg) ===== -->
 		<aside
 			ref="sidebarRef"
-			class="hidden lg:flex bg-[#FFEDD5] dark:bg-warm-dark-900/60 border-r border-orange-200 dark:border-warm-border/50 flex-col z-30 relative min-h-0"
+			class="hidden lg:flex bg-white/40 dark:bg-warm-dark-900/60 backdrop-blur-xl border-r border-gray-200 dark:border-warm-border/50 flex-col z-30 relative min-h-0"
 			:class="isResizing ? 'transition-none' : 'transition-all duration-300'"
 			:style="
 				isSidebarCollapsed
@@ -135,10 +135,10 @@
 		<div class="app-shell-content-col">
 			<!-- Header -->
 			<header
-				class="h-14 md:h-16 lg:h-20 bg-[#FFEDD5] dark:bg-warm-dark-950/80 border-b border-orange-200 dark:border-warm-border/50 flex items-center justify-between px-3 sm:px-4 lg:px-6 z-20 sticky top-0 shadow-sm transition-colors duration-300 shrink-0"
+				class="h-14 md:h-16 lg:h-20 bg-white/70 dark:bg-warm-dark-950/80 backdrop-blur-md border-b border-gray-200 dark:border-warm-border/50 flex items-center justify-between px-3 sm:px-4 lg:px-6 z-20 sticky top-0 shadow-sm transition-colors duration-300 shrink-0"
 			>
-				<!-- Mobile Left: Hamburger + Logo + Brand (Simplified) -->
-				<div class="flex lg:hidden items-center gap-3 flex-1 min-w-0">
+				<!-- Mobile Left: Hamburger + Logo + Store -->
+				<div class="flex lg:hidden items-center gap-2 flex-1 min-w-0">
 					<button
 						@click="isMobileDrawerOpen = true"
 						class="p-1 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0 touch-target"
@@ -158,9 +158,20 @@
 							/>
 						</svg>
 					</button>
-					<div class="flex items-center gap-2">
-						<img src="/logo.svg" alt="Zevar" class="w-7 h-7 rounded-lg shrink-0" />
-						<span class="text-gray-900 dark:text-white font-black text-lg tracking-tighter leading-none shrink-0">ZEVAR</span>
+					<img src="/logo.svg" alt="Zevar" class="w-7 h-7 rounded-lg shrink-0" />
+					<div class="relative ml-1 min-w-0 flex-1">
+						<select
+							v-model="session.currentWarehouse"
+							@change="session.setWarehouse($event.target.value)"
+							class="h-8 w-full bg-gray-50/50 dark:bg-warm-dark-900/50 border border-gray-200 dark:border-warm-border/50 pl-2 pr-6 rounded-lg text-xs font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] cursor-pointer appearance-none truncate"
+						>
+							<option :value="null" disabled>Store...</option>
+							<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
+								{{
+									wh.name.replace('Zevar US Stores - ', '').replace(' - ZUS', '')
+								}}
+							</option>
+						</select>
 					</div>
 				</div>
 
@@ -170,7 +181,7 @@
 						<select
 							v-model="session.currentWarehouse"
 							@change="session.setWarehouse($event.target.value)"
-							class="h-11 bg-white/60 dark:bg-warm-dark-900/50 border border-orange-200/60 dark:border-warm-border/50 pl-4 pr-10 rounded-lg text-sm font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] cursor-pointer min-w-[200px] shadow-sm outline-none"
+							class="h-11 bg-gray-50/50 dark:bg-warm-dark-900/50 border border-gray-200 dark:border-warm-border/50 pl-4 pr-10 rounded-lg text-sm font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] cursor-pointer min-w-[200px] shadow-sm outline-none"
 						>
 							<option :value="null" disabled>Select Store Location</option>
 							<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
@@ -196,7 +207,7 @@
 							type="text"
 							v-model="ui.searchQuery"
 							placeholder="Search collection..."
-							class="h-11 w-full bg-white/60 dark:bg-warm-dark-900/50 border border-orange-200/60 dark:border-warm-border rounded-lg text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-[#D4AF37] text-sm font-medium pl-11 transition-all"
+							class="h-11 w-full bg-gray-50/50 dark:bg-warm-dark-900/50 border border-gray-200 dark:border-warm-border rounded-lg text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-[#D4AF37] text-sm font-medium pl-11 transition-all"
 						/>
 					</div>
 				</div>
@@ -234,10 +245,10 @@
 
 					<!-- Live Rates (desktop only) -->
 					<div
-						class="hidden xl:flex items-center h-11 bg-white/60 dark:bg-warm-dark-900/50 border border-orange-200 dark:border-warm-border rounded-lg shadow-sm max-w-2xl overflow-x-auto custom-scrollbar-hide"
+						class="hidden xl:flex items-center h-11 bg-gray-50/50 dark:bg-warm-dark-900/50 border border-gray-200 dark:border-warm-border rounded-lg shadow-sm max-w-2xl overflow-x-auto custom-scrollbar-hide"
 					>
 						<div
-							class="flex items-center gap-2 border-r border-orange-200/60 dark:border-warm-border pr-3 pl-4 bg-orange-50/30 dark:bg-warm-dark-700 h-full sticky left-0 z-10 backdrop-blur-md"
+							class="flex items-center gap-2 border-r border-gray-200 dark:border-warm-border pr-3 pl-4 bg-gray-100/50 dark:bg-warm-dark-700 h-full sticky left-0 z-10 backdrop-blur-md"
 						>
 							<span class="relative flex h-2 w-2"
 								><span
@@ -289,11 +300,14 @@
 						</div>
 					</div>
 
+					<!-- Notifications -->
+					<NotificationCenter />
+
 					<!-- User menu -->
-					<div class="relative hidden lg:block" ref="userMenuRef">
+					<div class="relative" ref="userMenuRef">
 						<button
 							@click.stop="isUserMenuOpen = !isUserMenuOpen"
-							class="flex items-center gap-2 p-1.5 pr-3 rounded-full hover:bg-white/60 dark:hover:bg-warm-dark-700 border border-transparent hover:border-orange-200 dark:border-warm-border"
+							class="flex items-center gap-2 p-1.5 pr-3 rounded-full hover:bg-gray-100 dark:hover:bg-warm-dark-700 border border-transparent hover:border-gray-200 dark:border-warm-border"
 						>
 							<div
 								class="w-8 h-8 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] flex items-center justify-center text-[#0F1115] font-bold text-xs"
@@ -453,7 +467,7 @@
 					<button
 						v-if="!showPersistentCart"
 						@click="isCartOpen = true"
-						class="relative p-2 rounded-full hover:bg-white/60 dark:hover:bg-gray-800 transition-colors group shrink-0 touch-target"
+						class="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group shrink-0 touch-target"
 					>
 						<svg
 							class="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 dark:text-gray-300"
@@ -494,7 +508,7 @@
 				>
 					<div
 						v-if="showPersistentCart"
-						class="flex flex-col shrink-0 bg-[#FFEDD5] dark:bg-warm-dark-900/60 border-l border-orange-200 dark:border-warm-border/50 min-h-0 overflow-hidden relative"
+						class="flex flex-col shrink-0 bg-white/40 dark:bg-warm-dark-900/60 backdrop-blur-xl border-l border-gray-200 dark:border-warm-border/50 min-h-0 overflow-hidden relative"
 						:class="{ 'transition-all duration-300': !isRightResizing }"
 						:style="{ width: rightSidebarWidth + 'px' }"
 					>
@@ -626,7 +640,7 @@
 
 		<!-- ===== MOBILE DRAWER ===== -->
 		<aside
-			class="fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[320px] bg-[#FFEDD5] dark:bg-warm-dark-900/90 shadow-2xl transform transition-transform duration-300 lg:hidden flex flex-col"
+			class="fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[320px] bg-white/90 dark:bg-warm-dark-900/90 backdrop-blur-xl shadow-2xl transform transition-transform duration-300 lg:hidden flex flex-col"
 			:class="isMobileDrawerOpen ? 'translate-x-0' : '-translate-x-full'"
 		>
 			<div
@@ -641,7 +655,7 @@
 				</div>
 				<button
 					@click="isMobileDrawerOpen = false"
-					class="text-gray-400 p-2 hover:text-[#D4AF37] dark:hover:text-white transition-colors touch-target"
+					class="text-gray-400 p-2 hover:text-white transition-colors touch-target"
 					aria-label="Close menu"
 				>
 					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -654,22 +668,6 @@
 					</svg>
 				</button>
 			</div>
-
-			<!-- Profile Section -->
-			<div class="px-4 py-3 bg-[#FFEDD5]/60 dark:bg-warm-dark-950/40 border-b border-gray-200 dark:border-warm-border/50 flex items-center gap-3 shrink-0">
-				<div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] flex items-center justify-center text-[#0F1115] font-bold text-sm shrink-0 shadow-sm border border-[#D4AF37]/20">
-					{{ session.user?.full_name?.[0]?.toUpperCase() || 'U' }}
-				</div>
-				<div class="min-w-0 flex-1">
-					<p class="text-sm font-bold text-gray-900 dark:text-white truncate">
-						{{ session.user?.full_name || 'Guest' }}
-					</p>
-					<p class="text-xs text-gray-500 truncate mt-0.5">
-						{{ session.user?.email }}
-					</p>
-				</div>
-			</div>
-
 			<div
 				class="p-4 space-y-3 border-b border-gray-200 dark:border-warm-border/50 shrink-0"
 			>
@@ -690,26 +688,21 @@
 					<input
 						type="text"
 						v-model="ui.searchQuery"
-						placeholder="Search collection..."
-						class="h-11 w-full bg-white/60 dark:bg-warm-dark-900/50 border border-orange-200/60 dark:border-warm-border/50 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 rounded-lg pl-10 pr-4 focus:ring-2 focus:ring-[#D4AF37] text-sm"
+						placeholder="Search..."
+						class="h-11 w-full bg-gray-800/50 border border-gray-700 text-gray-200 rounded-lg pl-10 pr-4 focus:ring-2 focus:ring-[#D4AF37] text-sm"
 					/>
 				</div>
 				<div class="relative">
 					<select
 						v-model="session.currentWarehouse"
 						@change="session.setWarehouse($event.target.value)"
-						class="h-11 w-full bg-white/60 dark:bg-warm-dark-900/50 border border-orange-200/60 dark:border-warm-border/50 text-gray-800 dark:text-gray-200 rounded-lg px-3 focus:ring-2 focus:ring-[#D4AF37] text-sm appearance-none outline-none cursor-pointer font-medium"
+						class="h-11 w-full bg-gray-800/50 border border-gray-700 text-gray-200 rounded-lg px-3 focus:ring-2 focus:ring-[#D4AF37] text-sm appearance-none"
 					>
-						<option :value="null" disabled>Select Store Location</option>
+						<option :value="null" disabled>Store</option>
 						<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
 							{{ wh.name }}
 						</option>
 					</select>
-					<div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-						</svg>
-					</div>
 				</div>
 			</div>
 			<nav class="flex-1 overflow-y-auto p-4 space-y-0.5 custom-scrollbar">
@@ -748,105 +741,20 @@
 						<span class="font-medium text-[13px]">{{ item.label }}</span>
 					</router-link>
 				</template>
-				<div class="mt-4 pt-4 border-t border-gray-200 dark:border-warm-border/50 space-y-1">
-					<!-- Theme Toggle -->
+				<div class="mt-4 pt-4 border-t border-gray-200 dark:border-warm-border/50">
 					<button
 						@click="ui.toggleTheme()"
-						class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-warm-dark-800 transition-colors"
+						class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400"
 					>
-						<svg
-							v-if="ui.isDark"
-							class="w-[18px] h-[18px] text-amber-400 shrink-0"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-							/>
-						</svg>
-						<svg
-							v-else
-							class="w-[18px] h-[18px] text-indigo-500 shrink-0"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-							/>
-						</svg>
-						<span class="font-medium text-[13px]">{{ ui.isDark ? 'Light Mode' : 'Dark Mode' }}</span>
+						<span class="text-sm font-medium">{{
+							ui.isDark ? 'Light Mode' : 'Dark Mode'
+						}}</span>
 					</button>
-
-					<!-- Employee Portal -->
-					<router-link
-						to="/employee-portal"
-						@click="isMobileDrawerOpen = false"
-						class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-warm-dark-800 transition-colors"
-					>
-						<svg
-							class="w-[18px] h-[18px] text-gray-400 shrink-0"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-							/>
-						</svg>
-						<span class="font-medium text-[13px]">Employee Portal</span>
-					</router-link>
-
-					<!-- Change Password -->
-					<button
-						@click="isMobileDrawerOpen = false; ui.showPreferencesModal = true"
-						class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-warm-dark-800 transition-colors"
-					>
-						<svg
-							class="w-[18px] h-[18px] text-gray-400 shrink-0"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M15 7a2 2 0 012 2m0 0a2 2 0 01-2 2m0 0a2 2 0 01-2-2m0 0a2 2 0 012-2m-2 4h.01M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-							/>
-						</svg>
-						<span class="font-medium text-[13px]">Change Password</span>
-					</button>
-
-					<!-- Sign Out -->
 					<button
 						@click="session.logoutResource.submit()"
-						class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-500 dark:text-red-400 hover:bg-red-500/10 transition-colors"
+						class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10"
 					>
-						<svg
-							class="w-[18px] h-[18px] shrink-0"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-							/>
-						</svg>
-						<span class="font-medium text-[13px]">Sign Out</span>
+						<span class="text-sm font-medium">Sign Out</span>
 					</button>
 				</div>
 			</nav>
@@ -871,6 +779,7 @@ import { canAccessReports, canAccessMonitor } from '@/utils/permissions.js'
 import CartSidebar from '@/components/CartSidebar.vue'
 import CheckoutModal from '@/components/CheckoutModal.vue'
 import AiAssistant from '@/components/ai/AiAssistant.vue'
+import NotificationCenter from '@/components/NotificationCenter.vue'
 
 const session = useSessionStore()
 const goldStore = useGoldStore()
@@ -934,6 +843,11 @@ const sidebarSections = computed(() => {
 					icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
 				},
 				{
+					to: '/my-dashboard',
+					label: 'My Dashboard',
+					icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+				},
+				{
 					to: '/terminal',
 					label: 'POS Terminal',
 					icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z',
@@ -980,6 +894,11 @@ const sidebarSections = computed(() => {
 					label: 'Layaway',
 					icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
 				},
+				{
+					to: '/special-orders',
+					label: 'Special Orders',
+					icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
+				},
 			],
 		},
 		{
@@ -1017,6 +936,21 @@ const sidebarSections = computed(() => {
 			to: '/reports/dashboards/admin',
 			label: 'Live Monitor',
 			icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z',
+		})
+			sections[3].items.push({
+				to: '/live-monitor',
+				label: 'Sales Monitor',
+				icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+			})
+		sections[3].items.push({
+			to: '/reports/dashboards/profit',
+			label: 'Profit Intelligence',
+			icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+		})
+		sections[3].items.push({
+			to: '/reports/dashboards/workforce',
+			label: 'Workforce Intelligence',
+			icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
 		})
 	}
 	sections[3].items.push(
@@ -1116,21 +1050,25 @@ const warehouses = createResource({
 	url: 'frappe.client.get_list',
 	params: {
 		doctype: 'Warehouse',
-		filters: {
-			is_group: 0,
-			disabled: 0,
-			name: ['in', [
-				'Store 1 - New York - ZJ',
-				'Store 2 - Los Angeles - ZJ',
-				'Store 3 - Chicago - ZJ',
-				'Store 4 - Houston - ZJ',
-				'Store 5 - Miami - ZJ'
-			]]
-		},
+		filters: { is_group: 0, parent_warehouse: ['like', '%Zevar US Stores%'] },
 		fields: ['name'],
-		limit_page_length: 10,
 	},
 	auto: true,
+	onSuccess(data) {
+		if (!data || data.length === 0) warehouseFallback.fetch()
+	},
+})
+const warehouseFallback = createResource({
+	url: 'frappe.client.get_list',
+	params: {
+		doctype: 'Warehouse',
+		filters: { is_group: 0 },
+		fields: ['name'],
+		limit_page_length: 50,
+	},
+	onSuccess(data) {
+		if (data?.length > 0) warehouses.data = data
+	},
 })
 
 // Resize handlers
@@ -1204,10 +1142,7 @@ async function handleGlobalPaymentSuccess(result) {
 				ui.closeLayawayPayment()
 				emit('layaway-created', responseObj)
 			} else {
-				console.error(
-					'AppShell: Layaway creation returned unexpected result:',
-					responseObj
-				)
+				console.error('AppShell: Layaway creation returned unexpected result:', responseObj)
 				const displayMsg =
 					typeof responseObj === 'string'
 						? responseObj
@@ -1228,7 +1163,8 @@ async function handleGlobalPaymentSuccess(result) {
 
 			// 2. Try parsing _server_messages for structured messages
 			if (!displayMsg) {
-				const rawServerMsg = err?.data?._server_messages || err?._server_messages
+				const rawServerMsg =
+					err?.data?._server_messages || err?._server_messages
 				if (rawServerMsg) {
 					try {
 						const msgs = JSON.parse(rawServerMsg)
@@ -1240,12 +1176,7 @@ async function handleGlobalPaymentSuccess(result) {
 									return m
 								}
 							})
-							.filter(
-								(m) =>
-									m &&
-									m !== 'ValidationError' &&
-									m !== 'frappe.exceptions.ValidationError'
-							)
+							.filter((m) => m && m !== 'ValidationError' && m !== 'frappe.exceptions.ValidationError')
 							.join('\n')
 					} catch {
 						displayMsg = rawServerMsg
@@ -1323,16 +1254,16 @@ onUnmounted(() => {
 /* ===== CSS Grid App Shell ===== */
 .app-shell-root {
 	display: grid;
-	height: 100dvh;
+	min-height: 100dvh;
 	width: 100%;
-	/* Mobile: content + ticker + bottom nav */
+	/* Mobile: header + content + ticker + bottom nav */
 	grid-template-columns: 1fr;
-	grid-template-rows: 1fr auto auto;
+	grid-template-rows: auto 1fr auto auto;
 	grid-template-areas:
+		'content'
 		'content'
 		'ticker'
 		'bottomnav';
-	overflow: hidden;
 }
 
 /* lg+: sidebar + content, no bottom nav */
@@ -1366,12 +1297,11 @@ onUnmounted(() => {
 	flex-direction: column;
 	min-width: 0;
 	min-height: 0;
-	overflow: hidden; /* Lock overflow to isolate scrolling inside main content */
 }
 
 @media (max-width: 1023px) {
 	.app-shell-content-col {
-		overflow: hidden; /* Lock overflow on mobile/tablet too to keep header/bottom-nav sticky */
+		overflow: visible;
 	}
 }
 
@@ -1386,6 +1316,7 @@ onUnmounted(() => {
 	display: flex;
 	min-height: 0;
 	min-width: 0;
+	overflow: hidden;
 }
 
 .app-shell-main {

@@ -47,6 +47,24 @@ def publish_anomaly_alert(alert: dict) -> None:
     )
 
 
+def publish_employee_event(employee: str, event_type: str, data: dict) -> None:
+    """Publish a user-scoped event to a specific employee's live monitor.
+
+    The employee's frontend subscribes to the 'employee_event' channel
+    and filters by their own employee ID.
+    """
+    frappe.publish_realtime(
+        event="employee_event",
+        message={
+            "employee": employee,
+            "event_type": event_type,
+            "timestamp": str(now_datetime()),
+            **data,
+        },
+        after_commit=True,
+    )
+
+
 # ──────────────────────────────────────────────────
 # 2. Multi-Store Command Center
 # ──────────────────────────────────────────────────

@@ -1,0 +1,187 @@
+{
+  "actions": [],
+  "autoname": "DL-.#####",
+  "creation": "2026-05-25 10:00:00",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "finance_account",
+    "customer",
+    "customer_name",
+    "column_break_1",
+    "dunning_level",
+    "status",
+    "overdue_days",
+    "section_details",
+    "overdue_amount",
+    "total_balance",
+    "minimum_due",
+    "column_break_details",
+    "last_payment_date",
+    "interest_rate",
+    "section_letter",
+    "subject",
+    "message_body",
+    "section_meta",
+    "sent_date",
+    "sent_by",
+    "response_date",
+    "response_notes"
+  ],
+  "fields": [
+    {
+      "fieldname": "finance_account",
+      "fieldtype": "Link",
+      "label": "Finance Account",
+      "options": "In-House Finance Account",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "customer",
+      "fieldtype": "Link",
+      "label": "Customer",
+      "options": "Customer",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "customer_name",
+      "fieldtype": "Data",
+      "label": "Customer Name",
+      "in_list_view": 1,
+      "read_only": 1
+    },
+    {
+      "fieldname": "column_break_1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "dunning_level",
+      "fieldtype": "Select",
+      "label": "Dunning Level",
+      "options": "\nLevel 1 - Reminder\nLevel 2 - Final Notice\nLevel 3 - Collections Notice",
+      "reqd": 1,
+      "default": "Level 1 - Reminder",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "Draft\nSent\nAcknowledged\nIgnored\nEscalated",
+      "default": "Draft",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "overdue_days",
+      "fieldtype": "Int",
+      "label": "Overdue Days",
+      "read_only": 1
+    },
+    {
+      "fieldname": "section_details",
+      "fieldtype": "Section Break",
+      "label": "Account Details"
+    },
+    {
+      "fieldname": "overdue_amount",
+      "fieldtype": "Currency",
+      "label": "Overdue Amount",
+      "read_only": 1
+    },
+    {
+      "fieldname": "total_balance",
+      "fieldtype": "Currency",
+      "label": "Total Balance",
+      "read_only": 1
+    },
+    {
+      "fieldname": "minimum_due",
+      "fieldtype": "Currency",
+      "label": "Minimum Payment Due",
+      "read_only": 1
+    },
+    {
+      "fieldname": "column_break_details",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "last_payment_date",
+      "fieldtype": "Date",
+      "label": "Last Payment Date",
+      "read_only": 1
+    },
+    {
+      "fieldname": "interest_rate",
+      "fieldtype": "Percent",
+      "label": "Interest Rate",
+      "read_only": 1
+    },
+    {
+      "fieldname": "section_letter",
+      "fieldtype": "Section Break",
+      "label": "Letter Content"
+    },
+    {
+      "fieldname": "subject",
+      "fieldtype": "Data",
+      "label": "Subject",
+      "reqd": 1
+    },
+    {
+      "fieldname": "message_body",
+      "fieldtype": "Text Editor",
+      "label": "Message Body",
+      "reqd": 1
+    },
+    {
+      "fieldname": "section_meta",
+      "fieldtype": "Section Break",
+      "label": "Tracking"
+    },
+    {
+      "fieldname": "sent_date",
+      "fieldtype": "Datetime",
+      "label": "Sent Date",
+      "read_only": 1
+    },
+    {
+      "fieldname": "sent_by",
+      "fieldtype": "Link",
+      "label": "Sent By",
+      "options": "User",
+      "read_only": 1
+    },
+    {
+      "fieldname": "response_date",
+      "fieldtype": "Datetime",
+      "label": "Response Date",
+      "read_only": 1
+    },
+    {
+      "fieldname": "response_notes",
+      "fieldtype": "Small Text",
+      "label": "Response Notes"
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "is_submittable": 0,
+  "links": [],
+  "modified": "2026-05-25 10:00:00",
+  "module": "Unified Retail Management System",
+  "name": "Dunning Letter",
+  "naming_rule": "Expression (old style)",
+  "owner": "Administrator",
+  "permissions": [
+    {"role": "Sales User", "create": 0, "read": 1, "write": 0, "submit": 0},
+    {"role": "Sales Manager", "create": 1, "read": 1, "write": 1, "submit": 0, "cancel": 0},
+    {"role": "Accounts User", "create": 1, "read": 1, "write": 1, "submit": 0},
+    {"role": "Accounts Manager", "create": 1, "read": 1, "write": 1, "submit": 0, "cancel": 1, "delete": 1},
+    {"role": "System Manager", "create": 1, "read": 1, "write": 1, "submit": 0, "cancel": 1, "delete": 1}
+  ],
+  "sort_field": "creation",
+  "sort_order": "DESC",
+  "title_field": "customer_name",
+  "track_changes": 1
+}

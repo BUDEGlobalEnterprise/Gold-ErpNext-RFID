@@ -75,14 +75,20 @@ class SpecialOrder(Document):
 		email = self._get_customer_email()
 		if not email:
 			return
-		subject = f"Your Special Order {self.name} Has Arrived!"
-		body = (
-			f"<p>Dear {self.customer_name},</p>"
-			f"<p>Great news! Your special order <strong>{self.name}</strong> "
-		 f"has arrived at our store.</p>"
-			f"<p>Please visit us at your earliest convenience to pick up your item(s).</p>"
-			f"<p>Balance due: <strong>${flt(self.balance_due):,.2f}</strong></p>"
+
+		subject, body = self._render_email_template(
+			"Special Order Arrival",
+			{"doc": self, "company": frappe.db.get_single_value("Selling Settings", "company") or "Zevar Jewelry"},
+			fallback_subject=f"Your Special Order {self.name} Has Arrived!",
+			fallback_body=(
+				f"<p>Dear {self.customer_name},</p>"
+				f"<p>Great news! Your special order <strong>{self.name}</strong> "
+				f"has arrived at our store.</p>"
+				f"<p>Please visit us at your earliest convenience to pick up your item(s).</p>"
+				f"<p>Balance due: <strong>${flt(self.balance_due):,.2f}</strong></p>"
+			),
 		)
+
 		frappe.sendmail(
 			recipients=[email],
 			subject=subject,
@@ -113,6 +119,16 @@ class SpecialOrder(Document):
 
 	def _get_customer_email(self):
 		return frappe.db.get_value("Customer", self.customer, "email_id")
+
+	def _render_email_template(self, template_name, context, fallback_subject=None, fallback_body=None):
+		if frappe.db.exists("Email Template", template_name):
+			try:
+				from frappe.email.doctype.email_template.email_template import get_email_template
+				subject, body = get_email_template(template_name, context)
+				return subject, body
+			except Exception:
+				pass
+		return fallback_subject or "", fallback_body or ""
 
 	def _log_event(self, event_type, details):
 		try:

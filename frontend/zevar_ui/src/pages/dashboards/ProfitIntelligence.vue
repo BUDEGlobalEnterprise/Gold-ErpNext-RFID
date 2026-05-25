@@ -1,8 +1,8 @@
 <template>
 	<AppLayout>
 		<div class="flex flex-col h-full">
-			<!-- Header -->
-			<div class="flex items-center gap-3 mb-4 flex-shrink-0">
+			<!-- Header: wraps date controls on mobile -->
+			<div class="flex items-center gap-3 mb-2 flex-shrink-0 flex-wrap">
 				<button
 					@click="$router.push('/reports')"
 					class="w-9 h-9 rounded-lg flex items-center justify-center border border-gray-200 dark:border-warm-border hover:border-[#D4AF37] text-gray-500 dark:text-gray-400 hover:text-[#D4AF37] transition-colors"
@@ -16,28 +16,29 @@
 						>monitoring</span
 					>
 				</div>
-				<div class="flex-1">
+				<div class="flex-1 min-w-0">
 					<h2 class="premium-title !text-xl">Profit Intelligence</h2>
 					<p class="text-[10px] text-gray-400">
 						Margins, cost analysis, pricing recommendations
 					</p>
 				</div>
-				<div class="flex items-center gap-2">
+				<!-- Date controls: full-width on mobile, inline on desktop -->
+				<div class="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
 					<input
 						type="date"
 						v-model="fromDate"
-						class="px-2 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+						class="flex-1 sm:flex-none px-2 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-400 min-w-0"
 					/>
-					<span class="text-xs text-gray-400">to</span>
+					<span class="text-xs text-gray-400 shrink-0">to</span>
 					<input
 						type="date"
 						v-model="toDate"
-						class="px-2 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+						class="flex-1 sm:flex-none px-2 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-400 min-w-0"
 					/>
 					<button
 						@click="refresh"
 						:disabled="store.loading"
-						class="px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+						class="px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors shrink-0"
 					>
 						Refresh
 					</button>
@@ -46,7 +47,7 @@
 
 			<!-- Tabs -->
 			<div class="border-b border-gray-200 dark:border-gray-700 mb-4 flex-shrink-0">
-				<nav class="flex space-x-4 overflow-x-auto">
+				<nav class="flex space-x-4 overflow-x-auto -mb-px">
 					<button
 						v-for="tab in tabs"
 						:key="tab.key"

@@ -1132,7 +1132,7 @@ def _brief_cash_variance(today, user_roles):
 
 	if not (user_roles & (ACCOUNTING_ROLES | ADMIN_ROLES)):
 		return 0.0
-	frappe.db.sql(
+	row = frappe.db.sql(
 		"""SELECT COALESCE(SUM(
 			CASE WHEN sip.mode_of_payment = 'Cash' THEN sip.amount ELSE 0 END
 		), 0) as expected
@@ -1142,7 +1142,7 @@ def _brief_cash_variance(today, user_roles):
 		(today,),
 		as_dict=True,
 	)
-	return 0.0
+	return flt(row[0].expected) if row else 0.0
 
 
 def _brief_low_stock_count(store, user_roles):

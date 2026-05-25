@@ -208,6 +208,16 @@ export async function markOrderFailed(id, error) {
 	})
 }
 
+export async function getAllOfflineOrders() {
+	const db = await openDB()
+	const tx = db.transaction('pendingOrders', 'readonly')
+	const request = tx.objectStore('pendingOrders').getAll()
+	return new Promise((resolve, reject) => {
+		request.onsuccess = () => resolve(request.result)
+		request.onerror = () => reject(request.error)
+	})
+}
+
 export async function clearSyncedOrders() {
 	const db = await openDB()
 	const tx = db.transaction('pendingOrders', 'readwrite')
@@ -216,8 +226,12 @@ export async function clearSyncedOrders() {
 
 	return new Promise((resolve, reject) => {
 		request.onsuccess = () => {
-			for (const record of request.result) {
-				if (record.status === 'synced') {
+			const items = request.result || []
+			const synced = items.filter(r => r.status === 'synced').sort((a,b) => (b.synced_at || 0) - (a.synced_at || 0))
+			
+			if (synced.length > 50) {
+				const toDelete = synced.slice(50)
+				for (const record of toDelete) {
 					store.delete(record.id)
 				}
 			}
@@ -382,5 +396,16 @@ export async function isCatalogStale() {
 			}
 		}
 		request.onerror = () => reject(request.error)
+	})
+}
+
+export async function deleteOfflineOrder(id) {
+	const db = await openDB()
+	const tx = db.transaction('pendingOrders', 'readwrite')
+	const store = tx.objectStore('pendingOrders')
+	store.delete(id)
+	return new Promise((resolve, reject) => {
+		tx.oncomplete = () => resolve(true)
+		tx.onerror = () => reject(tx.error)
 	})
 }

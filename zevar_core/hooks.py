@@ -55,13 +55,20 @@ doc_events = {
 			"zevar_core.tax_events.apply_store_tax",
 			"zevar_core.trade_in_events.validate_trade_in_2x_rule",
 			"zevar_core.api.inventory.validate_serial_sellable_zones",
+			"zevar_core.stock_validation.validate_pos_stock_qty",
 		],
-		"before_submit": ["zevar_core.api.repair_accounting.validate_sales_invoice_stream"],
+		"before_submit": [
+				"zevar_core.api.repair_accounting.validate_sales_invoice_stream",
+				"zevar_core.api.tax_exemption.validate_exemption_on_submit",
+			],
 		"on_submit": [
 			"zevar_core.api.commission.calculate_commissions",
-			"zevar_core.api.profit_intelligence.calculate_sale_cost_breakdown",
 			"zevar_core.services.stock_reduction.detect_stock_reduction",
+			"zevar_core.services.reservation_manager.release_reservation_for_invoice",
 		],
+			"on_cancel": [
+				"zevar_core.api.commission.reverse_commissions",
+			],
 	},
 }
 
@@ -73,7 +80,6 @@ scheduler_events = {
 		"0 8 * * *": [
 			"zevar_core.api.layaway.check_overdue_and_forfeit",
 			"zevar_core.api.layaway.send_payment_reminders",
-			"zevar_core.api.memo.check_overdue_memos",
 		],
 		"0 23 * * *": ["zevar_core.tasks.email_eod_brief"],
 		"0 6 * * *": [
@@ -82,11 +88,17 @@ scheduler_events = {
 			"zevar_core.tasks.audit_cadence_heartbeat",
 			"zevar_core.tasks.serial_last_seen_backfill",
 			"zevar_core.tasks.consignment_overdue_alert",
+			"zevar_core.api.pricing_intelligence.analyze_pricing_opportunities",
 		],
-		"0 * * * *": ["zevar_core.tasks.expire_stale_reservations"],
+		"0 * * * *": [
+				"zevar_core.tasks.expire_stale_reservations",
+				"zevar_core.api.pos_activation.auto_deactivate_profiles",
+			],
 		"0 */2 * * *": ["zevar_core.tasks.run_report_subscriptions"],
-		"0 3 * * *": ["zevar_core.tasks.index_sales_pricing_data"],
-		"0 4 * * 1": ["zevar_core.tasks.generate_pricing_recommendations"],
+			"0 9 1 * *": [
+				"zevar_core.api.dunning.run_auto_dunning",
+				"zevar_core.api.dunning.send_monthly_statements",
+			],
 	},
 }
 
@@ -104,7 +116,6 @@ after_migrate = [
 	"zevar_core.install.import_desktop_icons",
 	"zevar_core.install.import_workspaces",
 	"zevar_core.install.create_default_desk_shortcuts",
-	"zevar_core.install.setup_pos_opening_entry_suspended_status",
 ]
 
 # Bench Commands

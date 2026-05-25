@@ -28,14 +28,29 @@ app.mount('#app')
 
 // Register Service Worker for offline support
 if ('serviceWorker' in navigator) {
-	window.addEventListener('load', () => {
-		navigator.serviceWorker
-			.register('/pos/sw.js', { scope: '/pos/' })
-			.then((registration) => {
-				// Service Worker registered
-			})
-			.catch((error) => {
-				console.error('[App] Service Worker registration failed:', error)
-			})
-	})
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/pos/sw.js', { scope: '/pos/' })
+      .then((registration) => {
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              newWorker.postMessage({ type: 'SKIP_WAITING' })
+            }
+          })
+        })
+
+        setInterval(() => registration.update(), 60 * 60 * 1000)
+      })
+      .catch((error) => {
+        console.error('[App] Service Worker registration failed:', error)
+      })
+
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (window.__swReloadPending) return
+      window.__swReloadPending = true
+      window.location.reload()
+    })
+  })
 }

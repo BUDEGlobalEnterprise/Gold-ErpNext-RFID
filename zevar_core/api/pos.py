@@ -23,6 +23,28 @@ def create_pos_invoice(
 	gift_card_number: str | None = None,
 	override_reference: str | None = None,
 ) -> dict:
+	try:
+		return _create_pos_invoice_internal(
+			items, payments, customer, warehouse, discount_amount, tax_exempt,
+			salespersons, layaway_reference, trade_ins, gift_card_number, override_reference
+		)
+	except Exception:
+		frappe.log_error(title="POS Invoice Sync Failed", message=frappe.get_traceback())
+		raise
+
+def _create_pos_invoice_internal(
+	items: str,
+	payments: str,
+	customer: str,
+	warehouse: str | None = None,
+	discount_amount: float = 0,
+	tax_exempt: str | bool = False,
+	salespersons: str | None = None,
+	layaway_reference: str | None = None,
+	trade_ins: str | None = None,
+	gift_card_number: str | None = None,
+	override_reference: str | None = None,
+) -> dict:
 	"""
 	Create a complete POS Invoice with:
 	- Stock reservation/deduction
@@ -37,20 +59,20 @@ def create_pos_invoice(
 	payments_list = frappe.parse_json(payments) if isinstance(payments, str) else payments
 	trade_in_list = frappe.parse_json(trade_ins) if trade_ins else []
 
-	from zevar_core.api.audit_log import log_event_safely
+	def checkout_bouncer(msg: str, event_type: str = "invoice_failed"):
+		frappe.log_error(title="POS Invoice Validation Error", message=f"{msg}\n\n{frappe.get_traceback()}")
+		frappe.db.commit()
+		from zevar_core.api.audit_log import log_event_safely
 
-	def checkout_bouncer(message, event_type="permission_denied", details=None):
-		"""Log failure and throw error."""
-		log_event_safely(
-			event_type=event_type,
-			details={
-				"message": message,
-				"customer": customer,
-				"items_count": len(items_list) if items_list else 0,
-				"additional_details": details or {},
-			},
-		)
-		frappe.throw(message, frappe.ValidationError if "permission" not in event_type else frappe.PermissionError)
+		try:
+			log_event_safely(
+				event_type=event_type,
+				details={"error": msg},
+				reference_document="Offline Transaction",
+			)
+		except Exception:
+			pass
+		frappe.throw(msg, frappe.ValidationError if "permission" not in event_type else frappe.PermissionError)
 
 	# Validate the user has an allowed role for POS invoicing
 	allowed_roles = {
@@ -383,6 +405,17 @@ def create_pos_invoice(
 					"amount": flt(pay.get("amount")),
 				},
 			)
+
+		si.set_missing_values()
+		si.calculate_taxes_and_totals()
+
+		# Auto-correct small rounding differences (e.g., tax rounding mismatches)
+		total_payments = sum(flt(p.amount) for p in si.payments)
+		difference = flt(si.grand_total) - total_payments
+
+		if si.payments and abs(difference) <= 2.0 and abs(difference) > 0:
+			si.payments[-1].amount = flt(si.payments[-1].amount) + difference
+			si.calculate_taxes_and_totals()
 
 		si.insert(ignore_permissions=True)
 		si.submit()

@@ -6,7 +6,8 @@
 				label
 			}}</span>
 		</div>
-		<p class="text-lg font-black" :class="valueClass">{{ value }}</p>
+		<div v-if="loading" class="h-6 w-24 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+		<p v-else class="text-lg font-black" :class="valueClass">{{ value }}</p>
 	</div>
 </template>
 
@@ -18,6 +19,7 @@ const props = defineProps({
 	value: { type: [String, Number], required: true },
 	icon: { type: String, default: 'analytics' },
 	color: { type: String, default: 'gray' },
+	loading: { type: Boolean, default: false },
 })
 
 const colors = {

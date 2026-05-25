@@ -105,7 +105,7 @@
 					</router-link>
 
 					<!-- Online/Offline Indicator -->
-					<OfflineIndicator />
+					<OfflineIndicator @show-sync-logs="showSyncModal = true" />
 
 					<div
 						v-if="ui.activeFilters.pos?.display_case"
@@ -286,6 +286,12 @@
 				:session-name="posSession.sessionName"
 				@close="showCashModal = false"
 				@recorded="onCashMovementSaved"
+			/>
+
+			<!-- Offline Sync Logs Modal -->
+			<OfflineSyncModal
+				:show="showSyncModal"
+				@close="showSyncModal = false"
 			/>
 
 			<div class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
@@ -819,6 +825,7 @@ import ItemCard from '@/components/ItemCard.vue'
 import ProductModal from '@/components/POSProductModal.vue'
 import CashMovementModal from '@/components/CashMovementModal.vue'
 import OfflineIndicator from '@/components/OfflineIndicator.vue'
+import OfflineSyncModal from '@/components/OfflineSyncModal.vue'
 import { useSessionStore } from '@/stores/session.js'
 import { useUIStore } from '@/stores/ui.js'
 import { useCartStore } from '@/stores/cart.js'
@@ -848,6 +855,7 @@ const sessionLoading = ref(false)
 const showModal = ref(false)
 const selectedItemCode = ref(null)
 const showCashModal = ref(false)
+const showSyncModal = ref(false)
 const showHeldDrawer = ref(false)
 const heldCarts = ref([])
 

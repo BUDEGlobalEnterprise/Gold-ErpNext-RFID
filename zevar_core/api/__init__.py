@@ -92,6 +92,33 @@ from zevar_core.api.live_monitor import (
 	get_repair_live_feed,
 	run_anomaly_detection,
 )
+from zevar_core.api.employee_live_monitor import (
+	get_employee_dashboard,
+	get_my_performance,
+	get_store_activity as get_employee_store_activity,
+	get_my_tasks,
+)
+from zevar_core.api.revenue_dashboard import (
+	get_dashboard_data as get_revenue_dashboard,
+	get_today_summary as get_revenue_today_summary,
+	get_hourly_distribution as get_revenue_hourly,
+	get_category_breakdown as get_revenue_categories,
+	get_top_salespersons as get_revenue_top_salespersons,
+)
+from zevar_core.api.inventory_dashboard import (
+	get_dashboard_data as get_inventory_dashboard,
+	get_kpi_summary as get_inventory_kpi,
+	get_stock_by_warehouse as get_inventory_by_warehouse,
+	get_aging_buckets as get_inventory_aging,
+	get_shrinkage_trend as get_inventory_shrinkage,
+)
+from zevar_core.api.customer_dashboard import (
+	get_dashboard_data as get_customer_dashboard,
+	get_kpi_summary as get_customer_kpi,
+	get_new_vs_returning as get_customer_new_vs_returning,
+	get_top_customers as get_customer_top,
+	get_layaway_cohort as get_customer_layaway_cohort,
+)
 from zevar_core.api.trending import get_trending_items, track_trending_click
 
 __all__ = [
@@ -170,4 +197,23 @@ __all__ = [
 	"get_command_center_data",
 	"get_repair_live_feed",
 	"run_anomaly_detection",
+	"get_revenue_dashboard",
+	"get_revenue_today_summary",
+	"get_revenue_hourly",
+	"get_revenue_categories",
+	"get_revenue_top_salespersons",
+	"get_inventory_dashboard",
+	"get_inventory_kpi",
+	"get_inventory_by_warehouse",
+	"get_inventory_aging",
+	"get_inventory_shrinkage",
+	"get_customer_dashboard",
+	"get_customer_kpi",
+	"get_customer_new_vs_returning",
+	"get_customer_top",
+	"get_customer_layaway_cohort",
+	"get_employee_dashboard",
+	"get_my_performance",
+	"get_employee_store_activity",
+	"get_my_tasks",
 ]
