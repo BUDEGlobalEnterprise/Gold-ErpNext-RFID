@@ -332,7 +332,8 @@ class RepairOrder(Document):  # nosemgrep
 		payments_total = sum((row.amount or 0.0) for row in (self.payments or []))
 		total_paid = deposit + payments_total
 
-		self.balance_due = total - total_paid
+		raw_balance = total - total_paid
+		self.balance_due = max(0.0, raw_balance)
 
 		if total <= 0:
 			self.payment_status = PaymentStatus.UNPAID
@@ -419,6 +420,11 @@ class RepairOrder(Document):  # nosemgrep
 
 		if not payment_method:
 			frappe.throw(_("Payment method is required"))
+
+		from frappe.utils import flt
+		self.update_payment_and_balance()
+		if flt(amount) > flt(self.balance_due) + 0.01:
+			frappe.throw(_("Payment amount ({0}) cannot exceed balance due ({1})").format(f"${amount:.2f}", f"${self.balance_due:.2f}"))
 
 		from frappe.utils import now
 

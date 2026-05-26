@@ -621,3 +621,191 @@ def validate_serial_sellable_zones(doc, method=None):
 				frappe.throw(
 					_("Serial No {0} is in {1} which is not a sellable zone. Cannot sell.").format(sn, sn_wh)
 				)
+
+		# Block sale of items reserved for a different customer
+		for sn in (item.serial_no or "").split("\n"):
+			sn = sn.strip()
+			if not sn:
+				continue
+			active_hold = frappe.db.exists(
+				"Stock Reservation",
+				{
+					"serial_no": sn,
+					"status": "Active",
+					"customer": ["!=", doc.customer],
+					"docstatus": 1,
+				},
+			)
+			if active_hold:
+				holder = frappe.db.get_value("Stock Reservation", active_hold, "customer")
+				frappe.throw(
+					_("Serial No {0} is reserved for another customer ({1}). Reservation: {2}").format(
+						sn, holder, active_hold
+					)
+				)
+
+
+# ─── Reservation API Endpoints ──────────────────────────────────────────────
+
+
+@frappe.whitelist(allow_guest=False)
+def hold_cart_items(items, customer, warehouse, hold_minutes=120):
+	"""Create soft holds for all cart items. Called when POS user holds a transaction."""
+	frappe.has_permission("Stock Reservation", ptype="create", throw=True)
+
+	from zevar_core.services.reservation_manager import create_soft_hold
+
+	items_list = json.loads(items) if isinstance(items, str) else items
+	results = []
+	cart_ref = cstr(frappe.generate_hash(length=10))
+
+	for item in items_list:
+		try:
+			result = create_soft_hold(
+				item_code=item.get("item_code"),
+				customer=customer,
+				warehouse=warehouse,
+				serial_no=item.get("serial_no"),
+				held_by=frappe.session.user,
+				cart_reference=cart_ref,
+				hold_minutes=cint(hold_minutes),
+			)
+			results.append(result)
+		except Exception as e:
+			frappe.log_error(f"Hold failed for {item.get('item_code')}", str(e))
+			results.append({"success": False, "item_code": item.get("item_code"), "error": str(e)})
+
+	return {"success": True, "cart_reference": cart_ref, "holds": results}
+
+
+@frappe.whitelist(allow_guest=False)
+def release_cart_hold(cart_reference):
+	"""Release all soft holds for a given cart reference."""
+	frappe.has_permission("Stock Reservation", ptype="cancel", throw=True)
+
+	reservations = frappe.get_all(
+		"Stock Reservation",
+		filters={"cart_reference": cart_reference, "status": "Active", "docstatus": 1},
+		pluck="name",
+	)
+
+	from zevar_core.services.reservation_manager import release_reservation
+
+	released = []
+	for res_name in reservations:
+		try:
+			release_reservation(res_name, reason="Cart hold released")
+			released.append(res_name)
+		except Exception:
+			frappe.log_error(f"Release failed for {res_name}", frappe.get_traceback())
+
+	return {"success": True, "released": released, "count": len(released)}
+
+
+@frappe.whitelist(allow_guest=False)
+def upgrade_hold_to_reserve(reservation_id, deposit_amount=0):
+	"""Promote a soft hold to a hard reserve (deposit-based)."""
+	frappe.has_permission("Stock Reservation", ptype="create", throw=True)
+	frappe.only_for("Sales Manager", "Store Manager", "System Manager")
+
+	from zevar_core.services.reservation_manager import promote_to_hard_reserve
+
+	return promote_to_hard_reserve(reservation_id, flt(deposit_amount))
+
+
+@frappe.whitelist(allow_guest=False)
+def get_store_reservations(warehouse=None, status="Active"):
+	"""List active reservations for a store/warehouse."""
+	frappe.has_permission("Stock Reservation", ptype="read", throw=True)
+
+	filters = {"status": status, "docstatus": 1}
+	if warehouse:
+		filters["warehouse_from"] = warehouse
+
+	reservations = frappe.get_all(
+		"Stock Reservation",
+		filters=filters,
+		fields=[
+			"name", "customer", "serial_no", "item_code", "item_name",
+			"reservation_type", "hold_until", "auto_expire_on",
+			"deposit_amount", "status", "salesperson", "cart_reference",
+			"creation",
+		],
+		order_by="creation desc",
+		limit=100,
+	)
+
+	return {"success": True, "count": len(reservations), "reservations": reservations}
+
+
+@frappe.whitelist(allow_guest=False)
+def check_item_reservation(item_code, serial_no=None):
+	"""Check if an item is currently reserved."""
+	frappe.has_permission("Stock Reservation", ptype="read", throw=True)
+
+	from zevar_core.services.reservation_manager import check_availability
+
+	warehouse = frappe.db.get_value("Bin", {"item_code": item_code, "actual_qty": [">", 0]}, "warehouse")
+	return check_availability(item_code, warehouse or "", serial_no)
+
+
+
+@frappe.whitelist(allow_guest=False)
+def diagnose_stock_deduction(invoice_name=None, limit=10):
+	"""Diagnostic: returns actual SLE data for recent POS invoices.
+
+	Shows qty, stock_qty, conversion_factor for each item and the
+	corresponding Stock Ledger Entry actual_qty deduction.
+	"""
+	frappe.only_for("Sales Manager", "Store Manager", "System Manager")
+
+	results = []
+
+	if invoice_name:
+		invoices = [invoice_name]
+	else:
+		invoices = frappe.get_all(
+			"Sales Invoice",
+			filters={"is_pos": 1, "update_stock": 1, "docstatus": 1},
+			fields=["name"],
+			order_by="creation desc",
+			limit=int(limit),
+			pluck="name",
+		)
+
+	for inv_name in invoices:
+		si = frappe.get_doc("Sales Invoice", inv_name)
+		item_data = []
+		for item in si.items:
+			sles = frappe.get_all(
+				"Stock Ledger Entry",
+				filters={
+					"voucher_type": "Sales Invoice",
+					"voucher_no": inv_name,
+					"voucher_detail_no": item.name,
+				},
+				fields=["actual_qty", "warehouse", "stock_value_difference", "name"],
+			)
+			item_data.append({
+				"item_code": item.item_code,
+				"item_name": item.item_name,
+				"qty": flt(item.qty),
+				"stock_qty": flt(item.stock_qty),
+				"uom": item.uom,
+				"stock_uom": item.stock_uom,
+				"conversion_factor": flt(item.conversion_factor),
+				"warehouse": item.warehouse,
+				"sle_deduction": sum(flt(s.get("actual_qty", 0)) for s in sles),
+				"sle_count": len(sles),
+				"sles": sles,
+			})
+
+		results.append({
+			"invoice": inv_name,
+			"customer": si.customer,
+			"posting_date": str(si.posting_date),
+			"grand_total": flt(si.grand_total),
+			"items": item_data,
+		})
+
+	return {"success": True, "count": len(results), "invoices": results}

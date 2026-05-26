@@ -22,11 +22,29 @@ def create_pos_invoice(
 	trade_ins: str | None = None,
 	gift_card_number: str | None = None,
 	override_reference: str | None = None,
+	idempotency_key: str | None = None,
 ) -> dict:
+	# Idempotency: if this key was already processed, return the cached result
+	if idempotency_key:
+		existing = frappe.db.get_value(
+			"POS Sync Log",
+			{"idempotency_key": idempotency_key},
+			["sales_invoice"],
+			as_dict=True,
+		)
+		if existing and existing.sales_invoice:
+			return {
+				"success": True,
+				"invoice_name": existing.sales_invoice,
+				"idempotent": True,
+				"message": f"Duplicate request — invoice {existing.sales_invoice} already created",
+			}
+
 	try:
 		return _create_pos_invoice_internal(
 			items, payments, customer, warehouse, discount_amount, tax_exempt,
-			salespersons, layaway_reference, trade_ins, gift_card_number, override_reference
+			salespersons, layaway_reference, trade_ins, gift_card_number, override_reference,
+			idempotency_key
 		)
 	except Exception:
 		frappe.log_error(title="POS Invoice Sync Failed", message=frappe.get_traceback())
@@ -44,6 +62,7 @@ def _create_pos_invoice_internal(
 	trade_ins: str | None = None,
 	gift_card_number: str | None = None,
 	override_reference: str | None = None,
+	idempotency_key: str | None = None,
 ) -> dict:
 	"""
 	Create a complete POS Invoice with:
@@ -418,6 +437,20 @@ def _create_pos_invoice_internal(
 			si.calculate_taxes_and_totals()
 
 		si.insert(ignore_permissions=True)
+
+		# Diagnostic: log item state before submit to track stock deduction
+		for _diag_item in si.items:
+			if flt(_diag_item.stock_qty) != flt(_diag_item.qty):
+				frappe.log_error(
+					title=f"POS Stock Diagnostic: {si.name}",
+					message=(
+						f"Item {_diag_item.item_code}: qty={_diag_item.qty}, "
+						f"stock_qty={_diag_item.stock_qty}, "
+						f"conversion_factor={_diag_item.conversion_factor}, "
+						f"uom={_diag_item.uom}, stock_uom={_diag_item.stock_uom}"
+					),
+				)
+
 		si.submit()
 
 		# Deduct gift card balance only after successful invoice submission
@@ -475,6 +508,22 @@ def _create_pos_invoice_internal(
 
 		if gc_payment_amount > 0 and gift_card_number:
 			log_gift_card_used(gc_doc, gc_payment_amount, source_reference=si.name)
+
+		# Record idempotency log so duplicate syncs are rejected
+		if idempotency_key:
+			try:
+				sync_log = frappe.new_doc("POS Sync Log")
+				sync_log.idempotency_key = idempotency_key
+				sync_log.sales_invoice = si.name
+				sync_log.terminal_user = frappe.session.user
+				sync_log.response_payload = frappe.as_json({
+					"invoice_name": si.name,
+					"grand_total": flt(si.grand_total),
+					"status": si.status,
+				})
+				sync_log.insert(ignore_permissions=True)
+			except Exception:
+				frappe.log_error("POS Sync Log Creation Failed", frappe.get_traceback())
 
 		return {
 			"success": True,
@@ -790,3 +839,24 @@ def get_pending_overrides() -> dict:
 		"overrides": overrides,
 		"count": len(overrides),
 	}
+
+
+
+@frappe.whitelist(allow_guest=True)
+def serve_sw():
+	"""Serve the POS service worker with correct headers for scope."""
+	from flask import make_response
+	import os
+
+	sw_path = frappe.get_app_path("zevar_core", "public", "pos", "sw.js")
+	if not os.path.exists(sw_path):
+		frappe.throw("Service worker not found", frappe.DoesNotExistError)
+
+	with open(sw_path, "r") as f:
+		sw_content = f.read()
+
+	resp = make_response(sw_content)
+	resp.headers["Content-Type"] = "text/javascript; charset=utf-8"
+	resp.headers["Service-Worker-Allowed"] = "/"
+	resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+	return resp

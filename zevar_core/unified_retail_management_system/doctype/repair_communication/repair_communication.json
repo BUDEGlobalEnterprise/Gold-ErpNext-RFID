@@ -28,7 +28,7 @@
       "fieldtype": "Select",
       "in_list_view": 1,
       "label": "Type",
-      "options": "SMS\nEmail\nPhone Call\nIn-Person\nSystem",
+      "options": "SMS\nEmail\nPhone Call\nIn-Person\nSystem\nAudit\nPayment",
       "reqd": 1
     },
     {
@@ -36,7 +36,7 @@
       "fieldtype": "Select",
       "in_list_view": 1,
       "label": "Direction",
-      "options": "Outgoing\nIncoming",
+      "options": "Outgoing\nIncoming\nSystem",
       "default": "Outgoing",
       "reqd": 1
     },

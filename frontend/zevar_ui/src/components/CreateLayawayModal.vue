@@ -142,7 +142,7 @@
 							@apply-data="applyIdData"
 						/>
 
-						<!-- Customer Selection Section -->
+												<!-- Customer Selection Section -->
 						<div class="mb-5">
 							<div class="flex items-center justify-between mb-3">
 								<h3
@@ -151,7 +151,8 @@
 									Customer <span class="text-red-500">*</span>
 								</h3>
 								<button
-									@click="isNewCustomerMode = !isNewCustomerMode"
+									type="button"
+									@click="showNewCustomerModal = true"
 									class="text-xs font-medium text-[#D4AF37] hover:text-[#c9a432] transition flex items-center gap-1"
 								>
 									<svg
@@ -167,12 +168,12 @@
 											d="M12 4v16m8-8H4"
 										/>
 									</svg>
-									{{ isNewCustomerMode ? 'Search Existing' : 'New Customer' }}
+									New Customer
 								</button>
 							</div>
 
 							<!-- Search Existing Customer -->
-							<div v-if="!isNewCustomerMode" class="relative">
+							<div class="relative">
 								<div class="relative">
 									<svg
 										class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
@@ -227,119 +228,11 @@
 									</button>
 								</div>
 							</div>
-
-							<!-- New Customer Form -->
-							<div
-								v-else
-								class="p-4 bg-gray-50 dark:bg-warm-dark-900 rounded-lg border border-gray-200 dark:border-warm-border"
-							>
-								<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-									<div>
-										<label
-											class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-											>Full Name *</label
-										>
-										<input
-											v-model="newCustomer.name"
-											type="text"
-											placeholder="Full legal name"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
-										/>
-									</div>
-									<div>
-										<label
-											class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-											>Phone *</label
-										>
-										<input
-											v-model="newCustomer.phone"
-											type="tel"
-											placeholder="Phone number"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
-										/>
-									</div>
-									<div>
-										<label
-											class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-											>Email</label
-										>
-										<input
-											v-model="newCustomer.email"
-											type="email"
-											placeholder="Email address"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
-										/>
-									</div>
-									<div>
-										<label
-											class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-											>Customer Type</label
-										>
-										<select
-											v-model="newCustomer.type"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
-										>
-											<option value="Individual">Individual</option>
-											<option value="Company">Company</option>
-										</select>
-									</div>
-								</div>
-								<div class="mt-3">
-									<label
-										class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-										>Address</label
-									>
-									<textarea
-										v-model="newCustomer.address"
-										rows="2"
-										placeholder="Full street address"
-										class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37] resize-none"
-									></textarea>
-								</div>
-								<div class="grid grid-cols-3 gap-3 mt-3">
-									<div>
-										<label
-											class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-											>City</label
-										>
-										<input
-											v-model="newCustomer.city"
-											type="text"
-											placeholder="City"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
-										/>
-									</div>
-									<div>
-										<label
-											class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-											>State</label
-										>
-										<input
-											v-model="newCustomer.state"
-											type="text"
-											placeholder="State"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
-										/>
-									</div>
-									<div>
-										<label
-											class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-											>ZIP</label
-										>
-										<input
-											v-model="newCustomer.zip"
-											type="text"
-											placeholder="ZIP Code"
-											class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
-										/>
-									</div>
-								</div>
-							</div>
 						</div>
 
 						<!-- Customer Details Card -->
 						<div
-							v-if="selectedCustomer || isNewCustomerMode"
+							v-if="selectedCustomer"
 							class="mb-5 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800/30"
 						>
 							<h4
@@ -353,11 +246,7 @@
 										>Name</span
 									>
 									<p class="font-medium text-gray-900 dark:text-white">
-										{{
-											isNewCustomerMode
-												? newCustomer.name
-												: selectedCustomer?.customer_name
-										}}
+										{{ selectedCustomer?.customer_name }}
 									</p>
 								</div>
 								<div>
@@ -365,11 +254,7 @@
 										>Phone</span
 									>
 									<p class="font-medium text-gray-900 dark:text-white">
-										{{
-											isNewCustomerMode
-												? newCustomer.phone
-												: selectedCustomer?.mobile_no || form.phone
-										}}
+										{{ selectedCustomer?.mobile_no || form.phone }}
 									</p>
 								</div>
 								<div>
@@ -377,11 +262,7 @@
 										>Email</span
 									>
 									<p class="font-medium text-gray-900 dark:text-white">
-										{{
-											isNewCustomerMode
-												? newCustomer.email
-												: selectedCustomer?.email_id || form.email
-										}}
+										{{ selectedCustomer?.email_id || form.email }}
 									</p>
 								</div>
 								<div>
@@ -1215,6 +1096,14 @@
 			</div>
 		</div>
 	</component>
+
+	<!-- Standardized Customer Creation Modal -->
+	<CustomerCreationModal
+		v-if="showNewCustomerModal"
+		:show="showNewCustomerModal"
+		@close="showNewCustomerModal = false"
+		@created="onCustomerCreated"
+	/>
 </template>
 
 <script setup>
@@ -1224,6 +1113,7 @@ import { useSessionStore } from '@/stores/session.js'
 import { useCartStore } from '@/stores/cart.js'
 import { useRoute } from 'vue-router'
 import IDScannerPanel from './IDScannerPanel.vue'
+import CustomerCreationModal from './CustomerCreationModal.vue'
 
 const props = defineProps({
 	show: { type: Boolean, default: false },
@@ -1237,6 +1127,7 @@ const route = useRoute()
 
 // UI State
 const submitting = ref(false)
+const showNewCustomerModal = ref(false)
 const isNewCustomerMode = ref(false)
 const showIdScanner = ref(false)
 const showSerialInput = ref(false)
@@ -1265,18 +1156,6 @@ const idScan = ref({
 	name: '',
 	address: '',
 	dob: '',
-})
-
-// New Customer Form
-const newCustomer = ref({
-	name: '',
-	phone: '',
-	email: '',
-	type: 'Individual',
-	address: '',
-	city: '',
-	state: '',
-	zip: '',
 })
 
 // Nominee Form
@@ -1724,39 +1603,22 @@ function handleItemBarcodeScan(event) {
 
 // ID Scanner Functions
 function applyIdData() {
-	if (isNewCustomerMode.value) {
-		newCustomer.value.name = idScan.value.name
-		newCustomer.value.address = idScan.value.address
-	} else {
-		form.value.address = idScan.value.address
-	}
+	form.value.address = idScan.value.address
 	form.value.idNumber = idScan.value.number
 	form.value.idType = idScan.value.type
 	showIdScanner.value = false
 }
 
-// Create Customer
-async function createNewCustomer() {
-	try {
-		const result = await createCustomerResource.submit({
-			doc: {
-				doctype: 'Customer',
-				customer_name: newCustomer.value.name,
-				customer_type: newCustomer.value.type,
-				mobile_no: newCustomer.value.phone,
-				email_id: newCustomer.value.email,
-				address_line1: newCustomer.value.address,
-				city: newCustomer.value.city,
-				state: newCustomer.value.state,
-				country: newCustomer.value.country || 'United States',
-				pincode: newCustomer.value.zip,
-			},
-		})
-		return result?.name || result?.message?.name
-	} catch (error) {
-		console.error('Failed to create customer:', error)
-		throw error
+// On customer created via the standard creation modal
+function onCustomerCreated(customerData) {
+	selectedCustomer.value = {
+		name: customerData.customer_name || customerData.name,
+		customer_name: customerData.customer_name || customerData.name,
+		mobile_no: customerData.mobile_no || customerData.phone,
+		email_id: customerData.email_id || customerData.email,
 	}
+	showNewCustomerModal.value = false
+	autoFillCustomerFromCart(selectedCustomer.value)
 }
 
 async function createLayaway() {
@@ -1766,11 +1628,6 @@ async function createLayaway() {
 
 	try {
 		let customerName = selectedCustomer.value?.name
-
-		// Create new customer if in new customer mode
-		if (isNewCustomerMode.value) {
-			customerName = await createNewCustomer()
-		}
 
 		// Duration months logic
 		const durationMonths =
@@ -1810,12 +1667,8 @@ async function createLayaway() {
 			store_location: session.currentStoreLocation || undefined,
 			notes: notes.trim(),
 			terms_accepted: form.value.agreedToTerms ? 1 : 0,
-			customer_contact: isNewCustomerMode.value
-				? newCustomer.value.phone
-				: form.value.phone || selectedCustomer.value?.mobile_no,
-			customer_email: isNewCustomerMode.value
-				? newCustomer.value.email
-				: form.value.email || selectedCustomer.value?.email_id,
+			customer_contact: form.value.phone || selectedCustomer.value?.mobile_no,
+			customer_email: form.value.email || selectedCustomer.value?.email_id,
 		}
 
 		// Block walk-in customers from layaway
@@ -1847,17 +1700,6 @@ function close() {
 	showSerialInput.value = false
 	hasNominee.value = false
 	isScanningBarcode.value = false
-
-	newCustomer.value = {
-		name: '',
-		phone: '',
-		email: '',
-		type: 'Individual',
-		address: '',
-		city: '',
-		state: '',
-		zip: '',
-	}
 
 	nominee.value = {
 		name: '',

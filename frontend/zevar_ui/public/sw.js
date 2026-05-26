@@ -1,5 +1,5 @@
 /**
- * Service Worker for Zevar POS - Offline Support v10
+ * Service Worker for Zevar POS - Offline Support v13
  *
  * Cache strategy:
  * - Navigation: network-first, cache fallback
@@ -13,8 +13,8 @@
  * - Background Sync API is used only as a connectivity signal to the app
  */
 
-const CACHE_NAME = 'zevar-pos-v10'
-const API_CACHE = 'zevar-api-v10'
+const CACHE_NAME = 'zevar-pos-v13'
+const API_CACHE = 'zevar-api-v13'
 
 const STATIC_ASSETS = ['/pos/', '/pos/index.html']
 
@@ -29,7 +29,7 @@ const SENSITIVE_METHODS = ['get_user_info', 'get_logged_user', 'logout', 'login'
 const MAX_ASSET_AGE_MS = 24 * 60 * 60 * 1000
 
 self.addEventListener('install', (event) => {
-  console.log('[SW v10] Installing...')
+  console.log('[SW v13] Installing...')
   event.waitUntil(
     caches
       .open(CACHE_NAME)
@@ -39,7 +39,7 @@ self.addEventListener('install', (event) => {
 })
 
 self.addEventListener('activate', (event) => {
-  console.log('[SW v10] Activating...')
+  console.log('[SW v13] Activating...')
   event.waitUntil(
     caches
       .keys()
@@ -47,7 +47,7 @@ self.addEventListener('activate', (event) => {
         Promise.all(
           names.map((n) => {
             if (n !== CACHE_NAME && n !== API_CACHE) {
-              console.log('[SW v10] Deleting old cache:', n)
+              console.log('[SW v13] Deleting old cache:', n)
               return caches.delete(n)
             }
           })
@@ -183,7 +183,7 @@ async function fetchAndCacheStatic(request) {
 
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-pos-transactions') {
-    console.log('[SW v10] Background sync fired — notifying app')
+    console.log('[SW v13] Background sync fired — notifying app')
     event.waitUntil(notifyAppToSync())
   }
 })

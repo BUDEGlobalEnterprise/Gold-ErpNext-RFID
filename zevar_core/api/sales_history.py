@@ -13,6 +13,73 @@ from frappe.utils import add_days, cstr, flt, getdate
 
 
 @frappe.whitelist()
+def get_repair_payments_history(
+	from_date: str | None = None,
+	to_date: str | None = None,
+	search: str | None = None,
+	page: int = 1,
+	page_size: int = 20,
+) -> dict:
+	"""
+	Get repair payments history with filtering and pagination.
+	"""
+	frappe.only_for(["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"])
+
+	if not from_date:
+		from_date = add_days(getdate(), -30)
+	if not to_date:
+		to_date = getdate()
+
+	query = """
+		SELECT
+			rp.name,
+			rp.parent as repair_order,
+			rp.creation as payment_date,
+			rp.amount,
+			rp.mode_of_payment,
+			rp.reference_no,
+			ro.customer,
+			ro.customer_name,
+			ro.status as repair_status
+		FROM `tabRepair Payment` rp
+		JOIN `tabRepair Order` ro ON rp.parent = ro.name
+		WHERE DATE(rp.creation) >= %s AND DATE(rp.creation) <= %s
+	"""
+	params = [cstr(from_date), cstr(to_date)]
+
+	if search:
+		query += " AND (rp.parent LIKE %s OR ro.customer_name LIKE %s)"
+		params.extend([f"%{search}%", f"%{search}%"])
+
+	query += " ORDER BY rp.creation DESC"
+
+	# Get total count
+	count_query = f"SELECT COUNT(*) as count FROM ({query}) as subq"
+	total_count = frappe.db.sql(count_query, tuple(params))[0][0]  # nosemgrep
+
+	# Calculate pagination
+	total_pages = (total_count + page_size - 1) // page_size if page_size > 0 else 1
+	offset = (page - 1) * page_size
+
+	# Get page data
+	query += " LIMIT %s OFFSET %s"
+	params.extend([page_size, offset])
+
+	payments = frappe.db.sql(query, tuple(params), as_dict=True)  # nosemgrep
+
+	return {
+		"payments": payments,
+		"pagination": {
+			"page": page,
+			"total_pages": total_pages,
+			"total_count": total_count,
+			"page_size": page_size,
+		},
+	}
+
+
+
+@frappe.whitelist()
 def get_sales_history(
 	from_date: str | None = None,
 	to_date: str | None = None,
