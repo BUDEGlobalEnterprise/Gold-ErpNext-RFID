@@ -29,10 +29,9 @@
     },
     {
       "fieldname": "payment_method",
-      "fieldtype": "Select",
+      "fieldtype": "Data",
       "in_list_view": 1,
       "label": "Payment Method",
-      "options": "Cash\nCredit Card\nCheck\nOther",
       "reqd": 1
     },
     {

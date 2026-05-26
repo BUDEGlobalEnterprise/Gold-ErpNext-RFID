@@ -920,6 +920,7 @@
 	<!-- New Customer Modal -->
 	<CustomerCreationModal
 		v-if="showNewCustomerModal"
+		:show="showNewCustomerModal"
 		@close="showNewCustomerModal = false"
 		@created="onCustomerCreated"
 	/>

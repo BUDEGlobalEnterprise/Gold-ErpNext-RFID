@@ -60,6 +60,7 @@ doc_events = {
 		"before_submit": [
 				"zevar_core.api.repair_accounting.validate_sales_invoice_stream",
 				"zevar_core.api.tax_exemption.validate_exemption_on_submit",
+				"zevar_core.stock_validation.force_pos_stock_qty_before_submit",
 			],
 		"on_submit": [
 			"zevar_core.api.commission.calculate_commissions",
@@ -88,7 +89,6 @@ scheduler_events = {
 			"zevar_core.tasks.audit_cadence_heartbeat",
 			"zevar_core.tasks.serial_last_seen_backfill",
 			"zevar_core.tasks.consignment_overdue_alert",
-			"zevar_core.api.pricing_intelligence.analyze_pricing_opportunities",
 		],
 		"0 * * * *": [
 				"zevar_core.tasks.expire_stale_reservations",

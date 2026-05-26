@@ -492,7 +492,6 @@
 			</div>
 		</div>
 
-		<!-- Detail Modal -->
 		<DetailModal
 			v-if="detailOrder"
 			:order="detailOrder"
@@ -501,6 +500,7 @@
 			@print-thermal="printThermalReceipt"
 			@open-qr="showQRCode"
 			@open-camera="showCameraModal = true"
+			@open-payment="openPayment"
 		/>
 
 		<!-- New Repair Modal -->
@@ -528,12 +528,16 @@
 			@transferred="onRepairCreated"
 		/>
 
-		<!-- Payment Modal -->
-		<PaymentModal
+		<!-- Payment/Checkout Modal -->
+		<CheckoutModal
 			v-if="showPaymentModal"
-			:order="paymentOrder"
+			:show="showPaymentModal"
+			mode="repair"
+			:referenceId="paymentOrder?.name"
+			:balanceAmount="paymentOrder?.balance_due || paymentOrder?.total_cost || 0"
+			:itemDetails="{ description: paymentOrder?.item_description || paymentOrder?.repair_type }"
 			@close="showPaymentModal = false"
-			@payment-recorded="onRepairCreated"
+			@success="onRepairCreated"
 		/>
 	</AppLayout>
 </template>
@@ -550,7 +554,7 @@ import NewRepairModal from '@/components/NewRepairModal.vue'
 import QRCodeModal from '@/components/QRCodeModal.vue'
 import CameraModal from '@/components/CameraModal.vue'
 import StoreTransferModal from '@/components/StoreTransferModal.vue'
-import PaymentModal from '@/components/PaymentModal.vue'
+import CheckoutModal from '@/components/CheckoutModal.vue'
 import TechnicianWorkloadPanel from '@/components/TechnicianWorkloadPanel.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
 
@@ -602,6 +606,16 @@ const statusTabs = computed(() => {
 			value: 'Ready for Pickup',
 			label: 'Ready',
 			count: stats.value?.['Ready for Pickup'] || 0,
+		},
+		{
+			value: 'Delivered',
+			label: 'Delivered',
+			count: stats.value?.['Delivered'] || 0,
+		},
+		{
+			value: 'Cancelled',
+			label: 'Cancelled',
+			count: stats.value?.['Cancelled'] || 0,
 		},
 	]
 	tabs[0].count = Object.values(stats.value || {}).reduce((a, b) => a + b, 0)
@@ -657,6 +671,18 @@ const kanbanColumns = computed(() => {
 			status: 'Ready for Pickup',
 			label: 'Ready',
 			badgeClass: 'bg-green-100 text-green-700',
+			orders: [],
+		},
+		{
+			status: 'Delivered',
+			label: 'Delivered',
+			badgeClass: 'bg-gray-100 text-gray-700',
+			orders: [],
+		},
+		{
+			status: 'Cancelled',
+			label: 'Cancelled',
+			badgeClass: 'bg-red-100 text-red-700',
 			orders: [],
 		},
 	]
@@ -866,6 +892,11 @@ function onRepairCreated() {
 
 function showQRCode(order) {
 	qrOrder.value = order
+}
+
+function openPayment(order) {
+	paymentOrder.value = order
+	showPaymentModal.value = true
 }
 
 async function printThermalReceipt(order) {

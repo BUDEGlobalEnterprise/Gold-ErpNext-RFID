@@ -144,7 +144,7 @@ export const useOfflineStore = defineStore('offline', () => {
 
 	async function _syncSingleOrder(order) {
 		const mode = order.mode || 'sale'
-		const apiUrl = _getSyncEndpoint(mode)
+		const methodPath = _getSyncMethod(mode)
 		const syncPayload = _buildSyncPayload(order, mode)
 
 		// Pre-validation to prevent junk requests
@@ -159,52 +159,38 @@ export const useOfflineStore = defineStore('offline', () => {
 			return { status: 'conflict', conflictType: 'missing_reference', message: errMessage }
 		}
 
+		// Attach idempotency key so backend can deduplicate
+		syncPayload.idempotency_key = order.idempotency_key || ''
+
 		try {
-			const response = await fetch(apiUrl, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'X-Frappe-CSRF-Token': window.csrf_token || '',
-					'X-Idempotency-Key': order.idempotency_key || '',
-				},
-				body: JSON.stringify(syncPayload),
-			})
+			// Use frappe.call instead of raw fetch — it handles CSRF,
+			// form-encoding, and response parsing correctly.
+			await frappe.call(methodPath, syncPayload)
 
-			if (response.ok) {
-				await markOrderSynced(order.id)
-				return { status: 'synced' }
-			}
+			await markOrderSynced(order.id)
+			return { status: 'synced' }
+		} catch (e) {
+			const errMessage = e?.message || String(e)
 
-			const errData = await response.json().catch(() => ({}))
-			let errMessage = `HTTP ${response.status}`
-			
-			if (errData._server_messages) {
-				try {
-					const msgs = JSON.parse(errData._server_messages)
-					if (msgs.length > 0) {
-						const nested = JSON.parse(msgs[0])
-						if (nested.message) errMessage = nested.message
-					}
-				} catch(e) {}
-			} else if (errData.exc_type || errData.exception) {
-				errMessage = errData.exception || errData.exc_type
-			} else if (errData.message) {
-				errMessage = errData.message
-			}
-
-			// Detect structured conflict responses (409 Conflict)
-			if (response.status === 409 || _isConflictError(errData)) {
+			// Detect conflict errors from server messages
+			if (_isConflictError({ message: errMessage })) {
 				await markOrderConflict(
 					order.id,
-					errData._conflict_type || 'stock_unavailable',
+					'stock_unavailable',
 					errMessage
 				)
-				return { status: 'conflict', conflictType: errData._conflict_type, message: errMessage }
+				return { status: 'conflict', conflictType: 'stock_unavailable', message: errMessage }
 			}
 
-			// Validation errors — mark failed with retry eligibility
-			if (response.status >= 400 && response.status < 500 && response.status !== 429) {
-				// Client errors (4xx) except rate limit: retry won't help
+			// Validation errors (4xx-equivalent from frappe.throw)
+			const isValidationError =
+				e?.exc_type === 'ValidationError' ||
+				errMessage.toLowerCase().includes('validation') ||
+				errMessage.toLowerCase().includes('not found') ||
+				errMessage.toLowerCase().includes('required') ||
+				errMessage.toLowerCase().includes('must be')
+
+			if (isValidationError) {
 				if ((order.attempts || 0) + 1 >= MAX_RETRY_ATTEMPTS) {
 					await markOrderDead(order.id)
 					return { status: 'dead_letter', message: errMessage }
@@ -213,25 +199,24 @@ export const useOfflineStore = defineStore('offline', () => {
 				return { status: 'failed', message: errMessage }
 			}
 
-			// Server errors / rate limit — retry with backoff
+			// Network / server errors — retry with backoff
 			await _retryWithBackoff(order)
 			return { status: 'retrying', message: errMessage }
-		} catch (e) {
-			// Network error during sync — will retry on next cycle
-			await markOrderFailed(order.id, e.message)
-			return { status: 'failed', message: e.message }
 		}
 	}
 
 	function _isConflictError(errData) {
 		const msg = (errData.message || '').toLowerCase()
 		return (
-			errData._conflict_type ||
+			!!errData._conflict_type ||
 			msg.includes('not available') ||
-			msg.includes('stock') ||
+			msg.includes('not enough stock') ||
+			msg.includes('insufficient stock') ||
+			msg.includes('stock unavailable') ||
 			msg.includes('already been sold') ||
 			msg.includes('serial no') ||
-			msg.includes('reserved for another')
+			msg.includes('reserved for another') ||
+			msg.includes('item.*not found')
 		)
 	}
 
@@ -244,14 +229,14 @@ export const useOfflineStore = defineStore('offline', () => {
 		}
 	}
 
-	function _getSyncEndpoint(mode) {
+	function _getSyncMethod(mode) {
 		switch (mode) {
 			case 'layaway':
-				return '/api/method/zevar_core.api.layaway.process_split_layaway_payment'
+				return 'zevar_core.api.layaway.process_split_layaway_payment'
 			case 'repair':
-				return '/api/method/zevar_core.api.add_repair_payment'
+				return 'zevar_core.api.add_repair_payment'
 			default:
-				return '/api/method/zevar_core.api.pos.create_pos_invoice'
+				return 'zevar_core.api.pos.create_pos_invoice'
 		}
 	}
 
@@ -260,21 +245,33 @@ export const useOfflineStore = defineStore('offline', () => {
 
 		if (mode === 'layaway') {
 			return {
-				layaway_id: p.layaway_id,
-				payments: p.payments,
+				layaway_id: p.layaway_id || '',
+				payments: p.payments || '[]',
 			}
 		}
 
 		if (mode === 'repair') {
 			return {
-				repair_order: p.repair_order,
-				amount: p.amount,
-				payment_method: p.payment_method,
+				repair_order: p.repair_order || '',
+				amount: p.amount || 0,
+				payment_method: p.payment_method || 'Cash',
 			}
 		}
 
-		// Sale mode — pass through the full payload
-		return p
+		// Sale mode — frappe.whitelist expects each param as a flat kwarg.
+		// The payload already has items/payments as JSON strings, customer,
+		// warehouse, tax_exempt etc. — just pass them through.
+		const result = {
+			items: p.items || '[]',
+			payments: p.payments || '[]',
+			customer: p.customer || 'Walk-In Customer',
+			warehouse: p.warehouse || '',
+			tax_exempt: p.tax_exempt || false,
+		}
+		if (p.gift_card_number) result.gift_card_number = p.gift_card_number
+		if (p.salespersons) result.salespersons = p.salespersons
+		if (p.trade_ins) result.trade_ins = p.trade_ins
+		return result
 	}
 
 	// ── Retry Loop ──

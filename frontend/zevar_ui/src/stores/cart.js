@@ -68,7 +68,10 @@ export const useCartStore = defineStore('cart', () => {
 	const taxRate = ref(0)
 	const currency = ref('USD')
 
-	// Salespersons attached to the current sale (up to 4)
+	// Max salespersons configurable from POS Settings (default 4)
+	const maxSalespersons = ref(4)
+
+	// Salespersons attached to the current sale
 	const salespersons = ref(storedSalespersons)
 
 	// Self-heal old/invalid salespersons splits on load
@@ -275,7 +278,7 @@ export const useCartStore = defineStore('cart', () => {
 	}
 
 	function addSalesperson(employee, split) {
-		if (salespersons.value.length >= 4) return
+		if (salespersons.value.length >= maxSalespersons.value) return
 		salespersons.value.push({ employee, split: split || 0 })
 		autoDistributeSplits()
 	}
@@ -569,6 +572,9 @@ export const useCartStore = defineStore('cart', () => {
 			if (data) {
 				taxRate.value = data.tax_rate || 0
 				currency.value = data.currency || 'USD'
+				if (data.max_salesperson_splits) {
+					maxSalespersons.value = data.max_salesperson_splits
+				}
 				const offlineStore = useOfflineStore()
 				offlineStore.cacheSettingValue('pos_settings', data)
 			}
@@ -600,6 +606,9 @@ export const useCartStore = defineStore('cart', () => {
 		if (cached) {
 			taxRate.value = cached.tax_rate || 0
 			currency.value = cached.currency || 'USD'
+			if (cached.max_salesperson_splits) {
+				maxSalespersons.value = cached.max_salesperson_splits
+			}
 		}
 	}).catch(() => {})
 
@@ -753,6 +762,7 @@ export const useCartStore = defineStore('cart', () => {
 		setCustomerType,
 		clearCustomer,
 		salespersons,
+		maxSalespersons,
 		addSalesperson,
 		recalculateSalespersonSplit,
 		removeSalesperson,

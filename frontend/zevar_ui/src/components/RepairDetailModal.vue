@@ -337,7 +337,7 @@
 						><span class="font-bold">${{ formatNum(order.total_cost) }}</span>
 					</div>
 					<div class="flex justify-between">
-						<span>Deposit:</span><span>${{ formatNum(order.deposit_amount) }}</span>
+						<span>Deposit:</span><span>${{ formatNum(computedDeposit) }}</span>
 					</div>
 					<div
 						class="flex justify-between font-bold border-t border-blue-200 dark:border-blue-800 pt-1"
@@ -352,6 +352,20 @@
 					>
 						Record Payment
 					</button>
+				</div>
+				<!-- Transaction History -->
+				<div v-if="order.payments && order.payments.length > 0" class="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
+					<h5 class="text-[10px] font-bold text-blue-700 dark:text-blue-300 uppercase tracking-wide mb-2">Transaction History</h5>
+					<div class="space-y-1.5">
+						<div v-for="(pay, idx) in order.payments" :key="pay.name" class="flex justify-between items-center text-xs bg-white/50 dark:bg-black/20 rounded p-2">
+							<div>
+								<span class="text-blue-600 dark:text-blue-400 font-bold block mb-0.5">{{ getPaymentLabel(idx, order.payments) }}</span>
+								<span class="text-gray-600 dark:text-gray-300 block">{{ formatDate(pay.payment_date || pay.creation) }}</span>
+								<span class="text-[10px] text-gray-500">{{ pay.payment_method }} <span v-if="pay.reference">#{{ pay.reference }}</span></span>
+							</div>
+							<span class="font-bold text-green-600 dark:text-green-400">${{ formatNum(pay.amount) }}</span>
+						</div>
+					</div>
 				</div>
 			</div>
 
@@ -467,20 +481,28 @@
 			<!-- Status Update -->
 			<div class="pt-2">
 				<label class="block text-sm font-medium mb-2">Update Status</label>
-				<select
-					v-model="selectedStatus"
-					@change="updateStatus"
-					class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900"
-				>
-					<option v-for="s in statusOptions" :key="s" :value="s">{{ s }}</option>
-				</select>
+				<div class="flex gap-2">
+					<select
+						v-model="selectedStatus"
+						class="flex-1 px-3 py-2 border rounded-lg bg-white dark:bg-warm-dark-900"
+					>
+						<option v-for="s in statusOptions" :key="s" :value="s">{{ s }}</option>
+					</select>
+					<button
+						@click="updateStatus"
+						:disabled="selectedStatus === order.status"
+						class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+					>
+						Update
+					</button>
+				</div>
 			</div>
 		</div>
 	</BaseModal>
 </template>
 
 <script setup>
-import { ref, onMounted, defineProps, defineEmits } from 'vue'
+import { ref, onMounted, defineProps, defineEmits, watch, computed } from 'vue'
 import { call, toast } from 'frappe-ui'
 import { formatDate, formatDateTime } from '@/utils/dates.js'
 import BaseModal from './BaseModal.vue'
@@ -501,6 +523,9 @@ const emit = defineEmits([
 ])
 
 const selectedStatus = ref(props.order.status)
+watch(() => props.order.status, (newVal) => {
+	selectedStatus.value = newVal
+})
 const statusOptions = [
 	'Received',
 	'Estimated',
@@ -520,6 +545,31 @@ const etaData = ref(null)
 
 function formatNum(n) {
 	return n ? Number(n).toFixed(2) : '0.00'
+}
+
+const computedDeposit = computed(() => {
+	if (props.order.deposit_amount > 0) return props.order.deposit_amount;
+	if (!props.order.payments || props.order.payments.length === 0) return 0;
+	
+	if (props.order.payment_status === 'Paid') {
+		if (props.order.payments.length === 1) return 0;
+		let dep = 0;
+		for (let i = 0; i < props.order.payments.length - 1; i++) {
+			dep += props.order.payments[i].amount || 0;
+		}
+		return dep;
+	}
+	
+	return props.order.payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+})
+
+function getPaymentLabel(index, payments) {
+	if (payments.length === 1) {
+		return props.order.payment_status === 'Paid' ? 'Full Payment' : 'Deposit';
+	}
+	if (index === 0) return 'Initial Deposit';
+	if (index === payments.length - 1 && props.order.payment_status === 'Paid') return 'Final Payment';
+	return 'Installment';
 }
 
 function isOverdue(dateStr) {
@@ -548,13 +598,21 @@ async function updateStatus() {
 			name: props.order.name,
 			status: selectedStatus.value,
 		})
+		
+		const newStatus = selectedStatus.value
+		const hasBalance = props.order.balance_due > 0
+		
 		emit('status-changed')
 		toast({
 			title: 'Updated',
-			message: `Status changed to ${selectedStatus.value}`,
+			message: `Status changed to ${newStatus}`,
 			icon: 'check',
 			intent: 'success',
 		})
+		
+		if (newStatus === 'Delivered' && hasBalance) {
+			emit('open-payment', props.order)
+		}
 	} catch (e) {
 		toast({
 			title: 'Error',

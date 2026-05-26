@@ -30,7 +30,7 @@ app.mount('#app')
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
-      .register('/pos/sw.js', { scope: '/pos/' })
+      .register('/api/method/zevar_core.api.pos.serve_sw?v=13', { scope: '/pos/' })
       .then((registration) => {
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing
@@ -41,7 +41,7 @@ if ('serviceWorker' in navigator) {
           })
         })
 
-        setInterval(() => registration.update(), 60 * 60 * 1000)
+        setInterval(() => registration.update(), 5 * 60 * 1000)
       })
       .catch((error) => {
         console.error('[App] Service Worker registration failed:', error)

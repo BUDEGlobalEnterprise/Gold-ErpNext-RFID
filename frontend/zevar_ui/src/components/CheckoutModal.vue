@@ -150,6 +150,12 @@
 							>
 								{{ mode === 'layaway' ? 'Layaway' : 'Repair' }}: {{ referenceId }}
 							</p>
+							<p
+								v-if="itemDetails?.description"
+								class="text-sm font-medium text-orange-800 dark:text-orange-200 mt-2 border-t border-orange-200/50 dark:border-orange-800/50 pt-2"
+							>
+								{{ itemDetails.description }}
+							</p>
 						</div>
 
 						<div
@@ -346,7 +352,7 @@
 								</button>
 							</div>
 							<button
-								v-if="cart.salespersons.length < 4"
+								v-if="cart.salespersons.length < cart.maxSalespersons"
 								@click="cart.addSalesperson('', null)"
 								class="w-full py-2 text-sm font-medium text-[#D4AF37] border border-dashed border-[#D4AF37]/40 rounded-lg hover:bg-[#D4AF37]/10 transition"
 							>
@@ -888,6 +894,7 @@ const props = defineProps({
 	},
 	referenceId: { type: String, default: null },
 	balanceAmount: { type: Number, default: 0 },
+	itemDetails: { type: Object, default: null },
 	draftMode: { type: Boolean, default: false },
 })
 const emit = defineEmits(['close', 'success'])
@@ -1159,12 +1166,18 @@ async function handlePayment() {
 		}
 	} catch (e) {
 		// Detect network failures and offer offline queuing
+		const errMessage = (e?.message || '').toLowerCase()
 		const isNetworkError =
-			(e instanceof TypeError &&
-				(e.message.includes('fetch') || e.message.includes('network'))) ||
-			e?.message?.includes('ERR_INTERNET_DISCONNECTED') ||
-			e?.message?.includes('NetworkError') ||
-			!navigator.onLine
+			!navigator.onLine ||
+			(e instanceof TypeError && (
+				errMessage.includes('fetch') ||
+				errMessage.includes('network') ||
+				errMessage.includes('load failed')
+			)) ||
+			errMessage.includes('err_internet') ||
+			errMessage.includes('networkerror') ||
+			errMessage.includes('failed to fetch') ||
+			errMessage.includes('net::err_')
 
 		// Auth-expired error from submitOrderSafe (Fix #8): bubble a clear
 		// message and DO NOT fall through to the offline-queue branch —
@@ -1201,6 +1214,34 @@ async function handlePayment() {
 							serial_no: i.serial_no || null,
 						}))
 					)
+
+					// Include salespersons so commission is tracked after sync
+					if (cart.salespersons.length > 0) {
+						payload.salespersons = JSON.stringify(
+							cart.salespersons.map((sp) => ({
+								employee: sp.employee,
+								split: sp.split,
+							}))
+						)
+					}
+
+					// Include trade-ins so credit is applied after sync
+					if (cart.tradeIns.length > 0) {
+						payload.trade_ins = JSON.stringify(
+							cart.tradeIns.map((ti) => ({
+								trade_in_value: ti.trade_in_value,
+								new_item_value: ti.new_item_value,
+								manager_override: ti.manager_override || '',
+								override_reason: ti.override_reason || '',
+							}))
+						)
+					}
+
+					// Include gift card number if gift card payment is present
+					const gcPayment = selectedPayments.value.find((p) => p.mode === 'Gift Card')
+					if (gcPayment && giftCardNumber.value) {
+						payload.gift_card_number = giftCardNumber.value
+					}
 				} else if (props.mode === 'layaway') {
 					payload.layaway_id = props.referenceId
 				} else if (props.mode === 'repair') {
