@@ -130,20 +130,23 @@ def _create_pos_invoice_internal(
 			checkout_bouncer(_("Item '{0}' not found in the system.").format(item_code), "invoice_failed")
 
 	if not warehouse:
-		# Try to get warehouse from active store location
-		store_loc = frappe.db.get_value("Store Location", {"is_active": 1}, "default_warehouse")
-		if store_loc:
-			warehouse = store_loc
-		else:
-			# Try to get default warehouse from company
-			company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value(
-				"Global Defaults", "default_company"
-			)
-			if company:
-				warehouse = frappe.db.get_value("Company", company, "default_warehouse")
+		# Try to get warehouse from user's POS Opening Entry (most reliable)
+		active_pos = frappe.db.get_value(
+			"POS Opening Entry",
+			filters={"user": frappe.session.user, "docstatus": 1, "status": "Open"},
+			fieldname="pos_profile",
+			order_by="creation desc",
+		)
+		if active_pos:
+			pos_wh = frappe.db.get_value("POS Profile", active_pos, "warehouse")
+			if pos_wh:
+				warehouse = pos_wh
 
 	if not warehouse:
-		checkout_bouncer(_("Warehouse is required. Please select a store location or configure a default warehouse."), "invoice_failed")
+		checkout_bouncer(
+			_("No store selected. Please select a store location from the dropdown before making a sale."),
+			"invoice_failed",
+		)
 
 	if not frappe.db.exists("Warehouse", warehouse):
 		checkout_bouncer(_("Warehouse '{0}' not found. Please ensure a valid warehouse is configured.").format(warehouse), "invoice_failed")
@@ -229,6 +232,39 @@ def _create_pos_invoice_internal(
 				),
 				"invoice_failed"
 			)
+
+	# Validate stock availability before creating invoice
+	for item in items_list:
+		item_code = item.get("item_code")
+		qty_needed = flt(item.get("qty", 1))
+		serial_no = item.get("serial_no")
+
+		# For serial-numbered items, verify the serial exists in this warehouse
+		if serial_no:
+			for sn in serial_no.split("\n"):
+				sn = sn.strip()
+				if not sn:
+					continue
+				sn_warehouse = frappe.db.get_value("Serial No", sn, "warehouse")
+				if sn_warehouse != warehouse:
+					checkout_bouncer(
+						_("Serial No {0} is not available in {1}. It is in {2}.").format(
+							sn, warehouse, sn_warehouse or "no warehouse"
+						),
+						"invoice_failed",
+					)
+		else:
+			# For non-serial items, check Bin qty
+			actual_qty = flt(
+				frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
+			)
+			if actual_qty < qty_needed:
+				checkout_bouncer(
+					_("Insufficient stock for {0} in {1}. Available: {2}, Required: {3}").format(
+						item_code, warehouse, actual_qty, qty_needed
+					),
+					"invoice_failed",
+				)
 
 	try:
 		si = frappe.new_doc("Sales Invoice")
@@ -407,6 +443,17 @@ def _create_pos_invoice_internal(
 		total_trade_in_credit = (
 			sum(flt(ti.get("trade_in_value")) for ti in trade_in_list) if trade_in_list else 0
 		)
+
+		si.set_missing_values()
+		si.calculate_taxes_and_totals()
+
+		# set_missing_values() overwrites item warehouses with POS Profile default
+		# and replaces payments with POS Profile defaults (all 0.0).
+		# We must restore the correct warehouse and set actual payments AFTER that call.
+		for item in si.items:
+			item.warehouse = warehouse
+
+		si.payments = []
 		if total_trade_in_credit > 0:
 			si.append(
 				"payments",
@@ -425,7 +472,6 @@ def _create_pos_invoice_internal(
 				},
 			)
 
-		si.set_missing_values()
 		si.calculate_taxes_and_totals()
 
 		# Auto-correct small rounding differences (e.g., tax rounding mismatches)

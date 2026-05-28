@@ -30,18 +30,20 @@ app.mount('#app')
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
-      .register('/api/method/zevar_core.api.pos.serve_sw?v=13', { scope: '/pos/' })
+      .register('/api/method/zevar_core.api.pos.serve_sw?v=14', { scope: '/pos/' })
       .then((registration) => {
+        // Auto-activate new SW immediately
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing
           newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            if (newWorker.state === 'installed') {
               newWorker.postMessage({ type: 'SKIP_WAITING' })
             }
           })
         })
 
-        setInterval(() => registration.update(), 5 * 60 * 1000)
+        // Check for updates every 2 minutes
+        setInterval(() => registration.update(), 2 * 60 * 1000)
       })
       .catch((error) => {
         console.error('[App] Service Worker registration failed:', error)
@@ -52,5 +54,31 @@ if ('serviceWorker' in navigator) {
       window.__swReloadPending = true
       window.location.reload()
     })
+
+    // Listen for cache cleared messages
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data?.type === 'CACHE_CLEARED') {
+        window.location.reload()
+      }
+    })
   })
+}
+
+// Global force refresh utility
+window.__zevarForceRefresh = async function () {
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    return new Promise((resolve) => {
+      const mc = new MessageChannel()
+      mc.port1.onmessage = () => {
+        window.location.reload()
+        resolve()
+      }
+      navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' }, [mc.port2])
+      // Fallback reload after 2s if SW doesn't respond
+      setTimeout(() => { window.location.reload(); resolve() }, 2000)
+    })
+  } else {
+    // No SW — just hard reload
+    window.location.reload()
+  }
 }

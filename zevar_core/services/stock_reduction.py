@@ -366,23 +366,23 @@ def ui_get_item_inventory(item_code: str):
 	)
 
 	from zevar_core.constants import STORE_LOCATIONS
-	from zevar_core.services.inventory_events import _get_abbr
 
-	abbr = _get_abbr()
 	store_breakdown = {}
-	for store_code, store_name in STORE_LOCATIONS.items():
-		root = f"{store_code} - {abbr}"
-		if not frappe.db.exists("Warehouse", root):
+	# Look up stock from active Store Location records (which have correct warehouses)
+	active_stores = frappe.get_all(
+		"Store Location",
+		filters={"is_active": 1},
+		fields=["name", "store_name", "default_warehouse"],
+	)
+	for store in active_stores:
+		wh = store.default_warehouse
+		if not wh or not frappe.db.exists("Warehouse", wh):
 			continue
-		wh_names = frappe.get_all(
-			"Warehouse", filters={"parent_warehouse": root, "is_group": 0}, pluck="name"
-		)
-		store_qty = sum(
-			flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": wh}, "actual_qty") or 0)
-			for wh in wh_names
+		store_qty = flt(
+			frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": wh}, "actual_qty") or 0
 		)
 		if store_qty > 0:
-			store_breakdown[store_code] = {"name": store_name, "qty": store_qty}
+			store_breakdown[store.name] = {"name": store.store_name or store.name, "qty": store_qty}
 
 	reservations = frappe.get_all(
 		"Stock Reservation",
@@ -425,25 +425,75 @@ def ui_get_item_inventory(item_code: str):
 def ui_get_store_warehouses(store_code=None):
 	frappe.has_permission("Warehouse", ptype="read", throw=True)
 
-	from zevar_core.constants import STORE_LOCATIONS
-	from zevar_core.services.inventory_events import _get_abbr
+	filters = {"is_active": 1}
+	if store_code:
+		filters["name"] = store_code
 
-	abbr = _get_abbr()
-	stores = (
-		{store_code: STORE_LOCATIONS[store_code]}
-		if store_code and store_code in STORE_LOCATIONS
-		else STORE_LOCATIONS
+	active_stores = frappe.get_all(
+		"Store Location",
+		filters=filters,
+		fields=["name", "store_name", "default_warehouse"],
 	)
 
 	result = {}
-	for code, name in stores.items():
-		root = f"{code} - {abbr}"
-		if frappe.db.exists("Warehouse", root):
-			whs = frappe.get_all(
-				"Warehouse",
-				filters={"parent_warehouse": root, "is_group": 0},
-				fields=["name", "warehouse_name"],
-			)
-			result[code] = {"name": name, "warehouses": whs}
+	for store in active_stores:
+		wh = store.default_warehouse
+		if wh and frappe.db.exists("Warehouse", wh):
+			wh_name = frappe.db.get_value("Warehouse", wh, "warehouse_name") or wh
+			result[store.name] = {
+				"name": store.store_name or store.name,
+				"warehouses": [{"name": wh, "warehouse_name": wh_name}],
+			}
 
 	return result
+
+
+@frappe.whitelist(allow_guest=False)
+def ui_get_stock_items(search=None, limit=50):
+	"""Get items with vendor info for stock management dropdowns."""
+	frappe.has_permission("Item", ptype="read", throw=True)
+
+	filters = {"disabled": 0, "is_stock_item": 1}
+	or_filters = {}
+	if search:
+		or_filters = {
+			"name": ["like", f"%{search}%"],
+			"item_name": ["like", f"%{search}%"],
+			"custom_vendor_sku": ["like", f"%{search}%"],
+			"custom_barcode": ["like", f"%{search}%"],
+		}
+
+	items = frappe.get_all(
+		"Item",
+		filters=filters,
+		or_filters=or_filters if or_filters else None,
+		fields=[
+			"name", "item_name", "item_group", "stock_uom",
+			"custom_vendor", "custom_vendor_sku", "custom_barcode",
+			"has_serial_no", "image",
+		],
+		order_by="item_name",
+		limit_page_length=int(limit),
+	)
+
+	return items
+
+
+@frappe.whitelist(allow_guest=False)
+def ui_get_vendors():
+	"""Get list of vendors/suppliers for dropdown."""
+	frappe.has_permission("Item", ptype="read", throw=True)
+
+	# Get unique vendors from Items
+	vendors = frappe.db.sql("""
+		SELECT DISTINCT custom_vendor as name
+		FROM `tabItem`
+		WHERE custom_vendor IS NOT NULL AND custom_vendor != ''
+		AND disabled = 0
+		ORDER BY custom_vendor
+	""", as_dict=True)
+
+	# Also get Suppliers
+	suppliers = frappe.get_all("Supplier", fields=["name"], order_by="name", limit=100)
+
+	return {"vendors": [v.name for v in vendors], "suppliers": [s.name for s in suppliers]}

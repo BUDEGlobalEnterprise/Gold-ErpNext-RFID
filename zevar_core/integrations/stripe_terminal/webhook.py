@@ -30,6 +30,8 @@ def handle_webhook(payload, sig_header):
 		"payment_intent.canceled": _handle_payment_canceled,
 		"payment_intent.payment_failed": _handle_payment_failed,
 		"charge.refunded": _handle_charge_refunded,
+		"checkout.session.completed": _handle_checkout_session_completed,
+		"checkout.session.expired": _handle_checkout_session_expired,
 	}
 	handler = handlers.get(event_type)
 	if handler:
@@ -92,6 +94,126 @@ def _handle_charge_refunded(data):
 		event_type="stripe_refund_processed",
 		details={"charge_id": charge_id, "refund_amount": refund_amount},
 	)
+
+
+def _handle_checkout_session_completed(data):
+	"""Handle Stripe Checkout Session completion (online repair payments)."""
+	session_id = data.get("id")
+	metadata = data.get("metadata", {})
+	repair_order = metadata.get("repair_order")
+	amount_total = flt(data.get("amount_total", 0)) / 100
+	customer_email = data.get("customer_email", "")
+	payment_intent = data.get("payment_intent", "")
+	payment_status = data.get("payment_status", "")
+
+	frappe.logger().info(
+		f"Stripe Checkout completed: {session_id} for ${amount_total} "
+		f"(repair: {repair_order}, status: {payment_status})"
+	)
+
+	# Only process if payment was actually collected
+	if payment_status != "paid":
+		frappe.logger().warning(
+			f"Checkout {session_id} completed but payment_status={payment_status}, skipping"
+		)
+		return
+
+	if repair_order and frappe.db.exists("Repair Order", repair_order):
+		_reconcile_repair_payment(repair_order, session_id, payment_intent, amount_total, customer_email)
+
+	from zevar_core.api.audit_log import log_event_safely
+
+	log_event_safely(
+		event_type="stripe_checkout_completed",
+		details={
+			"session_id": session_id,
+			"repair_order": repair_order,
+			"amount": amount_total,
+			"payment_intent": payment_intent,
+			"customer_email": customer_email,
+		},
+		reference_document=repair_order or session_id,
+	)
+
+
+def _handle_checkout_session_expired(data):
+	"""Handle Stripe Checkout Session expiry."""
+	session_id = data.get("id")
+	metadata = data.get("metadata", {})
+	repair_order = metadata.get("repair_order")
+
+	frappe.logger().warning(f"Stripe Checkout expired: {session_id} (repair: {repair_order})")
+
+	from zevar_core.api.audit_log import log_event_safely
+
+	log_event_safely(
+		event_type="stripe_checkout_expired",
+		details={"session_id": session_id, "repair_order": repair_order},
+		reference_document=repair_order or session_id,
+	)
+
+
+def _reconcile_repair_payment(repair_order, session_id, payment_intent, amount, customer_email):
+	"""Update a Repair Order with the payment received from Stripe Checkout."""
+	try:
+		doc = frappe.get_doc("Repair Order", repair_order)
+
+		# Update deposit / payment status
+		current_deposit = flt(doc.deposit_amount or 0)
+		doc.deposit_amount = current_deposit + amount
+		total_cost = flt(doc.total_cost or 0)
+		if total_cost > 0 and doc.deposit_amount >= total_cost:
+			doc.payment_status = "Fully Paid"
+		else:
+			doc.payment_status = "Partially Paid"
+
+		# Recalculate balance
+		doc.balance_due = max(0, total_cost - doc.deposit_amount)
+
+		doc.flags.ignore_validate_update_after_submit = True
+		doc.save(ignore_permissions=True)
+
+		# Log communication on the repair
+		try:
+			doc._log_communication(
+				"System",
+				"Incoming",
+				(
+					f"Online payment of ${amount:.2f} received via Stripe Checkout\n"
+					f"Session: {session_id}\n"
+					f"Payment Intent: {payment_intent}\n"
+					f"Customer Email: {customer_email}"
+				),
+				"System",
+				"Payment Received",
+			)
+		except Exception:
+			pass  # Communication logging is best-effort
+
+		# Broadcast to live monitor
+		try:
+			from zevar_core.api.live_monitor import publish_repair_event
+
+			publish_repair_event(
+				"payment_received",
+				{
+					"repair": doc.name,
+					"customer": doc.customer_name,
+					"amount": amount,
+					"method": "Stripe Checkout",
+					"warehouse": doc.warehouse,
+				},
+			)
+		except Exception:
+			pass  # Live monitor broadcast is best-effort
+
+		frappe.db.commit()
+
+	except Exception:
+		frappe.log_error(
+			f"Failed to reconcile repair payment for {repair_order} (session: {session_id})",
+			"Stripe Webhook",
+		)
 
 
 def _update_invoice_payment(invoice_name, payment_intent_id, amount, method):
