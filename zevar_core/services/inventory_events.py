@@ -65,7 +65,7 @@ def _get_zone_warehouse(store_parent_wh, zone_name, store_code=None):
 		return f"{zone_name} {store_code} - {abbr}"
 	if store_parent_wh:
 		parts = store_parent_wh.split(" - ")
-		code = parts[0].strip() if parts else "NY-01"
+		code = parts[0].strip() if parts else "NYC"
 		return f"{zone_name} {code} - {abbr}"
 	return None
 

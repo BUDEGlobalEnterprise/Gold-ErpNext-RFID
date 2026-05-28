@@ -735,6 +735,106 @@
 						</div>
 					</div>
 
+					<!-- Terminal Device Selector (shown when card payment is selected) -->
+					<div
+						v-if="hasCardPaymentSelected && !cardPaymentActive"
+						class="bg-blue-50 dark:bg-blue-900/10 rounded-xl p-4 mb-4 border border-blue-200 dark:border-blue-800/30"
+						data-testid="terminal-device-selector"
+					>
+						<div class="flex items-center justify-between mb-2">
+							<div class="flex items-center gap-2">
+								<div class="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center">
+									<svg class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+									</svg>
+								</div>
+								<span class="text-sm font-medium text-blue-700 dark:text-blue-300">Card Reader</span>
+							</div>
+							<button
+								v-if="!gateway.isTerminalReady.value"
+								@click="discoverTerminalDevices"
+								:disabled="deviceLoading"
+								class="text-xs font-bold px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+							>
+								{{ deviceLoading ? 'Searching...' : 'Find Readers' }}
+							</button>
+							<span v-else class="text-xs font-bold text-green-600 dark:text-green-400 flex items-center gap-1">
+								<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+								Connected
+							</span>
+						</div>
+
+						<!-- Device List -->
+						<div v-if="terminalDevices.length > 0 && !gateway.isTerminalReady.value" class="space-y-1 mt-2">
+							<button
+								v-for="device in terminalDevices"
+								:key="device.id"
+								@click="connectToDevice(device)"
+								class="w-full flex items-center justify-between p-2 rounded-lg text-left transition"
+								:class="device.is_online
+									? 'bg-white dark:bg-[#0F1115] border border-blue-200 dark:border-blue-800/30 hover:border-blue-400'
+									: 'bg-gray-100 dark:bg-gray-800 opacity-50 cursor-not-allowed'"
+								:disabled="!device.is_online"
+							>
+								<div>
+									<span class="text-sm font-medium text-gray-900 dark:text-white">{{ device.label || device.name }}</span>
+									<span class="text-xs text-gray-400 block">{{ device.device_type || device.type || 'Terminal' }}</span>
+								</div>
+								<span
+									class="w-2 h-2 rounded-full"
+									:class="device.is_online ? 'bg-green-500' : 'bg-gray-400'"
+								></span>
+							</button>
+						</div>
+
+						<!-- No gateway message -->
+						<p v-if="gateway.error.value && !gateway.isTerminalReady.value" class="text-xs text-red-500 mt-1">
+							{{ gateway.error.value }}
+						</p>
+
+						<p v-if="!gateway.isTerminalReady.value && terminalDevices.length === 0 && !deviceLoading" class="text-xs text-blue-500 dark:text-blue-400 mt-1">
+							Click "Find Readers" to discover available card readers, or proceed without to record a manual card payment.
+						</p>
+					</div>
+
+					<!-- Card Payment Status Overlay (during terminal payment) -->
+					<div
+						v-if="cardPaymentActive"
+						class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 mb-4 border border-blue-200 dark:border-blue-800/30 text-center"
+						data-testid="card-payment-status"
+					>
+						<div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
+							:class="gateway.status.value === 'succeeded'
+								? 'bg-green-100 dark:bg-green-900/30'
+								: gateway.status.value === 'failed'
+								? 'bg-red-100 dark:bg-red-900/30'
+								: 'bg-blue-100 dark:bg-blue-900/30'"
+						>
+							<div v-if="!['succeeded', 'failed', 'canceled'].includes(gateway.status.value)"
+								class="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent"
+							></div>
+							<svg v-else-if="gateway.status.value === 'succeeded'" class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+							</svg>
+							<svg v-else class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+							</svg>
+						</div>
+						<h3 class="font-bold text-gray-900 dark:text-white mb-1">
+							{{ terminalStatusTitle }}
+						</h3>
+						<p class="text-sm text-gray-500 dark:text-gray-400">
+							{{ gateway.statusMessage.value || 'Processing...' }}
+						</p>
+						<button
+							v-if="gateway.isProcessing.value"
+							@click="cancelTerminalPayment"
+							class="mt-4 px-4 py-2 text-sm font-medium text-red-600 border border-red-200 dark:border-red-800/30 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 transition"
+						>
+							Cancel
+						</button>
+					</div>
+
 					<!-- Confirm Button -->
 					<div class="flex-shrink-0 mt-6">
 						<button
@@ -876,12 +976,13 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import { createResource, call } from 'frappe-ui'
 import { useCartStore } from '@/stores/cart.js'
 import { useSessionStore } from '@/stores/session.js'
 import { useOfflineStore } from '@/stores/offline.js'
 import { hardwareService } from '@/services/HardwareService.js'
+import { usePaymentGateway } from '@/composables/usePaymentGateway.js'
 import BaseModal from './BaseModal.vue'
 import FinancingApplicationModal from './FinancingApplicationModal.vue'
 
@@ -917,6 +1018,13 @@ const giftCardNumber = ref('')
 const giftCardInfo = ref(null)
 const giftCardLoading = ref(false)
 const showFinancingWaterfall = ref(false)
+
+// ── Payment Terminal Integration ──
+const gateway = usePaymentGateway()
+const showDeviceSelector = ref(false)
+const terminalDevices = ref([])
+const deviceLoading = ref(false)
+const cardPaymentActive = ref(false)
 
 const salesAssociates = createResource({
 	url: 'zevar_core.api.sales_associates.get_sales_associates',
@@ -1101,6 +1209,48 @@ async function handlePayment() {
 		}
 		if (gc && gc.amount > (giftCardInfo.value?.balance || 0)) {
 			error.value = 'Gift Card amount exceeds available balance.'
+			return
+		}
+	}
+
+	// Check if any card-based payment is selected
+	const cardModes = ['Credit Card', 'Debit Card', 'Apple Pay', 'Google Pay']
+	const cardPayment = selectedPayments.value.find(p => cardModes.includes(p.mode))
+
+	// If card payment and we have a terminal connected, use the terminal flow
+	if (cardPayment && gateway.isTerminalReady.value && cardPayment.amount > 0) {
+		try {
+			cardPaymentActive.value = true
+			processing.value = true
+			error.value = ''
+
+			const terminalResult = await gateway.collectPayment({
+				amount: cardPayment.amount,
+				invoiceName: props.mode === 'sale' ? null : props.referenceId,
+				description: props.mode === 'sale'
+					? `POS Sale - ${cart.items.length} items`
+					: `${props.mode} payment - ${props.referenceId}`,
+			})
+
+			if (!terminalResult.success) {
+				if (terminalResult.canceled) {
+					error.value = 'Card payment was canceled.'
+				} else {
+					error.value = terminalResult.error || 'Card payment failed.'
+				}
+				processing.value = false
+				cardPaymentActive.value = false
+				return
+			}
+
+			// Terminal payment succeeded — attach reference to the payment
+			cardPayment.reference_no = terminalResult.paymentIntentId || terminalResult.paymentId || ''
+			cardPaymentActive.value = false
+			// Fall through to the normal submission flow below
+		} catch (e) {
+			error.value = e.message || 'Card payment failed unexpectedly.'
+			processing.value = false
+			cardPaymentActive.value = false
 			return
 		}
 	}
@@ -1340,7 +1490,69 @@ function close() {
 		cart.clearCart()
 	}
 	step.value = 'review'
+	gateway.reset()
+	cardPaymentActive.value = false
 }
+
+// ── Terminal Integration Helpers ──
+
+const hasCardPaymentSelected = computed(() => {
+	const cardModes = ['Credit Card', 'Debit Card', 'Apple Pay', 'Google Pay']
+	return selectedPayments.value.some(p => cardModes.includes(p.mode))
+})
+
+const terminalStatusTitle = computed(() => {
+	const s = gateway.status.value
+	const titles = {
+		loading_sdk: 'Loading Terminal',
+		discovering: 'Finding Readers',
+		connecting: 'Connecting',
+		creating_intent: 'Creating Payment',
+		creating_checkout: 'Creating Payment',
+		waiting_for_card: 'Waiting for Card',
+		processing: 'Processing Payment',
+		confirming: 'Confirming',
+		succeeded: 'Payment Approved',
+		failed: 'Payment Failed',
+		canceled: 'Payment Canceled',
+	}
+	return titles[s] || 'Processing'
+})
+
+async function discoverTerminalDevices() {
+	deviceLoading.value = true
+	try {
+		await gateway.detectGateway()
+		const found = await gateway.loadDevices()
+		terminalDevices.value = found || []
+	} catch {
+		// Error is displayed via gateway.error
+	} finally {
+		deviceLoading.value = false
+	}
+}
+
+async function connectToDevice(device) {
+	try {
+		deviceLoading.value = true
+		await gateway.selectDevice(device)
+	} catch {
+		// Error displayed via gateway.error
+	} finally {
+		deviceLoading.value = false
+	}
+}
+
+async function cancelTerminalPayment() {
+	await gateway.cancelPayment()
+	cardPaymentActive.value = false
+	processing.value = false
+}
+
+// Auto-detect gateway on mount (best-effort, non-blocking)
+onMounted(() => {
+	gateway.detectGateway().catch(() => {})
+})
 
 function formatCurrency(val) {
 	if (!val) return '$0.00'

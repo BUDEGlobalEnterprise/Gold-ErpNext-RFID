@@ -153,8 +153,17 @@ INVENTORY_ZONES = [
 	"Shrinkage",
 ]
 
-# Store codes and names
+# Store codes and names (active stores with correct warehouses)
 STORE_LOCATIONS = {
+	"NYC": "New York",
+	"MIA": "Miami",
+	"LA": "Los Angeles",
+	"HOU": "Houston",
+	"CHI": "Chicago",
+}
+
+# Legacy store codes (deactivated - kept for reference)
+LEGACY_STORE_LOCATIONS = {
 	"NY-01": "New York",
 	"Miami-01": "Miami",
 	"LA-01": "Los Angeles",

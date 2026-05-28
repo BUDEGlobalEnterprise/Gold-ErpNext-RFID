@@ -105,6 +105,8 @@ export const useUIStore = defineStore('ui', () => {
 		draftPayload: null,
 	})
 
+	const sidebarScrollTop = ref(0)
+
 	function openLayawayPayment(layawayId, balance, draftPayload = null) {
 		layawayPayment.value = {
 			show: true,
@@ -133,5 +135,6 @@ export const useUIStore = defineStore('ui', () => {
 		layawayPayment,
 		openLayawayPayment,
 		closeLayawayPayment,
+		sidebarScrollTop,
 	}
 })

@@ -747,6 +747,9 @@ def schedule_pickup(
 def initiate_repair_payment(auth_token: str, repair_order: str, provider: str = "stripe") -> dict[str, Any]:
 	"""
 	Initiate an online payment for the repair order balance.
+
+	Creates a real Stripe Checkout Session (or falls back to simulation in sandbox mode).
+	The checkout.session.completed webhook in stripe_terminal/webhook.py handles reconciliation.
 	"""
 	customer = _get_customer_from_token(auth_token)
 	if not customer:
@@ -760,38 +763,172 @@ def initiate_repair_payment(auth_token: str, repair_order: str, provider: str = 
 	try:
 		doc = frappe.get_doc("Repair Order", repair_order)
 		balance = doc.balance_due or 0
-		
+
 		if balance <= 0:
 			return {"success": False, "message": "No balance due"}
-			
-		# In a real app, this would integrate with Stripe or Square API
-		# For MVP, we simulate a payment link creation
-		
-		payment_id = frappe.generate_hash()[:10]
-		
+
 		# Log the attempt
 		doc._log_communication(
-			"Customer Portal", 
-			"Incoming", 
-			f"Customer initiated online payment via {provider} for ${balance}", 
-			"Customer Portal", 
-			"Payment Initiated"
+			"Customer Portal",
+			"Incoming",
+			f"Customer initiated online payment via {provider} for ${balance}",
+			"Customer Portal",
+			"Payment Initiated",
 		)
-		
-		# Return a simulated payment URL
-		# Usually: return stripe.checkout.Session.create(...)['url']
-		domain = frappe.utils.get_url()
-		simulated_url = f"{domain}/api/method/zevar_core.api.repair_customer_portal.simulate_payment_success?repair={repair_order}&amount={balance}&ref={payment_id}"
-		
+
+		# Get customer email
+		customer_doc = frappe.get_doc("Customer", customer)
+		customer_email = customer_doc.email_id or ""
+
+		# Attempt real Stripe Checkout Session
+		if provider == "stripe":
+			checkout_url = _create_stripe_checkout_session(repair_order, balance, customer_email)
+			if checkout_url:
+				return {
+					"success": True,
+					"payment_url": checkout_url,
+					"provider": "stripe",
+					"message": "Stripe Checkout session created",
+				}
+
+		# Fallback to simulated URL if Stripe is not configured or failed
+		payment_id = frappe.generate_hash()[:10]
+		domain = get_url()
+		simulated_url = (
+			f"{domain}/api/method/zevar_core.api.repair_customer_portal"
+			f".simulate_payment_success?repair={repair_order}&amount={balance}&ref={payment_id}"
+		)
 		return {
-			"success": True, 
+			"success": True,
 			"payment_url": simulated_url,
-			"message": "Payment link generated"
+			"provider": "simulated",
+			"message": "Payment link generated (simulated)",
 		}
 
 	except Exception as e:
 		frappe.log_error(f"Failed to initiate payment for {repair_order}: {e}")
 		return {"success": False, "message": f"Failed to initiate payment: {e!s}"}
+
+
+def _create_stripe_checkout_session(repair_order, amount, customer_email):
+	"""
+	Create a real Stripe Checkout Session for online repair payment.
+
+	Returns the session URL or None if Stripe is not configured.
+	PCI Note: Card data is handled entirely by Stripe — never touches our server.
+	"""
+	try:
+		settings = frappe.get_single("Payment Gateway Settings")
+		if not settings.stripe_enabled:
+			return None
+
+		secret_key = settings.get_stripe_secret_key()
+		if not secret_key:
+			return None
+
+		import requests as http_requests
+
+		base_url = get_url()
+		success_url = f"{base_url}/pos/repair-portal/payment-success?session_id={{CHECKOUT_SESSION_ID}}"
+		cancel_url = f"{base_url}/pos/repair-portal/payment-cancelled?repair={repair_order}"
+
+		# Stripe API expects amount in cents
+		amount_cents = int(float(amount) * 100)
+
+		data = {
+			"payment_method_types[]": "card",
+			"mode": "payment",
+			"success_url": success_url,
+			"cancel_url": cancel_url,
+			"metadata[repair_order]": repair_order,
+			"metadata[source]": "customer_repair_portal",
+			"line_items[0][price_data][currency]": "usd",
+			"line_items[0][price_data][product_data][name]": f"Repair Order {repair_order}",
+			"line_items[0][price_data][product_data][description]": "Jewelry Repair Service",
+			"line_items[0][price_data][unit_amount]": str(amount_cents),
+			"line_items[0][quantity]": "1",
+		}
+
+		if customer_email:
+			data["customer_email"] = customer_email
+
+		resp = http_requests.post(
+			"https://api.stripe.com/v1/checkout/sessions",
+			headers={
+				"Authorization": f"Bearer {secret_key}",
+				"Content-Type": "application/x-www-form-urlencoded",
+			},
+			data=data,
+			timeout=30,
+		)
+
+		result = resp.json()
+
+		if resp.status_code >= 400:
+			error_msg = result.get("error", {}).get("message", str(result))
+			frappe.log_error(f"Stripe Checkout Session creation failed: {error_msg}", "Stripe Checkout")
+			return None
+
+		session_url = result.get("url")
+		session_id = result.get("id")
+
+		frappe.logger().info(f"Stripe Checkout Session created: {session_id} for repair {repair_order}")
+		return session_url
+
+	except Exception as e:
+		frappe.log_error(f"Stripe Checkout Session error: {e}", "Stripe Checkout")
+		return None
+
+
+@frappe.whitelist(allow_guest=True)  # nosemgrep
+def verify_checkout_session(session_id: str) -> dict[str, Any]:
+	"""
+	Verify the status of a Stripe Checkout Session.
+	Called from the payment success page to confirm the payment went through.
+	"""
+	if not session_id:
+		return {"success": False, "message": "Session ID is required"}
+
+	try:
+		settings = frappe.get_single("Payment Gateway Settings")
+		if not settings.stripe_enabled:
+			return {"success": False, "message": "Stripe is not configured"}
+
+		secret_key = settings.get_stripe_secret_key()
+		if not secret_key:
+			return {"success": False, "message": "Stripe API key not configured"}
+
+		import requests as http_requests
+
+		resp = http_requests.get(
+			f"https://api.stripe.com/v1/checkout/sessions/{session_id}",
+			headers={"Authorization": f"Bearer {secret_key}"},
+			timeout=30,
+		)
+
+		if resp.status_code >= 400:
+			return {"success": False, "message": "Invalid session"}
+
+		session = resp.json()
+
+		metadata = session.get("metadata", {})
+		repair_order = metadata.get("repair_order", "")
+
+		return {
+			"success": True,
+			"session_id": session.get("id"),
+			"payment_status": session.get("payment_status"),
+			"status": session.get("status"),
+			"amount_total": (session.get("amount_total") or 0) / 100,
+			"currency": session.get("currency", "usd").upper(),
+			"customer_email": session.get("customer_email", ""),
+			"repair_order": repair_order,
+		}
+
+	except Exception as e:
+		frappe.log_error(f"Checkout session verification failed: {e}", "Stripe Checkout")
+		return {"success": False, "message": "Failed to verify payment session"}
+
 
 @frappe.whitelist(allow_guest=True)  # nosemgrep
 def simulate_payment_success(repair: str, amount: float, ref: str) -> str:

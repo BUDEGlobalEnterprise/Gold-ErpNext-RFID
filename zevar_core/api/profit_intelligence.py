@@ -10,6 +10,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Count, Sum
 from frappe.utils import add_days, flt, getdate, now_datetime, today
 
 # ---------------------------------------------------------------------------
@@ -476,17 +477,17 @@ def get_profit_summary(from_date=None, to_date=None):
 	summary = (
 		frappe.qb.from_(scb)
 		.select(
-			frappe.qb.fn.Sum(scb.total_revenue).as_("total_revenue"),
-			frappe.qb.fn.Sum(scb.total_metal_cogs).as_("total_metal_cogs"),
-			frappe.qb.fn.Sum(scb.total_gemstone_cogs).as_("total_gemstone_cogs"),
-			frappe.qb.fn.Sum(scb.total_item_cogs).as_("total_item_cogs"),
-			frappe.qb.fn.Sum(scb.total_labor_cost).as_("total_labor_cost"),
-			frappe.qb.fn.Sum(scb.total_commission).as_("total_commission"),
-			frappe.qb.fn.Sum(scb.total_payment_cost).as_("total_payment_cost"),
-			frappe.qb.fn.Sum(scb.overhead_per_invoice).as_("total_overhead"),
-			frappe.qb.fn.Sum(scb.total_cost).as_("total_cost"),
-			frappe.qb.fn.Sum(scb.gross_profit).as_("gross_profit"),
-			frappe.qb.fn.Count(scb.name).as_("invoice_count"),
+			Sum(scb.total_revenue).as_("total_revenue"),
+			Sum(scb.total_metal_cogs).as_("total_metal_cogs"),
+			Sum(scb.total_gemstone_cogs).as_("total_gemstone_cogs"),
+			Sum(scb.total_item_cogs).as_("total_item_cogs"),
+			Sum(scb.total_labor_cost).as_("total_labor_cost"),
+			Sum(scb.total_commission).as_("total_commission"),
+			Sum(scb.total_payment_cost).as_("total_payment_cost"),
+			Sum(scb.overhead_per_invoice).as_("total_overhead"),
+			Sum(scb.total_cost).as_("total_cost"),
+			Sum(scb.gross_profit).as_("gross_profit"),
+			Count(scb.name).as_("invoice_count"),
 		)
 		.where((scb.posting_date >= from_date) & (scb.posting_date <= to_date))
 	).run(as_dict=True)
@@ -501,8 +502,8 @@ def get_profit_summary(from_date=None, to_date=None):
 	prev = (
 		frappe.qb.from_(scb)
 		.select(
-			frappe.qb.fn.Sum(scb.gross_profit).as_("gross_profit"),
-			frappe.qb.fn.Sum(scb.total_revenue).as_("total_revenue"),
+			Sum(scb.gross_profit).as_("gross_profit"),
+			Sum(scb.total_revenue).as_("total_revenue"),
 		)
 		.where((scb.posting_date >= prev_start) & (scb.posting_date <= prev_end))
 	).run(as_dict=True)
@@ -568,10 +569,10 @@ def get_margin_analysis(from_date=None, to_date=None, group_by="jewelry_type"):
 			.on(scs.employee == emp.name)
 			.select(
 				emp.employee_name.as_("group_name"),
-				frappe.qb.fn.Sum(scb.total_revenue).as_("revenue"),
-				frappe.qb.fn.Sum(scb.total_cost).as_("total_cost"),
-				frappe.qb.fn.Sum(scb.gross_profit).as_("gross_profit"),
-				frappe.qb.fn.Count(scb.name).as_("count"),
+				Sum(scb.total_revenue).as_("revenue"),
+				Sum(scb.total_cost).as_("total_cost"),
+				Sum(scb.gross_profit).as_("gross_profit"),
+				Count(scb.name).as_("count"),
 			)
 			.where((scb.posting_date >= from_date) & (scb.posting_date <= to_date))
 			.groupby(emp.employee_name)
@@ -609,10 +610,10 @@ def get_margin_analysis(from_date=None, to_date=None, group_by="jewelry_type"):
 			.on(item.name == sii.item_code)
 			.select(
 				getattr(item, item_field).as_("group_name"),
-				frappe.qb.fn.Sum(scb.total_revenue).as_("revenue"),
-				frappe.qb.fn.Sum(scb.total_cost).as_("total_cost"),
-				frappe.qb.fn.Sum(scb.gross_profit).as_("gross_profit"),
-				frappe.qb.fn.Count(scb.name).as_("count"),
+				Sum(scb.total_revenue).as_("revenue"),
+				Sum(scb.total_cost).as_("total_cost"),
+				Sum(scb.gross_profit).as_("gross_profit"),
+				Count(scb.name).as_("count"),
 			)
 			.where((scb.posting_date >= from_date) & (scb.posting_date <= to_date))
 			.groupby(getattr(item, item_field))

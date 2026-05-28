@@ -146,11 +146,11 @@ const mainTabs = [
 ]
 
 const storeLocations = {
-	'NY-01': 'New York',
-	'Miami-01': 'Miami',
-	'LA-01': 'Los Angeles',
-	'Houston-01': 'Houston',
-	'Chicago-01': 'Chicago',
+	'NYC': 'New York',
+	'MIA': 'Miami',
+	'LA': 'Los Angeles',
+	'HOU': 'Houston',
+	'CHI': 'Chicago',
 }
 
 const activeTab = ref('brief')

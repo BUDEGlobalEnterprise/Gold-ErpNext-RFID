@@ -5,6 +5,7 @@ category breakdown, and top salesperson rankings.
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Coalesce, Count, Sum
 from frappe.utils import flt, getdate, nowdate, add_days
 
 
@@ -81,8 +82,8 @@ def _get_today_summary(today):
 	row = (
 		frappe.qb.from_(si)
 		.select(
-			frappe.qb.fn.Coalesce(frappe.qb.fn.Sum(si.base_grand_total), 0).as_("total_sales"),
-			frappe.qb.fn.Count(si.name).as_("txn_count"),
+			Coalesce(Sum(si.base_grand_total), 0).as_("total_sales"),
+			Count(si.name).as_("txn_count"),
 		)
 		.where((si.docstatus == 1) & (si.is_pos == 1) & (si.posting_date == today))
 	).run(as_dict=True)
@@ -97,7 +98,7 @@ def _get_today_summary(today):
 	si2 = frappe.qb.DocType("Sales Invoice")
 	ly_row = (
 		frappe.qb.from_(si2)
-		.select(frappe.qb.fn.Coalesce(frappe.qb.fn.Sum(si2.base_grand_total), 0).as_("total_sales"))
+		.select(Coalesce(Sum(si2.base_grand_total), 0).as_("total_sales"))
 		.where((si2.docstatus == 1) & (si2.is_pos == 1) & (si2.posting_date == last_year))
 	).run(as_dict=True)
 
@@ -175,7 +176,7 @@ def _get_top_salespersons(today):
 			emp.employee_name AS name,
 			emp.name AS employee_id,
 			SUM(scs.commission_amount) AS commission,
-			SUM(scs.allocated_amount) AS total
+			SUM(scs.sale_amount) AS total
 		FROM `tabSales Commission Split` scs
 		JOIN `tabEmployee` emp ON scs.employee = emp.name
 		JOIN `tabSales Invoice` si ON scs.sales_invoice = si.name

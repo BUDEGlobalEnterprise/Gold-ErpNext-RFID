@@ -64,63 +64,105 @@
 			</div>
 
 			<div class="flex-1 flex flex-col overflow-hidden min-h-0">
-				<nav class="p-4 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
+				<nav
+					ref="sidebarNavRef"
+					@scroll.passive="handleSidebarScroll"
+					class="p-4 space-y-6 flex-1 overflow-y-auto custom-scrollbar"
+				>
 					<template v-for="(section, groupIdx) in sidebarSections" :key="groupIdx">
-						<div class="space-y-1">
-							<div v-if="!isSidebarCollapsed" class="px-3 mb-2">
+						<div v-if="section.items.length > 0">
+							<button
+								v-if="!isSidebarCollapsed"
+								@click="toggleSection(section.label)"
+								class="w-full flex items-center justify-between px-3 mb-1 group text-left"
+							>
 								<span
-									class="text-[10px] font-black text-gray-500 uppercase tracking-widest opacity-50"
+									class="text-[10px] font-black text-gray-500 uppercase tracking-widest opacity-50 group-hover:opacity-80 transition-opacity"
 									>{{ section.label }}</span
 								>
-							</div>
+								<svg
+									class="w-3 h-3 text-gray-400 transition-transform duration-200"
+									:class="{ 'rotate-180': !collapsedSections[section.label] }"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M19 9l-7 7-7-7"
+									/>
+								</svg>
+							</button>
 							<div
 								v-else
-								class="h-px bg-gray-200 dark:bg-warm-border-subtle mx-2 mb-4 opacity-50"
+								class="h-px bg-gray-200 dark:bg-warm-border-subtle mx-2 mb-3 opacity-50"
 							></div>
-							<router-link
-								v-for="item in section.items"
-								:key="item.to"
-								:to="item.to"
-								class="flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden"
-								:class="
-									isNavActive(item.to)
-										? 'bg-gradient-to-r from-[#D4AF37]/20 to-transparent text-[#D4AF37]'
-										: 'text-gray-600 dark:text-gray-400 hover:text-[#D4AF37] hover:bg-gradient-to-r hover:from-[#D4AF37]/10 hover:to-transparent'
-								"
+							<div
+								v-show="isSidebarCollapsed || !collapsedSections[section.label]"
+								class="space-y-1"
 							>
-								<div
-									class="relative z-10 flex items-center gap-4 w-full"
-									:class="{ 'justify-center': isSidebarCollapsed }"
+								<router-link
+									v-for="item in section.items"
+									:key="item.to"
+									:to="item.to"
+									class="flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden"
+									:class="
+										isNavActive(item.to)
+											? 'bg-gradient-to-r from-[#D4AF37]/20 to-transparent text-[#D4AF37]'
+											: 'text-gray-600 dark:text-gray-400 hover:text-[#D4AF37] hover:bg-gradient-to-r hover:from-[#D4AF37]/10 hover:to-transparent'
+									"
 								>
-									<svg
-										class="w-5 h-5 transition-colors shrink-0"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											:d="item.icon"
-										/>
-									</svg>
-									<span
-										v-if="!isSidebarCollapsed"
-										class="font-medium tracking-wide text-sm whitespace-nowrap"
-										>{{ item.label }}</span
-									>
 									<div
-										v-if="isSidebarCollapsed"
-										class="absolute left-14 px-3 py-1 bg-gray-900 text-white text-[10px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-xl"
+										class="relative z-10 flex items-center gap-4 w-full"
+										:class="{ 'justify-center': isSidebarCollapsed }"
 									>
-										{{ item.label }}
+										<svg
+											class="w-5 h-5 transition-colors shrink-0"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												:d="item.icon"
+											/>
+										</svg>
+										<span
+											v-if="!isSidebarCollapsed"
+											class="font-medium tracking-wide text-sm whitespace-nowrap"
+											>{{ item.label }}</span
+										>
+										<div
+											v-if="isSidebarCollapsed"
+											class="absolute left-14 px-3 py-1 bg-gray-900 text-white text-[10px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-xl"
+										>
+											{{ item.label }}
+										</div>
 									</div>
-								</div>
-							</router-link>
+								</router-link>
+							</div>
 						</div>
 					</template>
 				</nav>
+
+				<!-- Force Refresh Button -->
+				<div class="p-3 border-t border-gray-200 dark:border-warm-border/30 shrink-0">
+					<button
+						@click="forceRefresh"
+						class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-all"
+						:class="{ 'justify-center': isSidebarCollapsed }"
+						:title="isSidebarCollapsed ? 'Force Refresh' : ''"
+					>
+						<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+						</svg>
+						<span v-if="!isSidebarCollapsed" class="whitespace-nowrap">Force Refresh</span>
+					</button>
+				</div>
 			</div>
 
 			<!-- Resize Handle -->
@@ -772,7 +814,7 @@ import { useCartStore } from '@/stores/cart.js'
 import { useUIStore } from '@/stores/ui.js'
 import { usePosSessionStore } from '@/stores/posSession.js'
 import { createResource, call } from 'frappe-ui'
-import { onMounted, ref, computed, watch, onUnmounted } from 'vue'
+import { onMounted, ref, computed, watch, onUnmounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useBreakpoint } from '@/composables/useBreakpoint.js'
 import { canAccessReports, canAccessMonitor } from '@/utils/permissions.js'
@@ -794,10 +836,21 @@ const isCartOpen = ref(false)
 const isUserMenuOpen = ref(false)
 const isMobileDrawerOpen = ref(false)
 const isSidebarCollapsed = ref(false)
+const collapsedSections = ref({})
+function toggleSection(label) {
+	collapsedSections.value[label] = !collapsedSections.value[label]
+}
 const isResizing = ref(false)
 const isRightResizing = ref(false)
 const sidebarRef = ref(null)
 const userMenuRef = ref(null)
+const sidebarNavRef = ref(null)
+
+function handleSidebarScroll() {
+	if (sidebarNavRef.value) {
+		ui.sidebarScrollTop = sidebarNavRef.value.scrollTop
+	}
+}
 
 const savedSidebarWidth = localStorage.getItem('zevar_sidebar_width')
 const sidebarWidth = ref(savedSidebarWidth ? parseInt(savedSidebarWidth) : 288)
@@ -971,7 +1024,12 @@ const sidebarSections = computed(() => {
 function isNavActive(path) {
 	const current = route.path || ''
 	if (path === '/') return current === '/'
-	return current === path || current.startsWith(path + '/')
+	if (current === path) return true
+	const hasExactMatchElsewhere = sidebarSections.value.some(section =>
+		section.items.some(item => item.to === current)
+	)
+	if (hasExactMatchElsewhere) return false
+	return current.startsWith(path + '/')
 }
 
 // Persistent cart logic
@@ -1070,6 +1128,15 @@ const warehouseFallback = createResource({
 		if (data?.length > 0) warehouses.data = data
 	},
 })
+
+// Force refresh - clears SW cache and reloads
+function forceRefresh() {
+	if (window.__zevarForceRefresh) {
+		window.__zevarForceRefresh()
+	} else {
+		window.location.reload()
+	}
+}
 
 // Resize handlers
 let startX = 0,
@@ -1215,6 +1282,11 @@ onMounted(() => {
 	posSession.fetchStatus()
 	if (session.currentWarehouse) cartStore.loadTaxForWarehouse(session.currentWarehouse)
 	document.addEventListener('click', handleDocumentClick)
+	nextTick(() => {
+		if (sidebarNavRef.value) {
+			sidebarNavRef.value.scrollTop = ui.sidebarScrollTop
+		}
+	})
 })
 onUnmounted(() => {
 	document.removeEventListener('mousemove', handleResize)

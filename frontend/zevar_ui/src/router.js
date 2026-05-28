@@ -132,6 +132,18 @@ const routes = [
 		meta: { guest: true },
 	},
 	{
+		path: '/repair-portal/payment-success',
+		name: 'PaymentSuccess',
+		component: () => import('./pages/PaymentSuccess.vue'),
+		meta: { guest: true },
+	},
+	{
+		path: '/repair-portal/payment-cancelled',
+		name: 'PaymentCancelled',
+		component: () => import('./pages/PaymentCancelled.vue'),
+		meta: { guest: true },
+	},
+	{
 		path: '/trade-ins',
 		name: 'TradeIns',
 		component: () => import('./pages/TradeIns.vue'),
@@ -225,6 +237,12 @@ const routes = [
 		meta: { requiresAuth: true },
 	},
 	// Phase 1: Stock
+	{
+		path: '/stock/manage',
+		name: 'StockManagement',
+		component: () => import('./pages/stock/StockManagement.vue'),
+		meta: { requiresAuth: true },
+	},
 	{
 		path: '/stock/supplier-orders',
 		name: 'SupplierOrders',
