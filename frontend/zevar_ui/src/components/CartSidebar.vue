@@ -31,74 +31,52 @@
 					:class="[
 						persistent
 							? 'flex flex-col flex-1 h-full min-h-0 overflow-hidden bg-transparent'
-							: 'fixed bottom-0 left-0 right-0 z-50 max-h-[85vh] bg-white dark:bg-warm-card rounded-t-2xl shadow-2xl flex flex-col border-t border-gray-200 dark:border-warm-border min-h-0 overflow-hidden',
+							: 'fixed bottom-0 left-0 right-0 z-50 max-h-[85vh] bg-[#FAF5EE] dark:bg-warm-card rounded-t-2xl shadow-2xl flex flex-col border-t border-[#EFEAE2] dark:border-warm-border min-h-0 overflow-hidden',
 					]"
 				>
 					<!-- Cart Header -->
 					<div
-						class="p-4 border-b border-gray-100 dark:border-warm-border/50 flex items-center justify-between shrink-0"
+						class="p-3.5 sm:p-4 border-b border-gray-100 dark:border-warm-border/50 flex items-center justify-between shrink-0"
 					>
-						<h2
-							class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2"
-						>
-							<span>💎</span> Selection Tray
-							<span
-								class="text-xs font-normal text-gray-500 dark:text-gray-400"
+						<div class="flex items-center gap-2 min-w-0">
+							<span class="text-sm">🛒</span>
+							<h2 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white tracking-tight uppercase">
+								Sale
+							</h2>
+							<div
+								class="w-6 h-6 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] flex items-center justify-center text-[#1E2022] font-black text-[11px] shadow-sm shrink-0"
 								data-testid="cart-item-count"
-								>({{ cart.totalItems }}
-								{{ cart.totalItems === 1 ? 'piece' : 'pieces' }})</span
 							>
-						</h2>
+								{{ cart.totalItems }}
+							</div>
+						</div>
 
-						<div class="flex items-center gap-2">
+						<div class="flex items-center gap-1.5 shrink-0">
 							<button
 								v-if="cart.items.length > 0"
 								@click="holdCurrentCart"
 								:disabled="holdingCart"
-								class="text-xs font-bold text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/20 px-2 py-1 rounded transition-colors flex items-center gap-1"
+								class="px-2.5 py-1 text-[9px] font-black tracking-wider uppercase rounded-full border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 hover:scale-105 active:scale-95 transition-all shadow-xs flex items-center gap-1"
 								title="Park this cart for later"
 							>
-								<svg
-									class="w-3 h-3"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"
-									/>
-								</svg>
-								{{ holdingCart ? 'Holding...' : 'Hold' }}
+								⏸ Hold
 							</button>
 							<button
 								v-if="cart.items.length > 0"
 								@click="cart.clearCart()"
-								class="text-xs font-bold text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded transition-colors"
+								class="px-2.5 py-1 text-[9px] font-black tracking-wider uppercase rounded-full border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 hover:scale-105 active:scale-95 transition-all shadow-xs flex items-center gap-1"
+								title="Clear active cart"
 							>
-								Clear
+								🗑 Clear
 							</button>
 
 							<button
 								v-if="!persistent"
 								@click="close"
-								class="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full transition-colors text-gray-500 dark:text-gray-400"
+								class="w-7 h-7 rounded-full border border-gray-200 dark:border-warm-border/50 bg-gray-50 dark:bg-warm-dark-800 text-gray-500 dark:text-gray-400 flex items-center justify-center transition hover:scale-105 active:scale-95 shadow-xs"
+								title="Close Panel"
 							>
-								<svg
-									class="w-5 h-5"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M6 18L18 6M6 6l12 12"
-									></path>
-								</svg>
+								✕
 							</button>
 						</div>
 					</div>
@@ -120,149 +98,142 @@
 								d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
 							></path>
 						</svg>
-						<p>Your selection tray is empty.</p>
+						<p>Your shopping cart is empty.</p>
 						<p class="text-xs text-gray-400 dark:text-gray-600 mt-1">
-							Add pieces from the collection to begin curating.
+							Search or scan items to add them here.
 						</p>
 						<button
 							@click="close"
 							class="mt-4 text-sm text-[#D4AF37] font-medium hover:underline"
 						>
-							Browse Collection
+							Browse Catalog
 						</button>
 					</div>
 
 					<div v-else class="flex-1 flex flex-col min-h-0 overflow-hidden">
-						<div class="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-							<!-- Customer Selector (moved inside scrollable area) -->
+						<div class="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-3.5 sm:space-y-4 custom-scrollbar">
+							<!-- Customer Selector (Compact layout) -->
 							<div
-								class="p-4 border border-orange-100 dark:border-warm-border/50 rounded-xl bg-orange-50/20 dark:bg-warm-dark-800/40 z-10"
+								class="p-3 border border-[#E3C583]/20 dark:border-warm-border/30 rounded-xl bg-white dark:bg-warm-dark-800/40 shadow-xs z-10 animate-in fade-in"
 							>
-								<div class="mb-3">
-									<label
-										class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-2"
-										>Customer <span class="text-red-500">*</span></label
-									>
-									<div class="flex bg-gray-100 dark:bg-warm-dark-700 p-1 rounded-lg">
-										<button
-											class="flex-1 text-xs font-medium py-1.5 rounded-md transition-colors"
-											:class="
-												cart.customerType === 'Individual'
-													? 'bg-white dark:bg-warm-card shadow-sm text-gray-900 dark:text-white'
-													: 'text-gray-500'
-											"
-											@click="setCustomerType('Individual')"
-										>
-											Individual
-										</button>
-										<button
-											class="flex-1 text-xs font-medium py-1.5 rounded-md transition-colors"
-											:class="
-												cart.customerType === 'Company'
-													? 'bg-white dark:bg-warm-card shadow-sm text-gray-900 dark:text-white'
-													: 'text-gray-500'
-											"
-											@click="setCustomerType('Company')"
-										>
-											Company
-										</button>
-										<button
-											class="flex-1 text-xs font-medium py-1.5 rounded-md transition-colors"
-											:class="
-												cart.customerType === 'Walkin'
-													? 'bg-white dark:bg-warm-card shadow-sm text-gray-900 dark:text-white'
-													: 'text-gray-500'
-											"
-											@click="setCustomerType('Walkin')"
-										>
-											Walk-In
-										</button>
+								<div class="mb-2.5">
+									<div class="flex items-center justify-between">
+										<!-- Bigger, More Visible Segment Tabs -->
+										<div class="flex bg-gray-100/80 dark:bg-warm-dark-700 p-1 rounded-xl border border-gray-200/40 dark:border-warm-border/10 w-full shadow-inner">
+											<button
+												class="flex-1 text-[11px] font-black py-2 rounded-lg transition-all uppercase tracking-wider duration-200"
+												:class="
+													cart.customerType === 'Individual'
+														? 'bg-[#D4AF37] text-white shadow-md transform scale-[1.02]'
+														: 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+												"
+												@click="setCustomerType('Individual')"
+											>
+												Individual
+											</button>
+											<button
+												class="flex-1 text-[11px] font-black py-2 rounded-lg transition-all uppercase tracking-wider duration-200"
+												:class="
+													cart.customerType === 'Company'
+														? 'bg-[#D4AF37] text-white shadow-md transform scale-[1.02]'
+														: 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+												"
+												@click="setCustomerType('Company')"
+											>
+												Company
+											</button>
+											<button
+												class="flex-1 text-[11px] font-black py-2 rounded-lg transition-all uppercase tracking-wider duration-200"
+												:class="
+													cart.customerType === 'Walkin'
+														? 'bg-[#D4AF37] text-white shadow-md transform scale-[1.02]'
+														: 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+												"
+												@click="setCustomerType('Walkin')"
+											>
+												Walk-In
+											</button>
+										</div>
 									</div>
 								</div>
 								<CustomerSelector v-if="cart.customerType !== 'Walkin'" />
 							</div>
-							<div
-								v-for="(item, index) in cart.items"
-								:key="index"
-								class="flex gap-4 border-b border-gray-100 dark:border-warm-border/50 pb-4 last:border-0"
-							>
+
+							<!-- Sleek Unified Register Cart List -->
+							<div class="bg-white dark:bg-warm-dark-800 rounded-xl p-3 border border-[#EFEAE2] dark:border-warm-border/30 shadow-xs divide-y divide-gray-100 dark:divide-warm-border/20 z-10 animate-in fade-in">
 								<div
-									class="w-16 h-16 bg-gray-100 dark:bg-warm-dark-700 rounded-lg flex-shrink-0 overflow-hidden border border-gray-200 dark:border-warm-border/50 relative"
+									v-for="(item, index) in cart.items"
+									:key="index"
+									class="py-2.5 first:pt-0 last:pb-0 flex gap-3 relative animate-in slide-in-from-bottom-2"
 								>
-									<img
-										v-if="item.image"
-										:src="item.image"
-										loading="lazy"
-										class="w-full h-full object-cover"
-									/>
+									<!-- Image Container (Slightly more compact) -->
 									<div
-										v-else
-										class="w-full h-full flex items-center justify-center text-xs text-gray-400 dark:text-gray-600"
+										class="w-11 h-11 rounded-lg flex-shrink-0 overflow-hidden border border-[#EFEAE2] dark:border-warm-border/30 relative bg-[#F3F1ED] dark:bg-warm-dark-900"
 									>
-										No Img
+										<img
+											:src="`${baseUrl}placeholders/${getJewelryCategory(item)}.png`"
+											:alt="item.item_name"
+											class="w-full h-full object-cover"
+											@error="(e) => e.target.src = `${baseUrl}placeholders/jewel.png`"
+										/>
 									</div>
 
-									<div
-										v-if="item.qty > 1"
-										class="absolute bottom-0 right-0 bg-black dark:bg-[#D4AF37] text-white dark:text-black text-[10px] font-bold px-1.5 py-0.5 rounded-tl-md"
-									>
-										x{{ item.qty }}
-									</div>
-								</div>
-
-								<div class="flex-1 min-w-0">
-									<h3
-										class="text-sm font-bold text-gray-900 dark:text-white truncate"
-									>
-										{{ item.item_name }}
-									</h3>
-									<p class="text-xs text-gray-500 dark:text-gray-400 truncate">
-										{{ item.item_code }}
-									</p>
-
-									<div class="flex items-center gap-2 mt-1">
-										<span
-											class="text-[10px] uppercase font-bold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-500 px-1.5 py-0.5 rounded"
-											>{{ item.metal }}</span
-										>
-										<span
-											class="text-[10px] uppercase font-bold bg-gray-100 dark:bg-warm-dark-900 text-gray-800 dark:text-gray-300 px-1.5 py-0.5 rounded"
-											>{{ item.purity }}</span
-										>
-									</div>
-
-									<div class="mt-2 flex items-center justify-between">
-										<div class="flex flex-col">
-											<span class="text-xs text-gray-400 dark:text-gray-500"
-												>{{ formatCurrency(item.amount) }} ea</span
+									<!-- Item Details -->
+									<div class="flex-1 min-w-0 flex flex-col justify-between">
+										<div class="pr-6">
+											<h3
+												class="text-[11px] font-bold text-gray-900 dark:text-white truncate leading-snug"
 											>
-											<span
-												class="font-mono text-sm font-bold text-gray-900 dark:text-white"
-											>
-												{{ formatCurrency(item.amount * item.qty) }}
-											</span>
+												{{ item.item_name }}
+											</h3>
+											<div class="flex items-center gap-2 mt-0.5">
+												<span class="text-[9px] text-gray-400 dark:text-gray-500 font-mono">
+													{{ item.item_code }}
+												</span>
+												<span
+													v-if="item.metal || item.purity"
+													class="text-[9px] font-semibold text-[#CBA358]"
+												>
+													• {{ item.metal && item.purity ? `${item.metal} · ${item.purity}` : (item.metal || item.purity) }}
+												</span>
+											</div>
 										</div>
 
-										<button
-											@click="cart.removeItem(index)"
-											class="text-red-400 hover:text-red-600 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-											title="Remove Item"
-										>
-											<svg
-												class="w-4 h-4"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-												></path>
-											</svg>
-										</button>
+										<!-- Pricing & Quantity Controls -->
+										<div class="flex items-center justify-between mt-2">
+											<!-- Sleek Quantity Adjuster -->
+											<div class="flex items-center border border-gray-200 dark:border-warm-border/40 rounded-md overflow-hidden h-6 w-16">
+												<button 
+													@click="updateQty(index, item.qty - 1)" 
+													class="w-5 h-full flex items-center justify-center bg-gray-50 dark:bg-warm-dark-900 hover:bg-gray-100 dark:hover:bg-warm-dark-800 text-[10px] font-extrabold text-gray-500 transition-colors"
+												>-</button>
+												<span class="flex-1 text-center text-[10px] font-bold text-gray-900 dark:text-white">{{ item.qty }}</span>
+												<button 
+													@click="updateQty(index, item.qty + 1)" 
+													class="w-5 h-full flex items-center justify-center bg-gray-50 dark:bg-warm-dark-900 hover:bg-gray-100 dark:hover:bg-warm-dark-800 text-[10px] font-extrabold text-gray-500 transition-colors"
+												>+</button>
+											</div>
+
+											<!-- Prices (Unit & Total) -->
+											<div class="text-right flex flex-col items-end">
+												<span class="text-[8px] text-gray-400 dark:text-gray-500"
+													>{{ formatCurrency(item.amount) }} ea</span
+												>
+												<span class="font-mono text-xs font-black text-[#D4AF37]">
+													{{ formatCurrency(item.amount * item.qty) }}
+												</span>
+											</div>
+										</div>
 									</div>
+
+									<!-- Clean Right Side Delete Button -->
+									<button
+										@click="cart.removeItem(index)"
+										class="absolute top-2 right-0 w-4 h-4 flex items-center justify-center text-gray-300 dark:text-gray-600 hover:text-red-500 rounded-full transition-colors"
+										title="Remove Item"
+									>
+										✕
+									</button>
 								</div>
 							</div>
 						</div>
@@ -417,18 +388,21 @@
 							</div>
 						</div>
 
-						<div class="flex flex-col gap-2 mt-4">
+						<div class="flex flex-col gap-2.5 mt-4">
 							<button
 								v-if="posSession.hasActiveSession"
 								@click="startLayaway"
-								class="w-full py-3 rounded-lg font-bold shadow-lg transition-all flex items-center justify-center gap-2 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 hover:bg-[#D4AF37]/20 active:scale-95"
+								class="w-full py-3.5 bg-[#D6BA8B] hover:bg-[#C9A976] text-[#1E2022] rounded-xl font-bold shadow-sm transition duration-200 active:scale-95 text-sm flex flex-col items-center justify-center leading-tight border border-[#D6BA8B]/20"
 							>
-								Create Layaway
+								<span>Create Layaway</span>
+								<span class="text-[9px] font-normal text-gray-700/80 mt-0.5">
+									{{ formatCurrency(cart.grandTotal * 0.5) }} Deposit Required
+								</span>
 							</button>
 							<router-link
 								v-if="!posSession.hasActiveSession"
 								to="/opening"
-								class="w-full py-3 rounded-lg font-bold shadow-lg transition-all flex items-center justify-center gap-2 bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500/20 active:scale-95 text-sm"
+								class="w-full py-3.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/30 rounded-xl font-bold transition duration-200 active:scale-95 text-sm flex items-center justify-center gap-2"
 							>
 								Open Register Session
 							</router-link>
@@ -439,10 +413,10 @@
 									ui.closeLayawayPayment();
 								"
 								:disabled="!isCheckoutReady"
-								class="w-full py-3 rounded-lg font-bold shadow-lg transition-all flex items-center justify-center gap-2"
+								class="w-full py-3.5 rounded-xl font-bold shadow-md transition duration-200 active:scale-95 text-sm flex items-center justify-center gap-2"
 								:class="
 									isCheckoutReady
-										? 'bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black hover:bg-gray-800 dark:hover:bg-[#b5952f] active:scale-95'
+										? 'bg-[#1E2022] hover:bg-black text-white dark:bg-[#D4AF37] dark:text-black dark:hover:bg-[#b5952f]'
 										: 'bg-gray-200 dark:bg-warm-dark-700 text-gray-400 dark:text-gray-600 cursor-not-allowed'
 								"
 								data-testid="checkout-btn"
@@ -465,6 +439,8 @@ import { usePosSessionStore } from '@/stores/posSession.js'
 import CheckoutModal from '@/components/CheckoutModal.vue'
 import CustomerSelector from '@/components/CustomerSelector.vue'
 import { ref, computed } from 'vue'
+
+const baseUrl = import.meta.env.BASE_URL
 import { useRouter } from 'vue-router'
 import { useUIStore } from '@/stores/ui.js'
 
@@ -473,6 +449,40 @@ const props = defineProps({
 	persistent: Boolean,
 })
 const emit = defineEmits(['close'])
+
+function getJewelryCategory(item) {
+	const name = (item.item_name || '').toLowerCase();
+	const group = (item.item_group || '').toLowerCase();
+	const type = (item.jewelry_type || '').toLowerCase();
+	const cat = (item.category || '').toLowerCase();
+	
+	if (name.includes('ring') || group.includes('ring') || type.includes('ring') || cat.includes('ring')) {
+		return 'ring';
+	}
+	if (name.includes('earring') || group.includes('earring') || type.includes('earring') || cat.includes('earring')) {
+		return 'earring';
+	}
+	if (name.includes('pendant') || name.includes('gemstone') || group.includes('pendant') || type.includes('pendant') || cat.includes('pendant')) {
+		return 'pendant';
+	}
+	if (name.includes('watch') || name.includes('timepiece') || group.includes('watch') || type.includes('watch') || cat.includes('watch')) {
+		return 'watch';
+	}
+	if (name.includes('bracelet') || name.includes('bangle') || group.includes('bangle') || group.includes('bracelet') || type.includes('bracelet') || cat.includes('bracelet') || name.includes('cuff')) {
+		return 'bracelet';
+	}
+	if (name.includes('necklace') || name.includes('choker') || group.includes('necklace') || type.includes('necklace') || cat.includes('necklace')) {
+		return 'necklace';
+	}
+	// Smart resolution for Chain, Link, Rope, Cuban
+	if (name.includes('chain') || name.includes('link') || name.includes('rope') || name.includes('cuban') || group.includes('chain') || type.includes('chain')) {
+		if (/7|8|9/.test(name)) {
+			return 'bracelet';
+		}
+		return 'necklace';
+	}
+	return 'jewel';
+}
 const cart = useCartStore()
 const posSession = usePosSessionStore()
 const ui = useUIStore()
@@ -551,6 +561,14 @@ const checkoutButtonText = computed(() => {
 function setCustomerType(type) {
 	cart.customerType = type
 	cart.clearCustomer()
+}
+
+function updateQty(index, newQty) {
+	if (newQty <= 0) {
+		cart.removeItem(index)
+	} else {
+		cart.updateItemQuantity(index, newQty)
+	}
 }
 
 // Trade-in form state

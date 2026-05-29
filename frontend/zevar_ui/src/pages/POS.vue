@@ -884,7 +884,7 @@ const isMobile = computed(() => isMobileBP.value)
 // Data State
 const catalog = ref([])
 const start = ref(0)
-const PAGE_LENGTH = 20
+const PAGE_LENGTH = 50
 const hasMore = ref(true)
 const filteredItems = computed(() => {
 	let items = [...(catalog.value || [])]

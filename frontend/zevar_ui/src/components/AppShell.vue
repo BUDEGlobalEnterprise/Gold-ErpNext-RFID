@@ -3,7 +3,7 @@
 		<!-- ===== DESKTOP SIDEBAR (>= lg) ===== -->
 		<aside
 			ref="sidebarRef"
-			class="hidden lg:flex bg-white/40 dark:bg-warm-dark-900/60 backdrop-blur-xl border-r border-gray-200 dark:border-warm-border/50 flex-col z-30 relative min-h-0"
+			class="hidden lg:flex bg-[#1E2022] dark:bg-warm-dark-950 border-r border-[#2C2E30] dark:border-warm-border/30 flex-col z-30 relative min-h-0"
 			:class="isResizing ? 'transition-none' : 'transition-all duration-300'"
 			:style="
 				isSidebarCollapsed
@@ -13,7 +13,7 @@
 		>
 			<!-- Sidebar Header -->
 			<div
-				class="h-20 flex items-center border-b border-gray-200 dark:border-warm-border/50 transition-all duration-300"
+				class="h-20 flex items-center border-b border-[#2C2E30] dark:border-warm-border/30 transition-all duration-300"
 				:class="isSidebarCollapsed ? 'px-4 justify-center' : 'px-4 justify-between'"
 			>
 				<div
@@ -26,7 +26,7 @@
 						class="w-8 h-8 rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.3)] shrink-0"
 					/>
 					<h1
-						class="premium-title !text-2xl !tracking-tighter whitespace-nowrap !leading-none truncate"
+						class="premium-title !text-2xl !tracking-tighter whitespace-nowrap !leading-none truncate !text-white"
 					>
 						ZEVAR
 					</h1>
@@ -34,7 +34,7 @@
 				<button
 					v-if="!isSidebarCollapsed"
 					@click="isSidebarCollapsed = true"
-					class="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-gray-200 dark:border-warm-border/50 hover:bg-white/10 transition-all text-gray-400 hover:text-white shrink-0"
+					class="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-[#2C2E30] dark:border-warm-border/50 hover:bg-white/10 transition-all text-gray-400 hover:text-white shrink-0"
 					aria-label="Collapse sidebar"
 				>
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,7 +49,7 @@
 				<button
 					v-else
 					@click="isSidebarCollapsed = false"
-					class="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-gray-200 dark:border-warm-border/50 hover:bg-white/10 transition-all text-gray-400 hover:text-white shrink-0"
+					class="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-[#2C2E30] dark:border-warm-border/50 hover:bg-white/10 transition-all text-gray-400 hover:text-white shrink-0"
 					aria-label="Expand sidebar"
 				>
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,7 +77,7 @@
 								class="w-full flex items-center justify-between px-3 mb-1 group text-left"
 							>
 								<span
-									class="text-[10px] font-black text-gray-500 uppercase tracking-widest opacity-50 group-hover:opacity-80 transition-opacity"
+									class="text-[10px] font-black text-gray-400 uppercase tracking-widest opacity-60 group-hover:opacity-95 transition-opacity"
 									>{{ section.label }}</span
 								>
 								<svg
@@ -97,7 +97,7 @@
 							</button>
 							<div
 								v-else
-								class="h-px bg-gray-200 dark:bg-warm-border-subtle mx-2 mb-3 opacity-50"
+								class="h-px bg-white/10 dark:bg-warm-border-subtle mx-2 mb-3 opacity-50"
 							></div>
 							<div
 								v-show="isSidebarCollapsed || !collapsedSections[section.label]"
@@ -110,12 +110,12 @@
 									class="flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden"
 									:class="
 										isNavActive(item.to)
-											? 'bg-gradient-to-r from-[#D4AF37]/20 to-transparent text-[#D4AF37]'
-											: 'text-gray-600 dark:text-gray-400 hover:text-[#D4AF37] hover:bg-gradient-to-r hover:from-[#D4AF37]/10 hover:to-transparent'
+											? 'bg-[#CBA358] text-[#1E2022] font-bold shadow-md shadow-[#CBA358]/20'
+											: 'text-gray-300 dark:text-gray-400 hover:text-white hover:bg-white/5'
 									"
 								>
 									<div
-										class="relative z-10 flex items-center gap-4 w-full"
+										class="relative z-10 flex items-center gap-2.5 w-full min-w-0"
 										:class="{ 'justify-center': isSidebarCollapsed }"
 									>
 										<svg
@@ -133,9 +133,17 @@
 										</svg>
 										<span
 											v-if="!isSidebarCollapsed"
-											class="font-medium tracking-wide text-sm whitespace-nowrap"
+											class="font-semibold tracking-wide text-sm truncate min-w-0"
 											>{{ item.label }}</span
 										>
+										<span
+											v-if="!isSidebarCollapsed && item.label === 'POS Terminal' && posSession.hasActiveSession"
+											class="ml-auto flex items-center gap-1 px-1.5 py-0.5 rounded-full shrink-0"
+											:class="isNavActive(item.to) ? 'bg-[#1E2022]/10 text-[#1E2022]' : 'bg-green-500/20 text-green-400 border border-green-500/30 text-[9px]'"
+										>
+											<span class="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
+											<span v-if="!isNavActive(item.to)" class="text-[8px] font-black uppercase tracking-wider">Active</span>
+										</span>
 										<div
 											v-if="isSidebarCollapsed"
 											class="absolute left-14 px-3 py-1 bg-gray-900 text-white text-[10px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-xl"
@@ -550,7 +558,7 @@
 				>
 					<div
 						v-if="showPersistentCart"
-						class="flex flex-col shrink-0 bg-white/40 dark:bg-warm-dark-900/60 backdrop-blur-xl border-l border-gray-200 dark:border-warm-border/50 min-h-0 overflow-hidden relative"
+						class="flex flex-col shrink-0 bg-[#FAF5EE] dark:bg-[#1a1610]/90 border-l border-[#EFEAE2] dark:border-warm-border/50 min-h-0 overflow-hidden relative"
 						:class="{ 'transition-all duration-300': !isRightResizing }"
 						:style="{ width: rightSidebarWidth + 'px' }"
 					>

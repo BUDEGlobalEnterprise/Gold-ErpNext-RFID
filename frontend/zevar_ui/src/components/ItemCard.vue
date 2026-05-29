@@ -1,39 +1,18 @@
 <template>
 	<div
-		class="premium-card !p-0 shadow-sm hover:shadow-xl transition-all cursor-pointer flex flex-col h-full group relative overflow-hidden border border-gray-100 dark:border-warm-border/30 hover:border-[#D4AF37]/50"
+		class="bg-white dark:bg-warm-dark-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full group relative overflow-hidden border border-[#EFEAE2] dark:border-warm-border/30 hover:border-[#CBA358]/50"
 		@click="emit('open-details', item.item_code)"
 		data-testid="item-card"
 	>
 		<div
-			class="aspect-[4/3] bg-gray-50 dark:bg-warm-dark-900 relative overflow-hidden flex items-center justify-center shrink-0"
+			class="aspect-[16/10] relative overflow-hidden flex items-center justify-center shrink-0 bg-[#F3F1ED] dark:bg-warm-dark-900"
 		>
 			<img
-				v-if="item.image && !imageFailed"
-				:src="item.image"
-				alt="Item"
-				class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-				loading="lazy"
-				@error="imageFailed = true"
+				:src="`${baseUrl}placeholders/${getJewelryCategory(item)}.png`"
+				:alt="item.item_name"
+				class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
+				@error="(e) => e.target.src = `${baseUrl}placeholders/jewel.png`"
 			/>
-			<div
-				v-else
-				class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600"
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="h-8 w-8"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="1"
-						d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-					/>
-				</svg>
-			</div>
 
 			<div class="absolute top-2 right-2 flex flex-col gap-1 items-end z-10">
 				<span
@@ -55,13 +34,13 @@
 			<div>
 				<div class="flex items-start justify-between mb-1">
 					<h3
-						class="font-semibold text-gray-900 dark:text-white line-clamp-1 text-xs leading-snug group-hover:text-[#D4AF37] transition-colors duration-200"
+						class="font-sans font-bold text-xs tracking-tight text-gray-900 dark:text-white line-clamp-2 leading-tight group-hover:text-[#CBA358] transition-colors duration-200 min-h-[2rem]"
 					>
 						{{ item.item_name }}
 					</h3>
 				</div>
 
-				<div class="flex flex-wrap gap-1 mb-2">
+				<div class="flex flex-wrap gap-1 mb-1.5">
 					<span
 						class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold bg-yellow-100/60 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border border-yellow-200/30"
 					>
@@ -74,60 +53,40 @@
 					</span>
 				</div>
 
-				<!-- Weight Breakdown -->
+				<!-- Sleek Horizontal Weight Breakdown -->
 				<div
-					v-if="item.net_weight > 0 || item.gross_weight > 0"
-					class="hidden lg:block text-[9px] text-gray-500 dark:text-white/40 mb-2 space-y-0.5 bg-gray-50 dark:bg-warm-dark-700/30 p-1.5 rounded-lg border border-gray-100 dark:border-warm-border/20"
+					v-if="item.net_weight > 0 || item.gross_weight > 0 || item.stone_weight > 0"
+					class="hidden lg:flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[8.5px] mt-1 border-t border-gray-200 dark:border-warm-border/30 pt-1.5"
 				>
-					<div v-if="item.gross_weight > 0" class="flex justify-between">
-						<span>Gross:</span>
-						<span class="font-bold text-gray-700 dark:text-white/80"
-							>{{ item.gross_weight }}g</span
-						>
-					</div>
-					<div v-if="item.stone_weight > 0" class="flex justify-between text-red-500/80">
-						<span>Stone:</span>
-						<span class="font-bold">-{{ item.stone_weight }}g</span>
-					</div>
-					<div
-						v-if="item.net_weight > 0"
-						class="flex justify-between font-bold text-gray-900 dark:text-white border-t border-gray-100 dark:border-warm-border pt-0.5 mt-0.5"
-					>
-						<span>Net Weight:</span> <span>{{ item.net_weight }}g</span>
-					</div>
+					<span v-if="item.net_weight > 0" class="font-bold text-gray-900 dark:text-white">
+						Net: {{ item.net_weight }}g
+					</span>
+					<span v-if="item.gross_weight > 0" class="font-semibold text-gray-700 dark:text-white/90">
+						Gross: {{ item.gross_weight }}g
+					</span>
+					<span v-if="item.stone_weight > 0" class="font-semibold text-red-600 dark:text-red-400">
+						Stn: -{{ item.stone_weight }}g
+					</span>
 				</div>
 			</div>
 
 			<div
-				class="mt-auto pt-1.5 border-t border-gray-50 dark:border-gray-800 flex items-center justify-between"
+				class="mt-auto pt-2 border-t border-gray-100 dark:border-warm-border/30 flex flex-col gap-1.5"
 			>
-				<div class="flex flex-col">
-					<span class="text-[9px] text-gray-500 dark:text-gray-400">Price</span>
-					<span class="text-xs font-extrabold text-[#D4AF37] font-mono leading-tight">
+				<div class="flex justify-between items-baseline">
+					<span class="text-[8px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-bold">Price</span>
+					<span class="text-xs font-black text-[#D4AF37] font-mono leading-none">
 						{{ formatCurrency(item.price) }}
 					</span>
 				</div>
 
 				<button
 					@click.stop="quickAdd"
-					class="bg-gray-900 dark:bg-[#D4AF37] text-white dark:text-black w-7 h-7 rounded-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-md"
+					class="w-full py-1.5 border border-[#CBA358] hover:bg-[#CBA358] text-[#CBA358] hover:text-[#1E2022] font-bold text-[10px] rounded-md transition-all duration-200 flex items-center justify-center gap-1 active:scale-95 shadow-sm"
 					title="Add to Cart"
 					data-testid="add-to-cart-btn"
 				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-4 w-4"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 4v16m8-8H4"
-						/>
-					</svg>
+					+ Add to Cart
 				</button>
 			</div>
 		</div>
@@ -136,6 +95,8 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+
+const baseUrl = import.meta.env.BASE_URL
 
 const props = defineProps({
 	item: {
@@ -146,6 +107,40 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['quick-add', 'open-details'])
+
+function getJewelryCategory(item) {
+	const name = (item.item_name || '').toLowerCase();
+	const group = (item.item_group || '').toLowerCase();
+	const type = (item.jewelry_type || '').toLowerCase();
+	const cat = (item.category || '').toLowerCase();
+	
+	if (name.includes('ring') || group.includes('ring') || type.includes('ring') || cat.includes('ring')) {
+		return 'ring';
+	}
+	if (name.includes('earring') || group.includes('earring') || type.includes('earring') || cat.includes('earring')) {
+		return 'earring';
+	}
+	if (name.includes('pendant') || name.includes('gemstone') || group.includes('pendant') || type.includes('pendant') || cat.includes('pendant')) {
+		return 'pendant';
+	}
+	if (name.includes('watch') || name.includes('timepiece') || group.includes('watch') || type.includes('watch') || cat.includes('watch')) {
+		return 'watch';
+	}
+	if (name.includes('bracelet') || name.includes('bangle') || group.includes('bangle') || group.includes('bracelet') || type.includes('bracelet') || cat.includes('bracelet') || name.includes('cuff')) {
+		return 'bracelet';
+	}
+	if (name.includes('necklace') || name.includes('choker') || group.includes('necklace') || type.includes('necklace') || cat.includes('necklace')) {
+		return 'necklace';
+	}
+	// Smart resolution for Chain, Link, Rope, Cuban
+	if (name.includes('chain') || name.includes('link') || name.includes('rope') || name.includes('cuban') || group.includes('chain') || type.includes('chain')) {
+		if (/7|8|9/.test(name)) {
+			return 'bracelet';
+		}
+		return 'necklace';
+	}
+	return 'jewel';
+}
 
 const imageFailed = ref(false)
 watch(

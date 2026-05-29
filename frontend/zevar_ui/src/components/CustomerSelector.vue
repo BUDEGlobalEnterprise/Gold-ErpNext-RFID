@@ -3,13 +3,13 @@
 		<!-- Selected Customer Display -->
 		<div
 			v-if="customer && !showSearch"
-			class="flex items-center justify-between p-3 bg-gray-50 dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border rounded-xl"
+			class="flex items-center justify-between p-2.5 bg-gray-50/50 dark:bg-warm-dark-700/30 border border-gray-100 dark:border-warm-border/20 rounded-xl"
 		>
-			<div class="flex items-center gap-3 flex-1 min-w-0">
+			<div class="flex items-center gap-2.5 flex-1 min-w-0">
 				<div
-					class="w-10 h-10 rounded-full bg-[#D4AF37]/20 flex items-center justify-center text-[#D4AF37] flex-shrink-0"
+					class="w-8 h-8 rounded-full bg-[#D4AF37]/15 flex items-center justify-center text-[#D4AF37] flex-shrink-0"
 				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -19,33 +19,33 @@
 					</svg>
 				</div>
 				<div class="min-w-0 flex-1">
-					<div class="font-semibold text-gray-900 dark:text-white text-sm truncate">
+					<div class="font-bold text-gray-900 dark:text-white text-xs truncate">
 						{{ customer.display_name || customer.customer_name || customer.name }}
 						<span
 							v-if="
 								customer.name &&
 								customer.name !== (customer.display_name || customer.customer_name)
 							"
-							class="text-xs text-gray-500 font-normal ml-1"
+							class="text-[10px] text-gray-400 font-normal ml-1"
 							>({{ customer.name }})</span
 						>
 					</div>
 					<div
 						v-if="customer.mobile_no || customer.email_id"
-						class="text-xs text-gray-500 truncate"
+						class="text-[10px] text-gray-400 truncate mt-0.5"
 					>
 						{{ customer.mobile_no || customer.email_id }}
 					</div>
 				</div>
 			</div>
-			<div class="flex items-center gap-1 flex-shrink-0">
+			<div class="flex items-center gap-0.5 flex-shrink-0">
 				<button
 					v-if="isAdmin && customer.name"
 					@click.prevent="openEditModal(customer)"
-					class="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-[#D4AF37]"
+					class="p-1.5 hover:bg-gray-200/50 dark:hover:bg-white/5 rounded-full transition-colors text-gray-400 hover:text-[#D4AF37]"
 					title="Edit Customer"
 				>
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -56,10 +56,10 @@
 				</button>
 				<button
 					@click="clearAndShowSearch"
-					class="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full transition-colors text-gray-400"
+					class="p-1.5 hover:bg-gray-200/50 dark:hover:bg-white/5 rounded-full transition-colors text-gray-400 hover:text-red-500"
 					title="Change Customer"
 				>
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -73,46 +73,6 @@
 
 		<!-- Search / Create UI -->
 		<div v-else class="space-y-3">
-			<!-- Recent Customers Section (Admin/Manager only) -->
-			<div v-if="isAdmin && recentCustomers.length > 0 && !searchQuery" class="space-y-2">
-				<div class="flex items-center justify-between">
-					<span
-						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-						>Recent Customers</span
-					>
-					<button
-						v-if="recentCustomers.length >= 10"
-						@click="loadMoreRecent"
-						class="text-[10px] text-[#D4AF37] font-medium hover:underline"
-					>
-						Load more
-					</button>
-				</div>
-				<div class="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
-					<button
-						v-for="rc in recentCustomers"
-						:key="rc.name"
-						@click="selectCustomer(rc)"
-						class="flex-shrink-0 flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-xl hover:border-[#D4AF37]/50 hover:bg-[#D4AF37]/5 transition min-w-[140px] max-w-[200px]"
-					>
-						<div
-							class="w-7 h-7 rounded-full bg-[#D4AF37]/20 flex items-center justify-center text-[#D4AF37] text-xs font-bold flex-shrink-0"
-						>
-							{{ getInitials(rc.customer_name) }}
-						</div>
-						<div class="min-w-0 flex-1 text-left">
-							<div
-								class="text-xs font-medium text-gray-900 dark:text-white truncate"
-							>
-								{{ rc.customer_name }}
-							</div>
-							<div class="text-[10px] text-gray-500 truncate">
-								{{ rc.mobile_no || rc.email_id || 'No contact' }}
-							</div>
-						</div>
-					</button>
-				</div>
-			</div>
 
 			<!-- Edit Customer Modal (Admin only) -->
 			<Teleport to="body">
