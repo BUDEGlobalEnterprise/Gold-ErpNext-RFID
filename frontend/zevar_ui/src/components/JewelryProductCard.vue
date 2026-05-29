@@ -168,7 +168,7 @@
 						<p class="text-xs text-gray-400 mb-0.5">Price</p>
 						<div class="flex items-baseline gap-2">
 							<span
-								class="text-xl font-bold font-serif"
+								class="text-xl font-bold font-sans"
 								:class="isDark ? 'text-white' : 'text-gray-900'"
 								>{{ formatPrice(product.price) }}</span
 							>

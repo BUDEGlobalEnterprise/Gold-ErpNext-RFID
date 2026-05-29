@@ -162,7 +162,7 @@ const isMobile = computed(() => {
 
 const catalog = ref([])
 const start = ref(0)
-const PAGE_LENGTH = 20
+const PAGE_LENGTH = 50
 const hasMore = ref(true)
 
 const categoryItems = computed(() => {

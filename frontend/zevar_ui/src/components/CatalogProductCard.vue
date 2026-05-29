@@ -83,7 +83,7 @@
 			<!-- Price -->
 			<div class="pt-1.5 border-t border-gray-100">
 				<div class="flex items-baseline gap-2">
-					<span class="text-base font-bold text-gray-900 font-serif leading-tight">{{
+					<span class="text-base font-bold text-gray-900 font-sans leading-tight">{{
 						formatPrice(product.price)
 					}}</span>
 					<span

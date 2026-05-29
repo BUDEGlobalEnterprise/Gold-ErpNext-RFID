@@ -7,25 +7,16 @@
 		@close="close"
 	>
 		<div class="flex flex-col md:flex-row">
-			<!-- Left: Image -->
+			<!-- Left: Luxury Vector Placeholder -->
 			<div
-				class="w-full md:w-1/2 bg-gray-50 dark:bg-[#0F1115] flex items-center justify-center p-8 border-r border-gray-100 dark:border-warm-border/50 relative"
+				class="w-full md:w-1/2 relative overflow-hidden flex items-center justify-center border-r border-gray-100 dark:border-warm-border/50 bg-[#F3F1ED] dark:bg-warm-dark-900 min-h-[300px] md:min-h-[500px]"
 			>
 				<img
-					v-if="details.image"
-					:src="details.image"
-					class="max-h-[60vh] object-contain drop-shadow-xl transform hover:scale-105 transition-transform duration-500"
+					:src="`${baseUrl}placeholders/${getJewelryCategory(details)}.png`"
+					:alt="details.item_name"
+					class="w-full h-full object-cover"
+					@error="(e) => e.target.src = `${baseUrl}placeholders/jewel.png`"
 				/>
-				<div v-else class="text-gray-300 dark:text-gray-700">
-					<svg class="h-32 w-32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="1"
-							d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-						/>
-					</svg>
-				</div>
 			</div>
 
 			<!-- Right: Details -->
@@ -39,7 +30,7 @@
 				<div v-else>
 					<div class="mb-6">
 						<h2
-							class="text-2xl font-serif font-bold text-gray-900 dark:text-white leading-tight"
+							class="text-2xl font-sans font-bold text-gray-900 dark:text-white leading-tight"
 						>
 							{{ details.item_name }}
 						</h2>
@@ -173,7 +164,7 @@
 								>
 							</div>
 							<span
-								class="text-3xl font-serif font-bold text-gray-900 dark:text-white tracking-tight"
+								class="text-3xl font-sans font-bold text-gray-900 dark:text-white tracking-tight"
 								>{{ formatCurrency(details.final_price) }}</span
 							>
 						</div>
@@ -208,6 +199,42 @@ import BaseModal from './BaseModal.vue'
 const props = defineProps(['show', 'itemCode'])
 const emit = defineEmits(['close'])
 const cart = useCartStore()
+
+const baseUrl = import.meta.env.BASE_URL
+
+function getJewelryCategory(item) {
+	const name = (item.item_name || '').toLowerCase();
+	const group = (item.item_group || '').toLowerCase();
+	const type = (item.jewelry_type || '').toLowerCase();
+	const cat = (item.category || '').toLowerCase();
+	
+	if (name.includes('ring') || group.includes('ring') || type.includes('ring') || cat.includes('ring')) {
+		return 'ring';
+	}
+	if (name.includes('earring') || group.includes('earring') || type.includes('earring') || cat.includes('earring')) {
+		return 'earring';
+	}
+	if (name.includes('pendant') || name.includes('gemstone') || group.includes('pendant') || type.includes('pendant') || cat.includes('pendant')) {
+		return 'pendant';
+	}
+	if (name.includes('watch') || name.includes('timepiece') || group.includes('watch') || type.includes('watch') || cat.includes('watch')) {
+		return 'watch';
+	}
+	if (name.includes('bracelet') || name.includes('bangle') || group.includes('bangle') || group.includes('bracelet') || type.includes('bracelet') || cat.includes('bracelet') || name.includes('cuff')) {
+		return 'bracelet';
+	}
+	if (name.includes('necklace') || name.includes('choker') || group.includes('necklace') || type.includes('necklace') || cat.includes('necklace')) {
+		return 'necklace';
+	}
+	// Smart resolution for Chain, Link, Rope, Cuban
+	if (name.includes('chain') || name.includes('link') || name.includes('rope') || name.includes('cuban') || group.includes('chain') || type.includes('chain')) {
+		if (/7|8|9/.test(name)) {
+			return 'bracelet';
+		}
+		return 'necklace';
+	}
+	return 'jewel';
+}
 
 const details = ref({})
 const loading = ref(false)
