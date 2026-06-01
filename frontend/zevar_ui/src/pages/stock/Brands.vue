@@ -31,6 +31,7 @@
 					<button
 						@click="loadData"
 						class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700"
+						title="Refresh"
 					>
 						<svg
 							class="w-4 h-4 text-gray-500"
@@ -47,8 +48,23 @@
 							/>
 						</svg>
 					</button>
+					<button
+						@click="openCreate"
+						class="flex items-center gap-1.5 px-3 py-2 bg-[#D4AF37] text-white rounded-lg text-xs font-bold hover:bg-[#C4A030] transition"
+					>
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+							/>
+						</svg>
+						Add Brand
+					</button>
 				</div>
 			</div>
+
 			<div class="flex-1 overflow-y-auto min-h-0">
 				<div
 					v-if="stock.brandsResource.loading && !stock.brands.length"
@@ -60,9 +76,23 @@
 				</div>
 				<div
 					v-else-if="!stock.brands.length"
-					class="text-center py-20 text-gray-400 text-sm"
+					class="flex flex-col items-center justify-center py-20 text-gray-400"
 				>
-					No brands found
+					<svg
+						class="w-16 h-16 mb-4 opacity-30"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="1"
+							d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+						/>
+					</svg>
+					<p class="text-sm font-bold">No brands found</p>
+					<p class="text-xs mt-1">Add a brand to start categorizing items</p>
 				</div>
 				<div
 					v-else
@@ -72,6 +102,7 @@
 						v-for="brand in stock.brands"
 						:key="brand.name"
 						class="premium-card !p-4 cursor-pointer hover:border-[#D4AF37]/50 flex flex-col items-center text-center"
+						@click="viewBrand(brand)"
 					>
 						<div
 							class="w-16 h-16 rounded-full bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 flex items-center justify-center mb-3 overflow-hidden"
@@ -96,22 +127,333 @@
 					</div>
 				</div>
 			</div>
+
+			<!-- Brand Items Modal -->
+			<div
+				v-if="selectedBrand"
+				class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+				@click.self="selectedBrand = null"
+			>
+				<div
+					class="premium-card !rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto m-4"
+				>
+					<div class="flex items-center justify-between mb-4">
+						<div class="flex items-center gap-3">
+							<div
+								class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 flex items-center justify-center overflow-hidden"
+							>
+								<img
+									v-if="selectedBrand.image"
+									:src="selectedBrand.image"
+									class="w-full h-full object-cover"
+								/>
+								<span v-else class="text-xl font-bold text-[#D4AF37]">{{
+									(selectedBrand.brand_name || selectedBrand.name || '?')[0]
+								}}</span>
+							</div>
+							<div>
+								<h3 class="text-lg font-bold text-gray-900 dark:text-white">
+									{{ selectedBrand.brand_name || selectedBrand.name }}
+								</h3>
+								<p class="text-xs text-gray-500">{{ brandItems.length }} items</p>
+							</div>
+						</div>
+						<button
+							@click="selectedBrand = null"
+							class="p-1 hover:bg-gray-100 dark:hover:bg-warm-dark-700 rounded-lg"
+						>
+							<svg
+								class="w-5 h-5 text-gray-500"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M6 18L18 6M6 6l12 12"
+								/>
+							</svg>
+						</button>
+					</div>
+					<div v-if="brandItems.length" class="space-y-1">
+						<div
+							v-for="item in brandItems"
+							:key="item.item_code"
+							class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-warm-border/30 last:border-0"
+						>
+							<div>
+								<div class="text-xs font-bold text-gray-900 dark:text-white">
+									{{ item.item_name }}
+								</div>
+								<div class="text-[10px] text-gray-500">
+									{{ item.item_code }} · {{ item.item_group }}
+								</div>
+							</div>
+							<div class="text-right text-xs font-mono text-[#D4AF37]">
+								${{ Number(item.standard_rate || 0).toFixed(2) }}
+							</div>
+						</div>
+					</div>
+					<div v-else-if="!loadingItems" class="text-center py-10 text-sm text-gray-400">
+						No items for this brand
+					</div>
+					<div v-if="loadingItems" class="flex items-center justify-center py-10">
+						<div
+							class="animate-spin w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full"
+						></div>
+					</div>
+					<div
+						class="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-warm-border/50"
+					>
+						<button
+							@click="openEdit(selectedBrand)"
+							class="flex-1 py-2 bg-[#D4AF37] text-white rounded-lg text-xs font-bold hover:bg-[#C4A030] transition"
+						>
+							Edit
+						</button>
+						<button
+							@click="confirmDelete(selectedBrand)"
+							class="py-2 px-4 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs font-bold hover:bg-red-100 transition"
+						>
+							Delete
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Create/Edit Modal -->
+			<div
+				v-if="showForm"
+				class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+				@click.self="showForm = false"
+			>
+				<div
+					class="premium-card !rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto m-4"
+				>
+					<div class="flex items-center justify-between mb-4">
+						<h3 class="text-lg font-bold text-gray-900 dark:text-white">
+							{{ formMode === 'edit' ? 'Edit Brand' : 'Add Brand' }}
+						</h3>
+						<button
+							@click="showForm = false"
+							class="p-1 hover:bg-gray-100 dark:hover:bg-warm-dark-700 rounded-lg"
+						>
+							<svg
+								class="w-5 h-5 text-gray-500"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M6 18L18 6M6 6l12 12"
+								/>
+							</svg>
+						</button>
+					</div>
+					<div class="space-y-3">
+						<div>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Brand Name *</label
+							>
+							<input
+								v-model="form.brand"
+								type="text"
+								placeholder="e.g. Tiffany & Co."
+								class="w-full mt-1 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none"
+							/>
+						</div>
+						<div>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Logo</label
+							>
+							<div class="flex gap-2 mt-1">
+								<input
+									v-model="form.image"
+									type="text"
+									placeholder="Logo URL or upload"
+									class="flex-1 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none"
+								/>
+								<label
+									class="px-3 py-2 bg-gray-100 dark:bg-warm-dark-700 border border-gray-200 dark:border-warm-border rounded-lg text-xs font-bold cursor-pointer hover:bg-gray-200"
+								>
+									Upload
+									<input
+										type="file"
+										accept="image/*"
+										class="hidden"
+										@change="onFileChosen"
+									/>
+								</label>
+							</div>
+							<div
+								v-if="form.image"
+								class="mt-2 h-20 w-20 rounded-full overflow-hidden bg-gray-100"
+							>
+								<img :src="form.image" class="w-full h-full object-cover" />
+							</div>
+						</div>
+						<div>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Description</label
+							>
+							<textarea
+								v-model="form.description"
+								rows="3"
+								placeholder="Optional"
+								class="w-full mt-1 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none"
+							></textarea>
+						</div>
+					</div>
+					<button
+						@click="handleSave"
+						:disabled="saving"
+						class="w-full mt-4 py-2.5 bg-[#D4AF37] text-white rounded-lg text-sm font-bold hover:bg-[#C4A030] transition disabled:opacity-50"
+					>
+						{{
+							saving
+								? 'Saving…'
+								: formMode === 'edit'
+								? 'Save Changes'
+								: 'Create Brand'
+						}}
+					</button>
+				</div>
+			</div>
 		</div>
 	</AppLayout>
 </template>
+
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
+import { toast } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
 import { useStockStore } from '@/stores/stock.js'
+
 const stock = useStockStore()
 const search = ref('')
+const selectedBrand = ref(null)
+const brandItems = ref([])
+const loadingItems = ref(false)
+const showForm = ref(false)
+const formMode = ref('create')
+const saving = ref(false)
+const form = reactive({
+	brand: '',
+	image: '',
+	description: '',
+})
+
 let searchTimer = null
-function loadData() {
-	stock.loadBrands({ search: search.value || undefined })
-}
 function debouncedSearch() {
 	clearTimeout(searchTimer)
 	searchTimer = setTimeout(loadData, 300)
 }
+
+function loadData() {
+	stock.loadBrands({ search: search.value || undefined })
+}
+
+async function viewBrand(brand) {
+	selectedBrand.value = brand
+	brandItems.value = []
+	loadingItems.value = true
+	try {
+		const res = await stock.loadItemsForBrand(brand.name)
+		brandItems.value = res?.items || []
+	} catch (e) {
+		console.warn('Could not load items', e)
+	} finally {
+		loadingItems.value = false
+	}
+}
+
+function openCreate() {
+	formMode.value = 'create'
+	Object.assign(form, { brand: '', image: '', description: '' })
+	showForm.value = true
+}
+
+function openEdit(brand) {
+	formMode.value = 'edit'
+	Object.assign(form, {
+		brand: brand.brand_name || brand.name,
+		image: brand.image || '',
+		description: brand.description || '',
+	})
+	selectedBrand.value = null
+	showForm.value = true
+}
+
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
+
+function onFileChosen(ev) {
+	const file = ev.target.files?.[0]
+	if (!file) return
+	if (file.size > MAX_IMAGE_SIZE_BYTES) {
+		toast({
+			title: 'Image too large',
+			text: 'Please choose an image under 5 MB.',
+			icon: 'alert-circle',
+			intent: 'error',
+		})
+		ev.target.value = ''
+		return
+	}
+	const reader = new FileReader()
+	reader.onload = (e) => {
+		form.image = e.target.result
+	}
+	reader.readAsDataURL(file)
+}
+
+async function handleSave() {
+	if (!form.brand) {
+		toast({ title: 'Brand name is required', icon: 'alert-circle', intent: 'warning' })
+		return
+	}
+	saving.value = true
+	try {
+		if (formMode.value === 'edit' && selectedBrand.value?.name) {
+			await stock.updateBrand(selectedBrand.value.name, { ...form })
+		} else {
+			await stock.createBrand({ ...form })
+		}
+		toast({ title: 'Brand saved', icon: 'check', intent: 'success' })
+		showForm.value = false
+		loadData()
+	} catch (e) {
+		toast({
+			title: 'Save failed',
+			text: e?.message || String(e),
+			icon: 'alert-circle',
+			intent: 'error',
+		})
+	} finally {
+		saving.value = false
+	}
+}
+
+async function confirmDelete(brand) {
+	if (!confirm(`Delete brand "${brand.brand_name || brand.name}"? You can't undo this.`)) return
+	try {
+		await stock.deleteBrand(brand.name)
+		toast({ title: 'Brand deleted', icon: 'check', intent: 'success' })
+		selectedBrand.value = null
+		loadData()
+	} catch (e) {
+		toast({
+			title: 'Delete failed',
+			text: e?.message || String(e),
+			icon: 'alert-circle',
+			intent: 'error',
+		})
+	}
+}
+
 onMounted(loadData)
 </script>

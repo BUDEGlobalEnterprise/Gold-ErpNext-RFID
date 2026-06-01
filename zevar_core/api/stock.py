@@ -339,6 +339,54 @@ def disassemble(name):
 	return {"success": True, "name": doc.name}
 
 
+@frappe.whitelist(allow_guest=False)
+def submit_assembly(name):
+	frappe.has_permission("Stock Entry", ptype="submit", throw=True)
+	name = cstr(name).strip()
+	doc = frappe.get_doc("Stock Entry", name)
+	if doc.purpose not in ("Manufacture", "Repack"):
+		frappe.throw("Can only submit Manufacture or Repack entries")
+	if doc.docstatus != 0:
+		frappe.throw("Only draft entries can be submitted")
+	doc.submit()
+	return {"success": True, "name": doc.name, "status": "Submitted"}
+
+
+@frappe.whitelist(allow_guest=False)
+def get_assembly_detail(name):
+	frappe.has_permission("Stock Entry", ptype="read", throw=True)
+	name = cstr(name).strip()
+	if not frappe.db.exists("Stock Entry", name):
+		frappe.throw("Stock Entry not found")
+	doc = frappe.get_doc("Stock Entry", name)
+	items = []
+	for row in doc.items:
+		items.append(
+			{
+				"item_code": row.item_code,
+				"item_name": row.item_name,
+				"qty": flt(row.qty),
+				"s_warehouse": row.s_warehouse,
+				"t_warehouse": row.t_warehouse,
+				"basic_rate": flt(row.basic_rate),
+				"amount": flt(row.amount),
+			}
+		)
+	return {
+		"success": True,
+		"assembly": {
+			"name": doc.name,
+			"purpose": doc.purpose,
+			"posting_date": str(doc.posting_date),
+			"from_warehouse": doc.from_warehouse,
+			"to_warehouse": doc.to_warehouse,
+			"total_amount": flt(doc.total_amount),
+			"docstatus": doc.docstatus,
+			"items": items,
+		},
+	}
+
+
 # ─── METALS ──────────────────────────────────────────────────────────────────
 
 

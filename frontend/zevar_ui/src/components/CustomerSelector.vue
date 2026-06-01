@@ -41,7 +41,7 @@
 			<div class="flex items-center gap-0.5 flex-shrink-0">
 				<button
 					v-if="isAdmin && customer.name"
-					@click.prevent="openEditModal(customer)"
+					@click.prevent="openEditCustomer(customer)"
 					class="p-1.5 hover:bg-gray-200/50 dark:hover:bg-white/5 rounded-full transition-colors text-gray-400 hover:text-[#D4AF37]"
 					title="Edit Customer"
 				>
@@ -51,6 +51,20 @@
 							stroke-linejoin="round"
 							stroke-width="2"
 							d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+						/>
+					</svg>
+				</button>
+				<button
+					@click.prevent="$emit('open-clienteling')"
+					class="p-1.5 hover:bg-[#D4AF37]/10 rounded-full transition-colors text-gray-400 hover:text-[#D4AF37]"
+					title="View Client Profile"
+				>
+					<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
 						/>
 					</svg>
 				</button>
@@ -73,453 +87,6 @@
 
 		<!-- Search / Create UI -->
 		<div v-else class="space-y-3">
-
-			<!-- Edit Customer Modal (Admin only) -->
-			<Teleport to="body">
-				<Transition name="fade">
-					<div
-						v-if="showEditModal"
-						class="fixed inset-0 z-[200] flex items-center justify-center p-4"
-					>
-						<div
-							@click="closeEditModal"
-							class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
-						></div>
-						<div
-							class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col border border-transparent dark:border-warm-border"
-						>
-							<!-- Header -->
-							<div
-								class="p-6 pb-4 border-b border-gray-100 dark:border-warm-border flex items-center justify-between flex-shrink-0"
-							>
-								<h3 class="text-lg font-bold text-gray-900 dark:text-white">
-									Edit Customer
-								</h3>
-								<button
-									@click="closeEditModal"
-									class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition"
-								>
-									<svg
-										class="w-5 h-5 text-gray-400"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M6 18L18 6M6 6l12 12"
-										/>
-									</svg>
-								</button>
-							</div>
-
-							<!-- Tabs -->
-							<div
-								class="flex border-b border-gray-100 dark:border-warm-border px-6 flex-shrink-0"
-							>
-								<button
-									v-for="tab in tabs"
-									:key="tab.key"
-									@click="editTab = tab.key"
-									class="px-4 py-3 text-sm font-medium transition-colors relative"
-									:class="
-										editTab === tab.key
-											? 'text-blue-600 dark:text-blue-400'
-											: 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-									"
-								>
-									{{ tab.label }}
-									<div
-										v-if="editTab === tab.key"
-										class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400"
-									></div>
-								</button>
-							</div>
-
-							<!-- Loading State -->
-							<div
-								v-if="editLoading"
-								class="flex-1 flex items-center justify-center py-12"
-							>
-								<div
-									class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-[#D4AF37]"
-								></div>
-							</div>
-
-							<!-- Form Content - Scrollable -->
-							<div v-else class="flex-1 overflow-y-auto p-6 space-y-5">
-								<!-- Tab 1: Contact Details -->
-								<div v-if="editTab === 'contact'" class="space-y-4">
-									<div class="grid grid-cols-2 gap-3">
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Contact type</label
-											>
-											<select
-												v-model="editForm.customer_type"
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											>
-												<option value="Individual">Individual</option>
-												<option value="Company">Company</option>
-											</select>
-										</div>
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Customer group</label
-											>
-											<input
-												v-model="editForm.customer_group"
-												type="text"
-												placeholder="e.g. VIP, Standard"
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											/>
-										</div>
-									</div>
-
-									<div class="grid grid-cols-2 gap-3">
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Mobile</label
-											>
-											<input
-												v-model="editForm.mobile_no"
-												type="tel"
-												placeholder="Mobile number"
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											/>
-										</div>
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Email</label
-											>
-											<input
-												v-model="editForm.email_id"
-												type="email"
-												placeholder="email@example.com"
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											/>
-										</div>
-									</div>
-
-									<div class="grid grid-cols-3 gap-3">
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Gender</label
-											>
-											<select
-												v-model="editForm.gender"
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											>
-												<option value="">--</option>
-												<option value="Male">Male</option>
-												<option value="Female">Female</option>
-												<option value="Other">Other</option>
-											</select>
-										</div>
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Birth date</label
-											>
-											<input
-												v-model="editForm.birth_date"
-												type="date"
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											/>
-										</div>
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Phone 2</label
-											>
-											<input
-												v-model="editForm.phone2"
-												type="tel"
-												placeholder="Secondary phone"
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											/>
-										</div>
-									</div>
-
-									<div>
-										<label
-											class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-											>Profession</label
-										>
-										<input
-											v-model="editForm.profession"
-											type="text"
-											placeholder="Profession"
-											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-										/>
-									</div>
-								</div>
-
-								<!-- Tab 2: Extra Details -->
-								<div v-if="editTab === 'extra'" class="space-y-4">
-									<div class="grid grid-cols-2 gap-3">
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Partner name</label
-											>
-											<input
-												v-model="editForm.partner_name"
-												type="text"
-												placeholder="Partner/spouse name"
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											/>
-										</div>
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Partner phone</label
-											>
-											<input
-												v-model="editForm.partner_phone"
-												type="tel"
-												placeholder="Partner phone"
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											/>
-										</div>
-									</div>
-
-									<div class="grid grid-cols-2 gap-3">
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Partner email</label
-											>
-											<input
-												v-model="editForm.partner_email"
-												type="email"
-												placeholder="Partner email"
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											/>
-										</div>
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Tags</label
-											>
-											<input
-												v-model="editForm.tags"
-												type="text"
-												placeholder="VIP, Wholesale, etc."
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											/>
-										</div>
-									</div>
-
-									<div class="grid grid-cols-2 gap-3">
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Birth date</label
-											>
-											<input
-												v-model="editForm.birth_date"
-												type="date"
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											/>
-										</div>
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Marriage date</label
-											>
-											<input
-												v-model="editForm.marriage_date"
-												type="date"
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											/>
-										</div>
-									</div>
-
-									<label
-										class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#0F1115] rounded-lg cursor-pointer"
-									>
-										<input
-											v-model="editForm.accepts_marketing"
-											type="checkbox"
-											class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-										/>
-										<span
-											class="text-sm font-medium text-gray-700 dark:text-gray-300"
-											>Accepts email marketing</span
-										>
-									</label>
-
-									<label
-										class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#0F1115] rounded-lg cursor-pointer"
-									>
-										<input
-											v-model="editForm.tax_exempt"
-											type="checkbox"
-											class="w-4 h-4 rounded border-gray-300 text-[#D4AF37] focus:ring-[#D4AF37]"
-										/>
-										<div>
-											<span
-												class="text-sm font-medium text-gray-700 dark:text-gray-300"
-												>Tax Exempt</span
-											>
-											<p class="text-xs text-gray-500">
-												Customer is exempt from sales tax
-											</p>
-										</div>
-									</label>
-								</div>
-
-								<!-- Tab 3: Sizes -->
-								<div v-if="editTab === 'sizes'" class="space-y-4">
-									<div class="grid grid-cols-2 gap-3">
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Ring left size</label
-											>
-											<input
-												v-model="editForm.ring_left_size"
-												type="text"
-												placeholder="e.g. 7"
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											/>
-										</div>
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Ring right size</label
-											>
-											<input
-												v-model="editForm.ring_right_size"
-												type="text"
-												placeholder="e.g. 7.5"
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											/>
-										</div>
-									</div>
-									<div class="grid grid-cols-2 gap-3">
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Wrist size</label
-											>
-											<input
-												v-model="editForm.wrist_size"
-												type="text"
-												placeholder="e.g. 7 inches"
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											/>
-										</div>
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Neck size</label
-											>
-											<input
-												v-model="editForm.neck_size"
-												type="text"
-												placeholder="e.g. 18 inches"
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											/>
-										</div>
-									</div>
-
-									<div class="grid grid-cols-2 gap-3">
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Ring size (single hand)</label
-											>
-											<input
-												v-model="editForm.ring_size"
-												type="text"
-												placeholder="e.g. 7"
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											/>
-										</div>
-										<div>
-											<label
-												class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block"
-												>Preferred metal</label
-											>
-											<input
-												v-model="editForm.preferred_metal"
-												type="text"
-												placeholder="Gold, Silver, etc."
-												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
-											/>
-										</div>
-									</div>
-								</div>
-
-								<!-- Edit Error Message -->
-								<div
-									v-if="editError"
-									class="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 px-4 py-3 rounded-lg border border-red-200 dark:border-red-800/30"
-								>
-									{{ editError }}
-								</div>
-
-								<!-- Edit Success Message -->
-								<div
-									v-if="editSuccess"
-									class="text-sm text-green-600 bg-green-50 dark:bg-green-900/20 px-4 py-3 rounded-lg border border-green-200 dark:border-green-800/30"
-								>
-									{{ editSuccess }}
-								</div>
-							</div>
-
-							<!-- Footer -->
-							<div
-								v-if="!editLoading"
-								class="p-6 pt-4 border-t border-gray-100 dark:border-warm-border flex gap-3 flex-shrink-0"
-							>
-								<button
-									@click="closeEditModal"
-									class="flex-1 py-2.5 rounded-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-warm-dark-700 dark:text-gray-300 dark:hover:bg-white/10 transition"
-								>
-									Close
-								</button>
-								<button
-									@click="saveCustomerEdit"
-									:disabled="savingEdit"
-									class="flex-1 py-2.5 rounded-lg font-bold text-white bg-[#D4AF37] hover:bg-[#b5952f] text-black disabled:opacity-50 transition flex items-center justify-center gap-2"
-								>
-									<svg
-										v-if="savingEdit"
-										class="animate-spin w-4 h-4"
-										fill="none"
-										viewBox="0 0 24 24"
-									>
-										<circle
-											class="opacity-25"
-											cx="12"
-											cy="12"
-											r="10"
-											stroke="currentColor"
-											stroke-width="4"
-										></circle>
-										<path
-											class="opacity-75"
-											fill="currentColor"
-											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-										></path>
-									</svg>
-									<span>{{ savingEdit ? 'Saving...' : 'Save changes' }}</span>
-								</button>
-							</div>
-						</div>
-					</div>
-				</Transition>
-			</Teleport>
 			<!-- Search Input -->
 			<div class="relative">
 				<input
@@ -703,9 +270,12 @@
 		<CustomerCreationModal
 			v-if="showCreateModalFlag"
 			:show="showCreateModalFlag"
-			:initial-name="searchQuery"
+			:initial-name="isEditMode ? '' : searchQuery"
+			:is-edit="isEditMode"
+			:customer-name="editCustomerNameRef"
 			@close="handleCancelCreate"
 			@created="onCustomerCreatedInSelector"
+			@updated="onCustomerUpdatedInSelector"
 		/>
 	</div>
 </template>
@@ -732,7 +302,7 @@ const props = defineProps({
 	},
 })
 
-const emit = defineEmits(['selected', 'cleared'])
+const emit = defineEmits(['selected', 'cleared', 'open-clienteling'])
 
 const cart = useCartStore()
 const session = useSessionStore()
@@ -745,22 +315,14 @@ const searchResults = ref([])
 const searching = ref(false)
 const showDropdown = ref(false)
 const showCreateModalFlag = ref(false)
+const isEditMode = ref(false)
+const editCustomerNameRef = ref('')
 const searchInput = ref(null)
 
 // Recent Customers
 const recentCustomers = ref([])
 const recentLimit = ref(10)
 const recentLoading = ref(false)
-
-// Edit Modal
-const showEditModal = ref(false)
-const editTab = ref('contact')
-const editLoading = ref(false)
-const savingEdit = ref(false)
-const editError = ref('')
-const editSuccess = ref('')
-const editCustomerName = ref('')
-const editForm = ref({})
 
 const recentCustomersResource = createResource({
 	url: 'zevar_core.api.customer.get_recent_customers',
@@ -787,152 +349,6 @@ async function loadMoreRecent() {
 	await loadRecentCustomers()
 }
 
-const editCustomerInfoResource = createResource({
-	url: 'zevar_core.api.customer.get_customer_edit_info',
-	auto: false,
-})
-
-async function openEditModal(customerData) {
-	editCustomerName.value = customerData.name || customerData.customer_name
-	showEditModal.value = true
-	editError.value = ''
-	editSuccess.value = ''
-	editTab.value = 'contact'
-	editLoading.value = true
-
-	try {
-		const r = await editCustomerInfoResource.submit({
-			customer_name: editCustomerName.value,
-		})
-		const data = r?.data || r
-		if (data) {
-			// Map API response to edit form
-			editForm.value = {
-				customer_type: data.customer_type || 'Individual',
-				mobile_no: data.mobile_no || '',
-				email_id: data.email_id || '',
-				gender: data.gender || '',
-				birth_date: data.birth_date || '',
-				profession: data.profession || '',
-				partner_name: data.partner_name || '',
-				partner_phone: data.partner_phone || '',
-				partner_email: data.partner_email || '',
-				marriage_date: data.marriage_date || '',
-				ring_size: data.ring_size || '',
-				preferred_metal: data.preferred_metal || '',
-				preferred_purity: data.preferred_purity || '',
-				tags: '',
-				internal_notes: data.internal_notes || '',
-				phone2: data.phone2 || '',
-				accepts_marketing: data.accepts_marketing == 1,
-				tax_exempt: data.tax_exempt == 1,
-				ring_left_size: data.ring_left_size || '',
-				ring_right_size: data.ring_right_size || '',
-				middle_left_size: data.middle_left_size || '',
-				middle_right_size: data.middle_right_size || '',
-				index_left_size: data.index_left_size || '',
-				index_right_size: data.index_right_size || '',
-				pink_left_size: data.pink_left_size || '',
-				pink_right_size: data.pink_right_size || '',
-				thumb_left_size: data.thumb_left_size || '',
-				thumb_right_size: data.thumb_right_size || '',
-				wrist_size: data.wrist_size || '',
-				neck_size: data.neck_size || '',
-				customer_group: data.customer_group || '',
-			}
-		}
-	} catch (e) {
-		editError.value = e?.message || 'Failed to load customer details'
-	} finally {
-		editLoading.value = false
-	}
-}
-
-async function saveCustomerEdit() {
-	savingEdit.value = true
-	editError.value = ''
-	editSuccess.value = ''
-
-	try {
-		const r = await createResource({
-			url: 'zevar_core.api.customer.update_customer',
-			params: {
-				customer_name: editCustomerName.value,
-				customer_type: editForm.value.customer_type || null,
-				mobile_no: editForm.value.mobile_no || null,
-				email_id: editForm.value.email_id || null,
-				gender: editForm.value.gender || null,
-				birth_date: editForm.value.birth_date || null,
-				profession: editForm.value.profession || null,
-				partner_name: editForm.value.partner_name || null,
-				partner_phone: editForm.value.partner_phone || null,
-				partner_email: editForm.value.partner_email || null,
-				marriage_date: editForm.value.marriage_date || null,
-				ring_size: editForm.value.ring_size || null,
-				preferred_metal: editForm.value.preferred_metal || null,
-				preferred_purity: editForm.value.preferred_purity || null,
-				tags: editForm.value.tags || null,
-				internal_notes: editForm.value.internal_notes || null,
-				phone2: editForm.value.phone2 || null,
-				accepts_marketing: editForm.value.accepts_marketing ? 1 : 0,
-				tax_exempt: editForm.value.tax_exempt ? 1 : 0,
-				ring_left_size: editForm.value.ring_left_size || null,
-				ring_right_size: editForm.value.ring_right_size || null,
-				middle_left_size: editForm.value.middle_left_size || null,
-				middle_right_size: editForm.value.middle_right_size || null,
-				index_left_size: editForm.value.index_left_size || null,
-				index_right_size: editForm.value.index_right_size || null,
-				pink_left_size: editForm.value.pink_left_size || null,
-				pink_right_size: editForm.value.pink_right_size || null,
-				thumb_left_size: editForm.value.thumb_left_size || null,
-				thumb_right_size: editForm.value.thumb_right_size || null,
-				wrist_size: editForm.value.wrist_size || null,
-				neck_size: editForm.value.neck_size || null,
-			},
-		}).fetch()
-
-		const data = r?.data || r
-		if (data && data.success) {
-			editSuccess.value = data.message || 'Customer updated successfully'
-
-			// Update cart if this is the currently selected customer
-			if (
-				cart.customer &&
-				(cart.customer.name === editCustomerName.value ||
-					cart.customer.customer_name === editCustomerName.value)
-			) {
-				const updated = { ...cart.customer }
-				if (editForm.value.mobile_no) updated.mobile_no = editForm.value.mobile_no
-				if (editForm.value.email_id) updated.email_id = editForm.value.email_id
-				cart.setCustomer(updated)
-			}
-
-			// Refresh recent customers list
-			await loadRecentCustomers()
-
-			// Close modal after delay
-			setTimeout(() => {
-				closeEditModal()
-			}, 1500)
-		} else {
-			editError.value = data?.message || 'Failed to update customer'
-		}
-	} catch (e) {
-		editError.value = e?.response?.data?.message || e?.message || 'Failed to update customer'
-		console.error('Customer update error:', e)
-	} finally {
-		savingEdit.value = false
-	}
-}
-
-function closeEditModal() {
-	showEditModal.value = false
-	editError.value = ''
-	editSuccess.value = ''
-	editForm.value = {}
-	editCustomerName.value = ''
-}
-
 function getInitials(name) {
 	if (!name) return '?'
 	return name
@@ -948,20 +364,57 @@ onMounted(() => {
 })
 
 function openCreateModal() {
+	isEditMode.value = false
+	editCustomerNameRef.value = ''
 	showCreateModalFlag.value = true
 	showDropdown.value = false
 }
 
+function openEditCustomer(customerData) {
+	isEditMode.value = true
+	editCustomerNameRef.value = customerData.name || customerData.customer_name
+	showCreateModalFlag.value = true
+}
+
 function handleCancelCreate() {
 	showCreateModalFlag.value = false
+	isEditMode.value = false
+	editCustomerNameRef.value = ''
 }
 
 function onCustomerCreatedInSelector(customerData) {
 	cart.setCustomer(customerData)
 	showCreateModalFlag.value = false
+	isEditMode.value = false
+	editCustomerNameRef.value = ''
 	showSearch.value = false
 	searchQuery.value = ''
 	emit('selected', cart.customer)
+}
+
+function onCustomerUpdatedInSelector(customerData) {
+	showCreateModalFlag.value = false
+	isEditMode.value = false
+	editCustomerNameRef.value = ''
+	if (customerData) {
+		const updatedId = customerData.name || customerData.customer_name
+		if (
+			cart.customer &&
+			updatedId &&
+			(cart.customer.name === updatedId || cart.customer.customer_name === updatedId)
+		) {
+			cart.setCustomer({ ...cart.customer, ...customerData })
+		}
+		if (updatedId) {
+			const idx = recentCustomers.value.findIndex(
+				(c) => c.name === updatedId || c.customer_name === updatedId
+			)
+			if (idx !== -1) {
+				recentCustomers.value[idx] = { ...recentCustomers.value[idx], ...customerData }
+			}
+		}
+	}
+	loadRecentCustomers()
 }
 
 const customer = computed(() => cart.customer)

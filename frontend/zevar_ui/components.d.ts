@@ -31,6 +31,7 @@ declare module 'vue' {
     ConsignmentModal: typeof import('./src/components/ConsignmentModal.vue')['default']
     CostBreakdownChart: typeof import('./src/components/profit/CostBreakdownChart.vue')['default']
     CreateLayawayModal: typeof import('./src/components/CreateLayawayModal.vue')['default']
+    CustomerClientelingDrawer: typeof import('./src/components/CustomerClientelingDrawer.vue')['default']
     CustomerCreationModal: typeof import('./src/components/CustomerCreationModal.vue')['default']
     CustomerFilterBar: typeof import('./src/components/CustomerFilterBar.vue')['default']
     CustomerSelector: typeof import('./src/components/CustomerSelector.vue')['default']

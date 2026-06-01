@@ -9,44 +9,73 @@
 						>{{ stock.assembliesTotal }} Entries</span
 					>
 				</div>
-				<button
-					@click="loadData"
-					class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700"
-				>
-					<svg
-						class="w-4 h-4 text-gray-500"
-						:class="{ 'animate-spin': stock.assembliesResource.loading }"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
+				<div class="flex items-center gap-2">
+					<button
+						@click="loadData"
+						class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700"
+						title="Refresh"
 					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357 2m15.357 2H15"
-						/>
-					</svg>
-				</button>
+						<svg
+							class="w-4 h-4 text-gray-500"
+							:class="{ 'animate-spin': stock.assembliesResource.loading }"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357 2m15.357 2H15"
+							/>
+						</svg>
+					</button>
+					<button
+						@click="openCreate"
+						class="flex items-center gap-1.5 px-3 py-2 bg-[#D4AF37] text-white rounded-lg text-xs font-bold hover:bg-[#C4A030] transition"
+					>
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+							/>
+						</svg>
+						New Assembly
+					</button>
+				</div>
 			</div>
-			<div class="flex flex-wrap gap-2 mb-4">
+
+			<div class="flex flex-wrap gap-2 mb-4 flex-shrink-0">
 				<button
-					v-for="f in ['All', 'Manufacture', 'Repack']"
-					:key="f"
-					@click="
-						purposeFilter = f === 'All' ? '' : f;
-						loadData();
-					"
+					v-for="f in purposeFilters"
+					:key="f.value || 'all'"
+					@click="activePurpose = f.value"
 					class="px-3 py-1.5 rounded-full text-xs font-bold transition"
 					:class="
-						(purposeFilter || 'All') === (f === 'All' && !purposeFilter ? 'All' : f)
+						activePurpose === f.value
 							? 'bg-[#D4AF37] text-white'
-							: 'bg-gray-100 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-300'
+							: 'bg-gray-100 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-warm-dark-600'
 					"
 				>
-					{{ f }}
+					{{ f.label }}
+				</button>
+				<button
+					v-for="s in statusFilters"
+					:key="s.value || 'all-status'"
+					@click="activeStatus = s.value"
+					class="px-3 py-1.5 rounded-full text-xs font-bold transition"
+					:class="
+						activeStatus === s.value
+							? 'bg-[#D4AF37] text-white'
+							: 'bg-gray-100 dark:bg-warm-dark-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-warm-dark-600'
+					"
+				>
+					{{ s.label }}
 				</button>
 			</div>
+
 			<div class="flex-1 overflow-y-auto min-h-0">
 				<div
 					v-if="stock.assembliesResource.loading && !stock.assemblies.length"
@@ -57,10 +86,24 @@
 					></div>
 				</div>
 				<div
-					v-else-if="!stock.assemblies.length"
-					class="text-center py-20 text-gray-400 text-sm"
+					v-else-if="!filteredAssemblies.length"
+					class="flex flex-col items-center justify-center py-20 text-gray-400"
 				>
-					No assembly entries found
+					<svg
+						class="w-16 h-16 mb-4 opacity-30"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="1"
+							d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+						/>
+					</svg>
+					<p class="text-sm font-bold">No assembly entries found</p>
+					<p class="text-xs mt-1">Create a new assembly to combine or repack items</p>
 				</div>
 				<div v-else class="premium-card !p-0 overflow-hidden">
 					<table class="w-full text-sm">
@@ -69,37 +112,37 @@
 								class="bg-gray-50 dark:bg-warm-dark-700 border-b border-gray-200 dark:border-warm-border/50"
 							>
 								<th
-									class="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase"
+									class="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider"
 								>
 									Entry
 								</th>
 								<th
-									class="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase hidden sm:table-cell"
+									class="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider hidden sm:table-cell"
 								>
 									Purpose
 								</th>
 								<th
-									class="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase hidden md:table-cell"
+									class="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider hidden md:table-cell"
 								>
 									Date
 								</th>
 								<th
-									class="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase hidden lg:table-cell"
+									class="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider hidden lg:table-cell"
 								>
 									From
 								</th>
 								<th
-									class="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase hidden lg:table-cell"
+									class="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider hidden lg:table-cell"
 								>
 									To
 								</th>
 								<th
-									class="text-right px-4 py-3 text-[10px] font-bold text-gray-500 uppercase"
+									class="text-right px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider"
 								>
 									Amount
 								</th>
 								<th
-									class="text-center px-4 py-3 text-[10px] font-bold text-gray-500 uppercase"
+									class="text-center px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider"
 								>
 									Status
 								</th>
@@ -107,9 +150,10 @@
 						</thead>
 						<tbody>
 							<tr
-								v-for="a in stock.assemblies"
+								v-for="a in filteredAssemblies"
 								:key="a.name"
-								class="border-b border-gray-100 dark:border-warm-border/50 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors"
+								class="border-b border-gray-100 dark:border-warm-border/50 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors cursor-pointer"
+								@click="viewAssembly(a)"
 							>
 								<td
 									class="px-4 py-3 text-xs font-bold text-gray-900 dark:text-white"
@@ -119,11 +163,7 @@
 								<td class="px-4 py-3 hidden sm:table-cell">
 									<span
 										class="text-[9px] font-bold px-2 py-0.5 rounded-full"
-										:class="
-											a.purpose === 'Manufacture'
-												? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
-												: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-										"
+										:class="purposeClass(a.purpose)"
 										>{{ a.purpose }}</span
 									>
 								</td>
@@ -150,30 +190,412 @@
 								<td class="px-4 py-3 text-center">
 									<span
 										class="text-[9px] font-bold px-2 py-1 rounded-full"
-										:class="
-											a.docstatus === 1
-												? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-												: 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
-										"
-										>{{ a.docstatus === 1 ? 'Submitted' : 'Draft' }}</span
+										:class="statusClass(a)"
 									>
+										{{
+											a.docstatus === 1
+												? 'Submitted'
+												: a.docstatus === 2
+												? 'Cancelled'
+												: 'Draft'
+										}}
+									</span>
 								</td>
 							</tr>
 						</tbody>
 					</table>
 				</div>
 			</div>
+
+			<!-- Detail Modal -->
+			<div
+				v-if="selectedAssembly"
+				class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+				@click.self="selectedAssembly = null"
+			>
+				<div
+					class="premium-card !rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto m-4"
+				>
+					<div class="flex items-center justify-between mb-4">
+						<h3 class="text-lg font-bold text-gray-900 dark:text-white">
+							{{ selectedAssembly.name }}
+						</h3>
+						<button
+							@click="selectedAssembly = null"
+							class="p-1 hover:bg-gray-100 dark:hover:bg-warm-dark-700 rounded-lg"
+						>
+							<svg
+								class="w-5 h-5 text-gray-500"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M6 18L18 6M6 6l12 12"
+								/>
+							</svg>
+						</button>
+					</div>
+					<div class="grid grid-cols-2 gap-3 mb-4">
+						<div>
+							<span class="text-[10px] text-gray-500 uppercase">Purpose</span>
+							<p class="text-sm font-bold text-gray-900 dark:text-white">
+								{{ selectedAssembly.purpose }}
+							</p>
+						</div>
+						<div>
+							<span class="text-[10px] text-gray-500 uppercase">Status</span>
+							<p class="text-sm font-bold">
+								<span
+									class="text-[9px] font-bold px-2 py-1 rounded-full"
+									:class="statusClass(selectedAssembly)"
+								>
+									{{
+										selectedAssembly.docstatus === 1
+											? 'Submitted'
+											: selectedAssembly.docstatus === 2
+											? 'Cancelled'
+											: 'Draft'
+									}}
+								</span>
+							</p>
+						</div>
+						<div>
+							<span class="text-[10px] text-gray-500 uppercase">Date</span>
+							<p class="text-sm text-gray-700 dark:text-gray-300">
+								{{ selectedAssembly.posting_date }}
+							</p>
+						</div>
+						<div>
+							<span class="text-[10px] text-gray-500 uppercase">Total</span>
+							<p class="text-sm font-bold text-[#D4AF37]">
+								${{ Number(selectedAssembly.total_amount || 0).toFixed(2) }}
+							</p>
+						</div>
+						<div v-if="selectedAssembly.from_warehouse">
+							<span class="text-[10px] text-gray-500 uppercase">From Warehouse</span>
+							<p class="text-sm text-gray-700 dark:text-gray-300">
+								{{ selectedAssembly.from_warehouse }}
+							</p>
+						</div>
+						<div v-if="selectedAssembly.to_warehouse">
+							<span class="text-[10px] text-gray-500 uppercase">To Warehouse</span>
+							<p class="text-sm text-gray-700 dark:text-gray-300">
+								{{ selectedAssembly.to_warehouse }}
+							</p>
+						</div>
+					</div>
+					<div
+						v-if="selectedAssembly.items?.length"
+						class="border-t border-gray-200 dark:border-warm-border/50 pt-4"
+					>
+						<h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Items</h4>
+						<div
+							v-for="item in selectedAssembly.items"
+							:key="item.item_code"
+							class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-warm-border/30 last:border-0"
+						>
+							<div>
+								<div class="text-xs font-bold text-gray-900 dark:text-white">
+									{{ item.item_name || item.item_code }}
+								</div>
+								<div class="text-[10px] text-gray-500">
+									{{ item.item_code }} · Qty: {{ item.qty }}
+								</div>
+							</div>
+							<div class="text-right text-xs">
+								<div class="font-bold text-gray-900 dark:text-white">
+									${{ Number(item.amount || 0).toFixed(2) }}
+								</div>
+								<div v-if="item.s_warehouse" class="text-[10px] text-gray-500">
+									From: {{ item.s_warehouse }}
+								</div>
+								<div v-if="item.t_warehouse" class="text-[10px] text-gray-500">
+									To: {{ item.t_warehouse }}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div
+						v-if="selectedAssembly.docstatus === 0"
+						class="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-warm-border/50"
+					>
+						<button
+							@click="handleSubmit"
+							class="flex-1 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition"
+						>
+							Submit
+						</button>
+					</div>
+					<div
+						v-else-if="selectedAssembly.docstatus === 1"
+						class="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-warm-border/50"
+					>
+						<button
+							@click="handleDisassemble"
+							class="flex-1 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs font-bold hover:bg-red-100 transition"
+						>
+							Disassemble
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Create Modal -->
+			<div
+				v-if="showCreate"
+				class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+				@click.self="showCreate = false"
+			>
+				<div
+					class="premium-card !rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto m-4"
+				>
+					<div class="flex items-center justify-between mb-4">
+						<h3 class="text-lg font-bold text-gray-900 dark:text-white">
+							New Assembly
+						</h3>
+						<button
+							@click="showCreate = false"
+							class="p-1 hover:bg-gray-100 dark:hover:bg-warm-dark-700 rounded-lg"
+						>
+							<svg
+								class="w-5 h-5 text-gray-500"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M6 18L18 6M6 6l12 12"
+								/>
+							</svg>
+						</button>
+					</div>
+					<div class="space-y-3">
+						<div class="grid grid-cols-2 gap-2">
+							<div>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Purpose</label
+								>
+								<select
+									v-model="newAssembly.purpose"
+									class="w-full mt-1 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none"
+								>
+									<option value="Manufacture">Manufacture</option>
+									<option value="Repack">Repack</option>
+								</select>
+							</div>
+							<div>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>From Warehouse</label
+								>
+								<input
+									v-model="newAssembly.source_warehouse"
+									type="text"
+									placeholder="Optional"
+									class="w-full mt-1 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none"
+								/>
+							</div>
+						</div>
+						<div>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>To Warehouse</label
+							>
+							<input
+								v-model="newAssembly.target_warehouse"
+								type="text"
+								placeholder="Optional"
+								class="w-full mt-1 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none"
+							/>
+						</div>
+						<div>
+							<div class="flex items-center justify-between mb-2">
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Items</label
+								>
+								<button
+									@click="addAssemblyItem"
+									class="text-[10px] font-bold text-[#D4AF37] hover:underline"
+								>
+									+ Add Item
+								</button>
+							</div>
+							<div
+								v-for="(item, idx) in newAssembly.items"
+								:key="idx"
+								class="flex gap-2 mb-2"
+							>
+								<input
+									v-model="item.item_code"
+									placeholder="Item Code"
+									class="flex-1 px-2 py-1.5 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded text-xs text-gray-900 dark:text-white outline-none"
+								/>
+								<input
+									v-model.number="item.qty"
+									type="number"
+									step="0.001"
+									min="0.001"
+									placeholder="Qty"
+									class="w-20 px-2 py-1.5 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded text-xs text-gray-900 dark:text-white outline-none"
+								/>
+								<button
+									@click="newAssembly.items.splice(idx, 1)"
+									class="p-1 text-red-400 hover:text-red-600"
+								>
+									<svg
+										class="w-4 h-4"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+										/>
+									</svg>
+								</button>
+							</div>
+						</div>
+					</div>
+					<button
+						@click="handleCreate"
+						:disabled="stock.createAssemblyResource.loading"
+						class="w-full mt-4 py-2.5 bg-[#D4AF37] text-white rounded-lg text-sm font-bold hover:bg-[#C4A030] transition disabled:opacity-50"
+					>
+						{{
+							stock.createAssemblyResource.loading
+								? 'Creating...'
+								: 'Create Assembly'
+						}}
+					</button>
+				</div>
+			</div>
 		</div>
 	</AppLayout>
 </template>
+
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { toast } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
 import { useStockStore } from '@/stores/stock.js'
+
 const stock = useStockStore()
-const purposeFilter = ref('')
-function loadData() {
-	stock.loadAssemblies({ purpose: purposeFilter.value || undefined })
+const activePurpose = ref('')
+const activeStatus = ref('')
+const selectedAssembly = ref(null)
+const showCreate = ref(false)
+const newAssembly = ref({
+	purpose: 'Manufacture',
+	source_warehouse: '',
+	target_warehouse: '',
+	items: [{ item_code: '', qty: 1 }],
+})
+
+const purposeFilters = [
+	{ label: 'All', value: '' },
+	{ label: 'Manufacture', value: 'Manufacture' },
+	{ label: 'Repack', value: 'Repack' },
+]
+const statusFilters = [
+	{ label: 'Any Status', value: '' },
+	{ label: 'Draft', value: 'Draft' },
+	{ label: 'Submitted', value: 'Submitted' },
+]
+
+const filteredAssemblies = computed(() => {
+	let list = stock.assemblies
+	if (activePurpose.value) {
+		list = list.filter((a) => a.purpose === activePurpose.value)
+	}
+	if (activeStatus.value === 'Draft') list = list.filter((a) => a.docstatus === 0)
+	if (activeStatus.value === 'Submitted') list = list.filter((a) => a.docstatus === 1)
+	return list
+})
+
+function purposeClass(p) {
+	return p === 'Manufacture'
+		? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
+		: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
 }
+function statusClass(a) {
+	if (a.docstatus === 1)
+		return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+	if (a.docstatus === 2) return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+	return 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
+}
+
+function loadData() {
+	stock.loadAssemblies({
+		purpose: activePurpose.value || undefined,
+		status: activeStatus.value || undefined,
+	})
+}
+
+async function viewAssembly(a) {
+	selectedAssembly.value = a
+	try {
+		const res = await stock.loadAssemblyDetail(a.name)
+		if (res && res.assembly) selectedAssembly.value = res.assembly
+	} catch (e) {
+		// fall back to list-view row
+		console.warn('Could not load assembly detail', e)
+	}
+}
+
+async function handleSubmit() {
+	if (!selectedAssembly.value) return
+	await stock.submitAssembly(selectedAssembly.value.name)
+	toast({ title: 'Assembly submitted', icon: 'check', intent: 'success' })
+	selectedAssembly.value = null
+	loadData()
+}
+
+async function handleDisassemble() {
+	if (!selectedAssembly.value) return
+	await stock.disassemble(selectedAssembly.value.name)
+	toast({ title: 'Assembly disassembled', icon: 'check', intent: 'success' })
+	selectedAssembly.value = null
+	loadData()
+}
+
+function addAssemblyItem() {
+	newAssembly.value.items.push({ item_code: '', qty: 1 })
+}
+
+function openCreate() {
+	newAssembly.value = {
+		purpose: 'Manufacture',
+		source_warehouse: '',
+		target_warehouse: '',
+		items: [{ item_code: '', qty: 1 }],
+	}
+	showCreate.value = true
+}
+
+async function handleCreate() {
+	const validItems = newAssembly.value.items.filter((i) => i.item_code)
+	if (!validItems.length) {
+		toast({ title: 'Add at least one item', icon: 'alert-circle', intent: 'warning' })
+		return
+	}
+	await stock.createAssembly(
+		JSON.stringify(validItems),
+		newAssembly.value.source_warehouse || null,
+		newAssembly.value.target_warehouse || null,
+		newAssembly.value.purpose
+	)
+	toast({ title: 'Assembly created', icon: 'check', intent: 'success' })
+	showCreate.value = false
+	loadData()
+}
+
 onMounted(loadData)
 </script>
