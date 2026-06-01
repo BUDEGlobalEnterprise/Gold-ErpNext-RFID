@@ -40,7 +40,9 @@
 					>
 						<div class="flex items-center gap-2 min-w-0">
 							<span class="text-sm">🛒</span>
-							<h2 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white tracking-tight uppercase">
+							<h2
+								class="text-xs sm:text-sm font-black text-gray-900 dark:text-white tracking-tight uppercase"
+							>
 								Sale
 							</h2>
 							<div
@@ -111,7 +113,9 @@
 					</div>
 
 					<div v-else class="flex-1 flex flex-col min-h-0 overflow-hidden">
-						<div class="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-3.5 sm:space-y-4 custom-scrollbar">
+						<div
+							class="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-3.5 sm:space-y-4 custom-scrollbar"
+						>
 							<!-- Customer Selector (Compact layout) -->
 							<div
 								class="p-3 border border-[#E3C583]/20 dark:border-warm-border/30 rounded-xl bg-white dark:bg-warm-dark-800/40 shadow-xs z-10 animate-in fade-in"
@@ -119,7 +123,9 @@
 								<div class="mb-2.5">
 									<div class="flex items-center justify-between">
 										<!-- Bigger, More Visible Segment Tabs -->
-										<div class="flex bg-gray-100/80 dark:bg-warm-dark-700 p-1 rounded-xl border border-gray-200/40 dark:border-warm-border/10 w-full shadow-inner">
+										<div
+											class="flex bg-gray-100/80 dark:bg-warm-dark-700 p-1 rounded-xl border border-gray-200/40 dark:border-warm-border/10 w-full shadow-inner"
+										>
 											<button
 												class="flex-1 text-[11px] font-black py-2 rounded-lg transition-all uppercase tracking-wider duration-200"
 												:class="
@@ -156,22 +162,37 @@
 										</div>
 									</div>
 								</div>
-								<CustomerSelector v-if="cart.customerType !== 'Walkin'" @open-clienteling="showClienteling = true" />
+								<CustomerSelector
+									v-if="cart.customerType !== 'Walkin'"
+									@open-clienteling="showClienteling = true"
+								/>
 								<button
 									v-if="cart.customer?.name && cart.customerType !== 'Walkin'"
 									@click.prevent="showClienteling = true"
 									class="mt-2 w-full flex items-center justify-center gap-1.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#D4AF37] hover:bg-[#D4AF37]/10 rounded-lg transition-colors border border-[#D4AF37]/20"
 									title="Client Intelligence"
 								>
-									<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+									<svg
+										class="w-3.5 h-3.5"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+										/>
 									</svg>
 									Client Profile
 								</button>
 							</div>
 
 							<!-- Sleek Unified Register Cart List -->
-							<div class="bg-white dark:bg-warm-dark-800 rounded-xl p-3 border border-[#EFEAE2] dark:border-warm-border/30 shadow-xs divide-y divide-gray-100 dark:divide-warm-border/20 z-10 animate-in fade-in">
+							<div
+								class="bg-white dark:bg-warm-dark-800 rounded-xl p-3 border border-[#EFEAE2] dark:border-warm-border/30 shadow-xs divide-y divide-gray-100 dark:divide-warm-border/20 z-10 animate-in fade-in"
+							>
 								<div
 									v-for="(item, index) in cart.items"
 									:key="index"
@@ -182,10 +203,15 @@
 										class="w-11 h-11 rounded-lg flex-shrink-0 overflow-hidden border border-[#EFEAE2] dark:border-warm-border/30 relative bg-[#F3F1ED] dark:bg-warm-dark-900"
 									>
 										<img
-											:src="`${baseUrl}placeholders/${getJewelryCategory(item)}.png`"
+											:src="`${baseUrl}placeholders/${getJewelryCategory(
+												item
+											)}.png`"
 											:alt="item.item_name"
 											class="w-full h-full object-cover"
-											@error="(e) => e.target.src = `${baseUrl}placeholders/jewel.png`"
+											@error="
+												(e) =>
+													(e.target.src = `${baseUrl}placeholders/jewel.png`)
+											"
 										/>
 									</div>
 
@@ -198,14 +224,21 @@
 												{{ item.item_name }}
 											</h3>
 											<div class="flex items-center gap-2 mt-0.5">
-												<span class="text-[9px] text-gray-400 dark:text-gray-500 font-mono">
+												<span
+													class="text-[9px] text-gray-400 dark:text-gray-500 font-mono"
+												>
 													{{ item.item_code }}
 												</span>
 												<span
 													v-if="item.metal || item.purity"
 													class="text-[9px] font-semibold text-[#CBA358]"
 												>
-													• {{ item.metal && item.purity ? `${item.metal} · ${item.purity}` : (item.metal || item.purity) }}
+													•
+													{{
+														item.metal && item.purity
+															? `${item.metal} · ${item.purity}`
+															: item.metal || item.purity
+													}}
 												</span>
 											</div>
 										</div>
@@ -213,24 +246,36 @@
 										<!-- Pricing & Quantity Controls -->
 										<div class="flex items-center justify-between mt-2">
 											<!-- Sleek Quantity Adjuster -->
-											<div class="flex items-center border border-gray-200 dark:border-warm-border/40 rounded-md overflow-hidden h-6 w-16">
-												<button 
-													@click="updateQty(index, item.qty - 1)" 
+											<div
+												class="flex items-center border border-gray-200 dark:border-warm-border/40 rounded-md overflow-hidden h-6 w-16"
+											>
+												<button
+													@click="updateQty(index, item.qty - 1)"
 													class="w-5 h-full flex items-center justify-center bg-gray-50 dark:bg-warm-dark-900 hover:bg-gray-100 dark:hover:bg-warm-dark-800 text-[10px] font-extrabold text-gray-500 transition-colors"
-												>-</button>
-												<span class="flex-1 text-center text-[10px] font-bold text-gray-900 dark:text-white">{{ item.qty }}</span>
-												<button 
-													@click="updateQty(index, item.qty + 1)" 
+												>
+													-
+												</button>
+												<span
+													class="flex-1 text-center text-[10px] font-bold text-gray-900 dark:text-white"
+													>{{ item.qty }}</span
+												>
+												<button
+													@click="updateQty(index, item.qty + 1)"
 													class="w-5 h-full flex items-center justify-center bg-gray-50 dark:bg-warm-dark-900 hover:bg-gray-100 dark:hover:bg-warm-dark-800 text-[10px] font-extrabold text-gray-500 transition-colors"
-												>+</button>
+												>
+													+
+												</button>
 											</div>
 
 											<!-- Prices (Unit & Total) -->
 											<div class="text-right flex flex-col items-end">
-												<span class="text-[8px] text-gray-400 dark:text-gray-500"
+												<span
+													class="text-[8px] text-gray-400 dark:text-gray-500"
 													>{{ formatCurrency(item.amount) }} ea</span
 												>
-												<span class="font-mono text-xs font-black text-[#D4AF37]">
+												<span
+													class="font-mono text-xs font-black text-[#D4AF37]"
+												>
 													{{ formatCurrency(item.amount * item.qty) }}
 												</span>
 											</div>
@@ -419,10 +464,7 @@
 							</router-link>
 							<button
 								v-else
-								@click="
-									showCheckout = true;
-									ui.closeLayawayPayment();
-								"
+								@click="openCheckout"
 								:disabled="!isCheckoutReady"
 								class="w-full py-3.5 rounded-xl font-bold shadow-md transition duration-200 active:scale-95 text-sm flex items-center justify-center gap-2"
 								:class="
@@ -468,37 +510,80 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 function getJewelryCategory(item) {
-	const name = (item.item_name || '').toLowerCase();
-	const group = (item.item_group || '').toLowerCase();
-	const type = (item.jewelry_type || '').toLowerCase();
-	const cat = (item.category || '').toLowerCase();
-	
-	if (name.includes('ring') || group.includes('ring') || type.includes('ring') || cat.includes('ring')) {
-		return 'ring';
+	const name = (item.item_name || '').toLowerCase()
+	const group = (item.item_group || '').toLowerCase()
+	const type = (item.jewelry_type || '').toLowerCase()
+	const cat = (item.category || '').toLowerCase()
+
+	if (
+		name.includes('ring') ||
+		group.includes('ring') ||
+		type.includes('ring') ||
+		cat.includes('ring')
+	) {
+		return 'ring'
 	}
-	if (name.includes('earring') || group.includes('earring') || type.includes('earring') || cat.includes('earring')) {
-		return 'earring';
+	if (
+		name.includes('earring') ||
+		group.includes('earring') ||
+		type.includes('earring') ||
+		cat.includes('earring')
+	) {
+		return 'earring'
 	}
-	if (name.includes('pendant') || name.includes('gemstone') || group.includes('pendant') || type.includes('pendant') || cat.includes('pendant')) {
-		return 'pendant';
+	if (
+		name.includes('pendant') ||
+		name.includes('gemstone') ||
+		group.includes('pendant') ||
+		type.includes('pendant') ||
+		cat.includes('pendant')
+	) {
+		return 'pendant'
 	}
-	if (name.includes('watch') || name.includes('timepiece') || group.includes('watch') || type.includes('watch') || cat.includes('watch')) {
-		return 'watch';
+	if (
+		name.includes('watch') ||
+		name.includes('timepiece') ||
+		group.includes('watch') ||
+		type.includes('watch') ||
+		cat.includes('watch')
+	) {
+		return 'watch'
 	}
-	if (name.includes('bracelet') || name.includes('bangle') || group.includes('bangle') || group.includes('bracelet') || type.includes('bracelet') || cat.includes('bracelet') || name.includes('cuff')) {
-		return 'bracelet';
+	if (
+		name.includes('bracelet') ||
+		name.includes('bangle') ||
+		group.includes('bangle') ||
+		group.includes('bracelet') ||
+		type.includes('bracelet') ||
+		cat.includes('bracelet') ||
+		name.includes('cuff')
+	) {
+		return 'bracelet'
 	}
-	if (name.includes('necklace') || name.includes('choker') || group.includes('necklace') || type.includes('necklace') || cat.includes('necklace')) {
-		return 'necklace';
+	if (
+		name.includes('necklace') ||
+		name.includes('choker') ||
+		group.includes('necklace') ||
+		type.includes('necklace') ||
+		cat.includes('necklace')
+	) {
+		return 'necklace'
 	}
 	// Smart resolution for Chain, Link, Rope, Cuban
-	if (name.includes('chain') || name.includes('link') || name.includes('rope') || name.includes('cuban') || group.includes('chain') || type.includes('chain')) {
+	if (
+		name.includes('chain') ||
+		name.includes('link') ||
+		name.includes('rope') ||
+		name.includes('cuban') ||
+		group.includes('chain') ||
+		type.includes('chain')
+	) {
 		if (/7|8|9/.test(name)) {
-			return 'bracelet';
+			return 'bracelet'
 		}
-		return 'necklace';
+		return 'necklace'
 	}
-	return 'jewel';
+	return 'jewel'
 }
 const cart = useCartStore()
 const posSession = usePosSessionStore()
@@ -561,6 +646,11 @@ function startLayaway() {
 		query.customer = cart.customer.name || cart.customer.customer_name
 	}
 	router.push({ name: 'Layaway', query })
+}
+
+function openCheckout() {
+	showCheckout.value = true
+	ui.closeLayawayPayment()
 }
 
 const isCheckoutReady = computed(() => {

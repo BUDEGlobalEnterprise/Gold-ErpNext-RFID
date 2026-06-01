@@ -190,7 +190,7 @@ def get_customer_details(customer_name: str) -> dict:
 			key = sf.replace("custom_", "")
 			result[key] = safe_get(customer, sf)
 
-	address = frappe.get_all(
+	address_rows = frappe.get_all(
 		"Address",
 		filters={
 			"name": [
@@ -206,6 +206,7 @@ def get_customer_details(customer_name: str) -> dict:
 			]
 		},
 		fields=[
+			"name",
 			"address_line1",
 			"address_line2",
 			"city",
@@ -214,17 +215,31 @@ def get_customer_details(customer_name: str) -> dict:
 			"country",
 			"phone",
 			"is_primary_address",
+			"is_shipping_address",
 		],
-		order_by="is_primary_address desc",
-		limit=1,
 	)
-	if address:
-		addr = address[0]
-		result["address"] = addr.address_line1 or ""
-		result["city"] = addr.city or ""
-		result["state"] = addr.state or ""
-		result["zip"] = addr.pincode or ""
-		result["country"] = addr.country or ""
+	if address_rows:
+		# Prefer primary for billing, otherwise the first row.
+		billing = next(
+			(a for a in address_rows if a.is_primary_address),
+			address_rows[0],
+		)
+		shipping = next(
+			(a for a in address_rows if a.is_shipping_address),
+			None,
+		)
+		result["address"] = billing.address_line1 or ""
+		result["city"] = billing.city or ""
+		result["state"] = billing.state or ""
+		result["zip"] = billing.pincode or ""
+		result["country"] = billing.country or ""
+
+		result["ship_address_line1"] = (shipping or billing).address_line1 or ""
+		result["ship_city"] = (shipping or billing).city or ""
+		result["ship_state"] = (shipping or billing).state or ""
+		result["ship_pincode"] = (shipping or billing).pincode or ""
+		result["ship_country"] = (shipping or billing).country or ""
+		result["same_as_billing"] = shipping is None
 
 	recent_orders = frappe.get_all(
 		"Sales Invoice",
@@ -335,19 +350,22 @@ def _update_customer_address(customer_name, address_type, addr_fields):
 					addr.set(key, value)
 			addr.save()
 		else:
-			addr = frappe.get_doc({
-				"doctype": "Address",
-				"address_title": customer_name,
-				"address_type": address_type,
-				**addr_fields,
-				"links": [{"link_doctype": "Customer", "link_name": customer_name}],
-			})
+			addr = frappe.get_doc(
+				{
+					"doctype": "Address",
+					"address_title": customer_name,
+					"address_type": address_type,
+					**addr_fields,
+					"links": [{"link_doctype": "Customer", "link_name": customer_name}],
+				}
+			)
 			addr.insert()
-	except Exception:
+	except Exception as e:
 		frappe.log_error(
-			frappe.get_traceback(),
-			f"Failed to update {address_type} address for {customer_name}",
+			title=f"Failed to update {address_type} address for {customer_name}",
+			message=frappe.get_traceback() + "\n\nError: " + str(e),
 		)
+		raise
 
 
 @frappe.whitelist()
@@ -493,24 +511,32 @@ def update_customer(
 
 	# Update or create billing address
 	if address_line1 or city:
-		_update_customer_address(customer_name, "Billing", {
-			"address_line1": address_line1,
-			"address_line2": address_line2,
-			"city": city,
-			"state": state,
-			"pincode": pincode,
-			"country": country or "United States",
-		})
+		_update_customer_address(
+			customer_name,
+			"Billing",
+			{
+				"address_line1": address_line1,
+				"address_line2": address_line2,
+				"city": city,
+				"state": state,
+				"pincode": pincode,
+				"country": country or "United States",
+			},
+		)
 
 	# Update or create shipping address
 	if not same_as_billing and (ship_address_line1 or ship_city):
-		_update_customer_address(customer_name, "Shipping", {
-			"address_line1": ship_address_line1,
-			"city": ship_city,
-			"state": ship_state,
-			"pincode": ship_pincode,
-			"country": ship_country or "United States",
-		})
+		_update_customer_address(
+			customer_name,
+			"Shipping",
+			{
+				"address_line1": ship_address_line1,
+				"city": ship_city,
+				"state": ship_state,
+				"pincode": ship_pincode,
+				"country": ship_country or "United States",
+			},
+		)
 
 	return {
 		"success": True,

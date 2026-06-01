@@ -3,6 +3,8 @@ Clienteling API - Customer intelligence, purchase history, and occasion tracking
 Provides data for the POS Clienteling Drawer.
 """
 
+import calendar
+
 import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit
@@ -56,7 +58,7 @@ def get_customer_intelligence(customer: str) -> dict:
 	invoices = frappe.get_all(
 		"Sales Invoice",
 		filters={"customer": customer, "docstatus": 1, "is_return": 0},
-		fields=["name", "posting_date", "grand_total"],
+		fields=["name", "posting_date", "grand_total", "status", "outstanding_amount"],
 		order_by="posting_date desc",
 	)
 
@@ -85,21 +87,31 @@ def get_customer_intelligence(customer: str) -> dict:
 			fields=["parent", "item_name", "qty", "amount"],
 		)
 		for item in items:
-			item_map.setdefault(item.parent, []).append({
-				"item_name": item.item_name,
-				"amount": item.amount,
-				"qty": item.qty,
-			})
+			item_map.setdefault(item.parent, []).append(
+				{
+					"item_name": item.item_name,
+					"amount": item.amount,
+					"qty": item.qty,
+				}
+			)
 
 	recent_purchases = []
 	for inv in recent:
-		recent_purchases.append({
-			"invoice": inv.name,
-			"date": str(inv.posting_date),
-			"items": item_map.get(inv.name, []),
-			"grand_total": inv.grand_total,
-			"status": "Paid",
-		})
+		if inv.status:
+			status = inv.status
+		elif inv.outstanding_amount is None or inv.outstanding_amount == 0:
+			status = "Paid"
+		else:
+			status = "Unpaid"
+		recent_purchases.append(
+			{
+				"invoice": inv.name,
+				"date": str(inv.posting_date),
+				"items": item_map.get(inv.name, []),
+				"grand_total": inv.grand_total,
+				"status": status,
+			}
+		)
 
 	# --- Upcoming Occasions (within 60 days) ---
 	today = getdate(nowdate())
@@ -108,17 +120,30 @@ def get_customer_intelligence(customer: str) -> dict:
 		date_val = safe_get(field)
 		if date_val:
 			d = getdate(date_val)
-			next_occ = d.replace(year=today.year)
+			try:
+				next_occ = d.replace(year=today.year)
+			except ValueError:
+				# Feb 29 in a non-leap target year — fall back to Feb 28.
+				target = today.year
+				last_day = 29 if calendar.isleap(target) else 28
+				next_occ = d.replace(year=target, day=last_day)
 			if next_occ < today:
-				next_occ = d.replace(year=today.year + 1)
+				try:
+					next_occ = d.replace(year=today.year + 1)
+				except ValueError:
+					target_next = today.year + 1
+					last_day = 29 if calendar.isleap(target_next) else 28
+					next_occ = d.replace(year=target_next, day=last_day)
 			days_until = (next_occ - today).days
 			if days_until <= 60:
-				occasions.append({
-					"type": label_type,
-					"date": str(next_occ),
-					"days_until": days_until,
-					"label": f"{label_type.title()} in {days_until} days",
-				})
+				occasions.append(
+					{
+						"type": label_type,
+						"date": str(next_occ),
+						"days_until": days_until,
+						"label": f"{label_type.title()} in {days_until} days",
+					}
+				)
 
 	# --- Notes ---
 	notes = safe_get("custom_internal_notes")

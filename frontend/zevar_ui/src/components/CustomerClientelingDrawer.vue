@@ -34,7 +34,9 @@
 				<!-- Loading State -->
 				<div v-if="loading" class="flex-1 flex items-center justify-center">
 					<div class="flex flex-col items-center gap-3">
-						<div class="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 border-t-[#D4AF37]"></div>
+						<div
+							class="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 border-t-[#D4AF37]"
+						></div>
 						<span class="text-xs text-gray-400">Loading client profile...</span>
 					</div>
 				</div>
@@ -43,7 +45,10 @@
 				<div v-else-if="error" class="flex-1 flex items-center justify-center p-6">
 					<div class="text-center">
 						<p class="text-sm text-red-500 mb-2">{{ error }}</p>
-						<button @click="reload" class="text-xs text-[#D4AF37] font-medium hover:underline">
+						<button
+							@click="reload"
+							class="text-xs text-[#D4AF37] font-medium hover:underline"
+						>
 							Try again
 						</button>
 					</div>
@@ -56,13 +61,25 @@
 						@click="emit('close')"
 						class="absolute top-3 right-3 w-7 h-7 rounded-full bg-gray-100 dark:bg-warm-dark-700 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors z-10"
 					>
-						<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						<svg
+							class="w-3.5 h-3.5"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
 						</svg>
 					</button>
 
 					<!-- Header -->
-					<div class="p-5 pb-4 border-b border-[#E8E0D4] dark:border-warm-border/30 shrink-0">
+					<div
+						class="p-5 pb-4 border-b border-[#E8E0D4] dark:border-warm-border/30 shrink-0"
+					>
 						<div class="flex items-center gap-3 pr-8">
 							<div
 								class="w-12 h-12 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#F2E6A0] flex items-center justify-center text-black font-black text-sm shrink-0"
@@ -70,11 +87,17 @@
 								{{ getInitial(profile.customer_name) }}
 							</div>
 							<div class="min-w-0 flex-1">
-								<h2 class="font-display text-lg font-semibold tracking-tight text-gray-900 dark:text-white truncate">
+								<h2
+									class="font-display text-lg font-semibold tracking-tight text-gray-900 dark:text-white truncate"
+								>
 									{{ profile.customer_name }}
 								</h2>
 								<div class="text-xs text-gray-500 truncate">
-									{{ [profile.mobile_no, profile.email_id].filter(Boolean).join(' · ') || 'No contact info' }}
+									{{
+										[profile.mobile_no, profile.email_id]
+											.filter(Boolean)
+											.join(' · ') || 'No contact info'
+									}}
 								</div>
 							</div>
 						</div>
@@ -82,25 +105,47 @@
 						<!-- Stats Row -->
 						<div class="grid grid-cols-3 gap-2 mt-4">
 							<div class="text-center">
-								<div class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Total Spent</div>
-								<div class="font-mono text-sm font-bold text-[#D4AF37]">{{ formatCurrency(profile.total_spent) }}</div>
+								<div
+									class="text-[10px] uppercase tracking-widest font-bold text-gray-400"
+								>
+									Total Spent
+								</div>
+								<div class="font-mono text-sm font-bold text-[#D4AF37]">
+									{{ formatCurrency(profile.total_spent) }}
+								</div>
 							</div>
 							<div class="text-center">
-								<div class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Visits</div>
-								<div class="font-mono text-sm font-bold text-[#D4AF37]">{{ profile.visit_count }}</div>
+								<div
+									class="text-[10px] uppercase tracking-widest font-bold text-gray-400"
+								>
+									Visits
+								</div>
+								<div class="font-mono text-sm font-bold text-[#D4AF37]">
+									{{ profile.visit_count }}
+								</div>
 							</div>
 							<div class="text-center">
-								<div class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Avg Order</div>
-								<div class="font-mono text-sm font-bold text-[#D4AF37]">{{ formatCurrency(profile.avg_order_value) }}</div>
+								<div
+									class="text-[10px] uppercase tracking-widest font-bold text-gray-400"
+								>
+									Avg Order
+								</div>
+								<div class="font-mono text-sm font-bold text-[#D4AF37]">
+									{{ formatCurrency(profile.avg_order_value) }}
+								</div>
 							</div>
 						</div>
 
 						<!-- Dormant Badge -->
 						<div
-							v-if="profile.days_since_last_visit && profile.days_since_last_visit > 90"
+							v-if="
+								profile.days_since_last_visit && profile.days_since_last_visit > 90
+							"
 							class="mt-3 px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 text-center"
 						>
-							<span class="text-[10px] font-bold text-red-500 dark:text-red-400 uppercase tracking-wider">
+							<span
+								class="text-[10px] font-bold text-red-500 dark:text-red-400 uppercase tracking-wider"
+							>
 								Haven't visited in {{ profile.days_since_last_visit }} days
 							</span>
 						</div>
@@ -111,14 +156,22 @@
 						v-if="upcomingOccasions.length > 0"
 						class="mx-4 mt-3 p-3 rounded-xl bg-gradient-to-r from-[#D4AF37]/10 to-[#F2E6A0]/10 border border-[#D4AF37]/30"
 					>
-						<div v-for="occ in upcomingOccasions" :key="occ.type" class="flex items-center gap-2">
-							<span class="text-base">{{ occ.type === 'birthday' ? '🎂' : '💍' }}</span>
+						<div
+							v-for="occ in upcomingOccasions"
+							:key="occ.type"
+							class="flex items-center gap-2"
+						>
+							<span class="text-base">{{
+								occ.type === 'birthday' ? '🎂' : '💍'
+							}}</span>
 							<span class="text-xs font-bold text-[#D4AF37]">{{ occ.label }}</span>
 						</div>
 					</div>
 
 					<!-- Tab Bar -->
-					<div class="flex border-b border-[#E8E0D4] dark:border-warm-border/30 px-4 mt-3 shrink-0">
+					<div
+						class="flex border-b border-[#E8E0D4] dark:border-warm-border/30 px-4 mt-3 shrink-0"
+					>
 						<button
 							v-for="tab in tabs"
 							:key="tab.key"
@@ -144,8 +197,12 @@
 								class="p-3 rounded-xl bg-white dark:bg-warm-dark-800 border border-[#EFEAE2] dark:border-warm-border/20 mb-2"
 							>
 								<div class="flex items-center justify-between mb-1.5">
-									<span class="text-[10px] text-gray-400 font-mono">{{ purchase.date }}</span>
-									<span class="font-mono text-xs font-black text-[#D4AF37]">{{ formatCurrency(purchase.grand_total) }}</span>
+									<span class="text-[10px] text-gray-400 font-mono">{{
+										purchase.date
+									}}</span>
+									<span class="font-mono text-xs font-black text-[#D4AF37]">{{
+										formatCurrency(purchase.grand_total)
+									}}</span>
 								</div>
 								<div
 									v-for="(item, idx) in purchase.items"
@@ -167,14 +224,23 @@
 						<div v-if="activeTab === 'sizes'">
 							<div class="grid grid-cols-2 gap-3">
 								<div v-for="field in sizeFields" :key="field.key">
-									<div class="text-[10px] uppercase tracking-widest font-bold text-gray-400">{{ field.label }}</div>
+									<div
+										class="text-[10px] uppercase tracking-widest font-bold text-gray-400"
+									>
+										{{ field.label }}
+									</div>
 									<div
 										v-if="profile[field.key]"
 										class="text-sm font-bold text-gray-900 dark:text-white mt-0.5"
 									>
 										{{ profile[field.key] }}
 									</div>
-									<div v-else class="text-gray-300 dark:text-gray-600 italic text-xs mt-0.5">Not set</div>
+									<div
+										v-else
+										class="text-gray-300 dark:text-gray-600 italic text-xs mt-0.5"
+									>
+										Not set
+									</div>
 								</div>
 							</div>
 						</div>
@@ -267,7 +333,7 @@ watch(
 			loadIntelligence(name)
 		}
 	},
-	{ immediate: true },
+	{ immediate: true }
 )
 
 watch(
@@ -280,7 +346,7 @@ watch(
 			activeTab.value = 'history'
 			newNote.value = ''
 		}
-	},
+	}
 )
 
 async function submitNote() {

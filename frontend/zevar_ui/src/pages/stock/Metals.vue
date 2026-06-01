@@ -93,10 +93,7 @@
 				</div>
 			</div>
 
-			<div
-				v-if="metalTypes.length"
-				class="flex flex-wrap gap-2 mb-4 flex-shrink-0"
-			>
+			<div v-if="metalTypes.length" class="flex flex-wrap gap-2 mb-4 flex-shrink-0">
 				<button
 					v-for="t in ['All', ...metalTypes]"
 					:key="t"
@@ -311,7 +308,9 @@
 							<p
 								class="text-sm font-bold"
 								:class="
-									selectedMetal.stock_qty > 0 ? 'text-emerald-500' : 'text-red-500'
+									selectedMetal.stock_qty > 0
+										? 'text-emerald-500'
+										: 'text-red-500'
 								"
 							>
 								{{ selectedMetal.stock_qty }}
@@ -383,7 +382,9 @@
 					</div>
 					<div class="space-y-3">
 						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">Item Name *</label>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Item Name *</label
+							>
 							<input
 								v-model="form.item_name"
 								type="text"
@@ -393,28 +394,38 @@
 						</div>
 						<div class="grid grid-cols-2 gap-2">
 							<div>
-								<label class="text-[10px] font-bold text-gray-500 uppercase">Metal Type</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Metal Type</label
+								>
 								<select
 									v-model="form.custom_metal_type"
 									class="w-full mt-1 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none"
 								>
 									<option value="">Select…</option>
-									<option v-for="t in metalTypeOptions" :key="t" :value="t">{{ t }}</option>
+									<option v-for="t in metalTypeOptions" :key="t" :value="t">
+										{{ t }}
+									</option>
 								</select>
 							</div>
 							<div>
-								<label class="text-[10px] font-bold text-gray-500 uppercase">Purity (Karat)</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Purity (Karat)</label
+								>
 								<select
 									v-model="form.custom_purity"
 									class="w-full mt-1 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none"
 								>
 									<option value="">Select…</option>
-									<option v-for="p in purityOptions" :key="p" :value="p">{{ p }}</option>
+									<option v-for="p in purityOptions" :key="p" :value="p">
+										{{ p }}
+									</option>
 								</select>
 							</div>
 						</div>
 						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">Gross Weight (g)</label>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Gross Weight (g)</label
+							>
 							<input
 								v-model.number="form.custom_gross_weight_g"
 								type="number"
@@ -426,7 +437,9 @@
 						</div>
 						<div class="grid grid-cols-2 gap-2">
 							<div>
-								<label class="text-[10px] font-bold text-gray-500 uppercase">Standard Rate ($/g)</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Standard Rate ($/g)</label
+								>
 								<input
 									v-model.number="form.standard_rate"
 									type="number"
@@ -437,7 +450,9 @@
 								/>
 							</div>
 							<div>
-								<label class="text-[10px] font-bold text-gray-500 uppercase">Valuation Rate ($/g)</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Valuation Rate ($/g)</label
+								>
 								<input
 									v-model.number="form.valuation_rate"
 									type="number"
@@ -454,7 +469,13 @@
 						:disabled="saving"
 						class="w-full mt-4 py-2.5 bg-[#D4AF37] text-white rounded-lg text-sm font-bold hover:bg-[#C4A030] transition disabled:opacity-50"
 					>
-						{{ saving ? 'Saving…' : formMode === 'edit' ? 'Save Changes' : 'Create Metal' }}
+						{{
+							saving
+								? 'Saving…'
+								: formMode === 'edit'
+								? 'Save Changes'
+								: 'Create Metal'
+						}}
 					</button>
 				</div>
 			</div>
@@ -499,10 +520,7 @@ const metalTypeOptions = [
 const purityOptions = ['9K', '10K', '14K', '18K', '22K', '24K', '925', '950', '999']
 
 const totalMetalValue = computed(() =>
-	stock.metals.reduce(
-		(s, i) => s + (i.current_value || 0) * Math.max(i.stock_qty, 0),
-		0
-	)
+	stock.metals.reduce((s, i) => s + (i.current_value || 0) * Math.max(i.stock_qty, 0), 0)
 )
 const ratesList = computed(() => {
 	const r = goldStore.rates || {}
@@ -575,7 +593,7 @@ function openEdit(m) {
 		standard_rate: m.standard_rate || 0,
 		valuation_rate: m.valuation_rate || 0,
 	})
-	selectedMetal.value = null
+	selectedMetal.value = m
 	showForm.value = true
 }
 

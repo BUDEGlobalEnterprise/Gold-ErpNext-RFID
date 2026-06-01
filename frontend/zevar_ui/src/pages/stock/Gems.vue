@@ -165,7 +165,9 @@
 								<span
 									class="text-sm font-bold text-gray-900 dark:text-white font-mono"
 									>${{
-										Number(gem.standard_rate || gem.valuation_rate || 0).toFixed(2)
+										Number(
+											gem.standard_rate || gem.valuation_rate || 0
+										).toFixed(2)
 									}}</span
 								>
 								<span
@@ -279,7 +281,9 @@
 							<p class="text-sm font-mono font-bold text-[#D4AF37]">
 								${{
 									Number(
-										selectedGem.standard_rate || selectedGem.valuation_rate || 0
+										selectedGem.standard_rate ||
+											selectedGem.valuation_rate ||
+											0
 									).toFixed(2)
 								}}
 							</p>
@@ -338,7 +342,9 @@
 					</div>
 					<div class="space-y-3">
 						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">Item Name *</label>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Item Name *</label
+							>
 							<input
 								v-model="form.item_name"
 								type="text"
@@ -348,17 +354,23 @@
 						</div>
 						<div class="grid grid-cols-2 gap-2">
 							<div>
-								<label class="text-[10px] font-bold text-gray-500 uppercase">Gem Type</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Gem Type</label
+								>
 								<select
 									v-model="form.custom_gem_type"
 									class="w-full mt-1 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none"
 								>
 									<option value="">Select…</option>
-									<option v-for="t in gemTypeOptions" :key="t" :value="t">{{ t }}</option>
+									<option v-for="t in gemTypeOptions" :key="t" :value="t">
+										{{ t }}
+									</option>
 								</select>
 							</div>
 							<div>
-								<label class="text-[10px] font-bold text-gray-500 uppercase">Carat</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Carat</label
+								>
 								<input
 									v-model.number="form.custom_carat_weight"
 									type="number"
@@ -371,29 +383,39 @@
 						</div>
 						<div class="grid grid-cols-2 gap-2">
 							<div>
-								<label class="text-[10px] font-bold text-gray-500 uppercase">Cut</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Cut</label
+								>
 								<select
 									v-model="form.custom_gem_cut"
 									class="w-full mt-1 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none"
 								>
 									<option value="">Select…</option>
-									<option v-for="c in cutOptions" :key="c" :value="c">{{ c }}</option>
+									<option v-for="c in cutOptions" :key="c" :value="c">
+										{{ c }}
+									</option>
 								</select>
 							</div>
 							<div>
-								<label class="text-[10px] font-bold text-gray-500 uppercase">Shape</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Shape</label
+								>
 								<select
 									v-model="form.custom_gem_shape"
 									class="w-full mt-1 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none"
 								>
 									<option value="">Select…</option>
-									<option v-for="s in shapeOptions" :key="s" :value="s">{{ s }}</option>
+									<option v-for="s in shapeOptions" :key="s" :value="s">
+										{{ s }}
+									</option>
 								</select>
 							</div>
 						</div>
 						<div class="grid grid-cols-2 gap-2">
 							<div>
-								<label class="text-[10px] font-bold text-gray-500 uppercase">Color</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Color</label
+								>
 								<input
 									v-model="form.custom_gem_color"
 									type="text"
@@ -402,7 +424,9 @@
 								/>
 							</div>
 							<div>
-								<label class="text-[10px] font-bold text-gray-500 uppercase">Clarity</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Clarity</label
+								>
 								<input
 									v-model="form.custom_gem_clarity"
 									type="text"
@@ -412,7 +436,9 @@
 							</div>
 						</div>
 						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">Certification #</label>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Certification #</label
+							>
 							<input
 								v-model="form.custom_certification_number"
 								type="text"
@@ -421,7 +447,9 @@
 							/>
 						</div>
 						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">Image URL</label>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Image URL</label
+							>
 							<div class="flex gap-2 mt-1">
 								<input
 									v-model="form.image"
@@ -450,7 +478,9 @@
 						</div>
 						<div class="grid grid-cols-2 gap-2">
 							<div>
-								<label class="text-[10px] font-bold text-gray-500 uppercase">Standard Rate</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Standard Rate</label
+								>
 								<input
 									v-model.number="form.standard_rate"
 									type="number"
@@ -461,7 +491,9 @@
 								/>
 							</div>
 							<div>
-								<label class="text-[10px] font-bold text-gray-500 uppercase">Valuation Rate</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Valuation Rate</label
+								>
 								<input
 									v-model.number="form.valuation_rate"
 									type="number"
@@ -478,7 +510,13 @@
 						:disabled="saving"
 						class="w-full mt-4 py-2.5 bg-[#D4AF37] text-white rounded-lg text-sm font-bold hover:bg-[#C4A030] transition disabled:opacity-50"
 					>
-						{{ saving ? 'Saving…' : formMode === 'edit' ? 'Save Changes' : 'Create Gem' }}
+						{{
+							saving
+								? 'Saving…'
+								: formMode === 'edit'
+								? 'Save Changes'
+								: 'Create Gem'
+						}}
 					</button>
 				</div>
 			</div>
@@ -548,8 +586,7 @@ const shapeOptions = [
 const filteredGems = computed(() => {
 	let list = stock.gems
 	if (activeType.value) list = list.filter((g) => g.custom_gem_type === activeType.value)
-	if (certifiedOnly.value)
-		list = list.filter((g) => g.custom_certification_number)
+	if (certifiedOnly.value) list = list.filter((g) => g.custom_certification_number)
 	return list
 })
 
@@ -597,7 +634,7 @@ function openEdit(g) {
 		standard_rate: g.standard_rate || 0,
 		valuation_rate: g.valuation_rate || 0,
 	})
-	selectedGem.value = null
+	selectedGem.value = g
 	showForm.value = true
 }
 

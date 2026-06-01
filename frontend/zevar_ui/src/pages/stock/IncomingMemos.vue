@@ -302,7 +302,9 @@
 					</div>
 					<div class="space-y-3">
 						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">Supplier</label>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Supplier</label
+							>
 							<input
 								v-model="newMemo.supplier"
 								type="text"
@@ -318,7 +320,9 @@
 						</div>
 						<div>
 							<div class="flex items-center justify-between mb-2">
-								<label class="text-[10px] font-bold text-gray-500 uppercase">Items</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Items</label
+								>
 								<button
 									@click="addMemoItem"
 									class="text-[10px] font-bold text-[#D4AF37] hover:underline"
@@ -404,10 +408,8 @@ const statusFilters = [
 
 const filteredMemos = computed(() => {
 	if (!activeStatus.value) return stock.memos
-	if (activeStatus.value === 'Draft')
-		return stock.memos.filter((m) => m.docstatus === 0)
-	if (activeStatus.value === 'Received')
-		return stock.memos.filter((m) => m.docstatus === 1)
+	if (activeStatus.value === 'Draft') return stock.memos.filter((m) => m.docstatus === 0)
+	if (activeStatus.value === 'Received') return stock.memos.filter((m) => m.docstatus === 1)
 	return stock.memos
 })
 
@@ -418,7 +420,9 @@ function statusClass(m) {
 }
 
 function loadData() {
-	stock.loadMemos({ status: activeStatus.value === 'Received' ? 'Completed' : activeStatus.value || undefined })
+	stock.loadMemos({
+		status: activeStatus.value === 'Received' ? 'Completed' : activeStatus.value || undefined,
+	})
 	if (!stock.suppliers.length) stock.loadSuppliers()
 }
 
@@ -428,10 +432,19 @@ function viewMemo(m) {
 
 async function handleReceive() {
 	if (!selectedMemo.value) return
-	await stock.receiveMemo(selectedMemo.value.name)
-	toast({ title: 'Memo received', icon: 'check', intent: 'success' })
-	selectedMemo.value = null
-	loadData()
+	try {
+		await stock.receiveMemo(selectedMemo.value.name)
+		toast({ title: 'Memo received', icon: 'check', intent: 'success' })
+		selectedMemo.value = null
+		loadData()
+	} catch (e) {
+		toast({
+			title: 'Receive failed',
+			text: e?.message || String(e),
+			icon: 'alert-circle',
+			intent: 'error',
+		})
+	}
 }
 
 function addMemoItem() {
@@ -453,10 +466,19 @@ async function handleCreate() {
 		toast({ title: 'Add at least one item', icon: 'alert-circle', intent: 'warning' })
 		return
 	}
-	await stock.createMemo(newMemo.value.supplier, JSON.stringify(validItems), null)
-	toast({ title: 'Memo created', icon: 'check', intent: 'success' })
-	showCreate.value = false
-	loadData()
+	try {
+		await stock.createMemo(newMemo.value.supplier, JSON.stringify(validItems), null)
+		toast({ title: 'Memo created', icon: 'check', intent: 'success' })
+		showCreate.value = false
+		loadData()
+	} catch (e) {
+		toast({
+			title: 'Create failed',
+			text: e?.message || String(e),
+			icon: 'alert-circle',
+			intent: 'error',
+		})
+	}
 }
 
 onMounted(loadData)

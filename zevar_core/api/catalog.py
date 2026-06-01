@@ -442,6 +442,7 @@ def get_catalog_filters(store_location: str | None = None) -> dict:
 
 
 @frappe.whitelist(allow_guest=False)
+@rate_limit(limit=100, seconds=60)
 def get_catalog_vendors(
 	page: int = 1,
 	page_size: int = 50,
@@ -460,61 +461,70 @@ def get_catalog_vendors(
 	page_size = min(100, max(1, int(page_size or 50)))
 	limit_start = (page - 1) * page_size
 
-	item_filters = [["Item", "disabled", "=", 0]]
+	# Build SQL filter clause once, reuse for both grouping queries.
+	filter_clauses = ["disabled = 0"]
+	filter_params = []
 	if source:
-		item_filters.append(["Item", "custom_source", "=", source])
+		filter_clauses.append("custom_source = %s")
+		filter_params.append(source)
 	if search:
 		search = _sanitize_search(search)
 		if search:
-			item_filters.append(["Item", "item_name", "like", f"%{search}%"])
+			filter_clauses.append("item_name LIKE %s")
+			filter_params.append(f"%{search}%")
+	filter_sql = " AND ".join(filter_clauses)
 
-	# Pull all items with a vendor, applying the source/search filters at the
-	# SQL level so we don't fetch the whole catalog just to filter in Python.
-	items = frappe.get_all(
-		"Item",
-		filters=item_filters,
-		fields=[
-			"name",
-			"item_name",
-			"custom_vendor",
-			"custom_source",
-			"standard_rate",
-			"custom_msrp",
-			"modified",
-		],
-		order_by="custom_vendor asc, item_name asc",
+	# (1) Per-vendor totals in a single grouped query.
+	vendor_rows = frappe.db.sql(
+		f"""
+		SELECT
+			COALESCE(custom_vendor, '(Unassigned)') AS vendor,
+			COUNT(name) AS item_count,
+			COALESCE(SUM(COALESCE(custom_msrp, standard_rate, 0)), 0) AS total_value,
+			COALESCE(MIN(COALESCE(custom_msrp, standard_rate, 0)), 0) AS min_price,
+			COALESCE(MAX(COALESCE(custom_msrp, standard_rate, 0)), 0) AS max_price,
+			MAX(modified) AS latest_modified
+		FROM `tabItem`
+		WHERE {filter_sql}
+		GROUP BY custom_vendor
+		""",
+		filter_params,
+		as_dict=True,
 	)
 
-	# Group in Python — this is a dashboard view, not a transactional hot path.
+	# (2) Per-(vendor, source) counts to build the sources breakdown.
+	source_rows = frappe.db.sql(
+		f"""
+		SELECT
+			COALESCE(custom_vendor, '(Unassigned)') AS vendor,
+			COALESCE(custom_source, 'Other') AS source,
+			COUNT(name) AS source_count
+		FROM `tabItem`
+		WHERE {filter_sql}
+		GROUP BY custom_vendor, custom_source
+		""",
+		filter_params,
+		as_dict=True,
+	)
+
+	# Merge sources into the vendor rows.
+	sources_by_vendor: dict[str, dict[str, int]] = {}
+	for row in source_rows:
+		sources_by_vendor.setdefault(row.vendor, {})[row.source] = int(row.source_count)
+
 	vendor_map: dict[str, dict] = {}
-	for it in items:
-		vendor = it.custom_vendor or "(Unassigned)"
-		v = vendor_map.setdefault(
-			vendor,
-			{
-				"vendor": vendor,
-				"vendor_name": vendor,
-				"item_count": 0,
-				"total_value": 0.0,
-				"min_price": None,
-				"max_price": None,
-				"sources": {},
-				"latest_modified": None,
-			},
-		)
-		v["item_count"] += 1
-		price = float(it.custom_msrp or it.standard_rate or 0)
-		v["total_value"] += price
-		if v["min_price"] is None or price < v["min_price"]:
-			v["min_price"] = price
-		if v["max_price"] is None or price > v["max_price"]:
-			v["max_price"] = price
-		src = it.custom_source or "Other"
-		v["sources"][src] = v["sources"].get(src, 0) + 1
-		if it.modified and (
-			v["latest_modified"] is None or str(it.modified) > str(v["latest_modified"])
-		):
-			v["latest_modified"] = it.modified
+	for row in vendor_rows:
+		vendor = row.vendor
+		vendor_map[vendor] = {
+			"vendor": vendor,
+			"vendor_name": vendor,
+			"item_count": int(row.item_count),
+			"total_value": float(row.total_value or 0),
+			"min_price": float(row.min_price or 0),
+			"max_price": float(row.max_price or 0),
+			"sources": sources_by_vendor.get(vendor, {}),
+			"latest_modified": row.latest_modified,
+		}
 
 	# Resolve Supplier display names
 	vendor_names = frappe.get_all(
@@ -551,6 +561,7 @@ def get_catalog_vendors(
 
 
 @frappe.whitelist(allow_guest=False)
+@rate_limit(limit=100, seconds=60)
 def get_catalog_items(
 	vendor: str | None = None,
 	source: str | None = None,

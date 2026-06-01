@@ -192,7 +192,13 @@
 										class="text-[9px] font-bold px-2 py-1 rounded-full"
 										:class="statusClass(a)"
 									>
-										{{ a.docstatus === 1 ? 'Submitted' : a.docstatus === 2 ? 'Cancelled' : 'Draft' }}
+										{{
+											a.docstatus === 1
+												? 'Submitted'
+												: a.docstatus === 2
+												? 'Cancelled'
+												: 'Draft'
+										}}
 									</span>
 								</td>
 							</tr>
@@ -247,7 +253,13 @@
 									class="text-[9px] font-bold px-2 py-1 rounded-full"
 									:class="statusClass(selectedAssembly)"
 								>
-									{{ selectedAssembly.docstatus === 1 ? 'Submitted' : selectedAssembly.docstatus === 2 ? 'Cancelled' : 'Draft' }}
+									{{
+										selectedAssembly.docstatus === 1
+											? 'Submitted'
+											: selectedAssembly.docstatus === 2
+											? 'Cancelled'
+											: 'Draft'
+									}}
 								</span>
 							</p>
 						</div>
@@ -342,7 +354,9 @@
 					class="premium-card !rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto m-4"
 				>
 					<div class="flex items-center justify-between mb-4">
-						<h3 class="text-lg font-bold text-gray-900 dark:text-white">New Assembly</h3>
+						<h3 class="text-lg font-bold text-gray-900 dark:text-white">
+							New Assembly
+						</h3>
 						<button
 							@click="showCreate = false"
 							class="p-1 hover:bg-gray-100 dark:hover:bg-warm-dark-700 rounded-lg"
@@ -365,7 +379,9 @@
 					<div class="space-y-3">
 						<div class="grid grid-cols-2 gap-2">
 							<div>
-								<label class="text-[10px] font-bold text-gray-500 uppercase">Purpose</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Purpose</label
+								>
 								<select
 									v-model="newAssembly.purpose"
 									class="w-full mt-1 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none"
@@ -375,7 +391,9 @@
 								</select>
 							</div>
 							<div>
-								<label class="text-[10px] font-bold text-gray-500 uppercase">From Warehouse</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>From Warehouse</label
+								>
 								<input
 									v-model="newAssembly.source_warehouse"
 									type="text"
@@ -385,7 +403,9 @@
 							</div>
 						</div>
 						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">To Warehouse</label>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>To Warehouse</label
+							>
 							<input
 								v-model="newAssembly.target_warehouse"
 								type="text"
@@ -395,7 +415,9 @@
 						</div>
 						<div>
 							<div class="flex items-center justify-between mb-2">
-								<label class="text-[10px] font-bold text-gray-500 uppercase">Items</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Items</label
+								>
 								<button
 									@click="addAssemblyItem"
 									class="text-[10px] font-bold text-[#D4AF37] hover:underline"
@@ -447,7 +469,11 @@
 						:disabled="stock.createAssemblyResource.loading"
 						class="w-full mt-4 py-2.5 bg-[#D4AF37] text-white rounded-lg text-sm font-bold hover:bg-[#C4A030] transition disabled:opacity-50"
 					>
-						{{ stock.createAssemblyResource.loading ? 'Creating...' : 'Create Assembly' }}
+						{{
+							stock.createAssemblyResource.loading
+								? 'Creating...'
+								: 'Create Assembly'
+						}}
 					</button>
 				</div>
 			</div>

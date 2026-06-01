@@ -112,7 +112,9 @@
 					>
 						<div class="flex items-start justify-between gap-3 mb-3">
 							<div class="min-w-0 flex-1">
-								<div class="text-sm font-bold text-gray-900 dark:text-white truncate">
+								<div
+									class="text-sm font-bold text-gray-900 dark:text-white truncate"
+								>
 									{{ v.vendor_name || v.vendor }}
 								</div>
 								<div
@@ -142,17 +144,13 @@
 						</div>
 
 						<div class="grid grid-cols-2 gap-2 text-center">
-							<div
-								class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-2"
-							>
+							<div class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-2">
 								<div class="text-[10px] text-gray-500 uppercase">Items</div>
 								<div class="text-sm font-bold text-gray-900 dark:text-white">
 									{{ v.item_count }}
 								</div>
 							</div>
-							<div
-								class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-2"
-							>
+							<div class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-2">
 								<div class="text-[10px] text-gray-500 uppercase">Total</div>
 								<div class="text-sm font-bold text-[#D4AF37] font-mono">
 									${{ Number(v.total_value || 0).toLocaleString() }}
@@ -200,7 +198,8 @@
 							<p class="text-xs text-gray-500">
 								{{ selectedVendor.item_count }} items · ${{
 									Number(selectedVendor.total_value || 0).toLocaleString()
-								}} total
+								}}
+								total
 							</p>
 						</div>
 						<button
@@ -239,19 +238,21 @@
 								<span v-else class="text-xs text-gray-400">—</span>
 							</div>
 							<div class="min-w-0 flex-1">
-								<div class="text-xs font-bold text-gray-900 dark:text-white truncate">
+								<div
+									class="text-xs font-bold text-gray-900 dark:text-white truncate"
+								>
 									{{ item.item_name }}
 								</div>
 								<div class="text-[10px] text-gray-500 truncate">
 									{{ item.name }} ·
-									<span
-										v-if="item.item_group"
-										class="text-gray-400"
+									<span v-if="item.item_group" class="text-gray-400"
 										>{{ item.item_group }} ·</span
 									>
 									<span v-if="item.custom_metal_type" class="text-gray-400"
 										>{{ item.custom_metal_type }}
-										<span v-if="item.custom_purity">{{ item.custom_purity }}</span></span
+										<span v-if="item.custom_purity">{{
+											item.custom_purity
+										}}</span></span
 									>
 								</div>
 							</div>
@@ -266,16 +267,10 @@
 							</div>
 						</div>
 					</div>
-					<div
-						v-else-if="!loadingItems"
-						class="text-center py-10 text-sm text-gray-400"
-					>
+					<div v-else-if="!loadingItems" class="text-center py-10 text-sm text-gray-400">
 						No items for this vendor
 					</div>
-					<div
-						v-if="loadingItems"
-						class="flex items-center justify-center py-10"
-					>
+					<div v-if="loadingItems" class="flex items-center justify-center py-10">
 						<div
 							class="animate-spin w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full"
 						></div>
@@ -288,6 +283,7 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue'
+import { toast } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
 import { useStockStore } from '@/stores/stock.js'
 
@@ -332,6 +328,13 @@ async function viewVendor(v) {
 		vendorItems.value = res?.items || []
 	} catch (e) {
 		console.warn('Could not load items', e)
+		toast({
+			title: 'Failed to load items',
+			text: `${v.vendor_name || v.vendor || 'Vendor'}: ${e?.message || String(e)}`,
+			icon: 'alert-circle',
+			intent: 'error',
+		})
+		vendorItems.value = []
 	} finally {
 		loadingItems.value = false
 	}

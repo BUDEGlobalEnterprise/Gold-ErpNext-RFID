@@ -13,7 +13,11 @@
 							{{ pagination.total_count }} Clients
 						</span>
 					</div>
-					<ViewToggle v-model="viewMode" storage-key="zevar_customers_view" class="shrink-0" />
+					<ViewToggle
+						v-model="viewMode"
+						storage-key="zevar_customers_view"
+						class="shrink-0"
+					/>
 				</div>
 
 				<!-- Actions Row (Search + Add Button) -->
@@ -295,7 +299,9 @@
 							:key="customer.name"
 							class="bg-white dark:bg-warm-dark-800 rounded-xl border border-gray-100 dark:border-warm-border/50 p-3 hover:shadow-md hover:border-[#D4AF37]/40 dark:hover:border-[#D4AF37]/30 transition-all duration-200 cursor-pointer flex flex-col group min-w-0"
 							:class="
-								customer.customer_group === 'VIP' ? '!border-[#D4AF37]/30 bg-gradient-to-b from-white to-[#D4AF37]/5 dark:from-warm-dark-800 dark:to-[#D4AF37]/5' : ''
+								customer.customer_group === 'VIP'
+									? '!border-[#D4AF37]/30 bg-gradient-to-b from-white to-[#D4AF37]/5 dark:from-warm-dark-800 dark:to-[#D4AF37]/5'
+									: ''
 							"
 							@click="openCustomer(customer.name)"
 						>
@@ -348,9 +354,13 @@
 												d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
 											/>
 										</svg>
-										<span class="truncate">{{ customer.mobile_no || 'No Phone' }}</span>
+										<span class="truncate">{{
+											customer.mobile_no || 'No Phone'
+										}}</span>
 									</div>
-									<div class="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+									<div
+										class="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+									>
 										<button
 											@click.stop="openCustomer(customer.name)"
 											class="p-0.5 rounded hover:bg-gray-100 dark:hover:bg-warm-dark-700 text-gray-400 hover:text-gray-600 dark:hover:text-white transition"
@@ -414,7 +424,9 @@
 											d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
 										/>
 									</svg>
-									<span class="truncate">{{ customer.email_id || 'No Email' }}</span>
+									<span class="truncate">{{
+										customer.email_id || 'No Email'
+									}}</span>
 								</div>
 							</div>
 						</div>
@@ -709,9 +721,9 @@ function getInitials(name) {
 		.toUpperCase()
 }
 
-function openCustomer(name) {
+function openCustomer(name, edit = false) {
 	editingCustomerName.value = name
-	isEditMode.value = true
+	isEditMode.value = edit && sessionStore.isManager
 	showCustomerModal.value = true
 }
 
@@ -737,6 +749,7 @@ function onCustomerCreated() {
 function onCustomerUpdated() {
 	showCustomerModal.value = false
 	fetchCustomers()
+	fetchGlobalStats()
 }
 
 onMounted(() => {

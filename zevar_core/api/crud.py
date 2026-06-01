@@ -99,7 +99,13 @@ def _parse_values(values_json, allowed_fields, doctype=None):
 	"""
 	if not values_json:
 		frappe.throw(_("No values provided"))
-	values = json.loads(values_json) if isinstance(values_json, str) else values_json
+	if isinstance(values_json, str):
+		try:
+			values = json.loads(values_json)
+		except (json.JSONDecodeError, TypeError):
+			frappe.throw(_("Invalid JSON in values"))
+	else:
+		values = values_json
 	if not isinstance(values, dict):
 		frappe.throw(_("Values must be a JSON object"))
 	filtered = {k: v for k, v in values.items() if k in allowed_fields}
@@ -110,9 +116,7 @@ def _parse_values(values_json, allowed_fields, doctype=None):
 		existing = {f.fieldname for f in meta.fields}
 		filtered = {k: v for k, v in filtered.items() if k in existing}
 		if not filtered:
-			frappe.throw(
-				_("No writable fields match the current {0} schema").format(doctype)
-			)
+			frappe.throw(_("No writable fields match the current {0} schema").format(doctype))
 	return filtered
 
 
@@ -185,10 +189,13 @@ def delete_item(name):
 		frappe.throw(_("Item {0} not found").format(name))
 
 	# Guard: refuse if item has open stock or open transactions
-	open_bin = frappe.db.sql(
-		"SELECT SUM(actual_qty) FROM `tabBin` WHERE item_code=%s",
-		(name,),
-	)[0][0] or 0
+	open_bin = (
+		frappe.db.sql(
+			"SELECT SUM(actual_qty) FROM `tabBin` WHERE item_code=%s",
+			(name,),
+		)[0][0]
+		or 0
+	)
 	if flt(open_bin) > 0:
 		frappe.throw(
 			_("Cannot delete {0}: has {1} units in stock. Disable it instead.").format(name, flt(open_bin))
@@ -268,9 +275,7 @@ def create_item_group(values_json):
 				idx += 1
 			values["name"] = f"{base}-{idx}"
 
-	if values.get("parent_item_group") and not frappe.db.exists(
-		"Item Group", values["parent_item_group"]
-	):
+	if values.get("parent_item_group") and not frappe.db.exists("Item Group", values["parent_item_group"]):
 		frappe.throw(_("Parent Item Group {0} does not exist").format(values["parent_item_group"]))
 
 	doc = frappe.new_doc("Item Group")
@@ -305,9 +310,7 @@ def delete_item_group(name):
 
 	item_count = frappe.db.count("Item", {"item_group": name, "disabled": 0})
 	if item_count > 0:
-		frappe.throw(
-			_("Cannot delete {0}: {1} items still assigned").format(name, item_count)
-		)
+		frappe.throw(_("Cannot delete {0}: {1} items still assigned").format(name, item_count))
 
 	children = frappe.get_all("Item Group", filters={"parent_item_group": name}, limit=1)
 	if children:
@@ -367,9 +370,7 @@ def delete_brand(name):
 
 	item_count = frappe.db.count("Item", {"brand": name, "disabled": 0})
 	if item_count > 0:
-		frappe.throw(
-			_("Cannot delete {0}: {1} items still use this brand").format(name, item_count)
-		)
+		frappe.throw(_("Cannot delete {0}: {1} items still use this brand").format(name, item_count))
 
 	frappe.delete_doc("Brand", name, ignore_permissions=False)
 	return {"success": True, "name": name}
@@ -420,8 +421,8 @@ def create_warehouse(values_json):
 
 	# company is required by Warehouse DocType
 	if not values.get("company"):
-		values["company"] = (
-			frappe.defaults.get_user_default("Company") or frappe.db.get_single_value("Global Defaults", "default_company")
+		values["company"] = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value(
+			"Global Defaults", "default_company"
 		)
 	if not values["company"]:
 		frappe.throw(_("Company is required to create a warehouse"))
@@ -457,10 +458,13 @@ def delete_warehouse(name):
 		frappe.throw(_("Warehouse {0} not found").format(name))
 
 	# Guard: refuse if has stock
-	stock = frappe.db.sql(
-		"SELECT SUM(actual_qty) FROM `tabBin` WHERE warehouse=%s AND actual_qty > 0",
-		(name,),
-	)[0][0] or 0
+	stock = (
+		frappe.db.sql(
+			"SELECT SUM(actual_qty) FROM `tabBin` WHERE warehouse=%s AND actual_qty > 0",
+			(name,),
+		)[0][0]
+		or 0
+	)
 	if flt(stock) > 0:
 		frappe.throw(
 			_("Cannot delete {0}: has {1} units in stock. Disable it instead.").format(name, flt(stock))
@@ -521,14 +525,20 @@ def get_items_in_group(item_group):
 	if not frappe.db.exists("Item Group", item_group):
 		frappe.throw(_("Item Group {0} not found").format(item_group))
 
-	# Recurse into children
+	# Recurse into children: walk the full subtree (children, grandchildren, …).
 	all_groups = [item_group]
-	children = frappe.get_all(
-		"Item Group",
-		filters={"parent_item_group": item_group},
-		pluck="name",
-	)
-	all_groups.extend(children)
+	frontier = [item_group]
+	while frontier:
+		children = frappe.get_all(
+			"Item Group",
+			filters={"parent_item_group": ["in", frontier]},
+			pluck="name",
+		)
+		new_children = [c for c in children if c not in all_groups]
+		if not new_children:
+			break
+		all_groups.extend(new_children)
+		frontier = new_children
 
 	items = frappe.get_all(
 		"Item",

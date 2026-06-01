@@ -1,10 +1,7 @@
 <template>
 	<Teleport to="body">
 		<Transition name="fade">
-			<div
-				v-if="show"
-				class="fixed inset-0 z-[250] flex items-center justify-center p-4"
-			>
+			<div v-if="show" class="fixed inset-0 z-[250] flex items-center justify-center p-4">
 				<!-- Backdrop -->
 				<div
 					@click="handleCancel"
@@ -20,11 +17,19 @@
 						class="p-6 pb-4 border-b border-gray-100 dark:border-warm-border flex items-center justify-between flex-shrink-0"
 					>
 						<div>
-							<h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+							<h3
+								class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2"
+							>
 								<span class="w-2 h-5 bg-[#D4AF37] rounded-sm inline-block"></span>
 								{{ isEdit ? 'Edit Customer Profile' : 'Create New Customer' }}
 							</h3>
-							<p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ isEdit ? 'Update customer details, addresses, and sizes' : 'Add a comprehensive customer profile with custom sizes' }}</p>
+							<p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+								{{
+									isEdit
+										? 'Update customer details, addresses, and sizes'
+										: 'Add a comprehensive customer profile with custom sizes'
+								}}
+							</p>
 						</div>
 						<button
 							@click="handleCancel"
@@ -72,496 +77,120 @@
 
 					<!-- Form Content - Scrollable with CONSTANT/FIXED HEIGHT to prevent modal jumping -->
 					<div class="flex-1 overflow-y-auto p-6 space-y-5 h-[420px] custom-scrollbar">
-												<!-- Tab 1: Contact Details -->
+						<!-- Tab 1: Contact Details -->
 						<!-- Loading State for Edit Mode -->
 						<div v-if="loadingEditData" class="flex items-center justify-center py-20">
 							<div class="flex flex-col items-center gap-3">
-								<div class="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 border-t-[#D4AF37]"></div>
+								<div
+									class="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 border-t-[#D4AF37]"
+								></div>
 								<span class="text-xs text-gray-400">Loading customer data...</span>
 							</div>
 						</div>
 						<template v-else>
-						<div v-if="activeTab === 'contact'" class="space-y-4">
-							<div class="grid grid-cols-2 gap-4">
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-									>
-										Contact type <span class="text-red-500">*</span>
-									</label>
-									<select
-										v-model="newCustomer.contact_type"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									>
-										<option value="Individual">Individual</option>
-										<option value="Company">Company</option>
-									</select>
-								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Language</label
-									>
-									<select
-										v-model="newCustomer.language"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									>
-										<option value="en">English</option>
-										<option value="es">Spanish</option>
-										<option value="fr">French</option>
-										<option value="de">German</option>
-										<option value="zh">Chinese</option>
-										<option value="hi">Hindi</option>
-										<option value="ar">Arabic</option>
-									</select>
-								</div>
-							</div>
-
-							<div class="grid grid-cols-1">
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Name <span class="text-red-500">*</span></label
-									>
-									<input
-										v-model="newCustomer.name"
-										type="text"
-										placeholder="Full name"
-										:disabled="isEdit"
-										required
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-							</div>
-
-							<div class="grid grid-cols-2 gap-4">
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Email</label
-									>
-									<input
-										v-model="newCustomer.email"
-										type="email"
-										placeholder="email@example.com"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Phone <span class="text-red-500">*</span></label
-									>
-									<div class="flex">
-										<select
-											v-model="newCustomer.phone_country"
-											class="px-2 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-r-0 border-gray-200 dark:border-warm-border rounded-l-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+							<div v-if="activeTab === 'contact'" class="space-y-4">
+								<div class="grid grid-cols-2 gap-4">
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
 										>
-											<option
-												v-for="c in usPhoneCodes"
-												:key="c.flag"
-												:value="c.code"
-											>
-												{{ c.flag }} {{ c.code }}
-											</option>
+											Contact type <span class="text-red-500">*</span>
+										</label>
+										<select
+											v-model="newCustomer.contact_type"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										>
+											<option value="Individual">Individual</option>
+											<option value="Company">Company</option>
 										</select>
+									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Language</label
+										>
+										<select
+											v-model="newCustomer.language"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										>
+											<option value="en">English</option>
+											<option value="es">Spanish</option>
+											<option value="fr">French</option>
+											<option value="de">German</option>
+											<option value="zh">Chinese</option>
+											<option value="hi">Hindi</option>
+											<option value="ar">Arabic</option>
+										</select>
+									</div>
+								</div>
+
+								<div class="grid grid-cols-1">
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Name <span class="text-red-500">*</span></label
+										>
 										<input
-											v-model="newCustomer.phone"
-											type="tel"
-											placeholder="(555) 123-4567"
+											v-model="newCustomer.name"
+											type="text"
+											placeholder="Full name"
+											:disabled="isEdit"
 											required
-											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-r-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
 										/>
 									</div>
 								</div>
-							</div>
 
-							<div class="grid grid-cols-3 gap-3">
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Street number</label
-									>
-									<input
-										v-model="newCustomer.street_number"
-										type="text"
-										placeholder="123"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Street</label
-									>
-									<input
-										v-model="newCustomer.street"
-										type="text"
-										placeholder="Main St"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>City</label
-									>
-									<input
-										v-model="newCustomer.city"
-										type="text"
-										placeholder="New York"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-							</div>
-
-							<div class="grid grid-cols-3 gap-3">
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Postcode</label
-									>
-									<input
-										v-model="newCustomer.pincode"
-										type="text"
-										placeholder="10001"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>State/Region</label
-									>
-									<select
-										v-model="newCustomer.state"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									>
-										<option value="">Select state</option>
-										<option
-											v-for="s in usStates"
-											:key="s.code"
-											:value="s.code"
-										>
-											{{ s.name }}
-										</option>
-									</select>
-								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Country</label
-									>
-									<select
-										v-model="newCustomer.country"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									>
-										<option value="United States">United States</option>
-										<option value="Canada">Canada</option>
-										<option value="Mexico">Mexico</option>
-										<option value="India">India</option>
-										<option value="United Kingdom">United Kingdom</option>
-									</select>
-								</div>
-							</div>
-						</div>
-
-						<!-- Tab 2: Extra Details -->
-						<div v-if="activeTab === 'extra'" class="space-y-4">
-							<div class="grid grid-cols-3 gap-3">
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Bank account number</label
-									>
-									<input
-										v-model="newCustomer.bank_account"
-										type="text"
-										placeholder="Account number"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>SWIFT/BIC code</label
-									>
-									<input
-										v-model="newCustomer.swift_bic"
-										type="text"
-										placeholder="SWIFT code"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Bank name</label
-									>
-									<input
-										v-model="newCustomer.bank_name"
-										type="text"
-										placeholder="Bank name"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-							</div>
-
-							<div class="grid grid-cols-2 gap-4">
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Phone 2</label
-									>
-									<input
-										v-model="newCustomer.phone2"
-										type="tel"
-										placeholder="Secondary phone"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Client number</label
-									>
-									<input
-										v-model="newCustomer.client_number"
-										type="text"
-										placeholder="Client ID"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-							</div>
-
-							<div class="grid grid-cols-2 gap-4">
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Birth date</label
-									>
-									<input
-										v-model="newCustomer.birth_date"
-										type="date"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Marriage date</label
-									>
-									<input
-										v-model="newCustomer.marriage_date"
-										type="date"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-							</div>
-
-							<div class="grid grid-cols-2 gap-4">
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Partner name</label
-									>
-									<input
-										v-model="newCustomer.partner_name"
-										type="text"
-										placeholder="Partner/spouse name"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Partner phone</label
-									>
-									<input
-										v-model="newCustomer.partner_phone"
-										type="tel"
-										placeholder="Partner phone"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-							</div>
-
-							<div class="grid grid-cols-2 gap-4">
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Partner email</label
-									>
-									<input
-										v-model="newCustomer.partner_email"
-										type="email"
-										placeholder="Partner email"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Discount (%)</label
-									>
-									<input
-										v-model.number="newCustomer.discount"
-										type="number"
-										min="0"
-										max="100"
-										placeholder="0"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-							</div>
-
-							<div class="grid grid-cols-2 gap-4">
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Gender</label
-									>
-									<select
-										v-model="newCustomer.gender"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									>
-										<option value="">--------</option>
-										<option value="Male">Male</option>
-										<option value="Female">Female</option>
-										<option value="Other">Other</option>
-									</select>
-								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Profession</label
-									>
-									<input
-										v-model="newCustomer.profession"
-										type="text"
-										placeholder="Profession"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-							</div>
-
-							<div class="grid grid-cols-2 gap-4">
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Works at</label
-									>
-									<input
-										v-model="newCustomer.works_at"
-										type="text"
-										placeholder="Company name"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Assigned to</label
-									>
-									<input
-										v-model="newCustomer.assigned_to"
-										type="text"
-										placeholder="Sales person"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-							</div>
-
-							<div>
-								<label
-									class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-									>Tags</label
-								>
-								<input
-									v-model="newCustomer.tags"
-									type="text"
-									placeholder="VIP, Wholesale, etc."
-									class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-								/>
-								<p class="text-[10px] text-gray-400 mt-1">
-									A comma-separated list of tags.
-								</p>
-							</div>
-
-							<div>
-								<label
-									class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-									>Internal notes</label
-								>
-								<textarea
-									v-model="newCustomer.internal_notes"
-									rows="3"
-									placeholder="Add internal notes about this customer..."
-									class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 resize-none transition-shadow"
-								></textarea>
-							</div>
-
-							<div class="grid grid-cols-2 gap-4 pt-2">
-								<label
-									class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#0F1115] border border-gray-100 dark:border-warm-border/50 rounded-xl cursor-pointer hover:bg-gray-100/50 dark:hover:bg-warm-dark-800/30 transition-colors"
-								>
-									<input
-										v-model="newCustomer.accepts_marketing"
-										type="checkbox"
-										class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-									/>
-									<div class="cursor-pointer">
-										<span
-											class="text-sm font-semibold text-gray-700 dark:text-gray-300 block"
-											>Marketing</span
-										>
-										<span class="text-[10px] text-gray-400">Accepts email marketing</span>
-									</div>
-								</label>
-								<label
-									class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#0F1115] border border-gray-100 dark:border-warm-border/50 rounded-xl cursor-pointer hover:bg-gray-100/50 dark:hover:bg-warm-dark-800/30 transition-colors"
-								>
-									<input
-										v-model="newCustomer.tax_exempt"
-										type="checkbox"
-										class="w-4 h-4 rounded border-gray-300 text-[#D4AF37] focus:ring-[#D4AF37] cursor-pointer"
-									/>
-									<div class="cursor-pointer">
-										<span
-											class="text-sm font-semibold text-gray-700 dark:text-gray-300 block"
-											>Tax Exempt</span
-										>
-										<span class="text-[10px] text-gray-400">Exempt from sales tax</span>
-									</div>
-								</label>
-							</div>
-						</div>
-
-						<!-- Tab 3: Shipping Address -->
-						<div v-if="activeTab === 'shipping'" class="space-y-4">
-							<div class="flex items-center gap-3 mb-3 p-3 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl border border-blue-100/30 dark:border-blue-900/20">
-								<label class="flex items-center gap-2 cursor-pointer">
-									<input
-										v-model="newCustomer.same_as_billing"
-										type="checkbox"
-										class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-									/>
-									<span
-										class="text-sm font-semibold text-gray-700 dark:text-gray-300"
-										>Shipping address is same as billing address</span
-									>
-								</label>
-							</div>
-
-							<div v-if="!newCustomer.same_as_billing" class="space-y-4 transition-all duration-300">
 								<div class="grid grid-cols-2 gap-4">
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Email</label
+										>
+										<input
+											v-model="newCustomer.email"
+											type="email"
+											placeholder="email@example.com"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Phone <span class="text-red-500">*</span></label
+										>
+										<div class="flex">
+											<select
+												v-model="newCustomer.phone_country"
+												class="px-2 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-r-0 border-gray-200 dark:border-warm-border rounded-l-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+											>
+												<option
+													v-for="c in usPhoneCodes"
+													:key="c.flag"
+													:value="c.code"
+												>
+													{{ c.flag }} {{ c.code }}
+												</option>
+											</select>
+											<input
+												v-model="newCustomer.phone"
+												type="tel"
+												placeholder="(555) 123-4567"
+												required
+												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-r-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+											/>
+										</div>
+									</div>
+								</div>
+
+								<div class="grid grid-cols-3 gap-3">
 									<div>
 										<label
 											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
 											>Street number</label
 										>
 										<input
-											v-model="newCustomer.ship_street_number"
+											v-model="newCustomer.street_number"
 											type="text"
 											placeholder="123"
 											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
@@ -573,9 +202,21 @@
 											>Street</label
 										>
 										<input
-											v-model="newCustomer.ship_street"
+											v-model="newCustomer.street"
 											type="text"
 											placeholder="Main St"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>City</label
+										>
+										<input
+											v-model="newCustomer.city"
+											type="text"
+											placeholder="New York"
 											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
 										/>
 									</div>
@@ -585,22 +226,10 @@
 									<div>
 										<label
 											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-											>City</label
-										>
-										<input
-											v-model="newCustomer.ship_city"
-											type="text"
-											placeholder="City"
-											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-										/>
-									</div>
-									<div>
-										<label
-											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
 											>Postcode</label
 										>
 										<input
-											v-model="newCustomer.ship_pincode"
+											v-model="newCustomer.pincode"
 											type="text"
 											placeholder="10001"
 											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
@@ -612,7 +241,7 @@
 											>State/Region</label
 										>
 										<select
-											v-model="newCustomer.ship_state"
+											v-model="newCustomer.state"
 											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
 										>
 											<option value="">Select state</option>
@@ -625,213 +254,630 @@
 											</option>
 										</select>
 									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Country</label
+										>
+										<select
+											v-model="newCustomer.country"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										>
+											<option value="United States">United States</option>
+											<option value="Canada">Canada</option>
+											<option value="Mexico">Mexico</option>
+											<option value="India">India</option>
+											<option value="United Kingdom">United Kingdom</option>
+										</select>
+									</div>
+								</div>
+							</div>
+
+							<!-- Tab 2: Extra Details -->
+							<div v-if="activeTab === 'extra'" class="space-y-4">
+								<div class="grid grid-cols-3 gap-3">
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Bank account number</label
+										>
+										<input
+											v-model="newCustomer.bank_account"
+											type="text"
+											placeholder="Account number"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>SWIFT/BIC code</label
+										>
+										<input
+											v-model="newCustomer.swift_bic"
+											type="text"
+											placeholder="SWIFT code"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Bank name</label
+										>
+										<input
+											v-model="newCustomer.bank_name"
+											type="text"
+											placeholder="Bank name"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+								</div>
+
+								<div class="grid grid-cols-2 gap-4">
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Phone 2</label
+										>
+										<input
+											v-model="newCustomer.phone2"
+											type="tel"
+											placeholder="Secondary phone"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Client number</label
+										>
+										<input
+											v-model="newCustomer.client_number"
+											type="text"
+											placeholder="Client ID"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+								</div>
+
+								<div class="grid grid-cols-2 gap-4">
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Birth date</label
+										>
+										<input
+											v-model="newCustomer.birth_date"
+											type="date"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Marriage date</label
+										>
+										<input
+											v-model="newCustomer.marriage_date"
+											type="date"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+								</div>
+
+								<div class="grid grid-cols-2 gap-4">
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Partner name</label
+										>
+										<input
+											v-model="newCustomer.partner_name"
+											type="text"
+											placeholder="Partner/spouse name"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Partner phone</label
+										>
+										<input
+											v-model="newCustomer.partner_phone"
+											type="tel"
+											placeholder="Partner phone"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+								</div>
+
+								<div class="grid grid-cols-2 gap-4">
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Partner email</label
+										>
+										<input
+											v-model="newCustomer.partner_email"
+											type="email"
+											placeholder="Partner email"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Discount (%)</label
+										>
+										<input
+											v-model.number="newCustomer.discount"
+											type="number"
+											min="0"
+											max="100"
+											placeholder="0"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+								</div>
+
+								<div class="grid grid-cols-2 gap-4">
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Gender</label
+										>
+										<select
+											v-model="newCustomer.gender"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										>
+											<option value="">--------</option>
+											<option value="Male">Male</option>
+											<option value="Female">Female</option>
+											<option value="Other">Other</option>
+										</select>
+									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Profession</label
+										>
+										<input
+											v-model="newCustomer.profession"
+											type="text"
+											placeholder="Profession"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+								</div>
+
+								<div class="grid grid-cols-2 gap-4">
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Works at</label
+										>
+										<input
+											v-model="newCustomer.works_at"
+											type="text"
+											placeholder="Company name"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Assigned to</label
+										>
+										<input
+											v-model="newCustomer.assigned_to"
+											type="text"
+											placeholder="Sales person"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
 								</div>
 
 								<div>
 									<label
 										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Country</label
+										>Tags</label
 									>
-									<select
-										v-model="newCustomer.ship_country"
+									<input
+										v-model="newCustomer.tags"
+										type="text"
+										placeholder="VIP, Wholesale, etc."
 										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									>
-										<option value="United States">United States</option>
-										<option value="Canada">Canada</option>
-										<option value="Mexico">Mexico</option>
-									</select>
+									/>
+									<p class="text-[10px] text-gray-400 mt-1">
+										A comma-separated list of tags.
+									</p>
 								</div>
-							</div>
-							<div v-else class="flex flex-col items-center justify-center py-12 text-center text-gray-400 space-y-2">
-								<svg class="w-12 h-12 text-gray-300 dark:text-warm-dark-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-								</svg>
-								<p class="text-sm font-medium">Shipping Address Synchronized</p>
-								<p class="text-xs text-gray-500/80 max-w-sm">
-									We will automatically copy and use the customer's billing address for all shipments.
-								</p>
-							</div>
-						</div>
 
-						<!-- Tab 4: Sizes -->
-						<div v-if="activeTab === 'sizes'" class="space-y-4">
-							<div class="p-3 bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100/30 dark:border-amber-900/20 rounded-xl mb-4">
-								<p class="text-xs text-amber-800 dark:text-amber-400 font-medium">
-									💡 Recording standard jewelry sizes enables personalized shopping recommendations and faster repair creation.
-								</p>
-							</div>
+								<div>
+									<label
+										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+										>Internal notes</label
+									>
+									<textarea
+										v-model="newCustomer.internal_notes"
+										rows="3"
+										placeholder="Add internal notes about this customer..."
+										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 resize-none transition-shadow"
+									></textarea>
+								</div>
 
-							<div class="grid grid-cols-2 gap-4">
-								<div>
+								<div class="grid grid-cols-2 gap-4 pt-2">
 									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Ring left size</label
+										class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#0F1115] border border-gray-100 dark:border-warm-border/50 rounded-xl cursor-pointer hover:bg-gray-100/50 dark:hover:bg-warm-dark-800/30 transition-colors"
 									>
-									<input
-										v-model="newCustomer.ring_left_size"
-										type="text"
-										placeholder="e.g. 7"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-								<div>
+										<input
+											v-model="newCustomer.accepts_marketing"
+											type="checkbox"
+											class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+										/>
+										<div class="cursor-pointer">
+											<span
+												class="text-sm font-semibold text-gray-700 dark:text-gray-300 block"
+												>Marketing</span
+											>
+											<span class="text-[10px] text-gray-400"
+												>Accepts email marketing</span
+											>
+										</div>
+									</label>
 									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Ring right size</label
+										class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#0F1115] border border-gray-100 dark:border-warm-border/50 rounded-xl cursor-pointer hover:bg-gray-100/50 dark:hover:bg-warm-dark-800/30 transition-colors"
 									>
-									<input
-										v-model="newCustomer.ring_right_size"
-										type="text"
-										placeholder="e.g. 7.5"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-							</div>
-
-							<div class="grid grid-cols-2 gap-4">
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Middle left size</label
-									>
-									<input
-										v-model="newCustomer.middle_left_size"
-										type="text"
-										placeholder="Size"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Middle right size</label
-									>
-									<input
-										v-model="newCustomer.middle_right_size"
-										type="text"
-										placeholder="Size"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
+										<input
+											v-model="newCustomer.tax_exempt"
+											type="checkbox"
+											class="w-4 h-4 rounded border-gray-300 text-[#D4AF37] focus:ring-[#D4AF37] cursor-pointer"
+										/>
+										<div class="cursor-pointer">
+											<span
+												class="text-sm font-semibold text-gray-700 dark:text-gray-300 block"
+												>Tax Exempt</span
+											>
+											<span class="text-[10px] text-gray-400"
+												>Exempt from sales tax</span
+											>
+										</div>
+									</label>
 								</div>
 							</div>
 
-							<div class="grid grid-cols-2 gap-4">
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Index left size</label
-									>
-									<input
-										v-model="newCustomer.index_left_size"
-										type="text"
-										placeholder="Size"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
+							<!-- Tab 3: Shipping Address -->
+							<div v-if="activeTab === 'shipping'" class="space-y-4">
+								<div
+									class="flex items-center gap-3 mb-3 p-3 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl border border-blue-100/30 dark:border-blue-900/20"
+								>
+									<label class="flex items-center gap-2 cursor-pointer">
+										<input
+											v-model="newCustomer.same_as_billing"
+											type="checkbox"
+											class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+										/>
+										<span
+											class="text-sm font-semibold text-gray-700 dark:text-gray-300"
+											>Shipping address is same as billing address</span
+										>
+									</label>
 								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Index right size</label
+
+								<div
+									v-if="!newCustomer.same_as_billing"
+									class="space-y-4 transition-all duration-300"
+								>
+									<div class="grid grid-cols-2 gap-4">
+										<div>
+											<label
+												class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+												>Street number</label
+											>
+											<input
+												v-model="newCustomer.ship_street_number"
+												type="text"
+												placeholder="123"
+												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+											/>
+										</div>
+										<div>
+											<label
+												class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+												>Street</label
+											>
+											<input
+												v-model="newCustomer.ship_street"
+												type="text"
+												placeholder="Main St"
+												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+											/>
+										</div>
+									</div>
+
+									<div class="grid grid-cols-3 gap-3">
+										<div>
+											<label
+												class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+												>City</label
+											>
+											<input
+												v-model="newCustomer.ship_city"
+												type="text"
+												placeholder="City"
+												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+											/>
+										</div>
+										<div>
+											<label
+												class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+												>Postcode</label
+											>
+											<input
+												v-model="newCustomer.ship_pincode"
+												type="text"
+												placeholder="10001"
+												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+											/>
+										</div>
+										<div>
+											<label
+												class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+												>State/Region</label
+											>
+											<select
+												v-model="newCustomer.ship_state"
+												class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+											>
+												<option value="">Select state</option>
+												<option
+													v-for="s in usStates"
+													:key="s.code"
+													:value="s.code"
+												>
+													{{ s.name }}
+												</option>
+											</select>
+										</div>
+									</div>
+
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Country</label
+										>
+										<select
+											v-model="newCustomer.ship_country"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										>
+											<option value="United States">United States</option>
+											<option value="Canada">Canada</option>
+											<option value="Mexico">Mexico</option>
+										</select>
+									</div>
+								</div>
+								<div
+									v-else
+									class="flex flex-col items-center justify-center py-12 text-center text-gray-400 space-y-2"
+								>
+									<svg
+										class="w-12 h-12 text-gray-300 dark:text-warm-dark-700"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="1.5"
+										viewBox="0 0 24 24"
 									>
-									<input
-										v-model="newCustomer.index_right_size"
-										type="text"
-										placeholder="Size"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+										/>
+									</svg>
+									<p class="text-sm font-medium">
+										Shipping Address Synchronized
+									</p>
+									<p class="text-xs text-gray-500/80 max-w-sm">
+										We will automatically copy and use the customer's billing
+										address for all shipments.
+									</p>
 								</div>
 							</div>
 
-							<div class="grid grid-cols-2 gap-4">
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Pink left size</label
+							<!-- Tab 4: Sizes -->
+							<div v-if="activeTab === 'sizes'" class="space-y-4">
+								<div
+									class="p-3 bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100/30 dark:border-amber-900/20 rounded-xl mb-4"
+								>
+									<p
+										class="text-xs text-amber-800 dark:text-amber-400 font-medium"
 									>
-									<input
-										v-model="newCustomer.pink_left_size"
-										type="text"
-										placeholder="Size"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
+										💡 Recording standard jewelry sizes enables personalized
+										shopping recommendations and faster repair creation.
+									</p>
 								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Pink right size</label
-									>
-									<input
-										v-model="newCustomer.pink_right_size"
-										type="text"
-										placeholder="Size"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
+
+								<div class="grid grid-cols-2 gap-4">
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Ring left size</label
+										>
+										<input
+											v-model="newCustomer.ring_left_size"
+											type="text"
+											placeholder="e.g. 7"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Ring right size</label
+										>
+										<input
+											v-model="newCustomer.ring_right_size"
+											type="text"
+											placeholder="e.g. 7.5"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+								</div>
+
+								<div class="grid grid-cols-2 gap-4">
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Middle left size</label
+										>
+										<input
+											v-model="newCustomer.middle_left_size"
+											type="text"
+											placeholder="Size"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Middle right size</label
+										>
+										<input
+											v-model="newCustomer.middle_right_size"
+											type="text"
+											placeholder="Size"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+								</div>
+
+								<div class="grid grid-cols-2 gap-4">
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Index left size</label
+										>
+										<input
+											v-model="newCustomer.index_left_size"
+											type="text"
+											placeholder="Size"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Index right size</label
+										>
+										<input
+											v-model="newCustomer.index_right_size"
+											type="text"
+											placeholder="Size"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+								</div>
+
+								<div class="grid grid-cols-2 gap-4">
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Pink left size</label
+										>
+										<input
+											v-model="newCustomer.pink_left_size"
+											type="text"
+											placeholder="Size"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Pink right size</label
+										>
+										<input
+											v-model="newCustomer.pink_right_size"
+											type="text"
+											placeholder="Size"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+								</div>
+
+								<div class="grid grid-cols-2 gap-4">
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Thumb left size</label
+										>
+										<input
+											v-model="newCustomer.thumb_left_size"
+											type="text"
+											placeholder="Size"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Thumb right size</label
+										>
+										<input
+											v-model="newCustomer.thumb_right_size"
+											type="text"
+											placeholder="Size"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+								</div>
+
+								<div class="grid grid-cols-2 gap-4">
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Wrist size</label
+										>
+										<input
+											v-model="newCustomer.wrist_size"
+											type="text"
+											placeholder="e.g. 7 inches"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Neck size</label
+										>
+										<input
+											v-model="newCustomer.neck_size"
+											type="text"
+											placeholder="e.g. 18 inches"
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
 								</div>
 							</div>
-
-							<div class="grid grid-cols-2 gap-4">
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Thumb left size</label
-									>
-									<input
-										v-model="newCustomer.thumb_left_size"
-										type="text"
-										placeholder="Size"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Thumb right size</label
-									>
-									<input
-										v-model="newCustomer.thumb_right_size"
-										type="text"
-										placeholder="Size"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-							</div>
-
-							<div class="grid grid-cols-2 gap-4">
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Wrist size</label
-									>
-									<input
-										v-model="newCustomer.wrist_size"
-										type="text"
-										placeholder="e.g. 7 inches"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-								<div>
-									<label
-										class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-										>Neck size</label
-									>
-									<input
-										v-model="newCustomer.neck_size"
-										type="text"
-										placeholder="e.g. 18 inches"
-										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-									/>
-								</div>
-							</div>
-						</div>
-
 						</template>
 						<!-- Error Message -->
 						<div
 							v-if="createError"
 							class="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 px-4 py-3 rounded-lg border border-red-200 dark:border-red-800/30 flex items-center gap-2"
 						>
-							<svg class="w-4 h-4 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+							<svg
+								class="w-4 h-4 text-red-500 shrink-0"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+								/>
 							</svg>
 							<span>{{ createError }}</span>
 						</div>
@@ -851,7 +897,9 @@
 						<button
 							type="button"
 							@click="submit"
-							:disabled="!newCustomer.name || (!isEdit && !newCustomer.phone) || creating"
+							:disabled="
+								!newCustomer.name || (!isEdit && !newCustomer.phone) || creating
+							"
 							class="flex-1 py-2.5 rounded-lg font-bold text-white bg-[#D4AF37] hover:bg-[#b5952f] disabled:opacity-50 transition-colors flex items-center justify-center gap-2 shadow-sm"
 						>
 							<svg
@@ -874,7 +922,15 @@
 									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 								></path>
 							</svg>
-							<span>{{ creating ? (isEdit ? 'Saving...' : 'Creating...') : (isEdit ? 'Save Changes' : 'Add contact →') }}</span>
+							<span>{{
+								creating
+									? isEdit
+										? 'Saving...'
+										: 'Creating...'
+									: isEdit
+									? 'Save Changes'
+									: 'Add contact →'
+							}}</span>
 						</button>
 					</div>
 				</div>
@@ -1041,87 +1097,96 @@ const newCustomer = ref(getDefaultForm())
 const creating = ref(false)
 const createError = ref('')
 
-watch(() => props.initialName, (newVal) => {
-	if (newVal && !newCustomer.value.name) {
-		newCustomer.value.name = newVal
+watch(
+	() => props.initialName,
+	(newVal) => {
+		if (newVal && !newCustomer.value.name) {
+			newCustomer.value.name = newVal
+		}
 	}
-})
+)
 
 const loadingEditData = ref(false)
 
-watch(() => props.show, async (newVal) => {
-	if (newVal) {
-		createError.value = ''
-		activeTab.value = 'contact'
-		if (props.isEdit && props.customerName) {
-			loadingEditData.value = true
-			try {
-				const data = await call('zevar_core.api.customer.get_customer_edit_info', {
-					customer_name: props.customerName,
-				})
-				const d = data?.data || data || {}
-				newCustomer.value = {
-					name: d.customer_name || d.display_name || '',
-					contact_type: d.customer_type || 'Individual',
-					email: d.email_id || '',
-					phone: d.mobile_no || '',
-					phone_country: '+1',
-					phone2: d.phone2 || '',
-					language: 'en',
-					street_number: '',
-					street: (d.address || '').replace(/^\d+\s*/, ''),
-					city: d.city || '',
-					state: d.state || '',
-					pincode: d.zip || '',
-					country: d.country || 'United States',
-					bank_account: '',
-					swift_bic: '',
-					bank_name: '',
-					client_number: '',
-					internal_notes: d.internal_notes || '',
-					birth_date: d.birth_date || '',
-					marriage_date: d.marriage_date || '',
-					partner_name: d.partner_name || '',
-					partner_phone: d.partner_phone || '',
-					partner_email: d.partner_email || '',
-					discount: null,
-					accepts_marketing: d.accepts_marketing == 1,
-					gender: d.gender || '',
-					profession: d.profession || '',
-					tags: '',
-					works_at: '',
-					assigned_to: '',
-					tax_exempt: d.tax_exempt == 1,
-					same_as_billing: true,
-					ship_street_number: '',
-					ship_street: '',
-					ship_city: '',
-					ship_pincode: '',
-					ship_state: '',
-					ship_country: 'United States',
-					ring_left_size: d.ring_left_size || '',
-					ring_right_size: d.ring_right_size || '',
-					middle_left_size: d.middle_left_size || '',
-					middle_right_size: d.middle_right_size || '',
-					index_left_size: d.index_left_size || '',
-					index_right_size: d.index_right_size || '',
-					pink_left_size: d.pink_left_size || '',
-					pink_right_size: d.pink_right_size || '',
-					thumb_left_size: d.thumb_left_size || '',
-					thumb_right_size: d.thumb_right_size || '',
-					wrist_size: d.wrist_size || '',
-					neck_size: d.neck_size || '',
+watch(
+	() => props.show,
+	async (newVal) => {
+		if (newVal) {
+			createError.value = ''
+			activeTab.value = 'contact'
+			if (props.isEdit && props.customerName) {
+				loadingEditData.value = true
+				try {
+					const data = await call('zevar_core.api.customer.get_customer_edit_info', {
+						customer_name: props.customerName,
+					})
+					const d = data?.data || data || {}
+					const addrMatch = (d.address || '').match(/^(\d+)\s*(.*)$/)
+					const streetNumber = addrMatch ? addrMatch[1] : ''
+					const streetRemainder = addrMatch ? addrMatch[2] : d.address || ''
+					newCustomer.value = {
+						name: d.customer_name || d.display_name || '',
+						contact_type: d.customer_type || 'Individual',
+						email: d.email_id || '',
+						phone: d.mobile_no || '',
+						phone_country: '+1',
+						phone2: d.phone2 || '',
+						language: 'en',
+						street_number: streetNumber,
+						street: streetRemainder,
+						city: d.city || '',
+						state: d.state || '',
+						pincode: d.zip || '',
+						country: d.country || 'United States',
+						bank_account: '',
+						swift_bic: '',
+						bank_name: '',
+						client_number: '',
+						internal_notes: d.internal_notes || '',
+						birth_date: d.birth_date || '',
+						marriage_date: d.marriage_date || '',
+						partner_name: d.partner_name || '',
+						partner_phone: d.partner_phone || '',
+						partner_email: d.partner_email || '',
+						discount: null,
+						accepts_marketing: d.accepts_marketing == 1,
+						gender: d.gender || '',
+						profession: d.profession || '',
+						tags: '',
+						works_at: '',
+						assigned_to: '',
+						tax_exempt: d.tax_exempt == 1,
+						same_as_billing: true,
+						ship_street_number: '',
+						ship_street: '',
+						ship_city: '',
+						ship_pincode: '',
+						ship_state: '',
+						ship_country: 'United States',
+						ring_left_size: d.ring_left_size || '',
+						ring_right_size: d.ring_right_size || '',
+						middle_left_size: d.middle_left_size || '',
+						middle_right_size: d.middle_right_size || '',
+						index_left_size: d.index_left_size || '',
+						index_right_size: d.index_right_size || '',
+						pink_left_size: d.pink_left_size || '',
+						pink_right_size: d.pink_right_size || '',
+						thumb_left_size: d.thumb_left_size || '',
+						thumb_right_size: d.thumb_right_size || '',
+						wrist_size: d.wrist_size || '',
+						neck_size: d.neck_size || '',
+					}
+				} catch (e) {
+					createError.value = e?.message || 'Failed to load customer data'
+				} finally {
+					loadingEditData.value = false
 				}
-			} catch (e) {
-				createError.value = e?.message || 'Failed to load customer data'
-			} finally {
-				loadingEditData.value = false
+			} else {
+				newCustomer.value = getDefaultForm()
 			}
-		} else {
-			newCustomer.value = getDefaultForm()
 		}
 	}
-})
+)
 
 function handleCancel() {
 	emit('close')
@@ -1137,7 +1202,7 @@ async function submit() {
 		})
 		return
 	}
-	if (!newCustomer.value.phone) {
+	if (!props.isEdit && !newCustomer.value.phone) {
 		toast({
 			title: 'Required',
 			message: 'Please enter phone number',
@@ -1160,8 +1225,11 @@ async function submit() {
 			? 'zevar_core.api.customer.update_customer'
 			: 'zevar_core.api.customer.quick_create_customer'
 
+		const identifier =
+			props.isEdit && props.customerName ? props.customerName : newCustomer.value.name
+
 		const response = await call(apiMethod, {
-			customer_name: newCustomer.value.name,
+			customer_name: identifier,
 			customer_type: newCustomer.value.contact_type,
 			mobile_no: newCustomer.value.phone || null,
 			email_id: newCustomer.value.email || null,
@@ -1198,8 +1266,8 @@ async function submit() {
 			same_as_billing: newCustomer.value.same_as_billing ? 1 : 0,
 			ship_address_line1: !newCustomer.value.same_as_billing
 				? [newCustomer.value.ship_street_number, newCustomer.value.ship_street]
-					.filter(Boolean)
-					.join(' ') || null
+						.filter(Boolean)
+						.join(' ') || null
 				: null,
 			ship_city: newCustomer.value.ship_city || null,
 			ship_state: newCustomer.value.ship_state || null,
@@ -1221,7 +1289,9 @@ async function submit() {
 			}
 			toast({
 				title: 'Success',
-				message: props.isEdit ? 'Customer updated successfully' : 'Customer created successfully',
+				message: props.isEdit
+					? 'Customer updated successfully'
+					: 'Customer created successfully',
 				icon: 'check',
 				intent: 'success',
 			})

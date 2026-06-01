@@ -74,10 +74,7 @@
 					<p class="text-sm font-bold">No collections found</p>
 					<p class="text-xs mt-1">Add a collection to showcase curated items</p>
 				</div>
-				<div
-					v-else
-					class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"
-				>
+				<div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
 					<div
 						v-for="col in stock.collections"
 						:key="col.name"
@@ -180,7 +177,9 @@
 									<div class="text-xs font-bold text-gray-900 dark:text-white">
 										{{ item.item_name }}
 									</div>
-									<div class="text-[10px] text-gray-500">{{ item.item_code }}</div>
+									<div class="text-[10px] text-gray-500">
+										{{ item.item_code }}
+									</div>
 								</div>
 							</div>
 							<div class="text-right text-xs font-mono text-[#D4AF37]">
@@ -188,16 +187,10 @@
 							</div>
 						</div>
 					</div>
-					<div
-						v-else-if="!loadingItems"
-						class="text-center py-10 text-sm text-gray-400"
-					>
+					<div v-else-if="!loadingItems" class="text-center py-10 text-sm text-gray-400">
 						No items in this collection
 					</div>
-					<div
-						v-if="loadingItems"
-						class="flex items-center justify-center py-10"
-					>
+					<div v-if="loadingItems" class="flex items-center justify-center py-10">
 						<div
 							class="animate-spin w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full"
 						></div>
@@ -255,7 +248,9 @@
 					</div>
 					<div class="space-y-3">
 						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">Collection Name *</label>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Collection Name *</label
+							>
 							<input
 								v-model="form.item_group_name"
 								type="text"
@@ -264,7 +259,9 @@
 							/>
 						</div>
 						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">Parent Collection</label>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Parent Collection</label
+							>
 							<input
 								v-model="form.parent_item_group"
 								type="text"
@@ -283,7 +280,9 @@
 							</datalist>
 						</div>
 						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">Cover Image URL</label>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Cover Image URL</label
+							>
 							<div class="flex gap-2 mt-1">
 								<input
 									v-model="form.image"
@@ -316,7 +315,13 @@
 						:disabled="saving"
 						class="w-full mt-4 py-2.5 bg-[#D4AF37] text-white rounded-lg text-sm font-bold hover:bg-[#C4A030] transition disabled:opacity-50"
 					>
-						{{ saving ? 'Saving…' : formMode === 'edit' ? 'Save Changes' : 'Create Collection' }}
+						{{
+							saving
+								? 'Saving…'
+								: formMode === 'edit'
+								? 'Save Changes'
+								: 'Create Collection'
+						}}
 					</button>
 				</div>
 			</div>
@@ -378,7 +383,7 @@ function openEdit(col) {
 		parent_item_group: col.parent_item_group || '',
 		image: col.image || '',
 	})
-	selectedCollection.value = null
+	selectedCollection.value = col
 	showForm.value = true
 }
 
@@ -425,9 +430,7 @@ async function handleSave() {
 }
 
 async function confirmDelete(col) {
-	if (
-		!confirm(`Delete collection "${col.item_group_name || col.name}"? You can't undo this.`)
-	)
+	if (!confirm(`Delete collection "${col.item_group_name || col.name}"? You can't undo this.`))
 		return
 	try {
 		await stock.deleteItemGroup(col.name)

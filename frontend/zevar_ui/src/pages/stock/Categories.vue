@@ -180,16 +180,10 @@
 							</div>
 						</div>
 					</div>
-					<div
-						v-else-if="!loadingItems"
-						class="text-center py-10 text-sm text-gray-400"
-					>
+					<div v-else-if="!loadingItems" class="text-center py-10 text-sm text-gray-400">
 						No items in this category
 					</div>
-					<div
-						v-if="loadingItems"
-						class="flex items-center justify-center py-10"
-					>
+					<div v-if="loadingItems" class="flex items-center justify-center py-10">
 						<div
 							class="animate-spin w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full"
 						></div>
@@ -249,7 +243,9 @@
 					</div>
 					<div class="space-y-3">
 						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">Category Name *</label>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Category Name *</label
+							>
 							<input
 								v-model="form.item_group_name"
 								type="text"
@@ -258,7 +254,9 @@
 							/>
 						</div>
 						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">Parent Category</label>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Parent Category</label
+							>
 							<input
 								v-model="form.parent_item_group"
 								type="text"
@@ -267,13 +265,19 @@
 								class="w-full mt-1 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none"
 							/>
 							<datalist id="cat-parent-suggestions">
-								<option v-for="c in stock.categories" :key="c.name" :value="c.name">
+								<option
+									v-for="c in stock.categories"
+									:key="c.name"
+									:value="c.name"
+								>
 									{{ c.item_group_name }}
 								</option>
 							</datalist>
 						</div>
 						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">Is Group?</label>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Is Group?</label
+							>
 							<select
 								v-model="form.is_group"
 								class="w-full mt-1 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none"
@@ -283,7 +287,9 @@
 							</select>
 						</div>
 						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">Image URL</label>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Image URL</label
+							>
 							<input
 								v-model="form.image"
 								type="text"
@@ -297,7 +303,13 @@
 						:disabled="saving"
 						class="w-full mt-4 py-2.5 bg-[#D4AF37] text-white rounded-lg text-sm font-bold hover:bg-[#C4A030] transition disabled:opacity-50"
 					>
-						{{ saving ? 'Saving…' : formMode === 'edit' ? 'Save Changes' : 'Create Category' }}
+						{{
+							saving
+								? 'Saving…'
+								: formMode === 'edit'
+								? 'Save Changes'
+								: 'Create Category'
+						}}
 					</button>
 				</div>
 			</div>

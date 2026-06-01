@@ -50,7 +50,7 @@ export function useClienteling() {
 
 	const upcomingOccasions = computed(() => customerData.value?.upcoming_occasions || [])
 	const hasUrgentOccasion = computed(() =>
-		upcomingOccasions.value.some((o) => o.days_until <= 14),
+		upcomingOccasions.value.some((o) => o.days_until <= 14)
 	)
 	const profile = computed(() => customerData.value?.profile || null)
 	const recentPurchases = computed(() => customerData.value?.recent_purchases || [])

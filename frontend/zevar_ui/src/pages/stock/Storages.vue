@@ -131,9 +131,12 @@
 										<span class="text-[10px] text-gray-500">Value</span>
 										<p class="text-sm font-bold text-[#D4AF37]">
 											${{
-												Number(wh.total_value || 0).toLocaleString('en-US', {
-													maximumFractionDigits: 0,
-												})
+												Number(wh.total_value || 0).toLocaleString(
+													'en-US',
+													{
+														maximumFractionDigits: 0,
+													}
+												)
 											}}
 										</p>
 									</div>
@@ -278,7 +281,9 @@
 					</div>
 					<div class="space-y-3">
 						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">Warehouse Name *</label>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Warehouse Name *</label
+							>
 							<input
 								v-model="form.warehouse_name"
 								type="text"
@@ -287,7 +292,9 @@
 							/>
 						</div>
 						<div>
-							<label class="text-[10px] font-bold text-gray-500 uppercase">Parent Warehouse</label>
+							<label class="text-[10px] font-bold text-gray-500 uppercase"
+								>Parent Warehouse</label
+							>
 							<input
 								v-model="form.parent_warehouse"
 								type="text"
@@ -296,14 +303,20 @@
 								class="w-full mt-1 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none"
 							/>
 							<datalist id="wh-parent-suggestions">
-								<option v-for="w in stock.warehouses" :key="w.name" :value="w.name">
+								<option
+									v-for="w in stock.warehouses"
+									:key="w.name"
+									:value="w.name"
+								>
 									{{ w.warehouse_name }}
 								</option>
 							</datalist>
 						</div>
 						<div class="grid grid-cols-2 gap-2">
 							<div>
-								<label class="text-[10px] font-bold text-gray-500 uppercase">Warehouse Type</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Warehouse Type</label
+								>
 								<input
 									v-model="form.warehouse_type"
 									type="text"
@@ -312,7 +325,9 @@
 								/>
 							</div>
 							<div>
-								<label class="text-[10px] font-bold text-gray-500 uppercase">Type</label>
+								<label class="text-[10px] font-bold text-gray-500 uppercase"
+									>Type</label
+								>
 								<select
 									v-model="form.is_group"
 									class="w-full mt-1 px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none"
@@ -328,7 +343,13 @@
 						:disabled="saving"
 						class="w-full mt-4 py-2.5 bg-[#D4AF37] text-white rounded-lg text-sm font-bold hover:bg-[#C4A030] transition disabled:opacity-50"
 					>
-						{{ saving ? 'Saving…' : formMode === 'edit' ? 'Save Changes' : 'Create Storage' }}
+						{{
+							saving
+								? 'Saving…'
+								: formMode === 'edit'
+								? 'Save Changes'
+								: 'Create Storage'
+						}}
 					</button>
 				</div>
 			</div>
@@ -383,7 +404,7 @@ function openEdit(wh) {
 		warehouse_type: wh.warehouse_type || '',
 		is_group: wh.is_group ? 1 : 0,
 	})
-	detailWh.value = null
+	detailWh.value = wh
 	showForm.value = true
 }
 
@@ -394,8 +415,8 @@ async function handleSave() {
 	}
 	saving.value = true
 	try {
-		if (formMode.value === 'edit' && detailWh.value?.warehouse) {
-			await stock.updateWarehouse(detailWh.value.warehouse.name, { ...form })
+		if (formMode.value === 'edit' && detailWh.value?.name) {
+			await stock.updateWarehouse(detailWh.value.name, { ...form })
 		} else {
 			await stock.createWarehouse({ ...form })
 		}

@@ -60,7 +60,12 @@
 					title="View Client Profile"
 				>
 					<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+						/>
 					</svg>
 				</button>
 				<button
@@ -82,7 +87,6 @@
 
 		<!-- Search / Create UI -->
 		<div v-else class="space-y-3">
-
 			<!-- Search Input -->
 			<div class="relative">
 				<input
@@ -374,20 +378,42 @@ function openEditCustomer(customerData) {
 
 function handleCancelCreate() {
 	showCreateModalFlag.value = false
+	isEditMode.value = false
+	editCustomerNameRef.value = ''
 }
 
 function onCustomerCreatedInSelector(customerData) {
 	cart.setCustomer(customerData)
 	showCreateModalFlag.value = false
 	isEditMode.value = false
+	editCustomerNameRef.value = ''
 	showSearch.value = false
 	searchQuery.value = ''
 	emit('selected', cart.customer)
 }
 
-function onCustomerUpdatedInSelector() {
+function onCustomerUpdatedInSelector(customerData) {
 	showCreateModalFlag.value = false
 	isEditMode.value = false
+	editCustomerNameRef.value = ''
+	if (customerData) {
+		const updatedId = customerData.name || customerData.customer_name
+		if (
+			cart.customer &&
+			updatedId &&
+			(cart.customer.name === updatedId || cart.customer.customer_name === updatedId)
+		) {
+			cart.setCustomer({ ...cart.customer, ...customerData })
+		}
+		if (updatedId) {
+			const idx = recentCustomers.value.findIndex(
+				(c) => c.name === updatedId || c.customer_name === updatedId
+			)
+			if (idx !== -1) {
+				recentCustomers.value[idx] = { ...recentCustomers.value[idx], ...customerData }
+			}
+		}
+	}
 	loadRecentCustomers()
 }
 
