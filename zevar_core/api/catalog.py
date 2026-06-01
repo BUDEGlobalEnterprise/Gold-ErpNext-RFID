@@ -438,6 +438,185 @@ def get_catalog_filters(store_location: str | None = None) -> dict:
 	return filters
 
 
+# ─── VENDOR CATALOGS ─────────────────────────────────────────────────────────
+
+
+@frappe.whitelist(allow_guest=False)
+def get_catalog_vendors(
+	page: int = 1,
+	page_size: int = 50,
+	search: str | None = None,
+	source: str | None = None,
+) -> dict:
+	"""Group items by their `custom_vendor` (Supplier link) and return per-vendor
+	summary stats: item count, total stock value, source breakdown, last update.
+
+	Used by the "Catalogs" dashboard page to show a vendor → catalog index.
+	No new DocType is introduced — Items are the source of truth.
+	"""
+	frappe.has_permission("Item", ptype="read", throw=True)
+
+	page = max(1, int(page or 1))
+	page_size = min(100, max(1, int(page_size or 50)))
+	limit_start = (page - 1) * page_size
+
+	item_filters = [["Item", "disabled", "=", 0]]
+	if source:
+		item_filters.append(["Item", "custom_source", "=", source])
+	if search:
+		search = _sanitize_search(search)
+		if search:
+			item_filters.append(["Item", "item_name", "like", f"%{search}%"])
+
+	# Pull all items with a vendor, applying the source/search filters at the
+	# SQL level so we don't fetch the whole catalog just to filter in Python.
+	items = frappe.get_all(
+		"Item",
+		filters=item_filters,
+		fields=[
+			"name",
+			"item_name",
+			"custom_vendor",
+			"custom_source",
+			"standard_rate",
+			"custom_msrp",
+			"modified",
+		],
+		order_by="custom_vendor asc, item_name asc",
+	)
+
+	# Group in Python — this is a dashboard view, not a transactional hot path.
+	vendor_map: dict[str, dict] = {}
+	for it in items:
+		vendor = it.custom_vendor or "(Unassigned)"
+		v = vendor_map.setdefault(
+			vendor,
+			{
+				"vendor": vendor,
+				"vendor_name": vendor,
+				"item_count": 0,
+				"total_value": 0.0,
+				"min_price": None,
+				"max_price": None,
+				"sources": {},
+				"latest_modified": None,
+			},
+		)
+		v["item_count"] += 1
+		price = float(it.custom_msrp or it.standard_rate or 0)
+		v["total_value"] += price
+		if v["min_price"] is None or price < v["min_price"]:
+			v["min_price"] = price
+		if v["max_price"] is None or price > v["max_price"]:
+			v["max_price"] = price
+		src = it.custom_source or "Other"
+		v["sources"][src] = v["sources"].get(src, 0) + 1
+		if it.modified and (
+			v["latest_modified"] is None or str(it.modified) > str(v["latest_modified"])
+		):
+			v["latest_modified"] = it.modified
+
+	# Resolve Supplier display names
+	vendor_names = frappe.get_all(
+		"Supplier",
+		filters={"name": ["in", [k for k in vendor_map if k != "(Unassigned)"]]},
+		fields=["name", "supplier_name"],
+	)
+	name_lookup = {s.name: s.supplier_name for s in vendor_names}
+	for vname, v in vendor_map.items():
+		if vname != "(Unassigned)":
+			v["vendor_name"] = name_lookup.get(vname, vname)
+
+	# Sort: real vendors first (alpha by display name), then unassigned
+	ordered = sorted(
+		vendor_map.values(),
+		key=lambda v: (v["vendor"] == "(Unassigned)", (v["vendor_name"] or "").casefold()),
+	)
+	total = len(ordered)
+	page_slice = ordered[limit_start : limit_start + page_size]
+
+	# Coerce numerics for JSON
+	for v in page_slice:
+		v["total_value"] = round(v["total_value"], 2)
+		v["min_price"] = round(v["min_price"] or 0, 2)
+		v["max_price"] = round(v["max_price"] or 0, 2)
+
+	return {
+		"success": True,
+		"vendors": page_slice,
+		"total": total,
+		"page": page,
+		"page_size": page_size,
+	}
+
+
+@frappe.whitelist(allow_guest=False)
+def get_catalog_items(
+	vendor: str | None = None,
+	source: str | None = None,
+	page: int = 1,
+	page_size: int = 50,
+	search: str | None = None,
+) -> dict:
+	"""List items belonging to a specific vendor (or source).
+
+	Used by the Catalogs page drill-down modal.
+	"""
+	frappe.has_permission("Item", ptype="read", throw=True)
+
+	page = max(1, int(page or 1))
+	page_size = min(200, max(1, int(page_size or 50)))
+	limit_start = (page - 1) * page_size
+
+	if not vendor and not source:
+		frappe.throw(frappe._("Either vendor or source is required"))
+
+	filters = [["Item", "disabled", "=", 0]]
+	if vendor and vendor != "(Unassigned)":
+		filters.append(["Item", "custom_vendor", "=", vendor])
+	if source:
+		filters.append(["Item", "custom_source", "=", source])
+	if search:
+		search = _sanitize_search(search)
+		if search:
+			filters.append(["Item", "item_name", "like", f"%{search}%"])
+
+	items = frappe.get_all(
+		"Item",
+		filters=filters,
+		fields=[
+			"name",
+			"item_name",
+			"item_group",
+			"brand",
+			"image",
+			"custom_vendor",
+			"custom_source",
+			"custom_metal_type",
+			"custom_purity",
+			"custom_msrp",
+			"standard_rate",
+		],
+		order_by="item_name asc",
+		limit_start=limit_start,
+		limit=page_size,
+	)
+	total = frappe.db.count("Item", filters=filters)
+
+	for it in items:
+		it["price"] = float(it.custom_msrp or it.standard_rate or 0)
+
+	return {
+		"success": True,
+		"items": items,
+		"total": total,
+		"page": page,
+		"page_size": page_size,
+		"vendor": vendor,
+		"source": source,
+	}
+
+
 @frappe.whitelist()
 @rate_limit(limit=100, seconds=60)
 def get_item_details(item_code: str) -> dict:

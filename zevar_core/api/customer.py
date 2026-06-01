@@ -314,6 +314,42 @@ def get_recent_customers(limit: int = 10) -> list:
 	return result
 
 
+def _update_customer_address(customer_name, address_type, addr_fields):
+	try:
+		existing = None
+		links = frappe.get_all(
+			"Dynamic Link",
+			filters={"link_name": customer_name, "parenttype": "Address"},
+			fields=["parent"],
+		)
+		for link in links:
+			addr_type = frappe.db.get_value("Address", link.parent, "address_type")
+			if addr_type == address_type:
+				existing = link.parent
+				break
+
+		if existing:
+			addr = frappe.get_doc("Address", existing)
+			for key, value in addr_fields.items():
+				if value:
+					addr.set(key, value)
+			addr.save()
+		else:
+			addr = frappe.get_doc({
+				"doctype": "Address",
+				"address_title": customer_name,
+				"address_type": address_type,
+				**addr_fields,
+				"links": [{"link_doctype": "Customer", "link_name": customer_name}],
+			})
+			addr.insert()
+	except Exception:
+		frappe.log_error(
+			frappe.get_traceback(),
+			f"Failed to update {address_type} address for {customer_name}",
+		)
+
+
 @frappe.whitelist()
 def get_customer_edit_info(customer_name: str) -> dict:
 	"""
@@ -363,6 +399,18 @@ def update_customer(
 	neck_size: str | None = None,
 	customer_group: str | None = None,
 	territory: str | None = None,
+	address_line1: str | None = None,
+	address_line2: str | None = None,
+	city: str | None = None,
+	state: str | None = None,
+	pincode: str | None = None,
+	country: str | None = None,
+	same_as_billing: int = 1,
+	ship_address_line1: str | None = None,
+	ship_city: str | None = None,
+	ship_state: str | None = None,
+	ship_pincode: str | None = None,
+	ship_country: str | None = None,
 ):
 	"""
 	Update an existing customer's details.
@@ -400,12 +448,16 @@ def update_customer(
 
 	# Custom fields
 	safe_set("gender", gender)
+	safe_set("birth_date", birth_date)
 	safe_set("custom_birth_date", birth_date)
 	safe_set("custom_profession", profession)
+	safe_set("spouse_name", partner_name)
 	safe_set("custom_partner_name", partner_name)
 	safe_set("custom_partner_phone", partner_phone)
 	safe_set("custom_partner_email", partner_email)
+	safe_set("anniversary_date", marriage_date)
 	safe_set("custom_marriage_date", marriage_date)
+	safe_set("custom_anniversary", marriage_date)
 	safe_set("custom_spouse_name", spouse_name)
 	safe_set("custom_anniversary", anniversary)
 	safe_set("custom_ring_size", ring_size)
@@ -438,6 +490,27 @@ def update_customer(
 	safe_set("custom_neck_size", neck_size)
 
 	customer.save()
+
+	# Update or create billing address
+	if address_line1 or city:
+		_update_customer_address(customer_name, "Billing", {
+			"address_line1": address_line1,
+			"address_line2": address_line2,
+			"city": city,
+			"state": state,
+			"pincode": pincode,
+			"country": country or "United States",
+		})
+
+	# Update or create shipping address
+	if not same_as_billing and (ship_address_line1 or ship_city):
+		_update_customer_address(customer_name, "Shipping", {
+			"address_line1": ship_address_line1,
+			"city": ship_city,
+			"state": ship_state,
+			"pincode": ship_pincode,
+			"country": ship_country or "United States",
+		})
 
 	return {
 		"success": True,
@@ -539,12 +612,16 @@ def quick_create_customer(
 			customer.set(field_name, value)
 
 	set_if_exists("gender", gender)
+	set_if_exists("birth_date", birth_date)
 	set_if_exists("custom_birth_date", birth_date)
 	set_if_exists("custom_profession", profession)
+	set_if_exists("spouse_name", partner_name)
 	set_if_exists("custom_partner_name", partner_name)
 	set_if_exists("custom_partner_phone", partner_phone)
 	set_if_exists("custom_partner_email", partner_email)
+	set_if_exists("anniversary_date", marriage_date)
 	set_if_exists("custom_marriage_date", marriage_date)
+	set_if_exists("custom_anniversary", marriage_date)
 	set_if_exists("custom_phone2", phone2)
 	set_if_exists("custom_internal_notes", internal_notes)
 

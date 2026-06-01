@@ -480,6 +480,15 @@
 				</div>
 			</div>
 		</div>
+		<CustomerCreationModal
+			v-if="showCustomerModal"
+			:show="showCustomerModal"
+			:is-edit="isEditMode"
+			:customer-name="editingCustomerName"
+			@close="showCustomerModal = false"
+			@created="onCustomerCreated"
+			@updated="onCustomerUpdated"
+		/>
 	</AppLayout>
 </template>
 
@@ -487,6 +496,7 @@
 import AppLayout from '@/components/AppLayout.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
 import CustomerFilterBar from '@/components/CustomerFilterBar.vue'
+import CustomerCreationModal from '@/components/CustomerCreationModal.vue'
 import { ref, onMounted, computed, watch } from 'vue'
 import { createResource } from 'frappe-ui'
 import { formatDate } from '@/utils/dates.js'
@@ -514,6 +524,9 @@ const searchQuery = ref('')
 const activeSearch = ref('')
 const recentCount = ref(0)
 const vipCount = ref(0)
+const showCustomerModal = ref(false)
+const isEditMode = ref(false)
+const editingCustomerName = ref('')
 
 const pagination = ref({
 	page: 1,
@@ -697,16 +710,33 @@ function getInitials(name) {
 }
 
 function openCustomer(name) {
-	window.open(`/app/customer/${name}`, '_blank')
+	editingCustomerName.value = name
+	isEditMode.value = true
+	showCustomerModal.value = true
 }
 
 function editCustomer(name) {
 	if (!sessionStore.isManager) return
-	window.open(`/app/customer/${name}`, '_blank')
+	editingCustomerName.value = name
+	isEditMode.value = true
+	showCustomerModal.value = true
 }
 
 function createNewClient() {
-	window.open(`/app/customer/new-customer-1`, '_blank')
+	editingCustomerName.value = ''
+	isEditMode.value = false
+	showCustomerModal.value = true
+}
+
+function onCustomerCreated() {
+	showCustomerModal.value = false
+	fetchCustomers()
+	fetchGlobalStats()
+}
+
+function onCustomerUpdated() {
+	showCustomerModal.value = false
+	fetchCustomers()
 }
 
 onMounted(() => {

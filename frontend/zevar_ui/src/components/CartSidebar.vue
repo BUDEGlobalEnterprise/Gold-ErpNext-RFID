@@ -156,7 +156,18 @@
 										</div>
 									</div>
 								</div>
-								<CustomerSelector v-if="cart.customerType !== 'Walkin'" />
+								<CustomerSelector v-if="cart.customerType !== 'Walkin'" @open-clienteling="showClienteling = true" />
+								<button
+									v-if="cart.customer?.name && cart.customerType !== 'Walkin'"
+									@click.prevent="showClienteling = true"
+									class="mt-2 w-full flex items-center justify-center gap-1.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#D4AF37] hover:bg-[#D4AF37]/10 rounded-lg transition-colors border border-[#D4AF37]/20"
+									title="Client Intelligence"
+								>
+									<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+									</svg>
+									Client Profile
+								</button>
 							</div>
 
 							<!-- Sleek Unified Register Cart List -->
@@ -430,6 +441,11 @@
 		</Teleport>
 
 		<CheckoutModal :show="showCheckout" @close="showCheckout = false" />
+		<CustomerClientelingDrawer
+			:show="showClienteling"
+			:customer-name="cart.customer?.name || ''"
+			@close="showClienteling = false"
+		/>
 	</div>
 </template>
 
@@ -438,6 +454,7 @@ import { useCartStore } from '@/stores/cart.js'
 import { usePosSessionStore } from '@/stores/posSession.js'
 import CheckoutModal from '@/components/CheckoutModal.vue'
 import CustomerSelector from '@/components/CustomerSelector.vue'
+import CustomerClientelingDrawer from './CustomerClientelingDrawer.vue'
 import { ref, computed } from 'vue'
 
 const baseUrl = import.meta.env.BASE_URL
@@ -488,6 +505,7 @@ const posSession = usePosSessionStore()
 const ui = useUIStore()
 const router = useRouter()
 const showCheckout = ref(false)
+const showClienteling = ref(false)
 const holdingCart = ref(false)
 
 async function holdCurrentCart() {

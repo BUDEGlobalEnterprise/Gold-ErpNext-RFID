@@ -22,9 +22,9 @@
 						<div>
 							<h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
 								<span class="w-2 h-5 bg-[#D4AF37] rounded-sm inline-block"></span>
-								Create New Customer
+								{{ isEdit ? 'Edit Customer Profile' : 'Create New Customer' }}
 							</h3>
-							<p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Add a comprehensive customer profile with custom sizes</p>
+							<p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ isEdit ? 'Update customer details, addresses, and sizes' : 'Add a comprehensive customer profile with custom sizes' }}</p>
 						</div>
 						<button
 							@click="handleCancel"
@@ -73,6 +73,14 @@
 					<!-- Form Content - Scrollable with CONSTANT/FIXED HEIGHT to prevent modal jumping -->
 					<div class="flex-1 overflow-y-auto p-6 space-y-5 h-[420px] custom-scrollbar">
 												<!-- Tab 1: Contact Details -->
+						<!-- Loading State for Edit Mode -->
+						<div v-if="loadingEditData" class="flex items-center justify-center py-20">
+							<div class="flex flex-col items-center gap-3">
+								<div class="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 border-t-[#D4AF37]"></div>
+								<span class="text-xs text-gray-400">Loading customer data...</span>
+							</div>
+						</div>
+						<template v-else>
 						<div v-if="activeTab === 'contact'" class="space-y-4">
 							<div class="grid grid-cols-2 gap-4">
 								<div>
@@ -119,6 +127,7 @@
 										v-model="newCustomer.name"
 										type="text"
 										placeholder="Full name"
+										:disabled="isEdit"
 										required
 										class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
 									/>
@@ -815,6 +824,7 @@
 							</div>
 						</div>
 
+						</template>
 						<!-- Error Message -->
 						<div
 							v-if="createError"
@@ -841,7 +851,7 @@
 						<button
 							type="button"
 							@click="submit"
-							:disabled="!newCustomer.name || !newCustomer.phone || creating"
+							:disabled="!newCustomer.name || (!isEdit && !newCustomer.phone) || creating"
 							class="flex-1 py-2.5 rounded-lg font-bold text-white bg-[#D4AF37] hover:bg-[#b5952f] disabled:opacity-50 transition-colors flex items-center justify-center gap-2 shadow-sm"
 						>
 							<svg
@@ -864,7 +874,7 @@
 									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 								></path>
 							</svg>
-							<span>{{ creating ? 'Creating...' : 'Add contact →' }}</span>
+							<span>{{ creating ? (isEdit ? 'Saving...' : 'Creating...') : (isEdit ? 'Save Changes' : 'Add contact →') }}</span>
 						</button>
 					</div>
 				</div>
@@ -886,9 +896,17 @@ const props = defineProps({
 		type: String,
 		default: '',
 	},
+	isEdit: {
+		type: Boolean,
+		default: false,
+	},
+	customerName: {
+		type: String,
+		default: '',
+	},
 })
 
-const emit = defineEmits(['close', 'created'])
+const emit = defineEmits(['close', 'created', 'updated'])
 
 const activeTab = ref('contact')
 
@@ -1029,11 +1047,79 @@ watch(() => props.initialName, (newVal) => {
 	}
 })
 
-watch(() => props.show, (newVal) => {
+const loadingEditData = ref(false)
+
+watch(() => props.show, async (newVal) => {
 	if (newVal) {
-		newCustomer.value = getDefaultForm()
 		createError.value = ''
 		activeTab.value = 'contact'
+		if (props.isEdit && props.customerName) {
+			loadingEditData.value = true
+			try {
+				const data = await call('zevar_core.api.customer.get_customer_edit_info', {
+					customer_name: props.customerName,
+				})
+				const d = data?.data || data || {}
+				newCustomer.value = {
+					name: d.customer_name || d.display_name || '',
+					contact_type: d.customer_type || 'Individual',
+					email: d.email_id || '',
+					phone: d.mobile_no || '',
+					phone_country: '+1',
+					phone2: d.phone2 || '',
+					language: 'en',
+					street_number: '',
+					street: (d.address || '').replace(/^\d+\s*/, ''),
+					city: d.city || '',
+					state: d.state || '',
+					pincode: d.zip || '',
+					country: d.country || 'United States',
+					bank_account: '',
+					swift_bic: '',
+					bank_name: '',
+					client_number: '',
+					internal_notes: d.internal_notes || '',
+					birth_date: d.birth_date || '',
+					marriage_date: d.marriage_date || '',
+					partner_name: d.partner_name || '',
+					partner_phone: d.partner_phone || '',
+					partner_email: d.partner_email || '',
+					discount: null,
+					accepts_marketing: d.accepts_marketing == 1,
+					gender: d.gender || '',
+					profession: d.profession || '',
+					tags: '',
+					works_at: '',
+					assigned_to: '',
+					tax_exempt: d.tax_exempt == 1,
+					same_as_billing: true,
+					ship_street_number: '',
+					ship_street: '',
+					ship_city: '',
+					ship_pincode: '',
+					ship_state: '',
+					ship_country: 'United States',
+					ring_left_size: d.ring_left_size || '',
+					ring_right_size: d.ring_right_size || '',
+					middle_left_size: d.middle_left_size || '',
+					middle_right_size: d.middle_right_size || '',
+					index_left_size: d.index_left_size || '',
+					index_right_size: d.index_right_size || '',
+					pink_left_size: d.pink_left_size || '',
+					pink_right_size: d.pink_right_size || '',
+					thumb_left_size: d.thumb_left_size || '',
+					thumb_right_size: d.thumb_right_size || '',
+					wrist_size: d.wrist_size || '',
+					neck_size: d.neck_size || '',
+				}
+			} catch (e) {
+				createError.value = e?.message || 'Failed to load customer data'
+			} finally {
+				loadingEditData.value = false
+			}
+		} else {
+			newCustomer.value = getDefaultForm()
+		}
 	}
 })
 
@@ -1070,29 +1156,27 @@ async function submit() {
 				.filter(Boolean)
 				.join(' ') || null
 
-		const response = await call('zevar_core.api.customer.quick_create_customer', {
+		const apiMethod = props.isEdit
+			? 'zevar_core.api.customer.update_customer'
+			: 'zevar_core.api.customer.quick_create_customer'
+
+		const response = await call(apiMethod, {
 			customer_name: newCustomer.value.name,
 			customer_type: newCustomer.value.contact_type,
 			mobile_no: newCustomer.value.phone || null,
 			email_id: newCustomer.value.email || null,
-			address_line1: billingAddress,
-			city: newCustomer.value.city || null,
-			state: newCustomer.value.state || null,
-			pincode: newCustomer.value.pincode || null,
-			country: newCustomer.value.country || null,
-			tax_exempt: newCustomer.value.tax_exempt ? 1 : 0,
 			gender: newCustomer.value.gender || null,
 			birth_date: newCustomer.value.birth_date || null,
+			profession: newCustomer.value.profession || null,
 			partner_name: newCustomer.value.partner_name || null,
 			partner_phone: newCustomer.value.partner_phone || null,
 			partner_email: newCustomer.value.partner_email || null,
 			marriage_date: newCustomer.value.marriage_date || null,
-			profession: newCustomer.value.profession || null,
 			tags: newCustomer.value.tags || null,
 			internal_notes: newCustomer.value.internal_notes || null,
 			phone2: newCustomer.value.phone2 || null,
 			accepts_marketing: newCustomer.value.accepts_marketing ? 1 : 0,
-			// Sizes
+			tax_exempt: newCustomer.value.tax_exempt ? 1 : 0,
 			ring_left_size: newCustomer.value.ring_left_size || null,
 			ring_right_size: newCustomer.value.ring_right_size || null,
 			middle_left_size: newCustomer.value.middle_left_size || null,
@@ -1105,12 +1189,17 @@ async function submit() {
 			thumb_right_size: newCustomer.value.thumb_right_size || null,
 			wrist_size: newCustomer.value.wrist_size || null,
 			neck_size: newCustomer.value.neck_size || null,
-			// Shipping address
+			address_line1: billingAddress,
+			address_line2: null,
+			city: newCustomer.value.city || null,
+			state: newCustomer.value.state || null,
+			pincode: newCustomer.value.pincode || null,
+			country: newCustomer.value.country || null,
 			same_as_billing: newCustomer.value.same_as_billing ? 1 : 0,
 			ship_address_line1: !newCustomer.value.same_as_billing
 				? [newCustomer.value.ship_street_number, newCustomer.value.ship_street]
-						.filter(Boolean)
-						.join(' ') || null
+					.filter(Boolean)
+					.join(' ') || null
 				: null,
 			ship_city: newCustomer.value.ship_city || null,
 			ship_state: newCustomer.value.ship_state || null,
@@ -1125,10 +1214,14 @@ async function submit() {
 				...data,
 				name: data.customer_name,
 			}
-			emit('created', customerData)
+			if (props.isEdit) {
+				emit('updated', customerData)
+			} else {
+				emit('created', customerData)
+			}
 			toast({
 				title: 'Success',
-				message: 'Customer created successfully',
+				message: props.isEdit ? 'Customer updated successfully' : 'Customer created successfully',
 				icon: 'check',
 				intent: 'success',
 			})
