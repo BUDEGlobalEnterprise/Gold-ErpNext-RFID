@@ -159,6 +159,18 @@ const routes = [
 	{
 		path: '/reports',
 		name: 'Reports',
+		component: () => import('./pages/reports/AnalyticsHub.vue'),
+		meta: { requiresAuth: true },
+	},
+	// /dashboard redirects to the unified hub
+	{
+		path: '/dashboard',
+		redirect: () => ({ name: 'Reports' }),
+	},
+	// Old "all reports" list reachable from Finance tab
+	{
+		path: '/reports/all',
+		name: 'ReportsList',
 		component: () => import('./pages/ReportsHub.vue'),
 		meta: { requiresAuth: true },
 	},
@@ -309,6 +321,37 @@ const routes = [
 		component: () => import('./pages/InventoryAudit.vue'),
 		meta: { requiresAuth: true },
 	},
+		// Phase 3: Inventory v2
+		{
+			path: '/stock/bom-builder',
+			name: 'BomBuilder',
+			component: () => import('./pages/stock/BomBuilder.vue'),
+			meta: { requiresAuth: true },
+		},
+		{
+			path: '/stock/gemstones',
+			name: 'GemstoneInventory',
+			component: () => import('./pages/stock/ComponentInventory.vue'),
+			meta: { requiresAuth: true },
+		},
+		{
+			path: '/stock/memo-aging',
+			name: 'MemoAging',
+			component: () => import('./pages/stock/MemoAging.vue'),
+			meta: { requiresAuth: true },
+		},
+		{
+			path: '/stock/appraisal-reminders',
+			name: 'AppraisalReminders',
+			component: () => import('./pages/stock/AppraisalReminders.vue'),
+			meta: { requiresAuth: true },
+		},
+		{
+			path: '/stock/external-bench',
+			name: 'ExternalBench',
+			component: () => import('./pages/stock/ExternalBench.vue'),
+			meta: { requiresAuth: true },
+		},
 	// Phase 2: Accounting
 	{
 		path: '/accounting/transactions',

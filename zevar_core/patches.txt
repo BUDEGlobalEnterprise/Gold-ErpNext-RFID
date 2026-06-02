@@ -27,3 +27,6 @@ zevar_core.patches.v1_1.bootstrap_payment_modes_and_accounts
 zevar_core.patches.v1_1.add_tax_override_fields
 zevar_core.patches.v1_1.add_tax_exemption_fields
 zevar_core.patches.v1_1.add_salesperson_split_fields
+zevar_core.patches.v1_2.fix_stock_reservation_schema_drift
+zevar_core.patches.v1_2.seed_metal_purity_reference
+zevar_core.patches.v1_2.backfill_pricing_method

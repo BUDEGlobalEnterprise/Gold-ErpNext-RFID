@@ -95,6 +95,10 @@ scheduler_events = {
 				"zevar_core.api.pos_activation.auto_deactivate_profiles",
 			],
 		"0 */2 * * *": ["zevar_core.tasks.run_report_subscriptions"],
+		"30 8 * * *": [
+			"zevar_core.services.appraisal_service.send_expiry_reminders",
+			"zevar_core.services.memo_lifecycle_service.send_aging_alerts",
+		],
 			"0 9 1 * *": [
 				"zevar_core.api.dunning.run_auto_dunning",
 				"zevar_core.api.dunning.send_monthly_statements",

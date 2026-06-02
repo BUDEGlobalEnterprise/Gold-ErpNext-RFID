@@ -6,19 +6,77 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "fine_metal_content"
+  "purity_code",
+  "purity_name",
+  "metal",
+  "column_break_purity",
+  "fine_metal_content",
+  "is_millesimal",
+  "section_break_extra",
+  "aliases",
+  "is_active"
  ],
  "fields": [
   {
+   "fieldname": "purity_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Purity Code",
+   "reqd": 1
+  },
+  {
+   "fieldname": "purity_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Purity Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "metal",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Metal",
+   "options": "Zevar Metal",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_purity",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "fine_metal_content",
    "fieldtype": "Float",
-   "label": "Fine Metal Content"
+   "description": "Fraction of pure metal (e.g. 0.750 for 18K)",
+   "in_list_view": 1,
+   "label": "Fine Metal Content",
+   "reqd": 1
+  },
+  {
+   "fieldname": "is_millesimal",
+   "fieldtype": "Check",
+   "label": "Is Millesimal"
+  },
+  {
+   "fieldname": "section_break_extra",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "aliases",
+   "fieldtype": "Small Text",
+   "label": "Aliases"
+  },
+  {
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "default": "1",
+   "in_list_view": 1,
+   "label": "Is Active"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-01 23:11:54.697175",
+ "modified": "2026-06-02 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Unified Retail Management System",
  "name": "Zevar Purity",
@@ -36,11 +94,16 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Sales User"
   }
  ],
  "row_format": "Dynamic",
  "rows_threshold_for_grid_search": 20,
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+ "sort_field": "purity_code",
+ "sort_order": "ASC",
+ "states": [],
+ "title_field": "purity_name"
 }

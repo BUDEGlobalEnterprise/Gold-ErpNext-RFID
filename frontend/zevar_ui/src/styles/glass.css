@@ -1,0 +1,45 @@
+/*
+ * Glass mixin tiers — Bulb Studio glassmorphism guide.
+ * Plan §11.2 / §11.3 — used only for containers, never for
+ * data tables, buttons, or text inputs.
+ */
+
+.glass-tier-1 {
+	background: var(--glass-tint-dark);
+	backdrop-filter: blur(var(--glass-1-blur));
+	-webkit-backdrop-filter: blur(var(--glass-1-blur));
+	border: 1px solid var(--glass-border);
+}
+.glass-tier-2 {
+	background: var(--glass-tint-dark);
+	backdrop-filter: blur(var(--glass-2-blur));
+	-webkit-backdrop-filter: blur(var(--glass-2-blur));
+	border: 1px solid var(--glass-border);
+}
+.glass-tier-3 {
+	background: var(--glass-tint-dark);
+	backdrop-filter: blur(var(--glass-3-blur));
+	-webkit-backdrop-filter: blur(var(--glass-3-blur));
+	border: 1px solid var(--glass-border-strong);
+}
+
+:where(.light) .glass-tier-1,
+:where(.light) .glass-tier-2 {
+	background: var(--glass-tint-light);
+	border-color: var(--glass-border-light);
+}
+:where(.light) .glass-tier-3 {
+	background: var(--glass-tint-light);
+	border-color: var(--glass-border-strong-light);
+}
+
+/* Elevation surfaces — Pixel Show four-step */
+.surface-0 { background: var(--bg-0); }
+.surface-1 { background: var(--bg-1); border: 1px solid var(--glass-border); }
+.surface-2 { background: var(--bg-2); border: 1px solid var(--glass-border); }
+.surface-3 { background: var(--bg-3); border: 1px solid var(--glass-border); }
+
+:where(.light) .surface-0 { background: var(--bg-0-light); }
+:where(.light) .surface-1 { background: var(--bg-1-light); border-color: var(--glass-border-light); }
+:where(.light) .surface-2 { background: var(--bg-2-light); border-color: var(--glass-border-light); }
+:where(.light) .surface-3 { background: var(--bg-3-light); border-color: var(--glass-border-light); }

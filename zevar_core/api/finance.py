@@ -232,3 +232,126 @@ def apply_finance_charges():
 			except Exception:
 				frappe.db.rollback()
 				frappe.log_error(f"Finance Charge Error for {acc.name}", frappe.get_traceback())
+
+
+@frappe.whitelist(methods=["GET"])
+def get_dashboard_summary():
+	"""KPI snapshot for the Finance tab: net profit, AR, AP, cash."""
+	frappe.only_for(
+		["System Manager", "Accounts Manager", "Store Manager", "Sales Manager"]
+	)
+
+	company = frappe.defaults.get_user_default("Company")
+	if not company:
+		company = frappe.db.get_value("Company", {}, "name")
+
+	from frappe.utils import getdate
+
+	today = frappe.utils.nowdate()
+	month_start = getdate(today).replace(day=1)
+
+	from frappe.query_builder.functions import Coalesce, Sum
+
+	income_total = 0.0
+	expense_total = 0.0
+	ar_outstanding = 0.0
+	ap_outstanding = 0.0
+	cash_balance = 0.0
+
+	# Income MTD
+	income_accounts = frappe.get_all(
+		"Account", filters={"root_type": "Income", "company": company, "is_group": 0}, pluck="name"
+	)
+	if income_accounts:
+		gl = frappe.qb.DocType("GL Entry")
+		row = (
+			frappe.qb.from_(gl)
+			.select(Coalesce(Sum(gl.credit - gl.debit), 0).as_("total"))
+			.where(
+				(gl.account.isin(income_accounts))
+				& (gl.docstatus == 1)
+				& (gl.posting_date >= month_start)
+				& (gl.posting_date <= today)
+				& (gl.company == company)
+				& (gl.is_cancelled == 0)
+			)
+		).run(as_dict=True)
+		income_total = flt(row[0].total) if row else 0
+
+	# Expense MTD
+	expense_accounts = frappe.get_all(
+		"Account", filters={"root_type": "Expense", "company": company, "is_group": 0}, pluck="name"
+	)
+	if expense_accounts:
+		gl = frappe.qb.DocType("GL Entry")
+		row = (
+			frappe.qb.from_(gl)
+			.select(Coalesce(Sum(gl.debit - gl.credit), 0).as_("total"))
+			.where(
+				(gl.account.isin(expense_accounts))
+				& (gl.docstatus == 1)
+				& (gl.posting_date >= month_start)
+				& (gl.posting_date <= today)
+				& (gl.company == company)
+				& (gl.is_cancelled == 0)
+			)
+		).run(as_dict=True)
+		expense_total = flt(row[0].total) if row else 0
+
+	# AR outstanding
+	default_receivable = frappe.db.get_value(
+		"Account", {"account_type": "Receivable", "company": company, "is_group": 0}, "name"
+	)
+	if default_receivable:
+		row = frappe.db.sql(
+			"""SELECT COALESCE(SUM(debit - credit), 0) AS bal
+			FROM `tabGL Entry`
+			WHERE account = %s AND docstatus = 1 AND is_cancelled = 0""",
+			(default_receivable,),
+			as_dict=True,
+		)
+		ar_outstanding = flt(row[0].bal) if row else 0
+
+	# AP outstanding
+	default_payable = frappe.db.get_value(
+		"Account", {"account_type": "Payable", "company": company, "is_group": 0}, "name"
+	)
+	if default_payable:
+		row = frappe.db.sql(
+			"""SELECT COALESCE(SUM(credit - debit), 0) AS bal
+			FROM `tabGL Entry`
+			WHERE account = %s AND docstatus = 1 AND is_cancelled = 0""",
+			(default_payable,),
+			as_dict=True,
+		)
+		ap_outstanding = flt(row[0].bal) if row else 0
+
+	# Cash / bank balance
+	cash_accounts = frappe.get_all(
+		"Account",
+		filters={"account_type": "Cash", "company": company, "is_group": 0},
+		pluck="name",
+	)
+	bank_accounts = frappe.get_all(
+		"Account",
+		filters={"account_type": "Bank", "company": company, "is_group": 0},
+		pluck="name",
+	)
+	all_liquid = cash_accounts + bank_accounts
+	if all_liquid:
+		placeholders = ", ".join(["%s"] * len(all_liquid))
+		row = frappe.db.sql(
+			f"""SELECT COALESCE(SUM(debit - credit), 0) AS bal
+			FROM `tabGL Entry`
+			WHERE account IN ({placeholders}) AND docstatus = 1 AND is_cancelled = 0""",
+			tuple(all_liquid),
+			as_dict=True,
+		)
+		cash_balance = flt(row[0].bal) if row else 0
+
+	return {
+		"net_profit_mtd": flt(income_total - expense_total, 2),
+		"ar_outstanding": flt(ar_outstanding, 2),
+		"ap_outstanding": flt(ap_outstanding, 2),
+		"cash_balance": flt(cash_balance, 2),
+	}
