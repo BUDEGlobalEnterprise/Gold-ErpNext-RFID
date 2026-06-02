@@ -723,7 +723,7 @@ function getInitials(name) {
 
 function openCustomer(name, edit = false) {
 	editingCustomerName.value = name
-	isEditMode.value = edit && sessionStore.isManager
+	isEditMode.value = true
 	showCustomerModal.value = true
 }
 

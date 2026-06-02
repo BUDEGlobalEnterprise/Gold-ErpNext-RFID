@@ -1,0 +1,112 @@
+/*
+ * Analytics Hub Design Tokens
+ * Plan §11.1 — Pixel Show four-step elevation, two-font split,
+ * Bulb Studio glass tiers, Masterly role-first density.
+ */
+
+:root {
+	/* Backgrounds — four-step elevation (Pixel Show) */
+	--bg-0: #08090C;          /* page */
+	--bg-1: #0E1015;          /* card */
+	--bg-2: #15171F;          /* nested card */
+	--bg-3: #1E212B;          /* hover / active */
+
+	/* Light-mode counterparts */
+	--bg-0-light: #fafafb;
+	--bg-1-light: #ffffff;
+	--bg-2-light: #f3f4f6;
+	--bg-3-light: #e5e7eb;
+
+	/* Text */
+	--text-primary: rgba(255, 255, 255, 0.92);
+	--text-secondary: rgba(255, 255, 255, 0.68);
+	--text-tertiary: rgba(255, 255, 255, 0.44);
+	--text-primary-light: #111827;
+	--text-secondary-light: #4b5563;
+	--text-tertiary-light: #6b7280;
+
+	/* Semantic */
+	--green: #22c55e;
+	--green-soft: rgba(34, 197, 94, 0.85);
+	--red: #ef4444;
+	--red-soft: rgba(239, 68, 68, 0.85);
+	--yellow: #f59e0b;
+	--yellow-soft: rgba(245, 158, 11, 0.85);
+	--blue: #3b82f6;
+	--purple: #a855f7;
+
+	/* Gold accent (existing brand) */
+	--color-gold: #D4AF37;
+
+	/* Glass tiers (Bulb Studio) */
+	--glass-1-blur: 8px;      /* low-elevation overlays (cards) */
+	--glass-2-blur: 16px;     /* mid (drawer backdrop) */
+	--glass-3-blur: 24px;     /* high (modal) */
+	--glass-tint-dark: rgba(14, 16, 21, 0.6);
+	--glass-tint-light: rgba(255, 255, 255, 0.7);
+	--glass-border: rgba(255, 255, 255, 0.05);
+	--glass-border-strong: rgba(255, 255, 255, 0.09);
+	--glass-border-light: rgba(0, 0, 0, 0.06);
+	--glass-border-strong-light: rgba(0, 0, 0, 0.12);
+
+	/* Fonts — Plan §11.1: two-font split. Pixel Show. */
+	--font-sans: "Inter", system-ui, sans-serif;
+	--font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+
+	/* Motion — three durations, one easing (Pixel Show) */
+	--duration-fast: 120ms;
+	--duration-normal: 200ms;
+	--duration-slow: 350ms;
+	--ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+	/* Radius */
+	--radius-sm: 6px;
+	--radius-md: 10px;
+	--radius-lg: 16px;
+	--radius-xl: 20px;
+}
+
+/* Accessibility: reduce transparency (Bulb Studio) */
+@media (prefers-reduced-transparency: reduce) {
+	:root {
+		--glass-1-blur: 0px;
+		--glass-2-blur: 0px;
+		--glass-3-blur: 0px;
+		--glass-tint-dark: var(--bg-1);
+		--glass-tint-light: var(--bg-1-light);
+	}
+}
+
+/* Accessibility: reduce motion */
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		--duration-fast: 0ms;
+		--duration-normal: 0ms;
+		--duration-slow: 0ms;
+	}
+}
+
+/* Numeric — monospaced everywhere (Pixel Show two-font rule) */
+.font-mono,
+.num {
+	font-family: var(--font-mono);
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -0.01em;
+}
+
+:where(.light),
+:root:not(.dark) {
+	--bg-0: var(--bg-0-light);
+	--bg-1: var(--bg-1-light);
+	--bg-2: var(--bg-2-light);
+	--bg-3: var(--bg-3-light);
+
+	--text-primary: var(--text-primary-light);
+	--text-secondary: var(--text-secondary-light);
+	--text-tertiary: var(--text-tertiary-light);
+
+	--glass-tint-dark: var(--glass-tint-light);
+	--glass-border: var(--glass-border-light);
+	--glass-border-strong: var(--glass-border-strong-light);
+}
+

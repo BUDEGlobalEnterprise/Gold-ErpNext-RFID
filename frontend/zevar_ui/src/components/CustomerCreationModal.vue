@@ -134,7 +134,6 @@
 											v-model="newCustomer.name"
 											type="text"
 											placeholder="Full name"
-											:disabled="isEdit"
 											required
 											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
 										/>
@@ -1273,6 +1272,7 @@ async function submit() {
 			ship_state: newCustomer.value.ship_state || null,
 			ship_pincode: newCustomer.value.ship_pincode || null,
 			ship_country: newCustomer.value.ship_country || null,
+				display_name: props.isEdit ? newCustomer.value.name : undefined,
 		})
 
 		const data = response?.data || response

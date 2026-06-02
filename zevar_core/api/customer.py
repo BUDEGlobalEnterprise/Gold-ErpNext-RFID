@@ -374,7 +374,7 @@ def get_customer_edit_info(customer_name: str) -> dict:
 	Fetch full customer details for the edit form.
 	Admin/manager only.
 	"""
-	_check_customer_edit_role()
+	_check_pos_customer_role()
 
 	return get_customer_details(customer_name)
 
@@ -429,6 +429,7 @@ def update_customer(
 	ship_state: str | None = None,
 	ship_pincode: str | None = None,
 	ship_country: str | None = None,
+	display_name: str | None = None,
 ):
 	"""
 	Update an existing customer's details.
@@ -463,6 +464,8 @@ def update_customer(
 		customer.customer_group = customer_group
 	if territory:
 		customer.territory = territory
+		if display_name:
+			customer.customer_name = display_name
 
 	# Custom fields
 	safe_set("gender", gender)
