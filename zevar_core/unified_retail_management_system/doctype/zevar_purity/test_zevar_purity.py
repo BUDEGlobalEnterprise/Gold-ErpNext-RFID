@@ -27,31 +27,37 @@ class TestZevarPurity(FrappeTestCase):
 		doc = frappe.get_doc(
 			{
 				"doctype": "Zevar Purity",
-				"__newname": "Test 24K",
+				"purity_name": "Test 24K",
+				"purity_code": "T24K",
 				"fine_metal_content": 0.999,
+				"metal": "Yellow Gold",
 			}
 		).insert(ignore_permissions=True)
 		self.assertEqual(doc.name, "Test 24K")
 		self.assertEqual(float(doc.fine_metal_content), 0.999)
 
-	def test_zevar_purity_autoname_is_prompt(self):
+	def test_zevar_purity_autoname_is_field_purity_name(self):
 		meta = frappe.get_meta("Zevar Purity")
-		self.assertEqual(meta.autoname, "prompt")
+		self.assertEqual(meta.autoname, "field:purity_name")
 
 	def test_zevar_purity_unique_name(self):
 		frappe.get_doc(
 			{
 				"doctype": "Zevar Purity",
-				"__newname": "Test 24K",
+				"purity_name": "Test 24K",
+				"purity_code": "T24K",
 				"fine_metal_content": 0.999,
+				"metal": "Yellow Gold",
 			}
 		).insert(ignore_permissions=True)
 
 		duplicate = frappe.get_doc(
 			{
 				"doctype": "Zevar Purity",
-				"__newname": "Test 24K",
+				"purity_name": "Test 24K",
+				"purity_code": "T24K",
 				"fine_metal_content": 0.999,
+				"metal": "Yellow Gold",
 			}
 		)
 		self.assertRaises(frappe.exceptions.DuplicateEntryError, duplicate.insert)
@@ -66,8 +72,10 @@ class TestZevarPurity(FrappeTestCase):
 		frappe.get_doc(
 			{
 				"doctype": "Zevar Purity",
-				"__newname": "Test 24K",
+				"purity_name": "Test 24K",
+				"purity_code": "T24K",
 				"fine_metal_content": 0.999,
+				"metal": "Yellow Gold",
 			}
 		).insert(ignore_permissions=True)
 		self.assertTrue(frappe.db.exists("Zevar Purity", "Test 24K"))
@@ -77,18 +85,20 @@ class TestZevarPurity(FrappeTestCase):
 
 	def test_zevar_purity_multiple_purities(self):
 		purities = [
-			("Test 24K", 0.999),
-			("Test 22K", 0.916),
-			("Test 18Kt", 0.750),
-			("Test 14Kt", 0.585),
-			("Test 10k", 0.417),
+			("Test 24K", "T24K", 0.999),
+			("Test 22K", "T22K", 0.916),
+			("Test 18Kt", "T18K", 0.750),
+			("Test 14Kt", "T14K", 0.585),
+			("Test 10k", "T10K", 0.417),
 		]
-		for name, content in purities:
+		for name, code, content in purities:
 			frappe.get_doc(
 				{
 					"doctype": "Zevar Purity",
-					"__newname": name,
+					"purity_name": name,
+					"purity_code": code,
 					"fine_metal_content": content,
+					"metal": "Yellow Gold",
 				}
 			).insert(ignore_permissions=True)
 
@@ -99,16 +109,20 @@ class TestZevarPurity(FrappeTestCase):
 		frappe.get_doc(
 			{
 				"doctype": "Zevar Purity",
-				"__newname": "Test 999 Fine",
+				"purity_name": "Test 999 Fine",
+				"purity_code": "T999",
 				"fine_metal_content": 0.999,
+				"metal": "Yellow Gold",
 			}
 		).insert(ignore_permissions=True)
 
 		frappe.get_doc(
 			{
 				"doctype": "Zevar Purity",
-				"__newname": "Test 925 Sterling",
+				"purity_name": "Test 925 Sterling",
+				"purity_code": "T925",
 				"fine_metal_content": 0.925,
+				"metal": "Yellow Gold",
 			}
 		).insert(ignore_permissions=True)
 
@@ -121,8 +135,10 @@ class TestZevarPurity(FrappeTestCase):
 		doc = frappe.get_doc(
 			{
 				"doctype": "Zevar Purity",
-				"__newname": "Test 24K",
+				"purity_name": "Test 24K",
+				"purity_code": "T24K",
 				"fine_metal_content": 0.999,
+				"metal": "Yellow Gold",
 			}
 		).insert(ignore_permissions=True)
 
@@ -136,8 +152,10 @@ class TestZevarPurity(FrappeTestCase):
 		frappe.get_doc(
 			{
 				"doctype": "Zevar Purity",
-				"__newname": "Test 24K",
+				"purity_name": "Test 24K",
+				"purity_code": "T24K",
 				"fine_metal_content": 0.999,
+				"metal": "Yellow Gold",
 			}
 		).insert(ignore_permissions=True)
 

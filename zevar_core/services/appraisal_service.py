@@ -27,7 +27,7 @@ def create_appraisal(
 	appraisal.appraised_value = flt(appraised_value or 0)
 
 	if template_name:
-		template = frappe.get_doc("Appraisal Template", template_name)
+		template = frappe.get_doc("Zevar Appraisal Template", template_name)
 		appraisal.appraisal_template = template_name
 		validity_months = template.default_validity_months or 24
 	else:

@@ -47,7 +47,7 @@ def execute(filters=None):
 			"width": 120,
 		},
 		{
-			"fieldname": "paid_amount",
+			"fieldname": "total_paid",
 			"label": _("Paid Amount"),
 			"fieldtype": "Currency",
 			"width": 120,
@@ -103,7 +103,7 @@ def execute(filters=None):
 			"customer_name",
 			"contract_date",
 			"total_amount",
-			"paid_amount",
+			"total_paid",
 			"balance_amount",
 			"status",
 		],
@@ -138,7 +138,7 @@ def execute(filters=None):
 		contract["aging_bucket"] = aging_bucket
 		contract["next_payment_due"] = next_payment
 		contract["total_amount"] = flt(contract.get("total_amount", 0))
-		contract["paid_amount"] = flt(contract.get("paid_amount", 0))
+		contract["paid_amount"] = flt(contract.get("total_paid", 0))
 		contract["balance_amount"] = flt(contract.get("balance_amount", 0))
 
 		data.append(contract)

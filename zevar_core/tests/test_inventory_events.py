@@ -50,11 +50,12 @@ class TestInventoryEvents(FrappeTestCase):
 					"doctype": "Serial No",
 					"serial_no": sn,
 					"item_code": item_code,
-					"warehouse": warehouse,
 					"company": self.company,
 				}
 			)
 			doc.insert(ignore_permissions=True)
+			# Set warehouse via db.set_value to bypass ERPNext validation
+			frappe.db.set_value("Serial No", sn, "warehouse", warehouse)
 		return sn
 
 	def _get_back_stock_wh(self, store_code="NY-01"):

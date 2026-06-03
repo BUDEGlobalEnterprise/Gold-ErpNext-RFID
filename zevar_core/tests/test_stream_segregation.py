@@ -13,7 +13,7 @@ class TestStreamSegregation(FrappeTestCase):
 				"doctype": "Customer",
 				"customer_name": "Test Stream Customer",
 				"customer_type": "Individual",
-				"customer_group": "All Customer Groups",
+				"customer_group": "Individual",
 			}
 		)
 		if not frappe.db.exists("Customer", customer.customer_name):

@@ -60,20 +60,25 @@ def get_transactions(
 		if to_date:
 			je_filters.setdefault("posting_date", ["<=", to_date])
 
+		je_fields = [
+			"name",
+			"posting_date",
+			"voucher_type",
+			"total_debit",
+			"total_credit",
+			"user_remark",
+			"docstatus",
+			"cheque_no",
+		]
+		if frappe.get_meta("Journal Entry").has_field("cheque_date"):
+			je_fields.append("cheque_date")
+		elif frappe.get_meta("Journal Entry").has_field("reference_date"):
+			je_fields.append("reference_date")
+
 		je_list = frappe.get_all(
 			"Journal Entry",
 			filters=je_filters,
-			fields=[
-				"name",
-				"posting_date",
-				"voucher_type",
-				"total_debit",
-				"total_credit",
-				"reference_date",
-				"user_remark",
-				"docstatus",
-				"cheque_no",
-			],
+			fields=je_fields,
 			order_by="posting_date desc, creation desc",
 			limit_start=limit_start if not doctype else 0,
 			limit=page_size if not doctype else 999,
@@ -84,6 +89,7 @@ def get_transactions(
 			je["party_name"] = ""
 			je["paid_amount"] = je.get("total_debit", 0)
 			je["mode_of_payment"] = je.get("voucher_type", "")
+			je["reference_date"] = je.get("cheque_date") or je.get("reference_date")
 			results.append(je)
 
 	results.sort(key=lambda x: x.get("posting_date", ""), reverse=True)
@@ -220,10 +226,14 @@ def get_terminals(page=1, page_size=50):
 	page_size = min(100, max(1, cint(page_size)))
 	limit_start = (page - 1) * page_size
 
+	fields = ["name", "company", "warehouse"]
+	if frappe.get_meta("POS Profile").has_field("posa_pos_profile_name"):
+		fields.append("posa_pos_profile_name")
+
 	profiles = frappe.get_all(
 		"POS Profile",
 		filters={"disabled": 0},
-		fields=["name", "company", "warehouse", "posa_pos_profile_name"],
+		fields=fields,
 		order_by="name asc",
 		limit_start=limit_start,
 		limit=page_size,
@@ -231,17 +241,23 @@ def get_terminals(page=1, page_size=50):
 	total = frappe.db.count("POS Profile", {"disabled": 0})
 
 	for p in profiles:
+		oe_fields = ["name", "user", "company"]
+		if frappe.get_meta("POS Opening Entry").has_field("pos_opening_time"):
+			oe_fields.append("pos_opening_time")
+		elif frappe.get_meta("POS Opening Entry").has_field("period_start_date"):
+			oe_fields.append("period_start_date")
+
 		open_sessions = frappe.get_all(
 			"POS Opening Entry",
 			filters={"pos_profile": p["name"], "status": "Open"},
-			fields=["name", "pos_opening_time", "user", "company"],
+			fields=oe_fields,
 			limit=1,
 		)
 		if open_sessions:
 			s = open_sessions[0]
 			p["status"] = "Open"
 			p["current_user"] = s.user
-			p["opened_at"] = str(s.pos_opening_time)
+			p["opened_at"] = str(s.get("pos_opening_time") or s.get("period_start_date") or "")
 
 			today_txns = frappe.db.sql(
 				"""SELECT COUNT(*) as cnt, SUM(grand_total) as total
@@ -269,12 +285,30 @@ def get_terminal_status(name):
 	if not frappe.db.exists("POS Profile", name):
 		frappe.throw("POS Profile not found")
 
+	oe_fields = ["name", "user"]
+	if frappe.get_meta("POS Opening Entry").has_field("pos_opening_time"):
+		oe_fields.append("pos_opening_time")
+	elif frappe.get_meta("POS Opening Entry").has_field("period_start_date"):
+		oe_fields.append("period_start_date")
+
+	if frappe.get_meta("POS Opening Entry").has_field("balance_amount"):
+		oe_fields.append("balance_amount")
+
 	open_entry = frappe.get_all(
 		"POS Opening Entry",
 		filters={"pos_profile": name, "status": "Open"},
-		fields=["name", "pos_opening_time", "user", "balance_amount"],
+		fields=oe_fields,
 		limit=1,
 	)
+
+	# Map fields for backward compatibility
+	if open_entry:
+		oe = open_entry[0]
+		if "pos_opening_time" not in oe:
+			oe["pos_opening_time"] = oe.get("period_start_date")
+		if "balance_amount" not in oe:
+			doc = frappe.get_doc("POS Opening Entry", oe["name"])
+			oe["balance_amount"] = sum(flt(row.opening_amount) for row in doc.balance_details)
 
 	today_payments = frappe.db.sql(
 		"""SELECT mode_of_payment, SUM(amount) as total

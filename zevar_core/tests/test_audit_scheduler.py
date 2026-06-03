@@ -97,6 +97,9 @@ class TestAuditScheduler(FrappeTestCase):
 		if not frappe.db.exists("Display Case", "Test Spot Case"):
 			case = frappe.new_doc("Display Case")
 			case.case_name = "Test Spot Case"
+			case.case_code = "SPOT-001"
+			case.zone_type = "Showcase"
+			case.store_location = "Stores - ZJ"
 			case.warehouse = "Stores - ZJ"
 			case.insert(ignore_permissions=True)
 

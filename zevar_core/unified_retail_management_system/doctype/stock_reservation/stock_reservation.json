@@ -4,23 +4,35 @@
  "creation": "2026-04-30 00:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
- "field_order": [
-  "customer",
-  "serial_no",
-  "item_code",
-  "item_name",
-  "column_break_1",
-  "hold_until",
-  "deposit_amount",
-  "status",
-  "section_break_details",
-  "warehouse_from",
-  "warehouse_to",
-  "column_break_2",
-  "stock_entry_ref",
-  "notes",
-  "amended_from"
- ],
+  "field_order": [
+   "customer",
+   "serial_no",
+   "item_code",
+   "item_name",
+   "column_break_1",
+   "hold_until",
+   "deposit_amount",
+   "status",
+   "reservation_type",
+   "priority",
+   "intended_use",
+   "pos_session",
+   "salesperson",
+   "cart_reference",
+   "converted_from",
+   "section_break_details",
+   "warehouse_from",
+   "warehouse_to",
+   "column_break_2",
+   "stock_entry_ref",
+   "notes",
+   "section_break_release",
+   "released_at",
+   "released_by",
+   "release_reason",
+   "auto_expire_on",
+   "amended_from"
+  ],
  "fields": [
   {
    "fieldname": "customer",
@@ -68,15 +80,55 @@
    "label": "Deposit Amount",
    "default": "0"
   },
-  {
-   "default": "Active",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Status",
-   "options": "Active\nExpired\nConverted\nCancelled",
-   "read_only": 1
-  },
+   {
+    "default": "Active",
+    "fieldname": "status",
+    "fieldtype": "Select",
+    "in_list_view": 1,
+    "label": "Status",
+    "options": "Active\nExpired\nConverted\nCancelled",
+    "read_only": 1
+   },
+   {
+    "fieldname": "reservation_type",
+    "fieldtype": "Select",
+    "label": "Reservation Type",
+    "options": "Customer Hold\nLayaway\nSpecial Order\nCart",
+    "default": "Customer Hold"
+   },
+   {
+    "fieldname": "priority",
+    "fieldtype": "Select",
+    "label": "Priority",
+    "options": "Low\nNormal\nHigh\nUrgent",
+    "default": "Normal"
+   },
+   {
+    "fieldname": "intended_use",
+    "fieldtype": "Small Text",
+    "label": "Intended Use"
+   },
+   {
+    "fieldname": "pos_session",
+    "fieldtype": "Data",
+    "label": "POS Session"
+   },
+   {
+    "fieldname": "salesperson",
+    "fieldtype": "Link",
+    "label": "Salesperson",
+    "options": "User"
+   },
+   {
+    "fieldname": "cart_reference",
+    "fieldtype": "Data",
+    "label": "Cart Reference"
+   },
+   {
+    "fieldname": "converted_from",
+    "fieldtype": "Data",
+    "label": "Converted From"
+   },
   {
    "fieldname": "section_break_details",
    "fieldtype": "Section Break",
@@ -107,13 +159,39 @@
    "options": "Stock Entry",
    "read_only": 1
   },
-  {
-   "fieldname": "notes",
-   "fieldtype": "Small Text",
-   "label": "Notes"
-  },
-  {
-   "fieldname": "amended_from",
+   {
+    "fieldname": "notes",
+    "fieldtype": "Small Text",
+    "label": "Notes"
+   },
+   {
+    "fieldname": "section_break_release",
+    "fieldtype": "Section Break",
+    "label": "Release Details"
+   },
+   {
+    "fieldname": "released_at",
+    "fieldtype": "Datetime",
+    "label": "Released At"
+   },
+   {
+    "fieldname": "released_by",
+    "fieldtype": "Link",
+    "label": "Released By",
+    "options": "User"
+   },
+   {
+    "fieldname": "release_reason",
+    "fieldtype": "Small Text",
+    "label": "Release Reason"
+   },
+   {
+    "fieldname": "auto_expire_on",
+    "fieldtype": "Datetime",
+    "label": "Auto Expire On"
+   },
+   {
+    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,

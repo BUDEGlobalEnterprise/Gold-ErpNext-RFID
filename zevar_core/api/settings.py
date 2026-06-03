@@ -4,7 +4,7 @@ from frappe.utils import cint, cstr, flt
 
 @frappe.whitelist(allow_guest=False)
 def get_settings():
-	frappe.only_for("System Manager", "Store Manager", "Administrator")
+	frappe.only_for(["System Manager", "Store Manager", "Administrator"])
 
 	company = frappe.db.get_single_value("Global Defaults", "default_company") or frappe.db.get_value(
 		"Company", {}, "name"
@@ -17,7 +17,6 @@ def get_settings():
 			"name",
 			"company",
 			"warehouse",
-			"posa_pos_profile_name",
 			"customer",
 			"selling_price_list",
 			"cost_center",
@@ -150,7 +149,7 @@ def get_settings():
 
 @frappe.whitelist(allow_guest=False)
 def get_pos_profile(name):
-	frappe.only_for("System Manager", "Store Manager", "Administrator")
+	frappe.only_for(["System Manager", "Store Manager", "Administrator"])
 	name = cstr(name).strip()
 
 	if not frappe.db.exists("POS Profile", name):
@@ -186,7 +185,6 @@ def get_pos_profile(name):
 			"cost_center": doc.cost_center,
 			"income_account": doc.income_account,
 			"expense_account": doc.expense_account,
-			"posa_pos_profile_name": getattr(doc, "posa_pos_profile_name", ""),
 			"disabled": doc.disabled,
 			"currency": getattr(doc, "currency", ""),
 			"payment_methods": payment_methods,
@@ -216,8 +214,6 @@ def create_pos_profile(
 		frappe.throw("Company is required")
 
 	profile = frappe.new_doc("POS Profile")
-	if name_override:
-		profile.posa_pos_profile_name = cstr(name_override).strip()
 	profile.company = company
 	profile.warehouse = cstr(warehouse).strip()
 	if customer:
@@ -266,7 +262,6 @@ def update_pos_profile(name, **kwargs):
 		"cost_center",
 		"income_account",
 		"expense_account",
-		"posa_pos_profile_name",
 		"disabled",
 	]
 
@@ -402,7 +397,7 @@ def create_user(email, first_name, last_name=None, roles_json=None, send_welcome
 
 @frappe.whitelist(allow_guest=False)
 def get_print_formats(doctype=None):
-	frappe.only_for("System Manager", "Store Manager", "Administrator")
+	frappe.only_for(["System Manager", "Store Manager", "Administrator"])
 
 	filters = {}
 	if doctype:

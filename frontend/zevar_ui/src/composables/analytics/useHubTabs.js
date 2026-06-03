@@ -1,10 +1,10 @@
 /**
  * useHubTabs — central config for the 6 module tabs and the 7 drawers.
- * Avoids a giant computed map inside AnalyticsHub.vue.
+ * Filters tabs based on role_context.visible_tabs from the backend.
  */
-import { defineAsyncComponent } from 'vue'
+import { defineAsyncComponent, computed } from 'vue'
 
-export const HUB_TABS = [
+const ALL_TABS = [
 	{ key: 'revenue', label: 'Revenue', icon: 'monitoring' },
 	{ key: 'inventory', label: 'Inventory', icon: 'inventory_2' },
 	{ key: 'customers', label: 'Customers', icon: 'group' },
@@ -30,4 +30,14 @@ export const DRAWER_COMPONENT_MAP = {
 	low_stock: defineAsyncComponent(() => import('@/components/analytics/drawers/LowStockDrawer.vue')),
 	overdue_payments: defineAsyncComponent(() => import('@/components/analytics/drawers/OverdueDrawer.vue')),
 	hold_queue: defineAsyncComponent(() => import('@/components/analytics/drawers/HoldQueueDrawer.vue')),
+}
+
+export function useFilteredTabs(roleContext) {
+	const HUB_TABS = computed(() => {
+		const visible = roleContext?.value?.visible_tabs
+		if (!visible || !Array.isArray(visible)) return ALL_TABS
+		const set = new Set(visible)
+		return ALL_TABS.filter((t) => set.has(t.key))
+	})
+	return { HUB_TABS, ALL_TABS }
 }

@@ -21,11 +21,13 @@
 			</header>
 
 			<section class="hub__hero" aria-label="Daily metrics" @touchstart.passive="onHeroTouchStart" @touchend.passive="onHeroTouchEnd">
-				<RevenueHeroCard :data="hero?.sales || {}" @open="openCard('sales')" />
-				<RepairHeroCard :data="hero?.sales || {}" @open="openCard('repair')" />
-				<LayawayHeroCard :data="hero?.layaway || {}" @open="openCard('layaway')" />
-				<CashVarianceHeroCard :data="hero?.cash_variance || {}" @open="openCard('cash_variance')" />
-				<LowStockHeroCard :data="lowStockData" @open="openCard('low_stock')" />
+				<component
+					v-for="card in heroCards"
+					:key="card.key"
+					:is="HERO_COMPONENT_MAP[card.key]"
+					:data="heroDataFor(card.key)"
+					@open="openCard(card.key)"
+				/>
 			</section>
 
 			<section v-if="aiBrief" class="hub__ai-brief glass-tier-1" aria-label="AI daily brief">
@@ -47,7 +49,7 @@
 				</div>
 			</section>
 
-			<ModuleTabs :tabs="HUB_TABS" :active="activeTab" @change="(k) => tabs.setTab(k)" />
+			<ModuleTabs :tabs="filteredTabs" :active="activeTab" @change="(k) => tabs.setTab(k)" />
 
 			<section class="hub__tab">
 				<component :is="currentTabComponent" />
@@ -61,11 +63,6 @@
 </template>
 
 <script setup>
-/**
- * AnalyticsHub — Plan §5, §7.1. Hub shell — single landing page.
- * Body kept under 200 LOC by extracting alerts, tab config, and drawer config
- * into composables under composables/analytics/.
- */
 import { ref, computed, onMounted, watch } from 'vue'
 import AppLayout from '@/components/AppLayout.vue'
 import RevenueHeroCard from '@/components/analytics/RevenueHeroCard.vue'
@@ -73,16 +70,29 @@ import RepairHeroCard from '@/components/analytics/RepairHeroCard.vue'
 import LayawayHeroCard from '@/components/analytics/LayawayHeroCard.vue'
 import CashVarianceHeroCard from '@/components/analytics/CashVarianceHeroCard.vue'
 import LowStockHeroCard from '@/components/analytics/LowStockHeroCard.vue'
+import OverduePaymentsHeroCard from '@/components/analytics/OverduePaymentsHeroCard.vue'
+import HoldQueueHeroCard from '@/components/analytics/HoldQueueHeroCard.vue'
 import ModuleTabs from '@/components/analytics/ModuleTabs.vue'
 import HubDrawer from '@/components/analytics/HubDrawer.vue'
 import { useAnalyticsHubStore } from '@/stores/analyticsHub'
 import { storeToRefs } from 'pinia'
 import { useHubAlerts } from '@/composables/analytics/useHubAlerts'
-import { HUB_TABS, TAB_COMPONENT_MAP, DRAWER_COMPONENT_MAP } from '@/composables/analytics/useHubTabs'
+import { useFilteredTabs, TAB_COMPONENT_MAP, DRAWER_COMPONENT_MAP } from '@/composables/analytics/useHubTabs'
+import { useRoleAwareHero } from '@/composables/analytics/useRoleAwareHero'
+
+const HERO_COMPONENT_MAP = {
+	sales: RevenueHeroCard,
+	repair: RepairHeroCard,
+	layaway: LayawayHeroCard,
+	cash_variance: CashVarianceHeroCard,
+	low_stock: LowStockHeroCard,
+	overdue_payments: OverduePaymentsHeroCard,
+	hold_queue: HoldQueueHeroCard,
+}
 
 const hub = useAnalyticsHubStore()
 const { tabs, drawer } = hub
-const { hero, refreshing, selectedStore, loading, aiBrief, asOf } = storeToRefs(hub)
+const { hero, refreshing, selectedStore, loading, aiBrief, asOf, roleContext } = storeToRefs(hub)
 
 const store = ref(selectedStore.value || '')
 const stores = ref([])
@@ -95,10 +105,19 @@ const asOfLabel = computed(() => {
 	catch { return '' }
 })
 
-const lowStockData = computed(() => ({
-	total: Number(hero.value?.low_stock?.total || 0),
-	stockout: Number(hero.value?.low_stock?.stockout || 0),
-}))
+const { cards: heroCards } = useRoleAwareHero(roleContext)
+const { HUB_TABS: filteredTabs } = useFilteredTabs(roleContext)
+
+function heroDataFor(key) {
+	if (!hero.value) return {}
+	if (key === 'low_stock') {
+		return {
+			total: Number(hero.value.low_stock?.total || 0),
+			stockout: Number(hero.value.low_stock?.stockout || 0),
+		}
+	}
+	return hero.value[key] || {}
+}
 
 const { alerts } = useHubAlerts(hero)
 const currentTabComponent = computed(() => TAB_COMPONENT_MAP[activeTab.value] || TAB_COMPONENT_MAP.revenue)
@@ -107,7 +126,6 @@ const currentDrawerComponent = computed(() => DRAWER_COMPONENT_MAP[drawer.curren
 function openCard(key) { hub.openCardDrawer(key) }
 function refresh(force = false) { hub.refresh(force) }
 
-// Mobile hero swipe — scroll the hero strip on horizontal swipe
 let touchStartX = 0
 function onHeroTouchStart(e) { touchStartX = e.touches[0].clientX }
 function onHeroTouchEnd(e) {
@@ -126,7 +144,7 @@ onMounted(() => hub.refresh())
 <style scoped>
 .hub { display: flex; flex-direction: column; gap: 16px; padding: 0; min-height: 100%; }
 .hub__header { display: flex; align-items: center; gap: 12px; justify-content: space-between; }
-.hub__hero { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.hub__hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
 @media (max-width: 1024px) { .hub__hero { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 640px) {
 	.hub__hero {

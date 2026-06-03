@@ -70,7 +70,7 @@ def get_session_status() -> dict:
 	)
 	invoices = invoices[0] if invoices else {"count": 0, "total": 0}
 
-	# Get today's sales count and total (separate from cumulative)
+	# Get today's sales count and total (sales since this session opened today)
 	today = nowdate()
 	today_invoices = frappe.db.sql(
 		"""
@@ -78,9 +78,10 @@ def get_session_status() -> dict:
 		FROM `tabSales Invoice`
 		WHERE owner = %s
 		AND posting_date = %s
+		AND creation >= %s
 		AND docstatus = 1
 		""",
-		(user, today),
+		(user, today, session.creation),
 		as_dict=True,
 	)
 	today_invoices = today_invoices[0] if today_invoices else {"count": 0, "total": 0}

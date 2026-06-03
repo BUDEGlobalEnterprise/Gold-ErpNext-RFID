@@ -3,9 +3,9 @@ from frappe import _
 from frappe.model.document import Document
 
 
-class AppraisalTemplate(Document):
+class ZevarAppraisalTemplate(Document):
 	def validate(self):
-		existing = frappe.db.exists("Appraisal Template", {
+		existing = frappe.db.exists("Zevar Appraisal Template", {
 			"template_name": self.template_name,
 			"template_type": self.template_type,
 			"name": ["!=", self.name],

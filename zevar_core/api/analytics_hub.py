@@ -8,24 +8,128 @@ from pypika.terms import CustomFunction
 
 DATEDIFF = CustomFunction("DATEDIFF", ["date1", "date2"])
 
+# Role constants matching reports.py
+ADMIN_ROLES = {"Administrator", "System Manager"}
+MANAGER_ROLES = {"Store Manager", "Sales Manager", "System Manager"}
+SALES_ROLES = {"Sales User", "Store Manager", "Sales Manager", "System Manager"}
+ACCOUNTING_ROLES = {"Accounts Manager", "Store Manager", "Sales Manager", "System Manager"}
+STOCK_ROLES = {"Stock Manager", "Inventory Manager", "Store Manager", "Sales Manager", "System Manager"}
+HR_ROLES = {"HR User", "HR Manager", "System Manager"}
+EMPLOYEE_ROLES = {"Employee", "Employee Self Service"}
+
+ALL_POS_ROLES = ADMIN_ROLES | MANAGER_ROLES | SALES_ROLES | ACCOUNTING_ROLES | STOCK_ROLES | HR_ROLES | EMPLOYEE_ROLES
+
+
+def _get_user_tier(user_roles: set[str]) -> str:
+    if user_roles & ADMIN_ROLES:
+        return "admin"
+    if user_roles & (MANAGER_ROLES | ACCOUNTING_ROLES):
+        return "manager"
+    if user_roles & STOCK_ROLES:
+        return "stock"
+    if user_roles & HR_ROLES:
+        return "hr"
+    if user_roles & SALES_ROLES:
+        return "employee"
+    if user_roles & EMPLOYEE_ROLES:
+        return "employee"
+    return "employee"
+
+
+def _get_primary_role(user_roles: set[str]) -> str:
+    for role in ("System Manager", "Administrator"):
+        if role in user_roles:
+            return "System Manager"
+    if "Accounts Manager" in user_roles:
+        return "Accounts Manager"
+    if "Store Manager" in user_roles:
+        return "Store Manager"
+    if "Sales Manager" in user_roles:
+        return "Sales Manager"
+    if "Stock Manager" in user_roles or "Inventory Manager" in user_roles:
+        return "Stock Manager"
+    if "HR Manager" in user_roles:
+        return "HR Manager"
+    if "HR User" in user_roles:
+        return "HR User"
+    if "Sales User" in user_roles:
+        return "Sales User"
+    if user_roles & EMPLOYEE_ROLES:
+        return "Employee"
+    return "User"
+
+
+def _get_role_context(user_roles: set[str]) -> dict:
+    tier = _get_user_tier(user_roles)
+    is_admin = bool(user_roles & ADMIN_ROLES)
+    is_manager = bool(user_roles & (MANAGER_ROLES | ACCOUNTING_ROLES))
+    is_stock = bool(user_roles & STOCK_ROLES)
+    is_hr = bool(user_roles & HR_ROLES)
+    is_employee = bool(user_roles & (SALES_ROLES | EMPLOYEE_ROLES)) and not is_manager and not is_admin
+
+    own_sales_only = bool(
+        (user_roles & (SALES_ROLES | EMPLOYEE_ROLES))
+        and not user_roles & (MANAGER_ROLES | ACCOUNTING_ROLES | STOCK_ROLES | HR_ROLES | ADMIN_ROLES)
+    )
+
+    heroes = []
+    tabs = []
+
+    if is_admin or is_manager:
+        heroes = ["sales", "repair", "layaway", "cash_variance", "low_stock", "overdue_payments", "hold_queue"]
+        tabs = ["revenue", "inventory", "customers", "repairs", "finance", "ai"]
+    elif is_stock:
+        heroes = ["low_stock", "hold_queue", "sales", "repair"]
+        tabs = ["inventory", "revenue", "repairs"]
+    elif is_hr:
+        heroes = ["sales", "repair", "hold_queue"]
+        tabs = ["revenue", "repairs"]
+    elif is_employee:
+        heroes = ["sales", "hold_queue", "layaway"]
+        tabs = ["revenue", "repairs"]
+    else:
+        heroes = ["sales"]
+        tabs = ["revenue"]
+
+    scope = "own" if own_sales_only else ("all" if is_admin else "store")
+
+    return {
+        "primary_role": _get_primary_role(user_roles),
+        "tier": tier,
+        "scope": scope,
+        "visible_heroes": heroes,
+        "visible_tabs": tabs,
+        "own_sales_only": own_sales_only,
+        "can_export_financials": bool(user_roles & (ACCOUNTING_ROLES | ADMIN_ROLES)),
+        "can_closeout": bool(user_roles & (MANAGER_ROLES | ACCOUNTING_ROLES | ADMIN_ROLES)),
+        "is_admin": is_admin,
+        "is_manager": is_manager,
+        "is_stock": is_stock,
+        "is_hr": is_hr,
+        "is_employee": is_employee,
+    }
+
+
 # ==============================================================================
 # Aggregator Endpoint (get_hub_data)
 # ==============================================================================
 
 @frappe.whitelist(allow_guest=False)
 def get_hub_data(store: str | None = None, date_from: str | None = None, date_to: str | None = None) -> dict:
-    frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Sales User", "Accounts Manager"])
-    
-    # Implement cache layer
     user = frappe.session.user
+    if not user or user == "Guest":
+        frappe.throw(_("Login required"), frappe.PermissionError)
+
+    user_roles = set(frappe.get_roles(user))
+    role_ctx = _get_role_context(user_roles)
+
     today_str = nowdate()
     cache_key = f"hub_data:{user}:{store or 'all'}:{today_str}"
-    
+
     cached = frappe.cache().get_value(cache_key)
     if cached:
         return cached
 
-    # Gather data from existing endpoints/sub-queries
     date_from_str = date_from or today_str
     date_to_str = date_to or today_str
 
@@ -36,38 +140,52 @@ def get_hub_data(store: str | None = None, date_from: str | None = None, date_to
             frappe.log_error(f"Hub sub-query {fn.__name__} failed: {e}", "AnalyticsHub")
             return {}
 
+    revenue = _safe(get_daily_revenue_breakdown, date_from_str, date_to_str, store, user_roles, role_ctx)
+
+    hero = {}
+    visible = set(role_ctx["visible_heroes"])
+
+    if "sales" in visible:
+        hero["sales"] = revenue
+    if "repair" in visible:
+        hero["repair"] = {
+            "repair_revenue": flt(revenue.get("repair_revenue", 0)),
+            "repair_count": cint(revenue.get("repair_count", 0)),
+        }
+    if "layaway" in visible:
+        hero["layaway"] = _safe(get_layaway_health, store)
+    if "cash_variance" in visible:
+        hero["cash_variance"] = _safe(get_cash_variance_today, store)
+    if "low_stock" in visible:
+        try:
+            hero["low_stock"] = get_low_stock_detail(severity="all", limit=1)
+        except Exception:
+            hero["low_stock"] = {"total": 0, "stockout": 0}
+    if "overdue_payments" in visible:
+        hero["overdue_payments"] = _safe(get_overdue_payments, store, type="all")
+    if "hold_queue" in visible:
+        hero["hold_queue"] = _safe(get_hold_queue, store)
+
+    ai_brief = None
+    if role_ctx["is_admin"] or role_ctx["is_manager"]:
+        try:
+            ai_brief = _rag_deterministic_fallback("today", None)
+        except Exception:
+            pass
+
     payload = {
-        "hero": {
-            "sales": _safe(get_daily_revenue_breakdown, date_from_str, date_to_str, store),
-            "layaway": _safe(get_layaway_health, store),
-            "low_stock": {"total": 0, "stockout": 0},
-            "cash_variance": _safe(get_cash_variance_today, store),
-            "overdue_payments": _safe(get_overdue_payments, store, type="all"),
-            "hold_queue": _safe(get_hold_queue, store),
-        },
+        "hero": hero,
         "role": {
-            "name": ", ".join(frappe.get_roles(user)),
-            "is_owner": "Sales Owner" in frappe.get_roles(user) or "System Manager" in frappe.get_roles(user),
-            "is_manager": "Sales Manager" in frappe.get_roles(user) or "Store Manager" in frappe.get_roles(user),
+            "name": ", ".join(user_roles),
+            "is_owner": bool(user_roles & ADMIN_ROLES),
+            "is_manager": bool(user_roles & (MANAGER_ROLES | ACCOUNTING_ROLES)),
         },
-        "as_of": str(frappe.utils.now_datetime())
+        "role_context": role_ctx,
+        "ai_brief": ai_brief,
+        "as_of": str(frappe.utils.now_datetime()),
     }
 
-    # Fetch actual low stock for hero count
-    try:
-        payload["hero"]["low_stock"] = get_low_stock_detail(severity="all", limit=1)
-    except Exception:
-        pass
-
-    # AI Brief (deterministic fallback)
-    try:
-        payload["ai_brief"] = _rag_deterministic_fallback("today", None)
-    except Exception:
-        payload["ai_brief"] = None
-
-    # Set cache for 2 minutes
     frappe.cache().set_value(cache_key, payload, expires_in_sec=120)
-    
     return payload
 
 
@@ -76,17 +194,29 @@ def get_hub_data(store: str | None = None, date_from: str | None = None, date_to
 # ==============================================================================
 
 @frappe.whitelist(allow_guest=False)
-def get_daily_revenue_breakdown(date_from: str, date_to: str, store: str | None = None) -> dict:
-    frappe.has_permission("Sales Invoice", ptype="read", throw=True)
-    frappe.has_permission("Repair Order", ptype="read", throw=True)
-    
+def get_daily_revenue_breakdown(
+    date_from: str, date_to: str, store: str | None = None,
+    _user_roles: set | None = None, _role_ctx: dict | None = None,
+) -> dict:
+    try:
+        frappe.has_permission("Sales Invoice", ptype="read", throw=True)
+    except frappe.PermissionError:
+        return _empty_revenue()
+    try:
+        frappe.has_permission("Repair Order", ptype="read", throw=True)
+    except frappe.PermissionError:
+        pass
+
+    own_only = _role_ctx.get("own_sales_only", False) if _role_ctx else False
+    user = frappe.session.user
+
     # Sales Revenue
     si = frappe.qb.DocType("Sales Invoice")
     q_sales = (
         frappe.qb.from_(si)
         .select(
             Coalesce(Sum(si.base_grand_total), 0).as_("sales_revenue"),
-            Count(si.name).as_("sales_count")
+            Count(si.name).as_("sales_count"),
         )
         .where(si.docstatus == 1)
         .where(si.is_pos == 1)
@@ -95,43 +225,52 @@ def get_daily_revenue_breakdown(date_from: str, date_to: str, store: str | None 
     )
     if store:
         q_sales = q_sales.where(si.cost_center == store)
-    
+    if own_only:
+        q_sales = q_sales.where(si.owner == user)
+
     sales_res = q_sales.run(as_dict=True)
     s_rev = flt(sales_res[0].sales_revenue) if sales_res else 0.0
     s_cnt = cint(sales_res[0].sales_count) if sales_res else 0
 
     # Repair Revenue
-    ro = frappe.qb.DocType("Repair Order")
-    q_repair = (
-        frappe.qb.from_(ro)
-        .select(
-            Coalesce(Sum(ro.total_cost), 0).as_("repair_revenue"),
-            Count(ro.name).as_("repair_count")
+    r_rev = 0.0
+    r_cnt = 0
+    try:
+        ro = frappe.qb.DocType("Repair Order")
+        q_repair = (
+            frappe.qb.from_(ro)
+            .select(
+                Coalesce(Sum(ro.total_cost), 0).as_("repair_revenue"),
+                Count(ro.name).as_("repair_count"),
+            )
+            .where(ro.docstatus == 1)
+            .where(ro.status == "Delivered")
+            .where(ro.received_date >= date_from)
+            .where(ro.received_date <= date_to)
         )
-        .where(ro.docstatus == 1)
-        .where(ro.status == 'Delivered')
-        .where(ro.received_date >= date_from)
-        .where(ro.received_date <= date_to)
-    )
-    if store:
-        q_repair = q_repair.where(ro.branch == store)
-        
-    repair_res = q_repair.run(as_dict=True)
-    r_rev = flt(repair_res[0].repair_revenue) if repair_res else 0.0
-    r_cnt = cint(repair_res[0].repair_count) if repair_res else 0
-    
+        if store:
+            q_repair = q_repair.where(ro.branch == store)
+        repair_res = q_repair.run(as_dict=True)
+        r_rev = flt(repair_res[0].repair_revenue) if repair_res else 0.0
+        r_cnt = cint(repair_res[0].repair_count) if repair_res else 0
+    except Exception:
+        pass
+
     # Sparkline data (30 days)
     thirty_days_ago = add_days(date_to, -30)
-    sparkline_data = frappe.db.sql("""
-        SELECT 
-            posting_date as date,
-            SUM(base_grand_total) as sales,
-            0 as repair
-        FROM `tabSales Invoice`
-        WHERE docstatus = 1 AND is_pos = 1 AND posting_date BETWEEN %s AND %s
-        GROUP BY posting_date
-        ORDER BY posting_date
-    """, (thirty_days_ago, date_to), as_dict=True)
+    owner_clause = "AND owner = %s" if own_only else ""
+    owner_params = [user] if own_only else []
+    sparkline_data = frappe.db.sql(
+        f"""SELECT posting_date as date,
+                  SUM(base_grand_total) as sales, 0 as repair
+           FROM `tabSales Invoice`
+           WHERE docstatus = 1 AND is_pos = 1
+             AND posting_date BETWEEN %s AND %s
+             {owner_clause}
+           GROUP BY posting_date ORDER BY posting_date""",
+        (thirty_days_ago, date_to, *owner_params),
+        as_dict=True,
+    )
 
     return {
         "sales_revenue": s_rev,
@@ -140,7 +279,19 @@ def get_daily_revenue_breakdown(date_from: str, date_to: str, store: str | None 
         "total_revenue": s_rev + r_rev,
         "sales_count": s_cnt,
         "repair_count": r_cnt,
-        "sparkline_30d": sparkline_data
+        "sparkline_30d": sparkline_data,
+    }
+
+
+def _empty_revenue() -> dict:
+    return {
+        "sales_revenue": 0.0,
+        "repair_revenue": 0.0,
+        "layaway_revenue": 0.0,
+        "total_revenue": 0.0,
+        "sales_count": 0,
+        "repair_count": 0,
+        "sparkline_30d": [],
     }
 
 @frappe.whitelist(allow_guest=False)
@@ -305,7 +456,7 @@ def get_overdue_payments(store: str | None = None, type: str = "all", overdue_da
             .where(lc.status == 'Active')
             .where(lc.target_completion_date < CurDate())
         ).run(as_dict=True)
-        total_amount += sum(flt(l.outstanding_amount) for l in layaways)
+        total_amount += sum(flt(l.balance_amount) for l in layaways)
         
     return {
         "repairs": repairs,
@@ -365,8 +516,8 @@ def get_rag_insights(scope: str = "today", focus: str | None = None) -> dict:
     """§8.8 — RAG P&L insight generator.
     Permission: System Manager, Sales Owner, or Store Manager (per §14.3).
     """
-    roles = frappe.get_roles()
-    if not any(r in roles for r in ("System Manager", "Sales Owner", "Store Manager", "Sales Manager")):
+    roles = set(frappe.get_roles())
+    if not roles & (ADMIN_ROLES | MANAGER_ROLES | ACCOUNTING_ROLES):
         frappe.throw(_("You do not have permission to view AI insights."), frappe.PermissionError)
 
     try:

@@ -19,7 +19,11 @@
   "county_tax_rate",
   "tax_template",
   "inventory_section",
-  "default_warehouse"
+  "default_warehouse",
+  "section_workshops",
+  "linked_workshops",
+  "section_bench_vendors",
+  "linked_external_bench_vendors"
  ],
  "fields": [
   {
@@ -94,6 +98,32 @@
    "fieldtype": "Link",
    "label": "Default Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_workshops",
+   "fieldtype": "Section Break",
+   "label": "Workshops"
+  },
+  {
+   "description": "Internal workshops associated with this store",
+   "fieldname": "linked_workshops",
+   "fieldtype": "Table",
+   "label": "Linked Workshops",
+   "options": "Workshop"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_bench_vendors",
+   "fieldtype": "Section Break",
+   "label": "External Bench Vendors"
+  },
+  {
+   "description": "External bench jewelers associated with this store",
+   "fieldname": "linked_external_bench_vendors",
+   "fieldtype": "Table",
+   "label": "External Bench Vendors",
+   "options": "External Bench Vendor"
   }
  ],
  "grid_page_length": 50,

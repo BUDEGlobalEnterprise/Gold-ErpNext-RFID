@@ -74,7 +74,14 @@ def verify_customer_identity(customer, id_type, id_number, id_state=None, id_exp
 	record.customer = customer
 	record.verification_type = "High-Value Transaction"
 	record.status = "Pending"
-	record.id_type = id_type
+	id_type_map = {
+		"Driver License": "Driver's License",
+		"Drivers License": "Driver's License",
+		"drivers license": "Driver's License",
+		"drivers_license": "Driver's License",
+		"driversLicense": "Driver's License",
+	}
+	record.id_type = id_type_map.get(id_type, id_type)
 	record.id_number = id_number
 	record.id_issuing_state = id_state
 	record.id_expiration = id_expiration

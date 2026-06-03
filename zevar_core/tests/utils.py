@@ -117,6 +117,8 @@ def ensure_pos_profile(
 	"""Create a minimal POS profile suitable for tests."""
 	existing = frappe.db.exists("POS Profile", profile_name)
 	if existing:
+		# Ensure fixed float enforcement is disabled for tests
+		frappe.db.set_value("POS Profile", existing, "custom_enforce_fixed_float", 0)
 		return existing
 
 	company = get_test_company()
@@ -131,6 +133,7 @@ def ensure_pos_profile(
 	profile.currency = "USD"
 	profile.customer = customer
 	profile.selling_price_list = "Standard Selling"
+	profile.custom_enforce_fixed_float = 0
 	profile.append("payments", {"mode_of_payment": "Cash", "default": 1})
 	profile.insert(ignore_permissions=True, ignore_mandatory=True)
 	return profile.name

@@ -17,7 +17,6 @@ from frappe.utils import (
 	add_days,
 	add_to_date,
 	cint,
-	fmt_datetime,
 	get_url,
 	getdate,
 	now,
@@ -720,7 +719,7 @@ def sync_to_google_calendar(repair_order: str, calendar_id: str | None = None) -
 
 	try:
 		# Get Google Calendar settings
-		settings = frappe.get_single("Google Calendar Settings", cache=True)
+		settings = frappe.get_single("Google Calendar Settings")
 		if not settings or not settings.get("enabled"):
 			return {"success": False, "message": "Google Calendar integration not enabled"}
 

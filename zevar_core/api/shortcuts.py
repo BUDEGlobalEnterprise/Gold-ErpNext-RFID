@@ -282,9 +282,9 @@ def _build_route(link_type: str | None, link_to: str | None) -> str:
 	if not link_to:
 		return "#"
 	if link_type == "DocType":
-		return f"/app/{frappe.scrub(link_to)}"
+		return f"/app/{frappe.scrub(link_to).replace('_', '-')}"
 	if link_type == "Page":
-		return f"/app/{frappe.scrub(link_to)}"
+		return f"/app/{frappe.scrub(link_to).replace('_', '-')}"
 	if link_type == "Report":
 		return f"/app/query-report/{quote(link_to, safe='')}"
 	return link_to

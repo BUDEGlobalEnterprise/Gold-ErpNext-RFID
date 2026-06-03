@@ -50,7 +50,7 @@ def execute(filters=None):
 		SELECT COUNT(name) as cnt, SUM(paid_amount) as total
 		FROM `tabPayment Entry`
 		WHERE docstatus = 1 AND payment_type = 'Receive'
-		AND paid_from LIKE 'Liability — Layaway Deposits Held%'
+		AND paid_from LIKE 'Liability — Layaway Deposits Held%%'
 		AND posting_date BETWEEN %(from_date)s AND %(to_date)s
 		AND company = %(company)s
 	""",

@@ -18,13 +18,14 @@ class TestPOSSessionFixedFloat(FrappeTestCase):
 			doc.name = self.pos_profile_name
 			doc.company = self.company
 			doc.currency = "USD"
+			doc.warehouse = "Stores - ZJ"
 			doc.custom_enforce_fixed_float = 1
 			doc.custom_fixed_opening_float = 300.0
 			doc.custom_variance_alert_threshold = 5.0
 
 			# Setup payment methods
 			doc.append("payments", {"mode_of_payment": "Cash", "default": 1})
-			doc.insert(ignore_permissions=True)
+			doc.insert(ignore_permissions=True, ignore_mandatory=True)
 
 	def test_open_session_enforces_fixed_float(self):
 		# Opening session with $500 should throw validation error if not matching fixed float?
@@ -50,7 +51,7 @@ class TestPOSSessionFixedFloat(FrappeTestCase):
 				"doctype": "Customer",
 				"customer_name": "Test Float",
 				"customer_type": "Individual",
-				"customer_group": "All Customer Groups",
+				"customer_group": "Individual",
 			}
 		)
 		if not frappe.db.exists("Customer", customer.customer_name):

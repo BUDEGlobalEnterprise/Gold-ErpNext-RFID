@@ -6,8 +6,8 @@
  * This prevents stale content issues permanently.
  */
 
-const CACHE_NAME = 'zevar-pos-v14'
-const API_CACHE = 'zevar-api-v14'
+const CACHE_NAME = 'zevar-pos-v15'
+const API_CACHE = 'zevar-api-v15'
 
 const OFFLINE_FALLBACK_ASSETS = ['/pos/', '/pos/index.html']
 

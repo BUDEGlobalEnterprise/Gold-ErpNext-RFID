@@ -28,11 +28,7 @@ def _add_pricing_method_field():
 		"dt": "Item",
 		"fieldname": "custom_pricing_method",
 		"fieldtype": "Select",
-		"options": "Fine
-Bulk UPC
-Bulk IUOM
-Bulk UOM
-Bulk Mixed",
+		"options": "Fine\nBulk UPC\nBulk IUOM\nBulk UOM\nBulk Mixed",
 		"label": "Pricing Method",
 		"default": "Fine",
 		"insert_after": "has_serial_no",
@@ -53,7 +49,7 @@ def _backfill_values():
 		UPDATE {table}
 		SET custom_pricing_method = 'Bulk UPC'
 		WHERE (custom_pricing_method IS NULL OR custom_pricing_method = '')
-		AND (custom_is_bulk_sdk = 1 OR custom_is_bulk_sku = 1)
+		AND custom_is_bulk_sku = 1
 	""")
 
 	frappe.db.sql(f"""

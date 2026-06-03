@@ -529,15 +529,14 @@ def audit_cadence_heartbeat():
 				continue
 
 			# Check last completed audit for this scope+store
-			last_audit = frappe.get_all(
-				"Case Audit Session",
-				filters={
-					"store_location": store,
-					"scope": scope,
-					"docstatus": 1,
-				},
-				fields=["MAX(completed_at) as last_completed"],
-				limit=1,
+			last_audit = frappe.db.sql(
+				"""
+				SELECT MAX(completed_at) as last_completed
+				FROM `tabCase Audit Session`
+				WHERE store_location = %s AND scope = %s AND docstatus = 1
+				""",
+				(store, scope),
+				as_dict=True,
 			)
 
 			last_completed = None

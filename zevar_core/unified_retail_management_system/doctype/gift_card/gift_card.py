@@ -19,8 +19,8 @@ class GiftCard(Document):
 		self._auto_expire()
 
 	def _validate_initial_value(self) -> None:
-		if flt(self.initial_value) <= 0:
-			frappe.throw(frappe._("Initial value must be greater than zero."))
+		if flt(self.initial_value) < 0:
+			frappe.throw(frappe._("Initial value cannot be negative."))
 
 	def _validate_balance(self) -> None:
 		if flt(self.balance) < 0:

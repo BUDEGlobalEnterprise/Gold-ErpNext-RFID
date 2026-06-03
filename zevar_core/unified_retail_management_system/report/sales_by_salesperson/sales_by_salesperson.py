@@ -72,7 +72,7 @@ def execute(filters=None):
 			emp.employee_name as employee_name,
 			COUNT(*) as transaction_count,
 			SUM(si.grand_total) as total_sales,
-			SUM(COALESCE(sc.total_commission, 0)) as total_commission,
+			0 as total_commission,
 			AVG(si.grand_total) as avg_sale
 		FROM `tabSales Invoice` si
 		LEFT JOIN `tabEmployee` emp ON emp.name = si.custom_salesperson_1

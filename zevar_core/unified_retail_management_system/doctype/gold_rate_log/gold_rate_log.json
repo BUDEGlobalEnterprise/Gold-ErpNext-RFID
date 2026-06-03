@@ -39,12 +39,13 @@
    "fieldtype": "Datetime",
    "label": "Timestamp"
   },
-  {
-   "fieldname": "purity",
-   "fieldtype": "Link",
-   "label": "Purity",
-   "options": "Zevar Purity"
-  }
+   {
+    "fieldname": "purity",
+    "fieldtype": "Link",
+    "label": "Purity",
+    "options": "Zevar Purity",
+    "reqd": 1
+   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
