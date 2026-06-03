@@ -464,8 +464,8 @@ def update_customer(
 		customer.customer_group = customer_group
 	if territory:
 		customer.territory = territory
-		if display_name:
-			customer.customer_name = display_name
+	if display_name:
+		customer.customer_name = display_name
 
 	# Custom fields
 	safe_set("gender", gender)
@@ -509,6 +509,40 @@ def update_customer(
 	safe_set("custom_thumb_right_size", thumb_right_size)
 	safe_set("custom_wrist_size", wrist_size)
 	safe_set("custom_neck_size", neck_size)
+
+	if customer.customer_primary_contact:
+		contact = frappe.get_doc("Contact", customer.customer_primary_contact)
+		contact_changed = False
+		if mobile_no:
+			primary_phone = None
+			for p in contact.phone_nos:
+				if p.is_primary_mobile_no:
+					primary_phone = p
+					break
+			if primary_phone:
+				if primary_phone.phone != mobile_no:
+					primary_phone.phone = mobile_no
+					contact_changed = True
+			else:
+				contact.add_phone(mobile_no, is_primary_mobile_no=1)
+				contact_changed = True
+
+		if email_id:
+			primary_email = None
+			for e in contact.email_ids:
+				if e.is_primary:
+					primary_email = e
+					break
+			if primary_email:
+				if primary_email.email_id != email_id:
+					primary_email.email_id = email_id
+					contact_changed = True
+			else:
+				contact.add_email(email_id, is_primary=1)
+				contact_changed = True
+
+		if contact_changed:
+			contact.save(ignore_permissions=True)
 
 	customer.save()
 

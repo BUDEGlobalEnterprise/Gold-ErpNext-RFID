@@ -6,13 +6,16 @@
     "engine": "InnoDB",
     "field_order": [
         "vendor_section",
+        "memo_class",
         "supplier",
         "supplier_name",
         "column_break_vendor",
+        "customer",
         "status",
         "contract_date",
         "due_date",
         "store_location",
+        "final_disposition",
         "terms_section",
         "interest_rate",
         "interest_period",
@@ -45,6 +48,10 @@
         "payments",
         "notes_section",
         "notes",
+        "vendor_invoice_ref",
+        "customer_signed_return_slip",
+        "return_slip_file",
+        "auto_aging_alert_sent_at",
         "amended_from"
     ],
     "fields": [
@@ -54,12 +61,21 @@
             "label": "Vendor / Supplier"
         },
         {
+            "default": "Vendor",
+            "fieldname": "memo_class",
+            "fieldtype": "Select",
+            "in_standard_filter": 1,
+            "label": "Memo Class",
+            "options": "Vendor\nCustomer",
+            "reqd": 1
+        },
+        {
             "fieldname": "supplier",
             "fieldtype": "Link",
             "in_list_view": 1,
             "label": "Supplier",
             "options": "Supplier",
-            "reqd": 1
+            "mandatory_depends_on": "eval:doc.memo_class==='Vendor'"
         },
         {
             "fieldname": "supplier_name",
@@ -72,6 +88,15 @@
         {
             "fieldname": "column_break_vendor",
             "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "customer",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Customer",
+            "options": "Customer",
+            "mandatory_depends_on": "eval:doc.memo_class==='Customer'",
+            "depends_on": "eval:doc.memo_class==='Customer'"
         },
         {
             "default": "Draft",
@@ -103,6 +128,15 @@
             "label": "Store Location",
             "options": "Store Location",
             "reqd": 1
+        },
+        {
+            "default": "Open",
+            "fieldname": "final_disposition",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "label": "Disposition",
+            "options": "Open\nSold\nReturned\nPartial Return\nForfeited",
+            "read_only": 1
         },
         {
             "fieldname": "terms_section",
@@ -290,6 +324,29 @@
             "fieldname": "notes",
             "fieldtype": "Text Editor",
             "label": "Notes"
+        },
+        {
+            "fieldname": "vendor_invoice_ref",
+            "fieldtype": "Data",
+            "label": "Vendor Invoice #",
+            "depends_on": "eval:doc.memo_class==='Vendor'"
+        },
+        {
+            "fieldname": "customer_signed_return_slip",
+            "fieldtype": "Attach",
+            "label": "Customer-Signed Return Slip",
+            "depends_on": "eval:doc.memo_class==='Customer'"
+        },
+        {
+            "fieldname": "return_slip_file",
+            "fieldtype": "Attach",
+            "label": "Return Slip"
+        },
+        {
+            "fieldname": "auto_aging_alert_sent_at",
+            "fieldtype": "Datetime",
+            "label": "Aging Alert Sent At",
+            "read_only": 1
         },
         {
             "fieldname": "amended_from",

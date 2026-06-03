@@ -224,7 +224,7 @@ def get_repair_chart_data(warehouse: str | None = None, period: int = 30):
 	from frappe.utils import add_days
 
 	today_date = getdate(today())
-	from_date = add_days(today_date, -period)
+	from_date = add_days(today_date, -(period - 1))
 
 	conditions = ""
 	values = {"from_date": from_date, "to_date": today_date}

@@ -15,9 +15,15 @@
         "memo_price",
         "retail_price",
         "status",
+        "line_status",
         "date_received",
         "date_sold",
         "date_returned",
+        "returned_at",
+        "returned_by",
+        "return_slip_ref",
+        "vendor_signed_by",
+        "vendor_signed_at",
         "sales_invoice",
         "notes"
     ],
@@ -91,6 +97,14 @@
             "options": "On Memo\nSold\nReturned\nLost"
         },
         {
+            "default": "Open",
+            "fieldname": "line_status",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "label": "Line Status",
+            "options": "Open\nSold\nReturned\nLost\nDamaged"
+        },
+        {
             "fieldname": "date_received",
             "fieldtype": "Date",
             "label": "Date Received"
@@ -106,6 +120,35 @@
             "fieldtype": "Date",
             "label": "Date Returned",
             "depends_on": "eval:doc.status==='Returned'"
+        },
+        {
+            "fieldname": "returned_at",
+            "fieldtype": "Datetime",
+            "label": "Returned At",
+            "depends_on": "eval:doc.line_status==='Returned'"
+        },
+        {
+            "fieldname": "returned_by",
+            "fieldtype": "Link",
+            "label": "Returned By",
+            "options": "User",
+            "depends_on": "eval:doc.line_status==='Returned'"
+        },
+        {
+            "fieldname": "return_slip_ref",
+            "fieldtype": "Attach",
+            "label": "Return Slip",
+            "depends_on": "eval:doc.line_status==='Returned'"
+        },
+        {
+            "fieldname": "vendor_signed_by",
+            "fieldtype": "Data",
+            "label": "Vendor Signed By"
+        },
+        {
+            "fieldname": "vendor_signed_at",
+            "fieldtype": "Datetime",
+            "label": "Vendor Signed At"
         },
         {
             "fieldname": "sales_invoice",

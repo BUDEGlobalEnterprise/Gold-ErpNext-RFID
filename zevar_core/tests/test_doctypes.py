@@ -96,9 +96,9 @@ ZEVAR_DOCTYPES = {
 	},
 	"Repair Type": {
 		"module": "Unified Retail Management System",
-		"required_fields": ["repair_type_name"],
+		"required_fields": ["repair_name"],
 		"sample_data": {
-			"repair_type_name": "Test Repair Type",
+			"repair_name": "Test Repair Type",
 		},
 		"is_submittable": False,
 	},
@@ -375,8 +375,10 @@ class TestDocTypeCRUD(FrappeTestCase):
 		doc = self._create_and_verify(
 			"Gift Card",
 			{
+				"customer": ensure_customer("Gift Card Test Customer"),
 				"card_number": "GC-CRUD-TEST-001",
-				"initial_balance": 250.00,
+				"initial_value": 250.00,
+				"balance": 250.00,
 				"status": "Active",
 			},
 		)
@@ -399,10 +401,10 @@ class TestDocTypeCRUD(FrappeTestCase):
 		doc = self._create_and_verify(
 			"Repair Type",
 			{
-				"repair_type_name": "CRUD Test Repair Type",
+				"repair_name": "CRUD Test Repair Type",
 			},
 		)
-		self.assertEqual(doc.repair_type_name, "CRUD Test Repair Type")
+		self.assertEqual(doc.repair_name, "CRUD Test Repair Type")
 
 	def test_audit_plan_crud(self):
 		"""Audit Plan CRUD"""

@@ -35,7 +35,7 @@ def _ensure_repair_type(name="Test Repair Type"):
 	if frappe.db.exists("Repair Type", name):
 		return name
 	doc = frappe.new_doc("Repair Type")
-	doc.repair_type_name = name
+	doc.repair_name = name
 	doc.is_active = 1
 	doc.insert(ignore_permissions=True, ignore_mandatory=True)
 	return name

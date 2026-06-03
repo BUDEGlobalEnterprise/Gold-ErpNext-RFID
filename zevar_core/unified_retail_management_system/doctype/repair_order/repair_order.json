@@ -66,6 +66,15 @@
   "payment_status",
   "section_parts",
   "parts",
+  "section_parts_consumed",
+  "parts_consumed",
+  "section_external_bench",
+  "external_bench_vendor",
+  "external_bench_dispatched_at",
+  "column_break_bench",
+  "external_bench_received_at",
+  "external_bench_invoice_ref",
+  "external_bench_cost",
   "section_dates",
   "promised_date",
   "completed_date",
@@ -92,6 +101,9 @@
   "sales_invoice",
   "section_payments",
   "payments",
+  "section_status_log",
+  "status_log",
+  "predicted_completion_date",
   "section_warranty",
   "warranty_months",
   "warranty_expiry_date",
@@ -442,8 +454,57 @@
   {
    "fieldname": "parts",
    "fieldtype": "Table",
-   "label": "Parts",
-   "options": "Repair Order Item"
+   "label": "Parts (Legacy)",
+   "options": "Repair Order Item",
+   "description": "Legacy parts table for billing reference. Use Parts Consumed for inventory tracking."
+  },
+  {
+   "fieldname": "section_parts_consumed",
+   "fieldtype": "Section Break",
+   "label": "Parts Consumed (Inventory Tracked)"
+  },
+  {
+   "fieldname": "parts_consumed",
+   "fieldtype": "Table",
+   "label": "Parts Consumed",
+   "options": "Repair Parts Consumed",
+   "description": "Inventory-tracked parts consumption via repair_parts_service"
+  },
+  {
+   "fieldname": "section_external_bench",
+   "fieldtype": "Section Break",
+   "label": "External Bench",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "external_bench_vendor",
+   "fieldtype": "Link",
+   "label": "External Bench Vendor",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "external_bench_dispatched_at",
+   "fieldtype": "Datetime",
+   "label": "Dispatched At"
+  },
+  {
+   "fieldname": "column_break_bench",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "external_bench_received_at",
+   "fieldtype": "Datetime",
+   "label": "Received At"
+  },
+  {
+   "fieldname": "external_bench_invoice_ref",
+   "fieldtype": "Data",
+   "label": "Vendor Invoice #"
+  },
+  {
+   "fieldname": "external_bench_cost",
+   "fieldtype": "Currency",
+   "label": "External Bench Cost"
   },
   {
    "fieldname": "section_dates",

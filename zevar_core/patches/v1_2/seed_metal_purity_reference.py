@@ -75,13 +75,13 @@ def _seed_metals():
 def _seed_purities():
 	for gold_metal in ("Yellow Gold", "White Gold", "Rose Gold"):
 		for p in GOLD_PURITIES:
-			name = f"{p['purity_code']} {gold_metal}"
-			if frappe.db.exists("Zevar Purity", name):
+			purity_name = f"{p['purity_name']} {gold_metal}"
+			if frappe.db.exists("Zevar Purity", purity_name):
 				continue
 			frappe.get_doc({
 				"doctype": "Zevar Purity",
 				"purity_code": p["purity_code"],
-				"purity_name": f"{p['purity_name']} {gold_metal}",
+				"purity_name": purity_name,
 				"metal": gold_metal,
 				"fine_metal_content": p["fine_metal_content"],
 				"is_millesimal": p.get("is_millesimal", 0),
@@ -132,6 +132,6 @@ def _seed_gemstone_types():
 
 def _seed_appraisal_templates():
 	for t in APPRAISAL_TEMPLATES:
-		if frappe.db.exists("Appraisal Template", {"template_name": t["template_name"]}):
+		if frappe.db.exists("Zevar Appraisal Template", t["template_name"]):
 			continue
-		frappe.get_doc({"doctype": "Appraisal Template", **t}).insert(ignore_permissions=True)
+		frappe.get_doc({"doctype": "Zevar Appraisal Template", **t}).insert(ignore_permissions=True)

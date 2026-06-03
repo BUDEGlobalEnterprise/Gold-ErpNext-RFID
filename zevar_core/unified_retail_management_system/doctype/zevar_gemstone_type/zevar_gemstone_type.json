@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "prompt",
+ "autoname": "field:gemstone_type_name",
  "creation": "2026-06-02 00:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -21,7 +21,7 @@
  "modified_by": "Administrator",
  "module": "Unified Retail Management System",
  "name": "Zevar Gemstone Type",
- "naming_rule": "Set by user",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {"create": 1, "delete": 1, "email": 1, "export": 1, "print": 1, "read": 1, "report": 1, "role": "System Manager", "share": 1, "write": 1},

@@ -11,6 +11,7 @@ const inflight = new Map()    // dedupe parallel calls with the same args
 export function useHubData() {
 	const hero = ref(null)
 	const role = ref(null)
+	const roleContext = ref(null)
 	const aiBrief = ref(null)
 	const overageQueue = ref(null)
 	const asOf = ref(null)
@@ -41,6 +42,7 @@ export function useHubData() {
 			.then((data) => {
 				hero.value = data?.hero || null
 				role.value = data?.role || null
+				roleContext.value = data?.role_context || null
 				aiBrief.value = data?.ai_brief || null
 				overageQueue.value = data?.overage_queue || null
 				asOf.value = data?.as_of || null
@@ -67,6 +69,7 @@ export function useHubData() {
 	return {
 		hero,
 		role,
+		roleContext,
 		aiBrief,
 		overageQueue,
 		asOf,

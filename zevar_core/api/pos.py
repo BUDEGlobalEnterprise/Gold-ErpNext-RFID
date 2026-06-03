@@ -906,3 +906,148 @@ def serve_sw():
 	resp.headers["Service-Worker-Allowed"] = "/"
 	resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
 	return resp
+
+
+# ---------------------------------------------------------------------------
+# Held Cart Management
+# ---------------------------------------------------------------------------
+
+_HELD_CART_CACHE_PREFIX = "pos_held_carts:"
+_MAX_HELD_CARTS = 10
+
+
+def _get_held_cart_key():
+	return f"{_HELD_CART_CACHE_PREFIX}{frappe.session.user}"
+
+
+@frappe.whitelist()
+def hold_cart(items: str, customer: str | None = None, warehouse: str | None = None, note: str | None = None):
+	import json
+	import secrets
+
+	items_list = frappe.parse_json(items) if isinstance(items, str) else items
+	if not items_list:
+		frappe.throw(_("Cannot hold an empty cart."), frappe.ValidationError)
+
+	cache_key = _get_held_cart_key()
+	carts = frappe.cache().get_value(cache_key) or []
+
+	if len(carts) >= _MAX_HELD_CARTS:
+		frappe.throw(
+			_("Maximum of {0} held carts reached. Please recall or discard one first.").format(_MAX_HELD_CARTS),
+			frappe.ValidationError,
+		)
+
+	total = sum(flt(i.get("amount", 0)) * flt(i.get("qty", 1)) for i in items_list)
+	cart_id = secrets.token_hex(4)
+
+	cart = {
+		"id": cart_id,
+		"items": items_list,
+		"customer": customer or "Walk-In Customer",
+		"warehouse": warehouse or "",
+		"note": note or "",
+		"item_count": len(items_list),
+		"total": flt(total),
+		"held_at": str(frappe.utils.now_datetime()),
+		"held_by": frappe.session.user,
+	}
+
+	carts.append(cart)
+	frappe.cache().set_value(cache_key, carts)
+
+	return {"success": True, "cart_id": cart_id, "held_count": len(carts)}
+
+
+@frappe.whitelist()
+def get_held_carts():
+	cache_key = _get_held_cart_key()
+	carts = frappe.cache().get_value(cache_key) or []
+	return {"carts": carts, "count": len(carts)}
+
+
+@frappe.whitelist()
+def recall_cart(cart_id: str):
+	cache_key = _get_held_cart_key()
+	carts = frappe.cache().get_value(cache_key) or []
+
+	matched = [c for c in carts if c["id"] == cart_id]
+	if not matched:
+		frappe.throw(_("Held cart {0} not found.").format(cart_id), frappe.ValidationError)
+
+	cart = matched[0]
+	remaining = [c for c in carts if c["id"] != cart_id]
+	frappe.cache().set_value(cache_key, remaining)
+
+	return {"success": True, "cart": cart}
+
+
+@frappe.whitelist()
+def discard_held_cart(cart_id: str):
+	cache_key = _get_held_cart_key()
+	carts = frappe.cache().get_value(cache_key) or []
+
+	remaining = [c for c in carts if c["id"] != cart_id]
+	if len(remaining) == len(carts):
+		frappe.throw(_("Held cart {0} not found.").format(cart_id), frappe.ValidationError)
+
+	frappe.cache().set_value(cache_key, remaining)
+	return {"success": True, "remaining": len(remaining)}
+
+
+# ---------------------------------------------------------------------------
+# Pre-Submit Cart Validator
+# ---------------------------------------------------------------------------
+
+@frappe.whitelist()
+def validate_pos_cart(items: str, warehouse: str | None = None):
+	import json
+
+	items_list = frappe.parse_json(items) if isinstance(items, str) else items
+	issues = []
+
+	for line in items_list:
+		item_code = line.get("item_code")
+		qty = flt(line.get("qty", 0))
+		rate = flt(line.get("rate", 0))
+
+		if not item_code or not frappe.db.exists("Item", item_code):
+			issues.append({"type": "item_missing", "item_code": item_code, "blocking": True, "message": f"Item {item_code} not found"})
+			continue
+
+		item = frappe.get_cached_doc("Item", item_code)
+
+		if item.disabled:
+			issues.append({"type": "item_disabled", "item_code": item_code, "blocking": True, "message": f"Item {item_code} is disabled"})
+
+		if qty <= 0:
+			issues.append({"type": "qty_invalid", "item_code": item_code, "blocking": True, "message": f"Item {item_code}: quantity must be positive"})
+
+		if rate <= 0:
+			issues.append({"type": "rate_invalid", "item_code": item_code, "blocking": True, "message": f"Item {item_code}: rate must be positive"})
+
+		# Stock check
+		if warehouse and qty > 0:
+			actual_qty = flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty") or 0)
+			if actual_qty < qty:
+				issues.append({
+					"type": "out_of_stock",
+					"item_code": item_code,
+					"blocking": True,
+					"message": f"Insufficient stock for {item_code}: need {qty}, have {actual_qty}",
+				})
+
+		# Price drift check (non-blocking)
+		current_price = flt(item.standard_rate)
+		if rate > 0 and current_price > 0 and abs(rate - current_price) > 0.005:
+			pct_drift = abs(rate - current_price) / current_price * 100
+			issues.append({
+				"type": "price_drift",
+				"item_code": item_code,
+				"blocking": False,
+				"message": f"Price drift: cart {rate} vs current {current_price} ({pct_drift:.1f}%)",
+				"details": {"cart_rate": rate, "current_price": current_price, "drift_pct": flt(pct_drift, 1)},
+			})
+
+	blocking = any(i.get("blocking") for i in issues)
+	return {"ok": not blocking, "issues": issues}

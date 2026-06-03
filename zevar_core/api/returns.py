@@ -332,6 +332,9 @@ def create_return_invoice(
 			"return_type": return_type,
 			"message": _("Return invoice {0} created successfully.").format(return_invoice.name),
 		}
+	except frappe.ValidationError:
+		frappe.db.rollback()
+		raise
 	except Exception as e:
 		frappe.db.rollback()
 		frappe.log_error("Return Invoice Creation Failed", frappe.get_traceback())
@@ -381,7 +384,12 @@ def void_invoice(invoice_name: str, reason: str, manager_pin: str) -> dict:
 		frappe.throw(_("This invoice is already cancelled."))
 
 	# Check if has returns
-	returns = frappe.db.count("Sales Invoice", {"custom_return_against": invoice_name, "docstatus": 1})
+	return_field = (
+		"custom_return_against"
+		if frappe.get_meta("Sales Invoice").get_field("custom_return_against")
+		else "return_against"
+	)
+	returns = frappe.db.count("Sales Invoice", {return_field: invoice_name, "docstatus": 1})
 	if returns > 0:
 		frappe.throw(_("This invoice has returns and cannot be voided."))
 
@@ -432,26 +440,38 @@ def get_return_history(invoice_name: str | None = None, customer: str | None = N
 	"""
 	frappe.has_permission("Sales Invoice", "read", throw=True)
 
+	meta = frappe.get_meta("Sales Invoice")
+	return_against_field = (
+		"custom_return_against" if meta.get_field("custom_return_against") else "return_against"
+	)
+
 	filters = {"is_return": 1, "docstatus": 1}
 
 	if invoice_name:
-		filters["custom_return_against"] = invoice_name
+		filters[return_against_field] = invoice_name
+
+	fields = ["name", return_against_field, "customer", "posting_date", "grand_total"]
+	if meta.get_field("custom_return_type"):
+		fields.append("custom_return_type")
+	if meta.get_field("custom_return_reason"):
+		fields.append("custom_return_reason")
 
 	returns = frappe.get_all(
 		"Sales Invoice",
 		filters=filters,
-		fields=[
-			"name",
-			"custom_return_against",
-			"customer",
-			"posting_date",
-			"grand_total",
-			"custom_return_type",
-			"custom_return_reason",
-		],
+		fields=fields,
 		order_by="posting_date desc",
-		limit_page_length=50,
+		limit=50,
 	)
+
+	# Map dynamically queryable return fields to return keys expected by callers
+	for r in returns:
+		if return_against_field != "custom_return_against":
+			r["custom_return_against"] = r.get(return_against_field)
+		if "custom_return_type" not in r:
+			r["custom_return_type"] = None
+		if "custom_return_reason" not in r:
+			r["custom_return_reason"] = None
 
 	if customer and not invoice_name:
 		returns = [r for r in returns if r.customer == customer]

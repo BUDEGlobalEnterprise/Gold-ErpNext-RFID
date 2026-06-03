@@ -2,6 +2,7 @@
  * useRoleAwareHero — Plan §5.5.
  * Returns the role-aware hero strip config: which cards, what size.
  * Sizes: 'lg' (default), 'md' (de-emphasized), 'sm' (compact).
+ * Tier values match backend analytics_hub._get_user_tier().
  */
 import { computed } from 'vue'
 
@@ -16,25 +17,24 @@ const CARDS = {
 }
 
 const ROLE_PRESETS = {
-	owner: ['sales', 'repair', 'layaway', 'cash_variance', 'low_stock', 'overdue_payments', 'hold_queue'],
+	admin: ['sales', 'repair', 'layaway', 'cash_variance', 'low_stock', 'overdue_payments', 'hold_queue'],
 	manager: ['sales', 'repair', 'layaway', 'cash_variance', 'low_stock', 'overdue_payments', 'hold_queue'],
 	finance: ['cash_variance', 'overdue_payments', 'sales', 'layaway', 'low_stock', 'repair', 'hold_queue'],
-	salesperson: ['sales', 'layaway', 'hold_queue'],
-	bench: ['repair', 'hold_queue', 'low_stock'],
+	stock: ['low_stock', 'hold_queue', 'sales', 'repair'],
+	hr: ['sales', 'repair', 'hold_queue'],
+	employee: ['sales', 'hold_queue', 'layaway'],
 	default: ['sales', 'repair', 'layaway', 'cash_variance', 'low_stock'],
 }
 
-export function useRoleAwareHero(roleInfo) {
+export function useRoleAwareHero(roleContext) {
 	const tier = computed(() => {
-		if (!roleInfo?.value) return 'default'
-		if (roleInfo.value.is_owner) return 'owner'
-		if (roleInfo.value.is_manager) return 'manager'
-		return 'default'
+		if (!roleContext?.value) return 'default'
+		return roleContext.value.tier || 'default'
 	})
 
 	const cards = computed(() => {
 		const order = ROLE_PRESETS[tier.value] || ROLE_PRESETS.default
-		return order.map((k) => CARDS[k])
+		return order.map((k) => CARDS[k]).filter(Boolean)
 	})
 
 	return { tier, cards, CARDS, ROLE_PRESETS }

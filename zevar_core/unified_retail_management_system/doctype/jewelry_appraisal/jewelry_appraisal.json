@@ -10,6 +10,9 @@
         "column_break_1",
         "appraiser",
         "status",
+        "valid_until",
+        "appraisal_template",
+        "replacement_for",
         "section_item",
         "item_description",
         "item_type",
@@ -24,7 +27,11 @@
         "insurance_value",
         "section_notes",
         "notes",
-        "certificate_number"
+        "certificate_number",
+        "section_reminders",
+        "reminder_30_sent",
+        "reminder_60_sent",
+        "reminder_90_sent"
     ],
     "fields": [
         {
@@ -60,7 +67,26 @@
             "fieldtype": "Select",
             "in_list_view": 1,
             "label": "Status",
-            "options": "Draft\nCompleted\nCancelled"
+            "options": "Draft\nCompleted\nExpired\nCancelled"
+        },
+        {
+            "fieldname": "valid_until",
+            "fieldtype": "Date",
+            "label": "Valid Until",
+            "description": "Date the appraisal expires"
+        },
+        {
+            "fieldname": "appraisal_template",
+            "fieldtype": "Link",
+            "label": "Appraisal Template",
+            "options": "Zevar Appraisal Template"
+        },
+        {
+            "fieldname": "replacement_for",
+            "fieldtype": "Link",
+            "label": "Replacement For",
+            "options": "Jewelry Appraisal",
+            "description": "Links to the previous appraisal this one replaces"
         },
         {
             "fieldname": "section_item",
@@ -142,6 +168,33 @@
             "fieldtype": "Data",
             "label": "Certificate Number",
             "unique": 1
+        },
+        {
+            "fieldname": "section_reminders",
+            "fieldtype": "Section Break",
+            "label": "Expiry Reminders",
+            "collapsible": 1
+        },
+        {
+            "default": "0",
+            "fieldname": "reminder_30_sent",
+            "fieldtype": "Check",
+            "label": "30-Day Reminder Sent",
+            "read_only": 1
+        },
+        {
+            "default": "0",
+            "fieldname": "reminder_60_sent",
+            "fieldtype": "Check",
+            "label": "60-Day Reminder Sent",
+            "read_only": 1
+        },
+        {
+            "default": "0",
+            "fieldname": "reminder_90_sent",
+            "fieldtype": "Check",
+            "label": "90-Day Reminder Sent",
+            "read_only": 1
         }
     ],
     "index_web_pages_for_search": 1,

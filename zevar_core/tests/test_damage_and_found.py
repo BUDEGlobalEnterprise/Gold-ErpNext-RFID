@@ -33,15 +33,17 @@ class TestDamageAndFound(FrappeTestCase):
 	def _create_serial_no(self, item_code, warehouse):
 		sn = f"SN-DMG-{frappe.generate_hash(length=8)}"
 		if not frappe.db.exists("Serial No", sn):
-			frappe.get_doc(
+			doc = frappe.get_doc(
 				{
 					"doctype": "Serial No",
 					"serial_no": sn,
 					"item_code": item_code,
-					"warehouse": warehouse,
 					"company": self.company,
 				}
-			).insert(ignore_permissions=True)
+			)
+			doc.insert(ignore_permissions=True)
+			# Set warehouse via db.set_value to bypass ERPNext validation
+			frappe.db.set_value("Serial No", sn, "warehouse", warehouse)
 		return sn
 
 	def _get_showcase_wh(self):

@@ -15,16 +15,10 @@ def execute(filters=None):
 	"""
 	columns = [
 		{
-			"fieldname": "date",
-			"label": _("Date"),
-			"fieldtype": "Date",
-			"width": 100,
-		},
-		{
-			"fieldname": "time",
-			"label": _("Time"),
-			"fieldtype": "Time",
-			"width": 80,
+			"fieldname": "timestamp",
+			"label": _("Timestamp"),
+			"fieldtype": "Datetime",
+			"width": 160,
 		},
 		{
 			"fieldname": "metal",
@@ -84,8 +78,8 @@ def execute(filters=None):
 	if not to_date:
 		to_date = frappe.utils.today()
 
-	# Build filters
-	query_filters = {"date": ["between", [from_date, to_date]]}
+	# Build filters - timestamp is a Datetime field, so we need to filter on the date part
+	query_filters = {}
 	if metal:
 		query_filters["metal"] = metal
 	if purity:
@@ -95,9 +89,21 @@ def execute(filters=None):
 	rates = frappe.get_all(
 		"Gold Rate Log",
 		filters=query_filters,
-		fields=["date", "time", "metal", "purity", "rate_per_gram", "source"],
-		order_by="date desc, time desc",
+		fields=["timestamp", "metal", "purity", "rate_per_gram", "source"],
+		order_by="timestamp desc",
 	)
+
+	# Filter by date range in Python since timestamp is Datetime
+	filtered_rates = []
+	for rate in rates:
+		if rate.get("timestamp"):
+			rate_date = str(rate["timestamp"])[:10]
+			if from_date and rate_date < str(from_date):
+				continue
+			if to_date and rate_date > str(to_date):
+				continue
+		filtered_rates.append(rate)
+	rates = filtered_rates
 
 	# Track previous rate for change calculation
 	prev_rates = {}
@@ -142,13 +148,13 @@ def get_chart_data(filters=None):
 	chart_data = frappe.db.sql(  # nosemgrep
 		"""
 		SELECT
-			date,
+			DATE(timestamp) as date,
 			metal,
 			purity,
 			rate_per_gram
 		FROM `tabGold Rate Log`
-		WHERE date BETWEEN %(from_date)s AND %(to_date)s
-		ORDER BY date
+		WHERE DATE(timestamp) BETWEEN %(from_date)s AND %(to_date)s
+		ORDER BY timestamp
 	""",
 		{"from_date": from_date, "to_date": to_date},
 		as_dict=1,

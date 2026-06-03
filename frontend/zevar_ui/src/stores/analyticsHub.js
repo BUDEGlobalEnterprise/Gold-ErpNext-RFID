@@ -17,6 +17,7 @@ export const useAnalyticsHubStore = defineStore('analyticsHub', () => {
 	const refreshing = ref(false)
 
 	const role = computed(() => hub.role.value)
+	const roleContext = computed(() => hub.roleContext.value)
 	const hero = computed(() => hub.hero.value)
 	const loading = computed(() => hub.loading.value)
 	const aiBrief = computed(() => hub.aiBrief.value)
@@ -53,6 +54,7 @@ export const useAnalyticsHubStore = defineStore('analyticsHub', () => {
 		selectedStore,
 		refreshing,
 		role,
+		roleContext,
 		hero,
 		loading,
 		aiBrief,
