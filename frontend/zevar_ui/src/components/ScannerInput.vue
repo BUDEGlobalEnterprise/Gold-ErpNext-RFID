@@ -58,22 +58,31 @@
 			Last scan: {{ lastScan }}
 		</div>
 
-		<CameraScanner
-			v-if="showCameraScanner"
-			@close="showCameraScanner = false"
-			@scan="handleCameraScan"
-		/>
+		<!-- Centered Modal Camera Scanner -->
+		<Teleport to="body">
+			<CameraScanner
+				v-if="showCameraScanner"
+				:mode="mode"
+				:inline="false"
+				:beep="beep"
+				@close="showCameraScanner = false"
+				@scan="handleCameraScan"
+			/>
+		</Teleport>
 	</div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import CameraScanner from './CameraScanner.vue'
+import { isAAMVA, parseAAMVA, isAadhaar, parseAadhaar } from '@/utils/idParser.js'
 
 const props = defineProps({
 	placeholder: { type: String, default: 'Scan barcode or RFID tag...' },
 	showCamera: { type: Boolean, default: true },
 	autoFocus: { type: Boolean, default: true },
+	mode: { type: String, default: 'all' },
+	beep: { type: Boolean, default: true },
 })
 
 const emit = defineEmits(['scan', 'camera-open'])
@@ -87,19 +96,16 @@ let hidDevice = null
 let buffer = ''
 let bufferTimer = null
 
-function onInput(e) {
+function onInput() {
 	clearTimeout(bufferTimer)
 	buffer = inputValue.value
 
-	// If the buffer contains multiple newlines, process them immediately
 	if (buffer.includes('\n')) {
 		const lines = buffer.split('\n')
-		// Process all complete lines (everything except the last partial line)
 		for (let i = 0; i < lines.length - 1; i++) {
 			const scan = lines[i].trim()
 			if (scan) processScan(scan)
 		}
-		// Keep the remaining partial line in the input
 		inputValue.value = lines[lines.length - 1]
 		buffer = inputValue.value
 	}
@@ -110,7 +116,7 @@ function onInput(e) {
 			inputValue.value = ''
 			buffer = ''
 		}
-	}, 150) // Slightly longer timeout for RFID bursts
+	}, 150)
 }
 
 function onScan() {
@@ -124,12 +130,25 @@ function onScan() {
 function processScan(value) {
 	if (!value) return
 	lastScan.value = value
-	emit('scan', value)
+	if (isAAMVA(value)) {
+		const parsedData = parseAAMVA(value)
+		emit('scan', value, parsedData)
+	} else if (isAadhaar(value)) {
+		const parsedData = parseAadhaar(value)
+		emit('scan', value, parsedData)
+	} else {
+		emit('scan', value)
+	}
 }
 
-function handleCameraScan(value) {
-	processScan(value)
-	showCameraScanner.value = false
+function handleCameraScan(value, ocrParsedData) {
+	if (ocrParsedData) {
+		emit('scan', value, ocrParsedData)
+		showCameraScanner.value = false
+	} else {
+		processScan(value)
+		showCameraScanner.value = false
+	}
 }
 
 function openCamera() {
@@ -141,7 +160,7 @@ async function connectHID() {
 	if (!navigator.hid) return
 	try {
 		const devices = await navigator.hid.requestDevice({
-			filters: props.hidVendorId ? [{ vendorId: props.hidVendorId }] : [],
+			filters: [],
 		})
 		if (devices.length > 0) {
 			hidDevice = devices[0]
@@ -167,6 +186,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+	clearTimeout(bufferTimer)
 	if (hidDevice) {
 		hidDevice.close().catch(() => {})
 	}

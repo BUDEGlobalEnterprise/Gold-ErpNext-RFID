@@ -23,20 +23,17 @@ def create_pos_invoice(
 	gift_card_number: str | None = None,
 	override_reference: str | None = None,
 	idempotency_key: str | None = None,
+	irs_8300_details: str | None = None,
 ) -> dict:
-	# Idempotency: if this key was already processed, return the cached result
+	frappe.only_for(["Sales User", "Sales Manager", "Store Manager", "POS Manager", "Employee", "System Manager"])
+
+	# Handle idempotency to prevent duplicate charges
 	if idempotency_key:
-		existing = frappe.db.get_value(
-			"POS Sync Log",
-			{"idempotency_key": idempotency_key},
-			["sales_invoice"],
-			as_dict=True,
-		)
-		if existing and existing.sales_invoice:
+		existing = frappe.db.get_value("Idempotency Record", {"name": idempotency_key}, ["sales_invoice", "status"], as_dict=True)
+		if existing and existing.status == "Completed":
 			return {
 				"success": True,
 				"invoice_name": existing.sales_invoice,
-				"idempotent": True,
 				"message": f"Duplicate request — invoice {existing.sales_invoice} already created",
 			}
 
@@ -44,7 +41,7 @@ def create_pos_invoice(
 		return _create_pos_invoice_internal(
 			items, payments, customer, warehouse, discount_amount, tax_exempt,
 			salespersons, layaway_reference, trade_ins, gift_card_number, override_reference,
-			idempotency_key
+			idempotency_key, irs_8300_details
 		)
 	except Exception:
 		frappe.log_error(title="POS Invoice Sync Failed", message=frappe.get_traceback())
@@ -63,6 +60,7 @@ def _create_pos_invoice_internal(
 	gift_card_number: str | None = None,
 	override_reference: str | None = None,
 	idempotency_key: str | None = None,
+	irs_8300_details: str | None = None,
 ) -> dict:
 	"""
 	Create a complete POS Invoice with:
@@ -497,7 +495,24 @@ def _create_pos_invoice_internal(
 					),
 				)
 
+		# Check IRS Form 8300 Compliance before submit (so it doesn't double count)
+		cash_amount = sum(flt(p.amount) for p in si.payments if p.mode_of_payment == "Cash")
+		form_8300_triggered = False
+		if cash_amount > 0:
+			from zevar_core.api.compliance import check_cash_transaction_for_8300, trigger_form_8300
+			if check_cash_transaction_for_8300(si.customer, cash_amount):
+				form_8300_triggered = True
+
 		si.submit()
+
+		if form_8300_triggered:
+			try:
+				details_dict = {"invoice": si.name}
+				if irs_8300_details:
+					details_dict["irs_8300_details"] = frappe.parse_json(irs_8300_details)
+				trigger_form_8300(si.customer, cash_amount, details_dict)
+			except Exception:
+				frappe.log_error("Failed to trigger IRS Form 8300", frappe.get_traceback())
 
 		# Deduct gift card balance only after successful invoice submission
 		if gc_payment_amount > 0 and gift_card_number:
@@ -577,6 +592,7 @@ def _create_pos_invoice_internal(
 			"status": si.status,
 			"grand_total": si.grand_total,
 			"outstanding_amount": si.outstanding_amount,
+			"form_8300_triggered": form_8300_triggered,
 			"message": f"Successfully created invoice {si.name}",
 		}
 

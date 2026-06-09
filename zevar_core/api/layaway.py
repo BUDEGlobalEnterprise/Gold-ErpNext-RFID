@@ -27,7 +27,6 @@ LAYAWAY_ALLOWED_ROLES = [
 
 
 def _enforce_layaway_access() -> None:
-	# Temporarily relaxed for testing to prevent session expiry from blocking development
 	user_roles = set(frappe.get_roles())
 	if frappe.session.user == "Administrator" or frappe.session.user == "Guest":
 		return
@@ -38,8 +37,7 @@ def _enforce_layaway_access() -> None:
 			title="Layaway Access Denied",
 			message=f"User: {frappe.session.user}\nRoles: {list(user_roles)}\nRequired: {LAYAWAY_ALLOWED_ROLES}",
 		)
-		# We won't throw right now to unblock the user's testing
-		pass
+		frappe.throw(_("Insufficient Permission to access Layaway Module"), frappe.PermissionError)
 
 
 def _coerce_statuses(statuses: str | list | tuple | None) -> list[str]:
@@ -427,6 +425,7 @@ def create_layaway(
 	auto_forfeit_days: int | None = None,
 	payments: str | list | None = None,
 	mode_of_payment: str | None = None,
+	irs_8300_details: str | None = None,
 ) -> dict:
 	_enforce_layaway_access()
 
@@ -581,12 +580,28 @@ def create_layaway(
 					},
 				)
 
-		doc.status = "Active"
 		doc.flags.ignore_permissions = True
 		doc.insert(ignore_permissions=True)
 
+		form_8300_triggered = False
+		cash_amount = 0.0
+		if deposit > 0 and deposit_mode == "Cash":
+			cash_amount = deposit
+			from zevar_core.api.compliance import check_cash_transaction_for_8300, trigger_form_8300
+			if check_cash_transaction_for_8300(doc.customer, cash_amount):
+				form_8300_triggered = True
+
 		doc.flags.ignore_permissions = True
 		doc.submit()
+
+		if form_8300_triggered:
+			try:
+				details_dict = {"layaway": doc.name}
+				if irs_8300_details:
+					details_dict["irs_8300_details"] = frappe.parse_json(irs_8300_details)
+				trigger_form_8300(doc.customer, cash_amount, details_dict)
+			except Exception:
+				frappe.log_error("Failed to trigger IRS Form 8300 for layaway", frappe.get_traceback())
 
 	except frappe.ValidationError:
 		frappe.db.rollback()
@@ -624,6 +639,7 @@ def create_layaway(
 		"layaway_id": doc.name,
 		"deposit_amount": doc.deposit_amount,
 		"payment_results": payment_results,
+		"form_8300_triggered": form_8300_triggered,
 		"message": "Layaway created and deposit recorded successfully",
 	}
 
@@ -1118,6 +1134,7 @@ def extend_layaway(
 def process_split_layaway_payment(
 	layaway_id: str,
 	payments: str,
+	irs_8300_details: str | None = None,
 ) -> dict:
 	_enforce_layaway_access()
 
@@ -1172,6 +1189,13 @@ def process_split_layaway_payment(
 		doc.flags.ignore_validate_update_after_submit = True
 		doc.save(ignore_permissions=True)
 
+		form_8300_triggered = False
+		cash_amount = sum(flt(p.get("amount", 0)) for p in payments_list if p.get("mode_of_payment", "Cash") == "Cash")
+		if cash_amount > 0:
+			from zevar_core.api.compliance import check_cash_transaction_for_8300, trigger_form_8300
+			if check_cash_transaction_for_8300(doc.customer, cash_amount):
+				form_8300_triggered = True
+
 		for p in payments_list:
 			_create_layaway_payment_entry(
 				doc, flt(p.get("amount", 0)), p.get("mode_of_payment", "Cash"), p.get("reference_number", "")
@@ -1179,6 +1203,15 @@ def process_split_layaway_payment(
 
 		if doc.status == "Completed":
 			_create_layaway_final_invoice(doc)
+
+		if form_8300_triggered:
+			try:
+				details_dict = {"layaway_payment": doc.name}
+				if irs_8300_details:
+					details_dict["irs_8300_details"] = frappe.parse_json(irs_8300_details)
+				trigger_form_8300(doc.customer, cash_amount, details_dict)
+			except Exception:
+				frappe.log_error("Failed to trigger IRS Form 8300 for layaway payment", frappe.get_traceback())
 
 		return {
 			"success": True,
@@ -1192,6 +1225,7 @@ def process_split_layaway_payment(
 				}
 				for p in payments_list
 			],
+			"form_8300_triggered": form_8300_triggered,
 			"message": "Split payment processed successfully",
 		}
 	except Exception as e:

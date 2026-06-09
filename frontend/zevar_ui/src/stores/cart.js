@@ -629,7 +629,7 @@ export const useCartStore = defineStore('cart', () => {
 	 */
 	async function submitOrder(
 		payments,
-		{ taxExempt = false, warehouse, giftCardNumber, overrideReference } = {}
+		{ taxExempt = false, warehouse, giftCardNumber, overrideReference, irs8300Details } = {}
 	) {
 		const itemsPayload = items.value.map((i) => ({
 			item_code: i.item_code,
@@ -664,6 +664,11 @@ export const useCartStore = defineStore('cart', () => {
 		// Attach tax override reference if provided
 		if (overrideReference) {
 			params.override_reference = overrideReference
+		}
+
+		// Attach IRS 8300 details if collected
+		if (irs8300Details) {
+			params.irs_8300_details = JSON.stringify(irs8300Details)
 		}
 
 		// Attach salespersons if any are assigned
@@ -704,7 +709,7 @@ export const useCartStore = defineStore('cart', () => {
 	 * @param {number} durationMonths - Contract duration (6, 9, or 12).
 	 * @returns {Promise<object>} The API response with layaway_id.
 	 */
-	async function submitLayaway(depositAmount, durationMonths, { warehouse } = {}) {
+	async function submitLayaway(depositAmount, durationMonths, { warehouse, irs8300Details } = {}) {
 		const itemsPayload = items.value.map((i) => ({
 			item_code: i.item_code,
 			qty: i.qty || 1,
@@ -724,13 +729,19 @@ export const useCartStore = defineStore('cart', () => {
 			)
 		}
 
-		const data = await call('zevar_core.api.layaway.create_layaway', {
+		const payload = {
 			customer: customerName,
 			items: JSON.stringify(itemsPayload),
 			deposit_amount: depositAmount,
 			duration_months: durationMonths,
 			warehouse: warehouse || undefined,
-		})
+		}
+
+		if (irs8300Details) {
+			payload.irs_8300_details = JSON.stringify(irs8300Details)
+		}
+
+		const data = await call('zevar_core.api.layaway.create_layaway', payload)
 
 		return data
 	}

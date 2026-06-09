@@ -104,6 +104,34 @@
 											<option value="Company">Company</option>
 										</select>
 									</div>
+									<div class="p-3 bg-gradient-to-r from-[#D4AF37]/10 to-[#D4AF37]/5 border border-[#D4AF37]/30 rounded-xl">
+										<label class="text-xs font-semibold text-[#D4AF37] mb-2 flex items-center gap-1.5">
+											<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+											Auto-fill from ID Scan
+										</label>
+										<ScannerInput 
+											placeholder="Scan Driver's License or ID..." 
+											:showCamera="true"
+											mode="id"
+											@scan="handleIdScan"
+										/>
+									</div>
+								</div>
+
+								<div class="grid grid-cols-2 gap-4">
+									<div>
+										<label
+											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
+											>Name <span class="text-red-500">*</span></label
+										>
+										<input
+											v-model="newCustomer.name"
+											type="text"
+											placeholder="Full name"
+											required
+											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
+										/>
+									</div>
 									<div>
 										<label
 											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
@@ -121,22 +149,6 @@
 											<option value="hi">Hindi</option>
 											<option value="ar">Arabic</option>
 										</select>
-									</div>
-								</div>
-
-								<div class="grid grid-cols-1">
-									<div>
-										<label
-											class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 block"
-											>Name <span class="text-red-500">*</span></label
-										>
-										<input
-											v-model="newCustomer.name"
-											type="text"
-											placeholder="Full name"
-											required
-											class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 transition-shadow"
-										/>
 									</div>
 								</div>
 
@@ -941,6 +953,7 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import { call, toast } from 'frappe-ui'
+import ScannerInput from './ScannerInput.vue'
 
 const props = defineProps({
 	show: {
@@ -971,6 +984,34 @@ const tabs = [
 	{ key: 'shipping', label: 'Shipping address' },
 	{ key: 'sizes', label: 'Sizes' },
 ]
+
+function handleIdScan(rawValue, parsedData) {
+	if (parsedData) {
+		if (parsedData.name) newCustomer.value.name = parsedData.name;
+		if (parsedData.address) newCustomer.value.street = parsedData.address;
+		if (parsedData.city) newCustomer.value.city = parsedData.city;
+		if (parsedData.state) newCustomer.value.state = parsedData.state;
+		if (parsedData.zip) newCustomer.value.pincode = parsedData.zip;
+		if (parsedData.dob) newCustomer.value.birth_date = parsedData.dob;
+		if (parsedData.type === 'national_id') {
+			newCustomer.value.country = 'India';
+		}
+		
+		toast({
+			title: 'ID Scanned',
+			text: 'Customer details have been auto-filled.',
+			icon: 'check-circle',
+			iconClasses: 'text-green-500',
+		})
+	} else if (rawValue) {
+		toast({
+			title: 'Scan Received',
+			text: 'Could not auto-fill details from this barcode.',
+			icon: 'info',
+			iconClasses: 'text-blue-500',
+		})
+	}
+}
 
 const usStates = [
 	{ code: 'AL', name: 'Alabama' },

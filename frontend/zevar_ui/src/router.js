@@ -352,6 +352,48 @@ const routes = [
 			component: () => import('./pages/stock/ExternalBench.vue'),
 			meta: { requiresAuth: true },
 		},
+		{
+			path: '/stock/metal-purity',
+			name: 'MetalPurityAdmin',
+			component: () => import('./pages/stock/MetalPurityAdmin.vue'),
+			meta: { requiresAuth: true },
+		},
+		{
+			path: '/stock/scrap-recovery',
+			name: 'ScrapRecovery',
+			component: () => import('./pages/stock/ScrapRecovery.vue'),
+			meta: { requiresAuth: true },
+		},
+		{
+			path: '/memos/vendor-dashboard',
+			name: 'VendorMemoDashboard',
+			component: () => import('./pages/memos/VendorMemoDashboard.vue'),
+			meta: { requiresAuth: true },
+		},
+		{
+			path: '/memos/customer',
+			name: 'CustomerMemo',
+			component: () => import('./pages/memos/CustomerMemo.vue'),
+			meta: { requiresAuth: true },
+		},
+		{
+			path: '/memos/item-status',
+			name: 'MemoItemStatus',
+			component: () => import('./pages/memos/MemoItemStatus.vue'),
+			meta: { requiresAuth: true },
+		},
+		{
+			path: '/appraisals/list',
+			name: 'AppraisalList',
+			component: () => import('./pages/appraisals/AppraisalList.vue'),
+			meta: { requiresAuth: true },
+		},
+		{
+			path: '/repairs/parts-drawer',
+			name: 'RepairPartsDrawer',
+			component: () => import('./pages/repairs/RepairPartsDrawer.vue'),
+			meta: { requiresAuth: true },
+		},
 	// Phase 2: Accounting
 	{
 		path: '/accounting/transactions',

@@ -30,22 +30,30 @@ export const useLayawayStore = defineStore('layaway', () => {
 	// ==========================================================================
 
 	const layawaysResource = createResource({
-		url: 'zevar_core.api.layaway.get_all_layaways',
+		fetcher: async (data) => {
+			return await frappe.call('zevar_core.api.layaway.get_all_layaways', data)
+		},
 		auto: false,
 	})
 
 	const layawayDetailsResource = createResource({
-		url: 'zevar_core.api.layaway.get_layaway_details',
+		fetcher: async (data) => {
+			return await frappe.call('zevar_core.api.layaway.get_layaway_details', data)
+		},
 		auto: false,
 	})
 
 	const customerLayawaysResource = createResource({
-		url: 'zevar_core.api.layaway.get_customer_layaways',
+		fetcher: async (data) => {
+			return await frappe.call('zevar_core.api.layaway.get_customer_layaways', data)
+		},
 		auto: false,
 	})
 
 	const processPaymentResource = createResource({
-		url: 'zevar_core.api.layaway.process_layaway_payment',
+		fetcher: async (data) => {
+			return await frappe.call('zevar_core.api.layaway.process_layaway_payment', data)
+		},
 		auto: false,
 	})
 
