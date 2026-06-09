@@ -89,7 +89,7 @@ def _get_repair_alerts(is_manager: bool) -> list[dict]:
 
 	# Severely overdue repairs (>7 days past promised date)
 	overdue = frappe.db.sql("""
-		SELECT name, customer_name, promised_date, status, warehouse,
+		SELECT name, customer, promised_date, status, warehouse,
 		       DATEDIFF(%(today)s, promised_date) as days_overdue
 		FROM `tabRepair Order`
 		WHERE status NOT IN ('Delivered', 'Cancelled')
@@ -104,7 +104,7 @@ def _get_repair_alerts(is_manager: bool) -> list[dict]:
 			"severity": "critical",
 			"type": "repair_overdue",
 			"title": f"Overdue: {r.name}",
-			"message": f"{r.customer_name} — {r.days_overdue} days past due",
+			"message": f"{r.customer} — {r.days_overdue} days past due",
 			"reference_doctype": "Repair Order",
 			"reference_name": r.name,
 			"timestamp": str(now_datetime()),
@@ -113,7 +113,7 @@ def _get_repair_alerts(is_manager: bool) -> list[dict]:
 	# Stuck repairs (no activity in 5+ days)
 	if is_manager:
 		stuck = frappe.db.sql("""
-			SELECT name, customer_name, status, modified, warehouse,
+			SELECT name, customer, status, modified, warehouse,
 			       DATEDIFF(%(today)s, modified) as days_stuck
 			FROM `tabRepair Order`
 			WHERE status IN ('In Progress', 'Waiting for Parts', 'Estimated')
@@ -136,7 +136,7 @@ def _get_repair_alerts(is_manager: bool) -> list[dict]:
 	# High-value without deposit (>$500)
 	if is_manager:
 		no_deposit = frappe.db.sql("""
-			SELECT name, customer_name, estimated_cost
+			SELECT name, customer, estimated_cost
 			FROM `tabRepair Order`
 			WHERE estimated_cost > 500
 			  AND (deposit_amount IS NULL OR deposit_amount = 0)
@@ -149,7 +149,7 @@ def _get_repair_alerts(is_manager: bool) -> list[dict]:
 				"severity": "warning",
 				"type": "repair_no_deposit",
 				"title": f"No deposit: {r.name}",
-				"message": f"${r.estimated_cost:.2f} repair for {r.customer_name} — no deposit",
+				"message": f"${r.estimated_cost:.2f} repair for {r.customer} — no deposit",
 				"reference_doctype": "Repair Order",
 				"reference_name": r.name,
 				"timestamp": str(now_datetime()),
@@ -179,8 +179,8 @@ def _get_inventory_alerts() -> list[dict]:
 		LEFT JOIN `tabBin` b ON b.item_code = i.item_code
 		WHERE i.disabled = 0
 		  AND i.is_stock_item = 1
-		  AND COALESCE(b.actual_qty, 0) <= COALESCE(i.re_order_level, 0)
-		  AND COALESCE(i.re_order_level, 0) > 0
+		  AND COALESCE(b.actual_qty, 0) <= COALESCE(i.safety_stock, 0)
+		  AND COALESCE(i.safety_stock, 0) > 0
 		LIMIT 10
 	""", as_dict=True)
 

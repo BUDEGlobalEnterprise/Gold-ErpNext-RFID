@@ -35,7 +35,7 @@ def check_cash_reporting_required(customer):
 
 @frappe.whitelist(methods=["POST"])
 def trigger_form_8300(customer, total_amount, transaction_details=None):
-	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
+	frappe.only_for(["Sales User", "Sales Manager", "System Manager", "POS User", "POS Manager"])
 	settings = frappe.get_single("Payment Gateway Settings")
 	if not settings.irs_8300_tracking_enabled:
 		return {"success": False, "message": "8300 tracking is disabled"}
@@ -46,17 +46,34 @@ def trigger_form_8300(customer, total_amount, transaction_details=None):
 	record.status = "Triggered"
 	record.trigger_date = now_datetime()
 	record.total_cash_amount = flt(total_amount)
-	record.transaction_details = transaction_details or "{}"
-	record.recipient_name = customer_name
-	if settings.auto_populate_8300:
+	if isinstance(transaction_details, dict):
+		record.transaction_details = frappe.as_json(transaction_details)
+		irs_details = transaction_details.get("irs_8300_details", {})
+		if irs_details:
+			if irs_details.get("bypassed_by"):
+				notes_text = f"Bypass Authorized By: {irs_details['bypassed_by']}\nReason: {irs_details.get('bypass_reason', 'None')}"
+				record.notes = notes_text
+			else:
+				record.recipient_name = irs_details.get("recipient_name") or customer_name
+				record.recipient_tin = irs_details.get("recipient_tin")
+				record.recipient_address = irs_details.get("recipient_address")
+				record.recipient_dob = irs_details.get("recipient_dob")
+				record.recipient_id_type = irs_details.get("recipient_id_type")
+				record.recipient_id_number = irs_details.get("recipient_id_number")
+	else:
+		record.transaction_details = transaction_details or "{}"
+		record.recipient_name = customer_name
+
+	if settings.auto_populate_8300 and not record.recipient_address:
 		customer_email = frappe.db.get_value("Contact Email", {"parent": customer}, "email_id")
 		customer_address = frappe.db.get_value(
 			"Address", {"link_name": customer}, ["address_line1", "city", "state", "pincode"], as_dict=True
 		)
 		if customer_email:
-			record.notes = f"Customer email: {customer_email}"
+			record.notes = (record.notes + f"\nCustomer email: {customer_email}") if record.notes else f"Customer email: {customer_email}"
 		if customer_address:
 			record.recipient_address = f"{customer_address.get('address_line1', '')}, {customer_address.get('city', '')}, {customer_address.get('state', '')} {customer_address.get('pincode', '')}"
+	
 	record.insert(ignore_permissions=True)
 	frappe.db.commit()
 	return {"success": True, "record_name": record.name, "message": _("Form 8300 record created.")}
@@ -121,7 +138,7 @@ def _get_customer_cash_total(customer, window_days=365):
 	SalesInvoice = DocType("Sales Invoice")
 	SalesInvoicePayment = DocType("Sales Invoice Payment")
 	cutoff = getdate(add_days(today(), -window_days))
-	result = (
+	si_result = (
 		frappe.qb.from_(SalesInvoicePayment)
 		.join(SalesInvoice)
 		.on(SalesInvoice.name == SalesInvoicePayment.parent)
@@ -133,7 +150,25 @@ def _get_customer_cash_total(customer, window_days=365):
 		.where(SalesInvoicePayment.mode_of_payment == "Cash")
 		.run(as_dict=True)
 	)
-	return flt(result[0].get("total_cash", 0)) if result else 0.0
+	si_cash = flt(si_result[0].get("total_cash", 0)) if si_result else 0.0
+
+	LayawayContract = DocType("Layaway Contract")
+	LayawayPayment = DocType("Layaway Payment Schedule")
+	layaway_result = (
+		frappe.qb.from_(LayawayPayment)
+		.join(LayawayContract)
+		.on(LayawayContract.name == LayawayPayment.parent)
+		.select(Sum(LayawayPayment.paid_amount).as_("total_cash"))
+		.where(LayawayContract.customer == customer)
+		.where(LayawayContract.docstatus == 1)
+		.where(LayawayPayment.status == "Paid")
+		.where(LayawayPayment.payment_date >= cutoff)
+		.where(LayawayPayment.mode_of_payment == "Cash")
+		.run(as_dict=True)
+	)
+	layaway_cash = flt(layaway_result[0].get("total_cash", 0)) if layaway_result else 0.0
+
+	return si_cash + layaway_cash
 
 
 def _assess_risk_level(customer):
@@ -197,6 +232,13 @@ def check_cash_transaction_for_8300(customer, cash_amount):
 	threshold = flt(settings.get("cash_threshold_8300") or 10000)
 	total_cash = _get_customer_cash_total(customer) + flt(cash_amount)
 	return total_cash >= threshold
+
+
+@frappe.whitelist()
+def check_pre_8300_status(customer, cash_amount):
+	frappe.only_for(["Sales User", "Sales Manager", "System Manager", "POS User", "POS Manager"])
+	triggered = check_cash_transaction_for_8300(customer, cash_amount)
+	return {"triggered": triggered}
 
 
 def scan_cash_transactions():

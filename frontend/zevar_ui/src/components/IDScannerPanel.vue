@@ -55,35 +55,23 @@
 				</div>
 				<div>
 					<label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-						>ID Number</label
+						>Scan Barcode Here</label
 					>
-					<input
-						v-model="modelValue.number"
-						type="text"
-						placeholder="Scan or enter ID number"
-						class="w-full px-3 py-2 text-sm bg-white dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg focus:ring-2 focus:ring-[#D4AF37]"
+					<ScannerInput 
+						placeholder="Ready to scan..." 
+						:autoFocus="true" 
+						:showCamera="true"
+						:inlineCamera="true"
+						mode="id"
+						@scan="handleScan" 
 					/>
 				</div>
 			</div>
 			<div class="mt-3 flex gap-2">
 				<button
-					@click="simulateIdScan"
-					class="flex-1 px-3 py-2 text-xs font-medium bg-[#D4AF37] text-black rounded-lg hover:bg-[#c9a432] transition flex items-center justify-center gap-1.5"
-				>
-					<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-						/>
-					</svg>
-					Scan Document
-				</button>
-				<button
 					@click="$emit('apply-data')"
 					:disabled="!modelValue.number"
-					class="flex-1 px-3 py-2 text-xs font-medium bg-gray-900 dark:bg-warm-dark-800 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 transition"
+					class="w-full px-3 py-2 text-xs font-medium bg-gray-900 dark:bg-warm-dark-800 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 transition"
 				>
 					Apply Data
 				</button>
@@ -93,6 +81,9 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
+import ScannerInput from './ScannerInput.vue'
+
 defineProps({
 	show: {
 		type: Boolean,
@@ -107,26 +98,19 @@ const modelValue = defineModel({
 
 defineEmits(['close', 'apply-data'])
 
-function simulateIdScan() {
-	const mockData = {
-		drivers_license: {
-			name: 'John Doe',
-			address: '123 Main St, Springfield, IL 62701',
-			number: 'D123456789',
-			dob: '1990-01-15',
-		},
-		passport: {
-			name: 'Jane Smith',
-			address: '456 Oak Ave, Chicago, IL 60601',
-			number: 'P987654321',
-			dob: '1985-05-20',
-		},
+// A simple AAMVA PDF417 parser for Driver's Licenses
+function handleScan(scanValue, parsedData) {
+	if (!scanValue) return;
+	
+	if (parsedData) {
+		modelValue.value.number = parsedData.idNumber;
+		modelValue.value.name = parsedData.name;
+		modelValue.value.address = parsedData.address;
+		modelValue.value.dob = parsedData.dob;
+		modelValue.value.type = parsedData.type || modelValue.value.type || 'drivers_license';
+	} else {
+		// Just a standard 1D barcode or unformatted string
+		modelValue.value.number = scanValue;
 	}
-
-	const data = mockData[modelValue.value.type] || mockData.drivers_license
-	modelValue.value.number = data.number
-	modelValue.value.name = data.name
-	modelValue.value.address = data.address
-	modelValue.value.dob = data.dob
 }
 </script>

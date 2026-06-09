@@ -1,0 +1,122 @@
+[
+  {
+    "docstatus": 0,
+    "doctype": "Zevar Metal",
+    "name": "Gold",
+    "metal_code": "GLD",
+    "metal_name": "Gold",
+    "metal_type": "Precious",
+    "default_purity": "18K",
+    "troy_oz_to_grams": 31.1035,
+    "color_hex": "#FFD700",
+    "is_active": 1
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Zevar Metal",
+    "name": "Silver",
+    "metal_code": "SLV",
+    "metal_name": "Silver",
+    "metal_type": "Precious",
+    "default_purity": "925",
+    "troy_oz_to_grams": 31.1035,
+    "color_hex": "#C0C0C0",
+    "is_active": 1
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Zevar Metal",
+    "name": "Platinum",
+    "metal_code": "PT",
+    "metal_name": "Platinum",
+    "metal_type": "Precious",
+    "default_purity": "950",
+    "troy_oz_to_grams": 31.1035,
+    "color_hex": "#E5E4E2",
+    "is_active": 1
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Zevar Purity",
+    "name": "24K",
+    "purity_code": "24K",
+    "purity_name": "24 Karat",
+    "metal": "Gold",
+    "fine_metal_content": 0.9999,
+    "is_millesimal": 0,
+    "aliases": "999",
+    "is_active": 1
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Zevar Purity",
+    "name": "22K",
+    "purity_code": "22K",
+    "purity_name": "22 Karat",
+    "metal": "Gold",
+    "fine_metal_content": 0.916,
+    "is_millesimal": 0,
+    "aliases": "916",
+    "is_active": 1
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Zevar Purity",
+    "name": "18K",
+    "purity_code": "18K",
+    "purity_name": "18 Karat",
+    "metal": "Gold",
+    "fine_metal_content": 0.75,
+    "is_millesimal": 0,
+    "aliases": "750",
+    "is_active": 1
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Zevar Purity",
+    "name": "14K",
+    "purity_code": "14K",
+    "purity_name": "14 Karat",
+    "metal": "Gold",
+    "fine_metal_content": 0.585,
+    "is_millesimal": 0,
+    "aliases": "585",
+    "is_active": 1
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Zevar Purity",
+    "name": "10K",
+    "purity_code": "10K",
+    "purity_name": "10 Karat",
+    "metal": "Gold",
+    "fine_metal_content": 0.417,
+    "is_millesimal": 0,
+    "aliases": "417",
+    "is_active": 1
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Zevar Purity",
+    "name": "925",
+    "purity_code": "925",
+    "purity_name": "Sterling Silver",
+    "metal": "Silver",
+    "fine_metal_content": 0.925,
+    "is_millesimal": 1,
+    "aliases": "Sterling",
+    "is_active": 1
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Zevar Purity",
+    "name": "950",
+    "purity_code": "950",
+    "purity_name": "Platinum 950",
+    "metal": "Platinum",
+    "fine_metal_content": 0.950,
+    "is_millesimal": 1,
+    "aliases": "PLAT",
+    "is_active": 1
+  }
+]
