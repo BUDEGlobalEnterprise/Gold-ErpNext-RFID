@@ -5,11 +5,11 @@ description: Active session state - RESET this file at the start of every new se
 # Current Session State
 
 ## Session Metadata
-- **Session ID**: sess-20260310-001
-- **Started**: 2026-03-10 06:00 UTC
-- **Branch**: main
+- **Session ID**: sess-20260602-002
+- **Started**: 2026-06-02 12:00 UTC
+- **Branch**: feat/Admin-Control
 - **Commit**: TBD
-- **Updated**: 2026-04-20 00:00 UTC
+- **Updated**: 2026-06-02 13:30 UTC
 
 ## Current Goal
 Complete POS UI/UX improvements and feature implementations
@@ -174,6 +174,13 @@ Overall: 82% Complete
 
 ## Recent Side Tasks
 
+- 2026-06-10: Improved ID/Barcode Scanner (CameraScanner.vue) to use decodeFromVideoElementContinuously for automatic background barcode scanning instead of single-pass, added manual capture and parse button, and integrated automatic OCR fallback on capture if barcode parsing fails.
+- 2026-05-25: Completed REPORTS_AND_MONITOR_PLAN Phase 6 (final phase). Mobile: Added `flex-wrap` to all dashboard headers, wrapped ProfitIntelligence date controls for mobile (`w-full sm:w-auto`), wrapped EmployeeLiveMonitor repair queue cards. Notifications: Created `notifications.py` unified alert engine with 4 sources (repairs, inventory, cash, sales anomalies), `NotificationCenter.vue` bell + dropdown component, wired into AppShell header. Also fixed 4 missing placeholder pages and corrected ProfitIntelligence import. Frontend build verified clean. Branch: feat/Admin-Control.
+- 2026-05-25: Implemented REPORTS_AND_MONITOR_PLAN Phases 1-5. Phase 1: Fixed cash variance bug, created 3 dashboard APIs (revenue/inventory/customer), wired Vue pages to real data with loading states. Phase 2: Created Employee Live Monitor (API + Vue page + WebSocket events), route `/my-dashboard` for all users. Phase 3: Added "My Dashboard" sidebar nav, verified role-based filtering works. Phase 4: Fixed ReportViewer to use dynamic catalog lookup instead of hardcoded map. Phase 5: Verified Profit Intelligence already complete (API + 4-tab Vue dashboard). Key corrections: Profit Intelligence API and Report Scheduler already existed. Phase 6 (mobile/notifications) remains. Branch: feat/Admin-Control.
+- 2026-05-25: Completed go-live audit plan — 10 tasks across 3 phases. Built: (1) Square webhook HMAC fix, (2) SQL injection fix in top_selling_jewelry.py → frappe.qb, (3) Special Orders module (DocType + API + frontend + 8 tests), (4) Cash Movement DocType with variance calculation fix, (5) Discount Rules DocType with POS validation integration, (6) AR Aging Report with 8 FIFO buckets, (7) 4 Inventory Reports (Valuation, Aging, Fast Moving, Slow Moving), (8) Dunning Letters + Write-offs + Customer Statements, (9) Email Template migration (18 templates with fallback pattern). All synced to frappe-bench. Branch: feat/Admin-Control.
+- 2026-05-22: Investigated POS dashboard/interactivity changes not reflecting. Root cause was duplicate frontend usage: the live Frappe app is `frappe-bench/apps/zevar_core/frontend/zevar_ui`, while a sibling `/workspace/frontend/zevar_ui` dev server had been serving stale/wrong code. Ported the StatCard/drill-down work into the live app, added `refreshRates` exposure in the gold store, added safe quote status list filtering, rebuilt `zevar_core/public/pos`, bumped the POS service worker cache to v8, and changed navigations to network-first so stale `/pos/index.html` is not pinned.
+
+- 2026-05-22: Investigated POS dashboard/interactivity changes not reflecting. Root cause was duplicate frontend usage: the live Frappe app is `frappe-bench/apps/zevar_core/frontend/zevar_ui`, while a sibling `/workspace/frontend/zevar_ui` dev server had been serving stale/wrong code. Ported the StatCard/drill-down work into the live app, added `refreshRates` exposure in the gold store, added safe quote status list filtering, rebuilt `zevar_core/public/pos`, bumped the POS service worker cache to v8, and changed navigations to network-first so stale `/pos/index.html` is not pinned.
 - 2026-05-08: Hardened the production Docker deployment files by shrinking the build context with a repo-root `.dockerignore`, switching `docker-compose.prod.yml` to env-driven image tags and required secrets, disabling default external DB/HTTPS exposure, wiring live Nginx support for `/assets`, `/files`, and `/socket.io/`, requiring deployment secrets in `docker-entrypoint.sh`, and adding `docker/config/mariadb.cnf` for MariaDB runtime tuning.
 - 2026-04-30: Fixed PR #59 CI blockers on `feat/zevar-ui-enhancement` by correcting the syntax error in `zevar_core/patches/setup_repair_system.py`, fixing `FrappeTestCase` usage and unused imports in `zevar_core/tests/test_inventory_events.py`, and removing trailing whitespace from the files flagged by the linter job; verified with `py_compile` and `git diff --check`, but a local `bench --site test_ci run-tests --module zevar_core.tests.test_inventory_events` attempt was blocked by unrelated MariaDB credential errors on the existing `test_ci` site.
 - 2026-04-28: Implemented the POS Reports role-aware hub using a backend `zevar_core.api.reports.get_report_catalog` endpoint, routed `/pos/reports` to `ReportsHub.vue`, expanded report access roles, aligned standard Report role metadata for first-slice reports, fixed a `Customers.vue` missing wrapper close that blocked the POS build, and verified `npm run build` plus Python syntax checks.
@@ -185,3 +192,6 @@ Overall: 82% Complete
 - 2026-03-31: Completed Phase A of the POS remediation plan: enabled the skipped POS session and return integration tests, fixed their backend blockers, and wired audit logging for invoice/session/layaway/gift-card/finance flows.
 - 2026-03-19: Wired the FoxPro migration CLI for `zevar_core`, added local setup script `frappe-bench/apps/zevar_core/scripts/setup_migration_local.sh`, and verified a dry-run import against `/workspace/development/Zevar_URMS/Zevar_HIPmall_RD/Zevar_HIPmall_RD`.
 - 2026-03-19: Fixed the POS frontend service worker to register under `/pos/` only, bumped its cache version, and rebuilt `zevar_core/public/pos` so Desk assets are not accidentally cached at the site root after deployment.
+
+- 2026-06-02: Implemented reporting analytics hub continuation from `plans/reporting_analytics_hub_plan.md`. Hardened `analytics_hub.py` low-stock/hold queue handling, completed Phase 9 overage scoring and action submission, added `Clearance Outcome` DocType, wired nightly overage warmup and weekly RAG graph/metric rebuild scheduler hooks, mounted the overage clearance queue/action modal in `InventoryTab.vue`, and verified with Python compile plus `npm run build`.
+- 2026-06-02: Phase 10/11 continuation. Updated AppShell sidebar: consolidated scattered report/monitor nav items into unified "Analytics Hub" entry, removed Profit Intelligence/Workforce sub-routes. Added `/dashboard` → `/reports` redirect route. Added mobile swipeable hero strip (CSS scroll-snap + touch handler) and mobile vertical-card tables for RepairsTab. Fixed RepairsTab to call actual `get_repair_dashboard_stats` API with correct field mapping (status vs workflow_state, days_overdue vs balance_due). Created `finance.get_dashboard_summary` endpoint for FinanceTab KPI cards. Added HubDrawer focus management on open. Verified all Python compiles + `npm run build` passes. Branch: feat/Admin-Control.
