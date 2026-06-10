@@ -51,6 +51,7 @@ OUT_DIR.mkdir(exist_ok=True)
 # ESC/POS byte interpreter
 # ---------------------------------------------------------------------------
 
+
 def render_escpos(content: str | bytes) -> str:
 	"""Best-effort render of ESC/POS content to readable ASCII.
 
@@ -67,39 +68,36 @@ def render_escpos(content: str | bytes) -> str:
 		text = content
 
 	# Drop common ESC/POS control sequences we don't want to display.
-	# (We intentionally keep 
- so layout is visible.)
+	# (We intentionally keep \n so layout is visible.)
 	replacements = {
-		"\x1b@": "",        # init
-		"\x1bE": "",        # bold on
-		"\x1bF": "",        # bold off
-		"\x1d!": "",        # text size
-		"\x1bM": "",        # font
-		"\x1ba": "",        # align
-		"\x1bd": "",        # align (legacy)
-		"\x1d\x61": "",     # align (GS!)
-		"\x1b\x21": "",     # print mode
-		"\x1b--\x00": "",   # cancel underline
-		"\x1b--\x01": "",   # underline 1-dot
-		"\x1dV\x41": "",    # cut (partial)
-		"\x1dV\x42": "",    # cut (full)
-		"\x1dV\x00": "",    # cut
-		"\x1b\x70\x00\x19\xfa": "",   # cash drawer pulse (we log it elsewhere)
-		"\x1b=\x01": "",    # printer online
-		"\x1b=\x00": "",    # printer offline
+		"\x1b@": "",  # init
+		"\x1bE": "",  # bold on
+		"\x1bF": "",  # bold off
+		"\x1d!": "",  # text size
+		"\x1bM": "",  # font
+		"\x1ba": "",  # align
+		"\x1bd": "",  # align (legacy)
+		"\x1d\x61": "",  # align (GS!)
+		"\x1b\x21": "",  # print mode
+		"\x1b--\x00": "",  # cancel underline
+		"\x1b--\x01": "",  # underline 1-dot
+		"\x1dV\x41": "",  # cut (partial)
+		"\x1dV\x42": "",  # cut (full)
+		"\x1dV\x00": "",  # cut
+		"\x1b\x70\x00\x19\xfa": "",  # cash drawer pulse (we log it elsewhere)
+		"\x1b=\x01": "",  # printer online
+		"\x1b=\x00": "",  # printer offline
 	}
 	for k, v in replacements.items():
 		text = text.replace(k, v)
 
-	# Strip any remaining non-printable bytes (keep 
-, \t, CR).
+	# Strip any remaining non-printable bytes (keep \n, \t, CR).
 	cleaned = []
 	for ch in text:
 		o = ord(ch)
-		if ch in ("
-", "\t", "\r") or 0x20 <= o < 0x7F:
+		if ch in ("\n", "\t", "\r") or 0x20 <= o < 0x7F:
 			cleaned.append(ch)
-		elif o == 0xa0:  # nbsp
+		elif o == 0xA0:  # nbsp
 			cleaned.append(" ")
 	return "".join(cleaned).replace("\r", "")
 
@@ -107,6 +105,7 @@ def render_escpos(content: str | bytes) -> str:
 # ---------------------------------------------------------------------------
 # Action handlers (mirror hardware_bridge.py wire protocol exactly)
 # ---------------------------------------------------------------------------
+
 
 async def handle_request(websocket, _path):
 	peer = getattr(websocket, "remote_address", None)
@@ -132,12 +131,16 @@ async def handle_request(websocket, _path):
 				# Save raw bytes for offline inspection
 				ext = "zpl" if encoding == "ZPL" else "bin"
 				outfile = OUT_DIR / f"{printer_type}_{_dt.datetime.now():%Y%m%d_%H%M%S}.{ext}"
-				outfile.write_bytes(content.encode("utf-8", errors="replace") if isinstance(content, str) else content)
+				outfile.write_bytes(
+					content.encode("utf-8", errors="replace") if isinstance(content, str) else content
+				)
 
 				if encoding == "ZPL":
 					print(f"   -> ZPL written to {outfile.name}")
 					print("   -> View at https://labelary.com/viewer.html  (paste file contents)")
-					preview = content if isinstance(content, str) else content.decode("utf-8", errors="replace")
+					preview = (
+						content if isinstance(content, str) else content.decode("utf-8", errors="replace")
+					)
 					print("   --- ZPL preview ---")
 					for line in preview.splitlines()[:8]:
 						print(f"   | {line}")
@@ -150,18 +153,23 @@ async def handle_request(websocket, _path):
 						print(f"   | {line}")
 					print("   ---")
 
-				await websocket.send(json.dumps({
-					"status": "success",
-					"message": f"{printer_type.capitalize()} printed (mock)",
-					"mock": True,
-					"output_file": str(outfile),
-				}))
+				await websocket.send(
+					json.dumps(
+						{
+							"status": "success",
+							"message": f"{printer_type.capitalize()} printed (mock)",
+							"mock": True,
+							"output_file": str(outfile),
+						}
+					)
+				)
 
 			elif action == "print_tag_zpl":
 				tag_data = data.get("tag_data", {}) or {}
 				# Reuse the real bridge's ZPL generator if importable; else inline.
 				try:
 					from hardware_bridge import generate_zpl_jewelry_tag  # type: ignore
+
 					zpl = generate_zpl_jewelry_tag(tag_data)
 				except Exception:
 					zpl = _inline_zpl(tag_data)
@@ -174,41 +182,57 @@ async def handle_request(websocket, _path):
 					print(f"   | {line}")
 				print("   ---")
 
-				await websocket.send(json.dumps({
-					"status": "success",
-					"message": "ZPL tag printed (mock)",
-					"mock": True,
-					"zpl": zpl,
-					"output_file": str(outfile),
-				}))
+				await websocket.send(
+					json.dumps(
+						{
+							"status": "success",
+							"message": "ZPL tag printed (mock)",
+							"mock": True,
+							"zpl": zpl,
+							"output_file": str(outfile),
+						}
+					)
+				)
 
 			elif action == "cash_drawer":
 				print("   -> CASH DRAWER KICK  (\\x1b\\x70\\x00\\x19\\xfa)")
 				print("   -> In production the receipt printer would emit the pulse.")
-				await websocket.send(json.dumps({
-					"status": "success",
-					"message": "Cash drawer opened (mock)",
-					"mock": True,
-				}))
+				await websocket.send(
+					json.dumps(
+						{
+							"status": "success",
+							"message": "Cash drawer opened (mock)",
+							"mock": True,
+						}
+					)
+				)
 
 			elif action == "ping":
 				await websocket.send(json.dumps({"status": "pong", "mock": True}))
 
 			elif action == "status":
-				await websocket.send(json.dumps({
-					"status": "ok",
-					"receipt_printer": True,
-					"tag_printer": True,
-					"cash_drawer": True,
-					"bridge_version": "mock-1.0",
-					"mock": True,
-				}))
+				await websocket.send(
+					json.dumps(
+						{
+							"status": "ok",
+							"receipt_printer": True,
+							"tag_printer": True,
+							"cash_drawer": True,
+							"bridge_version": "mock-1.0",
+							"mock": True,
+						}
+					)
+				)
 
 			else:
-				await websocket.send(json.dumps({
-					"status": "error",
-					"message": f"unknown action: {action!r}",
-				}))
+				await websocket.send(
+					json.dumps(
+						{
+							"status": "error",
+							"message": f"unknown action: {action!r}",
+						}
+					)
+				)
 
 	except websockets.exceptions.ConnectionClosed:
 		print(f"[disconnect] {peer}")
@@ -229,33 +253,24 @@ def _inline_zpl(tag: dict) -> str:
 	weight = tag.get("weight_grams") or 0
 	desc = f"{metal} {weight}g" if metal else item_name
 	return (
-		"^XA
-"
-		"^PW400
-"
-		"^LL200
-"
-		"^FO20,10^A0N,25,25^FDZEVAR^FS
-"
-		f"^FO20,40^A0N,18,18^FD{desc}^FS
-"
-		f"^FO20,65^A0N,18,18^FD{item_name}^FS
-"
-		f"^FO20,90^A0N,30,30^FD${rate:.2f}^FS
-"
-		f"^FO20,130^BY2^BCN,40,Y,N,N^FD{item_code}^FS
-"
-		"^XZ
-"
+		"^XA\n"
+		"^PW400\n"
+		"^LL200\n"
+		"^FO20,10^A0N,25,25^FDZEVAR^FS\n"
+		f"^FO20,40^A0N,18,18^FD{desc}^FS\n"
+		f"^FO20,65^A0N,18,18^FD{item_name}^FS\n"
+		f"^FO20,90^A0N,30,30^FD${rate:.2f}^FS\n"
+		f"^FO20,130^BY2^BCN,40,Y,N,N^FD{item_code}^FS\n"
+		"^XZ\n"
 	)
 
 
 async def main():
 	print("=" * 70)
-	print(f" Zevar Hardware Bridge — MOCK SERVER")
+	print(" Zevar Hardware Bridge — MOCK SERVER")
 	print(f" Listening on ws://{BRIDGE_HOST}:{BRIDGE_PORT}")
 	print(f" Output dir:  {OUT_DIR}")
-	print(f" Stop with Ctrl+C")
+	print(" Stop with Ctrl+C")
 	print("=" * 70)
 	print(" This is NOT a real hardware bridge. It accepts the same wire")
 	print(" protocol as hardware_bridge.py and renders output to console")
@@ -269,5 +284,4 @@ if __name__ == "__main__":
 	try:
 		asyncio.run(main())
 	except KeyboardInterrupt:
-		print("
-Mock bridge stopped.")
+		print("\nMock bridge stopped.")

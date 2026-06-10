@@ -588,6 +588,7 @@ def create_layaway(
 		if deposit > 0 and deposit_mode == "Cash":
 			cash_amount = deposit
 			from zevar_core.api.compliance import check_cash_transaction_for_8300, trigger_form_8300
+
 			if check_cash_transaction_for_8300(doc.customer, cash_amount):
 				form_8300_triggered = True
 
@@ -1190,9 +1191,12 @@ def process_split_layaway_payment(
 		doc.save(ignore_permissions=True)
 
 		form_8300_triggered = False
-		cash_amount = sum(flt(p.get("amount", 0)) for p in payments_list if p.get("mode_of_payment", "Cash") == "Cash")
+		cash_amount = sum(
+			flt(p.get("amount", 0)) for p in payments_list if p.get("mode_of_payment", "Cash") == "Cash"
+		)
 		if cash_amount > 0:
 			from zevar_core.api.compliance import check_cash_transaction_for_8300, trigger_form_8300
+
 			if check_cash_transaction_for_8300(doc.customer, cash_amount):
 				form_8300_triggered = True
 
@@ -1211,7 +1215,9 @@ def process_split_layaway_payment(
 					details_dict["irs_8300_details"] = frappe.parse_json(irs_8300_details)
 				trigger_form_8300(doc.customer, cash_amount, details_dict)
 			except Exception:
-				frappe.log_error("Failed to trigger IRS Form 8300 for layaway payment", frappe.get_traceback())
+				frappe.log_error(
+					"Failed to trigger IRS Form 8300 for layaway payment", frappe.get_traceback()
+				)
 
 		return {
 			"success": True,

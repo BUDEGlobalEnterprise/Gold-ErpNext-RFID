@@ -114,8 +114,8 @@
 							class="ai-history__item"
 							:class="{ 'ai-history__item--active': chat.id === currentChatId }"
 							@click="
-								loadFromHistory(chat.id);
-								isHistoryOpen = false;
+								loadFromHistory(chat.id)
+								isHistoryOpen = false
 							"
 						>
 							<div class="ai-history__item-title">{{ chat.title }}</div>

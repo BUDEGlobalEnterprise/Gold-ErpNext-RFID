@@ -25,11 +25,15 @@ def create_pos_invoice(
 	idempotency_key: str | None = None,
 	irs_8300_details: str | None = None,
 ) -> dict:
-	frappe.only_for(["Sales User", "Sales Manager", "Store Manager", "POS Manager", "Employee", "System Manager"])
+	frappe.only_for(
+		["Sales User", "Sales Manager", "Store Manager", "POS Manager", "Employee", "System Manager"]
+	)
 
 	# Handle idempotency to prevent duplicate charges
 	if idempotency_key:
-		existing = frappe.db.get_value("Idempotency Record", {"name": idempotency_key}, ["sales_invoice", "status"], as_dict=True)
+		existing = frappe.db.get_value(
+			"Idempotency Record", {"name": idempotency_key}, ["sales_invoice", "status"], as_dict=True
+		)
 		if existing and existing.status == "Completed":
 			return {
 				"success": True,
@@ -39,13 +43,24 @@ def create_pos_invoice(
 
 	try:
 		return _create_pos_invoice_internal(
-			items, payments, customer, warehouse, discount_amount, tax_exempt,
-			salespersons, layaway_reference, trade_ins, gift_card_number, override_reference,
-			idempotency_key, irs_8300_details
+			items,
+			payments,
+			customer,
+			warehouse,
+			discount_amount,
+			tax_exempt,
+			salespersons,
+			layaway_reference,
+			trade_ins,
+			gift_card_number,
+			override_reference,
+			idempotency_key,
+			irs_8300_details,
 		)
 	except Exception:
 		frappe.log_error(title="POS Invoice Sync Failed", message=frappe.get_traceback())
 		raise
+
 
 def _create_pos_invoice_internal(
 	items: str,
@@ -89,7 +104,9 @@ def _create_pos_invoice_internal(
 			)
 		except Exception:
 			pass
-		frappe.throw(msg, frappe.ValidationError if "permission" not in event_type else frappe.PermissionError)
+		frappe.throw(
+			msg, frappe.ValidationError if "permission" not in event_type else frappe.PermissionError
+		)
 
 	# Validate the user has an allowed role for POS invoicing
 	allowed_roles = {
@@ -104,8 +121,10 @@ def _create_pos_invoice_internal(
 	user_roles = set(frappe.get_roles())
 	if not user_roles & allowed_roles:
 		checkout_bouncer(
-			_("You do not have permission to create POS Invoices. Required role: Sales User, Employee, or equivalent."),
-			"permission_denied"
+			_(
+				"You do not have permission to create POS Invoices. Required role: Sales User, Employee, or equivalent."
+			),
+			"permission_denied",
 		)
 
 	if not items_list:
@@ -120,9 +139,13 @@ def _create_pos_invoice_internal(
 		if not item_code:
 			checkout_bouncer(_("Each item must have an item_code."), "invoice_failed")
 		if flt(item.get("qty", 0)) <= 0:
-			checkout_bouncer(_("Item {0}: quantity must be greater than zero.").format(item_code), "invoice_failed")
+			checkout_bouncer(
+				_("Item {0}: quantity must be greater than zero.").format(item_code), "invoice_failed"
+			)
 		if flt(item.get("rate", 0)) <= 0:
-			checkout_bouncer(_("Item {0}: rate must be greater than zero.").format(item_code), "invoice_failed")
+			checkout_bouncer(
+				_("Item {0}: rate must be greater than zero.").format(item_code), "invoice_failed"
+			)
 		# Verify item exists in the system
 		if not frappe.db.exists("Item", item_code):
 			checkout_bouncer(_("Item '{0}' not found in the system.").format(item_code), "invoice_failed")
@@ -147,7 +170,10 @@ def _create_pos_invoice_internal(
 		)
 
 	if not frappe.db.exists("Warehouse", warehouse):
-		checkout_bouncer(_("Warehouse '{0}' not found. Please ensure a valid warehouse is configured.").format(warehouse), "invoice_failed")
+		checkout_bouncer(
+			_("Warehouse '{0}' not found. Please ensure a valid warehouse is configured.").format(warehouse),
+			"invoice_failed",
+		)
 
 	# Validate active POS session exists (managers bypass)
 	active_session = frappe.db.get_value(
@@ -159,7 +185,10 @@ def _create_pos_invoice_internal(
 	if not active_session:
 		manager_roles = {"Sales Manager", "Store Manager", "System Manager"}
 		if not (manager_roles & set(frappe.get_roles())):
-			checkout_bouncer(_("You must open a POS session before making sales. Please open a register first."), "permission_denied")
+			checkout_bouncer(
+				_("You must open a POS session before making sales. Please open a register first."),
+				"permission_denied",
+			)
 
 	salesperson_data = []
 	if salespersons:
@@ -171,7 +200,10 @@ def _create_pos_invoice_internal(
 				checkout_bouncer(_("Salesperson '{0}' not found.").format(emp), "invoice_failed")
 		total_split = sum(flt(sp.get("split")) for sp in salesperson_data[:4])
 		if salesperson_data and abs(total_split - 100) > 0.01:
-			checkout_bouncer(_("Salesperson splits must total 100%. Current total: {0}%").format(total_split), "invoice_failed")
+			checkout_bouncer(
+				_("Salesperson splits must total 100%. Current total: {0}%").format(total_split),
+				"invoice_failed",
+			)
 
 	is_tax_exempt = str(tax_exempt).lower() in ["true", "1", "t", "y", "yes"]
 
@@ -185,7 +217,10 @@ def _create_pos_invoice_internal(
 
 			create_required_modes_of_payment()
 			if not frappe.db.exists("Mode of Payment", mode):
-				checkout_bouncer(_("Payment mode '{0}' is not set up. Please run migrate or contact admin.").format(mode), "invoice_failed")
+				checkout_bouncer(
+					_("Payment mode '{0}' is not set up. Please run migrate or contact admin.").format(mode),
+					"invoice_failed",
+				)
 
 	if not frappe.db.exists("Customer", customer):
 		if customer == "Walk-In Customer":
@@ -212,7 +247,9 @@ def _create_pos_invoice_internal(
 
 	if gc_payment_amount > 0:
 		if not gift_card_number:
-			checkout_bouncer(_("Gift Card number is required when using Gift Card payment."), "invoice_failed")
+			checkout_bouncer(
+				_("Gift Card number is required when using Gift Card payment."), "invoice_failed"
+			)
 		if not frappe.db.exists("Gift Card", gift_card_number):
 			checkout_bouncer(_("Gift Card '{0}' not found.").format(gift_card_number), "invoice_failed")
 
@@ -220,7 +257,9 @@ def _create_pos_invoice_internal(
 
 		gc_doc = frappe.get_doc("Gift Card", gift_card_number)
 		if gc_doc.status != "Active":
-			checkout_bouncer(_("Gift Card is {0}. Cannot process payment.").format(gc_doc.status), "invoice_failed")
+			checkout_bouncer(
+				_("Gift Card is {0}. Cannot process payment.").format(gc_doc.status), "invoice_failed"
+			)
 		if gc_doc.expiry_date and getdate(gc_doc.expiry_date) < getdate(today()):
 			checkout_bouncer(_("Gift Card has expired."), "invoice_failed")
 		if gc_payment_amount > flt(gc_doc.balance):
@@ -228,7 +267,7 @@ def _create_pos_invoice_internal(
 				_("Gift Card balance insufficient. Available: {0}, Requested: {1}").format(
 					flt(gc_doc.balance), gc_payment_amount
 				),
-				"invoice_failed"
+				"invoice_failed",
 			)
 
 	# Validate stock availability before creating invoice
@@ -257,12 +296,14 @@ def _create_pos_invoice_internal(
 				frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
 			)
 			if actual_qty < qty_needed:
-				checkout_bouncer(
-					_("Insufficient stock for {0} in {1}. Available: {2}, Required: {3}").format(
-						item_code, warehouse, actual_qty, qty_needed
-					),
-					"invoice_failed",
-				)
+				allow_negative = frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
+				if not allow_negative:
+					checkout_bouncer(
+						_("Insufficient stock for {0} in {1}. Available: {2}, Required: {3}").format(
+							item_code, warehouse, actual_qty, qty_needed
+						),
+						"invoice_failed",
+					)
 
 	try:
 		si = frappe.new_doc("Sales Invoice")
@@ -332,7 +373,9 @@ def _create_pos_invoice_internal(
 				from zevar_core.api.discount import validate_discount
 
 				subtotal_val = sum(flt(item.get("rate", 0)) * flt(item.get("qty", 1)) for item in items_list)
-				discount_pct = (flt(discount_amount) / flt(subtotal_val) * 100) if flt(subtotal_val) > 0 else 0
+				discount_pct = (
+					(flt(discount_amount) / flt(subtotal_val) * 100) if flt(subtotal_val) > 0 else 0
+				)
 				result = validate_discount(
 					discount_amount=flt(discount_amount),
 					discount_pct=discount_pct,
@@ -363,7 +406,7 @@ def _create_pos_invoice_internal(
 						_(
 							"Tax exemption requires manager approval. Customer '{0}' is not marked as tax exempt."
 						).format(customer),
-						"invoice_failed"
+						"invoice_failed",
 					)
 				_validate_tax_override(override_reference, customer)
 
@@ -500,6 +543,7 @@ def _create_pos_invoice_internal(
 		form_8300_triggered = False
 		if cash_amount > 0:
 			from zevar_core.api.compliance import check_cash_transaction_for_8300, trigger_form_8300
+
 			if check_cash_transaction_for_8300(si.customer, cash_amount):
 				form_8300_triggered = True
 
@@ -577,11 +621,13 @@ def _create_pos_invoice_internal(
 				sync_log.idempotency_key = idempotency_key
 				sync_log.sales_invoice = si.name
 				sync_log.terminal_user = frappe.session.user
-				sync_log.response_payload = frappe.as_json({
-					"invoice_name": si.name,
-					"grand_total": flt(si.grand_total),
-					"status": si.status,
-				})
+				sync_log.response_payload = frappe.as_json(
+					{
+						"invoice_name": si.name,
+						"grand_total": flt(si.grand_total),
+						"status": si.status,
+					}
+				)
 				sync_log.insert(ignore_permissions=True)
 			except Exception:
 				frappe.log_error("POS Sync Log Creation Failed", frappe.get_traceback())
@@ -903,18 +949,18 @@ def get_pending_overrides() -> dict:
 	}
 
 
-
 @frappe.whitelist(allow_guest=True)
 def serve_sw():
 	"""Serve the POS service worker with correct headers for scope."""
-	from flask import make_response
 	import os
+
+	from flask import make_response
 
 	sw_path = frappe.get_app_path("zevar_core", "public", "pos", "sw.js")
 	if not os.path.exists(sw_path):
 		frappe.throw("Service worker not found", frappe.DoesNotExistError)
 
-	with open(sw_path, "r") as f:
+	with open(sw_path) as f:
 		sw_content = f.read()
 
 	resp = make_response(sw_content)
@@ -950,7 +996,9 @@ def hold_cart(items: str, customer: str | None = None, warehouse: str | None = N
 
 	if len(carts) >= _MAX_HELD_CARTS:
 		frappe.throw(
-			_("Maximum of {0} held carts reached. Please recall or discard one first.").format(_MAX_HELD_CARTS),
+			_("Maximum of {0} held carts reached. Please recall or discard one first.").format(
+				_MAX_HELD_CARTS
+			),
 			frappe.ValidationError,
 		)
 
@@ -1015,6 +1063,7 @@ def discard_held_cart(cart_id: str):
 # Pre-Submit Cart Validator
 # ---------------------------------------------------------------------------
 
+
 @frappe.whitelist()
 def validate_pos_cart(items: str, warehouse: str | None = None):
 	import json
@@ -1028,42 +1077,81 @@ def validate_pos_cart(items: str, warehouse: str | None = None):
 		rate = flt(line.get("rate", 0))
 
 		if not item_code or not frappe.db.exists("Item", item_code):
-			issues.append({"type": "item_missing", "item_code": item_code, "blocking": True, "message": f"Item {item_code} not found"})
+			issues.append(
+				{
+					"type": "item_missing",
+					"item_code": item_code,
+					"blocking": True,
+					"message": f"Item {item_code} not found",
+				}
+			)
 			continue
 
 		item = frappe.get_cached_doc("Item", item_code)
 
 		if item.disabled:
-			issues.append({"type": "item_disabled", "item_code": item_code, "blocking": True, "message": f"Item {item_code} is disabled"})
+			issues.append(
+				{
+					"type": "item_disabled",
+					"item_code": item_code,
+					"blocking": True,
+					"message": f"Item {item_code} is disabled",
+				}
+			)
 
 		if qty <= 0:
-			issues.append({"type": "qty_invalid", "item_code": item_code, "blocking": True, "message": f"Item {item_code}: quantity must be positive"})
+			issues.append(
+				{
+					"type": "qty_invalid",
+					"item_code": item_code,
+					"blocking": True,
+					"message": f"Item {item_code}: quantity must be positive",
+				}
+			)
 
 		if rate <= 0:
-			issues.append({"type": "rate_invalid", "item_code": item_code, "blocking": True, "message": f"Item {item_code}: rate must be positive"})
+			issues.append(
+				{
+					"type": "rate_invalid",
+					"item_code": item_code,
+					"blocking": True,
+					"message": f"Item {item_code}: rate must be positive",
+				}
+			)
 
 		# Stock check
 		if warehouse and qty > 0:
-			actual_qty = flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty") or 0)
+			actual_qty = flt(
+				frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
+				or 0
+			)
 			if actual_qty < qty:
-				issues.append({
-					"type": "out_of_stock",
-					"item_code": item_code,
-					"blocking": True,
-					"message": f"Insufficient stock for {item_code}: need {qty}, have {actual_qty}",
-				})
+				issues.append(
+					{
+						"type": "out_of_stock",
+						"item_code": item_code,
+						"blocking": True,
+						"message": f"Insufficient stock for {item_code}: need {qty}, have {actual_qty}",
+					}
+				)
 
 		# Price drift check (non-blocking)
 		current_price = flt(item.standard_rate)
 		if rate > 0 and current_price > 0 and abs(rate - current_price) > 0.005:
 			pct_drift = abs(rate - current_price) / current_price * 100
-			issues.append({
-				"type": "price_drift",
-				"item_code": item_code,
-				"blocking": False,
-				"message": f"Price drift: cart {rate} vs current {current_price} ({pct_drift:.1f}%)",
-				"details": {"cart_rate": rate, "current_price": current_price, "drift_pct": flt(pct_drift, 1)},
-			})
+			issues.append(
+				{
+					"type": "price_drift",
+					"item_code": item_code,
+					"blocking": False,
+					"message": f"Price drift: cart {rate} vs current {current_price} ({pct_drift:.1f}%)",
+					"details": {
+						"cart_rate": rate,
+						"current_price": current_price,
+						"drift_pct": flt(pct_drift, 1),
+					},
+				}
+			)
 
 	blocking = any(i.get("blocking") for i in issues)
 	return {"ok": not blocking, "issues": issues}

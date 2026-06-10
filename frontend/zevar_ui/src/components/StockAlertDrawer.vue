@@ -2,7 +2,10 @@
 	<Teleport to="body">
 		<Transition name="slide">
 			<div v-if="items.length > 0" class="fixed inset-0 z-[90] flex justify-end">
-				<div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="$emit('close')"></div>
+				<div
+					class="absolute inset-0 bg-black/40 backdrop-blur-sm"
+					@click="$emit('close')"
+				></div>
 				<div
 					class="relative w-full max-w-lg bg-white dark:bg-warm-card shadow-2xl overflow-y-auto flex flex-col h-full"
 				>
@@ -10,16 +13,24 @@
 						class="sticky top-0 bg-white dark:bg-warm-card border-b border-gray-100 dark:border-warm-border/50 p-4 flex items-center justify-between z-10"
 					>
 						<div>
-							<h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ title }}</h3>
+							<h3 class="text-lg font-bold text-gray-900 dark:text-white">
+								{{ title }}
+							</h3>
 							<p class="text-xs text-gray-500">
-								{{ subtitle }} - {{ items.length }} {{ items.length === 1 ? 'item' : 'items' }}
+								{{ subtitle }} - {{ items.length }}
+								{{ items.length === 1 ? 'item' : 'items' }}
 							</p>
 						</div>
 						<button
 							@click="$emit('close')"
 							class="p-2 hover:bg-gray-100 dark:hover:bg-warm-dark-700 rounded-full"
 						>
-							<svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg
+								class="w-5 h-5 text-gray-400"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -65,7 +76,13 @@
 										d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
 									/>
 								</svg>
-								<svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<svg
+									v-else
+									class="w-4 h-4"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
 									<path
 										stroke-linecap="round"
 										stroke-linejoin="round"
@@ -84,8 +101,14 @@
 							@click="$emit('item-click', item)"
 						>
 							<div class="min-w-0 flex-1 pr-3">
-								<div class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ item.name }}</div>
-								<div class="text-[10px] text-gray-500 font-mono">{{ item.code }}</div>
+								<div
+									class="text-xs font-bold text-gray-900 dark:text-white truncate"
+								>
+									{{ item.name }}
+								</div>
+								<div class="text-[10px] text-gray-500 font-mono">
+									{{ item.code }}
+								</div>
 								<div class="flex flex-wrap gap-1 mt-1">
 									<span
 										v-if="item.metal && item.metal !== '-'"
@@ -102,10 +125,15 @@
 								</div>
 							</div>
 							<div class="text-right ml-3 shrink-0">
-								<div class="text-sm font-bold" :class="item.stock <= 0 ? 'text-red-500' : 'text-amber-500'">
+								<div
+									class="text-sm font-bold"
+									:class="item.stock <= 0 ? 'text-red-500' : 'text-amber-500'"
+								>
 									{{ item.stock }} pcs
 								</div>
-								<div class="text-[10px] font-bold text-[#D4AF37]">{{ fmtCur(itemValue(item)) }}</div>
+								<div class="text-[10px] font-bold text-[#D4AF37]">
+									{{ fmtCur(itemValue(item)) }}
+								</div>
 							</div>
 						</div>
 					</div>

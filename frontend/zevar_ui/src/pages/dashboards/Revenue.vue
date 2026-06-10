@@ -8,12 +8,18 @@
 				>
 					<span class="material-symbols-outlined !text-lg">arrow_back</span>
 				</button>
-				<div class="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/10">
-					<span class="material-symbols-outlined !text-xl text-emerald-500">monitoring</span>
+				<div
+					class="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/10"
+				>
+					<span class="material-symbols-outlined !text-xl text-emerald-500"
+						>monitoring</span
+					>
 				</div>
 				<div>
 					<h2 class="premium-title !text-xl">Revenue Dashboard</h2>
-					<p class="text-[10px] text-gray-400">Sales vs last year, category, hourly, salesperson</p>
+					<p class="text-[10px] text-gray-400">
+						Sales vs last year, category, hourly, salesperson
+					</p>
 				</div>
 				<button
 					@click="refresh"
@@ -26,63 +32,146 @@
 
 			<div class="flex-1 overflow-auto space-y-4 pr-1">
 				<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-					<KPICard label="Today's Sales" :value="'$' + fmt(summary.today_sales)" icon="payments" color="emerald" :loading="loading" />
-					<KPICard label="Transactions" :value="summary.txn_count" icon="receipt" color="blue" :loading="loading" />
-					<KPICard label="Avg Ticket" :value="'$' + fmt(summary.avg_ticket)" icon="sell" color="purple" :loading="loading" />
-					<KPICard label="vs Last Year" :value="(summary.yoy_pct >= 0 ? '+' : '') + summary.yoy_pct + '%'" icon="trending_up" color="amber" :loading="loading" />
+					<KPICard
+						label="Today's Sales"
+						:value="'$' + fmt(summary.today_sales)"
+						icon="payments"
+						color="emerald"
+						:loading="loading"
+					/>
+					<KPICard
+						label="Transactions"
+						:value="summary.txn_count"
+						icon="receipt"
+						color="blue"
+						:loading="loading"
+					/>
+					<KPICard
+						label="Avg Ticket"
+						:value="'$' + fmt(summary.avg_ticket)"
+						icon="sell"
+						color="purple"
+						:loading="loading"
+					/>
+					<KPICard
+						label="vs Last Year"
+						:value="(summary.yoy_pct >= 0 ? '+' : '') + summary.yoy_pct + '%'"
+						icon="trending_up"
+						color="amber"
+						:loading="loading"
+					/>
 				</div>
 
 				<!-- Hourly Chart -->
 				<div class="premium-card !p-3 sm:!p-5">
-					<h3 class="text-sm font-bold text-gray-900 dark:text-white mb-3">Hourly Sales Distribution</h3>
+					<h3 class="text-sm font-bold text-gray-900 dark:text-white mb-3">
+						Hourly Sales Distribution
+					</h3>
 					<div v-if="loading" class="h-40 sm:h-64 flex items-center justify-center">
-						<span class="material-symbols-outlined animate-spin text-gray-300">progress_activity</span>
+						<span class="material-symbols-outlined animate-spin text-gray-300"
+							>progress_activity</span
+						>
 					</div>
 					<div v-else-if="hourlyData.length" class="h-40 sm:h-64 overflow-x-auto">
 						<div class="flex items-end gap-1 min-w-[360px] h-full">
-							<div v-for="(bar, i) in hourlyData" :key="i" class="flex-1 flex flex-col items-center gap-1 group cursor-default">
-								<span class="text-[8px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">${{ fmt(bar.total) }}</span>
-								<div class="w-full rounded-t bg-emerald-500/70 dark:bg-emerald-400/50 transition-all min-h-[2px] hover:bg-emerald-500" :style="{ height: bar.height + '%' }"></div>
+							<div
+								v-for="(bar, i) in hourlyData"
+								:key="i"
+								class="flex-1 flex flex-col items-center gap-1 group cursor-default"
+							>
+								<span
+									class="text-[8px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
+									>${{ fmt(bar.total) }}</span
+								>
+								<div
+									class="w-full rounded-t bg-emerald-500/70 dark:bg-emerald-400/50 transition-all min-h-[2px] hover:bg-emerald-500"
+									:style="{ height: bar.height + '%' }"
+								></div>
 								<span class="text-[8px] text-gray-400">{{ bar.label }}</span>
 							</div>
 						</div>
 					</div>
-					<p v-else class="text-xs text-gray-400 text-center py-8">No sales data for today</p>
+					<p v-else class="text-xs text-gray-400 text-center py-8">
+						No sales data for today
+					</p>
 				</div>
 
 				<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 					<!-- Category Breakdown -->
 					<div class="premium-card !p-3 sm:!p-5">
-						<h3 class="text-sm font-bold text-gray-900 dark:text-white mb-3">Category Breakdown</h3>
+						<h3 class="text-sm font-bold text-gray-900 dark:text-white mb-3">
+							Category Breakdown
+						</h3>
 						<div v-if="loading" class="space-y-2">
-							<div v-for="n in 4" :key="n" class="h-4 bg-gray-100 dark:bg-gray-800 rounded-full animate-pulse"></div>
+							<div
+								v-for="n in 4"
+								:key="n"
+								class="h-4 bg-gray-100 dark:bg-gray-800 rounded-full animate-pulse"
+							></div>
 						</div>
 						<div v-else-if="categoryData.length" class="space-y-2">
-							<div v-for="cat in categoryData" :key="cat.category" class="flex items-center gap-3">
-								<div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-4 overflow-hidden">
-									<div class="h-full rounded-full bg-[#D4AF37] transition-all" :style="{ width: cat.pct + '%' }"></div>
+							<div
+								v-for="cat in categoryData"
+								:key="cat.category"
+								class="flex items-center gap-3"
+							>
+								<div
+									class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-4 overflow-hidden"
+								>
+									<div
+										class="h-full rounded-full bg-[#D4AF37] transition-all"
+										:style="{ width: cat.pct + '%' }"
+									></div>
 								</div>
-								<span class="text-[10px] font-bold text-gray-600 dark:text-gray-300 shrink-0 w-24 text-right truncate">{{ cat.category }}</span>
-								<span class="text-[10px] font-bold text-gray-900 dark:text-white shrink-0">${{ fmt(cat.total) }}</span>
+								<span
+									class="text-[10px] font-bold text-gray-600 dark:text-gray-300 shrink-0 w-24 text-right truncate"
+									>{{ cat.category }}</span
+								>
+								<span
+									class="text-[10px] font-bold text-gray-900 dark:text-white shrink-0"
+									>${{ fmt(cat.total) }}</span
+								>
 							</div>
 						</div>
-						<p v-else class="text-xs text-gray-400 text-center py-4">No category data</p>
+						<p v-else class="text-xs text-gray-400 text-center py-4">
+							No category data
+						</p>
 					</div>
 
 					<!-- Top Salespersons -->
 					<div class="premium-card !p-3 sm:!p-5">
-						<h3 class="text-sm font-bold text-gray-900 dark:text-white mb-3">Top Salespersons</h3>
+						<h3 class="text-sm font-bold text-gray-900 dark:text-white mb-3">
+							Top Salespersons
+						</h3>
 						<div v-if="loading" class="space-y-2">
-							<div v-for="n in 3" :key="n" class="h-4 bg-gray-100 dark:bg-gray-800 rounded animate-pulse"></div>
+							<div
+								v-for="n in 3"
+								:key="n"
+								class="h-4 bg-gray-100 dark:bg-gray-800 rounded animate-pulse"
+							></div>
 						</div>
 						<div v-else-if="topSalespeople.length" class="space-y-2">
-							<div v-for="(sp, i) in topSalespeople" :key="sp.employee_id || sp.name" class="flex items-center gap-3">
-								<span class="text-[10px] font-black text-gray-400 w-4">{{ i + 1 }}</span>
-								<span class="text-xs font-bold text-gray-900 dark:text-white flex-1 truncate">{{ sp.name }}</span>
-								<span class="text-xs font-black text-emerald-600 dark:text-emerald-400">${{ fmt(sp.total) }}</span>
+							<div
+								v-for="(sp, i) in topSalespeople"
+								:key="sp.employee_id || sp.name"
+								class="flex items-center gap-3"
+							>
+								<span class="text-[10px] font-black text-gray-400 w-4">{{
+									i + 1
+								}}</span>
+								<span
+									class="text-xs font-bold text-gray-900 dark:text-white flex-1 truncate"
+									>{{ sp.name }}</span
+								>
+								<span
+									class="text-xs font-black text-emerald-600 dark:text-emerald-400"
+									>${{ fmt(sp.total) }}</span
+								>
 							</div>
 						</div>
-						<p v-else class="text-xs text-gray-400 text-center py-4">No salesperson data</p>
+						<p v-else class="text-xs text-gray-400 text-center py-4">
+							No salesperson data
+						</p>
 					</div>
 				</div>
 			</div>
@@ -106,9 +195,12 @@ async function refresh() {
 	loading.value = true
 	error.value = null
 	try {
-		const res = await fetch('/api/method/zevar_core.api.revenue_dashboard.get_dashboard_data', {
-			headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
-		})
+		const res = await fetch(
+			'/api/method/zevar_core.api.revenue_dashboard.get_dashboard_data',
+			{
+				headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
+			}
+		)
 		if (!res.ok) throw new Error('Failed to load revenue data')
 		const json = await res.json()
 		const data = json.message || json

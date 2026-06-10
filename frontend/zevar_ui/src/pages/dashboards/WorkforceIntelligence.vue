@@ -7,12 +7,16 @@
 				</div>
 				<div>
 					<h2 class="premium-title !text-xl">Workforce Intelligence</h2>
-					<p class="text-[10px] text-gray-400">Employee performance and scheduling analytics</p>
+					<p class="text-[10px] text-gray-400">
+						Employee performance and scheduling analytics
+					</p>
 				</div>
 			</div>
 			<div class="flex-1 flex items-center justify-center">
 				<div class="text-center">
-					<span class="material-symbols-outlined !text-4xl text-gray-300 mb-2 block">construction</span>
+					<span class="material-symbols-outlined !text-4xl text-gray-300 mb-2 block"
+						>construction</span
+					>
 					<p class="text-sm text-gray-400">Workforce Intelligence coming soon</p>
 				</div>
 			</div>

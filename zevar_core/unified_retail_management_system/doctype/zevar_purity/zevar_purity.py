@@ -13,16 +13,17 @@ class ZevarPurity(Document):
 				frappe.throw(_("Fine Metal Content must be between 0 and 1"))
 
 		if self.purity_code and self.metal:
-			existing = frappe.db.exists("Zevar Purity", {
-				"purity_code": self.purity_code,
-				"metal": self.metal,
-				"name": ["!=", self.name],
-			})
+			existing = frappe.db.exists(
+				"Zevar Purity",
+				{
+					"purity_code": self.purity_code,
+					"metal": self.metal,
+					"name": ["!=", self.name],
+				},
+			)
 			if existing:
 				frappe.throw(
-					_("Purity code {0} already exists for metal {1}").format(
-						self.purity_code, self.metal
-					)
+					_("Purity code {0} already exists for metal {1}").format(self.purity_code, self.metal)
 				)
 
 	def on_trash(self):

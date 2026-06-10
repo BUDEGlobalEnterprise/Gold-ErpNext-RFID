@@ -34,12 +34,34 @@
 }
 
 /* Elevation surfaces — Pixel Show four-step */
-.surface-0 { background: var(--bg-0); }
-.surface-1 { background: var(--bg-1); border: 1px solid var(--glass-border); }
-.surface-2 { background: var(--bg-2); border: 1px solid var(--glass-border); }
-.surface-3 { background: var(--bg-3); border: 1px solid var(--glass-border); }
+.surface-0 {
+	background: var(--bg-0);
+}
+.surface-1 {
+	background: var(--bg-1);
+	border: 1px solid var(--glass-border);
+}
+.surface-2 {
+	background: var(--bg-2);
+	border: 1px solid var(--glass-border);
+}
+.surface-3 {
+	background: var(--bg-3);
+	border: 1px solid var(--glass-border);
+}
 
-:where(.light) .surface-0 { background: var(--bg-0-light); }
-:where(.light) .surface-1 { background: var(--bg-1-light); border-color: var(--glass-border-light); }
-:where(.light) .surface-2 { background: var(--bg-2-light); border-color: var(--glass-border-light); }
-:where(.light) .surface-3 { background: var(--bg-3-light); border-color: var(--glass-border-light); }
+:where(.light) .surface-0 {
+	background: var(--bg-0-light);
+}
+:where(.light) .surface-1 {
+	background: var(--bg-1-light);
+	border-color: var(--glass-border-light);
+}
+:where(.light) .surface-2 {
+	background: var(--bg-2-light);
+	border-color: var(--glass-border-light);
+}
+:where(.light) .surface-3 {
+	background: var(--bg-3-light);
+	border-color: var(--glass-border-light);
+}

@@ -1,7 +1,9 @@
 <template>
 	<AppLayout>
 		<div class="flex flex-col">
-			<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 flex-shrink-0">
+			<div
+				class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 flex-shrink-0"
+			>
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Trade-Ins</h2>
 					<span
@@ -135,7 +137,9 @@
 							class="grid grid-cols-2 gap-2 p-2 bg-gray-50 dark:bg-warm-dark-900 rounded-lg border border-gray-100 dark:border-warm-border/30 mt-auto min-w-0"
 						>
 							<div>
-								<div class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5">
+								<div
+									class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5"
+								>
 									Metal
 								</div>
 								<span
@@ -144,7 +148,9 @@
 								>
 							</div>
 							<div>
-								<div class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5">
+								<div
+									class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5"
+								>
 									Weight
 								</div>
 								<div
@@ -154,7 +160,9 @@
 								</div>
 							</div>
 							<div>
-								<div class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5">
+								<div
+									class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5"
+								>
 									Appraised
 								</div>
 								<div class="text-[11px] font-bold text-[#D4AF37] font-mono">
@@ -162,7 +170,9 @@
 								</div>
 							</div>
 							<div>
-								<div class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5">
+								<div
+									class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5"
+								>
 									Min Purc. (2×)
 								</div>
 								<div

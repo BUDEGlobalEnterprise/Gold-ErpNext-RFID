@@ -468,9 +468,15 @@ def ui_get_stock_items(search=None, limit=50):
 		filters=filters,
 		or_filters=or_filters if or_filters else None,
 		fields=[
-			"name", "item_name", "item_group", "stock_uom",
-			"custom_vendor", "custom_vendor_sku", "custom_barcode",
-			"has_serial_no", "image",
+			"name",
+			"item_name",
+			"item_group",
+			"stock_uom",
+			"custom_vendor",
+			"custom_vendor_sku",
+			"custom_barcode",
+			"has_serial_no",
+			"image",
 		],
 		order_by="item_name",
 		limit_page_length=int(limit),
@@ -485,13 +491,16 @@ def ui_get_vendors():
 	frappe.has_permission("Item", ptype="read", throw=True)
 
 	# Get unique vendors from Items
-	vendors = frappe.db.sql("""
+	vendors = frappe.db.sql(
+		"""
 		SELECT DISTINCT custom_vendor as name
 		FROM `tabItem`
 		WHERE custom_vendor IS NOT NULL AND custom_vendor != ''
 		AND disabled = 0
 		ORDER BY custom_vendor
-	""", as_dict=True)
+	""",
+		as_dict=True,
+	)
 
 	# Also get Suppliers
 	suppliers = frappe.get_all("Supplier", fields=["name"], order_by="name", limit=100)

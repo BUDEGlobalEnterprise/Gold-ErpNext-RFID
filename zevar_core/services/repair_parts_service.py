@@ -38,18 +38,21 @@ def consume_part(
 
 	# Add to repair order parts_consumed table
 	repair = frappe.get_doc("Repair Order", repair_order)
-	row = repair.append("parts_consumed", {
-		"component_item": component_item,
-		"component_item_name": frappe.db.get_value("Item", component_item, "item_name"),
-		"qty": qty,
-		"uom": frappe.db.get_value("Item", component_item, "stock_uom") or "Nos",
-		"unit_cost": unit_cost,
-		"source_warehouse": source_warehouse,
-		"serial_no": serial_no or "",
-		"consumed_at": now_datetime(),
-		"consumed_by": frappe.session.user,
-		"notes": notes or "",
-	})
+	repair.append(
+		"parts_consumed",
+		{
+			"component_item": component_item,
+			"component_item_name": frappe.db.get_value("Item", component_item, "item_name"),
+			"qty": qty,
+			"uom": frappe.db.get_value("Item", component_item, "stock_uom") or "Nos",
+			"unit_cost": unit_cost,
+			"source_warehouse": source_warehouse,
+			"serial_no": serial_no or "",
+			"consumed_at": now_datetime(),
+			"consumed_by": frappe.session.user,
+			"notes": notes or "",
+		},
+	)
 	repair.save(ignore_permissions=True)
 
 	_log_parts_event("part_consumed", repair_order, component_item, qty, se.name)
@@ -99,18 +102,20 @@ def get_parts_summary(repair_order: str) -> dict:
 	for row in repair.parts_consumed:
 		line_cost = flt(row.qty) * flt(row.unit_cost)
 		total_cost += line_cost
-		parts.append({
-			"component_item": row.component_item,
-			"component_item_name": row.component_item_name,
-			"qty": row.qty,
-			"uom": row.uom,
-			"unit_cost": flt(row.unit_cost, 2),
-			"line_cost": flt(line_cost, 2),
-			"source_warehouse": row.source_warehouse,
-			"serial_no": row.serial_no,
-			"consumed_at": str(row.consumed_at) if row.consumed_at else "",
-			"consumed_by": row.consumed_by,
-		})
+		parts.append(
+			{
+				"component_item": row.component_item,
+				"component_item_name": row.component_item_name,
+				"qty": row.qty,
+				"uom": row.uom,
+				"unit_cost": flt(row.unit_cost, 2),
+				"line_cost": flt(line_cost, 2),
+				"source_warehouse": row.source_warehouse,
+				"serial_no": row.serial_no,
+				"consumed_at": str(row.consumed_at) if row.consumed_at else "",
+				"consumed_by": row.consumed_by,
+			}
+		)
 
 	return {
 		"repair_order": repair_order,
@@ -139,14 +144,12 @@ def _validate_stock_available(item_code: str, warehouse: str, qty: float, serial
 		if sn_wh != warehouse:
 			frappe.throw(_("Serial No {0} is not in warehouse {1}").format(serial_no, warehouse))
 	else:
-		actual_qty = flt(frappe.db.get_value(
-			"Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty"
-		) or 0)
+		actual_qty = flt(
+			frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty") or 0
+		)
 		if actual_qty < qty:
 			frappe.throw(
-				_("Insufficient stock: {0} available, {1} needed in {2}").format(
-					actual_qty, qty, warehouse
-				)
+				_("Insufficient stock: {0} available, {1} needed in {2}").format(actual_qty, qty, warehouse)
 			)
 
 
@@ -157,9 +160,11 @@ def _log_parts_event(event_type, repair_order, item_code, qty, stock_entry):
 	log.category = "Repair"
 	log.reference_type = "Repair Order"
 	log.reference_document = repair_order
-	log.details = frappe.as_json({
-		"item_code": item_code,
-		"qty": qty,
-		"stock_entry": stock_entry,
-	})
+	log.details = frappe.as_json(
+		{
+			"item_code": item_code,
+			"qty": qty,
+			"stock_entry": stock_entry,
+		}
+	)
 	log.insert(ignore_permissions=True)

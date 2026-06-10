@@ -1,7 +1,9 @@
 <template>
 	<AppLayout>
 		<div class="flex flex-col">
-			<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 flex-shrink-0">
+			<div
+				class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 flex-shrink-0"
+			>
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Appraisals</h2>
 					<span
@@ -83,7 +85,9 @@
 						:key="item.id"
 						class="premium-card !p-0 overflow-hidden cursor-pointer border border-gray-100 dark:border-warm-border/30 hover:border-[#D4AF37]/50 hover:shadow-md transition-all duration-200 group flex flex-col min-w-0"
 					>
-						<div class="aspect-[4/3] bg-gray-50 dark:bg-warm-dark-900 relative shrink-0">
+						<div
+							class="aspect-[4/3] bg-gray-50 dark:bg-warm-dark-900 relative shrink-0"
+						>
 							<div
 								class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600"
 							>
@@ -141,7 +145,8 @@
 									class="text-[8px] font-bold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-warm-dark-900 text-gray-600 dark:text-gray-400 inline-block truncate"
 									>{{ item.purity }}</span
 								>
-								<span class="text-[9px] text-gray-500 ml-auto font-mono font-bold shrink-0"
+								<span
+									class="text-[9px] text-gray-500 ml-auto font-mono font-bold shrink-0"
 									>{{ item.weight }}g</span
 								>
 							</div>
@@ -149,15 +154,21 @@
 								class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-warm-border/30 mt-auto min-w-0"
 							>
 								<div>
-									<div class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5">
+									<div
+										class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5"
+									>
 										Est. Value
 									</div>
-									<div class="text-xs font-bold text-[#D4AF37] font-mono leading-none">
+									<div
+										class="text-xs font-bold text-[#D4AF37] font-mono leading-none"
+									>
 										{{ formatCurrency(item.estimatedValue) }}
 									</div>
 								</div>
 								<div v-if="item.certification" class="text-right min-w-0 ml-1">
-									<div class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5">
+									<div
+										class="text-[8px] text-gray-400 dark:text-gray-500 uppercase font-bold mb-0.5"
+									>
 										Cert #
 									</div>
 									<div

@@ -30,13 +30,21 @@
 				class="absolute right-0 mt-2 w-80 sm:w-96 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden"
 			>
 				<!-- Header -->
-				<div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+				<div
+					class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800"
+				>
 					<h3 class="text-sm font-bold text-gray-900 dark:text-white">Alerts</h3>
 					<div class="flex items-center gap-2">
-						<span v-if="summary.critical" class="text-[10px] font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-1.5 py-0.5 rounded-full">
+						<span
+							v-if="summary.critical"
+							class="text-[10px] font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-1.5 py-0.5 rounded-full"
+						>
 							{{ summary.critical }} critical
 						</span>
-						<span v-if="summary.warning" class="text-[10px] font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded-full">
+						<span
+							v-if="summary.warning"
+							class="text-[10px] font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded-full"
+						>
 							{{ summary.warning }} warning
 						</span>
 					</div>
@@ -45,10 +53,14 @@
 				<!-- Alert list -->
 				<div class="max-h-80 overflow-auto custom-scrollbar">
 					<div v-if="loading" class="flex items-center justify-center py-8">
-						<span class="material-symbols-outlined animate-spin text-gray-300">progress_activity</span>
+						<span class="material-symbols-outlined animate-spin text-gray-300"
+							>progress_activity</span
+						>
 					</div>
 					<div v-else-if="alerts.length === 0" class="py-8 text-center">
-						<span class="material-symbols-outlined !text-3xl text-gray-300 mb-2 block">notifications_off</span>
+						<span class="material-symbols-outlined !text-3xl text-gray-300 mb-2 block"
+							>notifications_off</span
+						>
 						<p class="text-xs text-gray-400">No active alerts</p>
 					</div>
 					<template v-else>
@@ -67,18 +79,32 @@
 								}"
 							></span>
 							<div class="flex-1 min-w-0">
-								<p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ alert.title }}</p>
-								<p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">{{ alert.message }}</p>
+								<p
+									class="text-xs font-bold text-gray-900 dark:text-white truncate"
+								>
+									{{ alert.title }}
+								</p>
+								<p
+									class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2"
+								>
+									{{ alert.message }}
+								</p>
 							</div>
-							<span class="text-[9px] text-gray-400 shrink-0 mt-0.5">{{ formatTime(alert.timestamp) }}</span>
+							<span class="text-[9px] text-gray-400 shrink-0 mt-0.5">{{
+								formatTime(alert.timestamp)
+							}}</span>
 						</button>
 					</template>
 				</div>
 
 				<!-- Footer -->
-				<div v-if="alerts.length > 0" class="px-4 py-2 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
+				<div
+					v-if="alerts.length > 0"
+					class="px-4 py-2 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30"
+				>
 					<p class="text-[10px] text-gray-400 text-center">
-						{{ alerts.length }} alert{{ alerts.length !== 1 ? 's' : '' }} &middot; Updated {{ formatTime(latestTimestamp) }}
+						{{ alerts.length }} alert{{ alerts.length !== 1 ? 's' : '' }} &middot;
+						Updated {{ formatTime(latestTimestamp) }}
 					</p>
 				</div>
 			</div>
@@ -135,7 +161,12 @@ async function fetchAlerts() {
 function handleAlertClick(alert) {
 	isOpen.value = false
 	if (alert.reference_doctype && alert.reference_name) {
-		window.open(`/app/${alert.reference_doctype.toLowerCase().replace(' ', '-')}/${alert.reference_name}`, '_blank')
+		window.open(
+			`/app/${alert.reference_doctype.toLowerCase().replace(' ', '-')}/${
+				alert.reference_name
+			}`,
+			'_blank'
+		)
 	}
 }
 

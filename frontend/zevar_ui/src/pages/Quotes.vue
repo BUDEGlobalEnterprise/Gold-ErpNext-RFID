@@ -1,7 +1,9 @@
 <template>
 	<AppLayout>
 		<div class="flex flex-col h-full">
-			<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 flex-shrink-0">
+			<div
+				class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 flex-shrink-0"
+			>
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Quotes</h2>
 					<span
@@ -53,8 +55,8 @@
 					v-for="s in statusFilters"
 					:key="s.value"
 					@click="
-						activeStatus = s.value;
-						loadData();
+						activeStatus = s.value
+						loadData()
 					"
 					class="px-3 py-1.5 rounded-full text-xs font-bold transition"
 					:class="
@@ -462,17 +464,28 @@
 				class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
 				@click.self="showValueBreakdown = false"
 			>
-				<div class="premium-card !rounded-2xl w-full max-w-xl max-h-[80vh] overflow-y-auto m-4">
+				<div
+					class="premium-card !rounded-2xl w-full max-w-xl max-h-[80vh] overflow-y-auto m-4"
+				>
 					<div class="flex items-center justify-between mb-4">
 						<div>
-							<h3 class="text-lg font-bold text-gray-900 dark:text-white">Quote Value Breakdown</h3>
-							<p class="text-xs text-gray-500">{{ formatCurrency(totalValue) }} total value</p>
+							<h3 class="text-lg font-bold text-gray-900 dark:text-white">
+								Quote Value Breakdown
+							</h3>
+							<p class="text-xs text-gray-500">
+								{{ formatCurrency(totalValue) }} total value
+							</p>
 						</div>
 						<button
 							@click="showValueBreakdown = false"
 							class="p-1 hover:bg-gray-100 dark:hover:bg-warm-dark-700 rounded-lg"
 						>
-							<svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg
+								class="w-5 h-5 text-gray-500"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -490,14 +503,23 @@
 							@click="viewQuoteFromBreakdown(quote)"
 						>
 							<div class="min-w-0">
-								<div class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ quote.name }}</div>
+								<div
+									class="text-xs font-bold text-gray-900 dark:text-white truncate"
+								>
+									{{ quote.name }}
+								</div>
 								<div class="text-[10px] text-gray-500 truncate">
 									{{ quote.customer_name || quote.party_name || 'No customer' }}
 								</div>
 							</div>
 							<div class="ml-3 text-right shrink-0">
-								<div class="text-sm font-bold text-[#D4AF37]">{{ formatCurrency(quote.grand_total) }}</div>
-								<span class="text-[9px] font-bold px-2 py-0.5 rounded-full" :class="statusClass(quote.status)">
+								<div class="text-sm font-bold text-[#D4AF37]">
+									{{ formatCurrency(quote.grand_total) }}
+								</div>
+								<span
+									class="text-[9px] font-bold px-2 py-0.5 rounded-full"
+									:class="statusClass(quote.status)"
+								>
 									{{ quote.status }}
 								</span>
 							</div>

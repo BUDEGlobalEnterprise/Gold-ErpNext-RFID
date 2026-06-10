@@ -22,15 +22,22 @@
 				class="h-32 flex items-center px-10 gap-4 shrink-0 transition-all duration-300"
 				:class="sidebarCollapsed ? 'lg:px-4 justify-center' : 'justify-between'"
 			>
-				<div class="flex items-center gap-5 overflow-hidden w-full transition-all duration-300" :class="sidebarCollapsed ? 'justify-center' : ''">
+				<div
+					class="flex items-center gap-5 overflow-hidden w-full transition-all duration-300"
+					:class="sidebarCollapsed ? 'justify-center' : ''"
+				>
 					<div
 						class="w-12 h-12 rounded-2xl bg-emerald-950 dark:bg-emerald-900 flex items-center justify-center text-white shadow-glow-emerald shrink-0 transition-all duration-300"
 					>
 						<span class="material-symbols-outlined text-2xl">diamond</span>
 					</div>
-					<div 
-						class="flex flex-col leading-none transition-all duration-300" 
-						:class="sidebarCollapsed ? 'w-0 opacity-0 pointer-events-none' : 'w-auto opacity-100'"
+					<div
+						class="flex flex-col leading-none transition-all duration-300"
+						:class="
+							sidebarCollapsed
+								? 'w-0 opacity-0 pointer-events-none'
+								: 'w-auto opacity-100'
+						"
 					>
 						<span
 							class="font-black text-gray-900 dark:text-white tracking-tighter text-2xl uppercase mb-1 whitespace-nowrap"
@@ -45,7 +52,10 @@
 			</div>
 
 			<!-- Nav Items -->
-			<nav class="flex-1 px-8 space-y-2.5 overflow-y-auto no-scrollbar pb-10 pt-4 transition-all duration-300" :class="sidebarCollapsed ? 'lg:px-4' : 'lg:px-8'">
+			<nav
+				class="flex-1 px-8 space-y-2.5 overflow-y-auto no-scrollbar pb-10 pt-4 transition-all duration-300"
+				:class="sidebarCollapsed ? 'lg:px-4' : 'lg:px-8'"
+			>
 				<router-link
 					v-for="item in navItems"
 					:key="item.to"
@@ -67,14 +77,22 @@
 						}}</span>
 						<span
 							class="text-[11px] font-black uppercase tracking-[0.25em] transition-all duration-300 whitespace-nowrap"
-							:class="sidebarCollapsed ? 'lg:w-0 lg:opacity-0 lg:pointer-events-none' : 'w-auto opacity-100'"
+							:class="
+								sidebarCollapsed
+									? 'lg:w-0 lg:opacity-0 lg:pointer-events-none'
+									: 'w-auto opacity-100'
+							"
 							>{{ item.label }}</span
 						>
 					</div>
 					<div
 						v-if="route.path === item.to"
 						class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgb(52,211,153)] transition-all duration-300"
-						:class="sidebarCollapsed ? 'lg:absolute lg:right-2 lg:top-1/2 lg:-translate-y-1/2 lg:w-1 lg:h-1' : ''"
+						:class="
+							sidebarCollapsed
+								? 'lg:absolute lg:right-2 lg:top-1/2 lg:-translate-y-1/2 lg:w-1 lg:h-1'
+								: ''
+						"
 					></div>
 				</router-link>
 			</nav>
@@ -86,7 +104,11 @@
 			>
 				<div
 					class="flex items-center gap-3 bg-white dark:bg-white/5 p-3 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm transition-all duration-300 w-full"
-					:class="sidebarCollapsed ? 'justify-center !p-1 border-transparent dark:border-transparent bg-transparent dark:bg-transparent shadow-none' : ''"
+					:class="
+						sidebarCollapsed
+							? 'justify-center !p-1 border-transparent dark:border-transparent bg-transparent dark:bg-transparent shadow-none'
+							: ''
+					"
 				>
 					<div
 						class="w-9 h-9 rounded-full overflow-hidden border border-gray-100 dark:border-white/10 shrink-0 shadow-sm"
@@ -96,9 +118,13 @@
 							class="w-full h-full object-cover"
 						/>
 					</div>
-					<div 
+					<div
 						class="flex flex-col min-w-0 transition-all duration-300"
-						:class="sidebarCollapsed ? 'w-0 opacity-0 pointer-events-none' : 'w-auto opacity-100'"
+						:class="
+							sidebarCollapsed
+								? 'w-0 opacity-0 pointer-events-none'
+								: 'w-auto opacity-100'
+						"
 					>
 						<span
 							class="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none mb-1 whitespace-nowrap"
@@ -124,7 +150,10 @@
 					@click="sidebarCollapsed = !sidebarCollapsed"
 					class="hidden lg:flex w-10 h-10 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 items-center justify-center text-gray-500 dark:text-gray-400 mr-6 transition-all border border-gray-200/50 dark:border-white/10 shadow-sm active:scale-95"
 				>
-					<span class="material-symbols-outlined text-[20px] transition-transform duration-300" :class="sidebarCollapsed ? 'rotate-180' : ''">
+					<span
+						class="material-symbols-outlined text-[20px] transition-transform duration-300"
+						:class="sidebarCollapsed ? 'rotate-180' : ''"
+					>
 						menu_open
 					</span>
 				</button>

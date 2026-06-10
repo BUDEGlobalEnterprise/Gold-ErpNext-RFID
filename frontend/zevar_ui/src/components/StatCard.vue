@@ -1,20 +1,27 @@
 <template>
 	<div
 		class="premium-card !p-4 transition duration-200"
-		:class="[clickable ? 'cursor-pointer hover:ring-2 active:scale-[0.98]' : '', clickable ? ringColor : '']"
+		:class="[
+			clickable ? 'cursor-pointer hover:ring-2 active:scale-[0.98]' : '',
+			clickable ? ringColor : '',
+		]"
 		:role="clickable ? 'button' : undefined"
 		:tabindex="clickable ? 0 : undefined"
 		@click="handleClick"
 		@keydown.enter.prevent="handleClick"
 		@keydown.space.prevent="handleClick"
 	>
-		<div class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+		<div
+			class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+		>
 			{{ label }}
 		</div>
 		<div class="text-2xl font-bold" :class="valueColor">{{ value }}</div>
 		<div v-if="subtext || clickable" class="text-[10px] font-bold mt-1" :class="subtextColor">
 			<span v-if="subtext">{{ subtext }}</span>
-			<span v-if="clickable" :class="{ 'ml-1': subtext }" class="underline">View &rarr;</span>
+			<span v-if="clickable" :class="{ 'ml-1': subtext }" class="underline"
+				>View &rarr;</span
+			>
 		</div>
 	</div>
 </template>

@@ -23,13 +23,27 @@ export const TAB_COMPONENT_MAP = {
 }
 
 export const DRAWER_COMPONENT_MAP = {
-	sales: defineAsyncComponent(() => import('@/components/analytics/drawers/SalesDetailDrawer.vue')),
-	repair: defineAsyncComponent(() => import('@/components/analytics/drawers/RepairDetailDrawer.vue')),
-	layaway: defineAsyncComponent(() => import('@/components/analytics/drawers/LayawayDetailDrawer.vue')),
-	cash_variance: defineAsyncComponent(() => import('@/components/analytics/drawers/CashVarianceDrawer.vue')),
-	low_stock: defineAsyncComponent(() => import('@/components/analytics/drawers/LowStockDrawer.vue')),
-	overdue_payments: defineAsyncComponent(() => import('@/components/analytics/drawers/OverdueDrawer.vue')),
-	hold_queue: defineAsyncComponent(() => import('@/components/analytics/drawers/HoldQueueDrawer.vue')),
+	sales: defineAsyncComponent(() =>
+		import('@/components/analytics/drawers/SalesDetailDrawer.vue')
+	),
+	repair: defineAsyncComponent(() =>
+		import('@/components/analytics/drawers/RepairDetailDrawer.vue')
+	),
+	layaway: defineAsyncComponent(() =>
+		import('@/components/analytics/drawers/LayawayDetailDrawer.vue')
+	),
+	cash_variance: defineAsyncComponent(() =>
+		import('@/components/analytics/drawers/CashVarianceDrawer.vue')
+	),
+	low_stock: defineAsyncComponent(() =>
+		import('@/components/analytics/drawers/LowStockDrawer.vue')
+	),
+	overdue_payments: defineAsyncComponent(() =>
+		import('@/components/analytics/drawers/OverdueDrawer.vue')
+	),
+	hold_queue: defineAsyncComponent(() =>
+		import('@/components/analytics/drawers/HoldQueueDrawer.vue')
+	),
 }
 
 export function useFilteredTabs(roleContext) {

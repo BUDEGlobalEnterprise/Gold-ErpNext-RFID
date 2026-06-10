@@ -14,12 +14,24 @@ def execute(filters=None):
 
 def get_columns():
 	return [
-		{"fieldname": "item_code", "label": _("Item Code"), "fieldtype": "Link", "options": "Item", "width": 140},
+		{
+			"fieldname": "item_code",
+			"label": _("Item Code"),
+			"fieldtype": "Link",
+			"options": "Item",
+			"width": 140,
+		},
 		{"fieldname": "item_name", "label": _("Item Name"), "fieldtype": "Data", "width": 180},
 		{"fieldname": "item_group", "label": _("Item Group"), "fieldtype": "Data", "width": 110},
 		{"fieldname": "metal_type", "label": _("Metal"), "fieldtype": "Data", "width": 80},
 		{"fieldname": "jewelry_type", "label": _("Type"), "fieldtype": "Data", "width": 90},
-		{"fieldname": "warehouse", "label": _("Warehouse"), "fieldtype": "Link", "options": "Warehouse", "width": 130},
+		{
+			"fieldname": "warehouse",
+			"label": _("Warehouse"),
+			"fieldtype": "Link",
+			"options": "Warehouse",
+			"width": 130,
+		},
 		{"fieldname": "actual_qty", "label": _("Qty"), "fieldtype": "Float", "width": 60},
 		{"fieldname": "valuation_rate", "label": _("Valuation"), "fieldtype": "Currency", "width": 100},
 		{"fieldname": "total_value", "label": _("Total Value"), "fieldtype": "Currency", "width": 110},
@@ -47,7 +59,9 @@ def get_data(filters):
 
 	max_age = filters.get("max_days")
 	if max_age:
-		conditions += " AND DATEDIFF(%(as_of_date)s, COALESCE(first_sle.first_date, i.creation)) <= %(max_days)s"
+		conditions += (
+			" AND DATEDIFF(%(as_of_date)s, COALESCE(first_sle.first_date, i.creation)) <= %(max_days)s"
+		)
 		values["as_of_date"] = today_date
 		values["max_days"] = max_age
 
@@ -84,19 +98,21 @@ def get_data(filters):
 		days = (today_date - getdate(row.first_stock_date)).days if row.first_stock_date else 0
 		bucket = _get_bucket(days)
 
-		result.append({
-			"item_code": row.item_code,
-			"item_name": row.item_name,
-			"item_group": row.item_group,
-			"metal_type": row.metal_type,
-			"jewelry_type": row.jewelry_type,
-			"warehouse": row.warehouse,
-			"actual_qty": row.actual_qty,
-			"valuation_rate": flt(row.valuation_rate),
-			"total_value": flt(row.total_value),
-			"days_on_hand": days,
-			"aging_bucket": bucket,
-		})
+		result.append(
+			{
+				"item_code": row.item_code,
+				"item_name": row.item_name,
+				"item_group": row.item_group,
+				"metal_type": row.metal_type,
+				"jewelry_type": row.jewelry_type,
+				"warehouse": row.warehouse,
+				"actual_qty": row.actual_qty,
+				"valuation_rate": flt(row.valuation_rate),
+				"total_value": flt(row.total_value),
+				"days_on_hand": days,
+				"aging_bucket": bucket,
+			}
+		)
 
 	return result
 

@@ -155,8 +155,7 @@ def get_session_status() -> dict:
 			"today_sales_total": today_invoices.total,
 			"expected_cash": flt(cash_payments),
 			"non_cash_payments": [
-				{"mode_of_payment": p.mode_of_payment, "total": flt(p.total)}
-				for p in non_cash_payments
+				{"mode_of_payment": p.mode_of_payment, "total": flt(p.total)} for p in non_cash_payments
 			],
 			"non_cash_total": sum(flt(p.total) for p in non_cash_payments),
 			"layaway_count": layaway_count,
@@ -237,7 +236,9 @@ def open_pos_session(
 
 	if existing_session:
 		frappe.throw(
-			_("You already have an active/suspended session: {0}. Please close or resume it first.").format(existing_session)
+			_("You already have an active/suspended session: {0}. Please close or resume it first.").format(
+				existing_session
+			)
 		)
 
 	# Parse cash breakdown if provided
@@ -371,18 +372,26 @@ def ensure_pos_variance_account(company):
 
 	# Try to find a group expense account
 	parent = None
-	for parent_candidate in [f"Direct Expenses - {abbr}", f"Indirect Expenses - {abbr}", f"Expenses - {abbr}"]:
+	for parent_candidate in [
+		f"Direct Expenses - {abbr}",
+		f"Indirect Expenses - {abbr}",
+		f"Expenses - {abbr}",
+	]:
 		if frappe.db.exists("Account", parent_candidate):
 			parent = parent_candidate
 			break
 
 	if not parent:
 		# Fallback to root type Expense group account
-		parent = frappe.db.get_value("Account", {"root_type": "Expense", "is_group": 1, "company": company}, "name", order_by="lft asc")
+		parent = frappe.db.get_value(
+			"Account", {"root_type": "Expense", "is_group": 1, "company": company}, "name", order_by="lft asc"
+		)
 
 	if not parent:
 		# Fallback to any group account
-		parent = frappe.db.get_value("Account", {"is_group": 1, "company": company}, "name", order_by="lft asc")
+		parent = frappe.db.get_value(
+			"Account", {"is_group": 1, "company": company}, "name", order_by="lft asc"
+		)
 
 	if parent:
 		try:
@@ -414,7 +423,9 @@ def create_variance_journal_entry(session_name, closing_entry_name, variance, co
 	variance_account = ensure_pos_variance_account(company)
 
 	if not cash_account or not variance_account:
-		frappe.log_error(f"Cannot create Variance Journal Entry for {session_name}: cash or variance account missing.")
+		frappe.log_error(
+			f"Cannot create Variance Journal Entry for {session_name}: cash or variance account missing."
+		)
 		return None
 
 	try:
@@ -428,28 +439,40 @@ def create_variance_journal_entry(session_name, closing_entry_name, variance, co
 
 		if flt(variance) > 0:
 			# Excess: Debit Cash (increase cash), Credit Variance (gain)
-			je.append("accounts", {
-				"account": cash_account,
-				"debit_in_account_currency": abs_val,
-				"credit_in_account_currency": 0.0,
-			})
-			je.append("accounts", {
-				"account": variance_account,
-				"debit_in_account_currency": 0.0,
-				"credit_in_account_currency": abs_val,
-			})
+			je.append(
+				"accounts",
+				{
+					"account": cash_account,
+					"debit_in_account_currency": abs_val,
+					"credit_in_account_currency": 0.0,
+				},
+			)
+			je.append(
+				"accounts",
+				{
+					"account": variance_account,
+					"debit_in_account_currency": 0.0,
+					"credit_in_account_currency": abs_val,
+				},
+			)
 		else:
 			# Shortage: Debit Variance (expense), Credit Cash (decrease cash)
-			je.append("accounts", {
-				"account": variance_account,
-				"debit_in_account_currency": abs_val,
-				"credit_in_account_currency": 0.0,
-			})
-			je.append("accounts", {
-				"account": cash_account,
-				"debit_in_account_currency": 0.0,
-				"credit_in_account_currency": abs_val,
-			})
+			je.append(
+				"accounts",
+				{
+					"account": variance_account,
+					"debit_in_account_currency": abs_val,
+					"credit_in_account_currency": 0.0,
+				},
+			)
+			je.append(
+				"accounts",
+				{
+					"account": cash_account,
+					"debit_in_account_currency": 0.0,
+					"credit_in_account_currency": abs_val,
+				},
+			)
 
 		je.insert(ignore_permissions=True)
 		je.submit()
@@ -503,8 +526,7 @@ def submit_blind_close_step1(
 
 	# Enforce network security lockdown: check if count was already sealed!
 	sealed_exists = frappe.db.exists(
-		"POS Audit Log",
-		{"event_type": "blind_close_step1", "reference_document": session_name, "user": user}
+		"POS Audit Log", {"event_type": "blind_close_step1", "reference_document": session_name, "user": user}
 	)
 	if sealed_exists:
 		# Retrieve details to pass back
@@ -512,7 +534,7 @@ def submit_blind_close_step1(
 			"POS Audit Log",
 			filters={"event_type": "blind_close_step1", "reference_document": session_name, "user": user},
 			fields=["details"],
-			limit=1
+			limit=1,
 		)
 		if sealed_log:
 			data = frappe.parse_json(sealed_log[0].details)
@@ -622,7 +644,7 @@ def submit_blind_close_step1(
 def submit_blind_close_step2(
 	session_name: str,
 	variance_reason_code: str,
-	notes: str = None,
+	notes: str | None = None,
 ) -> dict:
 	"""Step 2 of the Blind Close process: select variance reason code, perform overrides, post GL Journal Entries, and close POS session."""
 	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
@@ -650,7 +672,7 @@ def submit_blind_close_step2(
 		filters={"event_type": "blind_close_step1", "reference_document": session_name, "user": user},
 		fields=["name", "details"],
 		order_by="creation desc",
-		limit=1
+		limit=1,
 	)
 	if not sealed_logs:
 		frappe.throw(_("Please submit and seal your physical count first (Step 1)."))
@@ -682,7 +704,7 @@ def submit_blind_close_step2(
 				)
 			)
 
-	breakdown_list = _normalize_cash_breakdown(breakdown)
+	_normalize_cash_breakdown(breakdown)
 
 	try:
 		from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
@@ -752,7 +774,7 @@ def submit_blind_close_step2(
 				session_name=session_name,
 				closing_entry_name=closing_entry.name,
 				variance=variance,
-				company=session.company
+				company=session.company,
 			)
 
 		# Log final EOD submission details in Audit Log
@@ -1309,12 +1331,6 @@ def get_session_sales(session_name: str) -> dict:
 
 	session = frappe.get_doc("POS Opening Entry", session_name)
 
-	start_date = (
-		session.period_start_date.date()
-		if hasattr(session.period_start_date, "date")
-		else session.period_start_date
-	)
-
 	sales = frappe.db.sql(
 		"""
 		SELECT
@@ -1349,10 +1365,12 @@ def get_session_sales(session_name: str) -> dict:
 
 	payments_by_invoice = {}
 	for p in payment_breakdown:
-		payments_by_invoice.setdefault(p.invoice, []).append({
-			"mode_of_payment": p.mode_of_payment,
-			"amount": flt(p.amount),
-		})
+		payments_by_invoice.setdefault(p.invoice, []).append(
+			{
+				"mode_of_payment": p.mode_of_payment,
+				"amount": flt(p.amount),
+			}
+		)
 
 	repair_orders = (
 		frappe.get_all(
@@ -1630,6 +1648,7 @@ def get_live_sales_feed(hours: int = 24) -> dict:
 		},
 	}
 
+
 @frappe.whitelist(methods=["POST"])
 def record_cash_movement(
 	session_name: str,
@@ -1649,6 +1668,7 @@ def record_cash_movement(
 		if not manager_pin:
 			frappe.throw(_("Manager PIN required for cash out over $100"))
 		from zevar_core.api.permissions import verify_manager_pin
+
 		manager = verify_manager_pin(manager_pin)
 		if not manager:
 			frappe.throw(_("Invalid manager PIN"))
@@ -1657,6 +1677,7 @@ def record_cash_movement(
 		if not manager_pin:
 			frappe.throw(_("Manager PIN required for float entry"))
 		from zevar_core.api.permissions import verify_manager_pin
+
 		manager = verify_manager_pin(manager_pin)
 		if not manager:
 			frappe.throw(_("Invalid manager PIN"))
@@ -1675,6 +1696,8 @@ def record_cash_movement(
 		"movement_name": movement.name,
 		"message": _("Cash movement '{0}' of ${1} recorded").format(movement_type, flt(amount)),
 	}
+
+
 @frappe.whitelist()
 def get_cash_movements(session_name: str) -> dict:
 	"""Get all cash movements for a session."""
@@ -1700,8 +1723,7 @@ def get_cash_movements(session_name: str) -> dict:
 	total_bank_drop = sum(flt(m.amount) for m in movements if m.movement_type == "Bank Drop")
 	total_tender_removal = sum(flt(m.amount) for m in movements if m.movement_type == "Tender Removal")
 	net_drawer_impact = (
-		total_in + total_float_entry
-		- total_out - total_safe_drop - total_bank_drop - total_tender_removal
+		total_in + total_float_entry - total_out - total_safe_drop - total_bank_drop - total_tender_removal
 	)
 	return {
 		"movements": movements,
@@ -1774,7 +1796,9 @@ def get_drawer_balance(session_name: str) -> dict:
 		"exceeds_threshold": exceeds_threshold,
 		"alert_message": _("Drawer balance ${0} exceeds threshold ${1}. Consider a cash drop.").format(
 			expected_balance, drawer_threshold
-		) if exceeds_threshold else "",
+		)
+		if exceeds_threshold
+		else "",
 	}
 
 
@@ -2032,13 +2056,15 @@ def get_cashier_variance_report(
 				else:
 					balanced_count += 1
 
-				variance_history.append({
-					"closing_entry": ce.name,
-					"date": ce.posting_date,
-					"variance": diff,
-					"grand_total": ce.grand_total,
-					"status": "shortage" if diff < 0 else ("excess" if diff > 0 else "balanced"),
-				})
+				variance_history.append(
+					{
+						"closing_entry": ce.name,
+						"date": ce.posting_date,
+						"variance": diff,
+						"grand_total": ce.grand_total,
+						"status": "shortage" if diff < 0 else ("excess" if diff > 0 else "balanced"),
+					}
+				)
 
 	total_closes = len(variance_history)
 	variance_rate = (shortage_count + excess_count) / total_closes * 100 if total_closes > 0 else 0
@@ -2055,9 +2081,9 @@ def get_cashier_variance_report(
 		"total_variance": total_variance,
 		"avg_variance": round(total_variance / total_closes, 2) if total_closes > 0 else 0,
 		"variance_history": variance_history,
-		"pattern": "consistent_shortages" if shortage_count > total_closes * 0.5 else (
-			"consistent_excess" if excess_count > total_closes * 0.5 else "normal"
-		),
+		"pattern": "consistent_shortages"
+		if shortage_count > total_closes * 0.5
+		else ("consistent_excess" if excess_count > total_closes * 0.5 else "normal"),
 	}
 
 
@@ -2075,12 +2101,15 @@ def suspend_session(session_name: str, reason: str | None = None) -> dict:
 		frappe.throw(_("Session must be open to suspend."))
 
 	if session.user != frappe.session.user:
-		if "Sales Manager" not in frappe.get_roles(frappe.session.user) and "System Manager" not in frappe.get_roles(frappe.session.user):
+		if "Sales Manager" not in frappe.get_roles(
+			frappe.session.user
+		) and "System Manager" not in frappe.get_roles(frappe.session.user):
 			frappe.throw(_("You can only suspend your own sessions."))
 
 	session.db_set("status", "Suspended", update_modified=False)
 
 	from zevar_core.api.audit_log import log_event_safely
+
 	log_event_safely(
 		event_type="session_suspended",
 		details={"session_name": session_name, "reason": reason},
@@ -2110,12 +2139,15 @@ def resume_session(session_name: str) -> dict:
 		frappe.throw(_("Session must be suspended to resume."))
 
 	if session.user != frappe.session.user:
-		if "Sales Manager" not in frappe.get_roles(frappe.session.user) and "System Manager" not in frappe.get_roles(frappe.session.user):
+		if "Sales Manager" not in frappe.get_roles(
+			frappe.session.user
+		) and "System Manager" not in frappe.get_roles(frappe.session.user):
 			frappe.throw(_("You can only resume your own sessions."))
 
 	session.db_set("status", "Open", update_modified=False)
 
 	from zevar_core.api.audit_log import log_event_safely
+
 	log_event_safely(
 		event_type="session_resumed",
 		details={"session_name": session_name},
@@ -2154,6 +2186,7 @@ def verify_opening_count(
 			frappe.throw(_("Verifier must be a manager."))
 
 	from zevar_core.api.audit_log import log_event_safely
+
 	log_event_safely(
 		event_type="opening_count_verified",
 		details={
@@ -2302,8 +2335,17 @@ def get_session_layaway_activity(session_name: str) -> dict:
 	new_contracts = frappe.get_all(
 		"Layaway Contract",
 		filters={"owner": session.user, "creation": [">=", session.creation]},
-		fields=["name", "customer", "customer_name", "total_amount", "deposit_amount",
-		        "balance_amount", "status", "contract_date", "target_completion_date"],
+		fields=[
+			"name",
+			"customer",
+			"customer_name",
+			"total_amount",
+			"deposit_amount",
+			"balance_amount",
+			"status",
+			"contract_date",
+			"target_completion_date",
+		],
 		order_by="creation desc",
 	)
 
@@ -2390,7 +2432,9 @@ def get_session_repair_activity(session_name: str) -> dict:
 		as_dict=True,
 	)
 
-	completed_repairs = [r for r in repair_orders_with_invoice if r.repair_status in ("Completed", "Delivered")]
+	completed_repairs = [
+		r for r in repair_orders_with_invoice if r.repair_status in ("Completed", "Delivered")
+	]
 	dropoff_repairs = [r for r in repair_orders_with_invoice if r.repair_status in ("In Progress", "Pending")]
 
 	total_repair_revenue = sum(flt(r.total_charges) for r in repair_orders_with_invoice)

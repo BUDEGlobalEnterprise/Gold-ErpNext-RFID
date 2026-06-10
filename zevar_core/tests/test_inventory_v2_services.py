@@ -19,13 +19,15 @@ class TestBOMService(FrappeTestCase):
 		from zevar_core.services.bom_service import get_bom_cost_rollup
 
 		# Create a minimal BOM doc
-		bom = frappe.get_doc({
-			"doctype": "Jewelry BOM",
-			"bom_name": f"Test BOM {frappe.generate_hash(length=6)}",
-			"parent_item_code": "TEST-ITEM",
-			"is_active": 1,
-			"yield_qty": 1,
-		})
+		bom = frappe.get_doc(
+			{
+				"doctype": "Jewelry BOM",
+				"bom_name": f"Test BOM {frappe.generate_hash(length=6)}",
+				"parent_item_code": "TEST-ITEM",
+				"is_active": 1,
+				"yield_qty": 1,
+			}
+		)
 		bom.insert(ignore_permissions=True)
 		self.addCleanup(frappe.delete_doc, "Jewelry BOM", bom.name, force=True)
 

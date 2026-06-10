@@ -5,7 +5,9 @@
 			<template v-for="(step, idx) in steps" :key="step.status">
 				<div
 					class="flex items-center gap-0.5"
-					:title="`${step.label}${step.timestamp ? ' — ' + formatTimestamp(step.timestamp) : ''}`"
+					:title="`${step.label}${
+						step.timestamp ? ' — ' + formatTimestamp(step.timestamp) : ''
+					}`"
 				>
 					<div
 						class="w-2 h-2 rounded-full transition-all duration-300 flex-shrink-0"
@@ -21,7 +23,10 @@
 		</div>
 
 		<!-- Full timeline mode (horizontal) -->
-		<div v-else-if="orientation === 'horizontal'" class="flex items-start w-full overflow-x-auto pb-2">
+		<div
+			v-else-if="orientation === 'horizontal'"
+			class="flex items-start w-full overflow-x-auto pb-2"
+		>
 			<template v-for="(step, idx) in steps" :key="step.status">
 				<div class="flex flex-col items-center min-w-[80px] flex-1 relative group">
 					<!-- Connector line (before dot) -->
@@ -29,13 +34,19 @@
 						<div
 							v-if="idx > 0"
 							class="flex-1 h-[2px] transition-all duration-500"
-							:class="step.completed || step.active ? 'bg-[#D4AF37]' : 'bg-gray-200 dark:bg-gray-700'"
+							:class="
+								step.completed || step.active
+									? 'bg-[#D4AF37]'
+									: 'bg-gray-200 dark:bg-gray-700'
+							"
 						></div>
 						<div v-else class="flex-1"></div>
 						<div
 							v-if="idx < steps.length - 1"
 							class="flex-1 h-[2px] transition-all duration-500"
-							:class="step.completed ? 'bg-[#D4AF37]' : 'bg-gray-200 dark:bg-gray-700'"
+							:class="
+								step.completed ? 'bg-[#D4AF37]' : 'bg-gray-200 dark:bg-gray-700'
+							"
 						></div>
 						<div v-else class="flex-1"></div>
 					</div>
@@ -46,8 +57,19 @@
 						:class="getStepDotClass(step)"
 					>
 						<!-- Check icon for completed -->
-						<svg v-if="step.completed" class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+						<svg
+							v-if="step.completed"
+							class="w-3.5 h-3.5 text-white"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="3"
+								d="M5 13l4 4L19 7"
+							/>
 						</svg>
 						<!-- Pulse animation for active -->
 						<span
@@ -55,7 +77,10 @@
 							class="w-2.5 h-2.5 bg-white rounded-full animate-pulse"
 						></span>
 						<!-- Empty dot for pending -->
-						<span v-else class="w-2 h-2 bg-gray-300 dark:bg-gray-600 rounded-full"></span>
+						<span
+							v-else
+							class="w-2 h-2 bg-gray-300 dark:bg-gray-600 rounded-full"
+						></span>
 					</div>
 
 					<!-- Label -->
@@ -65,8 +90,8 @@
 							step.active
 								? 'text-[#D4AF37]'
 								: step.completed
-									? 'text-gray-700 dark:text-gray-300'
-									: 'text-gray-400 dark:text-gray-500'
+								? 'text-gray-700 dark:text-gray-300'
+								: 'text-gray-400 dark:text-gray-500'
 						"
 					>
 						{{ step.label }}
@@ -100,14 +125,28 @@
 						class="w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300 border-2 flex-shrink-0"
 						:class="getStepDotClass(step)"
 					>
-						<svg v-if="step.completed" class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+						<svg
+							v-if="step.completed"
+							class="w-3.5 h-3.5 text-white"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="3"
+								d="M5 13l4 4L19 7"
+							/>
 						</svg>
 						<span
 							v-else-if="step.active"
 							class="w-2.5 h-2.5 bg-white rounded-full animate-pulse"
 						></span>
-						<span v-else class="w-2 h-2 bg-gray-300 dark:bg-gray-600 rounded-full"></span>
+						<span
+							v-else
+							class="w-2 h-2 bg-gray-300 dark:bg-gray-600 rounded-full"
+						></span>
 					</div>
 					<div
 						v-if="idx < steps.length - 1"
@@ -125,8 +164,8 @@
 								step.active
 									? 'text-[#D4AF37]'
 									: step.completed
-										? 'text-gray-800 dark:text-gray-200'
-										: 'text-gray-400 dark:text-gray-500'
+									? 'text-gray-800 dark:text-gray-200'
+									: 'text-gray-400 dark:text-gray-500'
 							"
 						>
 							{{ step.label }}
@@ -134,7 +173,9 @@
 								v-if="step.active"
 								class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 bg-[#D4AF37]/10 text-[#D4AF37] text-[10px] font-bold rounded-full"
 							>
-								<span class="w-1.5 h-1.5 bg-[#D4AF37] rounded-full animate-pulse"></span>
+								<span
+									class="w-1.5 h-1.5 bg-[#D4AF37] rounded-full animate-pulse"
+								></span>
 								NOW
 							</span>
 						</p>
@@ -151,8 +192,12 @@
 						class="text-xs text-blue-500 dark:text-blue-400 mt-1 flex items-center gap-1"
 					>
 						<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-								d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
 						</svg>
 						Est. ready: {{ formatDate(predictedDate) }}
 					</p>

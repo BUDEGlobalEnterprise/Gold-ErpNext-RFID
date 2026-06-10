@@ -58,18 +58,18 @@ doc_events = {
 			"zevar_core.stock_validation.validate_pos_stock_qty",
 		],
 		"before_submit": [
-				"zevar_core.api.repair_accounting.validate_sales_invoice_stream",
-				"zevar_core.api.tax_exemption.validate_exemption_on_submit",
-				"zevar_core.stock_validation.force_pos_stock_qty_before_submit",
-			],
+			"zevar_core.api.repair_accounting.validate_sales_invoice_stream",
+			"zevar_core.api.tax_exemption.validate_exemption_on_submit",
+			"zevar_core.stock_validation.force_pos_stock_qty_before_submit",
+		],
 		"on_submit": [
 			"zevar_core.api.commission.calculate_commissions",
 			"zevar_core.services.stock_reduction.detect_stock_reduction",
 			"zevar_core.services.reservation_manager.release_reservation_for_invoice",
 		],
-			"on_cancel": [
-				"zevar_core.api.commission.reverse_commissions",
-			],
+		"on_cancel": [
+			"zevar_core.api.commission.reverse_commissions",
+		],
 	},
 }
 
@@ -91,18 +91,18 @@ scheduler_events = {
 			"zevar_core.tasks.consignment_overdue_alert",
 		],
 		"0 * * * *": [
-				"zevar_core.tasks.expire_stale_reservations",
-				"zevar_core.api.pos_activation.auto_deactivate_profiles",
-			],
+			"zevar_core.tasks.expire_stale_reservations",
+			"zevar_core.api.pos_activation.auto_deactivate_profiles",
+		],
 		"0 */2 * * *": ["zevar_core.tasks.run_report_subscriptions"],
 		"30 8 * * *": [
 			"zevar_core.services.appraisal_service.send_expiry_reminders",
 			"zevar_core.services.memo_lifecycle_service.send_aging_alerts",
 		],
-			"0 9 1 * *": [
-				"zevar_core.api.dunning.run_auto_dunning",
-				"zevar_core.api.dunning.send_monthly_statements",
-			],
+		"0 9 1 * *": [
+			"zevar_core.api.dunning.run_auto_dunning",
+			"zevar_core.api.dunning.send_monthly_statements",
+		],
 	},
 }
 

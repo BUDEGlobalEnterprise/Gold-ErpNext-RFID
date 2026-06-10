@@ -38,11 +38,7 @@ class SpecialOrder(Document):
 		if flt(amount) <= 0:
 			frappe.throw(_("Deposit amount must be greater than zero."))
 		if flt(amount) > flt(self.balance_due):
-			frappe.throw(
-				_("Deposit of {0} exceeds balance due of {1}").format(
-					amount, self.balance_due
-				)
-			)
+			frappe.throw(_("Deposit of {0} exceeds balance due of {1}").format(amount, self.balance_due))
 		self.deposit_paid = flt(self.deposit_paid) + flt(amount)
 		self.balance_due = flt(self.total_amount) - flt(self.deposit_paid)
 
@@ -78,7 +74,10 @@ class SpecialOrder(Document):
 
 		subject, body = self._render_email_template(
 			"Special Order Arrival",
-			{"doc": self, "company": frappe.db.get_single_value("Selling Settings", "company") or "Zevar Jewelry"},
+			{
+				"doc": self,
+				"company": frappe.db.get_single_value("Selling Settings", "company") or "Zevar Jewelry",
+			},
 			fallback_subject=f"Your Special Order {self.name} Has Arrived!",
 			fallback_body=(
 				f"<p>Dear {self.customer_name},</p>"
@@ -124,6 +123,7 @@ class SpecialOrder(Document):
 		if frappe.db.exists("Email Template", template_name):
 			try:
 				from frappe.email.doctype.email_template.email_template import get_email_template
+
 				subject, body = get_email_template(template_name, context)
 				return subject, body
 			except Exception:

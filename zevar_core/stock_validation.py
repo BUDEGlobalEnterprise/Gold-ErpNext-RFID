@@ -5,7 +5,7 @@ Two-layer protection:
 1. validate hook: catches inflated stock_qty early in the validation chain
 2. before_submit hook: last-resort reset right before SLE creation
 
-The ERPNext stock deduction uses stock_qty (= qty × conversion_factor).
+The ERPNext stock deduction uses stock_qty (= qty x conversion_factor).
 If conversion_factor != 1.0, the deduction is multiplied, causing the
 15 → -1 bug (selling 1 unit deducts 16).
 """

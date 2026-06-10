@@ -70,10 +70,14 @@ def trigger_form_8300(customer, total_amount, transaction_details=None):
 			"Address", {"link_name": customer}, ["address_line1", "city", "state", "pincode"], as_dict=True
 		)
 		if customer_email:
-			record.notes = (record.notes + f"\nCustomer email: {customer_email}") if record.notes else f"Customer email: {customer_email}"
+			record.notes = (
+				(record.notes + f"\nCustomer email: {customer_email}")
+				if record.notes
+				else f"Customer email: {customer_email}"
+			)
 		if customer_address:
 			record.recipient_address = f"{customer_address.get('address_line1', '')}, {customer_address.get('city', '')}, {customer_address.get('state', '')} {customer_address.get('pincode', '')}"
-	
+
 	record.insert(ignore_permissions=True)
 	frappe.db.commit()
 	return {"success": True, "record_name": record.name, "message": _("Form 8300 record created.")}

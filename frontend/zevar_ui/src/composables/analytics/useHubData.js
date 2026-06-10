@@ -5,8 +5,8 @@
 import { ref, computed, watch } from 'vue'
 import { call } from 'frappe-ui'
 
-const CACHE_TTL_MS = 110_000  // 110s — slightly less than server's 120s
-const inflight = new Map()    // dedupe parallel calls with the same args
+const CACHE_TTL_MS = 110_000 // 110s — slightly less than server's 120s
+const inflight = new Map() // dedupe parallel calls with the same args
 
 export function useHubData() {
 	const hero = ref(null)

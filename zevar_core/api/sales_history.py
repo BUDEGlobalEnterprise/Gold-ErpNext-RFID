@@ -78,7 +78,6 @@ def get_repair_payments_history(
 	}
 
 
-
 @frappe.whitelist()
 def get_sales_history(
 	from_date: str | None = None,

@@ -1,5 +1,4 @@
 frappe.provide("zevar.layaway");
-
 (() => {
 	if (zevar.layaway._bootstrapped) {
 		return;

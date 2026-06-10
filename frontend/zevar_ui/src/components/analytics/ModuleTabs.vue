@@ -16,7 +16,9 @@
 			:class="{ active: active === t.key }"
 			@click="$emit('change', t.key)"
 		>
-			<span v-if="t.icon" class="material-symbols-outlined module-tab__icon">{{ t.icon }}</span>
+			<span v-if="t.icon" class="material-symbols-outlined module-tab__icon">{{
+				t.icon
+			}}</span>
 			<span class="module-tab__label">{{ t.label }}</span>
 			<span v-if="t.badge" class="module-tab__badge">{{ t.badge }}</span>
 		</button>
@@ -77,7 +79,9 @@ onUnmounted(() => {
 	overflow-x: auto;
 	scrollbar-width: none;
 }
-.module-tabs::-webkit-scrollbar { display: none; }
+.module-tabs::-webkit-scrollbar {
+	display: none;
+}
 .module-tabs.stuck {
 	background: var(--glass-tint-dark);
 	backdrop-filter: blur(var(--glass-1-blur));
@@ -97,16 +101,20 @@ onUnmounted(() => {
 	font-size: 13px;
 	font-weight: 600;
 	white-space: nowrap;
-	transition:
-		background var(--duration-fast) var(--ease-out),
+	transition: background var(--duration-fast) var(--ease-out),
 		color var(--duration-fast) var(--ease-out);
 }
-.module-tab:hover { background: var(--bg-2); color: var(--text-primary); }
+.module-tab:hover {
+	background: var(--bg-2);
+	color: var(--text-primary);
+}
 .module-tab.active {
 	background: var(--color-gold);
 	color: #0a0a0f;
 }
-.module-tab__icon { font-size: 16px; }
+.module-tab__icon {
+	font-size: 16px;
+}
 .module-tab__badge {
 	font-size: 10px;
 	font-weight: 800;

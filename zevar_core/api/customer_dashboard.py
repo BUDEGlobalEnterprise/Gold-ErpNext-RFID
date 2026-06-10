@@ -5,15 +5,13 @@ layaway cohort retention, and top customer rankings.
 
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate, nowdate, add_months, add_days
+from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
 
 @frappe.whitelist()
 def get_dashboard_data():
 	"""Single-call payload for the Customer Dashboard page."""
-	frappe.only_for(
-		["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"]
-	)
+	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
 	today = nowdate()
 	return {
 		"kpi": _get_kpi_summary(today),
@@ -26,36 +24,28 @@ def get_dashboard_data():
 @frappe.whitelist()
 def get_kpi_summary():
 	"""Total customers, new this month, avg LTV, active layaways."""
-	frappe.only_for(
-		["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"]
-	)
+	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
 	return _get_kpi_summary(nowdate())
 
 
 @frappe.whitelist()
 def get_new_vs_returning():
 	"""New vs returning customers for the last 6 months."""
-	frappe.only_for(
-		["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"]
-	)
+	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
 	return _get_new_vs_returning(nowdate())
 
 
 @frappe.whitelist()
 def get_top_customers():
 	"""Top 10 customers by revenue (last 12 months)."""
-	frappe.only_for(
-		["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"]
-	)
+	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
 	return _get_top_customers(nowdate())
 
 
 @frappe.whitelist()
 def get_layaway_cohort():
 	"""Layaway completion rate by month of origination (6 months)."""
-	frappe.only_for(
-		["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"]
-	)
+	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
 	return _get_layaway_cohort(nowdate())
 
 

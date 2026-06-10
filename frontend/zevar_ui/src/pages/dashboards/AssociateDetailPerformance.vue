@@ -12,7 +12,9 @@
 			</div>
 			<div class="flex-1 flex items-center justify-center">
 				<div class="text-center">
-					<span class="material-symbols-outlined !text-4xl text-gray-300 mb-2 block">construction</span>
+					<span class="material-symbols-outlined !text-4xl text-gray-300 mb-2 block"
+						>construction</span
+					>
 					<p class="text-sm text-gray-400">Associate Detail Performance coming soon</p>
 				</div>
 			</div>

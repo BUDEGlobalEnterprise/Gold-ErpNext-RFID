@@ -16,8 +16,19 @@
 						class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-warm-dark-700"
 						title="Refresh"
 					>
-						<svg class="w-4 h-4 text-gray-500" :class="{ 'animate-spin': store.bomListResource.loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357 2m15.357 2H15" />
+						<svg
+							class="w-4 h-4 text-gray-500"
+							:class="{ 'animate-spin': store.bomListResource.loading }"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357 2m15.357 2H15"
+							/>
 						</svg>
 					</button>
 				</div>
@@ -33,16 +44,27 @@
 				>
 					<div class="flex items-center justify-between">
 						<div>
-							<span class="text-sm font-semibold text-gray-900 dark:text-white">{{ bom.bom_name || bom.name }}</span>
-							<span class="ml-2 text-xs text-gray-500">{{ bom.parent_item_code }}</span>
-							<span v-if="bom.is_default" class="ml-2 px-1.5 py-0.5 bg-[#D4AF37]/20 text-[#D4AF37] text-[10px] font-bold rounded">DEFAULT</span>
+							<span class="text-sm font-semibold text-gray-900 dark:text-white">{{
+								bom.bom_name || bom.name
+							}}</span>
+							<span class="ml-2 text-xs text-gray-500">{{
+								bom.parent_item_code
+							}}</span>
+							<span
+								v-if="bom.is_default"
+								class="ml-2 px-1.5 py-0.5 bg-[#D4AF37]/20 text-[#D4AF37] text-[10px] font-bold rounded"
+								>DEFAULT</span
+							>
 						</div>
 						<span class="text-xs text-gray-400">Yield: {{ bom.yield_qty || 1 }}</span>
 					</div>
 				</div>
 			</div>
 
-			<div v-else-if="!store.bomListResource.loading" class="text-center text-gray-400 text-sm py-8">
+			<div
+				v-else-if="!store.bomListResource.loading"
+				class="text-center text-gray-400 text-sm py-8"
+			>
 				No BOMs found. Select an item to view its BOM.
 			</div>
 
@@ -70,19 +92,27 @@
 				<div v-if="store.bomCostRollup" class="grid grid-cols-4 gap-3 mb-4">
 					<div class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-3 text-center">
 						<div class="text-[10px] text-gray-500 uppercase">Material</div>
-						<div class="text-sm font-bold text-gray-900 dark:text-white">${{ store.bomCostRollup.material_total }}</div>
+						<div class="text-sm font-bold text-gray-900 dark:text-white">
+							${{ store.bomCostRollup.material_total }}
+						</div>
 					</div>
 					<div class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-3 text-center">
 						<div class="text-[10px] text-gray-500 uppercase">Labor</div>
-						<div class="text-sm font-bold text-gray-900 dark:text-white">${{ store.bomCostRollup.labor_cost }}</div>
+						<div class="text-sm font-bold text-gray-900 dark:text-white">
+							${{ store.bomCostRollup.labor_cost }}
+						</div>
 					</div>
 					<div class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-3 text-center">
 						<div class="text-[10px] text-gray-500 uppercase">Overhead</div>
-						<div class="text-sm font-bold text-gray-900 dark:text-white">${{ store.bomCostRollup.overhead }}</div>
+						<div class="text-sm font-bold text-gray-900 dark:text-white">
+							${{ store.bomCostRollup.overhead }}
+						</div>
 					</div>
 					<div class="bg-[#D4AF37]/10 rounded-lg p-3 text-center">
 						<div class="text-[10px] text-[#D4AF37] uppercase font-bold">Total</div>
-						<div class="text-sm font-bold text-[#D4AF37]">${{ store.bomCostRollup.grand_total }}</div>
+						<div class="text-sm font-bold text-[#D4AF37]">
+							${{ store.bomCostRollup.grand_total }}
+						</div>
 					</div>
 				</div>
 
@@ -90,7 +120,9 @@
 				<div v-if="selectedBomComponents.length" class="overflow-x-auto">
 					<table class="w-full text-xs">
 						<thead>
-							<tr class="text-left text-gray-500 border-b border-gray-200 dark:border-warm-border">
+							<tr
+								class="text-left text-gray-500 border-b border-gray-200 dark:border-warm-border"
+							>
 								<th class="pb-2 pr-3">Type</th>
 								<th class="pb-2 pr-3">Item</th>
 								<th class="pb-2 pr-3">Qty</th>
@@ -99,14 +131,22 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr v-for="(c, i) in selectedBomComponents" :key="i" class="border-b border-gray-100 dark:border-warm-border/50">
+							<tr
+								v-for="(c, i) in selectedBomComponents"
+								:key="i"
+								class="border-b border-gray-100 dark:border-warm-border/50"
+							>
 								<td class="py-2 pr-3">
-									<span class="px-1.5 py-0.5 rounded text-[10px] font-bold"
-										:class="componentTypeColor(c.component_type)">
+									<span
+										class="px-1.5 py-0.5 rounded text-[10px] font-bold"
+										:class="componentTypeColor(c.component_type)"
+									>
 										{{ c.component_type }}
 									</span>
 								</td>
-								<td class="py-2 pr-3 text-gray-900 dark:text-white">{{ c.component_item }}</td>
+								<td class="py-2 pr-3 text-gray-900 dark:text-white">
+									{{ c.component_item }}
+								</td>
 								<td class="py-2 pr-3">{{ c.qty_per_build }}</td>
 								<td class="py-2 pr-3 text-gray-500">{{ c.uom }}</td>
 								<td class="py-2 text-gray-500">{{ c.cost_share_pct }}%</td>
@@ -120,12 +160,28 @@
 			<BaseModal v-if="showAssemble" @close="showAssemble = false" title="Assemble from BOM">
 				<div class="p-4 space-y-3">
 					<div>
-						<label class="text-xs font-semibold text-gray-700 dark:text-gray-300">Parent Serial No (optional)</label>
-						<input v-model="assembleSerial" type="text" class="mt-1 w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 rounded-lg text-xs" placeholder="Scan or enter serial" />
+						<label class="text-xs font-semibold text-gray-700 dark:text-gray-300"
+							>Parent Serial No (optional)</label
+						>
+						<input
+							v-model="assembleSerial"
+							type="text"
+							class="mt-1 w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 rounded-lg text-xs"
+							placeholder="Scan or enter serial"
+						/>
 					</div>
 					<div class="flex justify-end gap-2">
-						<button @click="showAssemble = false" class="px-3 py-2 text-xs text-gray-600 hover:text-gray-800">Cancel</button>
-						<button @click="doAssemble" :disabled="store.assembleResource.loading" class="px-4 py-2 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700 disabled:opacity-50">
+						<button
+							@click="showAssemble = false"
+							class="px-3 py-2 text-xs text-gray-600 hover:text-gray-800"
+						>
+							Cancel
+						</button>
+						<button
+							@click="doAssemble"
+							:disabled="store.assembleResource.loading"
+							class="px-4 py-2 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700 disabled:opacity-50"
+						>
 							{{ store.assembleResource.loading ? 'Assembling...' : 'Assemble' }}
 						</button>
 					</div>
@@ -133,20 +189,51 @@
 			</BaseModal>
 
 			<!-- Disassemble Modal -->
-			<BaseModal v-if="showDisassemble" @close="showDisassemble = false" title="Disassemble to Components">
+			<BaseModal
+				v-if="showDisassemble"
+				@close="showDisassemble = false"
+				title="Disassemble to Components"
+			>
 				<div class="p-4 space-y-3">
 					<div>
-						<label class="text-xs font-semibold text-gray-700 dark:text-gray-300">Serial No to Disassemble</label>
-						<input v-model="disassembleSerial" type="text" class="mt-1 w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 rounded-lg text-xs" placeholder="Scan or enter serial" />
+						<label class="text-xs font-semibold text-gray-700 dark:text-gray-300"
+							>Serial No to Disassemble</label
+						>
+						<input
+							v-model="disassembleSerial"
+							type="text"
+							class="mt-1 w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 rounded-lg text-xs"
+							placeholder="Scan or enter serial"
+						/>
 					</div>
 					<div>
-						<label class="text-xs font-semibold text-gray-700 dark:text-gray-300">Reason</label>
-						<input v-model="disassembleReason" type="text" class="mt-1 w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 rounded-lg text-xs" placeholder="Optional reason" />
+						<label class="text-xs font-semibold text-gray-700 dark:text-gray-300"
+							>Reason</label
+						>
+						<input
+							v-model="disassembleReason"
+							type="text"
+							class="mt-1 w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 rounded-lg text-xs"
+							placeholder="Optional reason"
+						/>
 					</div>
 					<div class="flex justify-end gap-2">
-						<button @click="showDisassemble = false" class="px-3 py-2 text-xs text-gray-600 hover:text-gray-800">Cancel</button>
-						<button @click="doDisassemble" :disabled="store.disassembleResource.loading" class="px-4 py-2 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 disabled:opacity-50">
-							{{ store.disassembleResource.loading ? 'Disassembling...' : 'Disassemble' }}
+						<button
+							@click="showDisassemble = false"
+							class="px-3 py-2 text-xs text-gray-600 hover:text-gray-800"
+						>
+							Cancel
+						</button>
+						<button
+							@click="doDisassemble"
+							:disabled="store.disassembleResource.loading"
+							class="px-4 py-2 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 disabled:opacity-50"
+						>
+							{{
+								store.disassembleResource.loading
+									? 'Disassembling...'
+									: 'Disassemble'
+							}}
 						</button>
 					</div>
 				</div>
@@ -181,9 +268,10 @@ function debouncedSearch() {
 const filteredBoms = computed(() => {
 	if (!itemSearch.value) return store.bomList
 	const q = itemSearch.value.toLowerCase()
-	return store.bomList.filter(b =>
-		(b.parent_item_code || '').toLowerCase().includes(q) ||
-		(b.bom_name || '').toLowerCase().includes(q)
+	return store.bomList.filter(
+		(b) =>
+			(b.parent_item_code || '').toLowerCase().includes(q) ||
+			(b.bom_name || '').toLowerCase().includes(q)
 	)
 })
 
@@ -218,7 +306,11 @@ async function doDisassemble() {
 		return
 	}
 	try {
-		const result = await store.disassemble(disassembleSerial.value, selectedBom.value.name, disassembleReason.value)
+		const result = await store.disassemble(
+			disassembleSerial.value,
+			selectedBom.value.name,
+			disassembleReason.value
+		)
 		alert(`Disassembled! Recovered ${result.recovered_components?.length || 0} components`)
 		showDisassemble.value = false
 		disassembleSerial.value = ''
@@ -230,11 +322,11 @@ async function doDisassemble() {
 
 function componentTypeColor(type) {
 	const colors = {
-		'Setting': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+		Setting: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
 		'Center Stone': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
-		'Melee': 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
-		'Finding': 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300',
-		'Labor': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
+		Melee: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
+		Finding: 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300',
+		Labor: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
 	}
 	return colors[type] || 'bg-gray-100 text-gray-700'
 }

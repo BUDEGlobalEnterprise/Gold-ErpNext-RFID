@@ -9,10 +9,21 @@ from frappe.utils import flt, today
 class TestSpecialOrder(FrappeTestCase):
 	def setUp(self):
 		self.customer = frappe.get_doc(
-			{"doctype": "Customer", "customer_name": "_Test SO Customer", "customer_group": "All Customer Groups", "territory": "All Territories"}
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test SO Customer",
+				"customer_group": "All Customer Groups",
+				"territory": "All Territories",
+			}
 		).insert(ignore_if_duplicate=1)
 		self.item = frappe.get_doc(
-			{"doctype": "Item", "item_code": "_Test SO Item", "item_name": "_Test SO Item", "item_group": "All Item Groups", "stock_uom": "Nos"}
+			{
+				"doctype": "Item",
+				"item_code": "_Test SO Item",
+				"item_name": "_Test SO Item",
+				"item_group": "All Item Groups",
+				"stock_uom": "Nos",
+			}
 		).insert(ignore_if_duplicate=1)
 
 	def _make_order(self, total=500, deposit=0):

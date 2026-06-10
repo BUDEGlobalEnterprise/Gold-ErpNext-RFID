@@ -108,8 +108,11 @@ def get_overdue_bench_repairs(days_threshold: int = 14) -> list[dict]:
 			"status": ["not in", ["Completed", "Cancelled", "Delivered"]],
 		},
 		fields=[
-			"name", "customer", "status",
-			"external_bench_vendor", "external_bench_dispatched_at",
+			"name",
+			"customer",
+			"status",
+			"external_bench_vendor",
+			"external_bench_dispatched_at",
 		],
 		order_by="external_bench_dispatched_at asc",
 	)
@@ -137,8 +140,10 @@ def _log_bench_event(event_type, repair_order, vendor, warehouse):
 	log.category = "Repair"
 	log.reference_type = "Repair Order"
 	log.reference_document = repair_order
-	log.details = frappe.as_json({
-		"vendor": vendor,
-		"warehouse": warehouse or "",
-	})
+	log.details = frappe.as_json(
+		{
+			"vendor": vendor,
+			"warehouse": warehouse or "",
+		}
+	)
 	log.insert(ignore_permissions=True)

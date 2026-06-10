@@ -136,12 +136,14 @@ def disassemble_to_components(
 			valuation_rate=unit_cost,
 		)
 
-		recovered_components.append({
-			"item_code": comp.component_item,
-			"qty": qty,
-			"warehouse": dest_wh,
-			"stock_entry": se.name,
-		})
+		recovered_components.append(
+			{
+				"item_code": comp.component_item,
+				"qty": qty,
+				"warehouse": dest_wh,
+				"stock_entry": se.name,
+			}
+		)
 
 	# Clear parent_serial_no on any child serials
 	child_serials = frappe.get_all(
@@ -176,13 +178,15 @@ def get_bom_cost_rollup(bom_name: str) -> dict:
 		line_cost = unit_cost * qty
 		total += line_cost
 
-		component_costs.append({
-			"component_type": comp.component_type,
-			"item_code": comp.component_item,
-			"qty": qty,
-			"unit_cost": flt(unit_cost, 2),
-			"line_cost": flt(line_cost, 2),
-		})
+		component_costs.append(
+			{
+				"component_type": comp.component_type,
+				"item_code": comp.component_item,
+				"qty": qty,
+				"unit_cost": flt(unit_cost, 2),
+				"line_cost": flt(line_cost, 2),
+			}
+		)
 
 	labor_cost = flt(bom.labor_minutes or 0) * flt(bom.labor_cost_per_minute or 0)
 	overhead = total * flt(bom.overhead_pct or 0) / 100
@@ -224,15 +228,11 @@ def _get_component_warehouse(comp, bom) -> str:
 
 def _get_disassembly_destination(comp) -> str:
 	if comp.component_type in ("Center Stone", "Melee"):
-		gem_wh = frappe.db.get_value(
-			"Warehouse", {"warehouse_name": ["like", "%Loose Stone%"]}, "name"
-		)
+		gem_wh = frappe.db.get_value("Warehouse", {"warehouse_name": ["like", "%Loose Stone%"]}, "name")
 		if gem_wh:
 			return gem_wh
 	if comp.component_type == "Setting":
-		scrap_wh = frappe.db.get_value(
-			"Warehouse", {"warehouse_name": ["like", "%Scrap%"]}, "name"
-		)
+		scrap_wh = frappe.db.get_value("Warehouse", {"warehouse_name": ["like", "%Scrap%"]}, "name")
 		if scrap_wh:
 			return scrap_wh
 	store_wh = frappe.db.get_value("Store Location", {"is_active": 1}, "default_warehouse")
@@ -257,11 +257,13 @@ def _log_bom_event(event_type, bom_name, stock_entry, item_code, serial_no, cost
 	log.category = "Inventory"
 	log.reference_type = "Stock Entry"
 	log.reference_document = stock_entry
-	log.details = frappe.as_json({
-		"bom": bom_name,
-		"item_code": item_code,
-		"serial_no": serial_no or "",
-		"cost": flt(cost, 2),
-		"reason": reason or "",
-	})
+	log.details = frappe.as_json(
+		{
+			"bom": bom_name,
+			"item_code": item_code,
+			"serial_no": serial_no or "",
+			"cost": flt(cost, 2),
+			"reason": reason or "",
+		}
+	)
 	log.insert(ignore_permissions=True)

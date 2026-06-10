@@ -125,9 +125,7 @@ def verify_webhook_signature(payload, sig_header, notification_url=None):
 		# Square signs: notification_url + request body, HMAC-SHA256 with webhook sig key
 		url = notification_url or ""
 		combined = url + payload
-		computed = hmac.new(
-			sig_key.encode("utf-8"), combined.encode("utf-8"), hashlib.sha256
-		).hexdigest()
+		computed = hmac.new(sig_key.encode("utf-8"), combined.encode("utf-8"), hashlib.sha256).hexdigest()
 		# Square sends signature in header — compare using constant-time digest
 		return hmac.compare_digest(computed, sig_header)
 	except Exception as e:

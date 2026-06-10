@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, now, getdate, today
+from frappe.utils import flt, getdate, now, today
 
 
 class DunningLetter(Document):
@@ -28,7 +28,11 @@ class DunningLetter(Document):
 
 		last_payment = frappe.get_all(
 			"Customer Ledger Entry",
-			filters={"parent": self.finance_account, "parenttype": "In-House Finance Account", "entry_type": "Payment"},
+			filters={
+				"parent": self.finance_account,
+				"parenttype": "In-House Finance Account",
+				"entry_type": "Payment",
+			},
 			fields=["entry_date"],
 			order_by="entry_date desc",
 			limit=1,
@@ -81,6 +85,7 @@ class DunningLetter(Document):
 				acct.save()
 
 		from zevar_core.api.audit_log import log_event_safely
+
 		log_event_safely(
 			event_type="dunning_letter_sent",
 			details={

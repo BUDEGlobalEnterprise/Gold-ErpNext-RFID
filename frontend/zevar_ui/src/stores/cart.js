@@ -602,15 +602,18 @@ export const useCartStore = defineStore('cart', () => {
 
 	// Load cached settings immediately on store init in case we start offline
 	const offlineStore = useOfflineStore()
-	offlineStore.getCachedSettingValue('pos_settings').then(cached => {
-		if (cached) {
-			taxRate.value = cached.tax_rate || 0
-			currency.value = cached.currency || 'USD'
-			if (cached.max_salesperson_splits) {
-				maxSalespersons.value = cached.max_salesperson_splits
+	offlineStore
+		.getCachedSettingValue('pos_settings')
+		.then((cached) => {
+			if (cached) {
+				taxRate.value = cached.tax_rate || 0
+				currency.value = cached.currency || 'USD'
+				if (cached.max_salesperson_splits) {
+					maxSalespersons.value = cached.max_salesperson_splits
+				}
 			}
-		}
-	}).catch(() => {})
+		})
+		.catch(() => {})
 
 	// ==========================================================================
 	// ORDER SUBMISSION
@@ -709,7 +712,11 @@ export const useCartStore = defineStore('cart', () => {
 	 * @param {number} durationMonths - Contract duration (6, 9, or 12).
 	 * @returns {Promise<object>} The API response with layaway_id.
 	 */
-	async function submitLayaway(depositAmount, durationMonths, { warehouse, irs8300Details } = {}) {
+	async function submitLayaway(
+		depositAmount,
+		durationMonths,
+		{ warehouse, irs8300Details } = {}
+	) {
 		const itemsPayload = items.value.map((i) => ({
 			item_code: i.item_code,
 			qty: i.qty || 1,

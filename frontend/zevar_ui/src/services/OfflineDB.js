@@ -227,8 +227,10 @@ export async function clearSyncedOrders() {
 	return new Promise((resolve, reject) => {
 		request.onsuccess = () => {
 			const items = request.result || []
-			const synced = items.filter(r => r.status === 'synced').sort((a,b) => (b.synced_at || 0) - (a.synced_at || 0))
-			
+			const synced = items
+				.filter((r) => r.status === 'synced')
+				.sort((a, b) => (b.synced_at || 0) - (a.synced_at || 0))
+
 			if (synced.length > 50) {
 				const toDelete = synced.slice(50)
 				for (const record of toDelete) {

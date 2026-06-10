@@ -7,13 +7,15 @@
 		icon-color="var(--red)"
 		:badge="data.count"
 		:badge-severity="data.count > 0 ? 'critical' : 'low'"
-		:aria-label="`Overdue payments: ${formatCurrency(data.total_overdue_amount)} across ${data.count} items`"
+		:aria-label="`Overdue payments: ${formatCurrency(data.total_overdue_amount)} across ${
+			data.count
+		} items`"
 		@click="$emit('open')"
 	>
 		<template #footer>
 			<span class="font-mono">
-				{{ (data.repairs || []).length }} repairs
-				· {{ (data.layaways || []).length }} layaways
+				{{ (data.repairs || []).length }} repairs ·
+				{{ (data.layaways || []).length }} layaways
 			</span>
 		</template>
 	</MetricCard>

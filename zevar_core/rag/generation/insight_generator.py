@@ -11,6 +11,7 @@ Pipeline:
    appear verbatim in a context chunk's value
 7. Strip ungrounded insights; if all fail, return the deterministic fallback
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -32,7 +33,6 @@ from zevar_core.rag.generation.llm_provider import get_llm_provider
 from zevar_core.rag.generation.prompt_templates import build_pnl_prompt
 from zevar_core.rag.indexing.kg_builder import get_or_build_kg
 from zevar_core.rag.indexing.store import VectorStore
-
 
 # ---------------------------------------------------------------------------
 # Public API
@@ -135,13 +135,20 @@ def _retrieve_chunks(scope: str, focus: str | None, limit: int = 12) -> list[dic
 	for i, doc in enumerate(documents):
 		meta = metadatas[i] if i < len(metadatas) else {}
 		dist = distances[i] if i < len(distances) else 0.0
-		chunks.append({
-			"value": str((meta or {}).get("revenue") or (meta or {}).get("count") or (meta or {}).get("value") or ""),
-			"label": (doc or "")[:200],
-			"source_query": (meta or {}).get("source_query", "rag_index"),
-			"date": str((meta or {}).get("date", "")),
-			"confidence": float(dist or 0.0),
-		})
+		chunks.append(
+			{
+				"value": str(
+					(meta or {}).get("revenue")
+					or (meta or {}).get("count")
+					or (meta or {}).get("value")
+					or ""
+				),
+				"label": (doc or "")[:200],
+				"source_query": (meta or {}).get("source_query", "rag_index"),
+				"date": str((meta or {}).get("date", "")),
+				"confidence": float(dist or 0.0),
+			}
+		)
 	# Always include the deterministic today numbers as a baseline
 	chunks.extend(_today_baseline_chunks())
 	return chunks
@@ -156,35 +163,78 @@ def _query_text(scope: str, focus: str | None) -> str:
 
 def _today_baseline_chunks() -> list[dict]:
 	"""Always include today's actual numbers from analytics_hub."""
+	from frappe.utils import nowdate
+
 	from zevar_core.api.analytics_hub import (
 		get_cash_variance_today,
 		get_daily_revenue_breakdown,
 		get_layaway_health,
 		get_overdue_payments,
 	)
-	from frappe.utils import nowdate
 
 	out = []
 	try:
 		d = get_daily_revenue_breakdown(nowdate(), nowdate())
-		out.append({"value": f"{float(d.get('total_revenue') or 0):.2f}", "label": "Today's total revenue", "source_query": "get_daily_revenue_breakdown", "confidence": 1.0})
-		out.append({"value": str(int(d.get("sales_count") or 0)), "label": "Today's sales count", "source_query": "get_daily_revenue_breakdown", "confidence": 1.0})
+		out.append(
+			{
+				"value": f"{float(d.get('total_revenue') or 0):.2f}",
+				"label": "Today's total revenue",
+				"source_query": "get_daily_revenue_breakdown",
+				"confidence": 1.0,
+			}
+		)
+		out.append(
+			{
+				"value": str(int(d.get("sales_count") or 0)),
+				"label": "Today's sales count",
+				"source_query": "get_daily_revenue_breakdown",
+				"confidence": 1.0,
+			}
+		)
 	except Exception:
 		pass
 	try:
 		l = get_layaway_health()
-		out.append({"value": str(int(l.get("active") or 0)), "label": "Active layaways", "source_query": "get_layaway_health", "confidence": 1.0})
-		out.append({"value": str(int(l.get("overdue") or 0)), "label": "Overdue layaways", "source_query": "get_layaway_health", "confidence": 1.0})
+		out.append(
+			{
+				"value": str(int(l.get("active") or 0)),
+				"label": "Active layaways",
+				"source_query": "get_layaway_health",
+				"confidence": 1.0,
+			}
+		)
+		out.append(
+			{
+				"value": str(int(l.get("overdue") or 0)),
+				"label": "Overdue layaways",
+				"source_query": "get_layaway_health",
+				"confidence": 1.0,
+			}
+		)
 	except Exception:
 		pass
 	try:
 		cv = get_cash_variance_today()
-		out.append({"value": f"{float(cv.get('total_variance') or 0):.2f}", "label": "Today's cash variance", "source_query": "get_cash_variance_today", "confidence": 1.0})
+		out.append(
+			{
+				"value": f"{float(cv.get('total_variance') or 0):.2f}",
+				"label": "Today's cash variance",
+				"source_query": "get_cash_variance_today",
+				"confidence": 1.0,
+			}
+		)
 	except Exception:
 		pass
 	try:
 		od = get_overdue_payments()
-		out.append({"value": f"{float(od.get('total_overdue_amount') or 0):.2f}", "label": "Total overdue amount", "source_query": "get_overdue_payments", "confidence": 1.0})
+		out.append(
+			{
+				"value": f"{float(od.get('total_overdue_amount') or 0):.2f}",
+				"label": "Total overdue amount",
+				"source_query": "get_overdue_payments",
+				"confidence": 1.0,
+			}
+		)
 	except Exception:
 		pass
 	return out
@@ -240,6 +290,7 @@ def _parse_json_safely(raw: str) -> dict:
 
 def _deterministic_fallback(scope: str, chunks: list[dict]) -> dict:
 	"""Plan §9.7 last paragraph: rule-based summary when grounding fails."""
+
 	# Pull out a few well-known labels
 	def find(label):
 		for c in chunks:
@@ -268,7 +319,12 @@ def _deterministic_fallback(scope: str, chunks: list[dict]) -> dict:
 				"severity": "info",
 				"text": f"Total revenue today is ${sales} across {count} sales.",
 				"grounded_numbers": [
-					{"value": f"${sales}", "label": "Total revenue", "source_query": "get_daily_revenue_breakdown", "confidence": 1.0}
+					{
+						"value": f"${sales}",
+						"label": "Total revenue",
+						"source_query": "get_daily_revenue_breakdown",
+						"confidence": 1.0,
+					}
 				],
 				"recommended_action": None,
 			}
@@ -282,7 +338,9 @@ def _deterministic_fallback(scope: str, chunks: list[dict]) -> dict:
 
 
 def _insight_id(insight: dict) -> str:
-	text = (insight.get("text") or insight.get("value") or json.dumps(insight, sort_keys=True)).encode("utf-8")
+	text = (insight.get("text") or insight.get("value") or json.dumps(insight, sort_keys=True)).encode(
+		"utf-8"
+	)
 	return hashlib.sha1(text).hexdigest()[:12]
 
 

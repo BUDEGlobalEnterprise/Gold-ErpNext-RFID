@@ -11,8 +11,7 @@ Provides:
 
 import frappe
 from frappe import _
-from frappe.utils import flt, today, getdate, now, add_months, get_first_day, get_last_day
-
+from frappe.utils import add_months, flt, get_first_day, get_last_day, getdate, now, today
 
 # ── Dunning ────────────────────────────────────────────────
 
@@ -60,18 +59,20 @@ def get_overdue_accounts(min_days: int = 30) -> list:
 		if overdue > 0:
 			overdue_days = (today_date - getdate(oldest_overdue)).days if oldest_overdue else 0
 			level = _determine_dunning_level(overdue_days)
-			result.append({
-				"account": acct.name,
-				"customer": acct.customer,
-				"customer_name": customer_name,
-				"email": email,
-				"total_balance": flt(acct.current_balance),
-				"overdue_amount": flt(overdue),
-				"overdue_days": overdue_days,
-				"suggested_level": level,
-				"last_payment": str(last_payment) if last_payment else None,
-				"status": acct.status,
-			})
+			result.append(
+				{
+					"account": acct.name,
+					"customer": acct.customer,
+					"customer_name": customer_name,
+					"email": email,
+					"total_balance": flt(acct.current_balance),
+					"overdue_amount": flt(overdue),
+					"overdue_days": overdue_days,
+					"suggested_level": level,
+					"last_payment": str(last_payment) if last_payment else None,
+					"status": acct.status,
+				}
+			)
 
 	return sorted(result, key=lambda x: x["overdue_days"], reverse=True)
 
@@ -85,7 +86,7 @@ def _determine_dunning_level(days: int) -> str:
 
 
 @frappe.whitelist(methods=["POST"])
-def create_dunning_letter(finance_account: str, dunning_level: str = None) -> dict:
+def create_dunning_letter(finance_account: str, dunning_level: str | None = None) -> dict:
 	"""Create a dunning letter for an overdue account."""
 	frappe.only_for(["Sales Manager", "Accounts Manager", "System Manager"])
 
@@ -110,31 +111,36 @@ def create_dunning_letter(finance_account: str, dunning_level: str = None) -> di
 	overdue_days = (today_date - getdate(oldest_overdue)).days if oldest_overdue else 0
 	level = dunning_level or _determine_dunning_level(overdue_days)
 
-	subject, body = _get_dunning_template(level, {
-		"customer_name": customer_name,
-		"account_id": finance_account,
-		"overdue_amount": flt(overdue),
-		"total_balance": flt(acct.current_balance),
-		"minimum_due": flt(acct.current_balance) * flt(acct.minimum_payment_percent) / 100,
-		"overdue_days": overdue_days,
-		"store_name": frappe.db.get_single_value("Selling Settings", "company") or "Zevar Jewelry",
-	})
+	subject, body = _get_dunning_template(
+		level,
+		{
+			"customer_name": customer_name,
+			"account_id": finance_account,
+			"overdue_amount": flt(overdue),
+			"total_balance": flt(acct.current_balance),
+			"minimum_due": flt(acct.current_balance) * flt(acct.minimum_payment_percent) / 100,
+			"overdue_days": overdue_days,
+			"store_name": frappe.db.get_single_value("Selling Settings", "company") or "Zevar Jewelry",
+		},
+	)
 
-	letter = frappe.get_doc({
-		"doctype": "Dunning Letter",
-		"finance_account": finance_account,
-		"customer": acct.customer,
-		"customer_name": customer_name,
-		"dunning_level": level,
-		"status": "Draft",
-		"overdue_days": overdue_days,
-		"overdue_amount": flt(overdue),
-		"total_balance": flt(acct.current_balance),
-		"minimum_due": flt(acct.current_balance) * flt(acct.minimum_payment_percent) / 100,
-		"interest_rate": flt(acct.interest_rate),
-		"subject": subject,
-		"message_body": body,
-	})
+	letter = frappe.get_doc(
+		{
+			"doctype": "Dunning Letter",
+			"finance_account": finance_account,
+			"customer": acct.customer,
+			"customer_name": customer_name,
+			"dunning_level": level,
+			"status": "Draft",
+			"overdue_days": overdue_days,
+			"overdue_amount": flt(overdue),
+			"total_balance": flt(acct.current_balance),
+			"minimum_due": flt(acct.current_balance) * flt(acct.minimum_payment_percent) / 100,
+			"interest_rate": flt(acct.interest_rate),
+			"subject": subject,
+			"message_body": body,
+		}
+	)
 	letter.insert(ignore_permissions=True)
 
 	return {
@@ -159,6 +165,7 @@ def _get_dunning_template(level: str, ctx: dict) -> tuple:
 
 	if template_name and frappe.db.exists("Email Template", template_name):
 		from frappe.email.doctype.email_template.email_template import get_email_template
+
 		ctx["company"] = ctx.get("store_name", "Zevar Jewelry")
 		try:
 			subject, body = get_email_template(template_name, ctx)
@@ -247,7 +254,7 @@ def run_auto_dunning():
 
 
 @frappe.whitelist(methods=["GET"])
-def generate_customer_statement(account_id: str, month: int = None, year: int = None) -> dict:
+def generate_customer_statement(account_id: str, month: int | None = None, year: int | None = None) -> dict:
 	"""Generate a detailed customer statement for a given period."""
 	frappe.only_for(["Sales User", "Sales Manager", "Accounts Manager", "System Manager"])
 
@@ -260,6 +267,7 @@ def generate_customer_statement(account_id: str, month: int = None, year: int = 
 	email = customer.email_id or ""
 
 	from frappe.utils import getdate
+
 	today_date = getdate(today())
 
 	if month is not None:
@@ -290,14 +298,16 @@ def generate_customer_statement(account_id: str, month: int = None, year: int = 
 		elif entry_date >= period_start and entry_date <= period_end:
 			total_debits += flt(row.debit)
 			total_credits += flt(row.credit)
-			entries.append({
-				"date": str(row.entry_date),
-				"type": row.entry_type,
-				"description": row.description,
-				"debit": flt(row.debit),
-				"credit": flt(row.credit),
-				"balance": flt(row.balance),
-			})
+			entries.append(
+				{
+					"date": str(row.entry_date),
+					"type": row.entry_type,
+					"description": row.description,
+					"debit": flt(row.debit),
+					"credit": flt(row.credit),
+					"balance": flt(row.balance),
+				}
+			)
 
 	closing_balance = opening_balance + total_debits - total_credits
 	min_payment_pct = flt(acct.minimum_payment_percent) or 10
@@ -349,7 +359,7 @@ def _get_customer_address(customer: str) -> str:
 
 
 @frappe.whitelist(methods=["POST"])
-def email_customer_statement(account_id: str, month: int = None, year: int = None) -> dict:
+def email_customer_statement(account_id: str, month: int | None = None, year: int | None = None) -> dict:
 	"""Generate and email a customer statement."""
 	frappe.only_for(["Sales Manager", "Accounts Manager", "System Manager"])
 

@@ -3,7 +3,14 @@ import { createRouter, createWebHistory } from 'vue-router'
 // Role tier definitions — must match backend reports.py constants
 const ROLE_TIERS = {
 	admin: ['Administrator', 'System Manager', 'Accounts Manager'],
-	manager: ['Store Manager', 'Sales Manager', 'Stock Manager', 'Inventory Manager', 'HR Manager', 'HR User'],
+	manager: [
+		'Store Manager',
+		'Sales Manager',
+		'Stock Manager',
+		'Inventory Manager',
+		'HR Manager',
+		'HR User',
+	],
 	employee: ['Sales User', 'Employee', 'Employee Self Service'],
 }
 
@@ -321,79 +328,79 @@ const routes = [
 		component: () => import('./pages/InventoryAudit.vue'),
 		meta: { requiresAuth: true },
 	},
-		// Phase 3: Inventory v2
-		{
-			path: '/stock/bom-builder',
-			name: 'BomBuilder',
-			component: () => import('./pages/stock/BomBuilder.vue'),
-			meta: { requiresAuth: true },
-		},
-		{
-			path: '/stock/gemstones',
-			name: 'GemstoneInventory',
-			component: () => import('./pages/stock/ComponentInventory.vue'),
-			meta: { requiresAuth: true },
-		},
-		{
-			path: '/stock/memo-aging',
-			name: 'MemoAging',
-			component: () => import('./pages/stock/MemoAging.vue'),
-			meta: { requiresAuth: true },
-		},
-		{
-			path: '/stock/appraisal-reminders',
-			name: 'AppraisalReminders',
-			component: () => import('./pages/stock/AppraisalReminders.vue'),
-			meta: { requiresAuth: true },
-		},
-		{
-			path: '/stock/external-bench',
-			name: 'ExternalBench',
-			component: () => import('./pages/stock/ExternalBench.vue'),
-			meta: { requiresAuth: true },
-		},
-		{
-			path: '/stock/metal-purity',
-			name: 'MetalPurityAdmin',
-			component: () => import('./pages/stock/MetalPurityAdmin.vue'),
-			meta: { requiresAuth: true },
-		},
-		{
-			path: '/stock/scrap-recovery',
-			name: 'ScrapRecovery',
-			component: () => import('./pages/stock/ScrapRecovery.vue'),
-			meta: { requiresAuth: true },
-		},
-		{
-			path: '/memos/vendor-dashboard',
-			name: 'VendorMemoDashboard',
-			component: () => import('./pages/memos/VendorMemoDashboard.vue'),
-			meta: { requiresAuth: true },
-		},
-		{
-			path: '/memos/customer',
-			name: 'CustomerMemo',
-			component: () => import('./pages/memos/CustomerMemo.vue'),
-			meta: { requiresAuth: true },
-		},
-		{
-			path: '/memos/item-status',
-			name: 'MemoItemStatus',
-			component: () => import('./pages/memos/MemoItemStatus.vue'),
-			meta: { requiresAuth: true },
-		},
-		{
-			path: '/appraisals/list',
-			name: 'AppraisalList',
-			component: () => import('./pages/appraisals/AppraisalList.vue'),
-			meta: { requiresAuth: true },
-		},
-		{
-			path: '/repairs/parts-drawer',
-			name: 'RepairPartsDrawer',
-			component: () => import('./pages/repairs/RepairPartsDrawer.vue'),
-			meta: { requiresAuth: true },
-		},
+	// Phase 3: Inventory v2
+	{
+		path: '/stock/bom-builder',
+		name: 'BomBuilder',
+		component: () => import('./pages/stock/BomBuilder.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/stock/gemstones',
+		name: 'GemstoneInventory',
+		component: () => import('./pages/stock/ComponentInventory.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/stock/memo-aging',
+		name: 'MemoAging',
+		component: () => import('./pages/stock/MemoAging.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/stock/appraisal-reminders',
+		name: 'AppraisalReminders',
+		component: () => import('./pages/stock/AppraisalReminders.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/stock/external-bench',
+		name: 'ExternalBench',
+		component: () => import('./pages/stock/ExternalBench.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/stock/metal-purity',
+		name: 'MetalPurityAdmin',
+		component: () => import('./pages/stock/MetalPurityAdmin.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/stock/scrap-recovery',
+		name: 'ScrapRecovery',
+		component: () => import('./pages/stock/ScrapRecovery.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/memos/vendor-dashboard',
+		name: 'VendorMemoDashboard',
+		component: () => import('./pages/memos/VendorMemoDashboard.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/memos/customer',
+		name: 'CustomerMemo',
+		component: () => import('./pages/memos/CustomerMemo.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/memos/item-status',
+		name: 'MemoItemStatus',
+		component: () => import('./pages/memos/MemoItemStatus.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/appraisals/list',
+		name: 'AppraisalList',
+		component: () => import('./pages/appraisals/AppraisalList.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/repairs/parts-drawer',
+		name: 'RepairPartsDrawer',
+		component: () => import('./pages/repairs/RepairPartsDrawer.vue'),
+		meta: { requiresAuth: true },
+	},
 	// Phase 2: Accounting
 	{
 		path: '/accounting/transactions',
@@ -531,9 +538,18 @@ router.beforeEach(async (to, _from, next) => {
 		// Legacy requiresManagement check
 		if (to.meta.requiresManagement) {
 			const reportRoles = [
-				'System Manager', 'Administrator', 'Store Manager', 'Sales Manager',
-				'Accounts Manager', 'Sales User', 'Stock Manager', 'Inventory Manager',
-				'HR User', 'HR Manager', 'Employee', 'Employee Self Service',
+				'System Manager',
+				'Administrator',
+				'Store Manager',
+				'Sales Manager',
+				'Accounts Manager',
+				'Sales User',
+				'Stock Manager',
+				'Inventory Manager',
+				'HR User',
+				'HR Manager',
+				'Employee',
+				'Employee Self Service',
 			]
 			if (!userInfo.roles.some((r) => reportRoles.includes(r))) {
 				return next({ name: 'Dashboard', query: { accessDenied: 'true' } })

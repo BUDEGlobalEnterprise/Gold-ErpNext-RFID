@@ -2,7 +2,9 @@
 	<AppLayout>
 		<div class="h-full flex flex-col min-h-0">
 			<!-- Page Header - consistent with other pages -->
-			<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4 flex-shrink-0">
+			<div
+				class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4 flex-shrink-0"
+			>
 				<div class="flex items-center gap-3">
 					<h2 class="premium-title !text-xl sm:!text-2xl">Repair Terminal</h2>
 					<span
@@ -11,7 +13,9 @@
 						{{ orders.length }} Orders
 					</span>
 				</div>
-				<div class="flex flex-wrap lg:flex-nowrap items-center gap-2 w-full lg:w-auto self-end lg:self-auto justify-end">
+				<div
+					class="flex flex-wrap lg:flex-nowrap items-center gap-2 w-full lg:w-auto self-end lg:self-auto justify-end"
+				>
 					<!-- Store Selector (inline) -->
 					<select
 						v-model="selectedStore"
@@ -37,14 +41,20 @@
 					<button
 						@click="showWorkloadPanel = !showWorkloadPanel"
 						class="hidden md:flex px-3 py-2 rounded-lg text-sm font-medium transition items-center gap-1.5"
-						:class="showWorkloadPanel
-							? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30'
-							: 'bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-700 border border-transparent'"
+						:class="
+							showWorkloadPanel
+								? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30'
+								: 'bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-700 border border-transparent'
+						"
 						title="Technician Workload"
 					>
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-								d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+							/>
 						</svg>
 						<span class="hidden lg:inline">Workload</span>
 					</button>
@@ -315,10 +325,7 @@
 			<!-- Main Content Area -->
 			<div class="flex-1 flex min-h-0 overflow-hidden gap-4">
 				<!-- Workload Panel (collapsible sidebar) -->
-				<div
-					v-if="showWorkloadPanel"
-					class="w-72 flex-shrink-0 overflow-y-auto"
-				>
+				<div v-if="showWorkloadPanel" class="w-72 flex-shrink-0 overflow-y-auto">
 					<TechnicianWorkloadPanel />
 				</div>
 
@@ -353,53 +360,92 @@
 				</div>
 
 				<!-- List View -->
-				<div v-else-if="viewMode === 'list'" class="flex-1 overflow-y-auto pb-20 bg-white dark:bg-warm-dark-900/50 rounded-xl border border-gray-100 dark:border-warm-border/50 shadow-sm custom-scrollbar">
+				<div
+					v-else-if="viewMode === 'list'"
+					class="flex-1 overflow-y-auto pb-20 bg-white dark:bg-warm-dark-900/50 rounded-xl border border-gray-100 dark:border-warm-border/50 shadow-sm custom-scrollbar"
+				>
 					<table class="w-full text-sm">
-						<thead class="bg-gray-50 dark:bg-warm-dark-900/90 border-b border-gray-100 dark:border-warm-border/50 sticky top-0 z-10 backdrop-blur-sm">
+						<thead
+							class="bg-gray-50 dark:bg-warm-dark-900/90 border-b border-gray-100 dark:border-warm-border/50 sticky top-0 z-10 backdrop-blur-sm"
+						>
 							<tr>
-								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+								<th
+									class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider"
+								>
 									Order ID
 								</th>
-								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+								<th
+									class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider"
+								>
 									Customer
 								</th>
-								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+								<th
+									class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider"
+								>
 									Repair Type
 								</th>
-								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+								<th
+									class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider"
+								>
 									Status
 								</th>
-								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+								<th
+									class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider"
+								>
 									Priority / Dates
 								</th>
-								<th class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+								<th
+									class="px-4 py-3 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider"
+								>
 									Technician
 								</th>
-								<th class="px-4 py-3 text-right text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+								<th
+									class="px-4 py-3 text-right text-[10px] font-bold text-gray-500 uppercase tracking-wider"
+								>
 									Cost
 								</th>
-								<th class="px-4 py-3 text-right text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+								<th
+									class="px-4 py-3 text-right text-[10px] font-bold text-gray-500 uppercase tracking-wider"
+								>
 									Actions
 								</th>
 							</tr>
 						</thead>
 						<tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
 							<tr v-if="ordersResource.loading && !orders.length">
-								<td colspan="8" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
-									<div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-[#D4AF37] mx-auto mb-3"></div>
+								<td
+									colspan="8"
+									class="px-4 py-12 text-center text-gray-500 dark:text-gray-400"
+								>
+									<div
+										class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-[#D4AF37] mx-auto mb-3"
+									></div>
 									Loading repairs...
 								</td>
 							</tr>
 							<tr v-else-if="!orders.length">
-								<td colspan="8" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+								<td
+									colspan="8"
+									class="px-4 py-12 text-center text-gray-500 dark:text-gray-400"
+								>
 									No repair orders found.
 								</td>
 							</tr>
-							<tr v-for="order in orders" :key="order.name" @click="openDetail(order)" class="hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition-colors cursor-pointer">
+							<tr
+								v-for="order in orders"
+								:key="order.name"
+								@click="openDetail(order)"
+								class="hover:bg-gray-50 dark:hover:bg-warm-dark-700 transition-colors cursor-pointer"
+							>
 								<td class="px-4 py-3">
 									<div class="flex items-center gap-2">
-										<span class="font-mono text-xs font-bold text-[#D4AF37]">{{ order.name }}</span>
-										<span v-if="order.is_warranty_repair" class="px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30 rounded text-[9px] font-bold text-green-600 dark:text-green-400 shrink-0">
+										<span class="font-mono text-xs font-bold text-[#D4AF37]">{{
+											order.name
+										}}</span>
+										<span
+											v-if="order.is_warranty_repair"
+											class="px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30 rounded text-[9px] font-bold text-green-600 dark:text-green-400 shrink-0"
+										>
 											Warranty
 										</span>
 									</div>
@@ -408,7 +454,9 @@
 									</div>
 								</td>
 								<td class="px-4 py-3">
-									<div class="font-semibold text-gray-900 dark:text-white text-xs">
+									<div
+										class="font-semibold text-gray-900 dark:text-white text-xs"
+									>
 										{{ order.customer_name || order.customer }}
 									</div>
 									<div class="text-[10px] text-gray-500 mt-0.5">
@@ -420,67 +468,156 @@
 										{{ order.repair_type_name || order.repair_type }}
 									</div>
 									<div class="flex flex-wrap gap-1 mt-1">
-										<span v-if="order.item_type" class="px-1 py-0.5 bg-gray-50 dark:bg-warm-dark-900 border border-gray-100 dark:border-warm-border/30 rounded text-[8px] font-bold text-gray-500 dark:text-gray-400">
+										<span
+											v-if="order.item_type"
+											class="px-1 py-0.5 bg-gray-50 dark:bg-warm-dark-900 border border-gray-100 dark:border-warm-border/30 rounded text-[8px] font-bold text-gray-500 dark:text-gray-400"
+										>
 											{{ order.item_type }}
 										</span>
-										<span v-if="order.stone_weight && order.stone_weight > 0" class="px-1 py-0.5 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/30 rounded text-[8px] font-bold text-purple-600 dark:text-purple-400">
+										<span
+											v-if="order.stone_weight && order.stone_weight > 0"
+											class="px-1 py-0.5 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/30 rounded text-[8px] font-bold text-purple-600 dark:text-purple-400"
+										>
 											💎 {{ order.stone_weight }}ct
 										</span>
-										<span v-if="order.item_brand" class="px-1 py-0.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 rounded text-[8px] font-bold text-amber-600 dark:text-amber-400">
+										<span
+											v-if="order.item_brand"
+											class="px-1 py-0.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 rounded text-[8px] font-bold text-amber-600 dark:text-amber-400"
+										>
 											{{ order.item_brand }}
 										</span>
 									</div>
 								</td>
 								<td class="px-4 py-3">
-									<span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold" :class="getStatusBadgeClass(order.status)">
+									<span
+										class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold"
+										:class="getStatusBadgeClass(order.status)"
+									>
 										{{ order.status }}
 									</span>
 								</td>
 								<td class="px-4 py-3">
 									<div class="flex items-center gap-1.5">
-										<span class="text-xs font-semibold" :class="{
-											'text-red-500': order.priority === 'Urgent',
-											'text-orange-500': order.priority === 'High',
-											'text-yellow-500': order.priority === 'Medium',
-											'text-gray-500': order.priority === 'Low',
-										}">
+										<span
+											class="text-xs font-semibold"
+											:class="{
+												'text-red-500': order.priority === 'Urgent',
+												'text-orange-500': order.priority === 'High',
+												'text-yellow-500': order.priority === 'Medium',
+												'text-gray-500': order.priority === 'Low',
+											}"
+										>
 											{{ order.priority }}
 										</span>
 									</div>
 									<div class="text-[10px] text-gray-400 mt-0.5">
 										Rec: {{ formatDate(order.creation) }}
 									</div>
-									<div v-if="isOverdue(order.promised_date) && order.status !== 'Delivered'" class="text-[9px] text-red-500 font-bold mt-0.5">
+									<div
+										v-if="
+											isOverdue(order.promised_date) &&
+											order.status !== 'Delivered'
+										"
+										class="text-[9px] text-red-500 font-bold mt-0.5"
+									>
 										Overdue ({{ formatDate(order.promised_date) }})
 									</div>
 								</td>
 								<td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-400">
 									{{ order.handled_by_name || 'Unassigned' }}
 								</td>
-								<td class="px-4 py-3 text-right font-mono font-extrabold text-gray-900 dark:text-white">
+								<td
+									class="px-4 py-3 text-right font-mono font-extrabold text-gray-900 dark:text-white"
+								>
 									${{ formatNum(order.estimated_cost || order.total_cost) }}
 								</td>
 								<td class="px-4 py-3 text-right" @click.stop>
 									<div class="flex items-center justify-end gap-1.5">
-										<button @click="openDetail(order)" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white bg-gray-50 dark:bg-warm-dark-900 hover:bg-gray-100 border border-gray-100 dark:border-warm-border/30 rounded transition" title="View Details">
-											<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+										<button
+											@click="openDetail(order)"
+											class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white bg-gray-50 dark:bg-warm-dark-900 hover:bg-gray-100 border border-gray-100 dark:border-warm-border/30 rounded transition"
+											title="View Details"
+										>
+											<svg
+												class="w-3.5 h-3.5"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+												/>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+												/>
 											</svg>
 										</button>
-										<button @click="quickStatusChange(order.name, getNextStatus(order.status))" class="p-1 text-[#D4AF37] hover:text-black hover:bg-[#D4AF37] border border-[#D4AF37]/30 rounded transition" title="Advance status">
-											<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+										<button
+											@click="
+												quickStatusChange(
+													order.name,
+													getNextStatus(order.status)
+												)
+											"
+											class="p-1 text-[#D4AF37] hover:text-black hover:bg-[#D4AF37] border border-[#D4AF37]/30 rounded transition"
+											title="Advance status"
+										>
+											<svg
+												class="w-3.5 h-3.5"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M14 5l7 7m0 0l-7 7m7-7H3"
+												/>
 											</svg>
 										</button>
-										<button @click="printThermalReceipt(order)" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white bg-gray-50 dark:bg-warm-dark-900 hover:bg-gray-100 border border-gray-100 dark:border-warm-border/30 rounded transition" title="Print Receipt">
-											<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+										<button
+											@click="printThermalReceipt(order)"
+											class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white bg-gray-50 dark:bg-warm-dark-900 hover:bg-gray-100 border border-gray-100 dark:border-warm-border/30 rounded transition"
+											title="Print Receipt"
+										>
+											<svg
+												class="w-3.5 h-3.5"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+												/>
 											</svg>
 										</button>
-										<button @click="showQRCode(order)" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white bg-gray-50 dark:bg-warm-dark-900 hover:bg-gray-100 border border-gray-100 dark:border-warm-border/30 rounded transition" title="QR Code">
-											<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+										<button
+											@click="showQRCode(order)"
+											class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white bg-gray-50 dark:bg-warm-dark-900 hover:bg-gray-100 border border-gray-100 dark:border-warm-border/30 rounded transition"
+											title="QR Code"
+										>
+											<svg
+												class="w-3.5 h-3.5"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+												/>
 											</svg>
 										</button>
 									</div>
@@ -535,7 +672,9 @@
 			mode="repair"
 			:referenceId="paymentOrder?.name"
 			:balanceAmount="paymentOrder?.balance_due || paymentOrder?.total_cost || 0"
-			:itemDetails="{ description: paymentOrder?.item_description || paymentOrder?.repair_type }"
+			:itemDetails="{
+				description: paymentOrder?.item_description || paymentOrder?.repair_type,
+			}"
 			@close="showPaymentModal = false"
 			@success="onRepairCreated"
 		/>

@@ -15,7 +15,7 @@
 					:src="`${baseUrl}placeholders/${getJewelryCategory(details)}.png`"
 					:alt="details.item_name"
 					class="w-full h-full object-cover"
-					@error="(e) => e.target.src = `${baseUrl}placeholders/jewel.png`"
+					@error="(e) => (e.target.src = `${baseUrl}placeholders/jewel.png`)"
 				/>
 			</div>
 
@@ -203,37 +203,80 @@ const cart = useCartStore()
 const baseUrl = import.meta.env.BASE_URL
 
 function getJewelryCategory(item) {
-	const name = (item.item_name || '').toLowerCase();
-	const group = (item.item_group || '').toLowerCase();
-	const type = (item.jewelry_type || '').toLowerCase();
-	const cat = (item.category || '').toLowerCase();
-	
-	if (name.includes('ring') || group.includes('ring') || type.includes('ring') || cat.includes('ring')) {
-		return 'ring';
+	const name = (item.item_name || '').toLowerCase()
+	const group = (item.item_group || '').toLowerCase()
+	const type = (item.jewelry_type || '').toLowerCase()
+	const cat = (item.category || '').toLowerCase()
+
+	if (
+		name.includes('ring') ||
+		group.includes('ring') ||
+		type.includes('ring') ||
+		cat.includes('ring')
+	) {
+		return 'ring'
 	}
-	if (name.includes('earring') || group.includes('earring') || type.includes('earring') || cat.includes('earring')) {
-		return 'earring';
+	if (
+		name.includes('earring') ||
+		group.includes('earring') ||
+		type.includes('earring') ||
+		cat.includes('earring')
+	) {
+		return 'earring'
 	}
-	if (name.includes('pendant') || name.includes('gemstone') || group.includes('pendant') || type.includes('pendant') || cat.includes('pendant')) {
-		return 'pendant';
+	if (
+		name.includes('pendant') ||
+		name.includes('gemstone') ||
+		group.includes('pendant') ||
+		type.includes('pendant') ||
+		cat.includes('pendant')
+	) {
+		return 'pendant'
 	}
-	if (name.includes('watch') || name.includes('timepiece') || group.includes('watch') || type.includes('watch') || cat.includes('watch')) {
-		return 'watch';
+	if (
+		name.includes('watch') ||
+		name.includes('timepiece') ||
+		group.includes('watch') ||
+		type.includes('watch') ||
+		cat.includes('watch')
+	) {
+		return 'watch'
 	}
-	if (name.includes('bracelet') || name.includes('bangle') || group.includes('bangle') || group.includes('bracelet') || type.includes('bracelet') || cat.includes('bracelet') || name.includes('cuff')) {
-		return 'bracelet';
+	if (
+		name.includes('bracelet') ||
+		name.includes('bangle') ||
+		group.includes('bangle') ||
+		group.includes('bracelet') ||
+		type.includes('bracelet') ||
+		cat.includes('bracelet') ||
+		name.includes('cuff')
+	) {
+		return 'bracelet'
 	}
-	if (name.includes('necklace') || name.includes('choker') || group.includes('necklace') || type.includes('necklace') || cat.includes('necklace')) {
-		return 'necklace';
+	if (
+		name.includes('necklace') ||
+		name.includes('choker') ||
+		group.includes('necklace') ||
+		type.includes('necklace') ||
+		cat.includes('necklace')
+	) {
+		return 'necklace'
 	}
 	// Smart resolution for Chain, Link, Rope, Cuban
-	if (name.includes('chain') || name.includes('link') || name.includes('rope') || name.includes('cuban') || group.includes('chain') || type.includes('chain')) {
+	if (
+		name.includes('chain') ||
+		name.includes('link') ||
+		name.includes('rope') ||
+		name.includes('cuban') ||
+		group.includes('chain') ||
+		type.includes('chain')
+	) {
 		if (/7|8|9/.test(name)) {
-			return 'bracelet';
+			return 'bracelet'
 		}
-		return 'necklace';
+		return 'necklace'
 	}
-	return 'jewel';
+	return 'jewel'
 }
 
 const details = ref({})

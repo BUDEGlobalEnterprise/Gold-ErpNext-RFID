@@ -40,14 +40,30 @@
 					</div>
 
 					<div v-else-if="loadError" class="p-4 space-y-4">
-						<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+						<div
+							class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4"
+						>
 							<div class="flex items-start gap-3">
-								<svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+								<svg
+									class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+									/>
 								</svg>
 								<div>
-									<div class="text-sm font-bold text-red-700 dark:text-red-400">Failed to load details</div>
-									<div class="text-xs text-red-600 dark:text-red-300 mt-1">{{ loadError }}</div>
+									<div class="text-sm font-bold text-red-700 dark:text-red-400">
+										Failed to load details
+									</div>
+									<div class="text-xs text-red-600 dark:text-red-300 mt-1">
+										{{ loadError }}
+									</div>
 								</div>
 							</div>
 							<button
@@ -60,10 +76,23 @@
 
 						<div class="bg-gray-50 dark:bg-warm-dark-900 rounded-lg p-4">
 							<div class="text-xs text-gray-500 mb-1">{{ item.code }}</div>
-							<div class="text-base font-bold text-gray-900 dark:text-white">{{ item.name }}</div>
-							<div v-if="item.metal || item.purity" class="flex flex-wrap gap-1.5 mt-2">
-								<span v-if="item.metal" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400">{{ item.metal }}</span>
-								<span v-if="item.purity" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-200 dark:bg-warm-dark-700 text-gray-700 dark:text-gray-300">{{ item.purity }}</span>
+							<div class="text-base font-bold text-gray-900 dark:text-white">
+								{{ item.name }}
+							</div>
+							<div
+								v-if="item.metal || item.purity"
+								class="flex flex-wrap gap-1.5 mt-2"
+							>
+								<span
+									v-if="item.metal"
+									class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400"
+									>{{ item.metal }}</span
+								>
+								<span
+									v-if="item.purity"
+									class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-200 dark:bg-warm-dark-700 text-gray-700 dark:text-gray-300"
+									>{{ item.purity }}</span
+								>
 							</div>
 							<div v-if="item.weight" class="mt-3 text-xs">
 								<span class="text-gray-500">Weight</span>
@@ -432,11 +461,7 @@ async function fetchDetails() {
 	}
 }
 
-watch(
-	() => props.item,
-	fetchDetails,
-	{ immediate: true }
-)
+watch(() => props.item, fetchDetails, { immediate: true })
 
 function getFirstSerial() {
 	if (details.value?.serials?.length > 0) return details.value.serials[0].name

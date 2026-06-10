@@ -12,7 +12,9 @@
 		<template #footer>
 			<span class="font-mono">
 				{{ (data.sessions || []).length }} sessions
-				<span v-if="data.within_tolerance" class="ml-1 text-emerald-500">· in tolerance</span>
+				<span v-if="data.within_tolerance" class="ml-1 text-emerald-500"
+					>· in tolerance</span
+				>
 				<span v-else class="ml-1 text-red-500">· out of tolerance</span>
 			</span>
 		</template>

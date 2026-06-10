@@ -56,12 +56,15 @@ def activate_pos_profile(profile_name: str) -> dict:
 	)
 
 	# Notify all managers
-	_notify_activation("pos_profile_activation", {
-		"event_type": "activated",
-		"profile_name": profile_name,
-		"activated_by": frappe.session.user,
-		"timestamp": str(now_datetime()),
-	})
+	_notify_activation(
+		"pos_profile_activation",
+		{
+			"event_type": "activated",
+			"profile_name": profile_name,
+			"activated_by": frappe.session.user,
+			"timestamp": str(now_datetime()),
+		},
+	)
 
 	return {
 		"success": True,
@@ -102,12 +105,16 @@ def deactivate_pos_profile(profile_name: str, reason: str | None = None) -> dict
 	)
 
 	if open_session:
-		frappe.publish_realtime("pos_profile_deactivated", {
-			"profile_name": profile_name,
-			"session_name": open_session.name,
-			"reason": reason or "Deactivated by manager",
-			"timestamp": str(now_datetime()),
-		}, user=open_session.user)
+		frappe.publish_realtime(
+			"pos_profile_deactivated",
+			{
+				"profile_name": profile_name,
+				"session_name": open_session.name,
+				"reason": reason or "Deactivated by manager",
+				"timestamp": str(now_datetime()),
+			},
+			user=open_session.user,
+		)
 
 	from zevar_core.api.audit_log import log_event_safely
 
@@ -141,8 +148,13 @@ def get_activation_status(profile_name: str) -> dict:
 	profile_values = frappe.db.get_value(
 		"POS Profile",
 		profile_name,
-		["disabled", "custom_is_activated", "custom_activated_by",
-		 "custom_activated_at", "custom_auto_deactivate_time"],
+		[
+			"disabled",
+			"custom_is_activated",
+			"custom_activated_by",
+			"custom_activated_at",
+			"custom_auto_deactivate_time",
+		],
 		as_dict=True,
 	)
 
@@ -163,7 +175,9 @@ def get_activation_status(profile_name: str) -> dict:
 		"is_activated": is_activated,
 		"can_use": is_activated and not is_disabled,
 		"activated_by": getattr(profile_values, "custom_activated_by", None),
-		"activated_at": str(getattr(profile_values, "custom_activated_at", "")) if getattr(profile_values, "custom_activated_at", None) else None,
+		"activated_at": str(getattr(profile_values, "custom_activated_at", ""))
+		if getattr(profile_values, "custom_activated_at", None)
+		else None,
 		"auto_deactivate_time": str(auto_deactivate) if auto_deactivate else None,
 	}
 
@@ -176,8 +190,13 @@ def get_all_activation_statuses() -> dict:
 	profiles = frappe.get_all(
 		"POS Profile",
 		filters={"disabled": 0},
-		fields=["name", "custom_is_activated", "custom_activated_by",
-				"custom_activated_at", "custom_auto_deactivate_time"],
+		fields=[
+			"name",
+			"custom_is_activated",
+			"custom_activated_by",
+			"custom_activated_at",
+			"custom_auto_deactivate_time",
+		],
 		order_by="name",
 	)
 
@@ -186,7 +205,9 @@ def get_all_activation_statuses() -> dict:
 		is_activated = bool(getattr(p, "custom_is_activated", 0))
 		activated_by_name = ""
 		if getattr(p, "custom_activated_by", None):
-			activated_by_name = frappe.db.get_value("User", p.custom_activated_by, "full_name") or p.custom_activated_by
+			activated_by_name = (
+				frappe.db.get_value("User", p.custom_activated_by, "full_name") or p.custom_activated_by
+			)
 
 		# Check for open session
 		open_session = frappe.db.get_value(
@@ -195,16 +216,22 @@ def get_all_activation_statuses() -> dict:
 			fieldname="name",
 		)
 
-		result.append({
-			"profile_name": p.name,
-			"is_activated": is_activated,
-			"activated_by": getattr(p, "custom_activated_by", None),
-			"activated_by_name": activated_by_name,
-			"activated_at": str(p.custom_activated_at) if getattr(p, "custom_activated_at", None) else None,
-			"auto_deactivate_time": str(p.custom_auto_deactivate_time) if getattr(p, "custom_auto_deactivate_time", None) else None,
-			"has_open_session": bool(open_session),
-			"open_session_name": open_session,
-		})
+		result.append(
+			{
+				"profile_name": p.name,
+				"is_activated": is_activated,
+				"activated_by": getattr(p, "custom_activated_by", None),
+				"activated_by_name": activated_by_name,
+				"activated_at": str(p.custom_activated_at)
+				if getattr(p, "custom_activated_at", None)
+				else None,
+				"auto_deactivate_time": str(p.custom_auto_deactivate_time)
+				if getattr(p, "custom_auto_deactivate_time", None)
+				else None,
+				"has_open_session": bool(open_session),
+				"open_session_name": open_session,
+			}
+		)
 
 	return {"profiles": result, "count": len(result)}
 
@@ -229,11 +256,15 @@ def auto_deactivate_profiles():
 			continue
 
 		if now >= auto_time:
-			frappe.db.set_value("POS Profile", p.name, {
-				"custom_is_activated": 0,
-				"custom_activated_by": None,
-				"custom_activated_at": None,
-			})
+			frappe.db.set_value(
+				"POS Profile",
+				p.name,
+				{
+					"custom_is_activated": 0,
+					"custom_activated_by": None,
+					"custom_activated_at": None,
+				},
+			)
 
 			# Notify cashier if session is open
 			open_session = frappe.db.get_value(
@@ -243,12 +274,16 @@ def auto_deactivate_profiles():
 				as_dict=True,
 			)
 			if open_session:
-				frappe.publish_realtime("pos_profile_deactivated", {
-					"profile_name": p.name,
-					"session_name": open_session.name,
-					"reason": "Auto-deactivated at scheduled time",
-					"timestamp": str(now_datetime()),
-				}, user=open_session.user)
+				frappe.publish_realtime(
+					"pos_profile_deactivated",
+					{
+						"profile_name": p.name,
+						"session_name": open_session.name,
+						"reason": "Auto-deactivated at scheduled time",
+						"timestamp": str(now_datetime()),
+					},
+					user=open_session.user,
+				)
 
 			deactivated.append(p.name)
 

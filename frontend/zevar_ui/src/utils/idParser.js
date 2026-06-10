@@ -9,14 +9,63 @@
 // Known 3-character AAMVA field codes used as delimiters during greedy capture.
 // Not exhaustive — only the codes we extract plus common surrounding ones.
 const FIELD_CODES = [
-	'DAQ', 'DCS', 'DAC', 'DCT', 'DAD', 'DBA', 'DBB', 'DBC', 'DBD', 'DAY',
-	'DAG', 'DAI', 'DAJ', 'DAK', 'DAL', 'DAM', 'DCG',
-	'DCS', 'DAB', 'DAU', 'DCA', 'DCB', 'DCD', 'DDE', 'DDF', 'DDG',
-	'DDH', 'DDI', 'DDJ', 'DDK', 'DDL',
-	'DAA', 'DAB', 'DAC', 'DAD', 'DAE', 'DAF', 'DAG', 'DAH', 'DAI',
-	'DAJ', 'DAK', 'DAL', 'DAM',
-	'DCE', 'DCF', 'DCG', 'DCH', 'DCI',
-	'ZG', 'ZI', 'ZJ', 'ZK', 'ZL', 'ZM', 'ZN', 'ZO',
+	'DAQ',
+	'DCS',
+	'DAC',
+	'DCT',
+	'DAD',
+	'DBA',
+	'DBB',
+	'DBC',
+	'DBD',
+	'DAY',
+	'DAG',
+	'DAI',
+	'DAJ',
+	'DAK',
+	'DAL',
+	'DAM',
+	'DCG',
+	'DCS',
+	'DAB',
+	'DAU',
+	'DCA',
+	'DCB',
+	'DCD',
+	'DDE',
+	'DDF',
+	'DDG',
+	'DDH',
+	'DDI',
+	'DDJ',
+	'DDK',
+	'DDL',
+	'DAA',
+	'DAB',
+	'DAC',
+	'DAD',
+	'DAE',
+	'DAF',
+	'DAG',
+	'DAH',
+	'DAI',
+	'DAJ',
+	'DAK',
+	'DAL',
+	'DAM',
+	'DCE',
+	'DCF',
+	'DCG',
+	'DCH',
+	'DCI',
+	'ZG',
+	'ZI',
+	'ZJ',
+	'ZK',
+	'ZL',
+	'ZM',
+	'ZN',
+	'ZO',
 ]
 
 const FIELD_CODE_SET = new Set(FIELD_CODES)
@@ -59,7 +108,13 @@ function getField(data, code) {
 			// or by a newline/whitespace boundary. If whitespace is missing,
 			// AAMVA concatenates fields directly, so we just check the code.
 			const prevChar = data[i - 1]
-			if (i === valueStart || prevChar === '\n' || prevChar === ' ' || /^[A-Z0-9]$/.test(prevChar) || !prevChar) {
+			if (
+				i === valueStart ||
+				prevChar === '\n' ||
+				prevChar === ' ' ||
+				/^[A-Z0-9]$/.test(prevChar) ||
+				!prevChar
+			) {
 				valueEnd = i
 				break
 			}
@@ -162,7 +217,12 @@ export function parseAAMVA(data) {
  */
 export function isAadhaar(data) {
 	if (!data || typeof data !== 'string') return false
-	return data.includes('<PrintLetterBarcodeData') || data.includes('PrintLetterBarcodeData') || data.includes('Aadhaar') || /uid="\d{12}"/i.test(data)
+	return (
+		data.includes('<PrintLetterBarcodeData') ||
+		data.includes('PrintLetterBarcodeData') ||
+		data.includes('Aadhaar') ||
+		/uid="\d{12}"/i.test(data)
+	)
 }
 
 /**
@@ -298,60 +358,248 @@ export function parseOCRText(text) {
 
 	if (!text) return result
 
-	// 1. Extract Aadhaar number (12 digits, optionally space-separated)
-	const uidMatch = text.match(/\b\d{4}\s\d{4}\s\d{4}\b/) || text.match(/\b\d{12}\b/)
-	if (uidMatch) {
-		result.idNumber = uidMatch[0].replace(/\s/g, '')
-	}
-
-	// 2. Extract DOB (format DD/MM/YYYY or DD-MM-YYYY)
-	const dobMatch = text.match(/\b\d{2}[-/]\d{2}[-/]\d{4}\b/)
-	if (dobMatch) {
-		const cleanDob = dobMatch[0].replace(/\//g, '-')
-		const parts = cleanDob.split('-')
-		if (parts.length === 3 && parts[2].length === 4) {
-			result.dob = `${parts[2]}-${parts[1]}-${parts[0]}`
-		}
-	}
-
-	// 3. Extract Name (ignore noise lines, look for clean alphabetical line)
-	const lines = text.split('\n')
-		.map(line => line.trim())
-		.filter(line => line.length > 2)
-
-	const noiseWords = [
-		'government', 'india', 'bharat', 'sarkar', 'aadhaar', 'unique', 'identification',
-		'authority', 'male', 'female', 'dob', 'birth', 'yob', 'year', 'enrollment', 'help'
+	// 1. Extract ID/DL number — try multiple patterns
+	const dlPatterns = [
+		/(?:4d\s*)?DLN\s*([A-Z0-9]{5,14})/i, // AAMVA 4d DLN prefix
+		/DL\s*(?:NO|#|:)?\s*([A-Z0-9]{5,14})/i, // DL NO / DL# / DL:
+		/(?:LICENSE|LIC)\s*(?:NO|#|:)?\s*([A-Z0-9]{5,14})/i, // LICENSE NO
+		/(?:ID)\s*(?:NO|#|:)?\s*([A-Z0-9]{5,14})/i, // ID NO
+		/\b([A-Z]\d{7,13})\b/, // California format: letter + 7-13 digits
+		/\b(\d{3}-\d{2}-\d{4})\b/, // SSN format (some states)
 	]
-
-	let nameCandidate = ''
-	for (let i = 0; i < lines.length; i++) {
-		const lineLower = lines[i].toLowerCase()
-		if (noiseWords.some(word => lineLower.includes(word))) {
-			continue
-		}
-		if (/\d{4}\s\d{4}\s\d{4}/.test(lines[i]) || /^\d{12}$/.test(lines[i])) {
-			continue
-		}
-		// First alphabetical line with capitalized words is the name
-		if (/^[A-Z][a-zA-Z]*(\s+[A-Z][a-zA-Z]*)*$/.test(lines[i])) {
-			nameCandidate = lines[i]
+	for (const pat of dlPatterns) {
+		const m = text.match(pat)
+		if (m) {
+			result.idNumber = m[1].replace(/\s/g, '')
 			break
 		}
 	}
+	// Aadhaar fallback
+	if (!result.idNumber) {
+		const uidMatch = text.match(/\b\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/)
+		if (uidMatch) result.idNumber = uidMatch[0].replace(/[\s-]/g, '')
+	}
 
-	if (nameCandidate) {
-		result.name = nameCandidate
-		const parts = nameCandidate.split(/\s+/)
+	// 2. Extract DOB — try labeled then bare date patterns
+	const dobPatterns = [
+		/(?:DOB|D\.?O\.?B|BIRTH|DATE\s*OF\s*BIRTH)\s*[:.]?\s*(\d{1,2}[\s/.-]\d{1,2}[\s/.-]\d{2,4})/i,
+		/\b3\s+DOB\s+(\d{1,2}[/.-]\d{1,2}[/.-]\d{4})\b/i, // AAMVA field 3 DOB
+	]
+	let rawDob = ''
+	for (const pat of dobPatterns) {
+		const m = text.match(pat)
+		if (m) {
+			rawDob = m[1]
+			break
+		}
+	}
+	// Fallback: find any MM/DD/YYYY date
+	if (!rawDob) {
+		const dateMatch = text.match(/\b(\d{1,2}[/.-]\d{1,2}[/.-]\d{4})\b/)
+		if (dateMatch) rawDob = dateMatch[1]
+	}
+	if (rawDob) {
+		const cleanDob = rawDob.replace(/[/.]/g, '-').replace(/\s/g, '')
+		const parts = cleanDob.split('-')
+		if (parts.length === 3 && parts[2].length === 4) {
+			const p0 = parseInt(parts[0], 10)
+			if (p0 > 12) {
+				result.dob = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(
+					2,
+					'0'
+				)}`
+			} else {
+				result.dob = `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(
+					2,
+					'0'
+				)}`
+			}
+		} else if (parts.length === 3 && parts[0].length === 4) {
+			result.dob = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`
+		}
+	}
+
+	// 3. Extract Name — multiple strategies
+	const linesRaw = text
+		.split('\n')
+		.map((line) => line.trim())
+		.filter((line) => line.length > 1)
+
+	// Strategy A: Look for AAMVA visual field numbers (1 LASTNAME, 2 FIRSTNAME)
+	let aamvaLastName = ''
+	let aamvaFirstName = ''
+	let aamvaAddress = []
+
+	for (let i = 0; i < linesRaw.length; i++) {
+		const line = linesRaw[i]
+		// Match "1 SAMPLE" or "1. SAMPLE" — the number label before the last name
+		const lastMatch = line.match(/^1\s+([A-Z][A-Za-z-]+(?:\s+[A-Z][A-Za-z-]+)*)/)
+		if (lastMatch && !aamvaLastName) {
+			aamvaLastName = lastMatch[1].trim()
+			continue
+		}
+		// Match "2 JANICE" — the number label before the first name
+		const firstMatch = line.match(/^2\s+([A-Z][A-Za-z-]+(?:\s+[A-Z][A-Za-z-]+)*)/)
+		if (firstMatch && !aamvaFirstName) {
+			aamvaFirstName = firstMatch[1].trim()
+			continue
+		}
+		// Match "8 123 NORTH STREET" — address
+		const addrMatch = line.match(/^8\s+(.+)$/)
+		if (addrMatch && aamvaAddress.length === 0) {
+			aamvaAddress.push(addrMatch[1].trim())
+			// Next line might be city/state/zip
+			if (i + 1 < linesRaw.length && /^[A-Za-z]/.test(linesRaw[i + 1])) {
+				aamvaAddress.push(linesRaw[i + 1].trim())
+			}
+		}
+	}
+
+	// Strategy B: Look for keyword-labeled lines ("LN: SAMPLE", "FN: JANICE")
+	if (!aamvaLastName) {
+		const lnMatch = text.match(/(?:LN|LAST\s*NAME|SURNAME)\s*[:.]?\s*([A-Z][A-Za-z-]+)/i)
+		if (lnMatch) aamvaLastName = lnMatch[1].trim()
+	}
+	if (!aamvaFirstName) {
+		const fnMatch = text.match(/(?:FN|FIRST\s*NAME|GIVEN\s*NAME)\s*[:.]?\s*([A-Z][A-Za-z-]+)/i)
+		if (fnMatch) aamvaFirstName = fnMatch[1].trim()
+	}
+
+	// Strategy C: Look for ALL-CAPS words that are likely names (on US DLs names are always uppercase)
+	if (!aamvaLastName && !aamvaFirstName) {
+		const noiseWords = new Set([
+			'california',
+			'texas',
+			'florida',
+			'new',
+			'york',
+			'illinois',
+			'ohio',
+			'arizona',
+			'usa',
+			'driver',
+			'license',
+			'licence',
+			'identification',
+			'card',
+			'state',
+			'department',
+			'public',
+			'safety',
+			'dln',
+			'dob',
+			'exp',
+			'iss',
+			'sex',
+			'eyes',
+			'hair',
+			'hgt',
+			'wgt',
+			'class',
+			'end',
+			'rest',
+			'restrictions',
+			'donor',
+			'none',
+			'brn',
+			'blk',
+			'blu',
+			'grn',
+			'hzl',
+			'sample',
+			'specimen',
+			'duplicate',
+			'north',
+			'south',
+			'east',
+			'west',
+			'street',
+			'avenue',
+			'road',
+			'drive',
+			'sacramento',
+			'golden',
+			'iss',
+			'the',
+		])
+
+		// Find lines that are purely uppercase alpha text ≥ 4 chars and aren't noise
+		const nameLines = []
+		for (const line of linesRaw) {
+			const cleaned = line.replace(/[^A-Za-z\s]/g, '').trim()
+			if (cleaned.length < 3) continue
+			if (/^[A-Z\s]+$/.test(cleaned)) {
+				const words = cleaned
+					.split(/\s+/)
+					.filter((w) => w.length >= 2 && !noiseWords.has(w.toLowerCase()))
+				if (words.length > 0) {
+					nameLines.push(words.join(' '))
+				}
+			}
+		}
+
+		if (nameLines.length >= 2) {
+			// US DL: first line is last name, second is first name
+			aamvaLastName = nameLines[0]
+			aamvaFirstName = nameLines[1]
+		} else if (nameLines.length === 1) {
+			// Single name line — could be "JANICE SAMPLE" on one line
+			const words = nameLines[0].split(/\s+/)
+			if (words.length >= 2) {
+				aamvaFirstName = words[0]
+				aamvaLastName = words.slice(1).join(' ')
+			} else {
+				aamvaFirstName = nameLines[0]
+			}
+		}
+	}
+
+	// Compose the final name
+	if (aamvaFirstName || aamvaLastName) {
+		const combined = `${aamvaFirstName} ${aamvaLastName}`.trim()
+		result.name = combined
+			.split(' ')
+			.map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+			.join(' ')
+		const parts = result.name.split(/\s+/)
 		if (parts.length > 1) {
 			result.lastName = parts.pop()
 			result.firstName = parts.join(' ')
 		} else {
-			result.firstName = nameCandidate
+			result.firstName = result.name
+		}
+	}
+
+	// 4. Extract Address
+	if (aamvaAddress.length > 0) {
+		result.address = aamvaAddress.join(', ')
+	} else {
+		// Try keyword-labeled address
+		const addrPatterns = [
+			/(?:address|addr|add)\s*[:.]?\s*([^\n]+(?:\n[^\n]+){0,2})/i,
+			/\b8\s+(\d+[^0-9\n][^\n]+)/, // "8 123 NORTH STREET"
+		]
+		for (const pat of addrPatterns) {
+			const m = text.match(pat)
+			if (m) {
+				result.address = m[1].replace(/\n/g, ', ').trim()
+				break
+			}
+		}
+		// Fallback: find a line with a street number
+		if (!result.address) {
+			for (const line of linesRaw) {
+				if (
+					/^\d+\s+[A-Za-z]+\s+(?:ST|STREET|AVE|AVENUE|RD|ROAD|DR|DRIVE|BLVD|CT|LN|WAY|PL|CIR)/i.test(
+						line
+					)
+				) {
+					result.address = line.trim()
+					break
+				}
+			}
 		}
 	}
 
 	return result
 }
-
-

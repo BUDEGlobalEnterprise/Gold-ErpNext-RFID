@@ -50,13 +50,17 @@ def get_expiring_appraisals(days_ahead: int = 90) -> list[dict]:
 	return frappe.get_all(
 		"Jewelry Appraisal",
 		filters={
-			"valid_until": ["<=", cutoff],
-			"valid_until": [">=", nowdate()],
+			"valid_until": ["between", [nowdate(), cutoff]],
 			"docstatus": ["!=", 2],
 		},
 		fields=[
-			"name", "item_code", "serial_no", "customer",
-			"appraised_value", "valid_until", "appraisal_template",
+			"name",
+			"item_code",
+			"serial_no",
+			"customer",
+			"appraised_value",
+			"valid_until",
+			"appraisal_template",
 		],
 		order_by="valid_until asc",
 	)
@@ -99,6 +103,7 @@ def send_expiry_reminders() -> dict:
 
 	# 30-day reminder
 	from frappe.utils import add_days
+
 	appraisals_30 = frappe.get_all(
 		"Jewelry Appraisal",
 		filters={
@@ -127,9 +132,15 @@ def get_appraisal_history(item_code: str, serial_no: str | None = None) -> list[
 		"Jewelry Appraisal",
 		filters=filters,
 		fields=[
-			"name", "item_code", "serial_no", "customer",
-			"appraised_value", "appraisal_date", "valid_until",
-			"appraisal_template", "docstatus",
+			"name",
+			"item_code",
+			"serial_no",
+			"customer",
+			"appraised_value",
+			"appraisal_date",
+			"valid_until",
+			"appraisal_template",
+			"docstatus",
 		],
 		order_by="appraisal_date desc",
 	)

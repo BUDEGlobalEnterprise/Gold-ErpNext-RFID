@@ -1,7 +1,9 @@
 <template>
 	<AppLayout>
 		<div class="flex flex-col h-full">
-			<div class="flex flex-col gap-3 mb-4 flex-shrink-0 pb-3 border-b border-gray-100 dark:border-warm-border/30">
+			<div
+				class="flex flex-col gap-3 mb-4 flex-shrink-0 pb-3 border-b border-gray-100 dark:border-warm-border/30"
+			>
 				<!-- Title & Display Controls Row (Always single-line, fits perfectly) -->
 				<div class="flex items-center justify-between gap-4 w-full">
 					<div class="flex items-center gap-3">
@@ -51,7 +53,11 @@
 								/>
 							</svg>
 						</button>
-						<ViewToggle v-model="viewMode" storage-key="zevar_inventory_view" class="flex-shrink-0" />
+						<ViewToggle
+							v-model="viewMode"
+							storage-key="zevar_inventory_view"
+							class="flex-shrink-0"
+						/>
 
 						<!-- Mobile Menu Toggle -->
 						<div class="md:hidden">
@@ -138,7 +144,9 @@
 					</button>
 
 					<!-- Bulk Actions Button Group -->
-					<div class="hidden sm:inline-flex rounded-lg border border-gray-200 dark:border-warm-border/50 shadow-sm bg-white dark:bg-warm-dark-800 overflow-hidden flex-shrink-0">
+					<div
+						class="hidden sm:inline-flex rounded-lg border border-gray-200 dark:border-warm-border/50 shadow-sm bg-white dark:bg-warm-dark-800 overflow-hidden flex-shrink-0"
+					>
 						<button
 							@click="openPushForSelected"
 							class="flex items-center gap-1 px-2.5 py-1.5 border-r border-gray-200 dark:border-warm-border/50 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition whitespace-nowrap"
@@ -164,8 +172,8 @@
 			<div v-if="mobileMenuOpen" class="md:hidden grid grid-cols-2 gap-2 mb-4">
 				<button
 					@click="
-						showStockAdjust = true;
-						mobileMenuOpen = false;
+						showStockAdjust = true
+						mobileMenuOpen = false
 					"
 					class="py-2 bg-[#059669] text-white rounded-lg text-xs font-bold hover:bg-[#047857]"
 				>
@@ -173,8 +181,8 @@
 				</button>
 				<button
 					@click="
-						showReductions = true;
-						mobileMenuOpen = false;
+						showReductions = true
+						mobileMenuOpen = false
 					"
 					class="py-2 bg-amber-50 text-amber-700 border border-amber-300 rounded-lg text-xs font-bold"
 				>
@@ -182,8 +190,8 @@
 				</button>
 				<button
 					@click="
-						showQuickAdd = true;
-						mobileMenuOpen = false;
+						showQuickAdd = true
+						mobileMenuOpen = false
 					"
 					class="py-2 bg-[#D4AF37] text-white rounded-lg text-xs font-bold"
 				>
@@ -191,8 +199,8 @@
 				</button>
 				<button
 					@click="
-						openPushForSelected();
-						mobileMenuOpen = false;
+						openPushForSelected()
+						mobileMenuOpen = false
 					"
 					class="py-2 bg-blue-600 text-white rounded-lg text-xs font-bold"
 				>
@@ -200,8 +208,8 @@
 				</button>
 				<button
 					@click="
-						showTransferModal = true;
-						mobileMenuOpen = false;
+						showTransferModal = true
+						mobileMenuOpen = false
 					"
 					class="py-2 border rounded-lg text-xs font-bold"
 				>
@@ -209,8 +217,8 @@
 				</button>
 				<button
 					@click="
-						showConsignment = true;
-						mobileMenuOpen = false;
+						showConsignment = true
+						mobileMenuOpen = false
 					"
 					class="py-2 border rounded-lg text-xs font-bold"
 				>
@@ -223,7 +231,12 @@
 			</div>
 
 			<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4 flex-shrink-0">
-				<StatCard label="Total Items" :value="totalItems" clickable @click="openStockAlert('all')" />
+				<StatCard
+					label="Total Items"
+					:value="totalItems"
+					clickable
+					@click="openStockAlert('all')"
+				/>
 				<StatCard
 					label="Total Value"
 					:value="formatCurrency(totalValue)"
@@ -638,28 +651,28 @@
 				:item="selectedItem"
 				@close="selectedItem = null"
 				@reserve="
-					openReserve(selectedItem);
-					selectedItem = null;
+					openReserve(selectedItem)
+					selectedItem = null
 				"
 				@damage="
-					openDamage(selectedItem);
-					selectedItem = null;
+					openDamage(selectedItem)
+					selectedItem = null
 				"
 				@lifecycle="
-					openLifecycle(selectedItem);
-					selectedItem = null;
+					openLifecycle(selectedItem)
+					selectedItem = null
 				"
 				@push="
-					openPushForItem(selectedItem);
-					selectedItem = null;
+					openPushForItem(selectedItem)
+					selectedItem = null
 				"
 				@transfer="
-					showTransferModal = true;
-					selectedItem = null;
+					showTransferModal = true
+					selectedItem = null
 				"
 				@edit="
-					openEdit(selectedItem);
-					selectedItem = null;
+					openEdit(selectedItem)
+					selectedItem = null
 				"
 			/>
 		</div>

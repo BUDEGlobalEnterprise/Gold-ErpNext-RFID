@@ -3,7 +3,11 @@
 		<!-- Bridge status banner -->
 		<div
 			class="premium-card !p-4 flex items-center justify-between gap-4"
-			:class="bridgeConnected ? 'border-green-300 dark:border-green-700' : 'border-amber-300 dark:border-amber-700'"
+			:class="
+				bridgeConnected
+					? 'border-green-300 dark:border-green-700'
+					: 'border-amber-300 dark:border-amber-700'
+			"
 		>
 			<div class="flex items-center gap-3">
 				<span
@@ -13,10 +17,17 @@
 				<div>
 					<div class="font-bold text-sm text-gray-900 dark:text-white">
 						Hardware Bridge
-						<span v-if="bridgeMock" class="text-xs text-amber-600 font-normal">(mock)</span>
+						<span v-if="bridgeMock" class="text-xs text-amber-600 font-normal"
+							>(mock)</span
+						>
 					</div>
 					<div class="text-xs text-gray-500 dark:text-gray-400">
-						{{ bridgeUrl }} · {{ bridgeConnected ? 'connected' : 'disconnected — tests will run in browser-fallback mode' }}
+						{{ bridgeUrl }} ·
+						{{
+							bridgeConnected
+								? 'connected'
+								: 'disconnected — tests will run in browser-fallback mode'
+						}}
 					</div>
 				</div>
 			</div>
@@ -70,7 +81,10 @@
 						Preview
 					</button>
 				</div>
-				<div v-if="receiptOutput" class="text-xs mt-2 font-mono text-gray-500 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">
+				<div
+					v-if="receiptOutput"
+					class="text-xs mt-2 font-mono text-gray-500 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto"
+				>
 					{{ receiptOutput }}
 				</div>
 			</DeviceCard>
@@ -96,7 +110,10 @@
 						Preview ZPL
 					</button>
 				</div>
-				<div v-if="tagZpl" class="text-[10px] mt-2 font-mono text-gray-500 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">
+				<div
+					v-if="tagZpl"
+					class="text-[10px] mt-2 font-mono text-gray-500 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto"
+				>
 					{{ tagZpl }}
 				</div>
 			</DeviceCard>
@@ -174,7 +191,9 @@
 		<!-- Activity log -->
 		<div class="premium-card !p-4">
 			<div class="flex items-center justify-between mb-2">
-				<h4 class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+				<h4
+					class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300"
+				>
 					Activity Log
 				</h4>
 				<button
@@ -204,7 +223,9 @@
 							'bg-gray-400': entry.level === 'info',
 						}"
 					></span>
-					<span class="text-gray-700 dark:text-gray-300 break-all">{{ entry.message }}</span>
+					<span class="text-gray-700 dark:text-gray-300 break-all">{{
+						entry.message
+					}}</span>
 				</div>
 			</div>
 		</div>
@@ -347,7 +368,9 @@ async function previewTag() {
 		const r = await call('zevar_core.integrations.hardware.api.build_test_zpl')
 		tagZpl.value = r.zpl || ''
 		// Open labelary in a new tab so the user can render the ZPL
-		const url = `https://api.labelary.com/v1/printers/8dpmm/labels/4x6/0/${encodeURIComponent(r.zpl)}`
+		const url = `https://api.labelary.com/v1/printers/8dpmm/labels/4x6/0/${encodeURIComponent(
+			r.zpl
+		)}`
 		window.open(url, '_blank')
 		log('ZPL preview sent to labelary.com', 'info')
 	} catch (e) {
@@ -389,7 +412,8 @@ async function testStripeQuick() {
 			stripeMessage.value = `${readers.length} reader(s) discovered, none connected`
 			log(`Stripe quick-check: ${readers.length} reader(s) discovered`, 'info')
 		} else {
-			stripeMessage.value = 'SDK loaded, no readers discovered (simulated reader OK in test mode)'
+			stripeMessage.value =
+				'SDK loaded, no readers discovered (simulated reader OK in test mode)'
 			log('Stripe quick-check: SDK loaded, no readers found', 'warn')
 		}
 		stripeStatus.value = 'success'
@@ -430,7 +454,10 @@ async function testSquareQuick() {
 		// Best-effort: call whatever state inspector exists
 		const status = square.status?.value || square.state?.value || 'unknown'
 		squareMessage.value = `Square SDK state: ${status}`
-		log(`Square quick-check: ${squareMessage.value}`, status === 'connected' ? 'success' : 'info')
+		log(
+			`Square quick-check: ${squareMessage.value}`,
+			status === 'connected' ? 'success' : 'info'
+		)
 		squareStatus.value = 'success'
 	} catch (e) {
 		squareMessage.value = e.message || String(e)
@@ -447,7 +474,9 @@ async function testSquareFull() {
 			amount_cents: 50,
 		})
 		if (r?.success) {
-			squareMessage.value = `Charged $0.50 sandbox, refunded. Order: ${r.order_id || r.transaction_id}`
+			squareMessage.value = `Charged $0.50 sandbox, refunded. Order: ${
+				r.order_id || r.transaction_id
+			}`
 			log(`Square full test OK`, 'success')
 			squareStatus.value = 'success'
 		} else {

@@ -27,11 +27,14 @@ def run():
 		print(f"Items with sales_uom != stock_uom ({len(mismatched)} found):")
 		for item in mismatched:
 			if item.sales_uom != item.stock_uom:
-				cf = frappe.db.get_value(
-					"UOM Conversion Detail",
-					{"parent": item.name, "uom": item.sales_uom},
-					"conversion_factor",
-				) or 1.0
+				cf = (
+					frappe.db.get_value(
+						"UOM Conversion Detail",
+						{"parent": item.name, "uom": item.sales_uom},
+						"conversion_factor",
+					)
+					or 1.0
+				)
 				print(f"  {item.name}: stock_uom={item.stock_uom}, sales_uom={item.sales_uom}, cf={cf}")
 	else:
 		print("No items with sales_uom set.")
@@ -78,4 +81,4 @@ def run():
 	else:
 		print("  None found.")
 
-	print(f"\n=== Diagnostic Complete ===\n")
+	print("\n=== Diagnostic Complete ===\n")

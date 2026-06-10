@@ -7,7 +7,9 @@
 		icon-color="var(--color-gold)"
 		:badge="data.overdue || 0"
 		:badge-severity="data.overdue > 0 ? 'high' : 'low'"
-		:aria-label="`Layaway outstanding: ${formatCurrency(data.total_outstanding)}; ${data.overdue || 0} overdue`"
+		:aria-label="`Layaway outstanding: ${formatCurrency(data.total_outstanding)}; ${
+			data.overdue || 0
+		} overdue`"
 		@click="$emit('open')"
 	>
 		<template #footer>

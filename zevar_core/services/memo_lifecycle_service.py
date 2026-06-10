@@ -34,13 +34,16 @@ def create_memo(
 	memo.notes = notes or ""
 
 	for item in items:
-		memo.append("items", {
-			"item_code": item["item_code"],
-			"serial_no": item.get("serial_no", ""),
-			"qty": item.get("qty", 1),
-			"valuation_rate": item.get("valuation_rate", 0),
-			"line_status": "Open",
-		})
+		memo.append(
+			"items",
+			{
+				"item_code": item["item_code"],
+				"serial_no": item.get("serial_no", ""),
+				"qty": item.get("qty", 1),
+				"valuation_rate": item.get("valuation_rate", 0),
+				"line_status": "Open",
+			},
+		)
 
 	memo.insert(ignore_permissions=True)
 	memo.submit()
@@ -116,14 +119,18 @@ def get_aging_summary(memo_class: str | None = None) -> dict:
 		created = memo.creation
 		if isinstance(created, str):
 			from frappe.utils import get_datetime
+
 			created = get_datetime(created)
 
 		days_out = (now - created).days
 
-		item_count = frappe.db.count("Memo Contract Item", {
-			"parent": memo.name,
-			"line_status": "Open",
-		})
+		item_count = frappe.db.count(
+			"Memo Contract Item",
+			{
+				"parent": memo.name,
+				"line_status": "Open",
+			},
+		)
 
 		entry = {
 			"memo_contract": memo.name,
