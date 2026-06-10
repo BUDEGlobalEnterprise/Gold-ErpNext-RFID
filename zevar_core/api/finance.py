@@ -237,9 +237,7 @@ def apply_finance_charges():
 @frappe.whitelist(methods=["GET"])
 def get_dashboard_summary():
 	"""KPI snapshot for the Finance tab: net profit, AR, AP, cash."""
-	frappe.only_for(
-		["System Manager", "Accounts Manager", "Store Manager", "Sales Manager"]
-	)
+	frappe.only_for(["System Manager", "Accounts Manager", "Store Manager", "Sales Manager"])
 
 	company = frappe.defaults.get_user_default("Company")
 	if not company:

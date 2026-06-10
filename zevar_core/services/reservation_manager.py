@@ -14,7 +14,6 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, flt, now_datetime
 
-
 # ---------------------------------------------------------------------------
 # Soft Hold
 # ---------------------------------------------------------------------------

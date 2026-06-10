@@ -27,7 +27,9 @@ export function useHubAlerts(hero) {
 				icon: 'error',
 				color: 'var(--red)',
 				label: 'Overdue',
-				detail: `${od.count} items · $${Number(od.total_overdue_amount || 0).toFixed(0)} outstanding`,
+				detail: `${od.count} items · $${Number(od.total_overdue_amount || 0).toFixed(
+					0
+				)} outstanding`,
 			})
 		}
 		const holds = hero.value?.hold_queue
@@ -38,7 +40,9 @@ export function useHubAlerts(hero) {
 				icon: 'bookmark',
 				color: 'var(--purple)',
 				label: 'Hold Items',
-				detail: `${holds.total_count} active${holds.expiring_soon_count ? ` · ${holds.expiring_soon_count} expiring` : ''}`,
+				detail: `${holds.total_count} active${
+					holds.expiring_soon_count ? ` · ${holds.expiring_soon_count} expiring` : ''
+				}`,
 			})
 		}
 		const cash = hero.value?.cash_variance

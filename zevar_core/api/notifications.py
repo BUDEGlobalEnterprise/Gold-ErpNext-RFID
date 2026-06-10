@@ -9,8 +9,7 @@ from typing import Any
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, getdate, now_datetime, today, add_days
-
+from frappe.utils import add_days, cint, flt, getdate, now_datetime, today
 
 # ──────────────────────────────────────────────────
 # 1. Unified Alert Engine
@@ -53,7 +52,7 @@ def get_alerts(severity: str | None = None, limit: int = 50) -> dict[str, Any]:
 		alerts = [a for a in alerts if a.get("severity") == severity]
 
 	return {
-		"alerts": alerts[:cint(limit)],
+		"alerts": alerts[: cint(limit)],
 		"total": len(alerts),
 		"unread_count": len([a for a in alerts if a.get("severity") in ("critical", "warning")]),
 		"timestamp": str(now_datetime()),
@@ -88,7 +87,8 @@ def _get_repair_alerts(is_manager: bool) -> list[dict]:
 	today_date = today()
 
 	# Severely overdue repairs (>7 days past promised date)
-	overdue = frappe.db.sql("""
+	overdue = frappe.db.sql(
+		"""
 		SELECT name, customer, promised_date, status, warehouse,
 		       DATEDIFF(%(today)s, promised_date) as days_overdue
 		FROM `tabRepair Order`
@@ -97,22 +97,28 @@ def _get_repair_alerts(is_manager: bool) -> list[dict]:
 		  AND DATEDIFF(%(today)s, promised_date) > 7
 		ORDER BY days_overdue DESC
 		LIMIT 10
-	""", {"today": today_date}, as_dict=True)
+	""",
+		{"today": today_date},
+		as_dict=True,
+	)
 
 	for r in overdue:
-		alerts.append({
-			"severity": "critical",
-			"type": "repair_overdue",
-			"title": f"Overdue: {r.name}",
-			"message": f"{r.customer} — {r.days_overdue} days past due",
-			"reference_doctype": "Repair Order",
-			"reference_name": r.name,
-			"timestamp": str(now_datetime()),
-		})
+		alerts.append(
+			{
+				"severity": "critical",
+				"type": "repair_overdue",
+				"title": f"Overdue: {r.name}",
+				"message": f"{r.customer} — {r.days_overdue} days past due",
+				"reference_doctype": "Repair Order",
+				"reference_name": r.name,
+				"timestamp": str(now_datetime()),
+			}
+		)
 
 	# Stuck repairs (no activity in 5+ days)
 	if is_manager:
-		stuck = frappe.db.sql("""
+		stuck = frappe.db.sql(
+			"""
 			SELECT name, customer, status, modified, warehouse,
 			       DATEDIFF(%(today)s, modified) as days_stuck
 			FROM `tabRepair Order`
@@ -120,40 +126,50 @@ def _get_repair_alerts(is_manager: bool) -> list[dict]:
 			  AND DATEDIFF(%(today)s, modified) >= 5
 			ORDER BY days_stuck DESC
 			LIMIT 5
-		""", {"today": today_date}, as_dict=True)
+		""",
+			{"today": today_date},
+			as_dict=True,
+		)
 
 		for r in stuck:
-			alerts.append({
-				"severity": "warning",
-				"type": "repair_stuck",
-				"title": f"Stuck: {r.name}",
-				"message": f"No activity for {r.days_stuck} days (status: {r.status})",
-				"reference_doctype": "Repair Order",
-				"reference_name": r.name,
-				"timestamp": str(r.modified),
-			})
+			alerts.append(
+				{
+					"severity": "warning",
+					"type": "repair_stuck",
+					"title": f"Stuck: {r.name}",
+					"message": f"No activity for {r.days_stuck} days (status: {r.status})",
+					"reference_doctype": "Repair Order",
+					"reference_name": r.name,
+					"timestamp": str(r.modified),
+				}
+			)
 
 	# High-value without deposit (>$500)
 	if is_manager:
-		no_deposit = frappe.db.sql("""
+		no_deposit = frappe.db.sql(
+			"""
 			SELECT name, customer, estimated_cost
 			FROM `tabRepair Order`
 			WHERE estimated_cost > 500
 			  AND (deposit_amount IS NULL OR deposit_amount = 0)
 			  AND status NOT IN ('Delivered', 'Cancelled')
 			LIMIT 5
-		""", as_dict=True)
+		""",
+			as_dict=True,
+		)
 
 		for r in no_deposit:
-			alerts.append({
-				"severity": "warning",
-				"type": "repair_no_deposit",
-				"title": f"No deposit: {r.name}",
-				"message": f"${r.estimated_cost:.2f} repair for {r.customer} — no deposit",
-				"reference_doctype": "Repair Order",
-				"reference_name": r.name,
-				"timestamp": str(now_datetime()),
-			})
+			alerts.append(
+				{
+					"severity": "warning",
+					"type": "repair_no_deposit",
+					"title": f"No deposit: {r.name}",
+					"message": f"${r.estimated_cost:.2f} repair for {r.customer} — no deposit",
+					"reference_doctype": "Repair Order",
+					"reference_name": r.name,
+					"timestamp": str(now_datetime()),
+				}
+			)
 
 	return alerts
 
@@ -171,7 +187,8 @@ def _get_inventory_alerts() -> list[dict]:
 	if not frappe.db.table_exists("Item"):
 		return alerts
 
-	low_stock = frappe.db.sql("""
+	low_stock = frappe.db.sql(
+		"""
 		SELECT i.name, i.item_name, i.item_code,
 		       COALESCE(b.actual_qty, 0) as actual_qty,
 		       COALESCE(b.warehouse, '') as warehouse
@@ -182,21 +199,26 @@ def _get_inventory_alerts() -> list[dict]:
 		  AND COALESCE(b.actual_qty, 0) <= COALESCE(i.safety_stock, 0)
 		  AND COALESCE(i.safety_stock, 0) > 0
 		LIMIT 10
-	""", as_dict=True)
+	""",
+		as_dict=True,
+	)
 
 	for item in low_stock:
-		alerts.append({
-			"severity": "warning",
-			"type": "low_stock",
-			"title": f"Low stock: {item.item_name or item.item_code}",
-			"message": f"Qty: {item.actual_qty:.0f} at {item.warehouse}",
-			"reference_doctype": "Item",
-			"reference_name": item.name,
-			"timestamp": str(now_datetime()),
-		})
+		alerts.append(
+			{
+				"severity": "warning",
+				"type": "low_stock",
+				"title": f"Low stock: {item.item_name or item.item_code}",
+				"message": f"Qty: {item.actual_qty:.0f} at {item.warehouse}",
+				"reference_doctype": "Item",
+				"reference_name": item.name,
+				"timestamp": str(now_datetime()),
+			}
+		)
 
 	# Items with no stock at all (stocked out)
-	stockouts = frappe.db.sql("""
+	stockouts = frappe.db.sql(
+		"""
 		SELECT i.name, i.item_name, i.item_code
 		FROM `tabItem` i
 		WHERE i.disabled = 0
@@ -211,18 +233,22 @@ def _get_inventory_alerts() -> list[dict]:
 		    AND sle.creation >= DATE_SUB(NOW(), INTERVAL 30 DAY)
 		  )
 		LIMIT 5
-	""", as_dict=True)
+	""",
+		as_dict=True,
+	)
 
 	for item in stockouts:
-		alerts.append({
-			"severity": "critical",
-			"type": "stockout",
-			"title": f"Stockout: {item.item_name or item.item_code}",
-			"message": "Previously sold item has zero stock across all locations",
-			"reference_doctype": "Item",
-			"reference_name": item.name,
-			"timestamp": str(now_datetime()),
-		})
+		alerts.append(
+			{
+				"severity": "critical",
+				"type": "stockout",
+				"title": f"Stockout: {item.item_name or item.item_code}",
+				"message": "Previously sold item has zero stock across all locations",
+				"reference_doctype": "Item",
+				"reference_name": item.name,
+				"timestamp": str(now_datetime()),
+			}
+		)
 
 	return alerts
 
@@ -239,7 +265,8 @@ def _get_cash_alerts() -> list[dict]:
 
 	# Large cash variance in today's POS Closings
 	if frappe.db.table_exists("POS Closing Entry"):
-		variances = frappe.db.sql("""
+		variances = frappe.db.sql(
+			"""
 			SELECT name, pos_period_start_date, pos_period_end_date,
 			       grand_closing_amount, grand_opening_amount,
 			       (grand_closing_amount - grand_opening_amount) as net_difference
@@ -249,41 +276,51 @@ def _get_cash_alerts() -> list[dict]:
 			  AND ABS(grand_closing_amount - grand_opening_amount) > 20
 			ORDER BY ABS(grand_closing_amount - grand_opening_amount) DESC
 			LIMIT 5
-		""", {"today": today_date}, as_dict=True)
+		""",
+			{"today": today_date},
+			as_dict=True,
+		)
 
 		for v in variances:
 			variance_amt = flt(v.net_difference or 0, 2)
-			alerts.append({
-				"severity": "critical" if abs(variance_amt) > 50 else "warning",
-				"type": "cash_variance",
-				"title": f"Cash variance: ${abs(variance_amt):.2f}",
-				"message": f"Closing {v.name} has ${abs(variance_amt):.2f} variance",
-				"reference_doctype": "POS Closing Entry",
-				"reference_name": v.name,
-				"timestamp": str(now_datetime()),
-			})
+			alerts.append(
+				{
+					"severity": "critical" if abs(variance_amt) > 50 else "warning",
+					"type": "cash_variance",
+					"title": f"Cash variance: ${abs(variance_amt):.2f}",
+					"message": f"Closing {v.name} has ${abs(variance_amt):.2f} variance",
+					"reference_doctype": "POS Closing Entry",
+					"reference_name": v.name,
+					"timestamp": str(now_datetime()),
+				}
+			)
 
 	# Stale open POS Opening Entries (>12 hours without closing)
 	if frappe.db.table_exists("POS Opening Entry"):
-		stale = frappe.db.sql("""
+		stale = frappe.db.sql(
+			"""
 			SELECT name, period_start_date, pos_profile
 			FROM `tabPOS Opening Entry`
 			WHERE docstatus = 1
 			  AND status = 'Open'
 			  AND TIMESTAMPDIFF(HOUR, period_start_date, NOW()) > 12
 			LIMIT 5
-		""", as_dict=True)
+		""",
+			as_dict=True,
+		)
 
 		for s in stale:
-			alerts.append({
-				"severity": "warning",
-				"type": "stale_register",
-				"title": f"Open register: {s.name}",
-				"message": "Register has been open for over 12 hours without closing",
-				"reference_doctype": "POS Opening Entry",
-				"reference_name": s.name,
-				"timestamp": str(now_datetime()),
-			})
+			alerts.append(
+				{
+					"severity": "warning",
+					"type": "stale_register",
+					"title": f"Open register: {s.name}",
+					"message": "Register has been open for over 12 hours without closing",
+					"reference_doctype": "POS Opening Entry",
+					"reference_name": s.name,
+					"timestamp": str(now_datetime()),
+				}
+			)
 
 	return alerts
 
@@ -303,7 +340,8 @@ def _get_sales_alerts(is_manager: bool) -> list[dict]:
 
 	# Large returns today (credit notes / returns > $200)
 	if frappe.db.table_exists("Sales Invoice"):
-		large_returns = frappe.db.sql("""
+		large_returns = frappe.db.sql(
+			"""
 			SELECT name, customer, grand_total, posting_date
 			FROM `tabSales Invoice`
 			WHERE docstatus = 1
@@ -312,39 +350,51 @@ def _get_sales_alerts(is_manager: bool) -> list[dict]:
 			  AND ABS(grand_total) > 200
 			ORDER BY ABS(grand_total) DESC
 			LIMIT 5
-		""", {"today": today_date}, as_dict=True)
+		""",
+			{"today": today_date},
+			as_dict=True,
+		)
 
 		for r in large_returns:
-			alerts.append({
-				"severity": "warning",
-				"type": "large_return",
-				"title": f"Large return: ${abs(flt(r.grand_total)):.2f}",
-				"message": f"Return {r.name} for {r.customer}",
-				"reference_doctype": "Sales Invoice",
-				"reference_name": r.name,
-				"timestamp": str(now_datetime()),
-			})
+			alerts.append(
+				{
+					"severity": "warning",
+					"type": "large_return",
+					"title": f"Large return: ${abs(flt(r.grand_total)):.2f}",
+					"message": f"Return {r.name} for {r.customer}",
+					"reference_doctype": "Sales Invoice",
+					"reference_name": r.name,
+					"timestamp": str(now_datetime()),
+				}
+			)
 
 	# Unusual: No sales today (if it's a business day and past noon)
 	if is_manager:
 		now = now_datetime()
 		weekday = now.weekday()  # 0=Mon, 6=Sun
 		if weekday < 6 and now.hour >= 13:  # Past 1 PM on a weekday/Saturday
-			today_sales = cint(frappe.db.sql("""
+			today_sales = cint(
+				frappe.db.sql(
+					"""
 				SELECT COUNT(*) FROM `tabSales Invoice`
 				WHERE docstatus = 1 AND posting_date = %(today)s AND is_return = 0
-			""", {"today": today_date})[0][0])
+			""",
+					{"today": today_date},
+				)[0][0]
+			)
 
 			if today_sales == 0:
-				alerts.append({
-					"severity": "info",
-					"type": "no_sales",
-					"title": "No sales today",
-					"message": "It's past 1 PM and no sales have been recorded",
-					"reference_doctype": None,
-					"reference_name": None,
-					"timestamp": str(now_datetime()),
-				})
+				alerts.append(
+					{
+						"severity": "info",
+						"type": "no_sales",
+						"title": "No sales today",
+						"message": "It's past 1 PM and no sales have been recorded",
+						"reference_doctype": None,
+						"reference_name": None,
+						"timestamp": str(now_datetime()),
+					}
+				)
 
 	return alerts
 
@@ -354,10 +404,15 @@ def _get_sales_alerts(is_manager: bool) -> list[dict]:
 # ──────────────────────────────────────────────────
 
 
-def publish_alert(alert_type: str, severity: str, title: str, message: str,
-                  reference_doctype: str | None = None,
-                  reference_name: str | None = None,
-                  target_role: str | None = None) -> None:
+def publish_alert(
+	alert_type: str,
+	severity: str,
+	title: str,
+	message: str,
+	reference_doctype: str | None = None,
+	reference_name: str | None = None,
+	target_role: str | None = None,
+) -> None:
 	"""Publish a real-time alert via WebSocket.
 
 	Args:

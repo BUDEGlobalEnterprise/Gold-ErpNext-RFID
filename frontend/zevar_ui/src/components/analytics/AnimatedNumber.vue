@@ -22,7 +22,9 @@ const el = ref(null)
 let started = false
 
 function format(v) {
-	return `${props.prefix}${v.toFixed(props.decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}${props.suffix}`
+	return `${props.prefix}${v.toFixed(props.decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}${
+		props.suffix
+	}`
 }
 
 function run() {

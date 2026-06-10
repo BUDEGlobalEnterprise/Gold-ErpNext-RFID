@@ -2,7 +2,9 @@
 	<AppLayout>
 		<div class="flex flex-col">
 			<!-- Page Header -->
-			<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 flex-shrink-0">
+			<div
+				class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 flex-shrink-0"
+			>
 				<div>
 					<h1 class="premium-title !text-2xl">Sales History</h1>
 					<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
@@ -100,7 +102,10 @@
 				<div v-else-if="sales.length === 0" class="flex items-center justify-center py-20">
 					<p class="text-gray-400 text-sm">No transactions found</p>
 				</div>
-				<div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5">
+				<div
+					v-else
+					class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5"
+				>
 					<div
 						v-for="sale in sales"
 						:key="sale.name"
@@ -113,7 +118,9 @@
 								<span class="font-mono text-[10px] font-bold text-[#D4AF37]">{{
 									sale.name
 								}}</span>
-								<p class="text-xs font-bold text-gray-900 dark:text-white mt-0.5 truncate leading-tight">
+								<p
+									class="text-xs font-bold text-gray-900 dark:text-white mt-0.5 truncate leading-tight"
+								>
 									{{ sale.customer || 'Walk-In' }}
 								</p>
 							</div>
@@ -128,7 +135,8 @@
 						<!-- Details grid -->
 						<div class="grid grid-cols-2 gap-2 mb-2.5">
 							<div>
-								<span class="text-[9px] uppercase font-bold text-gray-400 dark:text-gray-500"
+								<span
+									class="text-[9px] uppercase font-bold text-gray-400 dark:text-gray-500"
 									>Date</span
 								>
 								<p class="text-xs text-gray-700 dark:text-gray-300 truncate">
@@ -136,10 +144,13 @@
 								</p>
 							</div>
 							<div>
-								<span class="text-[9px] uppercase font-bold text-gray-400 dark:text-gray-500"
+								<span
+									class="text-[9px] uppercase font-bold text-gray-400 dark:text-gray-500"
 									>Items</span
 								>
-								<p class="text-xs font-mono font-bold text-gray-700 dark:text-gray-300">
+								<p
+									class="text-xs font-mono font-bold text-gray-700 dark:text-gray-300"
+								>
 									{{ sale.item_count || 1 }}
 								</p>
 							</div>
@@ -149,7 +160,8 @@
 						<div
 							class="flex items-center justify-between mt-auto pt-2 border-t border-gray-50 dark:border-warm-border/30 min-w-0"
 						>
-							<span class="text-base font-mono font-extrabold text-green-600 dark:text-green-400"
+							<span
+								class="text-base font-mono font-extrabold text-green-600 dark:text-green-400"
 								>${{ formatAmount(sale.grand_total) }}</span
 							>
 							<button

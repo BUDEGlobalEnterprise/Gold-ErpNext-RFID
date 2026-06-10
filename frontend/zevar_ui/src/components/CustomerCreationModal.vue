@@ -104,13 +104,29 @@
 											<option value="Company">Company</option>
 										</select>
 									</div>
-									<div class="p-3 bg-gradient-to-r from-[#D4AF37]/10 to-[#D4AF37]/5 border border-[#D4AF37]/30 rounded-xl">
-										<label class="text-xs font-semibold text-[#D4AF37] mb-2 flex items-center gap-1.5">
-											<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+									<div
+										class="p-3 bg-gradient-to-r from-[#D4AF37]/10 to-[#D4AF37]/5 border border-[#D4AF37]/30 rounded-xl"
+									>
+										<label
+											class="text-xs font-semibold text-[#D4AF37] mb-2 flex items-center gap-1.5"
+										>
+											<svg
+												class="w-4 h-4"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+												></path>
+											</svg>
 											Auto-fill from ID Scan
 										</label>
-										<ScannerInput 
-											placeholder="Scan Driver's License or ID..." 
+										<ScannerInput
+											placeholder="Scan Driver's License or ID..."
 											:showCamera="true"
 											mode="id"
 											@scan="handleIdScan"
@@ -987,16 +1003,16 @@ const tabs = [
 
 function handleIdScan(rawValue, parsedData) {
 	if (parsedData) {
-		if (parsedData.name) newCustomer.value.name = parsedData.name;
-		if (parsedData.address) newCustomer.value.street = parsedData.address;
-		if (parsedData.city) newCustomer.value.city = parsedData.city;
-		if (parsedData.state) newCustomer.value.state = parsedData.state;
-		if (parsedData.zip) newCustomer.value.pincode = parsedData.zip;
-		if (parsedData.dob) newCustomer.value.birth_date = parsedData.dob;
+		if (parsedData.name) newCustomer.value.name = parsedData.name
+		if (parsedData.address) newCustomer.value.street = parsedData.address
+		if (parsedData.city) newCustomer.value.city = parsedData.city
+		if (parsedData.state) newCustomer.value.state = parsedData.state
+		if (parsedData.zip) newCustomer.value.pincode = parsedData.zip
+		if (parsedData.dob) newCustomer.value.birth_date = parsedData.dob
 		if (parsedData.type === 'national_id') {
-			newCustomer.value.country = 'India';
+			newCustomer.value.country = 'India'
 		}
-		
+
 		toast({
 			title: 'ID Scanned',
 			text: 'Customer details have been auto-filled.',
@@ -1313,7 +1329,7 @@ async function submit() {
 			ship_state: newCustomer.value.ship_state || null,
 			ship_pincode: newCustomer.value.ship_pincode || null,
 			ship_country: newCustomer.value.ship_country || null,
-				display_name: props.isEdit ? newCustomer.value.name : undefined,
+			display_name: props.isEdit ? newCustomer.value.name : undefined,
 		})
 
 		const data = response?.data || response

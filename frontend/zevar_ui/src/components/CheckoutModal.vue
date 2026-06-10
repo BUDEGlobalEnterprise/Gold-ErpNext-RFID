@@ -743,12 +743,26 @@
 					>
 						<div class="flex items-center justify-between mb-2">
 							<div class="flex items-center gap-2">
-								<div class="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center">
-									<svg class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+								<div
+									class="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center"
+								>
+									<svg
+										class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
+										/>
 									</svg>
 								</div>
-								<span class="text-sm font-medium text-blue-700 dark:text-blue-300">Card Reader</span>
+								<span class="text-sm font-medium text-blue-700 dark:text-blue-300"
+									>Card Reader</span
+								>
 							</div>
 							<button
 								v-if="!gateway.isTerminalReady.value"
@@ -758,27 +772,42 @@
 							>
 								{{ deviceLoading ? 'Searching...' : 'Find Readers' }}
 							</button>
-							<span v-else class="text-xs font-bold text-green-600 dark:text-green-400 flex items-center gap-1">
-								<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+							<span
+								v-else
+								class="text-xs font-bold text-green-600 dark:text-green-400 flex items-center gap-1"
+							>
+								<span
+									class="w-2 h-2 rounded-full bg-green-500 animate-pulse"
+								></span>
 								Connected
 							</span>
 						</div>
 
 						<!-- Device List -->
-						<div v-if="terminalDevices.length > 0 && !gateway.isTerminalReady.value" class="space-y-1 mt-2">
+						<div
+							v-if="terminalDevices.length > 0 && !gateway.isTerminalReady.value"
+							class="space-y-1 mt-2"
+						>
 							<button
 								v-for="device in terminalDevices"
 								:key="device.id"
 								@click="connectToDevice(device)"
 								class="w-full flex items-center justify-between p-2 rounded-lg text-left transition"
-								:class="device.is_online
-									? 'bg-white dark:bg-[#0F1115] border border-blue-200 dark:border-blue-800/30 hover:border-blue-400'
-									: 'bg-gray-100 dark:bg-gray-800 opacity-50 cursor-not-allowed'"
+								:class="
+									device.is_online
+										? 'bg-white dark:bg-[#0F1115] border border-blue-200 dark:border-blue-800/30 hover:border-blue-400'
+										: 'bg-gray-100 dark:bg-gray-800 opacity-50 cursor-not-allowed'
+								"
 								:disabled="!device.is_online"
 							>
 								<div>
-									<span class="text-sm font-medium text-gray-900 dark:text-white">{{ device.label || device.name }}</span>
-									<span class="text-xs text-gray-400 block">{{ device.device_type || device.type || 'Terminal' }}</span>
+									<span
+										class="text-sm font-medium text-gray-900 dark:text-white"
+										>{{ device.label || device.name }}</span
+									>
+									<span class="text-xs text-gray-400 block">{{
+										device.device_type || device.type || 'Terminal'
+									}}</span>
 								</div>
 								<span
 									class="w-2 h-2 rounded-full"
@@ -788,12 +817,23 @@
 						</div>
 
 						<!-- No gateway message -->
-						<p v-if="gateway.error.value && !gateway.isTerminalReady.value" class="text-xs text-red-500 mt-1">
+						<p
+							v-if="gateway.error.value && !gateway.isTerminalReady.value"
+							class="text-xs text-red-500 mt-1"
+						>
 							{{ gateway.error.value }}
 						</p>
 
-						<p v-if="!gateway.isTerminalReady.value && terminalDevices.length === 0 && !deviceLoading" class="text-xs text-blue-500 dark:text-blue-400 mt-1">
-							Click "Find Readers" to discover available card readers, or proceed without to record a manual card payment.
+						<p
+							v-if="
+								!gateway.isTerminalReady.value &&
+								terminalDevices.length === 0 &&
+								!deviceLoading
+							"
+							class="text-xs text-blue-500 dark:text-blue-400 mt-1"
+						>
+							Click "Find Readers" to discover available card readers, or proceed
+							without to record a manual card payment.
 						</p>
 					</div>
 
@@ -803,21 +843,51 @@
 						class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 mb-4 border border-blue-200 dark:border-blue-800/30 text-center"
 						data-testid="card-payment-status"
 					>
-						<div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
-							:class="gateway.status.value === 'succeeded'
-								? 'bg-green-100 dark:bg-green-900/30'
-								: gateway.status.value === 'failed'
-								? 'bg-red-100 dark:bg-red-900/30'
-								: 'bg-blue-100 dark:bg-blue-900/30'"
+						<div
+							class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
+							:class="
+								gateway.status.value === 'succeeded'
+									? 'bg-green-100 dark:bg-green-900/30'
+									: gateway.status.value === 'failed'
+									? 'bg-red-100 dark:bg-red-900/30'
+									: 'bg-blue-100 dark:bg-blue-900/30'
+							"
 						>
-							<div v-if="!['succeeded', 'failed', 'canceled'].includes(gateway.status.value)"
+							<div
+								v-if="
+									!['succeeded', 'failed', 'canceled'].includes(
+										gateway.status.value
+									)
+								"
 								class="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent"
 							></div>
-							<svg v-else-if="gateway.status.value === 'succeeded'" class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+							<svg
+								v-else-if="gateway.status.value === 'succeeded'"
+								class="w-8 h-8 text-green-600"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2.5"
+									d="M5 13l4 4L19 7"
+								/>
 							</svg>
-							<svg v-else class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+							<svg
+								v-else
+								class="w-8 h-8 text-red-600"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M6 18L18 6M6 6l12 12"
+								/>
 							</svg>
 						</div>
 						<h3 class="font-bold text-gray-900 dark:text-white mb-1">
@@ -865,15 +935,31 @@
 			<div class="p-8 max-w-3xl mx-auto min-h-[500px]">
 				<div class="mb-6 flex items-center justify-between">
 					<div class="flex items-center gap-3">
-						<div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
-							<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+						<div
+							class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-500 rounded-full flex items-center justify-center flex-shrink-0"
+						>
+							<svg
+								class="w-6 h-6"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+								/>
 							</svg>
 						</div>
 						<div>
-							<h2 class="text-xl font-bold text-gray-900 dark:text-white">IRS Form 8300 Required</h2>
+							<h2 class="text-xl font-bold text-gray-900 dark:text-white">
+								IRS Form 8300 Required
+							</h2>
 							<p class="text-sm text-gray-500 dark:text-gray-400">
-								This transaction involves more than $10,000 in cash. Compliance requires we record the customer's identity before completing the transaction.
+								This transaction involves more than $10,000 in cash. Compliance
+								requires we record the customer's identity before completing the
+								transaction.
 							</p>
 						</div>
 					</div>
@@ -883,7 +969,12 @@
 						class="flex items-center gap-2 px-4 py-2 bg-[#D4AF37]/10 text-[#D4AF37] hover:bg-[#D4AF37]/20 rounded-lg text-sm font-bold transition"
 					>
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+							/>
 						</svg>
 						Scan ID
 					</button>
@@ -896,27 +987,66 @@
 					@apply-data="applyScannedIdData"
 				/>
 
-				<div class="bg-white dark:bg-[#15171e] p-6 border border-gray-200 dark:border-warm-border rounded-xl shadow-sm space-y-4">
+				<div
+					class="bg-white dark:bg-[#15171e] p-6 border border-gray-200 dark:border-warm-border rounded-xl shadow-sm space-y-4"
+				>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div class="space-y-1">
-							<label class="block text-xs font-medium text-gray-700 dark:text-gray-300">Recipient Full Name</label>
-							<input v-model="irs8300Details.recipient_name" type="text" class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]" placeholder="John Doe">
+							<label
+								class="block text-xs font-medium text-gray-700 dark:text-gray-300"
+								>Recipient Full Name</label
+							>
+							<input
+								v-model="irs8300Details.recipient_name"
+								type="text"
+								class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+								placeholder="John Doe"
+							/>
 						</div>
 						<div class="space-y-1">
-							<label class="block text-xs font-medium text-gray-700 dark:text-gray-300">TIN / SSN</label>
-							<input v-model="irs8300Details.recipient_tin" type="text" class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]" placeholder="XXX-XX-XXXX">
+							<label
+								class="block text-xs font-medium text-gray-700 dark:text-gray-300"
+								>TIN / SSN</label
+							>
+							<input
+								v-model="irs8300Details.recipient_tin"
+								type="text"
+								class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+								placeholder="XXX-XX-XXXX"
+							/>
 						</div>
 						<div class="space-y-1">
-							<label class="block text-xs font-medium text-gray-700 dark:text-gray-300">Date of Birth</label>
-							<input v-model="irs8300Details.recipient_dob" type="date" class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]">
+							<label
+								class="block text-xs font-medium text-gray-700 dark:text-gray-300"
+								>Date of Birth</label
+							>
+							<input
+								v-model="irs8300Details.recipient_dob"
+								type="date"
+								class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+							/>
 						</div>
 						<div class="space-y-1">
-							<label class="block text-xs font-medium text-gray-700 dark:text-gray-300">Address</label>
-							<input v-model="irs8300Details.recipient_address" type="text" class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]" placeholder="123 Main St, City, State, Zip">
+							<label
+								class="block text-xs font-medium text-gray-700 dark:text-gray-300"
+								>Address</label
+							>
+							<input
+								v-model="irs8300Details.recipient_address"
+								type="text"
+								class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+								placeholder="123 Main St, City, State, Zip"
+							/>
 						</div>
 						<div class="space-y-1">
-							<label class="block text-xs font-medium text-gray-700 dark:text-gray-300">ID Type</label>
-							<select v-model="irs8300Details.recipient_id_type" class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]">
+							<label
+								class="block text-xs font-medium text-gray-700 dark:text-gray-300"
+								>ID Type</label
+							>
+							<select
+								v-model="irs8300Details.recipient_id_type"
+								class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+							>
 								<option value="">Select ID Type</option>
 								<option value="Driver's License">Driver's License</option>
 								<option value="Passport">Passport</option>
@@ -926,25 +1056,55 @@
 							</select>
 						</div>
 						<div class="space-y-1">
-							<label class="block text-xs font-medium text-gray-700 dark:text-gray-300">ID Number</label>
-							<input v-model="irs8300Details.recipient_id_number" type="text" class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]" placeholder="ID Number">
+							<label
+								class="block text-xs font-medium text-gray-700 dark:text-gray-300"
+								>ID Number</label
+							>
+							<input
+								v-model="irs8300Details.recipient_id_number"
+								type="text"
+								class="w-full px-3 py-2 bg-gray-50 dark:bg-warm-dark-900 border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+								placeholder="ID Number"
+							/>
 						</div>
 					</div>
-					
+
 					<!-- Bypass Section -->
-					<div class="mt-8 p-4 bg-gray-50 dark:bg-warm-dark-900/50 border border-gray-200 dark:border-warm-border/50 rounded-lg">
-						<h4 class="text-sm font-bold text-gray-900 dark:text-gray-200 mb-2 flex items-center gap-2">
+					<div
+						class="mt-8 p-4 bg-gray-50 dark:bg-warm-dark-900/50 border border-gray-200 dark:border-warm-border/50 rounded-lg"
+					>
+						<h4
+							class="text-sm font-bold text-gray-900 dark:text-gray-200 mb-2 flex items-center gap-2"
+						>
 							Manager Bypass
-							<span class="text-xs font-normal text-gray-500">(Optional - Protects Cashier)</span>
+							<span class="text-xs font-normal text-gray-500"
+								>(Optional - Protects Cashier)</span
+							>
 						</h4>
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<div class="space-y-1">
-								<label class="block text-xs font-medium text-gray-700 dark:text-gray-400">Bypass Authorized By</label>
-								<input v-model="irs8300Details.bypassed_by" type="text" class="w-full px-3 py-2 bg-white dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]" placeholder="Manager Name or PIN">
+								<label
+									class="block text-xs font-medium text-gray-700 dark:text-gray-400"
+									>Bypass Authorized By</label
+								>
+								<input
+									v-model="irs8300Details.bypassed_by"
+									type="text"
+									class="w-full px-3 py-2 bg-white dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+									placeholder="Manager Name or PIN"
+								/>
 							</div>
 							<div class="space-y-1">
-								<label class="block text-xs font-medium text-gray-700 dark:text-gray-400">Bypass Reason</label>
-								<input v-model="irs8300Details.bypass_reason" type="text" class="w-full px-3 py-2 bg-white dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]" placeholder="e.g. Customer in rush, fill later">
+								<label
+									class="block text-xs font-medium text-gray-700 dark:text-gray-400"
+									>Bypass Reason</label
+								>
+								<input
+									v-model="irs8300Details.bypass_reason"
+									type="text"
+									class="w-full px-3 py-2 bg-white dark:bg-[#0F1115] border border-gray-200 dark:border-warm-border rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+									placeholder="e.g. Customer in rush, fill later"
+								/>
 							</div>
 						</div>
 					</div>
@@ -964,7 +1124,10 @@
 						:disabled="processing"
 						class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-warm-dark-700 dark:hover:bg-warm-dark-600 text-gray-800 dark:text-gray-200 rounded-lg text-sm font-medium transition flex items-center justify-center min-w-[120px]"
 					>
-						<span v-if="processing" class="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent"></span>
+						<span
+							v-if="processing"
+							class="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent"
+						></span>
 						<span v-else>Skip & Pay</span>
 					</button>
 					<button
@@ -973,7 +1136,10 @@
 						:disabled="processing"
 						class="px-6 py-2 bg-[#D4AF37] hover:bg-[#b5952f] text-black rounded-lg text-sm font-bold transition flex items-center justify-center min-w-[160px]"
 					>
-						<span v-if="processing" class="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent"></span>
+						<span
+							v-if="processing"
+							class="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent"
+						></span>
 						<span v-else>Submit & Pay</span>
 					</button>
 				</div>
@@ -1023,13 +1189,26 @@
 					class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-xl p-4 mb-6 w-full max-w-sm text-left"
 				>
 					<div class="flex items-start gap-3">
-						<svg class="w-6 h-6 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+						<svg
+							class="w-6 h-6 text-red-600 shrink-0"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+							/>
 						</svg>
 						<div>
-							<h4 class="text-sm font-bold text-red-800 dark:text-red-400">IRS Form 8300 Required</h4>
+							<h4 class="text-sm font-bold text-red-800 dark:text-red-400">
+								IRS Form 8300 Required
+							</h4>
 							<p class="text-xs text-red-600 dark:text-red-300 mt-1">
-								Cash payments exceed $10,000. An IRS Form 8300 record has been generated. Please ensure the customer's identity is verified.
+								Cash payments exceed $10,000. An IRS Form 8300 record has been
+								generated. Please ensure the customer's identity is verified.
 							</p>
 						</div>
 					</div>
@@ -1167,7 +1346,7 @@ const irs8300Details = ref({
 	recipient_id_number: '',
 	recipient_address: '',
 	bypass_reason: '',
-	bypassed_by: ''
+	bypassed_by: '',
 })
 
 const showIdScanner = ref(false)
@@ -1175,15 +1354,21 @@ const scannedIdData = ref({ type: '', number: '', name: '', address: '', dob: ''
 
 function applyScannedIdData() {
 	if (scannedIdData.value.name) irs8300Details.value.recipient_name = scannedIdData.value.name
-	if (scannedIdData.value.address) irs8300Details.value.recipient_address = scannedIdData.value.address
-	if (scannedIdData.value.number) irs8300Details.value.recipient_id_number = scannedIdData.value.number
+	if (scannedIdData.value.address)
+		irs8300Details.value.recipient_address = scannedIdData.value.address
+	if (scannedIdData.value.number)
+		irs8300Details.value.recipient_id_number = scannedIdData.value.number
 	if (scannedIdData.value.dob) irs8300Details.value.recipient_dob = scannedIdData.value.dob
-	
-	if (scannedIdData.value.type === 'drivers_license') irs8300Details.value.recipient_id_type = "Driver's License"
-	else if (scannedIdData.value.type === 'passport') irs8300Details.value.recipient_id_type = 'Passport'
-	else if (scannedIdData.value.type === 'state_id') irs8300Details.value.recipient_id_type = 'State ID'
-	else if (scannedIdData.value.type === 'national_id') irs8300Details.value.recipient_id_type = 'National ID'
-	
+
+	if (scannedIdData.value.type === 'drivers_license')
+		irs8300Details.value.recipient_id_type = "Driver's License"
+	else if (scannedIdData.value.type === 'passport')
+		irs8300Details.value.recipient_id_type = 'Passport'
+	else if (scannedIdData.value.type === 'state_id')
+		irs8300Details.value.recipient_id_type = 'State ID'
+	else if (scannedIdData.value.type === 'national_id')
+		irs8300Details.value.recipient_id_type = 'National ID'
+
 	showIdScanner.value = false
 }
 
@@ -1383,17 +1568,22 @@ async function handlePayment() {
 
 	// ── PRE-CHECK: IRS Form 8300 ──
 	// If it's a cash transaction, check if it pushes them over $10,000 before proceeding
-	const cashPayment = selectedPayments.value.find(p => p.mode === 'Cash')
-	if (cashPayment && cashPayment.amount > 0 && (props.mode === 'sale' || props.mode === 'layaway')) {
+	const cashPayment = selectedPayments.value.find((p) => p.mode === 'Cash')
+	if (
+		cashPayment &&
+		cashPayment.amount > 0 &&
+		(props.mode === 'sale' || props.mode === 'layaway')
+	) {
 		try {
 			processing.value = true
-			const customerId = props.mode === 'sale' ? (cart.customer?.name || 'Walk-In Customer') : cart.customerId
-			
+			const customerId =
+				props.mode === 'sale' ? cart.customer?.name || 'Walk-In Customer' : cart.customerId
+
 			// Only check for registered customers (Walk-ins might just pass 'Walk-In Customer' which we handle in backend)
 			if (customerId && customerId !== 'Walk-In Customer') {
 				const res = await call('zevar_core.api.compliance.check_pre_8300_status', {
 					customer: customerId,
-					cash_amount: cashPayment.amount
+					cash_amount: cashPayment.amount,
 				})
 				if (res?.triggered) {
 					step.value = 'irs_8300_form'
@@ -1415,7 +1605,7 @@ async function handlePayment() {
 async function processFinalPayment() {
 	// Check if any card-based payment is selected
 	const cardModes = ['Credit Card', 'Debit Card', 'Apple Pay', 'Google Pay']
-	const cardPayment = selectedPayments.value.find(p => cardModes.includes(p.mode))
+	const cardPayment = selectedPayments.value.find((p) => cardModes.includes(p.mode))
 
 	// If card payment and we have a terminal connected, use the terminal flow
 	if (cardPayment && gateway.isTerminalReady.value && cardPayment.amount > 0) {
@@ -1427,9 +1617,10 @@ async function processFinalPayment() {
 			const terminalResult = await gateway.collectPayment({
 				amount: cardPayment.amount,
 				invoiceName: props.mode === 'sale' ? null : props.referenceId,
-				description: props.mode === 'sale'
-					? `POS Sale - ${cart.items.length} items`
-					: `${props.mode} payment - ${props.referenceId}`,
+				description:
+					props.mode === 'sale'
+						? `POS Sale - ${cart.items.length} items`
+						: `${props.mode} payment - ${props.referenceId}`,
 			})
 
 			if (!terminalResult.success) {
@@ -1444,7 +1635,8 @@ async function processFinalPayment() {
 			}
 
 			// Terminal payment succeeded — attach reference to the payment
-			cardPayment.reference_no = terminalResult.paymentIntentId || terminalResult.paymentId || ''
+			cardPayment.reference_no =
+				terminalResult.paymentIntentId || terminalResult.paymentId || ''
 			cardPaymentActive.value = false
 			// Fall through to the normal submission flow below
 		} catch (e) {
@@ -1478,13 +1670,15 @@ async function processFinalPayment() {
 				taxExempt: taxExempt.value,
 				warehouse: session.currentWarehouse,
 				giftCardNumber: gcPayment ? giftCardNumber.value : undefined,
-				irs8300Details: step.value === 'irs_8300_form' ? irs8300Details.value : undefined
+				irs8300Details: step.value === 'irs_8300_form' ? irs8300Details.value : undefined,
 			})
 			const invoiceName = result?.invoice_name || result?.data?.invoice_name
 			successInvoiceId.value = invoiceName || null
 			successBreakdown.value = payments
 			step.value = 'success'
-			form8300Triggered.value = !!(result?.form_8300_triggered || result?.data?.form_8300_triggered)
+			form8300Triggered.value = !!(
+				result?.form_8300_triggered || result?.data?.form_8300_triggered
+			)
 			emit('success', result)
 		} else if (props.mode === 'layaway') {
 			const splitPaymentResource = createResource({
@@ -1494,14 +1688,19 @@ async function processFinalPayment() {
 			const rawResult = await splitPaymentResource.submit({
 				layaway_id: props.referenceId,
 				payments: JSON.stringify(payments),
-				irs_8300_details: step.value === 'irs_8300_form' ? JSON.stringify(irs8300Details.value) : undefined
+				irs_8300_details:
+					step.value === 'irs_8300_form'
+						? JSON.stringify(irs8300Details.value)
+						: undefined,
 			})
 			const result = rawResult?.message ?? rawResult
 			if (result?.success) {
 				successBreakdown.value = result.payment_breakdown || payments
 				successInvoiceId.value = props.referenceId
 				step.value = 'success'
-				form8300Triggered.value = !!(result?.form_8300_triggered || result?.data?.form_8300_triggered)
+				form8300Triggered.value = !!(
+					result?.form_8300_triggered || result?.data?.form_8300_triggered
+				)
 				emit('success', result)
 			} else {
 				throw new Error(result?.message || 'Layaway payment failed')
@@ -1523,11 +1722,10 @@ async function processFinalPayment() {
 		const errMessage = (e?.message || '').toLowerCase()
 		const isNetworkError =
 			!navigator.onLine ||
-			(e instanceof TypeError && (
-				errMessage.includes('fetch') ||
-				errMessage.includes('network') ||
-				errMessage.includes('load failed')
-			)) ||
+			(e instanceof TypeError &&
+				(errMessage.includes('fetch') ||
+					errMessage.includes('network') ||
+					errMessage.includes('load failed'))) ||
 			errMessage.includes('err_internet') ||
 			errMessage.includes('networkerror') ||
 			errMessage.includes('failed to fetch') ||
@@ -1544,7 +1742,10 @@ async function processFinalPayment() {
 			return
 		}
 
-		if (isNetworkError && (props.mode === 'sale' || props.mode === 'layaway' || props.mode === 'repair')) {
+		if (
+			isNetworkError &&
+			(props.mode === 'sale' || props.mode === 'layaway' || props.mode === 'repair')
+		) {
 			// Queue for offline sync — all payment modes supported
 			try {
 				const payments = selectedPayments.value
@@ -1621,25 +1822,30 @@ async function processFinalPayment() {
 		}
 
 		let errorMsg = ''
+		const respData = e?.response?.data || e
+
 		if (isNetworkError) {
 			errorMsg = 'Network connection lost. Please check your internet and try again.'
-		} else if (e?.exc_type === 'ValidationError' && e?.message) {
-			errorMsg = e.message
-		} else if (e?._server_messages) {
+		} else if (respData?._server_messages) {
 			try {
-				const msgs = JSON.parse(e._server_messages)
+				const msgs = JSON.parse(respData._server_messages)
 				errorMsg = msgs
 					.map((m) => {
 						try {
-							return JSON.parse(m).message
+							const parsed = JSON.parse(m)
+							return parsed.message || m
 						} catch {
 							return m
 						}
 					})
 					.join('\n')
 			} catch {
-				errorMsg = String(e._server_messages)
+				errorMsg = String(respData._server_messages)
 			}
+		} else if (respData?.exc_type === 'ValidationError' && respData?.message) {
+			errorMsg = respData.message
+		} else if (e?.messages && Array.isArray(e.messages)) {
+			errorMsg = e.messages.join('\n')
 		} else {
 			errorMsg = e?.message || 'Failed to process payment'
 		}
@@ -1703,7 +1909,7 @@ function close() {
 
 const hasCardPaymentSelected = computed(() => {
 	const cardModes = ['Credit Card', 'Debit Card', 'Apple Pay', 'Google Pay']
-	return selectedPayments.value.some(p => cardModes.includes(p.mode))
+	return selectedPayments.value.some((p) => cardModes.includes(p.mode))
 })
 
 const terminalStatusTitle = computed(() => {

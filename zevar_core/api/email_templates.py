@@ -219,13 +219,15 @@ def install_all_templates():
 			doc.save(ignore_permissions=True)
 			updated += 1
 		else:
-			doc = frappe.get_doc({
-				"doctype": "Email Template",
-				"name": tmpl["name"],
-				"subject": tmpl["subject"],
-				"response_html": tmpl["response_html"],
-				"owner": "Administrator",
-			})
+			doc = frappe.get_doc(
+				{
+					"doctype": "Email Template",
+					"name": tmpl["name"],
+					"subject": tmpl["subject"],
+					"response_html": tmpl["response_html"],
+					"owner": "Administrator",
+				}
+			)
 			doc.insert(ignore_permissions=True)
 			installed += 1
 
@@ -234,15 +236,15 @@ def install_all_templates():
 
 
 @frappe.whitelist(methods=["GET"])
-def get_email_template(template_name: str, context: dict = None) -> dict:
+def get_email_template(template_name: str, context: dict | None = None) -> dict:
 	"""Render an email template with context variables."""
 	frappe.only_for(["System Manager", "Sales Manager", "Accounts Manager"])
 
 	if not frappe.db.exists("Email Template", template_name):
 		frappe.throw(_("Email Template '{0}' not found.").format(template_name))
 
-	from frappe.utils.jinja import render_template
 	from frappe.email.doctype.email_template.email_template import get_email_template as _get
+	from frappe.utils.jinja import render_template
 
 	subject, body = _get(template_name, context or {})
 	return {"subject": subject, "body": body}

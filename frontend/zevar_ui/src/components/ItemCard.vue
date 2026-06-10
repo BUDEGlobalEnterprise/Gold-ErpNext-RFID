@@ -11,7 +11,7 @@
 				:src="`${baseUrl}placeholders/${getJewelryCategory(item)}.png`"
 				:alt="item.item_name"
 				class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
-				@error="(e) => e.target.src = `${baseUrl}placeholders/jewel.png`"
+				@error="(e) => (e.target.src = `${baseUrl}placeholders/jewel.png`)"
 			/>
 
 			<div class="absolute top-2 right-2 flex flex-col gap-1 items-end z-10">
@@ -58,13 +58,22 @@
 					v-if="item.net_weight > 0 || item.gross_weight > 0 || item.stone_weight > 0"
 					class="hidden lg:flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[8.5px] mt-1 border-t border-gray-200 dark:border-warm-border/30 pt-1.5"
 				>
-					<span v-if="item.net_weight > 0" class="font-bold text-gray-900 dark:text-white">
+					<span
+						v-if="item.net_weight > 0"
+						class="font-bold text-gray-900 dark:text-white"
+					>
 						Net: {{ item.net_weight }}g
 					</span>
-					<span v-if="item.gross_weight > 0" class="font-semibold text-gray-700 dark:text-white/90">
+					<span
+						v-if="item.gross_weight > 0"
+						class="font-semibold text-gray-700 dark:text-white/90"
+					>
 						Gross: {{ item.gross_weight }}g
 					</span>
-					<span v-if="item.stone_weight > 0" class="font-semibold text-red-600 dark:text-red-400">
+					<span
+						v-if="item.stone_weight > 0"
+						class="font-semibold text-red-600 dark:text-red-400"
+					>
 						Stn: -{{ item.stone_weight }}g
 					</span>
 				</div>
@@ -74,7 +83,10 @@
 				class="mt-auto pt-2 border-t border-gray-100 dark:border-warm-border/30 flex flex-col gap-1.5"
 			>
 				<div class="flex justify-between items-baseline">
-					<span class="text-[8px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-bold">Price</span>
+					<span
+						class="text-[8px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-bold"
+						>Price</span
+					>
 					<span class="text-xs font-black text-[#D4AF37] font-mono leading-none">
 						{{ formatCurrency(item.price) }}
 					</span>
@@ -109,37 +121,80 @@ const props = defineProps({
 const emit = defineEmits(['quick-add', 'open-details'])
 
 function getJewelryCategory(item) {
-	const name = (item.item_name || '').toLowerCase();
-	const group = (item.item_group || '').toLowerCase();
-	const type = (item.jewelry_type || '').toLowerCase();
-	const cat = (item.category || '').toLowerCase();
-	
-	if (name.includes('ring') || group.includes('ring') || type.includes('ring') || cat.includes('ring')) {
-		return 'ring';
+	const name = (item.item_name || '').toLowerCase()
+	const group = (item.item_group || '').toLowerCase()
+	const type = (item.jewelry_type || '').toLowerCase()
+	const cat = (item.category || '').toLowerCase()
+
+	if (
+		name.includes('ring') ||
+		group.includes('ring') ||
+		type.includes('ring') ||
+		cat.includes('ring')
+	) {
+		return 'ring'
 	}
-	if (name.includes('earring') || group.includes('earring') || type.includes('earring') || cat.includes('earring')) {
-		return 'earring';
+	if (
+		name.includes('earring') ||
+		group.includes('earring') ||
+		type.includes('earring') ||
+		cat.includes('earring')
+	) {
+		return 'earring'
 	}
-	if (name.includes('pendant') || name.includes('gemstone') || group.includes('pendant') || type.includes('pendant') || cat.includes('pendant')) {
-		return 'pendant';
+	if (
+		name.includes('pendant') ||
+		name.includes('gemstone') ||
+		group.includes('pendant') ||
+		type.includes('pendant') ||
+		cat.includes('pendant')
+	) {
+		return 'pendant'
 	}
-	if (name.includes('watch') || name.includes('timepiece') || group.includes('watch') || type.includes('watch') || cat.includes('watch')) {
-		return 'watch';
+	if (
+		name.includes('watch') ||
+		name.includes('timepiece') ||
+		group.includes('watch') ||
+		type.includes('watch') ||
+		cat.includes('watch')
+	) {
+		return 'watch'
 	}
-	if (name.includes('bracelet') || name.includes('bangle') || group.includes('bangle') || group.includes('bracelet') || type.includes('bracelet') || cat.includes('bracelet') || name.includes('cuff')) {
-		return 'bracelet';
+	if (
+		name.includes('bracelet') ||
+		name.includes('bangle') ||
+		group.includes('bangle') ||
+		group.includes('bracelet') ||
+		type.includes('bracelet') ||
+		cat.includes('bracelet') ||
+		name.includes('cuff')
+	) {
+		return 'bracelet'
 	}
-	if (name.includes('necklace') || name.includes('choker') || group.includes('necklace') || type.includes('necklace') || cat.includes('necklace')) {
-		return 'necklace';
+	if (
+		name.includes('necklace') ||
+		name.includes('choker') ||
+		group.includes('necklace') ||
+		type.includes('necklace') ||
+		cat.includes('necklace')
+	) {
+		return 'necklace'
 	}
 	// Smart resolution for Chain, Link, Rope, Cuban
-	if (name.includes('chain') || name.includes('link') || name.includes('rope') || name.includes('cuban') || group.includes('chain') || type.includes('chain')) {
+	if (
+		name.includes('chain') ||
+		name.includes('link') ||
+		name.includes('rope') ||
+		name.includes('cuban') ||
+		group.includes('chain') ||
+		type.includes('chain')
+	) {
 		if (/7|8|9/.test(name)) {
-			return 'bracelet';
+			return 'bracelet'
 		}
-		return 'necklace';
+		return 'necklace'
 	}
-	return 'jewel';
+	return 'jewel'
 }
 
 const imageFailed = ref(false)

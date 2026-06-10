@@ -48,22 +48,26 @@
 					>
 						<option value="">Select Type</option>
 						<option value="drivers_license">Driver's License</option>
-						<option value="passport">Passport</option>
-						<option value="national_id">National ID</option>
 						<option value="state_id">State ID</option>
+						<option value="passport">Passport</option>
+						<option value="alien_registration">Alien Registration Card</option>
+						<option value="military_id">Military ID</option>
+						<option value="tribal_id">Tribal ID</option>
+						<option value="national_id">National ID</option>
+						<option value="other_official">Other Official ID</option>
 					</select>
 				</div>
 				<div>
 					<label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
 						>Scan Barcode Here</label
 					>
-					<ScannerInput 
-						placeholder="Ready to scan..." 
-						:autoFocus="true" 
+					<ScannerInput
+						placeholder="Ready to scan..."
+						:autoFocus="true"
 						:showCamera="true"
 						:inlineCamera="true"
 						mode="id"
-						@scan="handleScan" 
+						@scan="handleScan"
 					/>
 				</div>
 			</div>
@@ -96,21 +100,22 @@ const modelValue = defineModel({
 	default: () => ({ type: '', number: '', name: '', address: '', dob: '' }),
 })
 
-defineEmits(['close', 'apply-data'])
+const emit = defineEmits(['close', 'apply-data'])
 
 // A simple AAMVA PDF417 parser for Driver's Licenses
 function handleScan(scanValue, parsedData) {
-	if (!scanValue) return;
-	
+	if (!scanValue) return
+
 	if (parsedData) {
-		modelValue.value.number = parsedData.idNumber;
-		modelValue.value.name = parsedData.name;
-		modelValue.value.address = parsedData.address;
-		modelValue.value.dob = parsedData.dob;
-		modelValue.value.type = parsedData.type || modelValue.value.type || 'drivers_license';
+		modelValue.value.number = parsedData.idNumber
+		modelValue.value.name = parsedData.name
+		modelValue.value.address = parsedData.address
+		modelValue.value.dob = parsedData.dob
+		modelValue.value.type = parsedData.type || modelValue.value.type || 'drivers_license'
+		emit('apply-data')
 	} else {
 		// Just a standard 1D barcode or unformatted string
-		modelValue.value.number = scanValue;
+		modelValue.value.number = scanValue
 	}
 }
 </script>

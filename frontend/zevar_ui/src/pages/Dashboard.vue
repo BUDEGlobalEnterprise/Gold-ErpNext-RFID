@@ -1057,19 +1057,19 @@
 							</svg>
 							Market Prices
 						</h4>
-							<div class="market-grid">
-								<div
-									v-for="[key, rate, changePct, trend, changeAmt] in sortedRates"
-									:key="key"
-									class="market-card cursor-pointer hover:bg-gray-50 dark:hover:bg-warm-dark-700 rounded-lg px-2 transition"
-									role="button"
-									tabindex="0"
-									title="Refresh prices"
-									@click="refreshMarketRates"
-									@keydown.enter.prevent="refreshMarketRates"
-									@keydown.space.prevent="refreshMarketRates"
-								>
-									<div class="market-name">
+						<div class="market-grid">
+							<div
+								v-for="[key, rate, changePct, trend, changeAmt] in sortedRates"
+								:key="key"
+								class="market-card cursor-pointer hover:bg-gray-50 dark:hover:bg-warm-dark-700 rounded-lg px-2 transition"
+								role="button"
+								tabindex="0"
+								title="Refresh prices"
+								@click="refreshMarketRates"
+								@keydown.enter.prevent="refreshMarketRates"
+								@keydown.space.prevent="refreshMarketRates"
+							>
+								<div class="market-name">
 									{{ formatPurityLabel(key).toUpperCase() }}
 								</div>
 								<div class="flex items-end justify-between mt-1">

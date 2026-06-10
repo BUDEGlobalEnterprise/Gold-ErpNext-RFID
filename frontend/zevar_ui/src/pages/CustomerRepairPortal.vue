@@ -417,7 +417,9 @@
 
 					<!-- Visual Repair Timeline -->
 					<div class="mb-6 p-4 bg-gray-50 dark:bg-warm-dark-900 rounded-xl">
-						<h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Repair Progress</h4>
+						<h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
+							Repair Progress
+						</h4>
 						<RepairTimeline
 							:currentStatus="selectedRepair.status"
 							orientation="horizontal"
@@ -425,7 +427,9 @@
 						/>
 						<div v-if="selectedRepair.promised_date" class="mt-3 text-center">
 							<span class="text-sm text-gray-500">Estimated ready by:</span>
-							<span class="ml-1 font-bold text-[#D4AF37]">{{ formatDate(selectedRepair.promised_date) }}</span>
+							<span class="ml-1 font-bold text-[#D4AF37]">{{
+								formatDate(selectedRepair.promised_date)
+							}}</span>
 						</div>
 					</div>
 
@@ -500,11 +504,18 @@
 					</div>
 
 					<!-- Online Payment -->
-					<RepairPayment v-if="selectedRepair && authToken" :repair="selectedRepair" :authToken="authToken" />
+					<RepairPayment
+						v-if="selectedRepair && authToken"
+						:repair="selectedRepair"
+						:authToken="authToken"
+					/>
 
 					<!-- Post-Repair Review -->
-					<RepairReview v-if="selectedRepair && selectedRepair.status === 'Delivered' && authToken" :repair="selectedRepair" :authToken="authToken" />
-
+					<RepairReview
+						v-if="selectedRepair && selectedRepair.status === 'Delivered' && authToken"
+						:repair="selectedRepair"
+						:authToken="authToken"
+					/>
 
 					<!-- Estimate Approval -->
 					<div
@@ -610,7 +621,6 @@ import { call } from 'frappe-ui'
 import RepairTimeline from '@/components/RepairTimeline.vue'
 import RepairPayment from '@/components/RepairPayment.vue'
 import RepairReview from '@/components/RepairReview.vue'
-
 
 // State
 const authStep = ref('lookup') // lookup, verify

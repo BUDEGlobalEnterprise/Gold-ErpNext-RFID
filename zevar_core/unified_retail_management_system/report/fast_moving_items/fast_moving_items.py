@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt, cint
+from frappe.utils import cint, flt
 
 
 def execute(filters=None):
@@ -14,7 +14,13 @@ def execute(filters=None):
 
 def get_columns():
 	return [
-		{"fieldname": "item_code", "label": _("Item Code"), "fieldtype": "Link", "options": "Item", "width": 140},
+		{
+			"fieldname": "item_code",
+			"label": _("Item Code"),
+			"fieldtype": "Link",
+			"options": "Item",
+			"width": 140,
+		},
 		{"fieldname": "item_name", "label": _("Item Name"), "fieldtype": "Data", "width": 180},
 		{"fieldname": "metal_type", "label": _("Metal"), "fieldtype": "Data", "width": 80},
 		{"fieldname": "jewelry_type", "label": _("Type"), "fieldtype": "Data", "width": 90},
@@ -77,16 +83,18 @@ def get_data(filters):
 		daily_velocity = flt(row.qty_sold) / days_in_period
 		dos = (flt(stock) / daily_velocity) if daily_velocity > 0 else 999
 
-		result.append({
-			"item_code": row.item_code,
-			"item_name": row.item_name,
-			"metal_type": row.metal_type,
-			"jewelry_type": row.jewelry_type,
-			"qty_sold": flt(row.qty_sold),
-			"revenue": flt(row.revenue),
-			"avg_rate": flt(row.avg_rate),
-			"current_stock": flt(stock),
-			"days_of_supply": round(dos, 1),
-		})
+		result.append(
+			{
+				"item_code": row.item_code,
+				"item_name": row.item_name,
+				"metal_type": row.metal_type,
+				"jewelry_type": row.jewelry_type,
+				"qty_sold": flt(row.qty_sold),
+				"revenue": flt(row.revenue),
+				"avg_rate": flt(row.avg_rate),
+				"current_stock": flt(stock),
+				"days_of_supply": round(dos, 1),
+			}
+		)
 
 	return result

@@ -23,16 +23,18 @@ def _add_pricing_method_field():
 	if frappe.db.exists("Custom Field", "Item-custom_pricing_method"):
 		return
 
-	frappe.get_doc({
-		"doctype": "Custom Field",
-		"dt": "Item",
-		"fieldname": "custom_pricing_method",
-		"fieldtype": "Select",
-		"options": "Fine\nBulk UPC\nBulk IUOM\nBulk UOM\nBulk Mixed",
-		"label": "Pricing Method",
-		"default": "Fine",
-		"insert_after": "has_serial_no",
-	}).insert(ignore_permissions=True)
+	frappe.get_doc(
+		{
+			"doctype": "Custom Field",
+			"dt": "Item",
+			"fieldname": "custom_pricing_method",
+			"fieldtype": "Select",
+			"options": "Fine\nBulk UPC\nBulk IUOM\nBulk UOM\nBulk Mixed",
+			"label": "Pricing Method",
+			"default": "Fine",
+			"insert_after": "has_serial_no",
+		}
+	).insert(ignore_permissions=True)
 
 
 def _backfill_values():

@@ -390,7 +390,7 @@ onMounted(async () => {
 		doctype: 'Store Location',
 		fields: ['name', 'store_name'],
 		filters: {
-			name: ['in', ['NYC', 'LA', 'CHI', 'HOU', 'Miami-01']]
+			name: ['in', ['NYC', 'LA', 'CHI', 'HOU', 'Miami-01']],
 		},
 		limit_page_length: 10,
 	})

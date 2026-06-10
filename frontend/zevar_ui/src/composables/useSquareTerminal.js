@@ -31,8 +31,15 @@ export function useSquareTerminal() {
 	let pollTimer = null
 	let currentCheckoutId = null
 
-	const isProcessing = computed(() =>
-		![SQUARE_STATUS.IDLE, SQUARE_STATUS.SUCCEEDED, SQUARE_STATUS.FAILED, SQUARE_STATUS.CANCELED, SQUARE_STATUS.TIMED_OUT].includes(status.value)
+	const isProcessing = computed(
+		() =>
+			![
+				SQUARE_STATUS.IDLE,
+				SQUARE_STATUS.SUCCEEDED,
+				SQUARE_STATUS.FAILED,
+				SQUARE_STATUS.CANCELED,
+				SQUARE_STATUS.TIMED_OUT,
+			].includes(status.value)
 	)
 
 	async function fetchDevices() {
@@ -41,9 +48,12 @@ export function useSquareTerminal() {
 		error.value = null
 		try {
 			const result = await call('zevar_core.integrations.square_terminal.api.get_devices')
-			devices.value = (result?.devices || []).map(d => ({
-				id: d.id, name: d.name || d.id, type: d.type,
-				status: d.status, location_id: d.location_id,
+			devices.value = (result?.devices || []).map((d) => ({
+				id: d.id,
+				name: d.name || d.id,
+				type: d.type,
+				status: d.status,
+				location_id: d.location_id,
 				is_online: d.status === 'ACTIVE' || d.status === 'PAIRED',
 			}))
 			status.value = SQUARE_STATUS.IDLE
@@ -61,7 +71,13 @@ export function useSquareTerminal() {
 		selectedDevice.value = device
 	}
 
-	async function collectPayment({ amount, invoiceName, description, currency = 'USD', deviceId }) {
+	async function collectPayment({
+		amount,
+		invoiceName,
+		description,
+		currency = 'USD',
+		deviceId,
+	}) {
 		const device = deviceId || selectedDevice.value?.id
 		if (!device) throw new Error('No Square Terminal device selected.')
 
@@ -73,10 +89,16 @@ export function useSquareTerminal() {
 			status.value = SQUARE_STATUS.CREATING_CHECKOUT
 			statusMessage.value = 'Sending payment to terminal...'
 
-			const checkout = await call('zevar_core.integrations.square_terminal.api.create_terminal_checkout', {
-				device_id: device, amount, currency,
-				invoice_name: invoiceName || null, note: description || null,
-			})
+			const checkout = await call(
+				'zevar_core.integrations.square_terminal.api.create_terminal_checkout',
+				{
+					device_id: device,
+					amount,
+					currency,
+					invoice_name: invoiceName || null,
+					note: description || null,
+				}
+			)
 			if (!checkout?.checkout_id) throw new Error('Failed to create terminal checkout')
 			currentCheckoutId = checkout.checkout_id
 
@@ -91,10 +113,13 @@ export function useSquareTerminal() {
 				status.value = SQUARE_STATUS.SUCCEEDED
 				statusMessage.value = 'Payment approved!'
 				return {
-					success: true, checkoutId: currentCheckoutId,
-					paymentId: finalResult.payment_id, amount: finalResult.amount,
+					success: true,
+					checkoutId: currentCheckoutId,
+					paymentId: finalResult.payment_id,
+					amount: finalResult.amount,
 					receiptUrl: finalResult.receipt_url,
-					cardBrand: finalResult.card_brand, last4: finalResult.last_4,
+					cardBrand: finalResult.card_brand,
+					last4: finalResult.last_4,
 				}
 			} else if (finalResult.status === 'CANCELED') {
 				status.value = SQUARE_STATUS.CANCELED
@@ -119,26 +144,46 @@ export function useSquareTerminal() {
 			pollTimer = setInterval(async () => {
 				attempts++
 				try {
-					const result = await call('zevar_core.integrations.square_terminal.api.get_checkout_status', {
-						checkout_id: checkoutId,
-					})
+					const result = await call(
+						'zevar_core.integrations.square_terminal.api.get_checkout_status',
+						{
+							checkout_id: checkoutId,
+						}
+					)
 					const s = result?.status
 					if (s === 'IN_PROGRESS') {
 						status.value = SQUARE_STATUS.PROCESSING
 						statusMessage.value = 'Processing payment...'
 					}
-					if (s === 'COMPLETED') { clearInterval(pollTimer); pollTimer = null; resolve(result) }
-					else if (['CANCELED', 'CANCEL_REQUESTED'].includes(s)) { clearInterval(pollTimer); pollTimer = null; resolve({ ...result, status: 'CANCELED' }) }
-					else if (attempts >= maxAttempts) { clearInterval(pollTimer); pollTimer = null; reject(new Error('Checkout timed out')) }
+					if (s === 'COMPLETED') {
+						clearInterval(pollTimer)
+						pollTimer = null
+						resolve(result)
+					} else if (['CANCELED', 'CANCEL_REQUESTED'].includes(s)) {
+						clearInterval(pollTimer)
+						pollTimer = null
+						resolve({ ...result, status: 'CANCELED' })
+					} else if (attempts >= maxAttempts) {
+						clearInterval(pollTimer)
+						pollTimer = null
+						reject(new Error('Checkout timed out'))
+					}
 				} catch (e) {
-					if (attempts >= maxAttempts) { clearInterval(pollTimer); pollTimer = null; reject(e) }
+					if (attempts >= maxAttempts) {
+						clearInterval(pollTimer)
+						pollTimer = null
+						reject(e)
+					}
 				}
 			}, intervalMs)
 		})
 	}
 
 	function cancelCollection() {
-		if (pollTimer) { clearInterval(pollTimer); pollTimer = null }
+		if (pollTimer) {
+			clearInterval(pollTimer)
+			pollTimer = null
+		}
 		status.value = SQUARE_STATUS.CANCELED
 		statusMessage.value = 'Payment canceled'
 		currentCheckoutId = null
@@ -147,7 +192,8 @@ export function useSquareTerminal() {
 	async function pairDevice(deviceName, locationId) {
 		try {
 			return await call('zevar_core.integrations.square_terminal.api.pair_device', {
-				device_name: deviceName, location_id: locationId || null,
+				device_name: deviceName,
+				location_id: locationId || null,
 			})
 		} catch (e) {
 			error.value = `Device pairing failed: ${e.message}`
@@ -162,17 +208,33 @@ export function useSquareTerminal() {
 		receiptUrl.value = null
 		statusMessage.value = ''
 		currentCheckoutId = null
-		if (pollTimer) { clearInterval(pollTimer); pollTimer = null }
+		if (pollTimer) {
+			clearInterval(pollTimer)
+			pollTimer = null
+		}
 	}
 
-	onUnmounted(() => { if (pollTimer) { clearInterval(pollTimer); pollTimer = null } })
+	onUnmounted(() => {
+		if (pollTimer) {
+			clearInterval(pollTimer)
+			pollTimer = null
+		}
+	})
 
 	return {
-		status: readonly(status), error: readonly(error),
-		devices: readonly(devices), selectedDevice: readonly(selectedDevice),
-		paymentResult: readonly(paymentResult), receiptUrl: readonly(receiptUrl),
-		statusMessage: readonly(statusMessage), isProcessing,
-		fetchDevices, selectDevice, collectPayment, cancelCollection,
-		pairDevice, reset,
+		status: readonly(status),
+		error: readonly(error),
+		devices: readonly(devices),
+		selectedDevice: readonly(selectedDevice),
+		paymentResult: readonly(paymentResult),
+		receiptUrl: readonly(receiptUrl),
+		statusMessage: readonly(statusMessage),
+		isProcessing,
+		fetchDevices,
+		selectDevice,
+		collectPayment,
+		cancelCollection,
+		pairDevice,
+		reset,
 	}
 }

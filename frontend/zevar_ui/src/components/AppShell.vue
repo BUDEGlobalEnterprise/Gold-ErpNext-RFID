@@ -137,12 +137,26 @@
 											>{{ item.label }}</span
 										>
 										<span
-											v-if="!isSidebarCollapsed && item.label === 'POS Terminal' && posSession.hasActiveSession"
+											v-if="
+												!isSidebarCollapsed &&
+												item.label === 'POS Terminal' &&
+												posSession.hasActiveSession
+											"
 											class="ml-auto flex items-center gap-1 px-1.5 py-0.5 rounded-full shrink-0"
-											:class="isNavActive(item.to) ? 'bg-[#1E2022]/10 text-[#1E2022]' : 'bg-green-500/20 text-green-400 border border-green-500/30 text-[9px]'"
+											:class="
+												isNavActive(item.to)
+													? 'bg-[#1E2022]/10 text-[#1E2022]'
+													: 'bg-green-500/20 text-green-400 border border-green-500/30 text-[9px]'
+											"
 										>
-											<span class="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
-											<span v-if="!isNavActive(item.to)" class="text-[8px] font-black uppercase tracking-wider">Active</span>
+											<span
+												class="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"
+											></span>
+											<span
+												v-if="!isNavActive(item.to)"
+												class="text-[8px] font-black uppercase tracking-wider"
+												>Active</span
+											>
 										</span>
 										<div
 											v-if="isSidebarCollapsed"
@@ -165,10 +179,22 @@
 						:class="{ 'justify-center': isSidebarCollapsed }"
 						:title="isSidebarCollapsed ? 'Force Refresh' : ''"
 					>
-						<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+						<svg
+							class="w-4 h-4 shrink-0"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+							/>
 						</svg>
-						<span v-if="!isSidebarCollapsed" class="whitespace-nowrap">Force Refresh</span>
+						<span v-if="!isSidebarCollapsed" class="whitespace-nowrap"
+							>Force Refresh</span
+						>
 					</button>
 				</div>
 			</div>
@@ -998,11 +1024,11 @@ const sidebarSections = computed(() => {
 			label: 'Live Monitor',
 			icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z',
 		})
-			sections[3].items.push({
-				to: '/live-monitor',
-				label: 'Sales Monitor',
-				icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
-			})
+		sections[3].items.push({
+			to: '/live-monitor',
+			label: 'Sales Monitor',
+			icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+		})
 		sections[3].items.push({
 			to: '/reports/dashboards/profit',
 			label: 'Profit Intelligence',
@@ -1033,8 +1059,8 @@ function isNavActive(path) {
 	const current = route.path || ''
 	if (path === '/') return current === '/'
 	if (current === path) return true
-	const hasExactMatchElsewhere = sidebarSections.value.some(section =>
-		section.items.some(item => item.to === current)
+	const hasExactMatchElsewhere = sidebarSections.value.some((section) =>
+		section.items.some((item) => item.to === current)
 	)
 	if (hasExactMatchElsewhere) return false
 	return current.startsWith(path + '/')
@@ -1217,7 +1243,10 @@ async function handleGlobalPaymentSuccess(result) {
 				ui.closeLayawayPayment()
 				emit('layaway-created', responseObj)
 			} else {
-				console.error('AppShell: Layaway creation returned unexpected result:', responseObj)
+				console.error(
+					'AppShell: Layaway creation returned unexpected result:',
+					responseObj
+				)
 				const displayMsg =
 					typeof responseObj === 'string'
 						? responseObj
@@ -1238,8 +1267,7 @@ async function handleGlobalPaymentSuccess(result) {
 
 			// 2. Try parsing _server_messages for structured messages
 			if (!displayMsg) {
-				const rawServerMsg =
-					err?.data?._server_messages || err?._server_messages
+				const rawServerMsg = err?.data?._server_messages || err?._server_messages
 				if (rawServerMsg) {
 					try {
 						const msgs = JSON.parse(rawServerMsg)
@@ -1251,7 +1279,12 @@ async function handleGlobalPaymentSuccess(result) {
 									return m
 								}
 							})
-							.filter((m) => m && m !== 'ValidationError' && m !== 'frappe.exceptions.ValidationError')
+							.filter(
+								(m) =>
+									m &&
+									m !== 'ValidationError' &&
+									m !== 'frappe.exceptions.ValidationError'
+							)
 							.join('\n')
 					} catch {
 						displayMsg = rawServerMsg

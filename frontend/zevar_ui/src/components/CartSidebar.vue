@@ -448,12 +448,9 @@
 							<button
 								v-if="posSession.hasActiveSession"
 								@click="startLayaway"
-								class="w-full py-3.5 bg-[#D6BA8B] hover:bg-[#C9A976] text-[#1E2022] rounded-xl font-bold shadow-sm transition duration-200 active:scale-95 text-sm flex flex-col items-center justify-center leading-tight border border-[#D6BA8B]/20"
+								class="w-full py-3.5 bg-[#D6BA8B] hover:bg-[#C9A976] text-[#1E2022] rounded-xl font-bold shadow-sm transition duration-200 active:scale-95 text-sm flex items-center justify-center border border-[#D6BA8B]/20"
 							>
-								<span>Create Layaway</span>
-								<span class="text-[9px] font-normal text-gray-700/80 mt-0.5">
-									{{ formatCurrency(cart.grandTotal * 0.5) }} Deposit Required
-								</span>
+								Create Layaway
 							</button>
 							<router-link
 								v-if="!posSession.hasActiveSession"

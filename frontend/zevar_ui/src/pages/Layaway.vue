@@ -177,7 +177,9 @@
 								<span class="font-mono text-[10px] text-[#D4AF37] font-bold">{{
 									layaway.name
 								}}</span>
-								<p class="text-xs font-bold text-gray-900 dark:text-white mt-0.5 truncate leading-tight">
+								<p
+									class="text-xs font-bold text-gray-900 dark:text-white mt-0.5 truncate leading-tight"
+								>
 									{{ layaway.customer_name || layaway.customer || 'Unknown' }}
 								</p>
 							</div>
@@ -192,16 +194,24 @@
 						<!-- Amounts -->
 						<div class="grid grid-cols-2 gap-2 mb-2.5">
 							<div>
-								<span class="text-[9px] uppercase font-bold text-gray-400 dark:text-gray-500">Total</span>
-								<p class="text-xs font-mono font-bold text-gray-900 dark:text-white">
+								<span
+									class="text-[9px] uppercase font-bold text-gray-400 dark:text-gray-500"
+									>Total</span
+								>
+								<p
+									class="text-xs font-mono font-bold text-gray-900 dark:text-white"
+								>
 									{{ formatCurrency(layaway.total_amount) }}
 								</p>
 							</div>
 							<div>
-								<span class="text-[9px] uppercase font-bold text-gray-400 dark:text-gray-500"
+								<span
+									class="text-[9px] uppercase font-bold text-gray-400 dark:text-gray-500"
 									>Balance</span
 								>
-								<p class="text-xs font-mono font-bold text-orange-600 dark:text-orange-400">
+								<p
+									class="text-xs font-mono font-bold text-orange-600 dark:text-orange-400"
+								>
 									{{ formatCurrency(layaway.balance_amount) }}
 								</p>
 							</div>
@@ -240,10 +250,15 @@
 							class="flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 mt-auto pt-2 border-t border-gray-50 dark:border-warm-border/30 min-w-0"
 						>
 							<span class="shrink-0">{{ layaway.item_count || 0 }} items</span>
-							<span v-if="layaway.next_payment_date" class="truncate ml-1 font-mono text-[9px]">
+							<span
+								v-if="layaway.next_payment_date"
+								class="truncate ml-1 font-mono text-[9px]"
+							>
 								Next: {{ formatDate(layaway.next_payment_date) }}
 							</span>
-							<span v-else class="shrink-0 font-mono text-[9px]"> {{ layaway.maximum_duration_months }} months </span>
+							<span v-else class="shrink-0 font-mono text-[9px]">
+								{{ layaway.maximum_duration_months }} months
+							</span>
 						</div>
 					</div>
 				</div>

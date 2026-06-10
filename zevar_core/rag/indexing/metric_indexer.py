@@ -7,6 +7,7 @@ space with text chunks) and stored as metric embeddings.
 
 Refreshed weekly alongside the KG rebuild.
 """
+
 from __future__ import annotations
 
 import frappe
@@ -55,12 +56,14 @@ def index_daily_revenue(days: int = 90) -> int:
 			count=int(r["count"] or 0),
 		)
 		docs.append(text)
-		metas.append({
-			"date": date_str,
-			"revenue": float(r["revenue"] or 0),
-			"count": int(r["count"] or 0),
-			"source_query": "get_daily_revenue_breakdown",
-		})
+		metas.append(
+			{
+				"date": date_str,
+				"revenue": float(r["revenue"] or 0),
+				"count": int(r["count"] or 0),
+				"source_query": "get_daily_revenue_breakdown",
+			}
+		)
 		ids.append(f"daily_revenue:{date_str}")
 
 	return _upsert_metrics(docs, metas, ids)
@@ -97,12 +100,14 @@ def index_daily_repair(days: int = 90) -> int:
 			count=int(r["count"] or 0),
 		)
 		docs.append(text)
-		metas.append({
-			"date": date_str,
-			"revenue": float(r["revenue"] or 0),
-			"count": int(r["count"] or 0),
-			"source_query": "get_daily_revenue_breakdown",
-		})
+		metas.append(
+			{
+				"date": date_str,
+				"revenue": float(r["revenue"] or 0),
+				"count": int(r["count"] or 0),
+				"source_query": "get_daily_revenue_breakdown",
+			}
+		)
 		ids.append(f"daily_repair:{date_str}")
 
 	return _upsert_metrics(docs, metas, ids)

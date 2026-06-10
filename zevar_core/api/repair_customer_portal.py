@@ -743,6 +743,7 @@ def schedule_pickup(
 		frappe.log_error(f"Failed to schedule pickup for {repair_order}: {e}")
 		return {"success": False, "message": f"Failed to schedule pickup: {e!s}"}
 
+
 @frappe.whitelist(allow_guest=True)  # nosemgrep
 def initiate_repair_payment(auth_token: str, repair_order: str, provider: str = "stripe") -> dict[str, Any]:
 	"""
@@ -937,39 +938,45 @@ def simulate_payment_success(repair: str, amount: float, ref: str) -> str:
 	"""
 	try:
 		doc = frappe.get_doc("Repair Order", repair)
-		
+
 		# Add deposit/payment
 		current_deposit = doc.deposit_amount or 0
 		doc.deposit_amount = current_deposit + float(amount)
 		doc.payment_status = "Fully Paid" if doc.deposit_amount >= doc.total_cost else "Partially Paid"
 		doc.save(ignore_permissions=True)
-		
+
 		# Log success
 		doc._log_communication(
-			"System", 
-			"Incoming", 
-			f"Online payment of ${amount} received (Ref: {ref})", 
-			"System", 
-			"Payment Received"
+			"System",
+			"Incoming",
+			f"Online payment of ${amount} received (Ref: {ref})",
+			"System",
+			"Payment Received",
 		)
-		
+
 		# Broadcast to live monitor
 		from zevar_core.api.live_monitor import publish_repair_event
-		publish_repair_event("payment_received", {
-			"repair": doc.name,
-			"customer": doc.customer_name,
-			"amount": float(amount),
-			"warehouse": doc.warehouse
-		})
-		
-		return f"Payment successful! You can close this window and return to the portal."
-		
+
+		publish_repair_event(
+			"payment_received",
+			{
+				"repair": doc.name,
+				"customer": doc.customer_name,
+				"amount": float(amount),
+				"warehouse": doc.warehouse,
+			},
+		)
+
+		return "Payment successful! You can close this window and return to the portal."
+
 	except Exception as e:
 		return f"Payment recording failed: {e!s}"
 
 
 @frappe.whitelist(allow_guest=True)  # nosemgrep
-def submit_repair_review(auth_token: str, repair_order: str, rating: int, comments: str | None = None) -> dict[str, Any]:
+def submit_repair_review(
+	auth_token: str, repair_order: str, rating: int, comments: str | None = None
+) -> dict[str, Any]:
 	"""
 	Submit a post-repair review and rating.
 	"""
@@ -984,47 +991,50 @@ def submit_repair_review(auth_token: str, repair_order: str, rating: int, commen
 
 	try:
 		doc = frappe.get_doc("Repair Order", repair_order)
-		
+
 		# Set custom fields for review if they exist, else log it
 		try:
-			doc.db_set('custom_review_rating', int(rating))
+			doc.db_set("custom_review_rating", int(rating))
 			if comments:
-				doc.db_set('custom_review_comments', comments)
+				doc.db_set("custom_review_comments", comments)
 		except Exception:
 			# Fields might not exist yet
 			pass
-			
+
 		# Always log it as communication
 		doc._log_communication(
-			"Customer Portal", 
-			"Incoming", 
-			f"Customer rated repair {rating}/5 stars.\nComments: {comments or 'None'}", 
-			"Customer Portal", 
-			"Review Submitted"
+			"Customer Portal",
+			"Incoming",
+			f"Customer rated repair {rating}/5 stars.\nComments: {comments or 'None'}",
+			"Customer Portal",
+			"Review Submitted",
 		)
-		
+
 		# Alert staff if it's a poor review
 		if int(rating) <= 2:
 			from frappe.desk.doctype.notification.log import add_notification_log
-			
+
 			users_to_notify = [doc.handled_by] if doc.handled_by else []
 			managers = frappe.get_all("Has Role", filters={"role": "Store Manager"}, pluck="parent")
 			users_to_notify.extend(managers)
-			
+
 			for user in set(users_to_notify):
-				if not user: continue
+				if not user:
+					continue
 				try:
-					add_notification_log({
-						"subject": f"Poor Review ({rating} stars) - {doc.name}",
-						"for_user": user,
-						"type": "Alert",
-						"document_type": "Repair Order",
-						"document_name": doc.name,
-						"message": f"Customer gave a low rating. Comments: {comments}"
-					})
+					add_notification_log(
+						{
+							"subject": f"Poor Review ({rating} stars) - {doc.name}",
+							"for_user": user,
+							"type": "Alert",
+							"document_type": "Repair Order",
+							"document_name": doc.name,
+							"message": f"Customer gave a low rating. Comments: {comments}",
+						}
+					)
 				except Exception:
 					pass
-					
+
 		return {"success": True, "message": "Review submitted successfully"}
 
 	except Exception as e:

@@ -191,11 +191,11 @@
 /* ===== Gold Accent Text ===== */
 
 .text-gold {
-	color: #D4AF37;
+	color: #d4af37;
 }
 
 .text-gold-gradient {
-	background: linear-gradient(135deg, #D4AF37, #F2E6A0);
+	background: linear-gradient(135deg, #d4af37, #f2e6a0);
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;

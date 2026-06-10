@@ -1,0 +1,150 @@
+yarn run v1.22.22
+warning ../../../../../package.json: No license field
+$ vite build
+[frappeui-build-config-plugin] Could not find build output directory automatically. Please specify it manually.
+vite v5.4.21 building for production...
+transforming...
+✓ 2456 modules transformed.
+rendering chunks...
+[plugin:vite:reporter] [plugin vite:reporter] 
+(!) /workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/services/OfflineDB.js is dynamically imported by /workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/stores/offline.js, /workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/stores/offline.js, /workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/stores/offline.js, /workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/stores/offline.js, /workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/stores/offline.js, /workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/stores/offline.js but also statically imported by /workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/stores/cart.js, /workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/stores/offline.js, dynamic import will not move module into another chunk.
+
+computing gzip size...
+../../zevar_core/public/pos/index.html                                         1.27 kB │ gzip:   0.65 kB
+../../zevar_core/public/pos/.vite/manifest.json                               46.01 kB │ gzip:   4.73 kB
+../../zevar_core/public/pos/assets/CategoryListing-Dvej-KPk.css                0.12 kB │ gzip:   0.11 kB
+../../zevar_core/public/pos/assets/ProductModal-CeVPQjTM.css                   0.24 kB │ gzip:   0.15 kB
+../../zevar_core/public/pos/assets/BaseFilterBar-CpYri0Qs.css                  0.32 kB │ gzip:   0.15 kB
+../../zevar_core/public/pos/assets/POS-f_XDxvvL.css                            0.36 kB │ gzip:   0.17 kB
+../../zevar_core/public/pos/assets/CatalogueView-CzVYHm4L.css                  0.43 kB │ gzip:   0.17 kB
+../../zevar_core/public/pos/assets/Inventory-FKV4TteU.css                      0.45 kB │ gzip:   0.17 kB
+../../zevar_core/public/pos/assets/BaseModal-B3eHRNXh.css                      0.49 kB │ gzip:   0.17 kB
+../../zevar_core/public/pos/assets/Layaway-f53K_7J8.css                        1.21 kB │ gzip:   0.38 kB
+../../zevar_core/public/pos/assets/RepairPartsDrawer-DvojlSCu.css              3.17 kB │ gzip:   0.92 kB
+../../zevar_core/public/pos/assets/InventoryTab-D3tjxA7Z.css                   3.32 kB │ gzip:   1.02 kB
+../../zevar_core/public/pos/assets/Login-BnCKqFEH.css                          3.67 kB │ gzip:   1.08 kB
+../../zevar_core/public/pos/assets/AnalyticsHub-BCinjq7X.css                   5.77 kB │ gzip:   1.49 kB
+../../zevar_core/public/pos/assets/Dashboard-DkkUccPa.css                      9.31 kB │ gzip:   1.79 kB
+../../zevar_core/public/pos/assets/index-BWaeeN3T.css                         11.80 kB │ gzip:   3.24 kB
+../../zevar_core/public/pos/assets/AppLayout-BLsZuJdh.css                     14.02 kB │ gzip:   3.09 kB
+../../zevar_core/public/pos/assets/index-CEE5nK9y.css                        224.85 kB │ gzip:  34.01 kB
+../../zevar_core/public/pos/assets/_plugin-vue_export-helper-DlAUqK2U.js       0.09 kB │ gzip:   0.10 kB
+../../zevar_core/public/pos/assets/InsertLink-Okf6Iv6l.js                      0.26 kB │ gzip:   0.22 kB
+../../zevar_core/public/pos/assets/InsertVideo-lgpSaJPU.js                     0.28 kB │ gzip:   0.23 kB
+../../zevar_core/public/pos/assets/CatalogueDashboard-Bi3EuSrV.js              0.33 kB │ gzip:   0.25 kB
+../../zevar_core/public/pos/assets/POSCategoryListing-Yin2-DLK.js              0.46 kB │ gzip:   0.33 kB
+../../zevar_core/public/pos/assets/POSCatalogue-CVQnEicP.js                    0.47 kB │ gzip:   0.33 kB
+../../zevar_core/public/pos/assets/dates-ByXNN2DU.js                           0.54 kB │ gzip:   0.30 kB
+../../zevar_core/public/pos/assets/useFormatters-yijnDPkr.js                   0.92 kB │ gzip:   0.50 kB
+../../zevar_core/public/pos/assets/RepairDetailDrawer-DBSzpXmG.js              1.04 kB │ gzip:   0.61 kB
+../../zevar_core/public/pos/assets/SpecialOrders-D6Tjf_Y2.js                   1.09 kB │ gzip:   0.57 kB
+../../zevar_core/public/pos/assets/LiveMonitor-C-NjHW-V.js                     1.10 kB │ gzip:   0.58 kB
+../../zevar_core/public/pos/assets/AssociateDetailPerformance-X0qEUI-r.js      1.11 kB │ gzip:   0.58 kB
+../../zevar_core/public/pos/assets/WorkforceIntelligence-ClqhIX6C.js           1.12 kB │ gzip:   0.58 kB
+../../zevar_core/public/pos/assets/InsertImage-ObngvHWY.js                     1.12 kB │ gzip:   0.69 kB
+../../zevar_core/public/pos/assets/SalesDetailDrawer-VaEIIwPl.js               1.12 kB │ gzip:   0.67 kB
+../../zevar_core/public/pos/assets/HoldQueueDrawer-BEWjZEMB.js                 1.29 kB │ gzip:   0.73 kB
+../../zevar_core/public/pos/assets/OverdueDrawer-8O1W_mFV.js                   1.41 kB │ gzip:   0.72 kB
+../../zevar_core/public/pos/assets/LowStockDrawer-D7BxN4gF.js                  1.48 kB │ gzip:   0.83 kB
+../../zevar_core/public/pos/assets/gold-Cot9W84S.js                            1.61 kB │ gzip:   0.86 kB
+../../zevar_core/public/pos/assets/ViewToggle-CsvngVxF.js                      1.62 kB │ gzip:   0.68 kB
+../../zevar_core/public/pos/assets/LayawayDetailDrawer-B27O-lz6.js             1.76 kB │ gzip:   0.93 kB
+../../zevar_core/public/pos/assets/BaseFilterBar-BSSQRvWt.js                   1.77 kB │ gzip:   0.94 kB
+../../zevar_core/public/pos/assets/CashVarianceDrawer-CKdJm8d6.js              1.79 kB │ gzip:   0.93 kB
+../../zevar_core/public/pos/assets/PaymentCancelled-DY8Ghcp9.js                1.92 kB │ gzip:   0.99 kB
+../../zevar_core/public/pos/assets/DetailListDrawer-CoajX_0o.js                2.01 kB │ gzip:   0.98 kB
+../../zevar_core/public/pos/assets/StatCard-brhUmKqh.js                        2.04 kB │ gzip:   0.89 kB
+../../zevar_core/public/pos/assets/KPICard-CNzDo5ib.js                         2.31 kB │ gzip:   0.83 kB
+../../zevar_core/public/pos/assets/hr-CkWQajzo.js                              3.09 kB │ gzip:   1.09 kB
+../../zevar_core/public/pos/assets/InsertIframe-BIm2fM0G.js                    3.13 kB │ gzip:   1.53 kB
+../../zevar_core/public/pos/assets/AppraisalReminders-CpCDcxj_.js              3.39 kB │ gzip:   1.54 kB
+../../zevar_core/public/pos/assets/FontColor-CBssVnn1.js                       3.55 kB │ gzip:   1.23 kB
+../../zevar_core/public/pos/assets/RevenueTab-BM3X7KY6.js                      3.57 kB │ gzip:   1.41 kB
+../../zevar_core/public/pos/assets/ReportViewer-Bf2pkCDZ.js                    3.69 kB │ gzip:   1.77 kB
+../../zevar_core/public/pos/assets/FinanceTab-DCoOdcor.js                      3.75 kB │ gzip:   1.60 kB
+../../zevar_core/public/pos/assets/AIInsightsTab-CiYXRL6L.js                   3.81 kB │ gzip:   1.74 kB
+../../zevar_core/public/pos/assets/CustomersTab-w3qo1oB6.js                    3.91 kB │ gzip:   1.50 kB
+../../zevar_core/public/pos/assets/RepairsTab-DUgsyyfH.js                      3.97 kB │ gzip:   1.62 kB
+../../zevar_core/public/pos/assets/accounting-BMNN4u0c.js                      4.04 kB │ gzip:   1.21 kB
+../../zevar_core/public/pos/assets/CustomerMemo-CwNX6m9z.js                    4.40 kB │ gzip:   1.89 kB
+../../zevar_core/public/pos/assets/Login-DCV9vwbI.js                           4.62 kB │ gzip:   1.88 kB
+../../zevar_core/public/pos/assets/inventoryV2-BuD0EmLG.js                     5.25 kB │ gzip:   1.45 kB
+../../zevar_core/public/pos/assets/ExternalBench-DMlED-rw.js                   5.41 kB │ gzip:   2.28 kB
+../../zevar_core/public/pos/assets/PaymentSuccess-CM3BsNis.js                  5.43 kB │ gzip:   2.16 kB
+../../zevar_core/public/pos/assets/permissions-SqhYUCRT.js                     5.46 kB │ gzip:   1.63 kB
+../../zevar_core/public/pos/assets/MemoItemStatus-koIzDV90.js                  5.51 kB │ gzip:   2.09 kB
+../../zevar_core/public/pos/assets/MetalPurityAdmin-B0NBlCR5.js                5.74 kB │ gzip:   1.79 kB
+../../zevar_core/public/pos/assets/Terminals-B_v0t2jQ.js                       5.76 kB │ gzip:   2.02 kB
+../../zevar_core/public/pos/assets/CreditNotes-BYmTwgyg.js                     5.82 kB │ gzip:   2.19 kB
+../../zevar_core/public/pos/assets/StoreTransferModal-RNwCRmk9.js              5.97 kB │ gzip:   2.44 kB
+../../zevar_core/public/pos/assets/TimeClock-D1gvXXZ-.js                       6.02 kB │ gzip:   2.35 kB
+../../zevar_core/public/pos/assets/Inventory-BKhkQhSN.js                       6.03 kB │ gzip:   2.31 kB
+../../zevar_core/public/pos/assets/Revenue-CbAocsR6.js                         6.18 kB │ gzip:   2.34 kB
+../../zevar_core/public/pos/assets/Invoices-DzbZDEqI.js                        6.29 kB │ gzip:   2.37 kB
+../../zevar_core/public/pos/assets/ScrapRecovery-C3Kkkzwm.js                   6.30 kB │ gzip:   2.22 kB
+../../zevar_core/public/pos/assets/Customer-Ca5fPkkl.js                        6.40 kB │ gzip:   2.42 kB
+../../zevar_core/public/pos/assets/MemoAging-DcLhKKI-.js                       6.46 kB │ gzip:   2.45 kB
+../../zevar_core/public/pos/assets/EmployeePortal-Ciu58ilA.js                  6.54 kB │ gzip:   2.31 kB
+../../zevar_core/public/pos/assets/RepairTimeline-DMi3jKKd.js                  6.67 kB │ gzip:   2.14 kB
+../../zevar_core/public/pos/assets/AppraisalList-CG9VMAox.js                   6.90 kB │ gzip:   2.40 kB
+../../zevar_core/public/pos/assets/VendorMemoDashboard-DlvcLR_3.js             6.93 kB │ gzip:   2.38 kB
+../../zevar_core/public/pos/assets/stock-aJazmZdD.js                           6.93 kB │ gzip:   1.67 kB
+../../zevar_core/public/pos/assets/ExportUBL-B5C3Q_E0.js                       7.42 kB │ gzip:   2.79 kB
+../../zevar_core/public/pos/assets/RepairLookup-CazxzKkc.js                    8.61 kB │ gzip:   3.34 kB
+../../zevar_core/public/pos/assets/LeaveManagement-Cuf4Sn7k.js                 8.75 kB │ gzip:   2.98 kB
+../../zevar_core/public/pos/assets/ComponentInventory-Cy-CbNzd.js              9.02 kB │ gzip:   2.82 kB
+../../zevar_core/public/pos/assets/RepairPartsDrawer-CBjR4PZs.js               9.13 kB │ gzip:   3.62 kB
+../../zevar_core/public/pos/assets/EstimateApproval-BMl2YWn7.js                9.22 kB │ gzip:   2.86 kB
+../../zevar_core/public/pos/assets/TradeIns-5jnm-EAh.js                        9.49 kB │ gzip:   3.08 kB
+../../zevar_core/public/pos/assets/BomBuilder-D4exxXAa.js                      9.50 kB │ gzip:   3.16 kB
+../../zevar_core/public/pos/assets/Catalogs-BhgUdHKA.js                        9.61 kB │ gzip:   3.45 kB
+../../zevar_core/public/pos/assets/Appraisals-w6n4Job8.js                      9.66 kB │ gzip:   3.17 kB
+../../zevar_core/public/pos/assets/EmployeeLiveMonitor-ts6kP8lo.js             9.75 kB │ gzip:   3.38 kB
+../../zevar_core/public/pos/assets/InventoryTab-C3VA-IRf.js                   11.53 kB │ gzip:   4.31 kB
+../../zevar_core/public/pos/assets/Categories-BgY8xHYP.js                     11.82 kB │ gzip:   3.68 kB
+../../zevar_core/public/pos/assets/KnowledgeBase-IyMdp7Yc.js                  12.46 kB │ gzip:   3.97 kB
+../../zevar_core/public/pos/assets/Brands-DgaQzOh1.js                         12.57 kB │ gzip:   4.09 kB
+../../zevar_core/public/pos/assets/Collections-CBNS68y4.js                    12.66 kB │ gzip:   3.97 kB
+../../zevar_core/public/pos/assets/Storages-BPi-X_E1.js                       12.74 kB │ gzip:   3.83 kB
+../../zevar_core/public/pos/assets/AdminMonitor-C49CTMdO.js                   12.88 kB │ gzip:   4.01 kB
+../../zevar_core/public/pos/assets/POSOpening-Ohq5OKzE.js                     13.06 kB │ gzip:   4.46 kB
+../../zevar_core/public/pos/assets/IncomingMemos-Desfc1J-.js                  13.20 kB │ gzip:   3.89 kB
+../../zevar_core/public/pos/assets/Transactions-CkVrYdZt.js                   14.15 kB │ gzip:   4.15 kB
+../../zevar_core/public/pos/assets/CategoryListing-ErpslOEj.js                14.36 kB │ gzip:   4.86 kB
+../../zevar_core/public/pos/assets/StockManagement-CtwzoXVo.js                14.96 kB │ gzip:   3.98 kB
+../../zevar_core/public/pos/assets/SupplierOrders-DmqAkZP2.js                 16.23 kB │ gzip:   4.50 kB
+../../zevar_core/public/pos/assets/ItemFilterBar-BqX6d4eW.js                  16.32 kB │ gzip:   3.92 kB
+../../zevar_core/public/pos/assets/Assemblies-CEvUTP13.js                     16.36 kB │ gzip:   4.37 kB
+../../zevar_core/public/pos/assets/Tasks-vmqzeoNB.js                          16.63 kB │ gzip:   4.71 kB
+../../zevar_core/public/pos/assets/Support-Br_3yuo0.js                        17.18 kB │ gzip:   5.16 kB
+../../zevar_core/public/pos/assets/Metals-2WRvKm3_.js                         17.27 kB │ gzip:   4.85 kB
+../../zevar_core/public/pos/assets/Contacts-qAOi5EU1.js                       19.07 kB │ gzip:   4.95 kB
+../../zevar_core/public/pos/assets/Quotes-BdGB4z_8.js                         19.39 kB │ gzip:   5.19 kB
+../../zevar_core/public/pos/assets/Gems-BIH8LQt5.js                           20.09 kB │ gzip:   5.19 kB
+../../zevar_core/public/pos/assets/ProductModal-nUh3g8Po.js                   23.74 kB │ gzip:   6.77 kB
+../../zevar_core/public/pos/assets/Customers-BD_tEZLH.js                      24.23 kB │ gzip:   6.26 kB
+../../zevar_core/public/pos/assets/CatalogueView-BZZBpZ6r.js                  24.95 kB │ gzip:   6.86 kB
+../../zevar_core/public/pos/assets/AnalyticsHub-BfrUw8v-.js                   26.97 kB │ gzip:   9.10 kB
+../../zevar_core/public/pos/assets/CustomerRepairPortal-C8zQU2kT.js           27.74 kB │ gzip:   7.73 kB
+../../zevar_core/public/pos/assets/BaseModal-4b8cPreO.js                      27.77 kB │ gzip:   8.78 kB
+../../zevar_core/public/pos/assets/Settings-CSPaoG68.js                       28.05 kB │ gzip:   6.35 kB
+../../zevar_core/public/pos/assets/POSClosing-Dl-M8DV0.js                     28.74 kB │ gzip:   8.00 kB
+../../zevar_core/public/pos/assets/Dashboard-iTKPzPPM.js                      28.96 kB │ gzip:   5.36 kB
+../../zevar_core/public/pos/assets/ProfitIntelligence-Dbx1QfSp.js             30.49 kB │ gzip:   8.39 kB
+../../zevar_core/public/pos/assets/SalesHistory-vrmC3qRk.js                   31.71 kB │ gzip:   8.20 kB
+../../zevar_core/public/pos/assets/ReportsHub-DI3RftN_.js                     37.85 kB │ gzip:  10.33 kB
+../../zevar_core/public/pos/assets/InventoryAudit-DOxdCsRs.js                 47.34 kB │ gzip:  12.13 kB
+../../zevar_core/public/pos/assets/POS-Dn5W3ajU.js                            72.63 kB │ gzip:  19.24 kB
+../../zevar_core/public/pos/assets/Layaway-CkCkBqJO.js                        78.75 kB │ gzip:  18.48 kB
+../../zevar_core/public/pos/assets/Inventory-D4mPBfVO.js                     103.73 kB │ gzip:  22.41 kB
+../../zevar_core/public/pos/assets/RepairTerminal-DfJUMxqP.js                137.63 kB │ gzip:  33.33 kB
+../../zevar_core/public/pos/assets/index-CzfK9D9-.js                         324.07 kB │ gzip: 106.09 kB
+../../zevar_core/public/pos/assets/AppLayout-zgX41FKj.js                     704.27 kB │ gzip: 184.50 kB
+../../zevar_core/public/pos/assets/index-DVCZ4J2k.js                       2,580.84 kB │ gzip: 809.25 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 15.94s
+Done in 16.52s.

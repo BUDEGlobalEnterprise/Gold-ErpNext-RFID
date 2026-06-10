@@ -1,8 +1,5 @@
 <template>
-	<div
-		class="premium-card !p-4 flex flex-col gap-2"
-		:class="statusBorder"
-	>
+	<div class="premium-card !p-4 flex flex-col gap-2" :class="statusBorder">
 		<div class="flex items-center justify-between gap-2">
 			<h4 class="text-sm font-bold text-gray-900 dark:text-white">
 				{{ title }}

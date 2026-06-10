@@ -6,7 +6,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 export function useDrawerStack() {
-	const stack = ref([])  // [{ id, title, component, props }]
+	const stack = ref([]) // [{ id, title, component, props }]
 	const isOpen = computed(() => stack.value.length > 0)
 	const current = computed(() => stack.value[stack.value.length - 1] || null)
 

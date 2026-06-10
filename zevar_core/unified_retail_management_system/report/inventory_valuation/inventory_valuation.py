@@ -16,13 +16,31 @@ def execute(filters=None):
 
 def get_columns():
 	return [
-		{"fieldname": "item_code", "label": _("Item Code"), "fieldtype": "Link", "options": "Item", "width": 140},
+		{
+			"fieldname": "item_code",
+			"label": _("Item Code"),
+			"fieldtype": "Link",
+			"options": "Item",
+			"width": 140,
+		},
 		{"fieldname": "item_name", "label": _("Item Name"), "fieldtype": "Data", "width": 180},
-		{"fieldname": "item_group", "label": _("Item Group"), "fieldtype": "Link", "options": "Item Group", "width": 120},
+		{
+			"fieldname": "item_group",
+			"label": _("Item Group"),
+			"fieldtype": "Link",
+			"options": "Item Group",
+			"width": 120,
+		},
 		{"fieldname": "metal_type", "label": _("Metal"), "fieldtype": "Data", "width": 90},
 		{"fieldname": "purity", "label": _("Purity"), "fieldtype": "Data", "width": 70},
 		{"fieldname": "jewelry_type", "label": _("Jewelry Type"), "fieldtype": "Data", "width": 100},
-		{"fieldname": "warehouse", "label": _("Warehouse"), "fieldtype": "Link", "options": "Warehouse", "width": 130},
+		{
+			"fieldname": "warehouse",
+			"label": _("Warehouse"),
+			"fieldtype": "Link",
+			"options": "Warehouse",
+			"width": 130,
+		},
 		{"fieldname": "actual_qty", "label": _("Qty"), "fieldtype": "Float", "width": 70},
 		{"fieldname": "cost_price", "label": _("Cost Price"), "fieldtype": "Currency", "width": 100},
 		{"fieldname": "retail_price", "label": _("Retail Price"), "fieldtype": "Currency", "width": 100},
@@ -79,32 +97,38 @@ def get_data(filters):
 		total_retail = flt(row.actual_qty) * retail
 		markup = ((retail - cost) / cost * 100) if cost > 0 else 0
 
-		result.append({
-			"item_code": row.item_code,
-			"item_name": row.item_name,
-			"item_group": row.item_group,
-			"metal_type": row.metal_type,
-			"purity": row.purity,
-			"jewelry_type": row.jewelry_type,
-			"warehouse": row.warehouse,
-			"actual_qty": row.actual_qty,
-			"cost_price": cost,
-			"retail_price": retail,
-			"total_cost": total_cost,
-			"total_retail": total_retail,
-			"markup_pct": markup,
-		})
+		result.append(
+			{
+				"item_code": row.item_code,
+				"item_name": row.item_name,
+				"item_group": row.item_group,
+				"metal_type": row.metal_type,
+				"purity": row.purity,
+				"jewelry_type": row.jewelry_type,
+				"warehouse": row.warehouse,
+				"actual_qty": row.actual_qty,
+				"cost_price": cost,
+				"retail_price": retail,
+				"total_cost": total_cost,
+				"total_retail": total_retail,
+				"markup_pct": markup,
+			}
+		)
 		totals["total_cost"] += total_cost
 		totals["total_retail"] += total_retail
 
 	# Summary totals row
 	if len(result) > 0:
-		result.append({
-			"item_code": None,
-			"item_name": _("** TOTAL **"),
-			"total_cost": totals["total_cost"],
-			"total_retail": totals["total_retail"],
-			"markup_pct": ((totals["total_retail"] - totals["total_cost"]) / totals["total_cost"] * 100) if totals["total_cost"] > 0 else 0,
-		})
+		result.append(
+			{
+				"item_code": None,
+				"item_name": _("** TOTAL **"),
+				"total_cost": totals["total_cost"],
+				"total_retail": totals["total_retail"],
+				"markup_pct": ((totals["total_retail"] - totals["total_cost"]) / totals["total_cost"] * 100)
+				if totals["total_cost"] > 0
+				else 0,
+			}
+		)
 
 	return result

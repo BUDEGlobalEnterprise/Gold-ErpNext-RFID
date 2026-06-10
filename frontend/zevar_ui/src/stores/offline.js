@@ -174,12 +174,12 @@ export const useOfflineStore = defineStore('offline', () => {
 
 			// Detect conflict errors from server messages
 			if (_isConflictError({ message: errMessage })) {
-				await markOrderConflict(
-					order.id,
-					'stock_unavailable',
-					errMessage
-				)
-				return { status: 'conflict', conflictType: 'stock_unavailable', message: errMessage }
+				await markOrderConflict(order.id, 'stock_unavailable', errMessage)
+				return {
+					status: 'conflict',
+					conflictType: 'stock_unavailable',
+					message: errMessage,
+				}
 			}
 
 			// Validation errors (4xx-equivalent from frappe.throw)
@@ -328,7 +328,7 @@ export const useOfflineStore = defineStore('offline', () => {
 	// ── Conflict Resolution ──
 
 	async function resolveConflict(orderId, resolution, updatedPayload) {
-		const db = (await import('@/services/OfflineDB.js'))
+		const db = await import('@/services/OfflineDB.js')
 		if (resolution === 'cancel') {
 			await db.markOrderSynced(orderId) // treat as resolved
 		} else if (resolution === 'retry_modified' && updatedPayload) {
@@ -375,7 +375,9 @@ export const useOfflineStore = defineStore('offline', () => {
 	async function getSyncedOrders() {
 		const db = await import('@/services/OfflineDB.js')
 		const all = await db.getAllOfflineOrders()
-		return all.filter(o => o.status === 'synced').sort((a,b) => (b.synced_at || 0) - (a.synced_at || 0))
+		return all
+			.filter((o) => o.status === 'synced')
+			.sort((a, b) => (b.synced_at || 0) - (a.synced_at || 0))
 	}
 
 	async function deleteOrder(id) {
@@ -453,12 +455,15 @@ export const useOfflineStore = defineStore('offline', () => {
 
 	// ── Status computed ──
 
-	const totalUnresolved = computed(() => pendingCount.value + failedCount.value + conflictCount.value)
+	const totalUnresolved = computed(
+		() => pendingCount.value + failedCount.value + conflictCount.value
+	)
 
 	const statusLabel = computed(() => {
 		if (!isOnline.value) return 'Offline'
 		if (syncing.value) return 'Syncing...'
-		if (conflictCount.value > 0) return `${conflictCount.value} conflict${conflictCount.value > 1 ? 's' : ''}`
+		if (conflictCount.value > 0)
+			return `${conflictCount.value} conflict${conflictCount.value > 1 ? 's' : ''}`
 		if (pendingCount.value > 0) return `${pendingCount.value} pending`
 		if (failedCount.value > 0) return `${failedCount.value} failed`
 		return 'Online'

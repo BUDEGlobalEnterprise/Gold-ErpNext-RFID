@@ -7,7 +7,9 @@
 		<!-- Header -->
 		<div class="flex justify-between items-start gap-1 mb-2.5 min-w-0">
 			<div class="min-w-0 flex items-center gap-1.5 flex-wrap">
-				<span class="font-mono text-[10px] font-bold text-[#D4AF37]">{{ order.name }}</span>
+				<span class="font-mono text-[10px] font-bold text-[#D4AF37]">{{
+					order.name
+				}}</span>
 				<span
 					class="inline-flex px-1.5 py-0.5 rounded-full text-[8px] font-bold shrink-0"
 					:class="getStatusBadgeClass(order.status)"
@@ -38,7 +40,9 @@
 						/>
 					</svg>
 				</span>
-				<span class="text-[9px] text-gray-400 font-mono">{{ formatDate(order.creation) }}</span>
+				<span class="text-[9px] text-gray-400 font-mono">{{
+					formatDate(order.creation)
+				}}</span>
 			</div>
 		</div>
 
@@ -77,7 +81,9 @@
 
 		<!-- Customer Info -->
 		<div class="space-y-1 mb-3.5 min-w-0">
-			<div class="flex items-center gap-2 text-[10px] text-gray-600 dark:text-gray-400 min-w-0">
+			<div
+				class="flex items-center gap-2 text-[10px] text-gray-600 dark:text-gray-400 min-w-0"
+			>
 				<svg
 					class="w-3.5 h-3.5 text-gray-400 shrink-0"
 					fill="none"
@@ -93,7 +99,10 @@
 				</svg>
 				<span class="truncate">{{ order.customer_name || order.customer }}</span>
 			</div>
-			<div v-if="order.customer_phone" class="flex items-center gap-2 text-[10px] text-gray-500 min-w-0">
+			<div
+				v-if="order.customer_phone"
+				class="flex items-center gap-2 text-[10px] text-gray-500 min-w-0"
+			>
 				<svg
 					class="w-3.5 h-3.5 text-gray-400 shrink-0"
 					fill="none"
@@ -113,10 +122,7 @@
 
 		<!-- Compact Timeline Progress -->
 		<div class="mb-2">
-			<RepairTimeline
-				:currentStatus="order.status"
-				variant="compact"
-			/>
+			<RepairTimeline :currentStatus="order.status" variant="compact" />
 		</div>
 
 		<!-- Footer with Quick Actions -->
@@ -126,7 +132,8 @@
 			<span class="text-[10px] text-gray-400 dark:text-gray-500 truncate"
 				>By: {{ order.handled_by_name || 'Unassigned' }}</span
 			>
-			<span class="text-xs font-mono font-extrabold text-gray-900 dark:text-white shrink-0 ml-1"
+			<span
+				class="text-xs font-mono font-extrabold text-gray-900 dark:text-white shrink-0 ml-1"
 				>${{ formatNum(order.estimated_cost || order.total_cost) }}</span
 			>
 		</div>

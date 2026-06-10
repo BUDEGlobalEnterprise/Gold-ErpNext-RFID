@@ -24,8 +24,8 @@ def _parse_status_filter(status):
 				frappe.throw("Invalid quotation status")
 			return value
 
-	if isinstance(status, (list, tuple)):
-		if len(status) != 2 or status[0] != "in" or not isinstance(status[1], (list, tuple)):
+	if isinstance(status, list | tuple):
+		if len(status) != 2 or status[0] != "in" or not isinstance(status[1], list | tuple):
 			frappe.throw("Invalid quotation status filter")
 		statuses = [cstr(value).strip() for value in status[1]]
 		if not statuses or any(value not in QUOTE_STATUSES for value in statuses):

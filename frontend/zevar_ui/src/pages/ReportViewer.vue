@@ -10,7 +10,9 @@
 				</button>
 				<div>
 					<h2 class="premium-title !text-xl">{{ reportTitle }}</h2>
-					<p v-if="reportMeta.group" class="text-[10px] text-gray-400 mt-0.5">{{ reportMeta.group }}</p>
+					<p v-if="reportMeta.group" class="text-[10px] text-gray-400 mt-0.5">
+						{{ reportMeta.group }}
+					</p>
 				</div>
 				<div class="ml-auto flex gap-2">
 					<button
@@ -27,7 +29,9 @@
 
 			<div class="flex-1 overflow-auto">
 				<div v-if="loading" class="flex items-center justify-center h-64">
-					<span class="material-symbols-outlined animate-spin text-gray-300 text-3xl">progress_activity</span>
+					<span class="material-symbols-outlined animate-spin text-gray-300 text-3xl"
+						>progress_activity</span
+					>
 				</div>
 				<iframe
 					v-else-if="frappeReportUrl"
@@ -77,21 +81,26 @@ async function loadReportData(id) {
 			fetch('/api/method/zevar_core.api.reports.get_report_catalog', {
 				headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
 			}),
-			fetch(`/api/method/zevar_core.api.reports.get_row_actions?report_id=${encodeURIComponent(id)}`, {
-				headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
-			}),
+			fetch(
+				`/api/method/zevar_core.api.reports.get_row_actions?report_id=${encodeURIComponent(
+					id
+				)}`,
+				{
+					headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
+				}
+			),
 		])
 
 		if (catalogRes.ok) {
 			const catalogData = await catalogRes.json()
 			const catalog = catalogData.message?.reports || catalogData.message || []
-			const found = catalog.find(r => r.id === id)
+			const found = catalog.find((r) => r.id === id)
 			if (found) {
 				reportTitle.value = found.title || found.report_name || id
 				frappeReportName.value = found.report_name || found.title || ''
 				reportMeta.value = { group: found.group || '' }
 			} else {
-				reportTitle.value = id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+				reportTitle.value = id.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 			}
 		}
 
@@ -101,7 +110,7 @@ async function loadReportData(id) {
 		}
 	} catch (e) {
 		console.error('Report viewer error:', e)
-		reportTitle.value = id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+		reportTitle.value = id.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 	} finally {
 		loading.value = false
 	}
@@ -109,7 +118,9 @@ async function loadReportData(id) {
 
 function handleAction(action) {
 	// Navigate to the report with action context, or show instruction
-	const msg = `Select a row in the report above, then click "${action.label}" to ${action.description || 'perform this action'}.`
+	const msg = `Select a row in the report above, then click "${action.label}" to ${
+		action.description || 'perform this action'
+	}.`
 	alert(msg)
 }
 

@@ -11,6 +11,7 @@ Builds a lightweight in-memory knowledge graph of Frappe entities:
 Serialized to a pickle file (per Q10 recommendation).
 Refreshed weekly (Sunday 03:00) and on demand via admin button.
 """
+
 from __future__ import annotations
 
 import datetime
@@ -55,7 +56,7 @@ class KGEdge:
 class ZevarKG:
 	"""In-memory knowledge graph for Zevar RAG.
 
-	Plan §9.3: ~10,000 items × 5,000 customers × 365 days × 8 categories.
+	Plan 9.3: ~10,000 items x 5,000 customers x 365 days x 8 categories.
 	Total nodes < 100K, edges < 500K. In-memory, no scaling issues.
 	"""
 
@@ -85,7 +86,7 @@ class ZevarKG:
 		seen_edges: list[KGEdge] = []
 
 		frontier = set(seed_node_ids)
-		for hop in (1, 2):
+		for _hop in (1, 2):
 			next_frontier: set[str] = set()
 			for e in self.edges:
 				if e.src in frontier and e.dst not in seen_nodes:
@@ -95,9 +96,7 @@ class ZevarKG:
 					seen_nodes[e.src] = self.nodes.get(e.src, KGNode(id=e.src, type="?"))
 					next_frontier.add(e.src)
 			for e in self.edges:
-				if (e.src in frontier and e.dst in frontier) or (
-					(e.src in frontier or e.dst in frontier)
-				):
+				if (e.src in frontier and e.dst in frontier) or (e.src in frontier or e.dst in frontier):
 					if e not in seen_edges:
 						seen_edges.append(e)
 			frontier = next_frontier or frontier  # 1-hop may be empty
@@ -167,11 +166,15 @@ class KGBuilder:
 			if not r.get("posting_date"):
 				continue
 			nid = f"metric:sales:{r['posting_date']}"
-			kg.add_node(nid, "Metric", {
-				"date": str(r["posting_date"]),
-				"revenue": float(r["revenue"] or 0),
-				"count": int(r["count"] or 0),
-			})
+			kg.add_node(
+				nid,
+				"Metric",
+				{
+					"date": str(r["posting_date"]),
+					"revenue": float(r["revenue"] or 0),
+					"count": int(r["count"] or 0),
+				},
+			)
 
 	def _add_items_and_categories(self, kg: ZevarKG) -> None:
 		"""Item and category nodes. Limit to the top N most-sold to bound graph size."""
@@ -183,11 +186,15 @@ class KGBuilder:
 		)
 		for it in items:
 			nid = f"item:{it['name']}"
-			kg.add_node(nid, "Item", {
-				"name": it.get("item_name") or it["name"],
-				"category": it.get("custom_jewelry_type") or it.get("item_group"),
-				"metal": it.get("custom_metal_type"),
-			})
+			kg.add_node(
+				nid,
+				"Item",
+				{
+					"name": it.get("item_name") or it["name"],
+					"category": it.get("custom_jewelry_type") or it.get("item_group"),
+					"metal": it.get("custom_metal_type"),
+				},
+			)
 			cat = it.get("custom_jewelry_type") or it.get("item_group")
 			if cat:
 				cat_id = f"category:{cat}"
@@ -203,10 +210,14 @@ class KGBuilder:
 		)
 		for c in customers:
 			nid = f"customer:{c['name']}"
-			kg.add_node(nid, "Customer", {
-				"name": c.get("customer_name") or c["name"],
-				"group": c.get("customer_group"),
-			})
+			kg.add_node(
+				nid,
+				"Customer",
+				{
+					"name": c.get("customer_name") or c["name"],
+					"group": c.get("customer_group"),
+				},
+			)
 
 	def _add_sales_edges(self, kg: ZevarKG) -> None:
 		"""Item -[:SOLD_IN]-> SalesInvoice (per date)."""
@@ -215,7 +226,8 @@ class KGBuilder:
 		si = frappe.qb.DocType("Sales Invoice")
 		rows = (
 			frappe.qb.from_(si_items)
-			.join(si).on(si_items.parent == si.name)
+			.join(si)
+			.on(si_items.parent == si.name)
 			.select(si_items.item_code, si.posting_date, si.customer, si_items.amount)
 			.where(si.docstatus == 1)
 			.where(si.posting_date >= from_date)
@@ -235,7 +247,8 @@ class KGBuilder:
 		lc = frappe.qb.DocType("Layaway Contract")
 		rows = (
 			frappe.qb.from_(layaway_items)
-			.join(lc).on(layaway_items.parent == lc.name)
+			.join(lc)
+			.on(layaway_items.parent == lc.name)
 			.select(lc.customer, layaway_items.item_code, lc.status)
 			.where(lc.docstatus == 1)
 			.limit(3000)

@@ -289,10 +289,7 @@
 			/>
 
 			<!-- Offline Sync Logs Modal -->
-			<OfflineSyncModal
-				:show="showSyncModal"
-				@close="showSyncModal = false"
-			/>
+			<OfflineSyncModal :show="showSyncModal" @close="showSyncModal = false" />
 
 			<div class="flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
 				<!-- POS View -->

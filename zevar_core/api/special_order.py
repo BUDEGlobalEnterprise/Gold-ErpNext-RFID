@@ -16,7 +16,6 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
-
 # ---------------------------------------------------------------------------
 # CRUD
 # ---------------------------------------------------------------------------
@@ -153,7 +152,12 @@ def record_deposit(order_name: str, amount: float, mode_of_payment: str = "Cash"
 	if doc.docstatus != 1:
 		frappe.throw(_("Order must be submitted before recording deposits."))
 	doc.record_deposit(flt(amount), mode_of_payment)
-	return {"success": True, "status": doc.status, "deposit_paid": doc.deposit_paid, "balance_due": doc.balance_due}
+	return {
+		"success": True,
+		"status": doc.status,
+		"deposit_paid": doc.deposit_paid,
+		"balance_due": doc.balance_due,
+	}
 
 
 @frappe.whitelist(methods=["POST"])

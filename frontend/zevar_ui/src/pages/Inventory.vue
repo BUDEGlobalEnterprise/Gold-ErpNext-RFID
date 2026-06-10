@@ -1,7 +1,9 @@
 <template>
 	<AppLayout>
 		<div class="flex flex-col h-full">
-			<div class="flex flex-col gap-3 mb-4 flex-shrink-0 pb-3 border-b border-gray-100 dark:border-warm-border/30">
+			<div
+				class="flex flex-col gap-3 mb-4 flex-shrink-0 pb-3 border-b border-gray-100 dark:border-warm-border/30"
+			>
 				<!-- Title & Display Controls Row (Always single-line, fits perfectly) -->
 				<div class="flex items-center justify-between gap-4 w-full">
 					<div class="flex items-center gap-3">
@@ -51,7 +53,11 @@
 								/>
 							</svg>
 						</button>
-						<ViewToggle v-model="viewMode" storage-key="zevar_inventory_view" class="flex-shrink-0" />
+						<ViewToggle
+							v-model="viewMode"
+							storage-key="zevar_inventory_view"
+							class="flex-shrink-0"
+						/>
 
 						<!-- Mobile Menu Toggle -->
 						<div class="md:hidden">
@@ -138,7 +144,9 @@
 					</button>
 
 					<!-- Bulk Actions Button Group -->
-					<div class="hidden sm:inline-flex rounded-lg border border-gray-200 dark:border-warm-border/50 shadow-sm bg-white dark:bg-warm-dark-800 overflow-hidden flex-shrink-0">
+					<div
+						class="hidden sm:inline-flex rounded-lg border border-gray-200 dark:border-warm-border/50 shadow-sm bg-white dark:bg-warm-dark-800 overflow-hidden flex-shrink-0"
+					>
 						<button
 							@click="openPushForSelected"
 							class="flex items-center gap-1 px-2.5 py-1.5 border-r border-gray-200 dark:border-warm-border/50 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition whitespace-nowrap"
@@ -223,7 +231,12 @@
 			</div>
 
 			<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4 flex-shrink-0">
-				<StatCard label="Total Items" :value="totalItems" clickable @click="openStockAlert('all')" />
+				<StatCard
+					label="Total Items"
+					:value="totalItems"
+					clickable
+					@click="openStockAlert('all')"
+				/>
 				<StatCard
 					label="Total Value"
 					:value="formatCurrency(totalValue)"

@@ -13,7 +13,11 @@
 				<span class="material-symbols-outlined">{{ icon }}</span>
 			</div>
 			<div class="metric-card__label">{{ label }}</div>
-			<BadgeCounter v-if="badge !== null && badge !== undefined" :value="badge" :severity="badgeSeverity" />
+			<BadgeCounter
+				v-if="badge !== null && badge !== undefined"
+				:value="badge"
+				:severity="badgeSeverity"
+			/>
 		</div>
 
 		<div class="metric-card__value" :class="valueColor">{{ formattedValue }}</div>
@@ -104,8 +108,7 @@ function onClick() {
 	padding: 14px 16px;
 	border-radius: var(--radius-md);
 	cursor: pointer;
-	transition:
-		background var(--duration-fast) var(--ease-out),
+	transition: background var(--duration-fast) var(--ease-out),
 		border-color var(--duration-fast) var(--ease-out),
 		transform var(--duration-fast) var(--ease-out);
 }
@@ -144,8 +147,12 @@ function onClick() {
 	font-weight: 700;
 	line-height: 1.05;
 }
-.size-md .metric-card__value { font-size: 17px; }
-.size-sm .metric-card__value { font-size: 14px; }
+.size-md .metric-card__value {
+	font-size: 17px;
+}
+.size-sm .metric-card__value {
+	font-size: 14px;
+}
 .metric-card__trend {
 	display: inline-flex;
 	align-items: center;
@@ -154,10 +161,18 @@ function onClick() {
 	font-weight: 600;
 	color: var(--text-secondary);
 }
-.trend-icon { font-size: 13px; }
-.trend-up { color: var(--green); }
-.trend-down { color: var(--red); }
-.trend-flat { color: var(--text-tertiary); }
+.trend-icon {
+	font-size: 13px;
+}
+.trend-up {
+	color: var(--green);
+}
+.trend-down {
+	color: var(--red);
+}
+.trend-flat {
+	color: var(--text-tertiary);
+}
 .metric-card__spark {
 	margin-top: 2px;
 	opacity: 0.9;

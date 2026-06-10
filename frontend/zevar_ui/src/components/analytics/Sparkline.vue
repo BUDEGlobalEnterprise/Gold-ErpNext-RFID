@@ -13,11 +13,7 @@
 				<stop offset="100%" :stop-color="strokeColor" stop-opacity="0" />
 			</linearGradient>
 		</defs>
-		<path
-			v-if="areaPath"
-			:d="areaPath"
-			:fill="`url(#spark-grad-${uid})`"
-		/>
+		<path v-if="areaPath" :d="areaPath" :fill="`url(#spark-grad-${uid})`" />
 		<path
 			v-if="linePath"
 			:d="linePath"
@@ -34,7 +30,9 @@
 			:fill="axisColor"
 			font-size="8"
 			font-family="var(--font-mono)"
-		>{{ minLabel }}–{{ maxLabel }}</text>
+		>
+			{{ minLabel }}–{{ maxLabel }}
+		</text>
 	</svg>
 </template>
 
@@ -56,7 +54,9 @@ const props = defineProps({
 
 const uid = Math.random().toString(36).slice(2, 9)
 
-const values = computed(() => props.points.map((p) => Number(p.value ?? p.total ?? p.sales ?? 0) || 0))
+const values = computed(() =>
+	props.points.map((p) => Number(p.value ?? p.total ?? p.sales ?? 0) || 0)
+)
 const min = computed(() => (values.value.length ? Math.min(...values.value) : 0))
 const max = computed(() => (values.value.length ? Math.max(...values.value) : 1))
 const range = computed(() => Math.max(1, max.value - min.value))

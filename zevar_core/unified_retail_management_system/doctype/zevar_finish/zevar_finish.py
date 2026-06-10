@@ -1,2 +1,5 @@
 from frappe.model.document import Document
-class ZevarFinish(Document): pass
+
+
+class ZevarFinish(Document):
+	pass

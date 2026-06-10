@@ -1,2 +1,5 @@
 from frappe.model.document import Document
-class JewelryBOMComponent(Document): pass
+
+
+class JewelryBOMComponent(Document):
+	pass

@@ -14,8 +14,20 @@ def execute(filters=None):
 
 def get_columns():
 	return [
-		{"fieldname": "account", "label": _("Finance Account"), "fieldtype": "Link", "options": "In-House Finance Account", "width": 150},
-		{"fieldname": "customer", "label": _("Customer"), "fieldtype": "Link", "options": "Customer", "width": 150},
+		{
+			"fieldname": "account",
+			"label": _("Finance Account"),
+			"fieldtype": "Link",
+			"options": "In-House Finance Account",
+			"width": 150,
+		},
+		{
+			"fieldname": "customer",
+			"label": _("Customer"),
+			"fieldtype": "Link",
+			"options": "Customer",
+			"width": 150,
+		},
 		{"fieldname": "customer_name", "label": _("Customer Name"), "fieldtype": "Data", "width": 160},
 		{"fieldname": "total_balance", "label": _("Total Balance"), "fieldtype": "Currency", "width": 120},
 		{"fieldname": "current", "label": _("Current"), "fieldtype": "Currency", "width": 100},
@@ -61,9 +73,15 @@ def get_data(filters):
 
 	result = []
 	totals = {
-		"total_balance": 0, "current": 0,
-		"age_1_30": 0, "age_31_60": 0, "age_61_90": 0,
-		"age_91_120": 0, "age_121_180": 0, "age_181_240": 0, "age_240_plus": 0,
+		"total_balance": 0,
+		"current": 0,
+		"age_1_30": 0,
+		"age_31_60": 0,
+		"age_61_90": 0,
+		"age_91_120": 0,
+		"age_121_180": 0,
+		"age_181_240": 0,
+		"age_240_plus": 0,
 	}
 
 	for acct in accounts:
@@ -117,8 +135,14 @@ def get_data(filters):
 				# Credits reduce oldest buckets first (FIFO)
 				remaining_credit = credit
 				for bucket_key in [
-					"age_240_plus", "age_181_240", "age_121_180",
-					"age_91_120", "age_61_90", "age_31_60", "age_1_30", "current",
+					"age_240_plus",
+					"age_181_240",
+					"age_121_180",
+					"age_91_120",
+					"age_61_90",
+					"age_31_60",
+					"age_1_30",
+					"current",
 				]:
 					if remaining_credit <= 0:
 						break
@@ -146,19 +170,21 @@ def get_data(filters):
 
 	# Totals row
 	if len(result) > 1:
-		result.append({
-			"account": None,
-			"customer": None,
-			"customer_name": _("** TOTAL **"),
-			"total_balance": totals["total_balance"],
-			"current": totals["current"],
-			"age_1_30": totals["age_1_30"],
-			"age_31_60": totals["age_31_60"],
-			"age_61_90": totals["age_61_90"],
-			"age_91_120": totals["age_91_120"],
-			"age_121_180": totals["age_121_180"],
-			"age_181_240": totals["age_181_240"],
-			"age_240_plus": totals["age_240_plus"],
-		})
+		result.append(
+			{
+				"account": None,
+				"customer": None,
+				"customer_name": _("** TOTAL **"),
+				"total_balance": totals["total_balance"],
+				"current": totals["current"],
+				"age_1_30": totals["age_1_30"],
+				"age_31_60": totals["age_31_60"],
+				"age_61_90": totals["age_61_90"],
+				"age_91_120": totals["age_91_120"],
+				"age_121_180": totals["age_121_180"],
+				"age_181_240": totals["age_181_240"],
+				"age_240_plus": totals["age_240_plus"],
+			}
+		)
 
 	return result

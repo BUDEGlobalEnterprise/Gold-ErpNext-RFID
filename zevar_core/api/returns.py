@@ -218,8 +218,7 @@ def create_return_invoice(
 					if sold_serials:
 						frappe.throw(
 							_(
-								"Serial Number '{0}' was not sold on invoice {1}. "
-								"Sold serials for {2}: {3}."
+								"Serial Number '{0}' was not sold on invoice {1}. Sold serials for {2}: {3}."
 							).format(
 								serial_no,
 								original_invoice,
@@ -244,7 +243,7 @@ def create_return_invoice(
 			# returning serial maps unambiguously to a stock movement.
 			if serial_no and abs(return_qty) > 1:
 				frappe.throw(
-					_("Serial Number '{0}' is a single physical piece — " "return qty must be 1.").format(
+					_("Serial Number '{0}' is a single physical piece — return qty must be 1.").format(
 						serial_no
 					)
 				)

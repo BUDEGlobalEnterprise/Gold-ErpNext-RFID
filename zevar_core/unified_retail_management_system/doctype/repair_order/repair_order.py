@@ -45,41 +45,49 @@ class RepairOrder(Document):  # nosemgrep
 		# On new document, seed the initial 'Received' entry
 		if self.is_new():
 			if not any(row.status == "Received" for row in (self.status_log or [])):
-				self.append("status_log", {
-					"status": self.status or "Received",
-					"timestamp": now_dt(),
-					"changed_by": frappe.session.user,
-					"notes": "Repair order created",
-				})
+				self.append(
+					"status_log",
+					{
+						"status": self.status or "Received",
+						"timestamp": now_dt(),
+						"changed_by": frappe.session.user,
+						"notes": "Repair order created",
+					},
+				)
 			return
 
 		doc_before_save = self.get_doc_before_save()
 		if not doc_before_save:
 			return
 
-	# Only log when the status actually changed
+		# Only log when the status actually changed
 		if doc_before_save.status != self.status:
-			self.append("status_log", {
-				"status": self.status,
-				"timestamp": now_dt(),
-				"changed_by": frappe.session.user,
-				"notes": "",
-			})
+			self.append(
+				"status_log",
+				{
+					"status": self.status,
+					"timestamp": now_dt(),
+					"changed_by": frappe.session.user,
+					"notes": "",
+				},
+			)
 			# Broadcast realtime event for Live Monitor
 			try:
 				from zevar_core.api.live_monitor import publish_repair_event
-				publish_repair_event("status_change", {
-					"repair": self.name,
-					"customer": self.customer_name,
-					"old_status": doc_before_save.status,
-					"new_status": self.status,
-					"warehouse": self.warehouse,
-					"repair_type": self.repair_type_name,
-				})
+
+				publish_repair_event(
+					"status_change",
+					{
+						"repair": self.name,
+						"customer": self.customer_name,
+						"old_status": doc_before_save.status,
+						"new_status": self.status,
+						"warehouse": self.warehouse,
+						"repair_type": self.repair_type_name,
+					},
+				)
 			except Exception:
 				pass  # Never block save for realtime failures
-
-
 
 	def auto_set_receiving_store(self):
 		if not self.receiving_store and self.warehouse:
@@ -422,9 +430,14 @@ class RepairOrder(Document):  # nosemgrep
 			frappe.throw(_("Payment method is required"))
 
 		from frappe.utils import flt
+
 		self.update_payment_and_balance()
 		if flt(amount) > flt(self.balance_due) + 0.01:
-			frappe.throw(_("Payment amount ({0}) cannot exceed balance due ({1})").format(f"${amount:.2f}", f"${self.balance_due:.2f}"))
+			frappe.throw(
+				_("Payment amount ({0}) cannot exceed balance due ({1})").format(
+					f"${amount:.2f}", f"${self.balance_due:.2f}"
+				)
+			)
 
 		from frappe.utils import now
 

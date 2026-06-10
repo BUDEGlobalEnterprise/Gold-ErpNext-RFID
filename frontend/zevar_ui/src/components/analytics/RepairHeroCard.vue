@@ -29,5 +29,7 @@ const props = defineProps({
 })
 defineEmits(['open'])
 const { formatCurrency } = useFormatters()
-const sparkPoints = computed(() => (props.data?.sparkline_30d || []).map((p) => ({ date: p.date, value: Number(p.repair || 0) })))
+const sparkPoints = computed(() =>
+	(props.data?.sparkline_30d || []).map((p) => ({ date: p.date, value: Number(p.repair || 0) }))
+)
 </script>

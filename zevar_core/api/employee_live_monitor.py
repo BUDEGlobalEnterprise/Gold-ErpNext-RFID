@@ -7,7 +7,7 @@ store-level anonymized aggregates. No cross-employee data exposed.
 
 import frappe
 from frappe import _
-from frappe.utils import flt, cint, getdate, nowdate, add_days, now_datetime
+from frappe.utils import add_days, cint, flt, getdate, now_datetime, nowdate
 
 
 def _get_current_employee():
@@ -59,15 +59,17 @@ def get_my_performance():
 	change_pct = ((today_rev - yest_rev) / yest_rev * 100) if yest_rev else 0
 
 	# Items sold today
-	items_sold = cint(frappe.db.sql(
-		"""SELECT COALESCE(SUM(sii.qty), 0)
+	items_sold = cint(
+		frappe.db.sql(
+			"""SELECT COALESCE(SUM(sii.qty), 0)
 		FROM `tabSales Commission Split` scs
 		JOIN `tabSales Invoice` si ON scs.sales_invoice = si.name
 		JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
 		WHERE scs.employee = %s AND si.docstatus = 1 AND si.is_pos = 1
 		AND si.posting_date = %s""",
-		(emp, today),
-	)[0][0])
+			(emp, today),
+		)[0][0]
+	)
 
 	# Active POS session
 	active_session = frappe.db.get_value(
@@ -122,12 +124,14 @@ def get_store_activity(hours=4):
 	result = []
 	for h in range(9, 21):
 		r = hour_map.get(h, {})
-		result.append({
-			"hour": h,
-			"label": _fmt_hour(h),
-			"txn_count": cint(r.get("txn_count", 0)),
-			"items_sold": cint(r.get("items_sold", 0)),
-		})
+		result.append(
+			{
+				"hour": h,
+				"label": _fmt_hour(h),
+				"txn_count": cint(r.get("txn_count", 0)),
+				"items_sold": cint(r.get("items_sold", 0)),
+			}
+		)
 
 	# Recent activity (last N hours, anonymized)
 	hours_ago = frappe.utils.add_to_date(now_datetime(), hours=-int(hours))
@@ -153,11 +157,13 @@ def get_store_activity(hours=4):
 		ts = r.posting_time
 		if hasattr(ts, "strftime"):
 			ts = ts.strftime("%I:%M %p")
-		feed.append({
-			"time": str(ts) if ts else "",
-			"stream": r.stream,
-			"item_count": cint(r.item_count),
-		})
+		feed.append(
+			{
+				"time": str(ts) if ts else "",
+				"stream": r.stream,
+				"item_count": cint(r.item_count),
+			}
+		)
 
 	return {
 		"hourly": result,

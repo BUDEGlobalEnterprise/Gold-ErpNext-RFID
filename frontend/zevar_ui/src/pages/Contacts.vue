@@ -12,7 +12,11 @@
 							{{ pagination.total_count }} Vendors
 						</span>
 					</div>
-					<ViewToggle v-model="viewMode" storage-key="zevar_contacts_view" class="shrink-0" />
+					<ViewToggle
+						v-model="viewMode"
+						storage-key="zevar_contacts_view"
+						class="shrink-0"
+					/>
 				</div>
 
 				<!-- Actions Row (Search) -->

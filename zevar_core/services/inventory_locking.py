@@ -7,13 +7,12 @@ for real-time conflict detection.
 
 from __future__ import annotations
 
-import frappe
-from frappe import _
-from frappe.utils import now_datetime
-
 import time
 import uuid
 
+import frappe
+from frappe import _
+from frappe.utils import now_datetime
 
 # Redis lock TTL (seconds)
 _LOCK_TTL = 300  # 5 minutes
@@ -73,16 +72,22 @@ def acquire_serial_lock(
 			time.sleep(0.5)
 
 	if not locked:
-		frappe.throw(_("Could not acquire lock on Serial No {0} within {1}s").format(
-			serial_no, timeout_seconds
-		))
+		frappe.throw(
+			_("Could not acquire lock on Serial No {0} within {1}s").format(serial_no, timeout_seconds)
+		)
 
 	# Set Redis token
-	frappe.cache().set(lock_key, frappe.as_json({
-		"owner": lock_owner,
-		"token": token,
-		"acquired_at": str(now_datetime()),
-	}), expires_in_sec=_LOCK_TTL)
+	frappe.cache().set(
+		lock_key,
+		frappe.as_json(
+			{
+				"owner": lock_owner,
+				"token": token,
+				"acquired_at": str(now_datetime()),
+			}
+		),
+		expires_in_sec=_LOCK_TTL,
+	)
 
 	return {"success": True, "lock_token": token, "serial_no": serial_no}
 

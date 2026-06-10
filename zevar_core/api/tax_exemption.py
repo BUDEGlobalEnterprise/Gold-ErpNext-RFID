@@ -42,17 +42,17 @@ def request_tax_exemption(
 
 		cert = frappe.get_doc("Tax Exemption Certificate", certificate_ref)
 		if cert.status != "Active":
-			frappe.throw(_("Certificate '{0}' is {1}. Only Active certificates are accepted.").format(
-				certificate_ref, cert.status
-			))
+			frappe.throw(
+				_("Certificate '{0}' is {1}. Only Active certificates are accepted.").format(
+					certificate_ref, cert.status
+				)
+			)
 		if cert.expiry_date and getdate(cert.expiry_date) < getdate():
-			frappe.throw(_("Certificate '{0}' expired on {1}.").format(
-				certificate_ref, cert.expiry_date
-			))
+			frappe.throw(_("Certificate '{0}' expired on {1}.").format(certificate_ref, cert.expiry_date))
 		if cert.customer != customer:
-			frappe.throw(_("Certificate '{0}' does not belong to customer '{1}'.").format(
-				certificate_ref, customer
-			))
+			frappe.throw(
+				_("Certificate '{0}' does not belong to customer '{1}'.").format(certificate_ref, customer)
+			)
 
 	# Check for misuse: count exemptions for this customer in rolling 30 days
 	misuse_flag, misuse_details = _check_misuse(customer)
@@ -70,24 +70,31 @@ def request_tax_exemption(
 	log.insert(ignore_permissions=True)
 
 	# Mark the invoice as tax-exempt pending
-	frappe.db.set_value("Sales Invoice", sales_invoice, {
-		"custom_no_tax_override": 1,
-		"custom_tax_override_reason": exemption_reason,
-		"custom_tax_exemption_status": "Pending",
-		"custom_tax_exemption_log": log.name,
-	})
+	frappe.db.set_value(
+		"Sales Invoice",
+		sales_invoice,
+		{
+			"custom_no_tax_override": 1,
+			"custom_tax_override_reason": exemption_reason,
+			"custom_tax_exemption_status": "Pending",
+			"custom_tax_exemption_log": log.name,
+		},
+	)
 
 	# Notify managers
-	_notify_managers_exemption("tax_exemption_requested", {
-		"event_type": "tax_exemption_requested",
-		"log_name": log.name,
-		"sales_invoice": sales_invoice,
-		"customer": customer,
-		"exemption_reason": exemption_reason,
-		"misuse_flag": misuse_flag,
-		"requested_by": frappe.session.user,
-		"timestamp": str(now_datetime()),
-	})
+	_notify_managers_exemption(
+		"tax_exemption_requested",
+		{
+			"event_type": "tax_exemption_requested",
+			"log_name": log.name,
+			"sales_invoice": sales_invoice,
+			"customer": customer,
+			"exemption_reason": exemption_reason,
+			"misuse_flag": misuse_flag,
+			"requested_by": frappe.session.user,
+			"timestamp": str(now_datetime()),
+		},
+	)
 
 	return {
 		"success": True,
@@ -122,18 +129,25 @@ def approve_tax_exemption(log_name: str, rejection_reason: str | None = None) ->
 		log.save(ignore_permissions=True)
 
 		# Re-enable tax on the invoice
-		frappe.db.set_value("Sales Invoice", log.sales_invoice, {
-			"custom_no_tax_override": 0,
-			"custom_tax_override_reason": "",
-			"custom_tax_exemption_status": "Rejected",
-		})
+		frappe.db.set_value(
+			"Sales Invoice",
+			log.sales_invoice,
+			{
+				"custom_no_tax_override": 0,
+				"custom_tax_override_reason": "",
+				"custom_tax_exemption_status": "Rejected",
+			},
+		)
 
-		_notify_managers_exemption("tax_exemption_rejected", {
-			"event_type": "tax_exemption_rejected",
-			"log_name": log_name,
-			"sales_invoice": log.sales_invoice,
-			"rejection_reason": rejection_reason,
-		})
+		_notify_managers_exemption(
+			"tax_exemption_rejected",
+			{
+				"event_type": "tax_exemption_rejected",
+				"log_name": log_name,
+				"sales_invoice": log.sales_invoice,
+				"rejection_reason": rejection_reason,
+			},
+		)
 
 		return {
 			"success": True,
@@ -154,17 +168,24 @@ def approve_tax_exemption(log_name: str, rejection_reason: str | None = None) ->
 		log.approved_at = now_datetime()
 		log.save(ignore_permissions=True)
 
-		frappe.db.set_value("Sales Invoice", log.sales_invoice, {
-			"custom_tax_exemption_status": "Approved",
-			"custom_tax_override_approved_by": frappe.session.user,
-		})
+		frappe.db.set_value(
+			"Sales Invoice",
+			log.sales_invoice,
+			{
+				"custom_tax_exemption_status": "Approved",
+				"custom_tax_override_approved_by": frappe.session.user,
+			},
+		)
 
-		_notify_managers_exemption("tax_exemption_approved", {
-			"event_type": "tax_exemption_approved",
-			"log_name": log_name,
-			"sales_invoice": log.sales_invoice,
-			"approved_by": frappe.session.user,
-		})
+		_notify_managers_exemption(
+			"tax_exemption_approved",
+			{
+				"event_type": "tax_exemption_approved",
+				"log_name": log_name,
+				"sales_invoice": log.sales_invoice,
+				"approved_by": frappe.session.user,
+			},
+		)
 
 		return {
 			"success": True,
@@ -199,7 +220,9 @@ def get_pending_exemptions() -> dict:
 	for log in logs:
 		log["applied_by_name"] = frappe.db.get_value("User", log.applied_by, "full_name") or log.applied_by
 		log["customer_name"] = frappe.db.get_value("Customer", log.customer, "customer_name") or log.customer
-		log["invoice_total"] = flt(frappe.db.get_value("Sales Invoice", log.sales_invoice, "grand_total") or 0)
+		log["invoice_total"] = flt(
+			frappe.db.get_value("Sales Invoice", log.sales_invoice, "grand_total") or 0
+		)
 
 	return {"exemptions": logs, "count": len(logs)}
 
@@ -249,8 +272,15 @@ def get_customer_certificates(customer: str) -> dict:
 	certificates = frappe.get_all(
 		"Tax Exemption Certificate",
 		filters={"customer": customer},
-		fields=["name", "certificate_number", "certificate_type", "issuing_state",
-				"issue_date", "expiry_date", "status"],
+		fields=[
+			"name",
+			"certificate_number",
+			"certificate_type",
+			"issuing_state",
+			"issue_date",
+			"expiry_date",
+			"status",
+		],
 		order_by="creation desc",
 	)
 
@@ -277,15 +307,19 @@ def validate_exemption_on_submit(doc, method=None):
 	exemption_status = getattr(doc, "custom_tax_exemption_status", None)
 	if exemption_status == "Pending":
 		frappe.throw(
-			_("This invoice has a pending tax exemption request. "
-			  "Manager approval is required before submission."),
+			_(
+				"This invoice has a pending tax exemption request. "
+				"Manager approval is required before submission."
+			),
 			title=_("Tax Exemption Pending Approval"),
 		)
 
 	if exemption_status == "Rejected":
 		frappe.throw(
-			_("Tax exemption was rejected for this invoice. "
-			  "Please remove the tax override or resolve the exemption."),
+			_(
+				"Tax exemption was rejected for this invoice. "
+				"Please remove the tax override or resolve the exemption."
+			),
 			title=_("Tax Exemption Rejected"),
 		)
 

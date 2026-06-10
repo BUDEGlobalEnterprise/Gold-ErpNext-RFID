@@ -44,13 +44,16 @@ const props = defineProps({
 })
 defineEmits(['close'])
 
-watch(() => props.open, async (isOpen) => {
-	if (isOpen) {
-		await nextTick()
-		const closeBtn = document.querySelector('.hub-drawer.open .hub-drawer__close')
-		closeBtn?.focus()
+watch(
+	() => props.open,
+	async (isOpen) => {
+		if (isOpen) {
+			await nextTick()
+			const closeBtn = document.querySelector('.hub-drawer.open .hub-drawer__close')
+			closeBtn?.focus()
+		}
 	}
-})
+)
 </script>
 
 <style scoped>
@@ -60,7 +63,9 @@ watch(() => props.open, async (isOpen) => {
 	pointer-events: none;
 	z-index: 60;
 }
-.hub-drawer.open { pointer-events: auto; }
+.hub-drawer.open {
+	pointer-events: auto;
+}
 .hub-drawer__backdrop {
 	position: absolute;
 	inset: 0;
@@ -68,7 +73,9 @@ watch(() => props.open, async (isOpen) => {
 	opacity: 0;
 	transition: opacity var(--duration-normal) var(--ease-out);
 }
-.hub-drawer.open .hub-drawer__backdrop { opacity: 1; }
+.hub-drawer.open .hub-drawer__backdrop {
+	opacity: 1;
+}
 .hub-drawer__panel {
 	position: absolute;
 	top: 0;
@@ -84,9 +91,13 @@ watch(() => props.open, async (isOpen) => {
 	flex-direction: column;
 	box-shadow: -10px 0 40px -10px rgba(0, 0, 0, 0.5);
 }
-.hub-drawer.open .hub-drawer__panel { transform: translateX(0); }
+.hub-drawer.open .hub-drawer__panel {
+	transform: translateX(0);
+}
 @media (max-width: 768px) {
-	.hub-drawer__panel { max-width: 100vw; }
+	.hub-drawer__panel {
+		max-width: 100vw;
+	}
 }
 .hub-drawer__header {
 	display: flex;
@@ -114,7 +125,9 @@ watch(() => props.open, async (isOpen) => {
 	color: var(--text-secondary);
 	transition: background var(--duration-fast) var(--ease-out);
 }
-.hub-drawer__close:hover { background: var(--bg-2); }
+.hub-drawer__close:hover {
+	background: var(--bg-2);
+}
 .hub-drawer__body {
 	flex: 1;
 	overflow: auto;

@@ -5,7 +5,7 @@ shrinkage trend, and velocity classification.
 
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate, nowdate, add_months, add_days
+from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
 
 @frappe.whitelist()
@@ -125,8 +125,8 @@ def _get_aging_buckets(today):
 	"""Items grouped by days since last Stock Ledger Entry movement."""
 	buckets = [
 		{"label": "< 30 days", "min_days": 0, "max_days": 30},
-		{"label": "30–90 days", "min_days": 30, "max_days": 90},
-		{"label": "90–180 days", "min_days": 90, "max_days": 180},
+		{"label": "30-90 days", "min_days": 30, "max_days": 90},
+		{"label": "90-180 days", "min_days": 90, "max_days": 180},
 		{"label": "> 180 days", "min_days": 180, "max_days": None},
 	]
 

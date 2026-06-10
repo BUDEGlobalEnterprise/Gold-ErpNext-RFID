@@ -47,6 +47,7 @@ class TestReservations(FrappeTestCase):
 	def _create_serial_no(self, item_code, warehouse):
 		sn = f"SN-RES-{frappe.generate_hash(length=8)}".upper()
 		from zevar_core.services.inventory_events import material_receipt
+
 		material_receipt(
 			item_code=item_code,
 			to_warehouse=warehouse,
@@ -137,11 +138,7 @@ class TestReservations(FrappeTestCase):
 		items = [{"item_code": item_code, "qty": 1, "rate": 100, "amount": 100, "serial_no": sn}]
 
 		# 1. Hold cart should reserve serial number
-		hold_res = hold_cart(
-			items=frappe.as_json(items),
-			customer=customer,
-			warehouse=showcase
-		)
+		hold_res = hold_cart(items=frappe.as_json(items), customer=customer, warehouse=showcase)
 		self.assertTrue(hold_res["success"])
 		cart_id = hold_res["cart_id"]
 
@@ -157,7 +154,7 @@ class TestReservations(FrappeTestCase):
 		self.assertEqual(res_doc.status, "Cancelled")
 
 	def test_held_cart_discard_releases_stock(self):
-		from zevar_core.api.pos import hold_cart, discard_held_cart
+		from zevar_core.api.pos import discard_held_cart, hold_cart
 
 		item_code = self._create_test_item()
 		customer = self._create_customer()
@@ -166,11 +163,7 @@ class TestReservations(FrappeTestCase):
 
 		items = [{"item_code": item_code, "qty": 1, "rate": 100, "amount": 100, "serial_no": sn}]
 
-		hold_res = hold_cart(
-			items=frappe.as_json(items),
-			customer=customer,
-			warehouse=showcase
-		)
+		hold_res = hold_cart(items=frappe.as_json(items), customer=customer, warehouse=showcase)
 		cart_id = hold_res["cart_id"]
 		res_exists = frappe.db.exists("Stock Reservation", {"serial_no": sn, "status": "Active"})
 		self.assertTrue(res_exists)

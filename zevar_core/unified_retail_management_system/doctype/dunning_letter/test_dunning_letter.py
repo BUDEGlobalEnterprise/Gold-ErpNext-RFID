@@ -3,19 +3,21 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import flt, today, add_days
+from frappe.utils import add_days, flt, today
 
 
 class TestDunningLetter(FrappeTestCase):
 	def setUp(self):
 		if not frappe.db.exists("Customer", "_Test Dunning Customer"):
-			frappe.get_doc({
-				"doctype": "Customer",
-				"customer_name": "_Test Dunning Customer",
-				"customer_group": "All Customer Groups",
-				"territory": "All Territories",
-				"email_id": "test-dunning@example.com",
-			}).insert(ignore_if_duplicate=True)
+			frappe.get_doc(
+				{
+					"doctype": "Customer",
+					"customer_name": "_Test Dunning Customer",
+					"customer_group": "All Customer Groups",
+					"territory": "All Territories",
+					"email_id": "test-dunning@example.com",
+				}
+			).insert(ignore_if_duplicate=True)
 
 	def test_validate_fetches_account_details(self):
 		letter = frappe.new_doc("Dunning Letter")

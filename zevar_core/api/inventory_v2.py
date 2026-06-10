@@ -17,7 +17,6 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -64,7 +63,15 @@ def list_purities(metal: str | None = None):
 	return frappe.get_all(
 		"Zevar Purity",
 		filters=filters,
-		fields=["name", "purity_code", "purity_name", "metal", "fine_metal_content", "is_millesimal", "aliases"],
+		fields=[
+			"name",
+			"purity_code",
+			"purity_name",
+			"metal",
+			"fine_metal_content",
+			"is_millesimal",
+			"aliases",
+		],
 		order_by="fine_metal_content desc",
 	)
 
@@ -91,7 +98,16 @@ def get_bom_for_item(item_code: str):
 	bom = frappe.get_all(
 		"Jewelry BOM",
 		filters={"parent_item_code": item_code, "is_active": 1, "is_default": 1},
-		fields=["name", "bom_name", "parent_item_code", "is_default", "labor_minutes", "labor_cost_per_minute", "overhead_pct", "yield_qty"],
+		fields=[
+			"name",
+			"bom_name",
+			"parent_item_code",
+			"is_default",
+			"labor_minutes",
+			"labor_cost_per_minute",
+			"overhead_pct",
+			"yield_qty",
+		],
 		limit=1,
 	)
 	if not bom:
@@ -99,15 +115,17 @@ def get_bom_for_item(item_code: str):
 	bom_doc = frappe.get_doc("Jewelry BOM", bom[0].name)
 	components = []
 	for c in bom_doc.components:
-		components.append({
-			"component_type": c.component_type,
-			"component_item": c.component_item,
-			"component_item_name": c.component_item_name,
-			"qty_per_build": c.qty_per_build,
-			"uom": c.uom,
-			"serial_required": c.serial_required,
-			"cost_share_pct": c.cost_share_pct,
-		})
+		components.append(
+			{
+				"component_type": c.component_type,
+				"component_item": c.component_item,
+				"component_item_name": c.component_item_name,
+				"qty_per_build": c.qty_per_build,
+				"uom": c.uom,
+				"serial_required": c.serial_required,
+				"cost_share_pct": c.cost_share_pct,
+			}
+		)
 	return {"found": True, "bom": bom[0], "components": components}
 
 
@@ -131,6 +149,7 @@ def assemble_from_bom(bom_name: str, parent_serial_no: str | None = None):
 	frappe.only_for("Sales Manager", "Store Manager", "System Manager")
 
 	from zevar_core.services.bom_service import assemble_from_bom as _assemble
+
 	return _assemble(bom_name, parent_serial_no)
 
 
@@ -140,6 +159,7 @@ def disassemble_to_components(parent_serial_no: str, bom_name: str, reason: str 
 	frappe.only_for("Sales Manager", "Store Manager", "System Manager")
 
 	from zevar_core.services.bom_service import disassemble_to_components as _disassemble
+
 	return _disassemble(parent_serial_no, bom_name, reason)
 
 
@@ -147,6 +167,7 @@ def disassemble_to_components(parent_serial_no: str, bom_name: str, reason: str 
 def get_bom_cost_rollup(bom_name: str):
 	frappe.has_permission("Jewelry BOM", ptype="read", throw=True)
 	from zevar_core.services.bom_service import get_bom_cost_rollup as _rollup
+
 	return _rollup(bom_name)
 
 
@@ -166,7 +187,18 @@ def list_gemstones(status: str | None = None, gemstone_type: str | None = None, 
 	return frappe.get_all(
 		"Zevar Gemstone",
 		filters=filters,
-		fields=["name", "gemstone_type", "shape", "carat_weight", "color", "clarity", "cut", "status", "serial_no", "is_melee"],
+		fields=[
+			"name",
+			"gemstone_type",
+			"shape",
+			"carat_weight",
+			"color",
+			"clarity",
+			"cut",
+			"status",
+			"serial_no",
+			"is_melee",
+		],
 		order_by="creation desc",
 		limit_page_length=cint(limit),
 	)
@@ -187,9 +219,22 @@ def register_gemstone(data: str | dict):
 
 	data = _parse_json_or_fail(data)
 	gem = frappe.new_doc("Zevar Gemstone")
-	for key in ("gemstone_type", "shape", "carat_weight", "color", "clarity", "cut",
-				"cert_lab", "cert_number", "cert_date", "cost_basis", "vendor",
-				"is_melee", "melee_parcel", "current_location"):
+	for key in (
+		"gemstone_type",
+		"shape",
+		"carat_weight",
+		"color",
+		"clarity",
+		"cut",
+		"cert_lab",
+		"cert_number",
+		"cert_date",
+		"cost_basis",
+		"vendor",
+		"is_melee",
+		"melee_parcel",
+		"current_location",
+	):
 		if key in data:
 			setattr(gem, key, data[key])
 	gem.insert(ignore_permissions=True)
@@ -229,6 +274,7 @@ def detach_gemstone_from_serial(gemstone: str):
 def list_repair_parts(repair_order: str):
 	frappe.has_permission("Repair Order", ptype="read", throw=True)
 	from zevar_core.services.repair_parts_service import get_parts_summary
+
 	return get_parts_summary(repair_order)
 
 
@@ -239,6 +285,7 @@ def consume_repair_part(data: str | dict):
 
 	data = _parse_json_or_fail(data)
 	from zevar_core.services.repair_parts_service import consume_part
+
 	return consume_part(
 		repair_order=_require(data, "repair_order"),
 		component_item=_require(data, "component_item"),
@@ -257,6 +304,7 @@ def return_repair_part(data: str | dict):
 
 	data = _parse_json_or_fail(data)
 	from zevar_core.services.repair_parts_service import return_unused_part
+
 	return return_unused_part(
 		repair_order=_require(data, "repair_order"),
 		component_item=_require(data, "component_item"),
@@ -277,15 +325,19 @@ def dispatch_to_external_bench(repair_order: str, vendor: str, estimated_days: i
 	frappe.only_for("Sales Manager", "Store Manager", "System Manager")
 
 	from zevar_core.services.external_bench_service import dispatch_to_bench
+
 	return dispatch_to_bench(repair_order, vendor, estimated_days)
 
 
 @frappe.whitelist(allow_guest=False)
-def receive_from_external_bench(repair_order: str, invoice_ref: str | None = None, bench_cost: float | None = None):
+def receive_from_external_bench(
+	repair_order: str, invoice_ref: str | None = None, bench_cost: float | None = None
+):
 	frappe.has_permission("Repair Order", ptype="write", throw=True)
 	frappe.only_for("Sales Manager", "Store Manager", "System Manager")
 
 	from zevar_core.services.external_bench_service import receive_from_bench
+
 	return receive_from_bench(repair_order, invoice_ref, bench_cost)
 
 
@@ -293,6 +345,7 @@ def receive_from_external_bench(repair_order: str, invoice_ref: str | None = Non
 def get_bench_status(vendor: str):
 	frappe.has_permission("Repair Order", ptype="read", throw=True)
 	from zevar_core.services.external_bench_service import get_bench_status as _status
+
 	return _status(vendor)
 
 
@@ -308,6 +361,7 @@ def create_memo(data: str | dict):
 
 	data = _parse_json_or_fail(data)
 	from zevar_core.services.memo_lifecycle_service import create_memo as _create
+
 	return _create(
 		memo_class=_require(data, "memo_class"),
 		items=_require(data, "items"),
@@ -322,13 +376,17 @@ def create_memo(data: str | dict):
 def mark_memo_item_sold(memo_contract: str, item_code: str, serial_no: str | None = None):
 	frappe.has_permission("Memo Contract", ptype="write", throw=True)
 	from zevar_core.services.memo_lifecycle_service import mark_item_sold
+
 	return mark_item_sold(memo_contract, item_code, serial_no)
 
 
 @frappe.whitelist(allow_guest=False)
-def mark_memo_item_returned(memo_contract: str, item_code: str, serial_no: str | None = None, return_slip_ref: str | None = None):
+def mark_memo_item_returned(
+	memo_contract: str, item_code: str, serial_no: str | None = None, return_slip_ref: str | None = None
+):
 	frappe.has_permission("Memo Contract", ptype="write", throw=True)
 	from zevar_core.services.memo_lifecycle_service import mark_item_returned
+
 	return mark_item_returned(memo_contract, item_code, serial_no=serial_no, return_slip_ref=return_slip_ref)
 
 
@@ -336,6 +394,7 @@ def mark_memo_item_returned(memo_contract: str, item_code: str, serial_no: str |
 def get_memo_aging_dashboard(memo_class: str | None = None):
 	frappe.has_permission("Memo Contract", ptype="read", throw=True)
 	from zevar_core.services.memo_lifecycle_service import get_aging_summary
+
 	return get_aging_summary(memo_class)
 
 
@@ -350,6 +409,7 @@ def create_appraisal(data: str | dict):
 
 	data = _parse_json_or_fail(data)
 	from zevar_core.services.appraisal_service import create_appraisal as _create
+
 	return _create(
 		item_code=_require(data, "item_code"),
 		serial_no=data.get("serial_no"),
@@ -364,6 +424,7 @@ def create_appraisal(data: str | dict):
 def list_expiring_appraisals(days_ahead: int = 90):
 	frappe.has_permission("Jewelry Appraisal", ptype="read", throw=True)
 	from zevar_core.services.appraisal_service import get_expiring_appraisals
+
 	return get_expiring_appraisals(cint(days_ahead))
 
 
@@ -371,6 +432,7 @@ def list_expiring_appraisals(days_ahead: int = 90):
 def get_appraisal_history(item_code: str, serial_no: str | None = None):
 	frappe.has_permission("Jewelry Appraisal", ptype="read", throw=True)
 	from zevar_core.services.appraisal_service import get_appraisal_history as _history
+
 	return _history(item_code, serial_no)
 
 
@@ -383,6 +445,7 @@ def get_appraisal_history(item_code: str, serial_no: str | None = None):
 def acquire_inventory_lock(serial_no: str, lock_owner: str | None = None):
 	frappe.has_permission("Serial No", ptype="read", throw=True)
 	from zevar_core.services.inventory_locking import acquire_serial_lock
+
 	return acquire_serial_lock(serial_no, lock_owner)
 
 
@@ -390,6 +453,7 @@ def acquire_inventory_lock(serial_no: str, lock_owner: str | None = None):
 def release_inventory_lock(serial_no: str, lock_token: str | None = None):
 	frappe.has_permission("Serial No", ptype="read", throw=True)
 	from zevar_core.services.inventory_locking import release_serial_lock
+
 	return release_serial_lock(serial_no, lock_token)
 
 
@@ -397,4 +461,5 @@ def release_inventory_lock(serial_no: str, lock_token: str | None = None):
 def check_inventory_lock(serial_no: str):
 	frappe.has_permission("Serial No", ptype="read", throw=True)
 	from zevar_core.services.inventory_locking import check_serial_locked
+
 	return check_serial_locked(serial_no)

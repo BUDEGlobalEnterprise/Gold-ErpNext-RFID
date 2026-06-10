@@ -382,7 +382,7 @@
 						</div>
 						<button
 							@click="
-								journalForm.accounts.push({ account: '', debit: 0, credit: 0 })
+								journalForm.accounts.push({ account: '', debit: 0, credit: 0 });
 							"
 							class="text-xs text-[#D4AF37] font-bold hover:underline"
 						>

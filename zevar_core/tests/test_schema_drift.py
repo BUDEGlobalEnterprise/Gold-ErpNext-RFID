@@ -12,10 +12,10 @@ import ast
 import json
 import os
 import unittest
+from typing import ClassVar
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-
 
 BASE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)))
 DOCTYPE_PATH = os.path.join(BASE_PATH, "unified_retail_management_system", "doctype")
@@ -37,9 +37,17 @@ class TestSchemaDrift(FrappeTestCase):
 		schema_fields = {f["fieldname"] for f in schema.get("fields", [])}
 
 		required_fields = {
-			"reservation_type", "auto_expire_on", "cart_reference", "salesperson",
-			"pos_session", "converted_from", "release_reason", "released_by",
-			"released_at", "priority", "intended_use",
+			"reservation_type",
+			"auto_expire_on",
+			"cart_reference",
+			"salesperson",
+			"pos_session",
+			"converted_from",
+			"release_reason",
+			"released_by",
+			"released_at",
+			"priority",
+			"intended_use",
 		}
 
 		missing = required_fields - schema_fields
@@ -87,7 +95,7 @@ class TestSchemaDrift(FrappeTestCase):
 			"zevar_purity": "zevar_purity",
 		}
 
-		for doctype_dir, expected_json in doctypes_to_check.items():
+		for doctype_dir, _expected_json in doctypes_to_check.items():
 			controller_path = os.path.join(DOCTYPE_PATH, doctype_dir, f"{doctype_dir}.py")
 			json_path = os.path.join(DOCTYPE_PATH, doctype_dir, f"{doctype_dir}.json")
 
@@ -98,10 +106,19 @@ class TestSchemaDrift(FrappeTestCase):
 				schema = json.load(f)
 			schema_fields = {f["fieldname"] for f in schema.get("fields", [])}
 			# Add standard Frappe fields that are always present
-			schema_fields.update({
-				"naming_series", "status", "docstatus", "owner", "creation",
-				"modified", "modified_by", "idx", "company",
-			})
+			schema_fields.update(
+				{
+					"naming_series",
+					"status",
+					"docstatus",
+					"owner",
+					"creation",
+					"modified",
+					"modified_by",
+					"idx",
+					"company",
+				}
+			)
 
 			with open(controller_path) as f:
 				source = f.read()
@@ -116,31 +133,40 @@ class TestSchemaDrift(FrappeTestCase):
 
 			# Filter out Python builtins and common non-field attributes
 			non_fields = {
-				"doctype", "_meta", "_doc_before_save", "flags", "name",
-				"owner", "creation", "modified", "modified_by", "idx",
-				"docstatus", "parent", "parentfield", "parenttype",
-				"idx", "_table_fieldnames",
+				"doctype",
+				"_meta",
+				"_doc_before_save",
+				"flags",
+				"name",
+				"owner",
+				"creation",
+				"modified",
+				"modified_by",
+				"idx",
+				"docstatus",
+				"parent",
+				"parentfield",
+				"parenttype",
+				"_table_fieldnames",
 			}
 			referenced_fields -= non_fields
 
 			# Only check fields referenced via self.<field> (not via self.get() or dict access)
 			missing = referenced_fields - schema_fields
 			if missing:
-				self.fail(
-					f"Controller {doctype_dir}.py references fields not in JSON schema: {missing}"
-				)
+				self.fail(f"Controller {doctype_dir}.py references fields not in JSON schema: {missing}")
 
 
 class TestNoDirectBinWrites(FrappeTestCase):
 	"""Enforce DEC-INV-V2-002: no direct tabBin writes outside inventory_events.py."""
 
-	DIRECT_BIN_PATTERNS = [
+	DIRECT_BIN_PATTERNS: ClassVar[list[str]] = [
 		"UPDATE `tabBin`",
 		"UPDATE tabBin",
 		"frappe.db.sql.*tabBin.*UPDATE",
 	]
 
-	ALLOWED_FILES = {
+	ALLOWED_FILES: ClassVar[set[str]] = {
 		"inventory_events.py",
 		"inventory_audit_utils.py",
 		"stock_reduction.py",
@@ -172,7 +198,7 @@ class TestNoDirectBinWrites(FrappeTestCase):
 
 		self.assertFalse(
 			violations,
-			f"Direct tabBin writes found (violates DEC-INV-V2-002):\n" + "\n".join(violations),
+			"Direct tabBin writes found (violates DEC-INV-V2-002):\n" + "\n".join(violations),
 		)
 
 

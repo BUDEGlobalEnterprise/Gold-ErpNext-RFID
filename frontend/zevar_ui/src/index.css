@@ -11,174 +11,176 @@
 
 /* 1. Define Luxury Fonts */
 :root {
-  --font-display: 'Cinzel', serif; /* Luxury Headings */
-  --font-body: 'Inter', sans-serif; /* Clean Data */
-  --font-accent: 'Spline Sans', sans-serif;
-  --color-gold: #D4AF37;
-  --color-dark: #15161A;
+	--font-display: 'Cinzel', serif; /* Luxury Headings */
+	--font-body: 'Inter', sans-serif; /* Clean Data */
+	--font-accent: 'Spline Sans', sans-serif;
+	--color-gold: #d4af37;
+	--color-dark: #15161a;
 }
 
 .material-symbols-outlined {
-  font-family: 'Material Symbols Outlined';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: 'liga';
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+	font-family: 'Material Symbols Outlined';
+	font-weight: normal;
+	font-style: normal;
+	font-size: 24px;
+	line-height: 1;
+	letter-spacing: normal;
+	text-transform: none;
+	display: inline-block;
+	white-space: nowrap;
+	word-wrap: normal;
+	direction: ltr;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+	-moz-osx-font-smoothing: grayscale;
+	font-feature-settings: 'liga';
+	font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
 .premium-card {
-    @apply bg-white;
-    border: 1.5px solid transparent;
-    border-radius: 18px;
-    padding: 1.5rem;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
+	@apply bg-white;
+	border: 1.5px solid transparent;
+	border-radius: 18px;
+	padding: 1.5rem;
+	position: relative;
+	overflow: hidden;
+	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .dark .premium-card {
-    background: rgba(15, 17, 21, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(10px);
+	background: rgba(15, 17, 21, 0.6);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+	box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+	backdrop-filter: blur(10px);
 }
 
 .premium-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    border-color: #FDBA74;
+	transform: translateY(-2px);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+	border-color: #fdba74;
 }
 
 .dark .premium-card:hover {
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    border-color: rgba(255, 255, 255, 0.1);
+	box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+	border-color: rgba(255, 255, 255, 0.1);
 }
 
 .premium-title {
-    font-family: var(--font-body) !important;
-    font-size: 1.5rem; /* text-2xl */
-    font-weight: 900;
-    color: #111827;
-    letter-spacing: -0.05em;
-    @apply leading-tight;
+	font-family: var(--font-body) !important;
+	font-size: 1.5rem; /* text-2xl */
+	font-weight: 900;
+	color: #111827;
+	letter-spacing: -0.05em;
+	@apply leading-tight;
 }
 
 .dark .premium-title {
-    color: #ffffff;
+	color: #ffffff;
 }
 
 .premium-subtitle {
-    color: #6b7280; /* text-gray-500 */
-    font-weight: 500;
-    font-size: 0.875rem;
+	color: #6b7280; /* text-gray-500 */
+	font-weight: 500;
+	font-size: 0.875rem;
 }
 
 .dark .premium-subtitle {
-    color: rgba(255, 255, 255, 0.4);
+	color: rgba(255, 255, 255, 0.4);
 }
 
 .status-label {
-    font-size: 10px;
-    color: rgba(0, 0, 0, 0.4);
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    font-weight: 800;
-    margin-bottom: 0.75rem;
-    display: block;
+	font-size: 10px;
+	color: rgba(0, 0, 0, 0.4);
+	text-transform: uppercase;
+	letter-spacing: 0.15em;
+	font-weight: 800;
+	margin-bottom: 0.75rem;
+	display: block;
 }
 
 .dark .status-label {
-    color: rgba(255, 255, 255, 0.3);
+	color: rgba(255, 255, 255, 0.3);
 }
 
 /* 2. Apply Defaults */
-html, body {
-  margin: 0;
-  padding: 0;
-  /* Never lock scroll at html/body level */
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+html,
+body {
+	margin: 0;
+	padding: 0;
+	/* Never lock scroll at html/body level */
+	overflow-x: hidden;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
 }
 
 /* Safe area insets for notched devices */
 :root {
-  --safe-area-inset-top: env(safe-area-inset-top, 0px);
-  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-area-inset-left: env(safe-area-inset-left, 0px);
-  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+	--safe-area-inset-top: env(safe-area-inset-top, 0px);
+	--safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+	--safe-area-inset-left: env(safe-area-inset-left, 0px);
+	--safe-area-inset-right: env(safe-area-inset-right, 0px);
 }
 
 body {
-  font-family: var(--font-body);
-  @apply text-gray-900 dark:text-gray-100;
-  background: linear-gradient(135deg, #FFFDF9 0%, #FFF9F2 30%, #FFF3E5 70%, #FFEBE0 100%);
-  background-attachment: fixed;
-  min-height: 100dvh;
+	font-family: var(--font-body);
+	@apply text-gray-900 dark:text-gray-100;
+	background: linear-gradient(135deg, #fffdf9 0%, #fff9f2 30%, #fff3e5 70%, #ffebe0 100%);
+	background-attachment: fixed;
+	min-height: 100dvh;
 }
 
 .dark body {
-  background: linear-gradient(135deg, #0F1115 0%, #15171E 30%, #1C1F26 70%, #2D1B0D 100%);
+	background: linear-gradient(135deg, #0f1115 0%, #15171e 30%, #1c1f26 70%, #2d1b0d 100%);
 }
 
 #app {
-  min-height: 100dvh;
-  width: 100%;
+	min-height: 100dvh;
+	width: 100%;
 }
 
 /* 3. Utility Class for Serif Headings */
 /* Use class="font-serif" in your Vue components to trigger this */
 .font-serif {
-  font-family: var(--font-display) !important;
+	font-family: var(--font-display) !important;
 }
 
 /* 4. Global Sophisticated Scrollbar */
 /* Firefox */
 * {
-  scrollbar-width: thin;
-  scrollbar-color: #CBD5E1 transparent;
+	scrollbar-width: thin;
+	scrollbar-color: #cbd5e1 transparent;
 }
 .dark * {
-  scrollbar-color: #333 #15171e;
+	scrollbar-color: #333 #15171e;
 }
 
 /* Chrome/Edge/Safari */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+	width: 6px;
+	height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+	background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
-  border-radius: 3px;
+	background: #cbd5e1;
+	border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-gold); /* Gold on hover */
+	background: var(--color-gold); /* Gold on hover */
 }
 
 /* Dark Mode Scrollbar Overrides */
 .dark ::-webkit-scrollbar-thumb {
-  background: #333;
+	background: #333;
 }
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-gold);
+	background: var(--color-gold);
 }
 
 /* 5. Smooth Transitions */
-button, a {
-  transition: all 0.2s ease-in-out;
+button,
+a {
+	transition: all 0.2s ease-in-out;
 }

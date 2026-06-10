@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, today, now
+from frappe.utils import flt, now, today
 
 
 class FinanceAccountWriteOff(Document):
@@ -34,7 +34,9 @@ class FinanceAccountWriteOff(Document):
 
 		acct = frappe.get_doc("In-House Finance Account", self.finance_account)
 		if flt(self.write_off_amount) > flt(acct.current_balance):
-			frappe.throw(_("Write-off amount cannot exceed current balance of {0}.").format(flt(acct.current_balance)))
+			frappe.throw(
+				_("Write-off amount cannot exceed current balance of {0}.").format(flt(acct.current_balance))
+			)
 
 		if self.approved_by == frappe.session.user:
 			frappe.throw(_("You cannot approve your own write-off request."))
@@ -42,12 +44,15 @@ class FinanceAccountWriteOff(Document):
 	def _apply_write_off(self):
 		acct = frappe.get_doc("In-House Finance Account", self.finance_account)
 
-		acct.append("ledger_entries", {
-			"entry_date": self.write_off_date or today(),
-			"entry_type": "Write-Off",
-			"description": f"Bad Debt Write-Off: {self.reason or 'N/A'}",
-			"credit": flt(self.write_off_amount),
-		})
+		acct.append(
+			"ledger_entries",
+			{
+				"entry_date": self.write_off_date or today(),
+				"entry_type": "Write-Off",
+				"description": f"Bad Debt Write-Off: {self.reason or 'N/A'}",
+				"credit": flt(self.write_off_amount),
+			},
+		)
 
 		running_balance = 0.0
 		for entry in acct.ledger_entries:
@@ -65,6 +70,7 @@ class FinanceAccountWriteOff(Document):
 		acct.save()
 
 		from zevar_core.api.audit_log import log_event_safely
+
 		log_event_safely(
 			event_type="finance_write_off",
 			details={
@@ -81,12 +87,15 @@ class FinanceAccountWriteOff(Document):
 	def _reverse_write_off(self):
 		acct = frappe.get_doc("In-House Finance Account", self.finance_account)
 
-		acct.append("ledger_entries", {
-			"entry_date": today(),
-			"entry_type": "Purchase",
-			"description": f"Write-Off Cancellation: {self.name}",
-			"debit": flt(self.write_off_amount),
-		})
+		acct.append(
+			"ledger_entries",
+			{
+				"entry_date": today(),
+				"entry_type": "Purchase",
+				"description": f"Write-Off Cancellation: {self.name}",
+				"debit": flt(self.write_off_amount),
+			},
+		)
 
 		running_balance = 0.0
 		for entry in acct.ledger_entries:

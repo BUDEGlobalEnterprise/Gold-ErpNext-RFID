@@ -6,8 +6,7 @@ category breakdown, and top salesperson rankings.
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Coalesce, Count, Sum
-from frappe.utils import flt, getdate, nowdate, add_days
-
+from frappe.utils import add_days, flt, getdate, nowdate
 
 # ---------------------------------------------------------------------------
 # Aggregated snapshot (single call for the whole page)
@@ -17,9 +16,7 @@ from frappe.utils import flt, getdate, nowdate, add_days
 @frappe.whitelist()
 def get_dashboard_data():
 	"""Single-call payload for the Revenue Dashboard page."""
-	frappe.only_for(
-		["System Manager", "Store Manager", "Sales Manager", "Sales User", "Accounts Manager"]
-	)
+	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Sales User", "Accounts Manager"])
 	today = nowdate()
 	return {
 		"summary": _get_today_summary(today),
@@ -37,36 +34,28 @@ def get_dashboard_data():
 @frappe.whitelist()
 def get_today_summary():
 	"""Today's sales total, transaction count, avg ticket, YoY change."""
-	frappe.only_for(
-		["System Manager", "Store Manager", "Sales Manager", "Sales User", "Accounts Manager"]
-	)
+	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Sales User", "Accounts Manager"])
 	return _get_today_summary(nowdate())
 
 
 @frappe.whitelist()
 def get_hourly_distribution():
-	"""Hourly sales distribution for today (9 AM – 8 PM)."""
-	frappe.only_for(
-		["System Manager", "Store Manager", "Sales Manager", "Sales User", "Accounts Manager"]
-	)
+	"""Hourly sales distribution for today (9 AM - 8 PM)."""
+	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Sales User", "Accounts Manager"])
 	return _get_hourly_distribution(nowdate())
 
 
 @frappe.whitelist()
 def get_category_breakdown():
 	"""Revenue breakdown by item jewelry_type category."""
-	frappe.only_for(
-		["System Manager", "Store Manager", "Sales Manager", "Sales User", "Accounts Manager"]
-	)
+	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Sales User", "Accounts Manager"])
 	return _get_category_breakdown(nowdate())
 
 
 @frappe.whitelist()
 def get_top_salespersons():
 	"""Top salespersons ranked by today's revenue."""
-	frappe.only_for(
-		["System Manager", "Store Manager", "Sales Manager", "Sales User", "Accounts Manager"]
-	)
+	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Sales User", "Accounts Manager"])
 	return _get_top_salespersons(nowdate())
 
 
@@ -135,12 +124,14 @@ def _get_hourly_distribution(today):
 
 	for h in range(9, 21):
 		total = hour_map.get(h, 0)
-		result.append({
-			"hour": h,
-			"label": _format_hour(h),
-			"total": flt(total),
-			"height": flt(total / max_val * 100, 1) if max_val else 0,
-		})
+		result.append(
+			{
+				"hour": h,
+				"label": _format_hour(h),
+				"total": flt(total),
+				"height": flt(total / max_val * 100, 1) if max_val else 0,
+			}
+		)
 
 	return result
 

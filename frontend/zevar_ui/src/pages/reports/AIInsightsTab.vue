@@ -1,7 +1,9 @@
 <template>
 	<div class="tab-content">
 		<div v-if="loading" class="glass-tier-1 p-6 rounded-2xl text-center text-sm text-gray-500">
-			<span class="material-symbols-outlined animate-spin align-middle">progress_activity</span>
+			<span class="material-symbols-outlined animate-spin align-middle"
+				>progress_activity</span
+			>
 			Generating insights…
 		</div>
 
@@ -9,7 +11,10 @@
 			{{ error }}
 		</div>
 
-		<div v-else-if="!brief?.insights?.length" class="glass-tier-1 p-6 rounded-2xl text-sm text-gray-500 text-center">
+		<div
+			v-else-if="!brief?.insights?.length"
+			class="glass-tier-1 p-6 rounded-2xl text-sm text-gray-500 text-center"
+		>
 			No insights available right now. Try refreshing.
 		</div>
 
@@ -20,7 +25,10 @@
 				class="glass-tier-1 p-4 rounded-2xl"
 			>
 				<div class="flex items-center gap-2 mb-1.5">
-					<span class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider" :class="sevClass(ins.severity)">
+					<span
+						class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+						:class="sevClass(ins.severity)"
+					>
 						{{ ins.category }}
 					</span>
 					<span class="text-[10px] text-gray-500 font-mono">{{ ins.id }}</span>
@@ -36,13 +44,26 @@
 						{{ g.label }}: <strong>{{ g.value }}</strong>
 					</span>
 				</div>
-				<div v-if="ins.recommended_action" class="mt-2 text-[11px] text-gray-600 dark:text-gray-400">
+				<div
+					v-if="ins.recommended_action"
+					class="mt-2 text-[11px] text-gray-600 dark:text-gray-400"
+				>
 					<span class="material-symbols-outlined !text-sm align-middle">lightbulb</span>
 					{{ ins.recommended_action.description }}
 				</div>
 				<div class="mt-2 flex gap-2">
-					<button class="text-[10px] font-bold text-emerald-500 hover:underline" @click="vote(ins, 1)">👍 Helpful</button>
-					<button class="text-[10px] font-bold text-red-500 hover:underline" @click="vote(ins, -1)">👎 Not helpful</button>
+					<button
+						class="text-[10px] font-bold text-emerald-500 hover:underline"
+						@click="vote(ins, 1)"
+					>
+						👍 Helpful
+					</button>
+					<button
+						class="text-[10px] font-bold text-red-500 hover:underline"
+						@click="vote(ins, -1)"
+					>
+						👎 Not helpful
+					</button>
 				</div>
 			</article>
 		</div>

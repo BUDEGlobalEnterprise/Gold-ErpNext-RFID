@@ -142,7 +142,7 @@
 							@apply-data="applyIdData"
 						/>
 
-												<!-- Customer Selection Section -->
+						<!-- Customer Selection Section -->
 						<div class="mb-5">
 							<div class="flex items-center justify-between mb-3">
 								<h3

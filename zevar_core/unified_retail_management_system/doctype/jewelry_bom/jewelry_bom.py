@@ -1,6 +1,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 
 
 class JewelryBOM(Document):
@@ -19,11 +20,14 @@ class JewelryBOM(Document):
 
 	def on_update(self):
 		if self.is_default and self.parent_item_code:
-			siblings = frappe.get_all("Jewelry BOM", filters={
-				"parent_item_code": self.parent_item_code,
-				"is_default": 1,
-				"name": ["!=", self.name],
-			})
+			siblings = frappe.get_all(
+				"Jewelry BOM",
+				filters={
+					"parent_item_code": self.parent_item_code,
+					"is_default": 1,
+					"name": ["!=", self.name],
+				},
+			)
 			for s in siblings:
 				frappe.db.set_value("Jewelry BOM", s.name, "is_default", 0)
 

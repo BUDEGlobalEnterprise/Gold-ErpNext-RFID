@@ -5,8 +5,10 @@ Unit Tests for Analytics Hub API (Plan §8.1-§8.7).
 
 Run with: bench run-tests --app zevar_core --test test_analytics_hub
 """
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
+
 from zevar_core.api import analytics_hub
 
 
@@ -55,11 +57,19 @@ class TestGetDailyRevenueBreakdown(FrappeTestCase):
 		frappe.set_user("Administrator")
 
 	def test_returns_required_fields(self):
-		from frappe.utils import nowdate, add_days
+		from frappe.utils import add_days, nowdate
+
 		today = nowdate()
 		week_ago = add_days(today, -7)
 		res = analytics_hub.get_daily_revenue_breakdown(week_ago, today)
-		for key in ("sales_revenue", "repair_revenue", "total_revenue", "sales_count", "repair_count", "sparkline_30d"):
+		for key in (
+			"sales_revenue",
+			"repair_revenue",
+			"total_revenue",
+			"sales_count",
+			"repair_count",
+			"sparkline_30d",
+		):
 			self.assertIn(key, res)
 		self.assertIsInstance(res["sparkline_30d"], list)
 
@@ -72,7 +82,14 @@ class TestGetLayawayHealth(FrappeTestCase):
 
 	def test_returns_required_fields(self):
 		res = analytics_hub.get_layaway_health()
-		for key in ("active", "overdue", "due_this_week", "total_outstanding", "avg_ticket", "completion_rate_90d"):
+		for key in (
+			"active",
+			"overdue",
+			"due_this_week",
+			"total_outstanding",
+			"avg_ticket",
+			"completion_rate_90d",
+		):
 			self.assertIn(key, res)
 
 
@@ -162,6 +179,7 @@ class TestRoleAwareFieldStripping(FrappeTestCase):
 
 	def test_role_block_resolves(self):
 		from zevar_core.api.analytics_hub import get_hub_data
+
 		payload = get_hub_data()
 		role = payload.get("role") or {}
 		self.assertIn("name", role)

@@ -6,10 +6,10 @@
 
 :root {
 	/* Backgrounds — four-step elevation (Pixel Show) */
-	--bg-0: #08090C;          /* page */
-	--bg-1: #0E1015;          /* card */
-	--bg-2: #15171F;          /* nested card */
-	--bg-3: #1E212B;          /* hover / active */
+	--bg-0: #08090c; /* page */
+	--bg-1: #0e1015; /* card */
+	--bg-2: #15171f; /* nested card */
+	--bg-3: #1e212b; /* hover / active */
 
 	/* Light-mode counterparts */
 	--bg-0-light: #fafafb;
@@ -36,12 +36,12 @@
 	--purple: #a855f7;
 
 	/* Gold accent (existing brand) */
-	--color-gold: #D4AF37;
+	--color-gold: #d4af37;
 
 	/* Glass tiers (Bulb Studio) */
-	--glass-1-blur: 8px;      /* low-elevation overlays (cards) */
-	--glass-2-blur: 16px;     /* mid (drawer backdrop) */
-	--glass-3-blur: 24px;     /* high (modal) */
+	--glass-1-blur: 8px; /* low-elevation overlays (cards) */
+	--glass-2-blur: 16px; /* mid (drawer backdrop) */
+	--glass-3-blur: 24px; /* high (modal) */
 	--glass-tint-dark: rgba(14, 16, 21, 0.6);
 	--glass-tint-light: rgba(255, 255, 255, 0.7);
 	--glass-border: rgba(255, 255, 255, 0.05);
@@ -50,8 +50,8 @@
 	--glass-border-strong-light: rgba(0, 0, 0, 0.12);
 
 	/* Fonts — Plan §11.1: two-font split. Pixel Show. */
-	--font-sans: "Inter", system-ui, sans-serif;
-	--font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+	--font-sans: 'Inter', system-ui, sans-serif;
+	--font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
 
 	/* Motion — three durations, one easing (Pixel Show) */
 	--duration-fast: 120ms;
@@ -109,4 +109,3 @@
 	--glass-border: var(--glass-border-light);
 	--glass-border-strong: var(--glass-border-strong-light);
 }
-

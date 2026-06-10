@@ -726,9 +726,18 @@ def get_store_reservations(warehouse=None, status="Active"):
 		"Stock Reservation",
 		filters=filters,
 		fields=[
-			"name", "customer", "serial_no", "item_code", "item_name",
-			"reservation_type", "hold_until", "auto_expire_on",
-			"deposit_amount", "status", "salesperson", "cart_reference",
+			"name",
+			"customer",
+			"serial_no",
+			"item_code",
+			"item_name",
+			"reservation_type",
+			"hold_until",
+			"auto_expire_on",
+			"deposit_amount",
+			"status",
+			"salesperson",
+			"cart_reference",
 			"creation",
 		],
 		order_by="creation desc",
@@ -747,7 +756,6 @@ def check_item_reservation(item_code, serial_no=None):
 
 	warehouse = frappe.db.get_value("Bin", {"item_code": item_code, "actual_qty": [">", 0]}, "warehouse")
 	return check_availability(item_code, warehouse or "", serial_no)
-
 
 
 @frappe.whitelist(allow_guest=False)
@@ -786,26 +794,30 @@ def diagnose_stock_deduction(invoice_name=None, limit=10):
 				},
 				fields=["actual_qty", "warehouse", "stock_value_difference", "name"],
 			)
-			item_data.append({
-				"item_code": item.item_code,
-				"item_name": item.item_name,
-				"qty": flt(item.qty),
-				"stock_qty": flt(item.stock_qty),
-				"uom": item.uom,
-				"stock_uom": item.stock_uom,
-				"conversion_factor": flt(item.conversion_factor),
-				"warehouse": item.warehouse,
-				"sle_deduction": sum(flt(s.get("actual_qty", 0)) for s in sles),
-				"sle_count": len(sles),
-				"sles": sles,
-			})
+			item_data.append(
+				{
+					"item_code": item.item_code,
+					"item_name": item.item_name,
+					"qty": flt(item.qty),
+					"stock_qty": flt(item.stock_qty),
+					"uom": item.uom,
+					"stock_uom": item.stock_uom,
+					"conversion_factor": flt(item.conversion_factor),
+					"warehouse": item.warehouse,
+					"sle_deduction": sum(flt(s.get("actual_qty", 0)) for s in sles),
+					"sle_count": len(sles),
+					"sles": sles,
+				}
+			)
 
-		results.append({
-			"invoice": inv_name,
-			"customer": si.customer,
-			"posting_date": str(si.posting_date),
-			"grand_total": flt(si.grand_total),
-			"items": item_data,
-		})
+		results.append(
+			{
+				"invoice": inv_name,
+				"customer": si.customer,
+				"posting_date": str(si.posting_date),
+				"grand_total": flt(si.grand_total),
+				"items": item_data,
+			}
+		)
 
 	return {"success": True, "count": len(results), "invoices": results}

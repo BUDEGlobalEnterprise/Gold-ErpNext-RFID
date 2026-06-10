@@ -74,7 +74,8 @@ export function usePaymentGateway() {
 				activeGateway.value = GATEWAY.SQUARE
 			} else {
 				activeGateway.value = GATEWAY.NONE
-				gatewayError.value = 'No payment gateway enabled. Enable Stripe or Square in Payment Gateway Settings.'
+				gatewayError.value =
+					'No payment gateway enabled. Enable Stripe or Square in Payment Gateway Settings.'
 			}
 		} catch (e) {
 			gatewayError.value = `Failed to load gateway settings: ${e.message}`
@@ -108,10 +109,17 @@ export function usePaymentGateway() {
 	// Unified payment collection
 	async function collectPayment({ amount, invoiceName, description, currency }) {
 		if (activeGateway.value === GATEWAY.STRIPE) {
-			return await stripe.collectPayment({ amount, invoiceName, description, currency: currency?.toLowerCase() || 'usd' })
+			return await stripe.collectPayment({
+				amount,
+				invoiceName,
+				description,
+				currency: currency?.toLowerCase() || 'usd',
+			})
 		} else if (activeGateway.value === GATEWAY.SQUARE) {
 			return await square.collectPayment({
-				amount, invoiceName, description,
+				amount,
+				invoiceName,
+				description,
 				currency: currency?.toUpperCase() || 'USD',
 				deviceId: square.selectedDevice.value?.id,
 			})
@@ -135,9 +143,20 @@ export function usePaymentGateway() {
 	return {
 		activeGateway: readonly(activeGateway),
 		gatewayLoading: readonly(gatewayLoading),
-		status, statusMessage, error, isProcessing, isTerminalReady, devices,
-		detectGateway, loadDevices, selectDevice, collectPayment, cancelPayment, reset,
+		status,
+		statusMessage,
+		error,
+		isProcessing,
+		isTerminalReady,
+		devices,
+		detectGateway,
+		loadDevices,
+		selectDevice,
+		collectPayment,
+		cancelPayment,
+		reset,
 		// Expose sub-composables for advanced usage
-		stripe, square,
+		stripe,
+		square,
 	}
 }

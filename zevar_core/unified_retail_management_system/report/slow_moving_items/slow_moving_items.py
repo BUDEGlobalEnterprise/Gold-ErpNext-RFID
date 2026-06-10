@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt, cint, today, getdate
+from frappe.utils import cint, flt, getdate, today
 
 
 def execute(filters=None):
@@ -14,12 +14,24 @@ def execute(filters=None):
 
 def get_columns():
 	return [
-		{"fieldname": "item_code", "label": _("Item Code"), "fieldtype": "Link", "options": "Item", "width": 140},
+		{
+			"fieldname": "item_code",
+			"label": _("Item Code"),
+			"fieldtype": "Link",
+			"options": "Item",
+			"width": 140,
+		},
 		{"fieldname": "item_name", "label": _("Item Name"), "fieldtype": "Data", "width": 180},
 		{"fieldname": "metal_type", "label": _("Metal"), "fieldtype": "Data", "width": 80},
 		{"fieldname": "purity", "label": _("Purity"), "fieldtype": "Data", "width": 70},
 		{"fieldname": "jewelry_type", "label": _("Type"), "fieldtype": "Data", "width": 90},
-		{"fieldname": "warehouse", "label": _("Warehouse"), "fieldtype": "Link", "options": "Warehouse", "width": 130},
+		{
+			"fieldname": "warehouse",
+			"label": _("Warehouse"),
+			"fieldtype": "Link",
+			"options": "Warehouse",
+			"width": 130,
+		},
 		{"fieldname": "actual_qty", "label": _("Stock Qty"), "fieldtype": "Float", "width": 80},
 		{"fieldname": "valuation_rate", "label": _("Cost"), "fieldtype": "Currency", "width": 100},
 		{"fieldname": "total_value", "label": _("Total Value"), "fieldtype": "Currency", "width": 120},
@@ -96,23 +108,27 @@ def get_data(filters):
 
 	for row in rows:
 		days_on_hand = (today_date - getdate(row.first_stock_date)).days if row.first_stock_date else 0
-		days_since_sale = (today_date - getdate(row.last_sold_date)).days if row.last_sold_date else days_on_hand
+		days_since_sale = (
+			(today_date - getdate(row.last_sold_date)).days if row.last_sold_date else days_on_hand
+		)
 		holding_cost = flt(row.total_value) * annual_carrying_rate * (days_on_hand / 365)
 
-		result.append({
-			"item_code": row.item_code,
-			"item_name": row.item_name,
-			"metal_type": row.metal_type,
-			"purity": row.purity,
-			"jewelry_type": row.jewelry_type,
-			"warehouse": row.warehouse,
-			"actual_qty": flt(row.actual_qty),
-			"valuation_rate": flt(row.valuation_rate),
-			"total_value": flt(row.total_value),
-			"days_on_hand": days_on_hand,
-			"last_sold_date": row.last_sold_date,
-			"days_since_sale": days_since_sale,
-			"holding_cost": round(holding_cost, 2),
-		})
+		result.append(
+			{
+				"item_code": row.item_code,
+				"item_name": row.item_name,
+				"metal_type": row.metal_type,
+				"purity": row.purity,
+				"jewelry_type": row.jewelry_type,
+				"warehouse": row.warehouse,
+				"actual_qty": flt(row.actual_qty),
+				"valuation_rate": flt(row.valuation_rate),
+				"total_value": flt(row.total_value),
+				"days_on_hand": days_on_hand,
+				"last_sold_date": row.last_sold_date,
+				"days_since_sale": days_since_sale,
+				"holding_cost": round(holding_cost, 2),
+			}
+		)
 
 	return result

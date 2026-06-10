@@ -38,8 +38,20 @@ def validate_discount(
 		# No rules configured — fall back to the 10% hard limit for non-managers
 		user_roles = frappe.get_roles(user)
 		if "Sales Manager" in user_roles or "Store Manager" in user_roles or "System Manager" in user_roles:
-			return {"valid": True, "max_allowed_pct": 100, "max_allowed_amt": 0, "requires_override": False, "reason": ""}
-		return {"valid": flt(discount_pct) <= 10, "max_allowed_pct": 10, "max_allowed_amt": 0, "requires_override": flt(discount_pct) > 10, "reason": ""}
+			return {
+				"valid": True,
+				"max_allowed_pct": 100,
+				"max_allowed_amt": 0,
+				"requires_override": False,
+				"reason": "",
+			}
+		return {
+			"valid": flt(discount_pct) <= 10,
+			"max_allowed_pct": 10,
+			"max_allowed_amt": 0,
+			"requires_override": flt(discount_pct) > 10,
+			"reason": "",
+		}
 
 	user_roles = frappe.get_roles(user)
 	max_pct = 0.0
@@ -74,7 +86,13 @@ def validate_discount(
 			"reason": _("Discount amount ${0} exceeds maximum ${1}").format(flt(discount_amount), max_amt),
 		}
 
-	return {"valid": True, "max_allowed_pct": max_pct, "max_allowed_amt": max_amt, "requires_override": False, "reason": ""}
+	return {
+		"valid": True,
+		"max_allowed_pct": max_pct,
+		"max_allowed_amt": max_amt,
+		"requires_override": False,
+		"reason": "",
+	}
 
 
 @frappe.whitelist()

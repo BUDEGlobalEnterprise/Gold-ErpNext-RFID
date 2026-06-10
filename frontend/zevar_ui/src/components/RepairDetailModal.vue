@@ -94,12 +94,24 @@
 			</div>
 
 			<!-- ═══ Repair Timeline ═══ -->
-			<div class="bg-gradient-to-r from-gray-50 to-white dark:from-warm-dark-900/50 dark:to-warm-dark-900 rounded-xl p-4 border border-gray-100 dark:border-warm-border">
+			<div
+				class="bg-gradient-to-r from-gray-50 to-white dark:from-warm-dark-900/50 dark:to-warm-dark-900 rounded-xl p-4 border border-gray-100 dark:border-warm-border"
+			>
 				<div class="flex items-center justify-between mb-3">
-					<h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Repair Progress</h4>
-					<span v-if="etaData?.predicted_date && etaData.method === 'predicted'" class="text-[10px] px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full flex items-center gap-1">
+					<h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+						Repair Progress
+					</h4>
+					<span
+						v-if="etaData?.predicted_date && etaData.method === 'predicted'"
+						class="text-[10px] px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full flex items-center gap-1"
+					>
 						<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
 						</svg>
 						ETA: {{ formatDate(etaData.predicted_date) }}
 						<span class="text-[8px] opacity-70">({{ etaData.confidence }})</span>
@@ -354,16 +366,37 @@
 					</button>
 				</div>
 				<!-- Transaction History -->
-				<div v-if="order.payments && order.payments.length > 0" class="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
-					<h5 class="text-[10px] font-bold text-blue-700 dark:text-blue-300 uppercase tracking-wide mb-2">Transaction History</h5>
+				<div
+					v-if="order.payments && order.payments.length > 0"
+					class="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800"
+				>
+					<h5
+						class="text-[10px] font-bold text-blue-700 dark:text-blue-300 uppercase tracking-wide mb-2"
+					>
+						Transaction History
+					</h5>
 					<div class="space-y-1.5">
-						<div v-for="(pay, idx) in order.payments" :key="pay.name" class="flex justify-between items-center text-xs bg-white/50 dark:bg-black/20 rounded p-2">
+						<div
+							v-for="(pay, idx) in order.payments"
+							:key="pay.name"
+							class="flex justify-between items-center text-xs bg-white/50 dark:bg-black/20 rounded p-2"
+						>
 							<div>
-								<span class="text-blue-600 dark:text-blue-400 font-bold block mb-0.5">{{ getPaymentLabel(idx, order.payments) }}</span>
-								<span class="text-gray-600 dark:text-gray-300 block">{{ formatDate(pay.payment_date || pay.creation) }}</span>
-								<span class="text-[10px] text-gray-500">{{ pay.payment_method }} <span v-if="pay.reference">#{{ pay.reference }}</span></span>
+								<span
+									class="text-blue-600 dark:text-blue-400 font-bold block mb-0.5"
+									>{{ getPaymentLabel(idx, order.payments) }}</span
+								>
+								<span class="text-gray-600 dark:text-gray-300 block">{{
+									formatDate(pay.payment_date || pay.creation)
+								}}</span>
+								<span class="text-[10px] text-gray-500"
+									>{{ pay.payment_method }}
+									<span v-if="pay.reference">#{{ pay.reference }}</span></span
+								>
 							</div>
-							<span class="font-bold text-green-600 dark:text-green-400">${{ formatNum(pay.amount) }}</span>
+							<span class="font-bold text-green-600 dark:text-green-400"
+								>${{ formatNum(pay.amount) }}</span
+							>
 						</div>
 					</div>
 				</div>
@@ -523,9 +556,12 @@ const emit = defineEmits([
 ])
 
 const selectedStatus = ref(props.order.status)
-watch(() => props.order.status, (newVal) => {
-	selectedStatus.value = newVal
-})
+watch(
+	() => props.order.status,
+	(newVal) => {
+		selectedStatus.value = newVal
+	}
+)
 const statusOptions = [
 	'Received',
 	'Estimated',
@@ -548,28 +584,29 @@ function formatNum(n) {
 }
 
 const computedDeposit = computed(() => {
-	if (props.order.deposit_amount > 0) return props.order.deposit_amount;
-	if (!props.order.payments || props.order.payments.length === 0) return 0;
-	
+	if (props.order.deposit_amount > 0) return props.order.deposit_amount
+	if (!props.order.payments || props.order.payments.length === 0) return 0
+
 	if (props.order.payment_status === 'Paid') {
-		if (props.order.payments.length === 1) return 0;
-		let dep = 0;
+		if (props.order.payments.length === 1) return 0
+		let dep = 0
 		for (let i = 0; i < props.order.payments.length - 1; i++) {
-			dep += props.order.payments[i].amount || 0;
+			dep += props.order.payments[i].amount || 0
 		}
-		return dep;
+		return dep
 	}
-	
-	return props.order.payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+
+	return props.order.payments.reduce((sum, p) => sum + (p.amount || 0), 0)
 })
 
 function getPaymentLabel(index, payments) {
 	if (payments.length === 1) {
-		return props.order.payment_status === 'Paid' ? 'Full Payment' : 'Deposit';
+		return props.order.payment_status === 'Paid' ? 'Full Payment' : 'Deposit'
 	}
-	if (index === 0) return 'Initial Deposit';
-	if (index === payments.length - 1 && props.order.payment_status === 'Paid') return 'Final Payment';
-	return 'Installment';
+	if (index === 0) return 'Initial Deposit'
+	if (index === payments.length - 1 && props.order.payment_status === 'Paid')
+		return 'Final Payment'
+	return 'Installment'
 }
 
 function isOverdue(dateStr) {
@@ -598,10 +635,10 @@ async function updateStatus() {
 			name: props.order.name,
 			status: selectedStatus.value,
 		})
-		
+
 		const newStatus = selectedStatus.value
 		const hasBalance = props.order.balance_due > 0
-		
+
 		emit('status-changed')
 		toast({
 			title: 'Updated',
@@ -609,7 +646,7 @@ async function updateStatus() {
 			icon: 'check',
 			intent: 'success',
 		})
-		
+
 		if (newStatus === 'Delivered' && hasBalance) {
 			emit('open-payment', props.order)
 		}

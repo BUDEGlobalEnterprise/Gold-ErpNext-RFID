@@ -104,8 +104,14 @@ export function useStripeTerminal() {
 	let pollTimer = null
 	let currentPaymentIntentId = null
 
-	const isProcessing = computed(() =>
-		![TERMINAL_STATUS.IDLE, TERMINAL_STATUS.SUCCEEDED, TERMINAL_STATUS.FAILED, TERMINAL_STATUS.CANCELED].includes(status.value)
+	const isProcessing = computed(
+		() =>
+			![
+				TERMINAL_STATUS.IDLE,
+				TERMINAL_STATUS.SUCCEEDED,
+				TERMINAL_STATUS.FAILED,
+				TERMINAL_STATUS.CANCELED,
+			].includes(status.value)
 	)
 
 	const isConnected = computed(() => !!connectedReader.value)
@@ -165,7 +171,7 @@ export function useStripeTerminal() {
 				throw new Error(result.error.message)
 			}
 
-			readers.value = (result.discoveredReaders || []).map(r => ({
+			readers.value = (result.discoveredReaders || []).map((r) => ({
 				id: r.id,
 				label: r.label || r.id,
 				device_type: r.device_type,
@@ -250,12 +256,15 @@ export function useStripeTerminal() {
 			status.value = TERMINAL_STATUS.CREATING_INTENT
 			statusMessage.value = 'Creating payment...'
 
-			const intent = await call('zevar_core.integrations.stripe_terminal.api.create_terminal_payment', {
-				amount,
-				currency,
-				invoice_name: invoiceName || null,
-				description: description || null,
-			})
+			const intent = await call(
+				'zevar_core.integrations.stripe_terminal.api.create_terminal_payment',
+				{
+					amount,
+					currency,
+					invoice_name: invoiceName || null,
+					description: description || null,
+				}
+			)
 
 			if (!intent?.client_secret) {
 				throw new Error('Failed to create payment intent')
@@ -282,7 +291,9 @@ export function useStripeTerminal() {
 			status.value = TERMINAL_STATUS.PROCESSING
 			statusMessage.value = 'Processing payment...'
 
-			const processResult = await terminalInstance.processPayment(collectResult.paymentIntent)
+			const processResult = await terminalInstance.processPayment(
+				collectResult.paymentIntent
+			)
 
 			if (processResult.error) {
 				throw new Error(processResult.error.message)
@@ -305,7 +316,8 @@ export function useStripeTerminal() {
 					paymentIntentId: currentPaymentIntentId,
 					amount: finalStatus.amount,
 					receiptUrl: receiptUrl.value,
-					cardBrand: finalStatus.charges?.[0]?.payment_method_details?.card_present?.brand,
+					cardBrand:
+						finalStatus.charges?.[0]?.payment_method_details?.card_present?.brand,
 					last4: finalStatus.charges?.[0]?.payment_method_details?.card_present?.last4,
 				}
 			} else {
@@ -320,9 +332,12 @@ export function useStripeTerminal() {
 			// Attempt to cancel the lingering intent
 			if (currentPaymentIntentId && status.value === TERMINAL_STATUS.FAILED) {
 				try {
-					await call('zevar_core.integrations.stripe_terminal.api.cancel_terminal_payment', {
-						payment_intent_id: currentPaymentIntentId,
-					})
+					await call(
+						'zevar_core.integrations.stripe_terminal.api.cancel_terminal_payment',
+						{
+							payment_intent_id: currentPaymentIntentId,
+						}
+					)
 				} catch {
 					// Best-effort cleanup
 				}
@@ -363,9 +378,12 @@ export function useStripeTerminal() {
 			pollTimer = setInterval(async () => {
 				attempts++
 				try {
-					const result = await call('zevar_core.integrations.stripe_terminal.api.get_payment_status', {
-						payment_intent_id: paymentIntentId,
-					})
+					const result = await call(
+						'zevar_core.integrations.stripe_terminal.api.get_payment_status',
+						{
+							payment_intent_id: paymentIntentId,
+						}
+					)
 
 					if (result?.status === 'succeeded') {
 						clearInterval(pollTimer)
@@ -399,7 +417,9 @@ export function useStripeTerminal() {
 	// ── List readers via backend (doesn't need SDK) ──
 	async function listBackendReaders() {
 		try {
-			const result = await call('zevar_core.integrations.stripe_terminal.api.list_terminal_devices')
+			const result = await call(
+				'zevar_core.integrations.stripe_terminal.api.list_terminal_devices'
+			)
 			return result?.devices || []
 		} catch {
 			return []
