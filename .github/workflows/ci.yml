@@ -47,7 +47,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.12'
+          python-version: '3.14'
 
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -83,7 +83,7 @@ jobs:
 
       - name: Setup
         run: |
-          pip install frappe-bench
+          pip install --no-cache-dir frappe-bench
           bench init --skip-redis-config-generation --skip-assets --python "$(which python)" ~/frappe-bench
           mariadb --host 127.0.0.1 --port 3306 -u root -proot -e "SET GLOBAL character_set_server = 'utf8mb4'"
           mariadb --host 127.0.0.1 --port 3306 -u root -proot -e "SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
@@ -93,6 +93,7 @@ jobs:
         run: |
           bench get-app erpnext --branch version-15
           bench get-app zevar_core $GITHUB_WORKSPACE
+          pip install --no-cache-dir chromadb sentence-transformers
           bench setup requirements --dev
           rm -f apps/zevar_core/zevar_core/fixtures/*.json
           bench new-site --db-root-password root --admin-password admin test_site
