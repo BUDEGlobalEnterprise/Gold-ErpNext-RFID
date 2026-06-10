@@ -775,7 +775,7 @@ function onScanSuccess(text) {
 					idNumber: parsed.idNumber || parsed.id || text.substring(0, 30),
 					dob: parsed.dob || '',
 					address: parsed.address || '',
-					type: parsed.type || "Generic ID",
+					type: parsed.type || 'Generic ID',
 				}
 				capturedImage.value = ''
 				isReviewMode.value = true
@@ -788,7 +788,7 @@ function onScanSuccess(text) {
 					idNumber: text.substring(0, 50), // Truncate just in case it's huge
 					dob: '',
 					address: '',
-					type: "Generic ID",
+					type: 'Generic ID',
 				}
 				capturedImage.value = ''
 				isReviewMode.value = true

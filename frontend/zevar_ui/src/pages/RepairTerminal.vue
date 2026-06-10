@@ -563,7 +563,7 @@
 												quickStatusChange(
 													order.name,
 													getNextStatus(order.status)
-												);
+												)
 											"
 											class="p-1 text-[#D4AF37] hover:text-black hover:bg-[#D4AF37] border border-[#D4AF37]/30 rounded transition"
 											title="Advance status"

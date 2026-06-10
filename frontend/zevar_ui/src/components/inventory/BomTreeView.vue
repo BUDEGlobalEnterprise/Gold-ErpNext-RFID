@@ -15,8 +15,8 @@
 					class="component-row"
 					:class="{ selected: selectedIndex === idx }"
 					@click="
-						$emit('select-component', comp, idx);
-						selectedIndex = idx;
+						$emit('select-component', comp, idx)
+						selectedIndex = idx
 					"
 				>
 					<span class="component-type-badge" :class="typeClass(comp.component_type)">

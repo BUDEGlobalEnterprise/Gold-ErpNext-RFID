@@ -39,7 +39,7 @@
 				<div class="flex items-center gap-3">
 					<button
 						@click="
-							allocation[store.code] = Math.max(0, (allocation[store.code] || 0) - 1);
+							allocation[store.code] = Math.max(0, (allocation[store.code] || 0) - 1)
 						"
 						class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-warm-dark-700 text-sm font-bold hover:bg-gray-200 transition"
 					>
