@@ -15,7 +15,8 @@ import { ref } from 'vue'
  * Handles common variants: "18K" → "18Kt", "10k" → "10Kt", etc.
  */
 function normalizePurity(purity) {
-	if (!purity) return purity
+	if (purity === null || purity === undefined) return purity
+	const purityStr = String(purity).toLowerCase().trim()
 	const map = {
 		'24k': '24Kt',
 		'24kt': '24Kt',
@@ -28,10 +29,10 @@ function normalizePurity(purity) {
 		'10k': '10Kt',
 		'10kt': '10Kt',
 		'999 sterling': '999 Fine',
-		925: '925 Sterling',
-		sterling: '925 Sterling',
+		'925': '925 Sterling',
+		'sterling': '925 Sterling',
 	}
-	return map[purity.toLowerCase().trim()] || purity
+	return map[purityStr] || purity
 }
 
 export const useGoldStore = defineStore('gold', () => {
@@ -53,10 +54,7 @@ export const useGoldStore = defineStore('gold', () => {
 	// ==========================================================================
 
 	const fetchRates = createResource({
-		fetcher: async () => {
-			const response = await frappe.call('zevar_core.api.pricing.get_live_metal_rates')
-			return response?.message || response
-		},
+		url: 'zevar_core.api.pricing.get_live_metal_rates',
 		onSuccess(data) {
 			const result = data
 			if (!result || !result.rates) return
@@ -67,20 +65,58 @@ export const useGoldStore = defineStore('gold', () => {
 				for (const p of purities) {
 					const normalizedPurity = normalizePurity(p.purity)
 					const key = `${metal}-${normalizedPurity}`
-					// Store the full object instead of just rate_per_gram
-					if (!newRates[key] || p.rate_per_gram > newRates[key].rate_per_gram) {
-						newRates[key] = {
-							rate_per_gram: p.rate_per_gram,
-							change_pct: p.change_pct || 0,
-							change_amount: p.change_amount || 0,
-							trend: p.trend || 'none',
-						}
+					
+					const rateObj = {
+						rate_per_gram: p.rate_per_gram,
+						change_pct: p.change_pct || 0,
+						change_amount: p.change_amount || 0,
+						trend: p.trend || 'none',
 					}
-					// Capture trend data from server
-					newTrends[key] = {
+					const trendObj = {
 						trend: p.trend || 'flat',
 						change_pct: p.change_pct || 0,
 						change_amount: p.change_amount || 0,
+					}
+
+					// Store the full object instead of just rate_per_gram
+					if (!newRates[key]) {
+						newRates[key] = rateObj
+					} else {
+						const current = newRates[key]
+						const currentHasTrend = current.trend && current.trend !== 'none' && current.trend !== 'flat'
+						const newHasTrend = p.trend && p.trend !== 'none' && p.trend !== 'flat'
+
+						if (newHasTrend && !currentHasTrend) {
+							newRates[key] = rateObj
+						} else if (!newHasTrend && currentHasTrend) {
+							// Keep current
+						} else {
+							// Prefer higher rate, or if rates are equal, prefer the one with a non-zero change_pct
+							if (p.rate_per_gram > current.rate_per_gram) {
+								newRates[key] = rateObj
+							} else if (p.rate_per_gram === current.rate_per_gram && Math.abs(rateObj.change_pct) > Math.abs(current.change_pct)) {
+								newRates[key] = rateObj
+							}
+						}
+					}
+
+					// Capture trend data from server
+					if (!newTrends[key]) {
+						newTrends[key] = trendObj
+					} else {
+						const current = newTrends[key]
+						const currentHasTrend = current.trend && current.trend !== 'none' && current.trend !== 'flat'
+						const newHasTrend = p.trend && p.trend !== 'none' && p.trend !== 'flat'
+
+						if (newHasTrend && !currentHasTrend) {
+							newTrends[key] = trendObj
+						} else if (!newHasTrend && currentHasTrend) {
+							// Keep current
+						} else {
+							if (Math.abs(trendObj.change_pct) > Math.abs(current.change_pct)) {
+								newTrends[key] = trendObj
+							}
+						}
 					}
 				}
 			}

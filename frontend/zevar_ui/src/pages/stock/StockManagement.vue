@@ -150,8 +150,8 @@
 							<span class="font-medium text-sm">{{ selectedItem.item_name }}</span>
 							<button
 								@click="
-									selectedItem = null
-									itemSearch = ''
+									selectedItem = null;
+									itemSearch = '';
 								"
 								class="text-xs text-red-500 hover:text-red-700"
 							>

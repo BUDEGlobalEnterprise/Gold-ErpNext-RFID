@@ -6,35 +6,35 @@
  * This prevents stale content issues permanently.
  */
 
-const CACHE_NAME = "zevar-pos-v16";
-const API_CACHE = "zevar-api-v16";
+const CACHE_NAME = 'zevar-pos-v16'
+const API_CACHE = 'zevar-api-v16'
 
-const OFFLINE_FALLBACK_ASSETS = ["/pos/", "/pos/index.html"];
+const OFFLINE_FALLBACK_ASSETS = ['/pos/', '/pos/index.html']
 
 const CACHEABLE_API_ROUTES = [
-	"zevar_core.api.pos.get_pos_items",
-	"zevar_core.api.get_pos_settings",
-	"zevar_core.api.pos.get_pos_profile",
-];
+	'zevar_core.api.pos.get_pos_items',
+	'zevar_core.api.get_pos_settings',
+	'zevar_core.api.pos.get_pos_profile',
+]
 
-const SENSITIVE_METHODS = ["get_user_info", "get_logged_user", "logout", "login"];
+const SENSITIVE_METHODS = ['get_user_info', 'get_logged_user', 'logout', 'login']
 
 // ── Install: cache shell for offline fallback only ──
 
-self.addEventListener("install", (event) => {
-	console.log("[SW v14] Installing — network-first strategy");
+self.addEventListener('install', (event) => {
+	console.log('[SW v14] Installing — network-first strategy')
 	event.waitUntil(
 		caches
 			.open(CACHE_NAME)
 			.then((cache) => cache.addAll(OFFLINE_FALLBACK_ASSETS))
 			.then(() => self.skipWaiting())
-	);
-});
+	)
+})
 
 // ── Activate: purge ALL old caches ──
 
-self.addEventListener("activate", (event) => {
-	console.log("[SW v14] Activating — clearing old caches");
+self.addEventListener('activate', (event) => {
+	console.log('[SW v14] Activating — clearing old caches')
 	event.waitUntil(
 		caches
 			.keys()
@@ -42,42 +42,42 @@ self.addEventListener("activate", (event) => {
 				Promise.all(
 					names.map((n) => {
 						if (n !== CACHE_NAME && n !== API_CACHE) {
-							console.log("[SW v14] Purging:", n);
-							return caches.delete(n);
+							console.log('[SW v14] Purging:', n)
+							return caches.delete(n)
 						}
 					})
 				)
 			)
 			.then(() => self.clients.claim())
-	);
-});
+	)
+})
 
 // ── Fetch: network-first for EVERYTHING ──
 
-self.addEventListener("fetch", (event) => {
-	const { request } = event;
-	const url = new URL(request.url);
+self.addEventListener('fetch', (event) => {
+	const { request } = event
+	const url = new URL(request.url)
 
 	// Skip non-GET (let browser handle POST/PUT/DELETE normally)
-	if (request.method !== "GET") return;
+	if (request.method !== 'GET') return
 
 	// Skip sensitive auth endpoints entirely
-	if (SENSITIVE_METHODS.some((m) => url.pathname.includes(m))) return;
+	if (SENSITIVE_METHODS.some((m) => url.pathname.includes(m))) return
 
-	if (request.mode === "navigate" || request.destination === "document") {
-		event.respondWith(networkFirst(request, CACHE_NAME, "/pos/index.html"));
-		return;
+	if (request.mode === 'navigate' || request.destination === 'document') {
+		event.respondWith(networkFirst(request, CACHE_NAME, '/pos/index.html'))
+		return
 	}
 
-	if (url.pathname.includes("/api/method/")) {
-		const isCacheable = CACHEABLE_API_ROUTES.some((r) => url.pathname.includes(r));
-		event.respondWith(networkFirst(request, isCacheable ? API_CACHE : null));
-		return;
+	if (url.pathname.includes('/api/method/')) {
+		const isCacheable = CACHEABLE_API_ROUTES.some((r) => url.pathname.includes(r))
+		event.respondWith(networkFirst(request, isCacheable ? API_CACHE : null))
+		return
 	}
 
 	// Static assets: network-first, cache as fallback
-	event.respondWith(networkFirst(request, CACHE_NAME));
-});
+	event.respondWith(networkFirst(request, CACHE_NAME))
+})
 
 /**
  * Network-first strategy:
@@ -87,59 +87,59 @@ self.addEventListener("fetch", (event) => {
  */
 async function networkFirst(request, cacheName, fallbackKey) {
 	try {
-		const response = await fetch(request);
+		const response = await fetch(request)
 		if (response && response.ok && cacheName) {
-			const cache = await caches.open(cacheName);
-			cache.put(request, response.clone());
+			const cache = await caches.open(cacheName)
+			cache.put(request, response.clone())
 		}
-		return response;
+		return response
 	} catch (err) {
 		if (cacheName) {
-			const cached = await caches.match(request);
-			if (cached) return cached;
+			const cached = await caches.match(request)
+			if (cached) return cached
 		}
 		if (fallbackKey) {
-			return caches.match(fallbackKey);
+			return caches.match(fallbackKey)
 		}
-		return new Response("Offline", { status: 503 });
+		return new Response('Offline', { status: 503 })
 	}
 }
 
 // ── Background Sync ──
 
-self.addEventListener("sync", (event) => {
-	if (event.tag === "sync-pos-transactions") {
+self.addEventListener('sync', (event) => {
+	if (event.tag === 'sync-pos-transactions') {
 		event.waitUntil(
 			self.clients.matchAll().then((clients) => {
-				clients.forEach((c) => c.postMessage({ type: "TRIGGER_SYNC" }));
+				clients.forEach((c) => c.postMessage({ type: 'TRIGGER_SYNC' }))
 			})
-		);
+		)
 	}
-});
+})
 
 // ── Message handling ──
 
-self.addEventListener("message", (event) => {
-	if (event.data?.type === "SKIP_WAITING") {
-		self.skipWaiting();
+self.addEventListener('message', (event) => {
+	if (event.data?.type === 'SKIP_WAITING') {
+		self.skipWaiting()
 	}
 
-	if (event.data?.type === "GET_VERSION") {
-		event.ports[0]?.postMessage({ version: 14 });
+	if (event.data?.type === 'GET_VERSION') {
+		event.ports[0]?.postMessage({ version: 14 })
 	}
 
-	if (event.data?.type === "CLEAR_CACHE") {
+	if (event.data?.type === 'CLEAR_CACHE') {
 		event.waitUntil(
 			caches
 				.keys()
 				.then((names) => Promise.all(names.map((n) => caches.delete(n))))
 				.then(() => {
-					event.ports[0]?.postMessage({ success: true });
-					return self.clients.matchAll();
+					event.ports[0]?.postMessage({ success: true })
+					return self.clients.matchAll()
 				})
 				.then((clients) => {
-					clients.forEach((c) => c.postMessage({ type: "CACHE_CLEARED" }));
+					clients.forEach((c) => c.postMessage({ type: 'CACHE_CLEARED' }))
 				})
-		);
+		)
 	}
-});
+})

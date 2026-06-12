@@ -150,7 +150,7 @@ def _seed_purities():
 	for gold_metal in ("Yellow Gold", "White Gold", "Rose Gold"):
 		for p in GOLD_PURITIES:
 			purity_name = f"{p['purity_name']} {gold_metal}"
-			if frappe.db.exists("Zevar Purity", purity_name):
+			if frappe.db.exists("Zevar Purity", purity_name) or frappe.db.exists("Zevar Purity", {"purity_code": p["purity_code"], "metal": gold_metal}):
 				continue
 			frappe.get_doc(
 				{
@@ -165,7 +165,7 @@ def _seed_purities():
 			).insert(ignore_permissions=True)
 
 	for p in SILVER_PURITIES:
-		if frappe.db.exists("Zevar Purity", p["purity_name"]):
+		if frappe.db.exists("Zevar Purity", p["purity_name"]) or frappe.db.exists("Zevar Purity", {"purity_code": p["purity_code"], "metal": "Silver"}):
 			continue
 		frappe.get_doc(
 			{
@@ -180,7 +180,7 @@ def _seed_purities():
 		).insert(ignore_permissions=True)
 
 	for p in PLATINUM_PURITIES:
-		if frappe.db.exists("Zevar Purity", p["purity_name"]):
+		if frappe.db.exists("Zevar Purity", p["purity_name"]) or frappe.db.exists("Zevar Purity", {"purity_code": p["purity_code"], "metal": "Platinum"}):
 			continue
 		frappe.get_doc(
 			{
