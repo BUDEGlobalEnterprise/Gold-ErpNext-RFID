@@ -1,5 +1,4 @@
 <template>
-	<div class="h-full flex flex-col gap-10 no-scrollbar overflow-y-auto pb-20">
 		<!-- Header Redesigned -->
 		<div class="shrink-0 px-2">
 			<div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
@@ -206,7 +205,6 @@
 				</div>
 			</div>
 		</div>
-	</div>
 </template>
 
 <script setup>

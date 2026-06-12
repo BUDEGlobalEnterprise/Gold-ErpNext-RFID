@@ -654,15 +654,18 @@ def get_item_details(item_code: str) -> dict:
 			)
 
 	# Get price
+	price_data = {}
 	try:
-		price_data = get_item_price(item_code)
-		price = price_data.get("final_price", item.custom_msrp or 0)
+		price_data = get_item_price(item_code) or {}
 	except Exception:
-		price = item.custom_msrp or 0
+		price_data = {}
+	price = price_data.get("final_price") or item.custom_msrp or item.standard_rate or 0
 
 	return {
 		"item_code": item.name,
 		"item_name": item.item_name,
+		"item_group": item.item_group,
+		"category": item.item_group,
 		"description": item.description,
 		"image": item.image,
 		"metal": item.custom_metal_type,
@@ -686,10 +689,18 @@ def get_item_details(item_code: str) -> dict:
 		"gender": item.custom_gender,
 		"completeness": "Complete (all stones included)" if item.custom_product_type else None,
 		"country_of_origin": item.custom_country_of_origin,
+		"vendor": item.custom_vendor,
+		"vendor_sku": item.custom_vendor_sku,
 		"gemstones": gemstones,
 		"custom_source": item.custom_source,
 		"price": price,
+		"final_price": price,
+		"price_source": price_data.get("price_source") or ("MSRP" if item.custom_msrp else "Standard Rate"),
+		"gold_rate": price_data.get("gold_rate", 0),
+		"gold_value": price_data.get("gold_value", 0),
+		"gemstone_value": price_data.get("gemstone_value", 0),
 		"msrp": item.custom_msrp,
+		"standard_rate": item.standard_rate,
 	}
 
 

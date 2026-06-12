@@ -130,6 +130,8 @@ def get_customer_details(customer_name: str) -> dict:
 		"mobile_no": customer.mobile_no or "",
 		"email_id": customer.email_id or "",
 		"customer_type": customer.customer_type or "Individual",
+		"customer_group": customer.customer_group or "",
+		"territory": customer.territory or "",
 	}
 
 	def safe_get(doc, field, default=""):
@@ -243,13 +245,30 @@ def get_customer_details(customer_name: str) -> dict:
 
 	recent_orders = frappe.get_all(
 		"Sales Invoice",
-		filters={"customer": customer_name, "docstatus": 1},
+		filters={"customer": customer_name, "docstatus": 1, "is_return": 0},
 		fields=["name", "posting_date", "grand_total"],
 		order_by="posting_date desc",
 		limit=5,
 	)
+	stats = frappe.db.sql(
+		"""
+		SELECT
+			COUNT(*) AS order_count,
+			COALESCE(SUM(grand_total), 0) AS total_spent,
+			MAX(posting_date) AS last_purchase_date
+		FROM `tabSales Invoice`
+		WHERE customer = %s
+			AND docstatus = 1
+			AND is_return = 0
+		""",
+		customer_name,
+		as_dict=True,
+	)[0]
+
 	result["recent_orders"] = recent_orders
-	result["total_spent"] = sum(order.grand_total for order in recent_orders)
+	result["total_spent"] = stats.total_spent or 0
+	result["order_count"] = stats.order_count or 0
+	result["last_purchase_date"] = stats.last_purchase_date
 
 	return result
 

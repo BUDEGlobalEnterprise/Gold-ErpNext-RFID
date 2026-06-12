@@ -62,6 +62,12 @@ export const useTasksStore = defineStore("tasks", () => {
 		auto: false,
 	});
 
+	// Update todo details
+	const updateTodoDetailResource = createResource({
+		url: "zevar_core.api.tasks.update_personal_todo",
+		auto: false,
+	});
+
 	// Update Gameplan task status
 	const updateTaskStatusResource = createResource({
 		url: "zevar_core.api.tasks.update_task_status",
@@ -94,38 +100,63 @@ export const useTasksStore = defineStore("tasks", () => {
 		await taskStatsResource.fetch();
 	}
 
-	async function fetchTodos() {
-		await todosResource.fetch();
+	async function fetchTodos(userFilter = null) {
+		await todosResource.fetch({ user_filter: userFilter });
 	}
 
-	async function createTodo(description, date = null, priority = "Medium") {
+	async function createTodo(description, date = null, priority = "Medium", allocated_to = null, userFilter = null) {
 		loading.value = true;
 		try {
 			const result = await createTodoResource.fetch({
 				description,
 				date,
 				priority,
+				allocated_to,
 			});
-			await fetchTodos();
+			await fetchTodos(userFilter);
 			return result;
 		} finally {
 			loading.value = false;
 		}
 	}
 
-	async function toggleTodo(todoId, currentStatus) {
+	async function updateTodo(todoId, description, date = null, priority = "Medium", allocated_to = null, status = "Open", userFilter = null) {
+		loading.value = true;
+		try {
+			const result = await updateTodoDetailResource.fetch({
+				todo_id: todoId,
+				description,
+				date,
+				priority,
+				allocated_to,
+				status,
+			});
+			await fetchTodos(userFilter);
+			return result;
+		} finally {
+			loading.value = false;
+		}
+	}
+
+	async function toggleTodo(todoId, currentStatus, userFilter = null) {
 		const newStatus = currentStatus === "Closed" ? "Open" : "Closed";
 		await updateTodoResource.fetch({ todo_id: todoId, status: newStatus });
-		await fetchTodos();
+		await fetchTodos(userFilter);
+	}
+
+	async function updateTodoStatus(todoId, status, userFilter = null) {
+		await updateTodoResource.fetch({ todo_id: todoId, status: status });
+		await fetchTodos(userFilter);
 	}
 
 	// Optimistic delete - removes from UI immediately
-	async function deleteTodoItem(todoId) {
+	async function deleteTodoItem(todoId, userFilter = null) {
 		const previousTodos = [...todos.value];
 		todos.value = todos.value.filter((t) => t.id !== todoId);
 
 		try {
 			await deleteTodoResource.fetch({ todo_id: todoId });
+			await fetchTodos(userFilter);
 		} catch (error) {
 			todos.value = previousTodos;
 			throw error;
@@ -150,10 +181,10 @@ export const useTasksStore = defineStore("tasks", () => {
 		}
 	}
 
-	function init() {
+	function init(userFilter = null) {
 		fetchTasks();
 		fetchTaskStats();
-		fetchTodos();
+		fetchTodos(userFilter);
 	}
 
 	return {
@@ -170,7 +201,9 @@ export const useTasksStore = defineStore("tasks", () => {
 		fetchTaskStats,
 		fetchTodos,
 		createTodo,
+		updateTodo,
 		toggleTodo,
+		updateTodoStatus,
 		deleteTodoItem,
 		updateTaskStatus,
 		init,

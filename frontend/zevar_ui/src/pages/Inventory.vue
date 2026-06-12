@@ -172,8 +172,8 @@
 			<div v-if="mobileMenuOpen" class="md:hidden grid grid-cols-2 gap-2 mb-4">
 				<button
 					@click="
-						showStockAdjust = true
-						mobileMenuOpen = false
+						showStockAdjust = true;
+						mobileMenuOpen = false;
 					"
 					class="py-2 bg-[#059669] text-white rounded-lg text-xs font-bold hover:bg-[#047857]"
 				>
@@ -181,8 +181,8 @@
 				</button>
 				<button
 					@click="
-						showReductions = true
-						mobileMenuOpen = false
+						showReductions = true;
+						mobileMenuOpen = false;
 					"
 					class="py-2 bg-amber-50 text-amber-700 border border-amber-300 rounded-lg text-xs font-bold"
 				>
@@ -190,8 +190,8 @@
 				</button>
 				<button
 					@click="
-						showQuickAdd = true
-						mobileMenuOpen = false
+						showQuickAdd = true;
+						mobileMenuOpen = false;
 					"
 					class="py-2 bg-[#D4AF37] text-white rounded-lg text-xs font-bold"
 				>
@@ -199,8 +199,8 @@
 				</button>
 				<button
 					@click="
-						openPushForSelected()
-						mobileMenuOpen = false
+						openPushForSelected();
+						mobileMenuOpen = false;
 					"
 					class="py-2 bg-blue-600 text-white rounded-lg text-xs font-bold"
 				>
@@ -208,8 +208,8 @@
 				</button>
 				<button
 					@click="
-						showTransferModal = true
-						mobileMenuOpen = false
+						showTransferModal = true;
+						mobileMenuOpen = false;
 					"
 					class="py-2 border rounded-lg text-xs font-bold"
 				>
@@ -217,8 +217,8 @@
 				</button>
 				<button
 					@click="
-						showConsignment = true
-						mobileMenuOpen = false
+						showConsignment = true;
+						mobileMenuOpen = false;
 					"
 					class="py-2 border rounded-lg text-xs font-bold"
 				>
@@ -651,28 +651,28 @@
 				:item="selectedItem"
 				@close="selectedItem = null"
 				@reserve="
-					openReserve(selectedItem)
-					selectedItem = null
+					openReserve(selectedItem);
+					selectedItem = null;
 				"
 				@damage="
-					openDamage(selectedItem)
-					selectedItem = null
+					openDamage(selectedItem);
+					selectedItem = null;
 				"
 				@lifecycle="
-					openLifecycle(selectedItem)
-					selectedItem = null
+					openLifecycle(selectedItem);
+					selectedItem = null;
 				"
 				@push="
-					openPushForItem(selectedItem)
-					selectedItem = null
+					openPushForItem(selectedItem);
+					selectedItem = null;
 				"
 				@transfer="
-					showTransferModal = true
-					selectedItem = null
+					showTransferModal = true;
+					selectedItem = null;
 				"
 				@edit="
-					openEdit(selectedItem)
-					selectedItem = null
+					openEdit(selectedItem);
+					selectedItem = null;
 				"
 			/>
 		</div>

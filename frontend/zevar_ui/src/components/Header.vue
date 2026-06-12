@@ -325,7 +325,7 @@ const goldPrice = computed(() => {
 
 const priceChange = computed(() => {
 	const data22kt = goldStore.rates['Yellow Gold-22Kt']
-	return data22kt?.change_percent || 0.0
+	return data22kt?.change_pct || 0.0
 })
 
 const navCategories = [

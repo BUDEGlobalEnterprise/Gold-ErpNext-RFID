@@ -9,7 +9,11 @@ export const useAttendanceStore = defineStore("attendance", () => {
 	const loading = ref(false);
 	const error = ref(null);
 	const workedSecondsToday = ref(0);
+	const employeeId = ref(null);
 	let timerInterval = null;
+
+	const employeeList = ref([]);
+	const monthlyRoster = ref(null);
 
 	// Today's check-in status
 	const todayStatusResource = createResource({
@@ -58,8 +62,50 @@ export const useAttendanceStore = defineStore("attendance", () => {
 		url: "zevar_core.api.attendance.get_attendance_history",
 		auto: false,
 		onSuccess(data) {
-			history.value = data || [];
+			history.value = data?.records || data || [];
 		},
+	});
+
+	// Employee list for marking attendance
+	const employeeListResource = createResource({
+		url: "zevar_core.api.roster.get_employee_list",
+		auto: false,
+		onSuccess(data) {
+			employeeList.value = data || [];
+		},
+	});
+
+	// Monthly roster
+	const monthlyRosterResource = createResource({
+		url: "zevar_core.api.roster.get_monthly_roster",
+		auto: false,
+		onSuccess(data) {
+			monthlyRoster.value = data;
+		},
+	});
+
+	// Check if user can mark attendance (create permission)
+	const canMarkAttendanceResource = createResource({
+		url: "zevar_core.api.attendance.can_mark_attendance",
+		auto: false,
+	});
+
+	// Check if user can manage attendance (write permission — view other employees' data)
+	const canManageAttendanceResource = createResource({
+		url: "zevar_core.api.attendance.can_manage_attendance",
+		auto: false,
+	});
+
+	// Check if user can view attendance (read permission — gate employee filter)
+	const canViewAttendanceResource = createResource({
+		url: "zevar_core.api.attendance.can_view_attendance",
+		auto: false,
+	});
+
+	// Mark attendance
+	const markAttendanceResource = createResource({
+		url: "zevar_core.api.attendance.mark_attendance",
+		auto: false,
 	});
 
 	// Computed
@@ -169,7 +215,11 @@ export const useAttendanceStore = defineStore("attendance", () => {
 
 	async function fetchHistory(employeeId, days = 30) {
 		if (!employeeId) return;
-		await historyResource.fetch({ employee_id: employeeId, days });
+		if (days && typeof days === "object") {
+			await historyResource.fetch({ employee_id: employeeId, ...days });
+		} else {
+			await historyResource.fetch({ employee_id: employeeId, days });
+		}
 	}
 
 	async function clockIn(employeeId, latitude = null, longitude = null, notes = null) {
@@ -246,9 +296,10 @@ export const useAttendanceStore = defineStore("attendance", () => {
 		}
 	}
 
-	async function init(employeeId) {
-		if (employeeId) {
-			await Promise.all([fetchTodayStatus(employeeId), fetchRoster(employeeId)]);
+	async function init(empId) {
+		if (empId) {
+			employeeId.value = empId;
+			await Promise.all([fetchTodayStatus(empId), fetchRoster(empId)]);
 		}
 	}
 
@@ -294,6 +345,35 @@ export const useAttendanceStore = defineStore("attendance", () => {
 		}
 	}
 
+	async function fetchEmployeeList() {
+		return employeeListResource.fetch();
+	}
+
+	async function fetchMonthlyRoster(employeeId, year, month) {
+		if (employeeId) {
+			return monthlyRosterResource.fetch({ employee_id: employeeId, year, month });
+		}
+	}
+
+	async function checkCanMarkAttendance() {
+		const result = await canMarkAttendanceResource.fetch();
+		return result || false;
+	}
+
+	async function checkCanManageAttendance() {
+		const result = await canManageAttendanceResource.fetch();
+		return result || false;
+	}
+
+	async function checkCanViewAttendance() {
+		const result = await canViewAttendanceResource.fetch();
+		return result || false;
+	}
+
+	async function markAttendance(empId, date, status) {
+		return markAttendanceResource.fetch({ employee_id: empId, date, status });
+	}
+
 	return {
 		todayStatus,
 		roster,
@@ -301,6 +381,7 @@ export const useAttendanceStore = defineStore("attendance", () => {
 		loading,
 		error,
 		workedSecondsToday,
+		employeeId,
 		isCheckedIn,
 		isOnBreak,
 		totalHoursToday,
@@ -311,9 +392,17 @@ export const useAttendanceStore = defineStore("attendance", () => {
 		canManageBreak,
 		timerLabel,
 		formattedWorkedTime,
+		employeeList,
+		monthlyRoster,
 		fetchTodayStatus,
 		fetchRoster,
 		fetchHistory,
+		fetchEmployeeList,
+		fetchMonthlyRoster,
+		checkCanMarkAttendance,
+		checkCanManageAttendance,
+		checkCanViewAttendance,
+		markAttendance,
 		clockIn,
 		clockOut,
 		startBreak,
