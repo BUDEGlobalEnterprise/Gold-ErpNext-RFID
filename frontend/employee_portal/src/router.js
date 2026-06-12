@@ -11,6 +11,12 @@ const router = createRouter({
 			meta: { guest: true },
 		},
 		{
+			path: "/desk",
+			name: "desk",
+			component: () => import("./views/DashboardView.vue"), // Placeholder for Desk view
+			meta: { requiresAuth: true },
+		},
+		{
 			path: "/",
 			name: "dashboard",
 			component: () => import("./views/DashboardView.vue"),
@@ -70,12 +76,7 @@ const router = createRouter({
 			component: () => import("./views/ReportsView.vue"),
 			meta: { requiresAuth: true },
 		},
-		{
-			path: "/open-desk",
-			name: "open-desk",
-			component: () => import("./views/DashboardView.vue"), // Placeholder
-			meta: { requiresAuth: true },
-		},
+
 		// Catch-all → dashboard
 		{
 			path: "/:pathMatch(.*)*",
@@ -97,6 +98,13 @@ router.beforeEach(async (to, _from, next) => {
 		next({ name: "dashboard" });
 	} else {
 		next();
+	}
+});
+
+router.onError((error, to) => {
+	const errors = ["Failed to fetch dynamically imported module", "Importing a module script failed"];
+	if (errors.some((e) => error.message.includes(e))) {
+		window.location.reload();
 	}
 });
 

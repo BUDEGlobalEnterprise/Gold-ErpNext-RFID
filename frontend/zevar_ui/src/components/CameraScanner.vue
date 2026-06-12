@@ -548,7 +548,13 @@ const headerTitle = computed(() => {
 })
 
 const permissionHelpText = computed(() => {
-	if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+	const isSecure =
+		window.isSecureContext ||
+		location.protocol === 'https:' ||
+		location.hostname === 'localhost' ||
+		location.hostname.endsWith('.localhost') ||
+		location.hostname === '127.0.0.1'
+	if (!isSecure) {
 		return 'Camera access requires HTTPS. Please load this page over a secure connection (https://).'
 	}
 	return 'Please allow camera access in your browser settings and try again.'
@@ -639,8 +645,10 @@ async function initScanner() {
 	showPermissionHelp.value = false
 
 	const isSecure =
+		window.isSecureContext ||
 		location.protocol === 'https:' ||
 		location.hostname === 'localhost' ||
+		location.hostname.endsWith('.localhost') ||
 		location.hostname === '127.0.0.1'
 	if (!isSecure) {
 		errorMsg.value = 'Camera requires HTTPS. Please use a secure connection.'

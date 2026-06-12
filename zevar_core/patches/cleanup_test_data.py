@@ -18,10 +18,21 @@ def execute():
     # ── 1. Identify test customers ──
     test_customer_patterns = [
         "_Test%",
+        "VerifyTest-%",
         "Test Customer",
         "Test POS Customer",
         "Test Trade-In Customer",
         "Return Test Customer",
+        "Integration Test Customer",
+        "Zevar E2E Customer",
+        "Zevar Reports Test Customer",
+        "KYC Test Customer",
+        "Form 8300 Test Customer",
+        "Test Loyalty Customer",
+        "Layaway Test Customer",
+        "Layaway Test Cust",
+        "Finance Test Cust",
+        "Session Test Cust",
     ]
 
     test_customers = set()
@@ -54,7 +65,8 @@ def execute():
                 filters={"customer": cust_name, "docstatus": 1},
             )
             if invoice_count > 0:
-                print(f"  SKIP {cust_name} - has {invoice_count} submitted invoices")
+                frappe.db.set_value("Customer", cust_name, "disabled", 1)
+                print(f"  Disabled customer: {cust_name} - has {invoice_count} submitted invoices")
                 continue
 
             frappe.delete_doc(
@@ -66,10 +78,14 @@ def execute():
             )
             print(f"  Deleted customer: {cust_name}")
         except Exception as e:
-            print(f"  WARN: Could not delete {cust_name}: {e}")
+            try:
+                frappe.db.set_value("Customer", cust_name, "disabled", 1)
+                print(f"  Disabled customer: {cust_name} - delete failed: {e}")
+            except Exception:
+                print(f"  WARN: Could not delete {cust_name}: {e}")
 
     # ── 2. Identify test items ──
-    test_item_patterns = ["_Test%"]
+    test_item_patterns = ["_Test%", "TEST-RES-%", "ZEVAR-REPORT-%", "ZEVAR-E2E-%", "ZEVAR-CART-DIS-%"]
     test_items = set()
     for pattern in test_item_patterns:
         names = frappe.db.sql(
@@ -94,9 +110,8 @@ def execute():
                 filters={"item_code": item_name, "docstatus": 1},
             )
             if sle_count > 0 or si_count > 0:
-                print(
-                    f"  SKIP {item_name} - has {sle_count} SLEs, {si_count} invoice items"
-                )
+                frappe.db.set_value("Item", item_name, "disabled", 1)
+                print(f"  Disabled item: {item_name} - has {sle_count} SLEs, {si_count} invoice items")
                 continue
 
             frappe.delete_doc(
@@ -108,7 +123,11 @@ def execute():
             )
             print(f"  Deleted item: {item_name}")
         except Exception as e:
-            print(f"  WARN: Could not delete {item_name}: {e}")
+            try:
+                frappe.db.set_value("Item", item_name, "disabled", 1)
+                print(f"  Disabled item: {item_name} - delete failed: {e}")
+            except Exception:
+                print(f"  WARN: Could not delete {item_name}: {e}")
 
     # ── 3. Identify test suppliers ──
     test_supplier_names = frappe.db.sql(
@@ -145,7 +164,7 @@ def execute():
                 delete_permanently=True,
             )
             print(f"  Deleted customer group: {grp['name']}")
-        except Exception as e:
+        except Exception:
             pass  # May have children, skip silently
 
     # ── 5. Clean up test territories ──
@@ -163,8 +182,32 @@ def execute():
                 delete_permanently=True,
             )
             print(f"  Deleted territory: {ter['name']}")
-        except Exception as e:
+        except Exception:
             pass
+
+    # ── 6. Clean invalid legacy/imported rate rows that break live-rate widgets ──
+    invalid_rate_logs = frappe.db.sql(
+        """
+        SELECT name
+        FROM `tabGold Rate Log`
+        WHERE source = 'Legacy Import'
+            AND (metal IS NULL OR purity IS NULL OR IFNULL(rate_per_gram, 0) <= 0)
+        """,
+        as_dict=1,
+    )
+    print(f"Found {len(invalid_rate_logs)} invalid legacy gold rate logs to remove")
+    for row in invalid_rate_logs:
+        try:
+            frappe.delete_doc(
+                "Gold Rate Log",
+                row["name"],
+                force=True,
+                ignore_permissions=True,
+                delete_permanently=True,
+            )
+            print(f"  Deleted invalid gold rate log: {row['name']}")
+        except Exception as e:
+            print(f"  WARN: Could not delete invalid gold rate log {row['name']}: {e}")
 
     frappe.db.commit()
     print("Test data cleanup complete.")

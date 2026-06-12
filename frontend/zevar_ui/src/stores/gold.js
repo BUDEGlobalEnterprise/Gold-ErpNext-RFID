@@ -62,12 +62,17 @@ export const useGoldStore = defineStore('gold', () => {
 			const newRates = {}
 			const newTrends = {}
 			for (const [metal, purities] of Object.entries(result.rates)) {
+				if (!metal || metal === 'null' || !Array.isArray(purities)) continue
+
 				for (const p of purities) {
 					const normalizedPurity = normalizePurity(p.purity)
+					const rate = Number(p.rate_per_gram || 0)
+					if (!normalizedPurity || rate <= 0) continue
+
 					const key = `${metal}-${normalizedPurity}`
-					
+
 					const rateObj = {
-						rate_per_gram: p.rate_per_gram,
+						rate_per_gram: rate,
 						change_pct: p.change_pct || 0,
 						change_amount: p.change_amount || 0,
 						trend: p.trend || 'none',
@@ -83,7 +88,8 @@ export const useGoldStore = defineStore('gold', () => {
 						newRates[key] = rateObj
 					} else {
 						const current = newRates[key]
-						const currentHasTrend = current.trend && current.trend !== 'none' && current.trend !== 'flat'
+						const currentHasTrend =
+							current.trend && current.trend !== 'none' && current.trend !== 'flat'
 						const newHasTrend = p.trend && p.trend !== 'none' && p.trend !== 'flat'
 
 						if (newHasTrend && !currentHasTrend) {
@@ -92,9 +98,12 @@ export const useGoldStore = defineStore('gold', () => {
 							// Keep current
 						} else {
 							// Prefer higher rate, or if rates are equal, prefer the one with a non-zero change_pct
-							if (p.rate_per_gram > current.rate_per_gram) {
+							if (rate > current.rate_per_gram) {
 								newRates[key] = rateObj
-							} else if (p.rate_per_gram === current.rate_per_gram && Math.abs(rateObj.change_pct) > Math.abs(current.change_pct)) {
+							} else if (
+								rate === current.rate_per_gram &&
+								Math.abs(rateObj.change_pct) > Math.abs(current.change_pct)
+							) {
 								newRates[key] = rateObj
 							}
 						}
@@ -105,7 +114,8 @@ export const useGoldStore = defineStore('gold', () => {
 						newTrends[key] = trendObj
 					} else {
 						const current = newTrends[key]
-						const currentHasTrend = current.trend && current.trend !== 'none' && current.trend !== 'flat'
+						const currentHasTrend =
+							current.trend && current.trend !== 'none' && current.trend !== 'flat'
 						const newHasTrend = p.trend && p.trend !== 'none' && p.trend !== 'flat'
 
 						if (newHasTrend && !currentHasTrend) {
@@ -122,7 +132,7 @@ export const useGoldStore = defineStore('gold', () => {
 			}
 			rates.value = newRates
 			trends.value = newTrends
-			lastUpdated.value = new Date()
+			lastUpdated.value = result.last_updated ? new Date(result.last_updated) : new Date()
 			isStale.value = result.is_stale || false
 			rateSource.value = result.source || 'unknown'
 			lastError.value = null

@@ -290,12 +290,18 @@ const calculatedNetWeight = computed(() => {
 })
 
 const itemFetcher = createResource({
-	url: 'zevar_core.api.pricing.get_item_price',
+	url: 'zevar_core.api.catalog.get_item_details',
 	makeParams() {
 		return { item_code: props.itemCode }
 	},
 	onSuccess(data) {
-		details.value = { ...data, item_code: props.itemCode }
+		const finalPrice = data.final_price || data.price || data.msrp || 0
+		details.value = {
+			...data,
+			item_code: data.item_code || props.itemCode,
+			price: finalPrice,
+			final_price: finalPrice,
+		}
 		loading.value = false
 	},
 	onError(error) {

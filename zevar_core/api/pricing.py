@@ -20,17 +20,25 @@ def get_item_price(item_code: str) -> dict:
 	"""
 	item = frappe.get_doc("Item", item_code)
 
-	# Priority 1: MSRP
-	if item.custom_msrp and item.custom_msrp > 0:
-		return _build_price_response(item, item.custom_msrp, "MSRP")
-
-	# Priority 2: Calculated (Gold Value + Gemstone Value)
+	gold_rate = _get_gold_rate(item.custom_metal_type, item.custom_purity)
 	gold_value = _calculate_gold_value(item)
 	gemstone_value = _calculate_gemstone_value(item)
+
+	# Priority 1: MSRP
+	if item.custom_msrp and item.custom_msrp > 0:
+		return _build_price_response(
+			item,
+			item.custom_msrp,
+			"MSRP",
+			gold_value=gold_value,
+			gemstone_value=gemstone_value,
+			gold_rate=gold_rate,
+		)
+
+	# Priority 2: Calculated (Gold Value + Gemstone Value)
 	calculated_price = gold_value + gemstone_value
 
 	if calculated_price > 0:
-		gold_rate = _get_gold_rate(item.custom_metal_type, item.custom_purity)
 		return _build_price_response(
 			item,
 			calculated_price,
@@ -42,7 +50,14 @@ def get_item_price(item_code: str) -> dict:
 
 	# Priority 3: Fallback to Standard Rate
 	standard_rate = item.standard_rate or 0
-	return _build_price_response(item, standard_rate, "Standard Rate")
+	return _build_price_response(
+		item,
+		standard_rate,
+		"Standard Rate",
+		gold_value=gold_value,
+		gemstone_value=gemstone_value,
+		gold_rate=gold_rate,
+	)
 
 
 @frappe.whitelist()
@@ -67,6 +82,7 @@ def get_live_metal_rates():
 		order_by="timestamp desc",
 		ignore_permissions=True,
 	)
+	rates = [r for r in rates if _is_valid_rate_row(r)]
 
 	if not rates:
 		# No cached rates at all — attempt a quick fetch, but don't hang
@@ -115,6 +131,7 @@ def get_live_metal_rates():
 				order_by="timestamp desc",
 				ignore_permissions=True,
 			)
+			rates = [r for r in rates if _is_valid_rate_row(r)]
 			latest_ts = max((r["timestamp"] for r in rates if r.get("timestamp")), default=None)
 			is_stale = False
 		except Exception:
@@ -175,6 +192,14 @@ def get_live_metal_rates():
 		"source": rates[0]["source"] if rates else "unknown",
 		"is_stale": is_stale,
 	}
+
+
+def _is_valid_rate_row(row) -> bool:
+	"""Return True when a cached metal rate is usable by POS/dashboard UI."""
+	try:
+		return bool(row.get("metal") and row.get("purity") and float(row.get("rate_per_gram") or 0) > 0)
+	except (TypeError, ValueError):
+		return False
 
 
 def _get_hardcoded_fallback_rates():
@@ -319,24 +344,25 @@ def _get_gold_rate(metal: str, purity: str) -> float:
 	if metal in ["Rose Gold", "White Gold"]:
 		metal = "Yellow Gold"
 
-	# Try the purity name as-is first
-	rate_log = frappe.db.get_value(
-		"Gold Rate Log",
-		filters={"metal": metal, "purity": purity},
-		fieldname="rate_per_gram",
-		order_by="timestamp desc",
-	)
+	purity_name = str(purity).strip()
+	purity_key = purity_name.lower()
+	canonical_purity = PURITY_ALIASES.get(purity_key) or PURITY_ALIASES.get(purity_name) or purity_name
 
-	# If not found, try the canonical alias (e.g. "14K" -> "14Kt")
-	if rate_log is None and purity in PURITY_ALIASES:
+	purities_to_try = [purity_name]
+	if canonical_purity not in purities_to_try:
+		purities_to_try.append(canonical_purity)
+
+	for purity_candidate in purities_to_try:
 		rate_log = frappe.db.get_value(
 			"Gold Rate Log",
-			filters={"metal": metal, "purity": PURITY_ALIASES[purity]},
+			filters={"metal": metal, "purity": purity_candidate},
 			fieldname="rate_per_gram",
 			order_by="timestamp desc",
 		)
+		if rate_log is not None:
+			return float(rate_log)
 
-	return float(rate_log) if rate_log else 0.0
+	return 0.0
 
 
 def _build_price_response(item, final_price: float, source: str, **kwargs) -> dict:

@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    ClockWidget: typeof import('./src/components/ClockWidget.vue')['default']
     ModernCalendar: typeof import('./src/components/ModernCalendar.vue')['default']
     PortalLayout: typeof import('./src/components/PortalLayout.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

@@ -31,7 +31,15 @@ def execute():
 			old_doc = frappe.db.get_value(
 				"Zevar Purity",
 				old_purity,
-				["fine_metal_content", "purity_code", "purity_name", "metal", "is_millesimal", "aliases", "is_active"],
+				[
+					"fine_metal_content",
+					"purity_code",
+					"purity_name",
+					"metal",
+					"is_millesimal",
+					"aliases",
+					"is_active",
+				],
 				as_dict=True,
 			)
 			if old_doc:

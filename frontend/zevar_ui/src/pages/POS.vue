@@ -1348,7 +1348,7 @@ onMounted(() => {
 			catalog.value = []
 			start.value = 0
 			hasMore.value = true
-			fetchItems.fetch({ start: 0 })
+			items.fetch()
 		}
 	})
 
