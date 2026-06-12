@@ -2,7 +2,7 @@
 Query Classifier - Detects the domain of a user query.
 
 Uses keyword matching to determine whether a query is about
-products, customers, repairs, policies, or is general.
+products, customers, repairs, policies, pricing, or is general.
 """
 
 from zevar_core.rag.config import QUERY_DOMAINS
@@ -15,7 +15,7 @@ def classify(query: str) -> str:
 		query: Natural language query string.
 
 	Returns:
-		Domain string: "product", "customer", "repair", "policy", or "general"
+		Domain string: "product", "customer", "repair", "policy", "pricing", or "general"
 	"""
 	query_lower = query.lower()
 
@@ -48,6 +48,7 @@ def get_search_collections(domain: str) -> list[str]:
 		COLLECTION_CUSTOMERS,
 		COLLECTION_KNOWLEDGE,
 		COLLECTION_PRODUCTS,
+		COLLECTION_SALES_PRICING,
 	)
 
 	mapping = {
@@ -55,6 +56,7 @@ def get_search_collections(domain: str) -> list[str]:
 		"customer": [COLLECTION_CUSTOMERS, COLLECTION_PRODUCTS],
 		"repair": [COLLECTION_KNOWLEDGE, COLLECTION_PRODUCTS],
 		"policy": [COLLECTION_KNOWLEDGE],
+		"pricing": [COLLECTION_SALES_PRICING, COLLECTION_PRODUCTS],
 		"general": [COLLECTION_PRODUCTS, COLLECTION_KNOWLEDGE, COLLECTION_CUSTOMERS],
 	}
 

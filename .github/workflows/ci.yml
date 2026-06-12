@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Find tests
         run: |
@@ -91,11 +91,12 @@ jobs:
       - name: Install
         working-directory: /home/runner/frappe-bench
         run: |
+          bench get-app erpnext --branch version-15
           bench get-app zevar_core $GITHUB_WORKSPACE
           bench setup requirements --dev
-          # Remove fixtures that depend on ERPNext DocTypes (not available in CI)
           rm -f apps/zevar_core/zevar_core/fixtures/*.json
           bench new-site --db-root-password root --admin-password admin test_site
+          bench --site test_site install-app erpnext
           bench --site test_site install-app zevar_core
           bench --site test_site migrate
           bench build

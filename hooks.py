@@ -60,7 +60,11 @@ doc_events = {
 			"zevar_core.tax_events.apply_store_tax",
 			"zevar_core.trade_in_events.validate_trade_in_2x_rule",
 		],
-		"on_submit": "zevar_core.api.commission.calculate_commissions",
+		"on_submit": [
+			"zevar_core.api.commission.calculate_commissions",
+			"zevar_core.api.performance.log_sale_event",
+		],
+		"on_cancel": ["zevar_core.api.performance.log_sale_cancel_event"],
 	},
 	"Customer": {
 		"on_update": "zevar_core.rag.hooks.doc_events.on_customer_update",
@@ -69,6 +73,15 @@ doc_events = {
 		"on_update": "zevar_core.rag.hooks.doc_events.on_article_update",
 		"on_trash": "zevar_core.rag.hooks.doc_events.on_article_trash",
 	},
+	"Layaway Contract": {
+		"on_submit": ["zevar_core.api.performance.log_layaway_event"],
+	},
+	"Repair Order": {
+		"on_submit": ["zevar_core.api.performance.log_repair_event"],
+	},
+	"Attendance": {
+		"on_submit": ["zevar_core.api.performance.log_attendance_event"],
+	},
 }
 
 # Scheduler events
@@ -76,6 +89,7 @@ scheduler_events = {
 	"cron": {
 		"*/15 * * * *": ["zevar_core.tasks.fetch_live_gold_rate"],
 		"0 2 * * *": ["zevar_core.rag.hooks.scheduler.reconcile_indexes"],
+		"0 2 1 1,4,7,10 *": ["zevar_core.api.performance.generate_quarterly_reviews"],
 	}
 }
 

@@ -1,0 +1,28 @@
+{
+    "add_total_row": 1,
+    "columns": [],
+    "creation": "2026-05-12 00:00:00.000000",
+    "disabled": 0,
+    "docstatus": 0,
+    "doctype": "Report",
+    "filters": [],
+    "modified": "2026-05-12 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Unified Retail Management System",
+    "name": "Compensation Breakdown",
+    "owner": "Administrator",
+    "ref_doctype": "Compensation Calculation",
+    "report_name": "Compensation Breakdown",
+    "report_type": "Script Report",
+    "roles": [
+        {
+            "role": "System Manager"
+        },
+        {
+            "role": "HR Manager"
+        },
+        {
+            "role": "Store Manager"
+        }
+    ]
+}

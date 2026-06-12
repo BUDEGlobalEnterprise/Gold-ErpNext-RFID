@@ -6,13 +6,24 @@ from frappe.utils import cint, cstr, flt
 def get_settings():
 	frappe.only_for("System Manager", "Store Manager", "Administrator")
 
-	company = frappe.db.get_single_value("Global Defaults", "default_company") or frappe.db.get_value("Company", {}, "name")
+	company = frappe.db.get_single_value("Global Defaults", "default_company") or frappe.db.get_value(
+		"Company", {}, "name"
+	)
 
 	pos_profiles = frappe.get_all(
 		"POS Profile",
 		filters={"disabled": 0},
-		fields=["name", "company", "warehouse", "posa_pos_profile_name",
-				"customer", "selling_price_list", "cost_center", "income_account", "expense_account"],
+		fields=[
+			"name",
+			"company",
+			"warehouse",
+			"posa_pos_profile_name",
+			"customer",
+			"selling_price_list",
+			"cost_center",
+			"income_account",
+			"expense_account",
+		],
 		order_by="name asc",
 	)
 
@@ -112,7 +123,9 @@ def get_settings():
 
 	zevar_settings = {}
 	if frappe.db.exists("Property Setter", {"doc_type": "POS Profile", "property": "default"}):
-		zevar_settings["default_pos_profile"] = frappe.db.get_value("Property Setter", {"doc_type": "POS Profile", "property": "default"}, "value")
+		zevar_settings["default_pos_profile"] = frappe.db.get_value(
+			"Property Setter", {"doc_type": "POS Profile", "property": "default"}, "value"
+		)
 
 	return {
 		"success": True,
@@ -147,16 +160,20 @@ def get_pos_profile(name):
 
 	payment_methods = []
 	for row in doc.get("payments", []):
-		payment_methods.append({
-			"mode_of_payment": row.mode_of_payment,
-			"default": row.default,
-		})
+		payment_methods.append(
+			{
+				"mode_of_payment": row.mode_of_payment,
+				"default": row.default,
+			}
+		)
 
 	item_groups_list = []
 	for row in doc.get("posa_idx_items_groups", []):
-		item_groups_list.append({
-			"item_group": row.get("item_group", ""),
-		})
+		item_groups_list.append(
+			{
+				"item_group": row.get("item_group", ""),
+			}
+		)
 
 	return {
 		"success": True,
@@ -179,9 +196,17 @@ def get_pos_profile(name):
 
 
 @frappe.whitelist(allow_guest=False)
-def create_pos_profile(company, warehouse, customer=None, selling_price_list=None,
-						cost_center=None, income_account=None, expense_account=None,
-						payments_json=None, name_override=None):
+def create_pos_profile(
+	company,
+	warehouse,
+	customer=None,
+	selling_price_list=None,
+	cost_center=None,
+	income_account=None,
+	expense_account=None,
+	payments_json=None,
+	name_override=None,
+):
 	frappe.only_for("System Manager", "Administrator")
 
 	import json
@@ -212,10 +237,13 @@ def create_pos_profile(company, warehouse, customer=None, selling_price_list=Non
 			mode = cstr(p.get("mode_of_payment", "")).strip()
 			if not mode:
 				continue
-			profile.append("payments", {
-				"mode_of_payment": mode,
-				"default": cint(p.get("default", 0)),
-			})
+			profile.append(
+				"payments",
+				{
+					"mode_of_payment": mode,
+					"default": cint(p.get("default", 0)),
+				},
+			)
 
 	profile.insert()
 	return {"success": True, "name": profile.name}
@@ -231,8 +259,16 @@ def update_pos_profile(name, **kwargs):
 
 	doc = frappe.get_doc("POS Profile", name)
 
-	updatable = ["warehouse", "customer", "selling_price_list", "cost_center",
-				 "income_account", "expense_account", "posa_pos_profile_name", "disabled"]
+	updatable = [
+		"warehouse",
+		"customer",
+		"selling_price_list",
+		"cost_center",
+		"income_account",
+		"expense_account",
+		"posa_pos_profile_name",
+		"disabled",
+	]
 
 	for field in updatable:
 		if field in kwargs:
@@ -240,16 +276,24 @@ def update_pos_profile(name, **kwargs):
 
 	if "payments_json" in kwargs:
 		import json
+
 		doc.payments = []
-		payments = json.loads(kwargs["payments_json"]) if isinstance(kwargs["payments_json"], str) else kwargs["payments_json"]
+		payments = (
+			json.loads(kwargs["payments_json"])
+			if isinstance(kwargs["payments_json"], str)
+			else kwargs["payments_json"]
+		)
 		for p in payments:
 			mode = cstr(p.get("mode_of_payment", "")).strip()
 			if not mode:
 				continue
-			doc.append("payments", {
-				"mode_of_payment": mode,
-				"default": cint(p.get("default", 0)),
-			})
+			doc.append(
+				"payments",
+				{
+					"mode_of_payment": mode,
+					"default": cint(p.get("default", 0)),
+				},
+			)
 
 	doc.save()
 	return {"success": True, "name": doc.name}
@@ -378,7 +422,9 @@ def get_print_formats(doctype=None):
 def get_company_settings():
 	frappe.only_for("System Manager", "Administrator")
 
-	company = frappe.db.get_single_value("Global Defaults", "default_company") or frappe.db.get_value("Company", {}, "name")
+	company = frappe.db.get_single_value("Global Defaults", "default_company") or frappe.db.get_value(
+		"Company", {}, "name"
+	)
 	if not company:
 		return {"success": True, "company": None, "settings": {}}
 

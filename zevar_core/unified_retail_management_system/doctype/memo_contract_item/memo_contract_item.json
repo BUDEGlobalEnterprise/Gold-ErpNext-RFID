@@ -1,0 +1,136 @@
+{
+    "actions": [],
+    "creation": "2026-05-13 00:00:00.000000",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "item_code",
+        "item_name",
+        "serial_no",
+        "metal_type",
+        "purity",
+        "gross_weight_g",
+        "qty",
+        "memo_price",
+        "retail_price",
+        "status",
+        "date_received",
+        "date_sold",
+        "date_returned",
+        "sales_invoice",
+        "notes"
+    ],
+    "fields": [
+        {
+            "fieldname": "item_code",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Item Code",
+            "options": "Item",
+            "reqd": 1
+        },
+        {
+            "fieldname": "item_name",
+            "fieldtype": "Data",
+            "fetch_from": "item_code.item_name",
+            "label": "Item Name",
+            "read_only": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "serial_no",
+            "fieldtype": "Link",
+            "label": "Serial No",
+            "options": "Serial No"
+        },
+        {
+            "fieldname": "metal_type",
+            "fieldtype": "Data",
+            "fetch_from": "item_code.custom_metal_type",
+            "label": "Metal"
+        },
+        {
+            "fieldname": "purity",
+            "fieldtype": "Data",
+            "fetch_from": "item_code.custom_purity",
+            "label": "Purity"
+        },
+        {
+            "fieldname": "gross_weight_g",
+            "fieldtype": "Float",
+            "fetch_from": "item_code.custom_gross_weight_g",
+            "label": "Weight (g)"
+        },
+        {
+            "fieldname": "qty",
+            "fieldtype": "Int",
+            "default": "1",
+            "in_list_view": 1,
+            "label": "Qty",
+            "reqd": 1
+        },
+        {
+            "fieldname": "memo_price",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Memo Cost (Vendor Price)",
+            "reqd": 1
+        },
+        {
+            "fieldname": "retail_price",
+            "fieldtype": "Currency",
+            "label": "Retail Price"
+        },
+        {
+            "default": "On Memo",
+            "fieldname": "status",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "label": "Status",
+            "options": "On Memo\nSold\nReturned\nLost"
+        },
+        {
+            "fieldname": "date_received",
+            "fieldtype": "Date",
+            "label": "Date Received"
+        },
+        {
+            "fieldname": "date_sold",
+            "fieldtype": "Date",
+            "label": "Date Sold",
+            "depends_on": "eval:doc.status==='Sold'"
+        },
+        {
+            "fieldname": "date_returned",
+            "fieldtype": "Date",
+            "label": "Date Returned",
+            "depends_on": "eval:doc.status==='Returned'"
+        },
+        {
+            "fieldname": "sales_invoice",
+            "fieldtype": "Link",
+            "label": "Sales Invoice",
+            "options": "Sales Invoice",
+            "depends_on": "eval:doc.status==='Sold'"
+        },
+        {
+            "fieldname": "notes",
+            "fieldtype": "Small Text",
+            "label": "Notes"
+        }
+    ],
+    "index_web_pages_for_search": 0,
+    "istable": 1,
+    "links": [],
+    "modified": "2026-05-13 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Unified Retail Management System",
+    "name": "Memo Contract Item",
+    "owner": "Administrator",
+    "permissions": [],
+    "row_format": "Dynamic",
+    "sort_field": "creation",
+    "sort_order": "DESC",
+    "states": []
+}

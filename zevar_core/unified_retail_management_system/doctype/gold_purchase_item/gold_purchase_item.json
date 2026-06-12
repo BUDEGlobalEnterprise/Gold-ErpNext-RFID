@@ -1,0 +1,115 @@
+{
+    "actions": [],
+    "creation": "2026-05-13 00:00:00.000000",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "metal_type",
+        "purity",
+        "purity_percentage",
+        "gross_weight_g",
+        "stone_weight_g",
+        "net_weight_g",
+        "rate_per_gram",
+        "calculated_value",
+        "agreed_value",
+        "test_method",
+        "test_result",
+        "description"
+    ],
+    "fields": [
+        {
+            "fieldname": "metal_type",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "label": "Metal Type",
+            "options": "Yellow Gold\nWhite Gold\nRose Gold\nSilver\nPlatinum",
+            "reqd": 1
+        },
+        {
+            "fieldname": "purity",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "label": "Purity (Karat)",
+            "options": "24Kt\n22Kt\n18Kt\n14Kt\n10Kt\n999 Fine\n925 Sterling",
+            "reqd": 1
+        },
+        {
+            "fieldname": "purity_percentage",
+            "fieldtype": "Percent",
+            "label": "Purity %",
+            "read_only": 1
+        },
+        {
+            "fieldname": "gross_weight_g",
+            "fieldtype": "Float",
+            "in_list_view": 1,
+            "label": "Gross Weight (g)",
+            "reqd": 1
+        },
+        {
+            "fieldname": "stone_weight_g",
+            "fieldtype": "Float",
+            "default": "0",
+            "label": "Stone Weight (g)"
+        },
+        {
+            "fieldname": "net_weight_g",
+            "fieldtype": "Float",
+            "in_list_view": 1,
+            "label": "Net Weight (g)",
+            "read_only": 1
+        },
+        {
+            "fieldname": "rate_per_gram",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Rate per Gram",
+            "read_only": 1
+        },
+        {
+            "fieldname": "calculated_value",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Calculated Value",
+            "read_only": 1
+        },
+        {
+            "fieldname": "agreed_value",
+            "fieldtype": "Currency",
+            "label": "Agreed Purchase Value",
+            "reqd": 1
+        },
+        {
+            "fieldname": "test_method",
+            "fieldtype": "Select",
+            "label": "Test Method",
+            "options": "\nXRF\nAcid Test\nFire Assay\nElectronic Tester",
+            "default": "XRF"
+        },
+        {
+            "fieldname": "test_result",
+            "fieldtype": "Data",
+            "label": "Test Result / Notes"
+        },
+        {
+            "fieldname": "description",
+            "fieldtype": "Small Text",
+            "label": "Description"
+        }
+    ],
+    "index_web_pages_for_search": 0,
+    "istable": 1,
+    "links": [],
+    "modified": "2026-05-13 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Unified Retail Management System",
+    "name": "Gold Purchase Item",
+    "owner": "Administrator",
+    "permissions": [],
+    "row_format": "Dynamic",
+    "sort_field": "creation",
+    "sort_order": "DESC",
+    "states": []
+}

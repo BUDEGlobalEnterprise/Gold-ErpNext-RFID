@@ -171,6 +171,41 @@ class TestPOSSessionAPI(FrappeTestCase):
 
 		self.assertIn("has_active_session", result)
 
+	def test_session_status_includes_today_sales(self):
+		"""Test that session status includes today's sales separate from cumulative"""
+		from zevar_core.api.pos_session import get_session_status, open_pos_session
+
+		# Open a session
+		result = open_pos_session(
+			pos_profile=self.test_profile,
+			opening_balance=100.00,
+		)
+		session_name = result.get("session_name")
+		self.assertTrue(result.get("success"))
+
+		try:
+			# Get status
+			status = get_session_status()
+			self.assertTrue(status["has_active_session"])
+			session = status["session"]
+
+			# Verify new today_sales fields exist
+			self.assertIn("today_sales_count", session)
+			self.assertIn("today_sales_total", session)
+			self.assertIn("sales_count", session)
+			self.assertIn("sales_total", session)
+
+			# Today's sales should be 0 if no invoices created today
+			self.assertEqual(session["today_sales_count"], 0)
+			self.assertEqual(session["today_sales_total"], 0)
+
+		finally:
+			# Clean up
+			if session_name:
+				doc = frappe.get_doc("POS Opening Entry", session_name)
+				doc.cancel()
+				frappe.delete_doc("POS Opening Entry", session_name, ignore_permissions=True)
+
 	def test_open_session_already_exists(self):
 		"""Test that opening session when one exists raises error"""
 		from zevar_core.api.pos_session import open_pos_session

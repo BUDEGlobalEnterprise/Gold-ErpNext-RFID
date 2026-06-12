@@ -74,6 +74,22 @@
 						></span>
 						No Register Session
 					</router-link>
+
+					<div
+						v-if="ui.activeFilters.pos?.display_case"
+						class="flex items-center gap-1.5 px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 rounded-full text-[10px] font-bold animate-in fade-in slide-in-from-left-2"
+					>
+						<svg
+							class="w-3 h-3"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+						</svg>
+						Case-Based View
+					</div>
 				</div>
 
 				<!-- Inline Filter Bar - Occupies the central "blank space" -->
@@ -262,11 +278,13 @@ const items = createResource({
 			custom_metal_type,
 			custom_purity,
 			custom_gemstone,
+			display_case,
 			...otherFilters
 		} = f
 
 		const params = {
 			warehouse: session.currentWarehouse,
+			display_case: display_case || undefined,
 			page_length: PAGE_LENGTH,
 			start: start.value,
 			search_term: ui.searchQuery || undefined,

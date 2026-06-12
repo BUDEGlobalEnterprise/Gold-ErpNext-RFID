@@ -62,6 +62,27 @@ class TestLayawayCreation(FrappeTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 
+	def _ensure_cashier_user(self) -> str:
+		email = "layaway-cashier@example.com"
+		if frappe.db.exists("User", email):
+			user = frappe.get_doc("User", email)
+		else:
+			user = frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": email,
+					"first_name": "Layaway",
+					"last_name": "Cashier",
+					"enabled": 1,
+					"user_type": "System User",
+					"send_welcome_email": 0,
+				}
+			)
+			user.insert(ignore_permissions=True)
+
+		user.add_roles("Sales User", "Employee", "POS Manager")
+		return email
+
 	def test_create_layaway_contract(self):
 		from zevar_core.api.layaway import create_layaway
 
@@ -82,6 +103,29 @@ class TestLayawayCreation(FrappeTestCase):
 		self.assertEqual(flt(doc.deposit_amount), 200.0)
 		self.assertEqual(flt(doc.balance_amount), 800.0)
 		self.assertEqual(len(doc.items), 1)
+
+	def test_create_layaway_records_payment_entry_for_cashier_user(self):
+		from zevar_core.api.layaway import create_layaway
+
+		cashier_user = self._ensure_cashier_user()
+		frappe.set_user(cashier_user)
+
+		result = create_layaway(
+			customer=self.customer,
+			items=json.dumps([{"item_code": self.item, "qty": 1, "rate": 1000.0}]),
+			deposit_amount=200.0,
+			duration_months=3,
+			warehouse=self.warehouse,
+			customer_contact="5551234567",
+			payments=json.dumps([{"mode_of_payment": "Cash", "amount": 200.0}]),
+		)
+
+		payment_entry = frappe.db.get_value(
+			"Payment Entry",
+			{"reference_no": result["layaway_id"], "party": self.customer},
+			"name",
+		)
+		self.assertTrue(payment_entry)
 
 	def test_create_layaway_generates_payment_schedule(self):
 		from zevar_core.api.layaway import create_layaway

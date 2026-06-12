@@ -22,7 +22,12 @@
 						stroke="currentColor"
 						viewBox="0 0 24 24"
 					>
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357 2m15.357 2H15" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357 2m15.357 2H15"
+						/>
 					</svg>
 				</button>
 			</div>
@@ -45,26 +50,58 @@
 
 			<div class="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-4 flex-shrink-0">
 				<div class="premium-card !p-4">
-					<div class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Total Notes</div>
-					<div class="text-2xl font-bold text-gray-900 dark:text-white">{{ store.creditNotesTotal }}</div>
+					<div
+						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+					>
+						Total Notes
+					</div>
+					<div class="text-2xl font-bold text-gray-900 dark:text-white">
+						{{ store.creditNotesTotal }}
+					</div>
 				</div>
 				<div class="premium-card !p-4">
-					<div class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Incoming</div>
+					<div
+						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+					>
+						Incoming
+					</div>
 					<div class="text-2xl font-bold text-purple-500">{{ incomingCount }}</div>
 				</div>
 				<div class="premium-card !p-4">
-					<div class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Outgoing</div>
+					<div
+						class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+					>
+						Outgoing
+					</div>
 					<div class="text-2xl font-bold text-blue-500">{{ outgoingCount }}</div>
 				</div>
 			</div>
 
 			<div class="flex-1 overflow-y-auto min-h-0">
-				<div v-if="store.creditNotesResource.loading && !store.creditNotes.length" class="flex items-center justify-center py-20">
-					<div class="animate-spin w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full"></div>
+				<div
+					v-if="store.creditNotesResource.loading && !store.creditNotes.length"
+					class="flex items-center justify-center py-20"
+				>
+					<div
+						class="animate-spin w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full"
+					></div>
 				</div>
-				<div v-else-if="!store.creditNotes.length" class="flex flex-col items-center justify-center py-20 text-gray-400 dark:text-gray-500">
-					<svg class="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+				<div
+					v-else-if="!store.creditNotes.length"
+					class="flex flex-col items-center justify-center py-20 text-gray-400 dark:text-gray-500"
+				>
+					<svg
+						class="w-12 h-12 mb-3"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="1.5"
+							d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+						/>
 					</svg>
 					<p class="text-sm font-medium">No credit notes found</p>
 				</div>
@@ -78,22 +115,49 @@
 						<div class="flex items-center gap-3 min-w-0">
 							<div
 								class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-								:class="cn.note_type === 'Incoming' ? 'bg-purple-100 dark:bg-purple-900/30' : 'bg-blue-100 dark:bg-blue-900/30'"
+								:class="
+									cn.note_type === 'Incoming'
+										? 'bg-purple-100 dark:bg-purple-900/30'
+										: 'bg-blue-100 dark:bg-blue-900/30'
+								"
 							>
-								<svg class="w-4 h-4" :class="cn.note_type === 'Incoming' ? 'text-purple-600' : 'text-blue-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+								<svg
+									class="w-4 h-4"
+									:class="
+										cn.note_type === 'Incoming'
+											? 'text-purple-600'
+											: 'text-blue-600'
+									"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+									/>
 								</svg>
 							</div>
 							<div class="min-w-0">
-								<div class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ cn.name }}</div>
+								<div
+									class="text-sm font-bold text-gray-900 dark:text-white truncate"
+								>
+									{{ cn.name }}
+								</div>
 								<div class="text-[11px] text-gray-500 dark:text-gray-400 truncate">
 									{{ cn.party_name || cn.party }}
-									<span v-if="cn.return_against"> &middot; Ref: {{ cn.return_against }}</span>
+									<span v-if="cn.return_against">
+										&middot; Ref: {{ cn.return_against }}</span
+									>
 								</div>
 							</div>
 						</div>
 						<div class="text-right flex-shrink-0 ml-3">
-							<div class="text-sm font-bold text-red-500">-{{ formatCurrency(cn.grand_total) }}</div>
+							<div class="text-sm font-bold text-red-500">
+								-{{ formatCurrency(cn.grand_total) }}
+							</div>
 							<div class="text-[10px] text-gray-400">{{ cn.posting_date }}</div>
 							<span
 								class="inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-bold"
@@ -124,16 +188,22 @@ const tabs = [
 	{ label: 'Outgoing', value: 'outgoing' },
 ]
 
-const incomingCount = computed(() => store.creditNotes.filter((c) => c.note_type === 'Incoming').length)
-const outgoingCount = computed(() => store.creditNotes.filter((c) => c.note_type === 'Outgoing').length)
+const incomingCount = computed(
+	() => store.creditNotes.filter((c) => c.note_type === 'Incoming').length
+)
+const outgoingCount = computed(
+	() => store.creditNotes.filter((c) => c.note_type === 'Outgoing').length
+)
 
 function formatCurrency(val) {
 	return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val || 0)
 }
 
 function noteStatusClass(cn) {
-	if (cn.docstatus === 0) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-	if (cn.note_type === 'Incoming') return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+	if (cn.docstatus === 0)
+		return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+	if (cn.note_type === 'Incoming')
+		return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
 	return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
 }
 

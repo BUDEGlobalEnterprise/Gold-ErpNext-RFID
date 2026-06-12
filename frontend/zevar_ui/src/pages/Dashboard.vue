@@ -849,7 +849,10 @@
 								</div>
 								<h3 class="tile-title-sm">Invoices to be Processed</h3>
 							</router-link>
-							<router-link to="/accounting/invoices?tab=purchase" class="tile-secondary">
+							<router-link
+								to="/accounting/invoices?tab=purchase"
+								class="tile-secondary"
+							>
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -869,7 +872,10 @@
 								</div>
 								<h3 class="tile-title-sm">Incoming Invoices</h3>
 							</router-link>
-							<router-link to="/accounting/invoices?tab=sales" class="tile-secondary">
+							<router-link
+								to="/accounting/invoices?tab=sales"
+								class="tile-secondary"
+							>
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -889,7 +895,10 @@
 								</div>
 								<h3 class="tile-title-sm">Outgoing Invoices</h3>
 							</router-link>
-							<router-link to="/accounting/credit-notes?tab=incoming" class="tile-secondary">
+							<router-link
+								to="/accounting/credit-notes?tab=incoming"
+								class="tile-secondary"
+							>
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -909,7 +918,10 @@
 								</div>
 								<h3 class="tile-title-sm">Incoming Credit Notes</h3>
 							</router-link>
-							<router-link to="/accounting/credit-notes?tab=outgoing" class="tile-secondary">
+							<router-link
+								to="/accounting/credit-notes?tab=outgoing"
+								class="tile-secondary"
+							>
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"

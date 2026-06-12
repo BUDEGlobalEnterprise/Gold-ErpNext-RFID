@@ -7,7 +7,11 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import flt, now_datetime
 
-from zevar_core.services.inventory_audit_utils import _log_audit_event, _reconcile_audit
+from zevar_core.services.inventory_audit_utils import (
+	_log_audit_event,
+	_reconcile_audit,
+	generate_discrepancy_records,
+)
 
 
 class CaseAuditSession(Document):
@@ -62,6 +66,7 @@ class CaseAuditSession(Document):
 		self._above_threshold = above_dollar_threshold or above_pieces_threshold
 
 	def on_submit(self):
+		generate_discrepancy_records(self)
 		missing_items = getattr(self, "_missing_items", [])
 		has_unexpected = getattr(self, "_has_unexpected", False)
 		above_threshold = getattr(self, "_above_threshold", False)

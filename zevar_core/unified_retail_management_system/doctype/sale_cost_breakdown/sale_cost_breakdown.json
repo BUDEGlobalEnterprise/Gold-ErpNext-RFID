@@ -1,0 +1,315 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "format:SCB-{YY}-{MM}-{#####}",
+ "creation": "2026-05-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sales_invoice",
+  "posting_date",
+  "customer",
+  "column_break_ref",
+  "total_revenue",
+  "total_qty",
+  "section_break_metal",
+  "gold_rate_at_sale",
+  "gold_rate_source",
+  "gold_rate_timestamp",
+  "total_metal_cogs",
+  "column_break_metal",
+  "total_gemstone_cogs",
+  "total_item_cogs",
+  "section_break_labor",
+  "total_labor_cost",
+  "labor_allocation_detail",
+  "total_commission",
+  "column_break_labor",
+  "total_payment_cost",
+  "payment_cost_detail",
+  "section_break_overhead",
+  "overhead_per_invoice",
+  "overhead_method",
+  "column_break_overhead",
+  "total_cost",
+  "gross_profit",
+  "gross_margin_pct",
+  "section_break_audit",
+  "calculation_log",
+  "column_break_audit",
+  "calculated_by",
+  "calculated_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "column_break_ref",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_revenue",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Revenue",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_qty",
+   "fieldtype": "Int",
+   "label": "Total Qty"
+  },
+  {
+   "fieldname": "section_break_metal",
+   "fieldtype": "Section Break",
+   "label": "Metal COGS (at point of sale)"
+  },
+  {
+   "fieldname": "gold_rate_at_sale",
+   "fieldtype": "Currency",
+   "label": "Gold Rate at Sale ($/g)",
+   "description": "Gold rate per gram used for COGS calculation"
+  },
+  {
+   "fieldname": "gold_rate_source",
+   "fieldtype": "Data",
+   "label": "Gold Rate Source",
+   "description": "live, fallback, or manual"
+  },
+  {
+   "fieldname": "gold_rate_timestamp",
+   "fieldtype": "Datetime",
+   "label": "Gold Rate Timestamp"
+  },
+  {
+   "fieldname": "total_metal_cogs",
+   "fieldtype": "Currency",
+   "label": "Total Metal COGS",
+   "description": "Sum of (net_weight x gold_rate) for all metal items"
+  },
+  {
+   "fieldname": "column_break_metal",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_gemstone_cogs",
+   "fieldtype": "Currency",
+   "label": "Total Gemstone COGS",
+   "description": "Sum of gemstone amounts from Item child table"
+  },
+  {
+   "fieldname": "total_item_cogs",
+   "fieldtype": "Currency",
+   "label": "Total Item COGS",
+   "description": "Metal COGS + Gemstone COGS"
+  },
+  {
+   "fieldname": "section_break_labor",
+   "fieldtype": "Section Break",
+   "label": "Labor & Commissions"
+  },
+  {
+   "fieldname": "total_labor_cost",
+   "fieldtype": "Currency",
+   "label": "Total Labor Cost",
+   "description": "Allocated labor from Labor Cost Pool"
+  },
+  {
+   "fieldname": "labor_allocation_detail",
+   "fieldtype": "Code",
+   "label": "Labor Allocation Detail",
+   "options": "JSON",
+   "description": "JSON array of per-employee labor allocations"
+  },
+  {
+   "fieldname": "total_commission",
+   "fieldtype": "Currency",
+   "label": "Total Commission",
+   "description": "From Sales Commission Split"
+  },
+  {
+   "fieldname": "column_break_labor",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_payment_cost",
+   "fieldtype": "Currency",
+   "label": "Total Payment Cost",
+   "description": "Payment processing fees"
+  },
+  {
+   "fieldname": "payment_cost_detail",
+   "fieldtype": "Code",
+   "label": "Payment Cost Detail",
+   "options": "JSON",
+   "description": "JSON breakdown by payment mode"
+  },
+  {
+   "fieldname": "section_break_overhead",
+   "fieldtype": "Section Break",
+   "label": "Overhead Allocation"
+  },
+  {
+   "fieldname": "overhead_per_invoice",
+   "fieldtype": "Currency",
+   "label": "Overhead per Invoice",
+   "description": "Calculated from Cost Center Allocation rules"
+  },
+  {
+   "fieldname": "overhead_method",
+   "fieldtype": "Data",
+   "label": "Overhead Method"
+  },
+  {
+   "fieldname": "column_break_overhead",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_cost",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Cost",
+   "bold": 1,
+   "description": "Item COGS + Labor + Commission + Payment + Overhead"
+  },
+  {
+   "fieldname": "gross_profit",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Gross Profit",
+   "bold": 1
+  },
+  {
+   "fieldname": "gross_margin_pct",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Gross Margin %",
+   "bold": 1
+  },
+  {
+   "fieldname": "section_break_audit",
+   "fieldtype": "Section Break",
+   "label": "Audit Trail"
+  },
+  {
+   "fieldname": "calculation_log",
+   "fieldtype": "Code",
+   "label": "Calculation Log",
+   "options": "JSON",
+   "description": "Full JSON trace of every calculation step for auditing"
+  },
+  {
+   "fieldname": "column_break_audit",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "calculated_by",
+   "fieldtype": "Link",
+   "label": "Calculated By",
+   "options": "User"
+  },
+  {
+   "fieldname": "calculated_at",
+   "fieldtype": "Datetime",
+   "label": "Calculated At"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "link_doctype": "Sales Invoice",
+   "link_fieldname": "sales_invoice"
+  }
+ ],
+ "modified": "2026-05-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Unified Retail Management System",
+ "name": "Sale Cost Breakdown",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "amend": 0,
+   "cancel": 0,
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Store Manager",
+   "share": 1,
+   "submit": 0,
+   "write": 0
+  },
+  {
+   "amend": 0,
+   "cancel": 0,
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "submit": 0,
+   "write": 0
+  },
+  {
+   "amend": 0,
+   "cancel": 0,
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 0,
+   "write": 0
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "posting_date",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "sales_invoice"
+}

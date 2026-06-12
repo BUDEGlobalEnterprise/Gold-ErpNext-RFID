@@ -1113,7 +1113,10 @@ async function handleGlobalPaymentSuccess(result) {
 				ui.closeLayawayPayment()
 				emit('layaway-created', responseObj)
 			} else {
-				console.error('AppShell: Layaway creation returned unexpected result:', responseObj)
+				console.error(
+					'AppShell: Layaway creation returned unexpected result:',
+					responseObj
+				)
 				const displayMsg =
 					typeof responseObj === 'string'
 						? responseObj
@@ -1134,8 +1137,7 @@ async function handleGlobalPaymentSuccess(result) {
 
 			// 2. Try parsing _server_messages for structured messages
 			if (!displayMsg) {
-				const rawServerMsg =
-					err?.data?._server_messages || err?._server_messages
+				const rawServerMsg = err?.data?._server_messages || err?._server_messages
 				if (rawServerMsg) {
 					try {
 						const msgs = JSON.parse(rawServerMsg)
@@ -1147,7 +1149,12 @@ async function handleGlobalPaymentSuccess(result) {
 									return m
 								}
 							})
-							.filter((m) => m && m !== 'ValidationError' && m !== 'frappe.exceptions.ValidationError')
+							.filter(
+								(m) =>
+									m &&
+									m !== 'ValidationError' &&
+									m !== 'frappe.exceptions.ValidationError'
+							)
 							.join('\n')
 					} catch {
 						displayMsg = rawServerMsg
