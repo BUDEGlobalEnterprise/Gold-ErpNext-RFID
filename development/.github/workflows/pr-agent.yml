@@ -1,0 +1,33 @@
+name: Qodo PR Agent
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+  issue_comment:
+    types: [created, edited]
+
+jobs:
+  pr_agent_job:
+    if: ${{ github.event.sender.type != 'Bot' }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: write
+    steps:
+      - name: PR Agent action step
+        uses: the-pr-agent/pr-agent@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # Primary: Nemotron 3 Ultra 550B — deep /review (bug scanning, security, architecture)
+          config.model: "nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b"
+          NVIDIA_NIM_API_KEY: ${{ secrets.NVIDIA_NIM_API_KEY }}
+
+          # Turbo: Nemotron 3 Super 120B — fast /describe, /ask (summarization, Q&A)
+          config.model_turbo: "nvidia_nim/nvidia/nemotron-3-super-120b-a12b"
+
+          # Automation triggers
+          github_action_config.auto_review: "true"
+          github_action_config.auto_describe: "true"
+          github_action_config.auto_improve: "false"
