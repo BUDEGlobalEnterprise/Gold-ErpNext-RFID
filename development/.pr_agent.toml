@@ -1,0 +1,97 @@
+# PR-Agent configuration for Zevar Gold ERP (Frappe/ERPNext)
+# https://github.com/qodo-ai/pr-agent
+#
+# Rate limit: 40 RPM on NVIDIA NIM API
+# Settings below are tuned to stay well under that limit.
+
+[config]
+ai_timeout = 180          # 3 minutes — allow slow responses from large models
+max_model_tokens = 16384  # halved from 32k to reduce per-call latency and token usage
+temperature = 0.1         # lower temp = faster, more deterministic outputs
+
+[github]
+ratelimit_retries = 8     # more retries for GitHub API rate limits
+
+[pr_reviewer]
+require_tests_review = false
+require_todo_scan = false
+persistent_comment = true
+num_max_findings = 3
+enable_help_text = false
+extra_instructions = """
+Review this Frappe/ERPNext PR with focus on:
+1. Security: proper @frappe.whitelist usage, permission checks, input validation.
+2. Database: frappe.qb preferred over raw SQL, no N+1 queries, proper indexing.
+3. Architecture: controllers kept lean, business logic in services/utils.
+4. Frappe conventions: correct hook registration, patch idempotency, test coverage.
+"""
+
+[pr_description]
+add_original_user_description = true
+use_bullet_points = true
+enable_pr_type = true
+enable_help_text = false
+enable_pr_diagram = false       # disable diagram generation to save an API call
+max_ai_calls = 2                # halved from 4 — fewer API calls per /describe
+async_ai_calls = true
+extra_instructions = """
+Generate a PR description for a Frappe/ERPNext project (Zevar Gold ERP).
+Include: what changed, why, affected DocTypes/modules, and any migration steps needed.
+"""
+
+[pr_code_suggestions]
+commitable_code_suggestions = false
+focus_only_on_problems = true
+persistent_comment = true
+enable_help_text = false
+enable_chat_text = false
+publish_output_no_suggestions = true
+parallel_calls = false          # CRITICAL: no parallel API calls — stay under 40 RPM
+max_number_of_calls = 2         # reduced from 3
+num_code_suggestions_per_chunk = 2  # reduced from 3
+auto_extended_mode = true
+final_clip_factor = 0.8
+new_score_mechanism = true
+suggestions_score_threshold = 0
+extra_instructions = """
+You are reviewing a Frappe/ERPNext project called Zevar Gold ERP. Enforce these rules:
+
+## Python (Frappe Backend)
+- All API methods in api.py must use @frappe.whitelist(allow_guest=False) unless explicitly public.
+- Validate user access inside whitelisted methods with frappe.has_permission() or frappe.only_for().
+- Never trust client-side data. Validate and type-cast all kwargs before processing.
+- Prefer frappe.qb (Query Builder) over raw SQL. Flag any frappe.db.sql() call that could use frappe.qb.
+- Use frappe.db.get_value for single-field fetches instead of loading full documents.
+- Never load full documents inside loops — batch fetch with frappe.get_all first.
+- Use frappe.throw() for user-facing errors, frappe.log_error() for background errors.
+- Never use bare except: — always catch specific exceptions.
+- Keep DocType controllers lean — only document lifecycle hooks (validate, on_submit, on_cancel).
+- Move complex business logic to separate utility modules or service files.
+- Use the bouncer pattern (early returns) in validate() and other hooks.
+
+## Frontend (Vue / Frappe UI)
+- Vue components must use <script setup> syntax, not Options API.
+- Never write raw fetch or axios calls in components — use frappe.call() or a centralized API utility.
+- Move state mutation and API interaction to Pinia stores or service files.
+- Extract reusable UI logic into Vue Composables.
+- Do not override Frappe UI component styles globally — use scoped overrides.
+
+## DocType Conventions
+- DocType names: Title Case with spaces (e.g., Employee Attendance).
+- Field names: snake_case (e.g., employee_name, check_in_time).
+- Define permissions in the DocType JSON, not in code, unless dynamic.
+
+## Patches & Migrations
+- Patches must be idempotent — safe to run multiple times.
+- Use frappe.reload_doc() before accessing new fields added in the same release.
+- Register all patches in patches.txt.
+
+## Testing
+- Use frappe.tests.utils.FrappeTestCase as base class.
+- Clean up test data in tearDown().
+- New DocTypes must have corresponding test files.
+
+## Security
+- Never log or expose secrets, API keys, or credentials.
+- Never commit .env files or credentials to the repository.
+"""
