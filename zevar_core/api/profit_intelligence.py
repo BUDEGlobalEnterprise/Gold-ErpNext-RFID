@@ -123,6 +123,21 @@ def calculate_sale_cost_breakdown(doc, method=None):
 	)
 
 
+def cancel_sale_cost_breakdown(doc, method=None):
+	"""Hook: Sales Invoice on_cancel. Remove the Sale Cost Breakdown for this invoice.
+
+	Sale Cost Breakdown is a non-submittable (draft-only) record kept in sync 1:1 with
+	its invoice (``sales_invoice`` is unique), so it cannot be set to docstatus=2.
+	On cancel we delete the row so profit reports never reflect a cancelled sale.
+	This mirrors the amend-cleanup ``db.delete`` already performed at the top of
+	``calculate_sale_cost_breakdown``.
+	"""
+	if not doc.is_pos:
+		return
+
+	frappe.db.delete("Sale Cost Breakdown", {"sales_invoice": doc.name})
+
+
 # ---------------------------------------------------------------------------
 # Private Helpers — Cost Calculation
 # ---------------------------------------------------------------------------

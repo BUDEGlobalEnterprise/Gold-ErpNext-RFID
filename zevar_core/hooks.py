@@ -64,11 +64,15 @@ doc_events = {
 		],
 		"on_submit": [
 			"zevar_core.api.commission.calculate_commissions",
+			"zevar_core.api.profit_intelligence.calculate_sale_cost_breakdown",
+			"zevar_core.api.performance.log_sale_event",
 			"zevar_core.services.stock_reduction.detect_stock_reduction",
 			"zevar_core.services.reservation_manager.release_reservation_for_invoice",
 		],
 		"on_cancel": [
 			"zevar_core.api.commission.reverse_commissions",
+			"zevar_core.api.profit_intelligence.cancel_sale_cost_breakdown",
+			"zevar_core.api.performance.log_sale_cancel_event",
 		],
 	},
 }
@@ -78,6 +82,7 @@ scheduler_events = {
 	"cron": {
 		"*/60 * * * *": ["zevar_core.tasks.fetch_live_metal_rates"],
 		"0 2 1 * *": ["zevar_core.api.finance.apply_finance_charges"],
+		"7 2 * * *": ["zevar_core.tasks.generate_pricing_recommendations"],
 		"0 8 * * *": [
 			"zevar_core.api.layaway.check_overdue_and_forfeit",
 			"zevar_core.api.layaway.send_payment_reminders",

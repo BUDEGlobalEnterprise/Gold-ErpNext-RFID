@@ -141,6 +141,24 @@ def calculate_commissions(doc, method=None):
 		split_doc.insert(ignore_permissions=True)
 
 
+def reverse_commissions(doc, method=None):
+	"""Hook: Sales Invoice on_cancel. Remove commission splits for this invoice.
+
+	Symmetric to ``calculate_commissions``: splits are draft records tied 1:1 to the
+	invoice (created via ``insert``, never submitted), so on cancel we delete them
+	so no orphaned commission amount survives a cancelled/returned sale.
+
+	NOTE: this function was referenced in ``hooks.py`` ``on_cancel`` but was missing,
+	which broke Sales Invoice cancellation entirely (Frappe resolves doc_events via
+	``frappe.get_attr`` and raised on every cancel). Added as part of the Q1/Q2
+	wiring sprint.
+	"""
+	if not doc.is_pos:
+		return
+
+	frappe.db.delete("Sales Commission Split", {"sales_invoice": doc.name})
+
+
 # ---------------------------------------------------------------------------
 # Helpers (single underscore — module-private, not name-mangled)
 # ---------------------------------------------------------------------------
