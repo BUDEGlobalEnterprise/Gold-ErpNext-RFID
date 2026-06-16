@@ -280,6 +280,7 @@
 
 <script setup>
 import AppLayout from '@/components/AppLayout.vue'
+import { fmt } from '@/utils/format'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { call } from 'frappe-ui'
 
@@ -377,12 +378,6 @@ onBeforeUnmount(() => {
 })
 
 // Helpers
-function fmt(n) {
-	return Number(n || 0).toLocaleString('en-US', {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	})
-}
 function formatTime(ts) {
 	if (!ts) return ''
 	try {

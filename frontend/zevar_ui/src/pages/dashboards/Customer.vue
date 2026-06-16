@@ -178,6 +178,7 @@
 
 <script setup>
 import AppLayout from '@/components/AppLayout.vue'
+import { fmt } from '@/utils/format'
 import { ref } from 'vue'
 import KPICard from '@/components/reports/KPICard.vue'
 
@@ -220,9 +221,4 @@ async function refresh() {
 }
 
 refresh()
-
-function fmt(n) {
-	if (n == null) return '0.00'
-	return Number(n).toFixed(2)
-}
 </script>

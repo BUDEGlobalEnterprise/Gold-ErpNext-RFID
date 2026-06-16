@@ -286,6 +286,7 @@
 
 <script setup>
 import AppLayout from '@/components/AppLayout.vue'
+import { fmt } from '@/utils/format'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import KPICard from '@/components/reports/KPICard.vue'
 
@@ -332,11 +333,6 @@ async function refresh() {
 function barHeight(count) {
 	const maxVal = Math.max(...(store.value.hourly?.map((h) => h.txn_count) || [1]), 1)
 	return (count / maxVal) * 100
-}
-
-function fmt(n) {
-	if (n == null) return '0.00'
-	return Number(n).toFixed(2)
 }
 
 // WebSocket subscription
