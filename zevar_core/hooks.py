@@ -64,15 +64,13 @@ doc_events = {
 		],
 		"on_submit": [
 			"zevar_core.api.commission.calculate_commissions",
-			"zevar_core.api.profit_intelligence.calculate_sale_cost_breakdown",
-			"zevar_core.api.performance.log_sale_event",
+			"zevar_core.api.monitor_hooks.on_invoice_submit",
 			"zevar_core.services.stock_reduction.detect_stock_reduction",
 			"zevar_core.services.reservation_manager.release_reservation_for_invoice",
 		],
 		"on_cancel": [
 			"zevar_core.api.commission.reverse_commissions",
-			"zevar_core.api.profit_intelligence.cancel_sale_cost_breakdown",
-			"zevar_core.api.performance.log_sale_cancel_event",
+			"zevar_core.api.monitor_hooks.on_invoice_cancel",
 		],
 	},
 }
