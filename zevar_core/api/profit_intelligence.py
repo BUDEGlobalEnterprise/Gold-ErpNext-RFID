@@ -782,10 +782,24 @@ def get_margin_heatmap(from_date=None, to_date=None):
 		as_dict=True,
 	)
 
+	# Pivot into the shape components/profit/MarginHeatmap.vue expects:
+	# [ { jewelry_type, margins: { <metal_type>: { margin_pct, revenue, gross_profit, count } } }, ... ]
+	pivot = {}
+	row_order = []
 	for r in results:
-		r["avg_margin"] = flt(r.get("avg_margin"), 2)
+		jtype = r.get("jewelry_type") or "Unknown"
+		metal = r.get("metal_type") or "Unknown"
+		if jtype not in pivot:
+			pivot[jtype] = {"jewelry_type": jtype, "margins": {}}
+			row_order.append(jtype)
+		pivot[jtype]["margins"][metal] = {
+			"margin_pct": flt(r.get("avg_margin"), 2),
+			"revenue": flt(r.get("revenue"), 2),
+			"gross_profit": flt(r.get("gross_profit"), 2),
+			"count": r.get("count") or 0,
+		}
 
-	return {"data": results, "period": {"from_date": from_date, "to_date": to_date}}
+	return [pivot[j] for j in row_order]
 
 
 @frappe.whitelist()
@@ -827,6 +841,83 @@ def get_cost_component_trends(from_date=None, to_date=None, granularity="weekly"
 	}
 
 
+_CONFIDENCE_SCORES = {"high": 90, "medium": 70, "low": 50}
+
+
+def _confidence_to_score(level):
+	"""Map a High/Medium/Low confidence label to a 0-100 score for the UI badge."""
+	return _CONFIDENCE_SCORES.get((level or "").strip().lower(), 0)
+
+
+@frappe.whitelist()
+def create_recommendation(
+	item_code, new_price, simulation_data=None, recommendation_type=None, notes=None
+):
+	"""Create a Pricing Recommendation from a What-If simulation.
+
+	Consumed by components/pricing/WhatIfSimulator.vue (item_code, new_price,
+	simulation_data). Previously this endpoint did not exist, so saving a
+	simulated price 404'd.
+	"""
+	frappe.only_for(["System Manager", "Store Manager", "Sales Manager"])
+
+	if not item_code or new_price in (None, ""):
+		frappe.throw(_("Item code and new price are required."))
+
+	if not frappe.db.exists("Item", item_code):
+		frappe.throw(_("Item {0} not found.").format(item_code))
+
+	item_name, current_price = frappe.db.get_value(
+		"Item", item_code, ["item_name", "custom_msrp"]
+	) or (None, 0)
+	current_price = flt(current_price)
+	recommended_price = flt(new_price)
+
+	if recommendation_type:
+		rec_type = recommendation_type
+	elif recommended_price > current_price:
+		rec_type = "Price Increase"
+	elif recommended_price < current_price:
+		rec_type = "Price Decrease"
+	else:
+		rec_type = "Premium Positioning"
+
+	price_change_pct = (
+		((recommended_price - current_price) / current_price * 100) if current_price else 0
+	)
+
+	reasoning = ["Created from What-If simulator."]
+	projected_margin = None
+	if simulation_data:
+		try:
+			sim = json.loads(simulation_data) if isinstance(simulation_data, str) else simulation_data
+			if isinstance(sim, dict):
+				projected_margin = flt(sim.get("margin_pct") or sim.get("projected_margin_pct"))
+				reasoning.append("Simulation data attached.")
+		except Exception:
+			reasoning.append("Simulation data attached.")
+
+	if notes:
+		reasoning.append(notes)
+
+	doc = frappe.new_doc("Pricing Recommendation")
+	doc.item_code = item_code
+	doc.item_name = item_name
+	doc.recommendation_type = rec_type
+	doc.current_price = current_price
+	doc.recommended_price = recommended_price
+	doc.price_change_pct = flt(price_change_pct, 2)
+	if projected_margin is not None:
+		doc.projected_margin_pct = flt(projected_margin, 2)
+	doc.confidence_level = "Medium"
+	doc.reasoning = " ".join(reasoning)
+	doc.generated_by = frappe.session.user
+	doc.status = "Pending Review"
+	doc.insert(ignore_permissions=True)
+
+	return {"success": True, "name": doc.name}
+
+
 @frappe.whitelist()
 def get_recommendations(status="Pending Review", limit=20):
 	"""Get pricing recommendations for the dashboard."""
@@ -854,6 +945,11 @@ def get_recommendations(status="Pending Review", limit=20):
 		limit_page_length=int(limit),
 	)
 
+	for rec in recommendations:
+		# PricingRecommendationsPanel reads `confidence` as a 0-100 number for the
+		# badge width/colour; the doctype stores High/Medium/Low in confidence_level.
+		rec["confidence"] = _confidence_to_score(rec.get("confidence_level"))
+
 	return {"recommendations": recommendations, "total": len(recommendations)}
 
 
@@ -867,7 +963,9 @@ def review_recommendation(recommendation, action, notes=None):
 
 	doc = frappe.get_doc("Pricing Recommendation", recommendation)
 
-	if action == "approve":
+	# Accept any casing/tense the UI sends: approve, approved, reject, rejected.
+	action_norm = (action or "").strip().lower()
+	if action_norm in ("approve", "approved"):
 		doc.status = "Approved"
 		doc.reviewed_by = frappe.session.user
 		doc.reviewed_at = now_datetime()
@@ -880,7 +978,7 @@ def review_recommendation(recommendation, action, notes=None):
 			doc.status = "Applied"
 			doc.applied_at = now_datetime()
 			doc.save(ignore_permissions=True)
-	elif action == "reject":
+	elif action_norm in ("reject", "rejected"):
 		doc.status = "Rejected"
 		doc.reviewed_by = frappe.session.user
 		doc.reviewed_at = now_datetime()
@@ -888,6 +986,6 @@ def review_recommendation(recommendation, action, notes=None):
 			doc.notes = notes
 		doc.save(ignore_permissions=True)
 	else:
-		frappe.throw(_("Invalid action. Use 'approve' or 'reject'."))
+		frappe.throw(_("Invalid action {0}. Use 'approve' or 'reject'.").format(action))
 
 	return {"success": True, "status": doc.status, "recommendation": doc.name}
