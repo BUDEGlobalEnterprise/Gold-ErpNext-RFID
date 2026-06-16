@@ -15,52 +15,25 @@ from frappe.utils import add_days, cint, flt, getdate, now_datetime, today
 
 
 def publish_repair_event(event_type: str, data: dict) -> None:
-	"""Publish a repair-related event via frappe.publish_realtime.
+	"""Publish a repair-related event.
 
-	Called from RepairOrder controller hooks and repair API endpoints.
-	Events are broadcast to the 'repair_monitor' room.
+	Called from RepairOrder controller hooks and repair API endpoints. Routed
+	through the central realtime bus (``zevar_core.api.realtime.bus``) so the
+	envelope and the privacy rule are consistent. The event name
+	(``repair_live_event``) and payload fields are preserved so existing callers
+	and the CommandCenter subscription keep working.
 	"""
-	payload = {
-		"event_type": event_type,
-		"timestamp": str(now_datetime()),
-		"user": frappe.session.user,
-		"user_name": frappe.db.get_value("User", frappe.session.user, "full_name") or frappe.session.user,
-		**data,
-	}
-	frappe.publish_realtime(
-		event="repair_live_event",
-		message=payload,
-		after_commit=True,
-	)
+	from zevar_core.api.realtime.bus import publish
 
-
-def publish_anomaly_alert(alert: dict) -> None:
-	"""Publish an anomaly alert to all connected admin users."""
-	frappe.publish_realtime(
-		event="repair_anomaly_alert",
-		message={
-			"timestamp": str(now_datetime()),
-			**alert,
-		},
-		after_commit=True,
-	)
-
-
-def publish_employee_event(employee: str, event_type: str, data: dict) -> None:
-	"""Publish a user-scoped event to a specific employee's live monitor.
-
-	The employee's frontend subscribes to the 'employee_event' channel
-	and filters by their own employee ID.
-	"""
-	frappe.publish_realtime(
-		event="employee_event",
-		message={
-			"employee": employee,
+	publish(
+		"repair_live_event",
+		{
 			"event_type": event_type,
-			"timestamp": str(now_datetime()),
+			"user": frappe.session.user,
+			"user_name": frappe.db.get_value("User", frappe.session.user, "full_name")
+			or frappe.session.user,
 			**data,
 		},
-		after_commit=True,
 	)
 
 

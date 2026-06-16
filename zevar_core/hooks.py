@@ -81,6 +81,8 @@ doc_events = {
 scheduler_events = {
 	"cron": {
 		"*/60 * * * *": ["zevar_core.tasks.fetch_live_metal_rates"],
+		"*/2 * * * *": ["zevar_core.api.realtime.hooks.run_anomaly_push"],
+		"*/5 * * * *": ["zevar_core.api.realtime.hooks.run_health_heartbeat"],
 		"0 2 1 * *": ["zevar_core.api.finance.apply_finance_charges"],
 		"7 2 * * *": ["zevar_core.tasks.generate_pricing_recommendations"],
 		"0 8 * * *": [
