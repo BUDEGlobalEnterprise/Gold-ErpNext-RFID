@@ -1,0 +1,650 @@
+# Zevar Monitor Suite — Current-State Audit
+> Authoritative baseline for the 4 monitoring modules + cross-cutting architecture. > Grounded in direct code reads with file:line references. > **Note:** the Profit Intelligence audit below CORRECTS an earlier rate-limited pass that falsely claimed the `calculate_sale_cost_breakdown` hook is wired and that margin math is centralized — both are false (see Profit section).
+
+---
+
+# Profit Intelligence
+
+**Summary:** The backend has a genuinely best-in-class *design* — a single authoritative per-invoice COGS+margin record (Sale Cost Breakdown) capturing metal, gemstone, labor, commission, payment, and overhead costs, with a full JSON calculation log, plus a Pricing Recommendation doctype with RAG auditability fields. BUT the design is critically undermined by an integration failure: the on_submit hook (calculate_sale_cost_breakdown) that populates Sale Cost Breakdown is NEVER registered in hooks.py, so in a live system NO breakdown records are ever created and every query endpoint returns empty/zero. Compounding this: the AI recommendation generator (generate_pricing_recommendations) is also not scheduled; the What-If 'Create Recommendation' button calls a non-existent endpoint; the Approve/Reject buttons pass the wrong action verb; and the Margin Heatmap expects a pivoted data shape the backend never returns. Separately, the COGS model is materially incomplete for jewelry (no making charge, no alloy/wastage, gemstone value is at-cost-not-replacement, labor model is time-guess not actual), margin math is duplicated and inconsistent in 5+ other files (commission payouts are computed on an inflated margin that ignores 4 of the 6 cost buckets), and there is zero margin-waterfall / PVM / multi-store overhead-allocation capability. Net: ~50% of a great system on paper, ~20% functional as shipped.
+
+
+## Files read
+
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/profit_intelligence.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/hooks.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/pricing.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/tasks.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/rag/tools/pricing_tools.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/doctype/sale_cost_breakdown/sale_cost_breakdown.json`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/doctype/pricing_recommendation/pricing_recommendation.json`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/doctype/cost_center_allocation/cost_center_allocation.json`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/doctype/labor_cost_pool/labor_cost_pool.json`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/dashboards/ProfitIntelligence.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/stores/profit.js`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/components/pricing/WhatIfSimulator.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/components/pricing/PricingRecommendationsPanel.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/components/profit/ProfitOverview.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/components/profit/CostBreakdownChart.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/components/profit/MarginHeatmap.vue`
+
+## Endpoints
+
+- `zevar_core.api.profit_intelligence.calculate_sale_cost_breakdown (hook fn, NOT whitelisted, NOT registered in hooks.doc_events — dead code in production)`
+- `zevar_core.api.profit_intelligence.get_profit_summary (whitelisted)`
+- `zevar_core.api.profit_intelligence.get_margin_analysis (whitelisted; group_by jewelry_type|metal_type|purity|salesperson|invoice)`
+- `zevar_core.api.profit_intelligence.get_cost_breakdown_detail (whitelisted; per-invoice drill-down)`
+- `zevar_core.api.profit_intelligence.get_profit_trends (whitelisted; weekly|monthly|quarterly)`
+- `zevar_core.api.profit_intelligence.recalculate_breakdown (whitelisted; System Manager only, manual)`
+- `zevar_core.api.profit_intelligence.get_margin_heatmap (whitelisted)`
+- `zevar_core.api.profit_intelligence.get_cost_component_trends (whitelisted; weekly|monthly)`
+- `zevar_core.api.profit_intelligence.get_recommendations (whitelisted)`
+- `zevar_core.api.profit_intelligence.review_recommendation (whitelisted; approve|reject)`
+- `zevar_core.api.profit_intelligence.create_recommendation (CALLED BY FRONTEND BUT DOES NOT EXIST — 404)`
+- `zevar_core.tasks.generate_pricing_recommendations (NOT whitelisted, NOT in scheduler_events — never auto-runs)`
+- `zevar_core.tasks.fetch_live_metal_rates (scheduled cron */60, writes Gold Rate Log)`
+- `zevar_core.rag.tools.pricing_tools.simulate_price_change (whitelisted; what-if engine used by UI)`
+- `zevar_core.rag.tools.pricing_tools.get_pricing_action_items (whitelisted; AI action feed, not surfaced in Profit UI)`
+- `zevar_core.api.pricing._get_gold_rate (internal; canonical gold-rate lookup with purity-alias handling)`
+
+## Current capabilities
+
+- Per-invoice cost-attribution model designed around 6 buckets: metal COGS (net_weight x gold_rate x qty), gemstone COGS (sum of Item Gemstone.amount), labor (from Labor Cost Pool via salesperson splits), commission (from Sales Commission Split), payment processing fees (per-mode % + flat from Cost Center Allocation), overhead (rent+utilities+insurance+marketing+depreciation+miscellaneous) — profit_intelligence.py:71-73.
+- Gold rate sourced from Gold Rate Log (live, fetched hourly from gold-api.com/metals.live/goldprice.org/custom-endpoint/fallback chain), with purity-alias normalization (14K vs 14Kt) and Rose/White Gold -> Yellow Gold mapping — pricing.py:333-365.
+- Materialized results: Sale Cost Breakdown doctype stores total_revenue, all 6 cost components, gold_rate_at_sale + source + timestamp, gross_profit, gross_margin_pct, and a full JSON calculation_log + calculated_by/at audit trail — sale_cost_breakdown.json.
+- Aggregation/grouping by jewelry_type, metal_type, purity, salesperson, or individual invoice — get_margin_analysis (profit_intelligence.py:539-628).
+- Period-over-period comparison (current vs previous period revenue/profit/margin) — get_profit_summary:499-513.
+- Two overhead allocation methods: 'Equal Per Invoice' and 'Proportional to Revenue' — _allocate_overhead:385-457.
+- Payment-cost allocation by mode: credit (% + flat), debit (%), cash (%), wire (flat), gift card (%), financing partner (%) — _calculate_payment_costs:309-382; configurable in Cost Center Allocation singleton.
+- Labor allocation via Labor Cost Pool: employee-specific pool, role-based fallback (Sales Associate/Manager/Bench Jeweler/Appraiser), Per-Hour/Per-Sale/Per-Repair/Salary-Spread methods — labor_cost_pool.json; allocated by salesperson split_percent x default_minutes_per_sale.
+- What-if price simulator: current vs projected margin, COGS split (metal+gemstone), price-change %, annualized profit projection from 90-day sales velocity, optional gold-rate override — pricing_tools.simulate_price_change:147-254.
+- Pricing Recommendation doctype with full RAG auditability fields: rag_query_id, similar_events_count, rag_sources, confidence_level, reasoning, gold_rate_at_generation, valid_until, and an approve->auto-apply workflow that writes custom_msrp — pricing_recommendation.json; review_recommendation:845-878.
+- Rule-based recommendation generator (declining-margin detection + slow-moving clearance) writing Pricing Recommendation records with AI-style reasoning — tasks.generate_pricing_recommendations:889-1059.
+- Vue 3 dashboard with 4 tabs (Overview/Cost Analysis/Pricing/Margin Heatmap), Pinia store, KPI cards with trend arrows, stacked cost-component bar chart (absolute/% toggle), monthly profit trend bars, recommendation table with approve/reject, what-if simulator panel.
+- Role-based access control via frappe.only_for on every query endpoint (System Manager / Store Manager / Sales Manager / Accounts Manager).
+
+## Strengths
+
+- Architectural purity of the data model: ONE authoritative per-invoice record (Sale Cost Breakdown) that every query reads via SUM/AVG — no per-query recomputation on the read path. This is the correct pattern and makes the numbers auditable and reconcilable.
+- Full calculation traceability: calculation_log stores a step-by-step JSON of revenue/cogs/labor/commission/payment/overhead, plus gold_rate_source (live/fallback/manual) and gold_rate_timestamp — defensible for owner/CPA questions and for audit.
+- Gold-rate-at-sale is point-in-time captured (not re-fetched at query time), so historical margins stay accurate even as spot moves — a genuinely correct jewelry-specific decision.
+- Purity-alias normalization (14K<->14Kt) and Rose/White->Yellow mapping in _get_gold_rate prevents silent zero-COGS rows that plague naive implementations.
+- Pricing Recommendation doctype's RAG-auditability fields (rag_query_id, similar_events_count, rag_sources) are best-in-class design — they let an owner see WHY the AI suggested a price and what historical events grounded it. This is the single strongest differentiator vs. generic retail tools.
+- Payment-cost allocation is mode-aware and includes financing-partner cut (Affirm/Klarna) — rare even in dedicated jewelry systems.
+- The what-if simulator correctly uses net_weight x gold_rate (not valuation_rate) for metal COGS, and surfaces annualized profit projection from real velocity — the right basis for a pricing conversation.
+- Cost Center Allocation is a singleton with sensible defaults (2.9% CC, 0.30 flat, etc.) and labor_burden_percent + operating_hours_daily fields ready for driver-based overhead.
+- Role-gated endpoints and a clean Pinia store with parallel resource fetching (Promise.all in loadAll) — the frontend plumbing is well-organized for its scope.
+
+## Gaps
+
+- CRITICAL — DATA FRESHNESS: calculate_sale_cost_breakdown is NOT registered in hooks.py doc_events for Sales Invoice on_submit/on_cancel. grep across the whole repo finds it only at its definition (profit_intelligence.py:21) and the manual recalculate_breakdown caller (:734). The Sales Invoice on_submit list in hooks.py registers commission, stock_reduction, and reservation_manager but NOT profit_intelligence. Therefore in a deployed system, Sale Cost Breakdown records are NEVER auto-created, and get_profit_summary/get_margin_analysis/get_margin_heatmap/get_cost_component_trends ALL return empty/zero. The entire dashboard is blank unless an admin manually runs recalculate_breakdown per invoice. This is the #1 issue.
+- CRITICAL — NO on_cancel cleanup: there is no hook to delete/void Sale Cost Breakdown when a Sales Invoice is cancelled. Even if on_submit were wired, cancelled invoices would leave orphan breakdowns inflating profit. (The on_submit body self-deletes prior breakdowns for amend scenarios at :31, but cancel has no handler anywhere.)
+- CRITICAL — Recommendation engine never runs: generate_pricing_recommendations (tasks.py:889) is defined but NOT in scheduler_events (hooks.py scheduler only lists fetch_live_metal_rates for */60 cron). So Pricing Recommendation records are never auto-generated; the dashboard's Pricing tab is permanently empty unless an admin manually invokes the function.
+- CRITICAL — Broken 'Create Recommendation' button: WhatIfSimulator.vue:217 calls zevar_core.api.profit_intelligence.create_recommendation, which does not exist anywhere in the codebase (grep for 'def create_recommendation' returns nothing). The button throws a 404/wrong-method error.
+- CRITICAL — Broken Approve/Reject buttons: PricingRecommendationsPanel.vue:113 calls handleReview(rec.name, 'Approved') and confirmReject passes 'Rejected', but review_recommendation (profit_intelligence.py:846-876) checks `if action == 'approve'` / `elif action == 'reject'` (lowercase) and throws 'Invalid action' otherwise. Casing mismatch -> every click hits the frappe.throw branch.
+- CRITICAL — Margin Heatmap data-shape mismatch: backend get_margin_heatmap (profit_intelligence.py:739-773) returns a FLAT array of {jewelry_type, metal_type, revenue, gross_profit, avg_margin, count}. Frontend MarginHeatmap.vue (rows/cols/getCellValue at :97-122) expects a PIVOTED structure with row.margins[metalType].margin_pct. The pivot never exists, so columns is always empty and every cell renders '--'. The heatmap tab is non-functional.
+- BUG — Confidence bar always 0%: PricingRecommendationsPanel.vue treats rec.confidence as a number (lines 99, 103, 219-223 use c>=80), but the doctype field is confidence_level = Select('High'|'Medium'|'Low') and get_recommendations does not return a numeric confidence. Bar renders gray/0% for every row.
+- COGS model gap — NO making charge: jewelry profitability fundamentally includes making/maintenance charges (per-gram or per-piece), which can be 10-30% of price. Not modeled anywhere in Sale Cost Breakdown (no field, no allocation). This is the largest jewelry-specific accuracy hole.
+- COGS model gap — NO alloy/wastage: net_weight x gold_rate assumes pure metal at marked purity with no manufacturing loss. Real jewelry COGS applies wastage % (typically 5-12%) and alloy mix. Not modeled.
+- COGS model gap — gemstone value is static Item-master cost, not replacement/lot cost: _get_gemstone_value (profit_intelligence.py:193-203) sums Item Gemstone.amount — a fixed field. It ignores melee-parcel lot costing, exchange-rate moves on imported stones, and certificate premium. Aged inventory's gemstones are often under-costed vs replacement.
+- COGS model gap — labor is a guessed constant, not actual: _allocate_labor (profit_intelligence.py:206-296) uses default_minutes_per_sale (default 30) x hourly_rate, scaled by split_percent. It ignores ticket complexity, bench-jeweler repair labor on the same sale, and the labor_burden_percent field defined in Cost Center Allocation is NEVER applied (the field exists but _allocate_labor reads only hourly_rate, not hourly_rate x (1+burden)).
+- Margin by STORE — not supported: get_margin_analysis groups by jewelry_type/metal_type/purity/salesperson/invoice only. There is no store/branch dimension despite Cost Center Allocation being store-relevant. No multi-store profit consolidation.
+- Margin by CATEGORY (beyond jewelry_type) — partial: no item_group/brand/collection grouping; jewelry_type is a single custom field.
+- No Price/Volume/Mix (PVM) bridge: period-over-period profit change is shown as a single delta, not decomposed into price effect vs volume effect vs mix effect vs cost effect. This is table-stakes for a 'Profit Intelligence' exec product.
+- No margin-waterfall visualization: nowhere does the UI show revenue -> minus metal -> minus gems -> minus labor -> minus commission -> minus payment -> minus overhead -> gross profit as a waterfall. The CostBreakdownChart shows the components as a stacked bar but not the bridge.
+- No gold-rate pass-through analysis: no view of 'how much of recent margin change is explained by gold moving +/-X%' vs pricing discipline. The pricing_tools.get_pricing_action_items detects gold moves >3% but does not quantify pass-through %.
+- No unrealized gain/loss on inventory: gold held in stock appreciates/depreciates with spot; no MTM view. (Out of scope for COGS but expected in a 'Profit Intelligence' suite.)
+- No markdown/velocity (AIMS) engine: Pricing Recommendation supports a 'Clearance' type, but there is no aged-inventory spiff+markdown+signage algorithm — just a flat 15% markdown for >90-day slow movers (tasks.py:1032).
+- No margin-floor enforcement at POS: nothing prevents a POS sale below a configured minimum margin; the breakdown is computed after the fact only.
+- No interchange-tier granularity: payment cost uses one credit_card_rate (2.9%) for all cards — no Visa/MC/Amex tiering, no corporate/regulated signature rates.
+- Overhead allocation only 2 methods, no ABC/driver-based: 'Equal Per Invoice' and 'Proportional to Revenue'. No activity-based (per-transaction, per-sq-ft, per-headcount) drivers despite operating_hours_daily and labor_burden_percent fields existing unused.
+- Backed-up UI gaps (capabilities the API has but the UI never exposes): get_cost_breakdown_detail (per-invoice drill-down) has no UI; get_profit_trends quarterly mode not exposed; get_margin_analysis group_by=invoice/metal_type/purity not selectable (UI hardcodes jewelry_type); recalculate_breakdown has no button; pricing_tools.get_pricing_action_items not surfaced; pricing_tools.get_slow_moving_inventory not surfaced; sale-cost-breakdown gold_rate_source/timestamp not shown; RAG auditability fields (rag_sources, similar_events_count) not rendered on recommendation cards.
+
+## Structural issues
+
+- Integration gap is the dominant structural flaw: the module is a well-designed island with no bridge to the invoice lifecycle. on_submit hook unwired + on_cancel absent + generator unscheduled = the module produces no data automatically. The previous internal audit (plan/02_current_state_audit/module_audit_raw.json:332) incorrectly asserts the hook IS wired and that reports.py does not recompute margin — both claims are false per direct grep. Treat that audit as unreliable.
+- Margin math is defined 7 different ways across the codebase (see math_integrity / data_model below), only one of which (Sale Cost Breakdown) is 'correct'. Because the SCB path is unwired, the system effectively runs on the WRONG margin definitions (commission.py and top_profitability_by_product.py) wherever margin drives money or reporting today.
+- The 'what-if' margin (pricing_tools.simulate_price_change) uses a DIFFERENT, thinner COGS than the canonical SCB model — so a price simulated at 28% margin will be recorded as ~22% when the sale actually posts (if SCB were wired). This will destroy user trust in the simulator.
+- Frontend/backend contract drift with no type-checking: 3 of the 6 frontend interactions with the backend are broken (create_recommendation 404, approve/reject casing, heatmap pivot shape, confidence number-vs-string). There is no OpenAPI/schema contract and no integration test catching these.
+- Cost Center Allocation is a global singleton — it cannot represent per-store overhead or per-store payment rates, which structurally blocks multi-store profit intelligence even before UI work.
+- No caching/materialization layer beyond the SCB rows themselves: get_margin_heatmap and get_cost_component_trends run raw GROUP BY SQL over SCB on every page load. Fine at low volume; will degrade without an index hint or rollup table at scale.
+- Permission asymmetry: get_recommendations is readable by Sales Manager, but review_recommendation allows Store Manager to approve and AUTO-APPLY a price change to Item.custom_msrp (profit_intelligence.py:863-864) — a price-change power with no secondary approval or audit log beyond the doc fields. Defensible but worth noting.
+
+## Data model
+
+- Sale Cost Breakdown (autoname SCB-YY-MM-#####; unique on sales_invoice): total_revenue, total_qty, gold_rate_at_sale (+source+timestamp), total_metal_cogs, total_gemstone_cogs, total_item_cogs, total_labor_cost (+JSON detail), total_commission, total_payment_cost (+JSON detail), overhead_per_invoice (+method), total_cost, gross_profit, gross_margin_pct, calculation_log (JSON), calculated_by/at. Correct and complete for the 6-bucket model. MISSING fields: making_charge, alloy/wastage, store/cost_center, item_group, gemstone_replacement_vs_cost flag.
+- Pricing Recommendation (autoname PR-YY-MM-#####): recommendation_type (6 options incl. Clearance & Premium Positioning), current_price/margin_pct/gold_rate, recommended_price, projected_margin_pct, price_change_pct, confidence_level (High/Med/Low), reasoning, rag_query_id/similar_events_count/rag_sources, gold_rate_at_generation, generated_by (default 'AI (Qwen)'), generation_method (rag_pipeline|manual), status lifecycle (Draft->Pending Review->Approved->Applied/Rejected), valid_until, reviewed_by/at, applied_at. Strong schema; the RAG fields are the standout.
+- Cost Center Allocation (singleton): rent/utilities/insurance/marketing/depreciation/miscellaneous_monthly, overhead_allocation_method (Equal|Proportional), operating_hours_daily, labor_burden_percent (UNUSED by code), payment rates (credit_card_rate+flat, debit, cash_handling, wire_flat, gift_card, financing_partner). Singleton = no per-store.
+- Labor Cost Pool: pool_name, employee (optional), role (Sales Associate/Bench Jeweler/Store Manager/Appraiser/Manager), hourly_rate ('Fully Loaded'), hours_per_week, allocation_method (Per Hour/Per Sale/Per Repair/Salary Spread), default_minutes_per_sale. allocation_method field is read inconsistently — _allocate_labor always does Per-Sale math regardless of this value.
+- Gold Rate Log: metal, purity, rate_per_gram, source, timestamp (read in pricing.py:333-365; written hourly by tasks.fetch_live_metal_rates). Functions as the spot-price cache; correct.
+- Item custom fields consumed: custom_net_weight_g, custom_metal_type, custom_purity, custom_gross_weight_g, custom_jewelry_type, custom_msrp, custom_cost_price, valuation_rate (ERPNext), gemstones child table (Item Gemstone: amount).
+- Sales Commission Split: sales_invoice, employee, commission_amount, split_percent — read by both commission.py and profit_intelligence._get_commission_total.
+
+## Tech debt
+
+- DRY violation — margin defined 7 ways: (1) profit_intelligence.py:74 [canonical, 6-bucket]; (2) commission.py:104-109 [valuation_rate only, drives real payouts]; (3) top_profitability_by_product.py:70-71 [valuation_rate only, joins SCB but ignores its gross_profit column — ironic]; (4) analytics_hub.py:1012 _margin_pct [custom_cost_price basis]; (5) pricing_tools.py:210 [gold-rate + gems only, no labor/comm/payment/overhead]; (6) repair_accounting.py:704 [material-only, labor excluded as 'pure service']; (7) gemstone_value_service.py:125 [markup-on-cost denominator]. Same key names (gross_profit, margin_pct) across all 7.
+- commission.py calculate_commissions runs on on_submit BEFORE the (unwired) SCB hook and uses a 1-bucket margin — salespeople on 'By Profit Margin' rules earn commission against an inflated margin. Highest-impact tech debt because it moves money.
+- top_profitability_by_product report joins Sale Cost Breakdown only to filter, then recomputes a cruder gross_profit from sii.valuation_rate — the canonical number is one column away and ignored.
+- WhatIfSimulator vs SCB inconsistency: simulator's projected_margin_pct will not match the SCB gross_margin_pct later recorded for the same item (simulator omits 4 cost buckets).
+- labor_burden_percent and operating_hours_daily fields defined in Cost Center Allocation but never read by _allocate_labor or _allocate_overhead — dead config.
+- Labor Cost Pool.allocation_method (Per Hour/Per Repair/Salary Spread) ignored — _allocate_labor always computes Per-Sale.
+- Hardcoded fallback gold price $4400/oz in fetch_live_metal_rates (tasks.py:171) vs $3300/oz in pricing._get_hardcoded_fallback_rates (pricing.py:210) — two different fallback numbers for the same concept.
+- Previous internal audit doc (plan/02_current_state_audit/module_audit_raw.json) records two false claims (hook is wired; no margin duplication) — the planning artifacts are built on an incorrect baseline and should be corrected before redesign work proceeds.
+- get_margin_heatmap and get_cost_component_trends use DATE_FORMAT string grouping in raw SQL with no rollup/materialization — acceptable now, scaling risk later.
+- Frontend uses ad-hoc frappe.call (WhatIfSimulator.vue:190) bypassing the frappe-ui resource pattern used by the store — inconsistent data-fetching style.
+
+## Recommendations
+
+- P0 — Wire the hook: add 'zevar_core.api.profit_intelligence.calculate_sale_cost_breakdown' to hooks.py doc_events['Sales Invoice']['on_submit'] (after commission.calculate_commissions so commission splits are available, as the docstring already assumes), and add an on_cancel handler that sets the SCB row docstatus cancelled or deletes it. Without this, no other work matters.
+- P0 — Schedule the generator: add 'zevar_core.tasks.generate_pricing_recommendations' to scheduler_events (e.g. daily '0 7 * * *' or weekly) so Pricing Recommendation records actually populate.
+- P0 — Fix the 4 broken frontend/backend contracts in one pass: (a) implement create_recommendation OR repoint WhatIfSimulator to an existing endpoint; (b) make review_recommendation accept case-insensitive action (or change the panel to send lowercase); (c) either pivot get_margin_heatmap output to {category, margins:{metal:{margin_pct}}} or rewrite MarginHeatmap.vue to pivot the flat array client-side; (d) map confidence_level High/Medium/Low to a numeric for the bar, or change the panel to show the label.
+- P0 — Unify margin math: extract a single get_item_cogs(item) and compute_invoice_margin(invoice) into a shared module (e.g. zevar_core.services.profit_math) and refactor commission.py, top_profitability_by_product.py, analytics_hub._margin_pct, and pricing_tools.simulate_price_change to call it. This is the single highest-leverage refactor for trust — every 'margin' number in the system becomes reconcilable.
+- P1 — Extend the COGS model for jewelry accuracy: add making_charge (per-gram and per-piece columns on Item, summed into a new SCB field), alloy/wastage % (applied to metal_cogs), and apply labor_burden_percent to labor (field exists, unused). Add a gemstone costing mode flag (cost vs replacement).
+- P1 — Add store/cost-center dimension: convert Cost Center Allocation from singleton to per-store (or add a Cost Center child table), add store to Sale Cost Breakdown, and add group_by='store' to get_margin_analysis plus a multi-store consolidation view. Required for any multi-location owner.
+- P1 — Build the exec views the redesign needs: (a) margin waterfall (revenue -> metal -> gems -> making -> labor -> commission -> payment -> overhead -> gross profit); (b) PVM bridge decomposing period-over-period profit delta into price/volume/mix/cost effects; (c) gold pass-through analysis (margin delta attributable to gold moves). These are what separates 'reports' from 'Profit Intelligence'.
+- P1 — Make the what-if simulator authoritative: have simulate_price_change call the SAME compute_invoice_margin used at posting time, and let the user toggle inclusion of overhead/payment (since those are invoice-level, not item-level). Add confidence bands on the annual projection (current point estimate has no range). Let the simulator sweep a price RANGE, not a single price, and show the margin curve.
+- P2 — Surface the backend capabilities the UI hides: per-invoice cost drill-down (get_cost_breakdown_detail), group-by selector for margin analysis, recalculate button, pricing action items feed, slow-moving inventory, and the RAG sources/similar-events on recommendation cards (the RAG auditability is a differentiator — show it).
+- P2 — Add margin-floor enforcement at POS: a configurable minimum-margin per category/metal that blocks or warns at checkout, computed from the same shared profit_math. Turns Profit Intelligence from descriptive to prescriptive.
+- P2 — Add an on_cancel hook and idempotency: re-key SCB on amend (the on_submit body self-deletes at :31, good), but formalize cancel handling and add a backfill bench command to populate SCB for historical invoices after the hook is wired.
+- P2 — Correct the internal planning artifacts (plan/02_current_state_audit/module_audit_raw.json and the wf1_consolidated baseline) which falsely state the hook is wired and no margin duplication exists — the redesign plan is currently built on an incorrect baseline.
+
+## Margin Math Integrity (Profit)
+
+**Canonical:** profit_intelligence.py:71-75 — gross_profit = total_revenue - (metal_cogs + gemstone_cogs + labor + commission + payment_cost + overhead); margin = gross_profit / total_revenue * 100. Metal_cogs = net_weight * gold_rate * qty (gold_rate from Gold Rate Log, point-in-time). This is the ONLY definition that includes all 6 cost buckets.
+
+**Net assessment:** The canonical SCB definition is correct and best-in-class in design, but because the hook is unwired the system today effectively runs on the valuation_rate-only margins in commission.py and the top_profitability report — i.e., the wrong definition is the operative one. Even after wiring the hook, 6 other sites will continue to show different numbers for 'margin' until the shared profit_math refactor is done.
+
+**Inconsistent sites:**
+
+- `commission.py:104-109` — cogs = sum(item.valuation_rate * qty); profit_margin = (net_total - cogs)/net_total*100 — missing: gemstone, labor, commission, payment, overhead; also uses valuation_rate not gold_rate — **impact:** Drives real salesperson commission payouts on 'By Profit Margin' rules — HIGHEST FINANCIAL IMPACT
+- `top_profitability_by_product.py:70-71` — cogs = sum(sii.valuation_rate*qty); gross_profit = sum(sii.amount) - cogs — missing: all 5 non-metal; joins SCB but ignores its gross_profit column — **impact:** Official profitability report contradicts the SCB table it joins
+- `analytics_hub.py:1012 (_margin_pct)` — (price - cost)/price*100, cost = custom_cost_price or valuation_rate — missing: all 6 (item-level pre-sale) — **impact:** Populates current_margin_pct / projected_margin_pct on Pricing Recommendation — same field names as SCB, different math
+- `pricing_tools.simulate_price_change:210` — (price - (net_weight*gold_rate + gemstone_value))/price*100 — missing: labor, commission, payment, overhead — **impact:** Simulator's projected margin will not match posted SCB margin for the same sale — trust killer
+- `repair_accounting.py:704` — gross_profit = revenue - material (labor excluded as 'pure service') — missing: labor excluded by design; different domain — **impact:** Reuses gross_profit/gross_margin_pct key names — cross-module aggregation hazard
+- `gemstone_value_service.py:125` — (sell_total - cost_total)/cost_total*100 — missing: markup-on-cost denominator not price — **impact:** Same margin_pct key, inverted denominator — labeling trap
+- `finance.py:351` — net_profit_mtd = GL_income_total - GL_expense_total — missing: different system (GL vs transaction) — **impact:** Accounting-net-profit will not reconcile with SCB gross_profit — both shown to users
+
+---
+
+# Live Monitor
+
+**Summary:** The "Live Monitor" in Zevar is not one feature but FOUR fragmented, partially-wired screens plus two backend API files, with no coherent command center tying them together. (1) `LiveMonitor.vue` is a dead stub telling the user to go elsewhere. (2) `CommandCenter.vue` is a multi-store repair-ops wall — it is the only screen with real realtime (WebSocket) subscriptions, but it is an ORPHAN: not in router.js, not reachable from nav, and the "Command Center" card in Dashboards.vue has no `route:` so clicking it does nothing. (3) `AdminMonitor.vue` is the actual live-sales/registers/overrides/audit screen (the real admin monitor) — pure 30s polling, subscribes to NO realtime events despite `pos_sale_event` being published on every sale. (4) `EmployeeLiveMonitor.vue` is an associate's personal dashboard with strict self-scoping — the most complete and cleanest of the four, but still poll-based with a token realtime trigger.
+
+Backend: `live_monitor.py` exposes realtime publishers (`publish_repair_event`, `publish_anomaly_alert`, `publish_employee_event`), a multi-store command-center aggregator, an anomaly-detection engine (4 rules), and a repair live feed. Realtime IS wired for repairs (publishers are called from repair_order.py, stripe webhook, customer portal). But `publish_anomaly_alert` is DEAD CODE — defined at live_monitor.py:37 and never called anywhere in the codebase, so the CommandCenter's `repair_anomaly_alert` subscription (CommandCenter.vue:367) can NEVER fire; anomalies are only ever computed on-demand when an admin manually polls `get_command_center_data` (live_monitor.py:83). There is NO scheduler entry for anomaly detection (hooks.py scheduler_events confirmed), so anomalies are only as fresh as the 30s poll and only when someone has the screen open.
+
+Net: data freshness is "30-second polling + repair-only push". Anomaly detection is basic threshold rules with no ML/baselines. Multi-store view is repair-only (no sales per store in the command center). Role separation exists but is split across screens rather than one role-aware command center. There is no system-health, no traffic-vs-sales, no employee-activity feed at the owner level. This is a collection of prototypes, not a world-class live command center.
+
+
+## Files read
+
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/live_monitor.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/employee_live_monitor.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/page/admin_monitor/admin_monitor.js`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/page/admin_monitor/admin_monitor.json`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/LiveMonitor.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/dashboards/CommandCenter.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/dashboards/AdminMonitor.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/dashboards/EmployeeLiveMonitor.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/router.js`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/stores/session.js`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/doctype/repair_order/repair_order.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/pos.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/hooks.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/components/reports/Dashboards.vue`
+
+## Current capabilities
+
+- Repair realtime push: publish_repair_event() (live_monitor.py:17) is actually wired — called from repair_order.py:76-86 on status change, stripe_terminal/webhook.py:195, and repair_customer_portal.py:958. CommandCenter subscribes to 'repair_live_event' (CommandCenter.vue:366) and prepends to its live feed.
+- Multi-store command-center aggregator: get_command_center_data (live_monitor.py:73) returns per-store repair metrics (active/overdue/completed/received/revenue + status_breakdown + health), system-wide KPIs, and active alerts. Role-gated via frappe.only_for(['System Manager','Store Manager','Accounts Manager']) (live_monitor.py:78).
+- Anomaly detection engine with 4 rules (live_monitor.py:254): severe overdue (>7d), stuck repairs (no change 5d), unassigned >24h, high-value (>=$500) without deposit. Sorted by severity (critical/warning/info).
+- Repair live feed from status_log: get_repair_live_feed (live_monitor.py:382) pulls last-N-hours of status changes with user attribution.
+- Employee self-service dashboard (employee_live_monitor.py): get_my_performance (today's revenue/txn/items via commission splits, vs-yesterday %), get_store_activity (anonymized hourly counts, no amounts), get_my_tasks (assigned repairs, layaway follow-ups, todos, queue summary). Strict user-scoping via _get_current_employee (employee_live_monitor.py:13).
+- Live sales admin monitor (AdminMonitor.vue): today's sales, open registers, pending tax-exemption overrides (approve/reject), audit log + summary. Force-close session capability. Polls every 30s.
+- Realtime sale event publishing: pos.py:610 publishes 'pos_sale_event' to managers on every invoice creation; session.js:66-72 subscribes (drives the 'Live' pulse on AdminMonitor). pos_session events also published (pos_session.py:1575).
+- Frappe-desk page admin_monitor (admin_monitor.js) embeds the Vue AdminMonitor in an iframe at /pos/reports/dashboards/admin.
+- Role-tier routing (router.js:17-30): AdminMonitor = admin-only, LiveMonitor stub = admin+manager, EmployeeLiveMonitor = all authenticated users.
+
+## Strengths
+
+- EmployeeLiveMonitor enforces genuine, well-documented data isolation: employees see only their own commission-attributed revenue and anonymized store-level counts (amounts stripped) — correct privacy posture for an associate view (employee_live_monitor.py:96-172).
+- Repair realtime path is end-to-end real: publisher is called from the doctype controller on actual status transitions (repair_order.py:76), so the CommandCenter feed genuinely updates without polling.
+- CommandCenter's optimistic local merge of realtime events + periodic full refresh (every 5 events) is a sensible hybrid that limits DB load while staying responsive (CommandCenter.vue:327-349).
+- Anomaly rules target genuinely useful jewelry/repair pain points (high-value-no-deposit financial risk, stuck repairs, unassigned aging) — the rule selection is domain-aware, not generic.
+- get_employee_dashboard batches three sub-calls into one round-trip (employee_live_monitor.py:261) — efficient frontend payload.
+- Health-status computation per store (critical/warning/healthy by overdue count) gives an at-a-glance wall view (live_monitor.py:187).
+
+## Gaps
+
+- NO SALES in the command center: get_command_center_data (live_monitor.py:93-192) is repair-only. The multi-store 'command center' shows zero live sales, no live revenue, no transactions per store — the single most important metric for an owner command center is absent. Sales live data lives in a totally separate screen (AdminMonitor) hitting different APIs (pos_session.get_live_sales_feed).
+- publish_anomaly_alert is DEAD CODE (live_monitor.py:37) — never called anywhere in the codebase. The CommandCenter subscribes to 'repair_anomaly_alert' (CommandCenter.vue:367) which can therefore NEVER fire. Anomalies are only computed on-demand inside get_command_center_data (live_monitor.py:83), so push-alerts are an illusion.
+- Anomaly detection is not scheduled (no entry in hooks.py scheduler_events) and not persisted. There is no alert history, no acknowledgement workflow, no snooze/resolve, no notification routing (email/push/SMS). Alerts vanish when the page closes.
+- Anomaly rules are static thresholds only — no ML, no rolling baselines, no z-score/seasonality. 'Unusual volume spikes/drops' is described in the docstring (live_monitor.py:259) but NOT implemented (rule 2 was replaced by 'stuck repairs'). No refunds/voids spikes, no discount-abuse, no register-discrepancy, no gold-price-shock, no employee-anomaly detection.
+- AdminMonitor (the actual sales monitor) subscribes to NO realtime events — it polls every 30s (AdminMonitor.vue:498). pos_sale_event and pos_session_event ARE published (pos.py:610, pos_session.py:1575) but AdminMonitor never consumes them; only session.js does, just to toggle a 'Live' badge. So live sales are up to 30s stale.
+- No system-health monitoring: no POS-offline/terminal-connectivity, no payment-gateway status, no sync-lag (POS Sync Log backlog), no printer/hardware-bridge health, no DB/API latency, no offline-queue depth — despite a hardware_bridge.py and POS Sync Log existing in the codebase.
+- No traffic-vs-sales, no footfall, no conversion — there is no people-counter / door-traffic input anywhere.
+- No live employee-activity feed at owner/manager level (who is selling what right now, register open durations, idle associates). Workforce activity is siloed in a separate WorkforceIntelligence screen.
+- No multi-store 'wall' view: stores with zero active repairs are SKIPPED entirely (live_monitor.py:115-117), so a quiet store vanishes from the command center instead of showing 'healthy/idle' — misleading for ops.
+- EmployeeLiveMonitor has NO realtime push of its own data: it subscribes to 'employee_event' (EmployeeLiveMonitor.vue:352) but nothing in the backend publishes 'employee_event' with event_type sale_completed/repair_updated for the current employee in the sale path — publish_employee_event (live_monitor.py:49) is never called from pos.py's sale flow. So the associate dashboard is effectively poll-only (and it has NO auto-refresh interval — only manual refresh button + the realtime trigger that rarely fires).
+- No role-aware unified command center: an owner must know to visit /reports/dashboards/admin for sales and a non-existent route for repair ops. There is no single screen that adapts by role.
+
+## Structural issues
+
+- FRAGMENTATION — 4 overlapping screens, no coherence: LiveMonitor.vue (dead stub), CommandCenter.vue (repair wall, orphaned), AdminMonitor.vue (sales/registers/audit), EmployeeLiveMonitor.vue (associate self). 'Live Monitor' is the title of at least three different screens (admin_monitor.json:22, LiveMonitor.vue:11, AdminMonitor.vue:26). A user cannot tell which to use.
+- ORPHAN ROUTE: CommandCenter.vue is never imported by router.js (no route for 'command-center'), and the 'Command Center' card in Dashboards.vue:228 has no `route:` field, so handleOpen() (Dashboards.vue:248-252) does nothing. The most realtime-capable screen is unreachable in the UI. Confirmed: only 1 of ~20 cards in Dashboards.vue has a `route:`.
+- DEAD STUB: LiveMonitor.vue is a 'construction' placeholder (LiveMonitor.vue:15-24) yet is the route named 'LiveMonitor' and linked from AppShell.vue:1028 as '/live-monitor'. Owners clicking 'Live Monitor' in nav hit a 'use the Command Center or Admin Monitor' message.
+- DEAD REALTIME CHANNEL: publish_anomaly_alert defined but zero callers; publish_employee_event defined but never invoked from the sale/repair hot paths. Two of three realtime publishers are unused.
+- EVENT-SHAPE FRAGILITY: CommandCenter.onRealtimeEvent (CommandCenter.vue:327) hard-reads eventData.new_status and eventData.customer — these only exist for repair status_change events. Any other repair event_type (e.g. from stripe webhook) will render undefined fields. No schema contract between publisher and subscriber.
+- BROADCAST SCALING/SECURITY: all live_monitor.py publish_realtime calls (lines 30,39,55) omit `user=`/`room=`, broadcasting repair events + employee events to EVERY connected socket. employee_live_monitor.py's careful per-employee scoping is undermined because publish_employee_event broadcasts the (employee-attributed) event to all sessions, not just that employee's. Compare: pos.py:610 correctly targets `user=mgr.parent`.
+- DUAL DATA-SOURCE FOR 'LIVE': sales live data comes from pos_session.get_live_sales_feed (AdminMonitor), repair live data from live_monitor.get_repair_live_feed (CommandCenter), employee data from employee_live_monitor — three unrelated API surfaces, no unified 'live' endpoint or event bus.
+- N+1 QUERY PATTERN in _get_store_metrics (live_monitor.py:103-175): per-warehouse it issues ~6 separate count/sql queries. With N stores that is ~6N round-trips on every 30s poll. No caching, no single aggregated query.
+- get_store_activity (employee_live_monitor.py:108) ignores the employee's store — it aggregates ALL POS invoices store-wide for the hourly chart and recent feed, not the employee's branch. The 'anonymized store activity' is actually company-wide, which may leak cross-store volume to an employee in a multi-store tenant.
+- ROLE MISMATCH between Frappe desk page and SPA route: admin_monitor.json grants 'Sales Manager' role access to the desk page (admin_monitor.json:13-17), but the embedded SPA route /reports/dashboards/admin is admin-tier-only in router.js:213 — Sales Manager will load the iframe then be redirected to Dashboard with accessDenied.
+- INCONSISTENT HTTP CLIENTS across the four screens: AdminMonitor uses frappe-ui createResource (AdminMonitor.vue:368), CommandCenter uses `call` (CommandCenter.vue:300), EmployeeLiveMonitor uses raw fetch() with manual CSRF (EmployeeLiveMonitor.vue:313). Three different data-fetching patterns for the same feature family.
+
+## Tech debt
+
+- Two unused realtime publishers (publish_anomaly_alert, publish_employee_event) — dead code masquerading as a live feature.
+- No TypeScript / no shared event-type contracts between Python publishers and Vue subscribers; event field names drift (new_status vs status).
+- Magic status-name string maps duplicated in CommandCenter.vue:423-448 (statusBarColor + statusDotColor) — single source of truth needed.
+- Hardcoded business thresholds scattered: $500 deposit rule (live_monitor.py:351), >7d severe, >5d stuck, >24h unassigned, >5/>2 overdue health (live_monitor.py:187). Not configurable, no settings doctype.
+- Hour range 9-21 hardcoded in get_store_activity (employee_live_monitor.py:125) — breaks for stores with different hours.
+- Health rule 'critical if overdue>5' ignores overdue severity (a 30-day overdue counts same as 6-day).
+- admin_monitor.js builds iframe src from frappe.boot.sitename with a fragile ternary (admin_monitor.js:9).
+- _get_store_metrics skips zero-repair stores (live_monitor.py:115) — silent data omission.
+
+## Recommendations
+
+- COLLAPSE TO ONE COMMAND CENTER: Build a single role-aware Command Center that renders different widget sets by tier (owner = full wall; manager = their stores; associate = redirects to a personal live view). Retire LiveMonitor.vue and the standalone CommandCenter.vue route, or fold their content into the unified screen. This is the #1 structural fix.
+- FIX THE REALTIME PIPELINE: (a) Wire publish_anomaly_alert into run_anomaly_detection output and into a scheduler job (hooks.py) so anomalies push in realtime AND run on a cadence even with no screen open. (b) Make AdminMonitor subscribe to pos_sale_event + pos_session_event (already published) instead of polling, keeping a 30s poll as a fallback reconcile. (c) Publish employee_event from the pos.py sale path (pos.py:610) scoped user=associate so EmployeeLiveMonitor updates live.
+- STOP BROADCASTING: add `user=` or a dedicated room to every live_monitor.py publish_realtime call (lines 30/39/55). Repair events should go to a 'store_managers' room; employee events MUST be user-scoped to preserve the isolation employee_live_monitor.py claims.
+- ADD SALES TO THE COMMAND CENTER: extend get_command_center_data to include per-store live sales (revenue today, txn count, AOV, items, hourly trend) reusing pos_session.get_live_sales_feed logic. Without this, no owner wall is credible.
+- DEFINE AN EVENT SCHEMA: create a single Python dataclass / TypedDict + a TS mirror for all live events (sale, refund, void, repair_status, session_open/close, anomaly, stock, override). Version it. Generate the TS types from Python to eliminate field drift.
+- UNIFY THE DATA LAYER: create one zevar_core.api.live endpoint family (get_command_center_state, subscribe/unsubscribe) and a single Vuex/Pinia store on the frontend that all live widgets read from. Standardize on frappe-ui `call`. Drop the raw-fetch + createResource + call triad.
+- BUILD AN ANOMALY ENGINE v2: persist alerts to an 'Operations Alert' doctype (severity, type, status=new/ack/resolved/snoozed, assigned_to, created, resolved). Add rules for refunds/voids spikes, discount-abuse, register cash discrepancy, sync-lag, gold-price shock, employee idle, offline terminal. Add rolling-baseline/z-score detection, not just static thresholds. Add ack/snooze/resolve UI + email/push routing via the existing NotificationCenter.
+- ADD SYSTEM-HEALTH WIDGETS: POS Sync Log backlog, terminal last-seen, payment-gateway ping, hardware-bridge status, offline-queue depth, API latency — feed from existing infrastructure (hardware_bridge.py, POS Sync Log).
+- STOP HIDING QUIET STORES: _get_store_metrics must return all stores with explicit 'idle/healthy' status; the wall should show green emptiness, not omit stores.
+- PERSIST LIVE HISTORY for replay: store a rolling 24h of live events (sales, repairs, sessions) in a lightweight log/Redis so a newly-opened command center backfills instantly instead of showing an empty feed until the next poll.
+- FIX THE DESK/SPA ROLE MISMATCH: align admin_monitor.json roles with router.js reportRoles=['admin'], or relax the SPA route to include 'Sales Manager' intentionally.
+
+---
+
+# Sales Monitor
+
+**Summary:** There is NO dedicated "Sales Monitor" module in Zevar. Sales-performance visibility is fragmented across at least 6 surfaces that do not know about each other: (1) a shallow Revenue.vue SPA page backed by revenue_dashboard.py, (2) the AdminMonitor.vue "Live Monitor" whose sales tab is just a raw recent-invoice list from pos_session.get_live_sales_feed, (3) the analytics_hub.py "sales hero" card, (4) the reports.py REPORT_CATALOG which advertises ~10 "Sales Performance" reports, (5) a set of native Frappe Script Reports (hourly_sales, sales_by_salesperson, top_selling_jewelry) embedded via an iframe in ReportViewer.vue, and (6) the EOD closeout payload in reports.py. The data primitives that DO exist are solid — sales totals, transaction counts, AOV/avg ticket, hourly distribution, YoY/WoW day-compare, top salespeople by revenue, category/metal breakdowns — and the EOD engine is genuinely well-engineered (role-aware, parameterized SQL, graceful degradation). But the analytical depth expected of a purpose-built sales-monitor product is almost entirely absent: ZERO foot-traffic capture, ZERO conversion rate, ZERO UPT/IPT, ZERO multi-day trend lines (only single-day or 30-day sparkline), ZERO channel comparison, ZERO store-vs-store sales pacing, and targets exist only in a workforce-compensation report (performance_target_progress), not as a live sales-vs-target monitor. The frontend exposure is thin: every sales dashboard is single-day only with no date selector, no period comparison, and no drill-down. This is the weakest of the four modules and currently functions as a "today's number" glance, not a sales-performance intelligence tool.
+
+
+## Files read
+
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/dashboards/Revenue.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/dashboards/AdminMonitor.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/dashboards/CommandCenter.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/reports/RevenueTab.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/ReportViewer.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/revenue_dashboard.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/sales_history.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/reports.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/analytics_hub.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/live_monitor.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/pos_session.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/report/hourly_sales/hourly_sales.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/report/sales_by_salesperson/sales_by_salesperson.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/report/performance_target_progress/performance_target_progress.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/report/top_selling_jewelry/top_selling_jewelry.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/router.js`
+
+## Endpoints
+
+- `zevar_core.api.revenue_dashboard.get_dashboard_data (summary+hourly+categories+top_salespersons, today only)`
+- `zevar_core.api.revenue_dashboard.get_today_summary / get_hourly_distribution / get_category_breakdown / get_top_salespersons`
+- `zevar_core.api.sales_history.get_sales_history / get_sales_summary / get_transaction_details / get_sales_by_payment_mode / export_sales_history`
+- `zevar_core.api.pos_session.get_live_sales_feed (recent invoices + open sessions + summary, last-N hours)`
+- `zevar_core.api.pos_session.get_all_active_sessions`
+- `zevar_core.api.analytics_hub.get_hub_data (sales hero card + revenue breakdown + 30d sparkline)`
+- `zevar_core.api.analytics_hub.get_daily_revenue_breakdown`
+- `zevar_core.api.reports.get_eod_summary / get_daily_brief / get_eod_closeout_report (revenue + hourly + YoY/WoW + salesperson perf)`
+- `zevar_core.api.reports.get_report_catalog / get_report_defaults / get_row_actions`
+- `Native Frappe Script Reports (iframe): hourly_sales, sales_by_salesperson, top_selling_jewelry, fast_moving_items, slow_moving_items, performance_target_progress`
+
+## Current capabilities
+
+- Today's sales total, transaction count, avg ticket/AOV (revenue_dashboard.py:_get_today_summary; reports.py:_eod_revenue)
+- Hourly sales distribution by hour-of-day with peak-hour detection (revenue_dashboard.py:_get_hourly_distribution 9am-8pm only; hourly_sales.py report covers full 24h with chart)
+- Year-over-year day compare (YoY %) and Week-over-week compare (WoY %) — reports.py:_eod_compare_deltas and _brief_yoy_deltas; revenue_dashboard also computes YoY
+- Top salespeople by revenue (via tabSales Commission Split joins) — revenue_dashboard.py:_get_top_salespersons
+- Category breakdown by custom_jewelry_type and (catalog-only) by metal/purity — revenue_dashboard.py:_get_category_breakdown
+- Payment-method/tender breakdown with grouped split (cash/card/financing/gift card/trade-in) — reports.py:_eod_tender_breakdown
+- 30-day revenue sparkline — analytics_hub.py:get_daily_revenue_breakdown returns sparkline_30d
+- Sales-by-salesperson native report: revenue + transaction_count + avg_sale — sales_by_salesperson.py
+- Targets vs actuals at the EMPLOYEE/period level (Performance Target doctype + Performance Log) — performance_target_progress.py report
+- Live recent-invoice feed + open POS sessions — pos_session.py:get_live_sales_feed (30s polling in AdminMonitor.vue)
+- EOD Z-report with PDF export, cash reconciliation, voids/refunds/discounts audit — reports.py:get_eod_closeout_report + generate_eod_pdf
+- Sales history transaction search with filters, pagination, CSV export — sales_history.py
+- Transaction stream segmentation (jewelry sales / repairs / layaway / trade-in / gold purchase / gift card) — reports.py:_eod_transaction_streams
+
+## Strengths
+
+- The EOD closeout engine (reports.py lines 1646-3067) is the strongest asset: role-aware, fully parameterized SQL, graceful per-section degradation via _eod_safe(), and a real 10-section A-J structure with hourly breakdown + YoY/WoW deltas + salesperson performance + tender breakdown — this is production-grade code that a Sales Monitor module could build directly on top of.
+- Consistent, careful SQL discipline in reports.py: _eod_owner_clause() enforces own-sales-only scoping for non-managers everywhere, and all user/date/store values use %s placeholders (never interpolated).
+- Role-based access is handled seriously: REPORT_CATALOG carries explicit role sets per report, and the EOD/brief endpoints mask financial sections to ACCOUNTING_ROLES/ADMIN_ROLES only.
+- Hourly sales distribution exists in two complementary forms (9-8pm SPA bar chart + full 24h native report) — a genuine building block for traffic-pattern analysis.
+- The transaction-stream segmentation in _eod_transaction_streams is jewelry-specific and thoughtful: it separates jewelry sales, repairs, layaway deposits, trade-ins, gold purchases, and gift cards, which generic ERPs never do.
+- EOD includes a peak-hour computation and refund-vs-gross-sales separation, giving a usable (if narrow) sales pulse.
+
+## Gaps
+
+- NO foot-traffic / door-counter / people-counter data source exists ANYWHERE in the codebase (grep for door_count/footfall/people_counter/visitor_count/walk_in_count returns zero). Without a traffic numerator, conversion rate is structurally impossible — the single most important sales-monitor KPI cannot exist.
+- NO conversion rate, capture rate, or browse-to-buy metric anywhere.
+- NO UPT / IPT (units or items per transaction) anywhere. sales_by_salesperson.py computes transaction_count and avg_sale but never SUM(qty); the data (tabSales Invoice Item.qty) is available but unused. Revenue.vue and the EOD report likewise never compute it.
+- NO multi-day trend visualization in any SPA dashboard. Revenue.vue, RevenueTab.vue, and AdminMonitor.vue are all single-day (today) with no date picker, no period selector, no 7/30/90-day line. The only trend is a 30-day sparkline buried in analytics_hub's hero card with no axis, no labels, no comparison.
+- NO daily/weekly/monthly sales trend chart with selectable granularity anywhere in the SPA.
+- NO targets-vs-actuals in the SALES context. performance_target_progress.py is employee/compensation-oriented; there is no store-level daily sales target, no live pacing-to-target gauge, no forecast-to-close projection.
+- NO channel comparison (in-store POS vs online vs phone/B2B vs memo/consignment) — channels are not modeled as a sales dimension anywhere.
+- NO store-vs-store sales comparison in the SPA. The REPORT_CATALOG lists a 'Store Scorecard' but it is a catalog stub; the live Command Center (CommandCenter.vue) shows only REPAIR metrics per store, not sales.
+- NO traffic-vs-sales correlation or staffing-adequacy view (the hourly report's own docstring says 'for staffing, goals, and traffic patterns' but has no traffic data to fulfill that).
+- NO salesperson leaderboard that includes UPT, conversion, attach rate, or margin — only revenue and transaction count.
+- NO sales-velocity / run-rate / projected-close-for-day metric (a hallmark of purpose-built sales monitors).
+- NO slow-mover vs fast-mover SALES-velocity analysis surfaced in a sales dashboard (fast_moving_items/slow_moving_items reports exist but are inventory-oriented, embedded via iframe, and not in any sales monitor).
+- NO basket/affinity analysis (items sold together) anywhere.
+- NO sales-anomaly detection for SALES (live_monitor.py:run_anomaly_detection is repair-only).
+- The REPORT_CATALOG 'Sales Performance' group (reports.py lines 116-222) lists Hourly Sales, Sales by Salesperson, Sales by Category, Sales by Metal, Average Ticket, High Value Sales, YoY Day Compare, and Store Scorecard — these are opened via a bare iframe to the Frappe desk (ReportViewer.vue), so they are stylistically disconnected from the SPA and offer no cross-filtering, no drill-down, and no combined view.
+
+## Structural issues
+
+- Extreme fragmentation: sales performance is computed in at least 3 independent Python modules (revenue_dashboard.py, analytics_hub.py, reports.py EOD/brief) with duplicate, divergent SQL for the same metrics (e.g. today's sales total is computed 4+ different ways). There is no shared sales-aggregation service layer, guaranteeing numbers will drift between surfaces.
+- Revenue.vue calls revenue_dashboard.get_dashboard_data with raw fetch() + manual CSRF header (Revenue.vue:198-203) while AdminMonitor.vue uses frappe-ui createResource and CommandCenter.vue uses call() — three different HTTP patterns in three dashboards, with Revenue.vue bypassing the standard frappe-ui resource/caching layer entirely.
+- Every SPA sales dashboard is hardcoded to 'today' with no date input. revenue_dashboard.get_dashboard_data takes NO parameters (revenue_dashboard.py:17) and always uses nowdate(); get_live_sales_feed only takes a hours-lookback window. This makes historical analysis impossible from the monitor UI.
+- REPORT_CATALOG vs reality mismatch: the catalog (reports.py:116-222) advertises 'Store Scorecard', 'Sales by Metal', 'High Value Sales' reports, but several have no corresponding report definition in unified_retail_management_system/report/ — they are catalog-only stubs that will render 'Report not available' in ReportViewer.vue. The catalog and the filesystem are not validated against each other.
+- The live_monitor.py module is mislabeled as the 'multi-store command center' for SALES (per the task description) but is actually 100% repair-focused: _get_store_metrics, _get_system_kpis, and run_anomaly_detection query only tabRepair Order. There is no equivalent live SALES anomaly/multi-store engine.
+- Two parallel 'Live Monitor' pages exist and overlap confusingly: AdminMonitor.vue (route /reports/dashboards/admin, polls 4 endpoints every 30s) and the /live-monitor route (LiveMonitor.vue) plus CommandCenter.vue (repair-only). Sales activity is split between them with no single source of truth.
+- The 30-day sparkline in analytics_hub hardcodes repair revenue to '0 as repair' in the SQL (analytics_hub.py:280) — the trend line is sales-only and silently mislabeled, so even the one trend visualization is partially broken.
+- No caching/materialization layer: every dashboard hit re-runs raw aggregations against tabSales Invoice. The EOD report alone fires ~15+ queries per request. At scale (multi-store, multi-year) this will not perform.
+- hourly_sales report (and revenue_dashboard) group by HOUR(posting_time) but do not bucket zero-sales hours, and revenue_dashboard hardcodes a 9am-8pm window (revenue_dashboard.py:125) that will hide early/late sales — an arbitrary and lossy choice baked into the chart.
+
+## Data model
+
+- Sales Invoice (tabSales Invoice) — primary sales fact: is_pos=1, docstatus=1, posting_date, posting_time, grand_total, base_grand_total, net_total, owner (used as salesperson proxy), custom_transaction_stream (jewelry/layaway-deposit/etc.), is_return, is_discounted, discount_amount, cost_center (store proxy)
+- Sales Invoice Item (tabSales Invoice Item) — line-level: qty, rate, amount, item_code; joined to Item for custom_jewelry_type, custom_metal, custom_purity. NOTE: qty is available here but never aggregated into a UPT metric.
+- Sales Invoice Payment (tabSales Invoice Payment) — tender-level: mode_of_payment, amount — basis for payment-method breakdown
+- Sales Commission Split (tabSales Commission Split) — employee, sales_invoice, sale_amount, commission_amount — the ONLY reliable salesperson attribution (owner is an unreliable proxy); used by top-salespersons and salesperson performance
+- POS Opening Entry / POS Closing Entry — session windows, opening float, expected/counted cash — basis for cash reconciliation and open-session counts
+- Performance Target + Performance Log (workforce doctypes) — revenue_target vs revenue_achieved per employee/period; the ONLY place targets exist (compensation-oriented, not store sales pacing)
+- Repair Order, Layaway Contract, Gold Purchase, Gift Card, Trade In Record — separate fact tables for non-jewelry streams, stitched together only in the EOD transaction-streams section
+- MISSING data model: NO traffic/footfall fact table, NO door-counter integration, NO sales-target doctype at the store/day/channel level, NO sales-channel dimension on Sales Invoice (channel is not modeled)
+
+## Tech debt
+
+- Duplicate sales-total SQL across revenue_dashboard.py, analytics_hub.py:get_daily_revenue_breakdown, reports.py:_eod_revenue, reports.py:_brief_sales, and sales_history.py:get_sales_summary — five implementations of essentially the same aggregation with subtly different filters (is_pos, base_grand_total vs grand_total, owner scoping).
+- reports.py is a 3067-line monolith mixing a static report catalog, EOD closeout, daily brief, row-action dispatch, and subscription CRUD — it has grown beyond a single responsibility and already has a reports.py.bak-pre-eod backup file signaling churn.
+- revenue_dashboard.py uses frappe.qb in some helpers and raw SQL in others, and defines its own local cint() helper (line 199) instead of importing frappe.utils.cint.
+- Revenue.vue uses a hand-rolled fetch() instead of the frappe-ui resource pattern used everywhere else, and constructs CSRF headers manually — inconsistent and error-prone.
+- The catalog's report_name strings (e.g. 'Hourly Sales', 'Store Scorecard') are not enforced against existing Frappe report docs, so dead links accumulate silently.
+- CommandCenter.vue (route /reports/dashboards/command implied) is entirely repair-oriented yet sits in the dashboards folder alongside Revenue.vue — module boundaries are unclear.
+
+## Recommendations
+
+- Establish a single sales-aggregation service layer (e.g. zevar_core/api/sales_monitor.py) that owns ALL sales KPI computation, and refactor revenue_dashboard.py, the EOD revenue section, and analytics_hub's sales hero to call it. Eliminate the 5 duplicate today's-sales queries. Build a daily-store sales-rollup materialized table (date x store x salesperson x channel) refreshed on invoice submit/cancel to make every monitor query sub-100ms.
+- Build the missing core KPIs from existing data first (cheap wins): UPT = SUM(Sales Invoice Item.qty)/COUNT(invoices); attach rate; refund/void rate; sales velocity (per-hour run-rate) and projected-day-close. These need NO new data capture.
+- Solve the conversion-rate gap deliberately: it is the headline KPI of every serious retail sales monitor. Either (a) integrate a door-counter/people-counter (hardware via the existing scripts/hardware_bridge.py) and model a Store Traffic Log doctype, or (b) ship a manual staff traffic-count entry on POS open/close as a pragmatic v1. Without this, Zevar cannot match LightspeedRetail/RetailPro/ShopifyPOS sales analytics.
+- Model sales CHANNEL as a first-class dimension on Sales Invoice (in-store / online / phone / B2B / memo) so channel-mix and channel comparison become possible — currently nonexistent.
+- Create a store-level Sales Target doctype (store x day/week/month x target_revenue x target_units x target_UPT) distinct from the employee Performance Target, and drive a live pacing-to-target gauge + forecast-to-close in the monitor.
+- Build one purpose-built Sales Monitor SPA page (not 6 fragments) with: a real date-range picker + period granularity toggle (hour/day/week/month), a multi-KPI trend chart with prior-period + YoY overlay, a conversion funnel (traffic -> engaged -> try-on -> sale), a store-vs-store pacing wall, a salesperson leaderboard ranked on revenue+UPT+conversion+margin, and a slow-vs-fast mover velocity panel. Consolidate AdminMonitor/CommandCenter/Revenue into role-scoped views of this one module.
+- Replace the iframe-embedded Frappe reports (ReportViewer.vue) for the Sales Performance group with in-SPA components, OR at minimum add cross-filtering and drill-through so a user can click an hour bar and see the underlying transactions.
+- Add SALES anomaly detection to live_monitor.py (currently repair-only): unusual volume drops, zero-sale hours during open sessions, AOV spikes/drops, refund clusters, and discount-rate spikes — mirroring the repair anomaly engine that already exists.
+- Fix the broken 30-day sparkline (analytics_hub.py:280 hardcodes '0 as repair') and surface it in Revenue.vue with axis labels and a selectable comparison period; today Revenue.vue shows no trend at all.
+- Add caching/materialization: the EOD closeout fires 15+ raw queries per call; a daily sales-rollup table would collapse most of these and make multi-store, multi-year monitors responsive.
+
+---
+
+# Workforce Intelligence
+
+**Summary:** Workforce Intelligence has a remarkably sophisticated BACKEND and an essentially nonexistent FRONTEND. The backend (zevar_core/api/performance.py, 1054 lines) implements a genuine jewelry-retail performance/compensation engine: an immutable Performance Log event stream fed by doctype hooks; a weighted 3-axis scorecard (Revenue/Activity/Quality); a tiered hourly-rate compensation algorithm (guaranteed -> target -> superior, with linear interpolation and a performance floor) that integrates commission; and an automated quarterly-review generator with data-driven strengths/improvements text and QoQ deltas. Four well-modelled doctypes back it (Performance Log, Performance Target, Compensation Calculation, Quarterly Performance Review). HOWEVER the Vue UI is two empty 28-29 line 'coming soon' stubs, so NONE of this capability reaches users. Worse, a critical wiring bug means the single most important event logger (Sale Completed) is never triggered, starving the entire pipeline of revenue data. On top of that, gamification, live push, coaching/1:1s, scheduling/clock-in, and several scorecard metrics are entirely absent or hardcoded to 0. The module is ~80% of a best-in-class backend with ~0% frontend exposure and one load-bearing integration bug.
+
+
+## Files read
+
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/performance.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/employee_live_monitor.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/commission.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/sales_associates.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/hooks.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/doctype/performance_log/performance_log.json`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/doctype/performance_log/performance_log.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/doctype/performance_target/performance_target.json`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/doctype/performance_target/performance_target.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/doctype/compensation_calculation/compensation_calculation.json`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/doctype/quarterly_performance_review/quarterly_performance_review.json`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/dashboards/WorkforceIntelligence.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/dashboards/AssociateDetailPerformance.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/dashboards/EmployeeLiveMonitor.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/router.js`
+
+## Endpoints
+
+- `GET zevar_core.api.performance.get_employee_performance_summary`
+- `GET zevar_core.api.performance.get_team_performance`
+- `GET zevar_core.api.performance.get_live_scoreboard`
+- `GET zevar_core.api.performance.get_performance_history`
+- `GET zevar_core.api.performance.get_performance_trend`
+- `POST zevar_core.api.performance.run_compensation_calculation`
+- `POST zevar_core.api.performance.bulk_calculate_compensation`
+- `GET zevar_core.api.performance.get_quarterly_review`
+- `POST zevar_core.api.performance.finalize_review`
+- `POST zevar_core.api.performance.acknowledge_review`
+- `GET zevar_core.api.performance.get_review_history`
+- `GET zevar_core.api.performance.get_team_review_summary`
+- `SCHED zevar_core.api.performance.generate_quarterly_reviews (cron 0 2 1 1,4,7,10 *)`
+- `GET zevar_core.api.employee_live_monitor.get_employee_dashboard (used by EmployeeLiveMonitor.vue, NOT by WorkforceIntelligence.vue)`
+- `GET zevar_core.api.commission.get_employee_commissions`
+- `GET zevar_core.api.commission.get_invoice_commission_summary`
+- `GET zevar_core.api.sales_associates.get_sales_associates`
+
+## Current capabilities
+
+- Immutable Performance Log event stream (Performance Log doctype, performance_log.py enforces immutability: no edit/delete/cancel) with 12 event types: Sale Completed, Layaway Created/Completed, Repair Completed, Return Processed, Upsell Recorded, Clock In/Out, Shift Complete, No-Show, Late Arrival, Overtime.
+- ⚠️ **VERIFIED CORRECTION (2026-06-16, direct code trace):** NONE of the performance log hooks are wired. `_create_performance_log` (performance.py:75) is called only by `log_sale_event`/`log_sale_cancel_event`/`log_layaway_event`/`log_repair_event`/`log_attendance_event` (performance.py:127/163/197/228/269), and none of those are registered in `hooks.py` nor called anywhere (grep across the package = zero references). The active `hooks.py` `doc_events` covers only `Item` and `Sales Invoice` (no `Layaway Contract` / `Repair Order` / `Attendance` key); the second `unified_retail_management_system/hooks.py` has its `doc_events` commented out. **The `Performance Log` table is therefore empty in production** — so the 12 event types below are a design intent, not live data. An earlier note in this audit claiming layaway/repair/attendance were "wired at hooks.py:77/80/83" was wrong (those lines are `scheduler_events`). The intended design (doctype hooks feeding the immutable log) is sound and worth completing — it is simply not connected today.
+- Weighted 3-axis scorecard engine: Revenue weight (default 50%), Activity (30%), Quality (20%), validated to sum to 100% (performance_target.py:39-46). Achievement %s computed for revenue, items, customers, repairs; return-rate drives quality score.
+- Tiered hourly-rate compensation algorithm (performance.py:591-612): guaranteed -> linear interpolation to target between min_pct and 100 -> superior rate at >=100, plus guaranteed_pay / performance_bonus / performance_deduction split. Final pay = hours*effective_rate + commission. This is a real, defensible commission-plus-performance-pay model.
+- Commission integration: log_sale_event pulls per-employee commission from Sales Commission Split via _get_commission_map (performance.py:286-293); commission engine itself (commission.py) supports Flat / By-Discount-Range / By-Profit-Margin / By-Sale-Amount rules with tiered Commission Range children.
+- Compensation Calculation doctype persists full per-period pay breakdown (hours, revenue/activity/quality metrics, pay components, final pay) and is submittable + Employee-readable (if_owner).
+- ⚠️ **VERIFIED:** quarterly-review generator `generate_quarterly_reviews` is defined (performance.py) but is **NOT in the active `scheduler_events`** (the active `zevar_core/hooks.py` scheduler lists only `fetch_live_metal_rates`, finance charges, layaway, eod brief, compliance/reorder at `0 6`). The earlier "wired hooks.py:92" claim was incorrect. Reviews are therefore never auto-generated.
+- Review workflow APIs: get_quarterly_review, finalize_review (manager), acknowledge_review (employee self-service with ownership verification), get_review_history, get_team_review_summary.
+- Performance Target validation is solid: date ordering, weight sum=100, hourly-rate monotonicity (guaranteed<=target<=superior), threshold sanity, and overlap prevention per employee+period_type (performance_target.py:80-109).
+- Separate employee-facing live view exists: employee_live_monitor.py (277 lines) powers EmployeeLiveMonitor.vue 'My Dashboard' — user-scoped today/yesterday revenue, items, active POS session, anonymized store hourly activity, personal repair/layaway/todo task queue. Strict self-scoping (no cross-employee data).
+- Role-gated endpoints: performance.py uses frappe.only_for for System/HR/Store/Sales Manager roles on every query/mutation.
+
+## Strengths
+
+- The compensation model is genuinely jewelry-retail-appropriate and uncommonly sophisticated: tiered hourly rates (guaranteed/target/superior) with interpolation reward high performers while guaranteeing a floor — this mirrors how real jewelry commission-plus-draw stores pay, and is more nuanced than typical POS 'flat % commission'.
+- Performance Log immutability is enforced at the controller level (performance_log.py before_save/on_trash/on_cancel all throw), making the event stream audit-defensible — important for pay disputes and compliance.
+- Clean separation of concerns: event capture (hooks) -> immutable log -> aggregation (summary/scoreboard) -> calculation (compensation) -> review (quarterly) is a sound data pipeline.
+- The quarterly-review auto-insight generator (_generate_review_insights) produces contextual, data-driven strengths/improvements copy rather than boilerplate — a nice 'AI-flavoured' touch that adds real manager value.
+- Strong validation on Performance Target prevents bad comp configs (rate inversions, weight drift, overlapping periods) before they corrupt payroll.
+- Role model is well thought out: managers write/finalize, employees self-acknowledge with ownership proof (acknowledge_review checks _resolve_employee_from_user == review.employee).
+- employee_live_monitor.py enforces honest privacy scoping (employees see anonymized store aggregates + only their own data) — good trust design.
+
+## Gaps
+
+- CRITICAL WIRING BUG: log_sale_event and log_sale_cancel_event are NEVER registered in hooks.py. The Sales Invoice on_submit block (hooks.py:65-69) lists only calculate_commissions, detect_stock_reduction, release_reservation_for_invoice — log_sale_event is absent (verified: grep returns exit 1). Result: 'Sale Completed' and 'Return Processed' Performance Logs are never created, so revenue (the dominant scorecard axis) is always 0 in get_employee_performance_summary, get_live_scoreboard, and run_compensation_calculation. The most important metric in the module is silently dead.
+- FRONTEND IS ENTIRELY STUBBED: WorkforceIntelligence.vue (29 lines) and AssociateDetailPerformance.vue (28 lines) both render only a 'coming soon' construction icon. ZERO backend endpoints are called from the Vue layer (confirmed by grep — only EmployeeLiveMonitor.vue calls a different API). The entire performance.py surface is unreachable from the UI.
+- No live/push scoreboard. get_live_scoreboard (performance.py:421-425) is just a thin alias for get_team_performance(...,today()), which itself N+1-queries get_employee_performance_summary per associate and re-aggregates ALL logs in Python — no websocket/SSE, no caching, no incremental rollup. It would not scale beyond a small store and is not 'live'.
+- Gamification entirely ABSENT: no leaderboard, badges, achievements, streaks, contests, SPIFFs, or peer recognition anywhere in backend or frontend (grep for gamif/leaderboard/badge/streak/reward/contest/spiff found zero real matches).
+- Coaching / 1:1s / development plans ABSENT as functionality: Quarterly Performance Review has a development_plan TEXT field but no coaching doctype, no 1-on-1 meeting log, no action items with due dates, no mentor pairing, no training-module tracking. _generate_review_insights is the closest thing to 'coaching intelligence' and it only emits static text.
+- Scheduling / clock-in / roster ABSENT: no Zevar shift, roster, or time-clock doctype exists (only ERPNext Attendance is used). 'Clock In'/'Clock Out'/'Overtime' are defined event types but NOTHING produces them. calc.scheduled_hours and calc.attendance_percentage are hardcoded to 0 (performance.py:628-629, 647-649). Hours worked depends entirely on ERPNext Attendance being populated.
+- Several scorecard fields hardcoded to 0: high_ticket_sales=0 (performance.py:636), upsells=0 (642), customer_satisfaction=100 (647), layaway_default_rate=0 (648); quarterly review activity_score=0, quality_score=0, punctuality_score=0, quarterly_target=0, revenue_achievement_pct=0, layaway_conversions never set (performance.py:982-988, 987-988). These degrade the scorecard's honesty.
+- No UPT (units per transaction), ATV trend, conversion rate, attach rate, or traffic-vs-sales analytics — the standard jewelry associate KPIs — are computed or stored.
+- No targets-vs-actuals visualization, no quota progress bars, no 'pace to target' / projected attainment calculation anywhere.
+- get_team_performance (performance.py:390-417) has an N+1 problem: it loops targets and calls get_employee_performance_summary per employee, each of which re-queries all logs and re-resolves the target — O(employees x logs) per page load.
+- No tests found that exercise performance.py (only unrelated event_type strings in test_integration.py); the comp algorithm and review generator are untested.
+- bulk_calculate_compensation catches exceptions per-employee but run_compensation_calculation THROWS on duplicate-existing (performance.py:522-525), so re-running a bulk batch after any partial success will error on already-calculated employees — no idempotent skip/recompute.
+- No 'what-if' / pay simulation: managers cannot model how a rate or weight change would affect pay without running a real calculation.
+
+## Structural issues
+
+- DATA INTEGRITY: Because log_sale_event is unwired, every downstream artifact (Compensation Calculation, Quarterly Performance Review, live scoreboard) is computed from an incomplete event stream. Any comp run executed to date has understated revenue and therefore underpaid associates. This is a payroll-affecting bug, not a cosmetic one.
+- DEAD EVENT TYPES: Of 12 declared Performance Log event types, only 4 are ever produced (Layaway Created, Repair Completed, Shift Complete/Late Arrival/No-Show). 'Layaway Completed', 'Upsell Recorded', 'Clock In', 'Clock Out', 'Overtime' have producers nowhere in the codebase; 'Sale Completed' and 'Return Processed' have producers that are unwired. The schema promises an event model the system does not deliver.
+- TWO PARALLEL EMPLOYEE-VIEW SYSTEMS: performance.py (manager-facing, log-aggregated) and employee_live_monitor.py (employee-facing, direct SQL on Sales Invoice/Commission Split) compute 'today's revenue' two completely different ways. The live monitor reads Sales Commission Split.allocated_amount directly via SQL; the performance engine reads Performance Log.revenue_amount. They will diverge, and neither is canonical.
+- FRONTEND/BACKEND CHASM: 13 whitelisted endpoints + a scheduler in performance.py vs two stub components. The router (router.js:473-485) routes to the stubs with manager/admin role gating — so the role policy is ready but the UI was never built. This is the single biggest leverage point: building the UI unlocks a large existing backend.
+- N+1 / PYTHON-SIDE AGGREGATION: get_team_performance -> get_employee_performance_summary pulls every log row into Python and loops (performance.py:335-348, 538-553). No SQL GROUP BY, no materialized summary table, no date index dependency beyond event_date. Will degrade as log volume grows.
+- INCONSISTENT EMPLOYEE RESOLUTION: log_sale_event/log_sale_cancel_event expect custom_salesperson_splits rows with an .employee field; log_layaway_event resolves via Sales Person.employee with a fallback to doc.owner's user_id; log_repair_event resolves via assigned_to -> user_id. Three different resolution strategies, none centrally tested, fragile if ERPNext field conventions change.
+- REVIEW GENERATOR LEAVES FIELDS EMPTY: _create_quarterly_review explicitly sets activity_score=0, quality_score=0, quarterly_target=0, revenue_achievement_pct=0, recommended_rate unset, bonus_recommendation unset (performance.py:982-988, 1003-1004). The review doctype's Compensation Impact section (recommended_rate, bonus_recommendation) is never populated — a visibly incomplete review for managers.
+- BULK COMP IS NOT IDEMPOTENT: run_compensation_calculation throws on existing Calculation (performance.py:513-525) instead of offering --recompute; bulk runs partially fail and require manual cleanup.
+- acknowledge_review (performance.py:743-758) has NO role gate (no frappe.only_for) and relies solely on _resolve_employee_from_user equality — if that helper returns None for a legitimate employee (e.g. user_id not set on Employee), the endpoint throws a confusing 'only acknowledge your own' error instead of a clear auth message.
+
+## Data model
+
+- Performance Log (immutable event stream): employee, event_type (12-option select), event_date, reference_doctype/document, store_location, performance_target (link), period_type, revenue_amount, item_count, customer, commission_amount, hours_worked, custom_data (JSON). Autoname PLOG-YYMMDD-#####. Not submittable; immutability enforced in controller.
+- Performance Target (submittable): employee, store_location, period_type (Weekly/Monthly/Quarterly/Annually), period_start/end, status (Draft/Active/Completed/Cancelled). Revenue targets (revenue_target, avg txn, high-ticket count, layaway conversion). Activity targets (customers, items, repairs, upsell %). Quality targets (max return rate, CSAT, max layaway default). Weights (revenue 50/activity 30/quality 20, must sum 100). Comp params (guaranteed/target/superior hourly rate, minimum_performance_pct 60, termination_threshold_pct 40). Calc method (Fixed/Historical/Store-Avg/Seasonal). Controller validates all of the above.
+- Compensation Calculation (submittable, Employee-readable): links Performance Target; stores total_hours_worked, scheduled_hours(always 0), attendance_%(always 0); full revenue/activity/quality metric set + achievement %s; overall_performance_score; effective_hourly_rate; guaranteed_pay/performance_bonus/performance_deduction; commission_earned + commission_details JSON; final_calculated_pay. Status Draft/Calculated/Finalized.
+- Quarterly Performance Review (submittable, Employee-readable): review_period Q1-Q4 + year; overall_score, performance_tier (5 tiers), qoq_change, revenue/activity/quality scores; quarterly revenue/target/achievement; behavioral (attendance_rate, punctuality_score always 0, avg_hours/week); auto_identified_strengths/improvements (Text Editor); recommendation (4 options) + rationale; compensation impact (current/recommended rate, bonus rec — recommended & bonus never populated); manager_comments + development_plan (editable); acknowledged_by_employee + acknowledgment_date. Status Draft/Generated/Reviewed/Finalized/Acknowledged.
+- Sales Commission Split (from commission module): sales_invoice, employee, posting_date, sale_amount, split_percent, commission_rate, commission_amount, status. The factual revenue source that performance.py's log_sale_event reads via _get_commission_map.
+- Salesperson Split Detail: child table (employee, split_percent) on Sales Invoice as custom_salesperson_splits — the input to both commission calculation and (intended) sale-event logging.
+- Depends on ERPNext core: Employee, Sales Person, Attendance (no Zevar-native shift/roster/clock-in doctype).
+
+## Tech debt
+
+- Unwired log_sale_event/log_sale_cancel_event — the headline bug; until fixed the whole revenue axis is silent.
+- Hardcoded-zero scorecard fields (high_ticket_sales, upsells, scheduled_hours, attendance_percentage, customer_satisfaction, layaway_default_rate, quarterly activity/quality scores, recommended_rate, bonus_recommendation) — placeholders that masquerade as real metrics.
+- N+1 Python aggregation in get_team_performance/get_employee_performance_summary — needs SQL GROUP BY or a nightly rollup/materialized summary.
+- Two divergent revenue paths (Performance Log vs Sales Commission Split direct SQL in employee_live_monitor.py) with no reconciliation.
+- Six declared-but-unproduced Performance Log event types (schema drift).
+- No test coverage for the compensation algorithm, review generator, or event hooks.
+- bulk_calculate_compensation is non-idempotent (throws on re-run).
+- acknowledge_review lacks a clean auth path / role declaration.
+- Frontend stubs with no data layer, no API service module for performance.py, no chart components — the entire presentation layer is greenfield.
+
+## Recommendations
+
+- FIX THE WIRING FIRST (P0, hours not days): add 'zevar_core.api.performance.log_sale_event' to the Sales Invoice on_submit list and 'zevar_core.api.performance.log_sale_cancel_event' to on_cancel in hooks.py (hooks.py:65-73). Without this, every comp/scoreboard number is wrong. Add a backfill task to create Sale Completed logs from historical submitted POS Sales Invoices + their Sales Commission Splits.
+- BUILD THE WORKFORCE UI (P0): replace WorkforceIntelligence.vue and AssociateDetailPerformance.vue with real dashboards. Manager view: live ranked scoreboard (revenue, ATV, UPT, txn count, attendance, % to target, pace), target-vs-actual bars, multi-store toggle, comp-run trigger. Associate detail: KPI hero cards, performance-trend chart (get_performance_trend), Compensation Calculation history, latest Quarterly Performance Review with strengths/improvements, acknowledge button, development plan. All 13 endpoints already exist.
+- ADD REAL-TIME PUSH (P1): get_live_scoreboard is poll-only and N+1. Add a websocket/SSE channel (or Frappe realtime) pushing per-store scoreboard deltas, and back it with a SQL GROUP BY query or a periodic rollup table so it scales beyond one store.
+- IMPLEMENT GAMIFICATION (P1, new doctypes): Leaderboard (daily/weekly/monthly, scoped by store), Badges/Achievements (e.g. 'First $10k day', '5 high-ticket week', '30-day punctuality streak'), SPIFFs/contests (manager-defined short-term incentives with live progress), peer shout-outs. Surface on both manager wall and associate self-view. This is table-stakes for world-class jewelry POS and is entirely missing.
+- BUILD COACHING (P1, new doctype): 1-on-1 meeting log (date, manager, agenda, notes, action items with owner+due date), coaching action items linked to auto-identified improvements, skill/training-module tracker, mentor pairing. Wire the Quarterly Review's empty development_plan field into a real coaching loop.
+- ADD SCHEDULING + CLOCK-IN (P2, new doctypes): Shift/Roster doctype (employee, store, day, start/end, break), POS-based clock-in/clock-out producing 'Clock In'/'Clock Out' Performance Logs and computing worked hours directly (removing dependency on ERPNext Attendance and fixing the hardcoded scheduled_hours/attendance_percentage=0).
+- POPULATE THE ZERO FIELDS (P1): compute high_ticket_sales from item lines > target.high_ticket_threshold; compute upsells from multi-item invoices; compute layaway_conversions and default_rate from Layaway Contract; derive attendance_percentage and punctuality_score from shift/clock data; populate quarterly activity_score/quality_score/recommended_rate/bonus_recommendation so reviews stop showing blank sections.
+- ADD ASSOCIATE KPIs (P1): UPT (items/txn), ATV, conversion (traffic/sales — needs footfall source), attach rate, revenue per hour worked, sales per shift — store on Compensation Calculation and expose in UI.
+- MAKE BULK COMP IDEMPOTENT (P2): change run_compensation_calculation to support force/recompute instead of throwing on existing; let bulk_calculate_compensation skip-or-replace cleanly.
+- ADD TESTS + WHAT-IF (P2): unit tests for the tiered-rate interpolation and review-tier mapping; a pay-simulation endpoint so managers can model rate/weight changes before committing.
+- RECONCILE THE TWO REVENUE PATHS (P2): make Performance Log the canonical source and have employee_live_monitor.py read from it (or vice-versa) so the manager view and employee view never disagree.
+
+---
+
+# Cross-cutting Architecture
+
+**Summary:** Audited the cross-cutting infrastructure shared by the 4 monitoring modules (Live Monitor, Sales Monitor, Profit Intelligence, Workforce Intelligence). The picture is of a capable but fragmented system: backend realtime publishing, permission enforcement, and profit/COGS math are solid and centralized, but the frontend layering that ties them into a unified monitoring suite is missing. There is no charting library (every dashboard hand-rolls CSS/SVG bars), no shared realtime abstraction (each dashboard manually subscribes and three of the four live pages silently fall back to 30s polling with no error handling), no shared data-fetching/refresh layer, role logic is duplicated in three places (utils/permissions.js, router.js, components/reports/Dashboards.vue), and the dashboard registry is split across two competing hubs (ReportsHub with reports/*Tab.vue, and Dashboards.vue) that both hard-navigate via full-page reloads (window.location.href) instead of SPA routing. Two of the four target modules are "coming soon" stubs (WorkforceIntelligence.vue, AssociateDetailPerformance.vue) and LiveMonitor.vue is itself a stub redirecting to AdminMonitor. The net effect: a world-class monitoring suite cannot be built on this foundation without first unifying realtime, KPI definitions, and the dashboard shell.
+
+
+## Files read
+
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/dashboards/AdminMonitor.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/dashboards/CommandCenter.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/dashboards/ProfitIntelligence.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/dashboards/WorkforceIntelligence.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/dashboards/Revenue.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/dashboards/EmployeeLiveMonitor.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/LiveMonitor.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/utils/permissions.js`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/router.js`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/components/reports/Dashboards.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/ReportsHub.vue`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/stores/session.js`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/stores/profit.js`
+- `/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/package.json`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/live_monitor.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/profit_intelligence.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/performance.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/revenue_dashboard.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/employee_live_monitor.py`
+- `/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/page/admin_monitor/admin_monitor.js`
+
+## Endpoints
+
+- `zevar_core.api.live_monitor.get_command_center_data`
+- `zevar_core.api.live_monitor.get_repair_live_feed`
+- `zevar_core.api.live_monitor.run_anomaly_detection`
+- `zevar_core.api.pos_session.get_live_sales_feed`
+- `zevar_core.api.pos_session.get_all_active_sessions`
+- `zevar_core.api.pos.get_pending_overrides`
+- `zevar_core.api.audit_log.get_audit_logs`
+- `zevar_core.api.audit_log.get_audit_summary`
+- `zevar_core.api.profit_intelligence.get_profit_summary`
+- `zevar_core.api.profit_intelligence.get_margin_analysis`
+- `zevar_core.api.profit_intelligence.get_margin_heatmap`
+- `zevar_core.api.profit_intelligence.get_cost_component_trends`
+- `zevar_core.api.profit_intelligence.get_recommendations`
+- `zevar_core.api.revenue_dashboard.get_dashboard_data`
+- `zevar_core.api.employee_live_monitor.get_employee_dashboard`
+- `zevar_core.api.performance.get_employee_performance_summary`
+- `zevar_core.api.performance.get_team_performance`
+- `zevar_core.api.performance.get_live_scoreboard`
+- `zevar_core.api.performance.run_compensation_calculation`
+
+## Current capabilities
+
+- Realtime event publishing EXISTS and is centralized on the backend: zevar_core/api/live_monitor.py:30,39,55 define publish_repair_event/publish_anomaly_alert/publish_employee_event using frappe.publish_realtime(after_commit=True); pos.py:610 publishes pos_sale_event; pos_session.py publishes pos_session_event; notifications.py:440 publishes zevar_alert. The plumbing is real.
+- Multi-store command center backend EXISTS: live_monitor.py:72 get_command_center_data aggregates per-store repair/sales KPIs + system KPIs + alerts; live_monitor.py:253 run_anomaly_detection implements 4 rules (severe overdue >7d, stuck >5d, unassigned >24h, high-value no-deposit >$500) with severity ordering.
+- Profit/COGS math IS centralized and consistent: profit_intelligence.py:21 calculate_sale_cost_breakdown computes metal_cogs (net_weight x gold_rate x qty) + gemstone_cogs + labor + commission + payment_cost + overhead -> gross_profit -> gross_margin_pct; results persisted in a Sale Cost Breakdown child/custom doc and all 8 profit endpoints (get_profit_summary, get_margin_analysis, get_margin_heatmap, get_cost_component_trends, get_recommendations, etc.) query that single source. reports.py does NOT recompute margin (grep finds no margin/profit computation), so there is no conflicting definition.
+- Workforce/performance backend EXISTS and is rich: performance.py (34KB) has log_sale_event/log_layaway_event/log_repair_event hooks, employee/team performance summaries, live scoreboard, compensation calculation, quarterly reviews with AI insights (_generate_review_insights at :1009). Frontend does not expose most of it.
+- Permission enforcement is consistent on the backend: every module API uses frappe.only_for(...) at the top of each whitelisted method (live_monitor.py:78, profit_intelligence.py:468/541/634/687/742/779/818, performance.py:306/392/423/431/459/490/674/706/725/764/786, revenue_dashboard.py:19). Frontend has a 7.6KB utils/permissions.js with ~15 access-check helpers.
+- Two dashboards consume realtime correctly: CommandCenter.vue:366-367 subscribes to repair_live_event + repair_anomaly_alert; EmployeeLiveMonitor.vue:352 subscribes to employee_event; both properly unsubscribe in onUnmounted and gate on window.frappe?.realtime existence.
+- Design tokens exist: index.css defines .premium-card/.premium-title component classes; styles/ has tokens.css, typography.css, glass.css, responsive.css. KPICard.vue is a genuinely reused shared component (used in 9 files).
+
+## Strengths
+
+- Backend realtime foundation is clean and idiomatically Frappe (publish_realtime with after_commit, user-scoped + global events, dedicated publisher functions per domain).
+- Profit/COGS model is genuinely jewelry-specific and authoritative: metal COGS via gold rate-at-time-of-sale, gemstone COGS from child tables, labor/commission/payment/overhead allocation - all persisted once and queried consistently. This is a real differentiator vs generic POS.
+- performance.py is feature-complete for Workforce Intelligence (scoreboard, targets, compensation engine, quarterly reviews with AI insights) - the backend is ready and is the highest-leverage thing to expose.
+- Backend permission enforcement is uniform and defense-in-depth (only_for on every endpoint), independent of any frontend gate.
+- Design tokens (.premium-card, .premium-title, styles/tokens.css) give a consistent visual base to build a unified shell on top of.
+
+## Gaps
+
+- NO charting library anywhere. package.json has only frappe-ui, pinia, vue-router, feather-icons, showdown, zxing. Every dashboard draws charts as hand-rolled CSS flex bars or inline SVG (Revenue.vue:hourly bars, CommandCenter.vue status breakdown bars, EmployeeLiveMonitor.vue hourly bars, RepairAnalytics.vue, Customer.vue, Inventory.vue). This blocks trend lines, multi-series, tooltips, zoom, drill-down, and any competitive analytics visualization.
+- LiveMonitor.vue (frontend/zevar_ui/src/pages/LiveMonitor.vue) is a STUB - it renders a 'Use the Command Center or Admin Monitor' placeholder. The module literally named 'Live Monitor' does not exist as a working page; AdminMonitor.vue is the actual implementation.
+- WorkforceIntelligence.vue and AssociateDetailPerformance.vue are both 'coming soon' stubs despite performance.py having a complete backend (scoreboard, compensation, quarterly reviews). The richest workforce backend is essentially unexposed.
+- ProfitIntelligence.vue is the only module wired to a Pinia store (stores/profit.js) and dedicated sub-components (components/profit/*, components/pricing/*). The other 3 modules have NO store and fetch data ad-hoc with createResource or raw fetch() - so there is no shared state, caching, date-range synchronization, or refresh coordination across modules.
+- Two of the four live dashboards (AdminMonitor.vue:498, CommandCenter.vue:362) use setInterval(refresh, 30000) polling as the primary refresh and treat realtime as secondary/decorative. CommandCenter only re-fetches store metrics every 5 realtime events, and AdminMonitor calls session.startSalesMonitoring() but never reads latestSaleEvent in its template - the realtime data is captured and discarded.
+- event_name wiring is fragile/inconsistent: publish_employee_event broadcasts globally but EmployeeLiveMonitor.vue:353 filters client-side (every employee receives every event); pos_sale_event is published per-user (pos.py:610 user=mgr.parent) so a multi-store owner wall would need one subscription per manager. There is no room-based or role-based broadcast for an owner 'system health' wall.
+- No 'system health' / 'employee activity' stream: the prompt asks for system health and employee activity feeds; live_monitor.py only covers repair + sales events. No realtime for inventory variance, register opens/closes beyond pos_session_event, or anomaly push (anomalies are pulled via run_anomaly_detection on each 30s poll, not pushed).
+- Revenue.vue, Customer.vue, Inventory.vue, EmployeeLiveMonitor.vue use raw fetch('/api/method/...') with manual CSRF headers instead of frappe-ui's call/createResource used elsewhere - inconsistent data-access pattern that bypasses the session's auth handling.
+- No date-range / period context shared across modules: ProfitIntelligence has from/to, RepairAnalytics has 7/30/90-day period, Revenue/Customer/Inventory are hardcoded to 'today', AdminMonitor uses 4/8/24/72-hour windows. A unified monitoring suite needs one global time context.
+
+## Structural issues
+
+- FRAPPE-PAGE vs SPA DUPLICATION CONFIRMED but low-severity: zevar_core/unified_retail_management_system/page/admin_monitor/admin_monitor.js is a 15-line iframe wrapper that embeds /pos/reports/dashboards/admin (the Vue AdminMonitor.vue). It is not a second competing UI - it is a thin entry point for the Frappe desk. However it adds an iframe nesting layer and a separate role gate (admin_monitor.json restricts to System/Store/Sales Manager, which does not match canAccessMonitor()'s broader list).
+- ROLE/PERMISSION LOGIC IS TRIPlicated: (1) utils/permissions.js ~15 boolean helpers (canAccessMonitor, canViewAllSalesHistory, getDashboardVisibility...), (2) router.js:17 getAccessTier() + ROLE_TIERS + TIER_LEVELS + canAccess() with route meta.reportRoles, (3) components/reports/Dashboards.vue:111-119 re-implements accessTier inline AND defines its own minTier per dashboard. Three sources of truth for 'who can see what' will drift.
+- TWO COMPETING DASHBOARD HUBS: ReportsHub.vue (renders reports/*Tab.vue tabs: RevenueTab, InventoryTab, CustomersTab, RepairsTab, FinanceTab) AND components/reports/Dashboards.vue (categorized dashboard cards). They overlap heavily - e.g. RevenueTab.vue vs dashboards/Revenue.vue both show revenue KPIs. No single source of truth for the dashboard catalog.
+- DASHBOARD NAVIGATION IS A FULL-PAGE RELOAD: ReportsHub.vue:245 openDashboard(name) does window.location.href = `/pos/reports/dashboards/${name}` instead of router.push(). Every dashboard switch tears down and reboots the entire SPA (re-imports JS, re-inits Pinia, re-establishes socket). This kills any cross-dashboard state, live shared timer, or smooth transition - fatal for a 'command center' UX.
+- fmt()/number-formatting DUPLICATED 17 TIMES across the frontend (grep 'function fmt('). No shared format util for currency/percent/date despite every dashboard needing it. Same applies to formatTime(), formatEventType(), alert color maps (healthDot/healthBadge/statusBarColor are redefined per dashboard).
+- DASHBOARDS DO NOT GATE ACCESS: grep for canAccess/isAdmin/permissions across pages/dashboards/ returns nothing. ProfitIntelligence.vue, WorkforceIntelligence.vue, Revenue.vue, Customer.vue, Inventory.vue, RepairAnalytics.vue contain zero client-side access checks - they rely entirely on the backend frappe.only_for throwing on API call. A user who lands on the route sees the full empty UI before the API 403s. Security-by-error is acceptable but the UX is broken and there is no graceful 'no access' state.
+- PERMISSION MISMATCH between frontend helpers and backend: revenue_dashboard.py:19 allows Sales User, but the analogous canAccess* helper for revenue does not exist; canAccessMonitor() allows Sales Manager but live_monitor.py:78 excludes Sales Manager. The role lists have drifted between frontend and backend.
+- NO shared data-fetch/refresh abstraction: each dashboard open-codes its own onMounted/onBeforeUnmount + setInterval + fetch. No useRealtime() / usePolling() / useDashboardData() composable, so consistent behavior (backoff, pause-on-hidden-tab, error toast) cannot be enforced.
+
+## Data model
+
+- Sale Cost Breakdown (custom doc/child): single authoritative COGS+margin record per Sales Invoice, written by profit_intelligence.calculate_sale_cost_breakdown (hook on invoice submit). Fields: total_metal_cogs, total_gemstone_cogs, total_item_cogs, labor, commission, payment_cost, overhead, gross_profit, gross_margin_pct. All profit queries SUM/AVG over this - no per-query recomputation.
+- Repair Order: source of truth for repair feed/anomaly (status, promised_date, assigned_to, deposit_amount, estimated_cost, warehouse, modified).
+- POS Session (pos_session.py): source for active-registers KPI and force-close; emits pos_session_event on open/close.
+- Performance Log (performance.py:55 _create_performance_log): per-event ledger (sale/layaway/repair/attendance) feeding scoreboard + reviews.
+- Realtime event channels (logical, not persisted): pos_sale_event (user-scoped to manager), pos_session_event, repair_live_event (global), repair_anomaly_alert (global), employee_event (global, client-filtered), zevar_alert.
+
+## Tech debt
+
+- 17 duplicated fmt() definitions across dashboards/reports/components (frontend/zevar_ui/src/pages/dashboards/*, pages/reports/*Tab.vue, components/analytics/*).
+- Triplicated role logic (utils/permissions.js, router.js ROLE_TIERS, Dashboards.vue inline accessTier) - three places to update when roles change.
+- Two overlapping dashboard hubs (ReportsHub + reports/*Tab.vue vs components/reports/Dashboards.vue + pages/dashboards/*.vue) serving near-identical data.
+- Stale/unbuilt module surfaces: LiveMonitor.vue stub, WorkforceIntelligence.vue stub, AssociateDetailPerformance.vue stub - either delete or build, do not ship 'coming soon' in a flagship suite.
+- Inconsistent data-access: mix of frappe-ui createResource (AdminMonitor, ProfitIntelligence), frappe-ui call (CommandCenter), and raw fetch+CSRF (Revenue, Customer, Inventory, EmployeeLiveMonitor). Standardize on one.
+- LiveMonitor.vue + AdminMonitor.vue naming collision - 'Live Monitor' title appears on the stub, the AdminMonitor, and the CommandCenter. User-facing label confusion.
+- POS.vue:1340-1342 maintains a fallback path subscribing via window.frappe.socketio.socket.on in addition to frappe.realtime - two subscription paths for the same 'stock_update' event indicates historical realtime-availability uncertainty that should be resolved.
+
+## Recommendations
+
+- Adopt ONE charting library (ECharts or ApexCharts) and build 5-6 reusable chart primitives (KPI sparkline, hourly-bar, donut, multi-line trend, heatmap, funnel). This single decision unblocks competitive visualization across all 4 modules and removes ~6 bespoke chart implementations.
+- Build a shared realtime composable (e.g. composables/useRealtime.js) wrapping frappe.realtime.on/off with: auto-reconnect awareness, paused-when-tab-hidden, typed event registry, and a single subscription-per-channel dedupe. Migrate CommandCenter, AdminMonitor, EmployeeLiveMonitor, NotificationCenter, and the session store onto it. Replace the 3 separate 30s polling intervals with realtime-first + exponential-backoff polling fallback.
+- Create a broadcast/room model on the backend: publish pos_sale_event, repair events, employee events, and anomaly alerts to an 'admin_wall' room scoped to owner/manager roles (frappe.publish_realtime room=) so a true multi-store command wall gets a single subscription. Move anomaly detection from poll-on-demand to push-on-trigger (publish when an anomaly rule fires, e.g. from a scheduled job or repair save hook).
+- Collapse role logic to ONE source of truth: keep utils/permissions.js as the single helper layer, delete router.js ROLE_TIERS/getAccessTier and Dashboards.vue inline accessTier, and have router meta reference permission keys instead of re-listing roles. Then reconcile the role lists with backend only_for() calls (currently mismatched, e.g. Sales Manager in canAccessMonitor but not in live_monitor.py:78).
+- Unify the dashboard shell: pick ONE hub (recommend expanding ReportsHub), SPA-route all dashboards with <router-view> (kill the window.location.href full-page reload at ReportsHub.vue:245), and add a global time-range context (store) that ProfitIntelligence, Revenue, RepairAnalytics, and AdminMonitor all consume so a user picks a window once and every widget respects it.
+- Delete the stub pages (LiveMonitor.vue redirect, WorkforceIntelligence.vue, AssociateDetailPerformance.vue) or wire them. performance.py already backs the Workforce module - build WorkforceIntelligence.vue against get_live_scoreboard/get_team_performance/run_compensation_calculation/get_quarterly_review. This is the highest-leverage gap (rich backend, zero frontend).
+- Standardize data access on frappe-ui createResource/call everywhere; remove raw fetch()+CSRF from Revenue/Customer/Inventory/EmployeeLiveMonitor. Create a useDashboardData() composable that wraps createResource with shared loading/error/refresh + respects the global time context.
+- Extract shared formatters (currency, percent, compact-number, relative-time) into utils/format.js and delete the 17 fmt() copies. Extract shared status-color maps into a constants file.
+- Add client-side route guards that call the unified permission helpers so restricted dashboards never render their chrome for unauthorized users (render a 'no access' state) - currently they flash full UI before the API 403s.
+- Treat the admin_monitor Frappe page as legacy/optional: keep it only as a desk shortcut for non-SPA users, and ensure its role gate (admin_monitor.json) matches the unified permission model.

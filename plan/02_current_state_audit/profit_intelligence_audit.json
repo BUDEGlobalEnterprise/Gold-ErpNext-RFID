@@ -1,0 +1,182 @@
+{
+  "module": "Profit Intelligence",
+  "summary": "The backend has a genuinely best-in-class *design* \u2014 a single authoritative per-invoice COGS+margin record (Sale Cost Breakdown) capturing metal, gemstone, labor, commission, payment, and overhead costs, with a full JSON calculation log, plus a Pricing Recommendation doctype with RAG auditability fields. BUT the design is critically undermined by an integration failure: the on_submit hook (calculate_sale_cost_breakdown) that populates Sale Cost Breakdown is NEVER registered in hooks.py, so in a live system NO breakdown records are ever created and every query endpoint returns empty/zero. Compounding this: the AI recommendation generator (generate_pricing_recommendations) is also not scheduled; the What-If 'Create Recommendation' button calls a non-existent endpoint; the Approve/Reject buttons pass the wrong action verb; and the Margin Heatmap expects a pivoted data shape the backend never returns. Separately, the COGS model is materially incomplete for jewelry (no making charge, no alloy/wastage, gemstone value is at-cost-not-replacement, labor model is time-guess not actual), margin math is duplicated and inconsistent in 5+ other files (commission payouts are computed on an inflated margin that ignores 4 of the 6 cost buckets), and there is zero margin-waterfall / PVM / multi-store overhead-allocation capability. Net: ~50% of a great system on paper, ~20% functional as shipped.",
+  "files": [
+    "/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/profit_intelligence.py",
+    "/workspace/development/frappe-bench/apps/zevar_core/zevar_core/hooks.py",
+    "/workspace/development/frappe-bench/apps/zevar_core/zevar_core/api/pricing.py",
+    "/workspace/development/frappe-bench/apps/zevar_core/zevar_core/tasks.py",
+    "/workspace/development/frappe-bench/apps/zevar_core/zevar_core/rag/tools/pricing_tools.py",
+    "/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/doctype/sale_cost_breakdown/sale_cost_breakdown.json",
+    "/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/doctype/pricing_recommendation/pricing_recommendation.json",
+    "/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/doctype/cost_center_allocation/cost_center_allocation.json",
+    "/workspace/development/frappe-bench/apps/zevar_core/zevar_core/unified_retail_management_system/doctype/labor_cost_pool/labor_cost_pool.json",
+    "/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/pages/dashboards/ProfitIntelligence.vue",
+    "/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/stores/profit.js",
+    "/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/components/pricing/WhatIfSimulator.vue",
+    "/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/components/pricing/PricingRecommendationsPanel.vue",
+    "/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/components/profit/ProfitOverview.vue",
+    "/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/components/profit/CostBreakdownChart.vue",
+    "/workspace/development/frappe-bench/apps/zevar_core/frontend/zevar_ui/src/components/profit/MarginHeatmap.vue"
+  ],
+  "endpoints": [
+    "zevar_core.api.profit_intelligence.calculate_sale_cost_breakdown (hook fn, NOT whitelisted, NOT registered in hooks.doc_events \u2014 dead code in production)",
+    "zevar_core.api.profit_intelligence.get_profit_summary (whitelisted)",
+    "zevar_core.api.profit_intelligence.get_margin_analysis (whitelisted; group_by jewelry_type|metal_type|purity|salesperson|invoice)",
+    "zevar_core.api.profit_intelligence.get_cost_breakdown_detail (whitelisted; per-invoice drill-down)",
+    "zevar_core.api.profit_intelligence.get_profit_trends (whitelisted; weekly|monthly|quarterly)",
+    "zevar_core.api.profit_intelligence.recalculate_breakdown (whitelisted; System Manager only, manual)",
+    "zevar_core.api.profit_intelligence.get_margin_heatmap (whitelisted)",
+    "zevar_core.api.profit_intelligence.get_cost_component_trends (whitelisted; weekly|monthly)",
+    "zevar_core.api.profit_intelligence.get_recommendations (whitelisted)",
+    "zevar_core.api.profit_intelligence.review_recommendation (whitelisted; approve|reject)",
+    "zevar_core.api.profit_intelligence.create_recommendation (CALLED BY FRONTEND BUT DOES NOT EXIST \u2014 404)",
+    "zevar_core.tasks.generate_pricing_recommendations (NOT whitelisted, NOT in scheduler_events \u2014 never auto-runs)",
+    "zevar_core.tasks.fetch_live_metal_rates (scheduled cron */60, writes Gold Rate Log)",
+    "zevar_core.rag.tools.pricing_tools.simulate_price_change (whitelisted; what-if engine used by UI)",
+    "zevar_core.rag.tools.pricing_tools.get_pricing_action_items (whitelisted; AI action feed, not surfaced in Profit UI)",
+    "zevar_core.api.pricing._get_gold_rate (internal; canonical gold-rate lookup with purity-alias handling)"
+  ],
+  "current_capabilities": [
+    "Per-invoice cost-attribution model designed around 6 buckets: metal COGS (net_weight x gold_rate x qty), gemstone COGS (sum of Item Gemstone.amount), labor (from Labor Cost Pool via salesperson splits), commission (from Sales Commission Split), payment processing fees (per-mode % + flat from Cost Center Allocation), overhead (rent+utilities+insurance+marketing+depreciation+miscellaneous) \u2014 profit_intelligence.py:71-73.",
+    "Gold rate sourced from Gold Rate Log (live, fetched hourly from gold-api.com/metals.live/goldprice.org/custom-endpoint/fallback chain), with purity-alias normalization (14K vs 14Kt) and Rose/White Gold -> Yellow Gold mapping \u2014 pricing.py:333-365.",
+    "Materialized results: Sale Cost Breakdown doctype stores total_revenue, all 6 cost components, gold_rate_at_sale + source + timestamp, gross_profit, gross_margin_pct, and a full JSON calculation_log + calculated_by/at audit trail \u2014 sale_cost_breakdown.json.",
+    "Aggregation/grouping by jewelry_type, metal_type, purity, salesperson, or individual invoice \u2014 get_margin_analysis (profit_intelligence.py:539-628).",
+    "Period-over-period comparison (current vs previous period revenue/profit/margin) \u2014 get_profit_summary:499-513.",
+    "Two overhead allocation methods: 'Equal Per Invoice' and 'Proportional to Revenue' \u2014 _allocate_overhead:385-457.",
+    "Payment-cost allocation by mode: credit (% + flat), debit (%), cash (%), wire (flat), gift card (%), financing partner (%) \u2014 _calculate_payment_costs:309-382; configurable in Cost Center Allocation singleton.",
+    "Labor allocation via Labor Cost Pool: employee-specific pool, role-based fallback (Sales Associate/Manager/Bench Jeweler/Appraiser), Per-Hour/Per-Sale/Per-Repair/Salary-Spread methods \u2014 labor_cost_pool.json; allocated by salesperson split_percent x default_minutes_per_sale.",
+    "What-if price simulator: current vs projected margin, COGS split (metal+gemstone), price-change %, annualized profit projection from 90-day sales velocity, optional gold-rate override \u2014 pricing_tools.simulate_price_change:147-254.",
+    "Pricing Recommendation doctype with full RAG auditability fields: rag_query_id, similar_events_count, rag_sources, confidence_level, reasoning, gold_rate_at_generation, valid_until, and an approve->auto-apply workflow that writes custom_msrp \u2014 pricing_recommendation.json; review_recommendation:845-878.",
+    "Rule-based recommendation generator (declining-margin detection + slow-moving clearance) writing Pricing Recommendation records with AI-style reasoning \u2014 tasks.generate_pricing_recommendations:889-1059.",
+    "Vue 3 dashboard with 4 tabs (Overview/Cost Analysis/Pricing/Margin Heatmap), Pinia store, KPI cards with trend arrows, stacked cost-component bar chart (absolute/% toggle), monthly profit trend bars, recommendation table with approve/reject, what-if simulator panel.",
+    "Role-based access control via frappe.only_for on every query endpoint (System Manager / Store Manager / Sales Manager / Accounts Manager)."
+  ],
+  "strengths": [
+    "Architectural purity of the data model: ONE authoritative per-invoice record (Sale Cost Breakdown) that every query reads via SUM/AVG \u2014 no per-query recomputation on the read path. This is the correct pattern and makes the numbers auditable and reconcilable.",
+    "Full calculation traceability: calculation_log stores a step-by-step JSON of revenue/cogs/labor/commission/payment/overhead, plus gold_rate_source (live/fallback/manual) and gold_rate_timestamp \u2014 defensible for owner/CPA questions and for audit.",
+    "Gold-rate-at-sale is point-in-time captured (not re-fetched at query time), so historical margins stay accurate even as spot moves \u2014 a genuinely correct jewelry-specific decision.",
+    "Purity-alias normalization (14K<->14Kt) and Rose/White->Yellow mapping in _get_gold_rate prevents silent zero-COGS rows that plague naive implementations.",
+    "Pricing Recommendation doctype's RAG-auditability fields (rag_query_id, similar_events_count, rag_sources) are best-in-class design \u2014 they let an owner see WHY the AI suggested a price and what historical events grounded it. This is the single strongest differentiator vs. generic retail tools.",
+    "Payment-cost allocation is mode-aware and includes financing-partner cut (Affirm/Klarna) \u2014 rare even in dedicated jewelry systems.",
+    "The what-if simulator correctly uses net_weight x gold_rate (not valuation_rate) for metal COGS, and surfaces annualized profit projection from real velocity \u2014 the right basis for a pricing conversation.",
+    "Cost Center Allocation is a singleton with sensible defaults (2.9% CC, 0.30 flat, etc.) and labor_burden_percent + operating_hours_daily fields ready for driver-based overhead.",
+    "Role-gated endpoints and a clean Pinia store with parallel resource fetching (Promise.all in loadAll) \u2014 the frontend plumbing is well-organized for its scope."
+  ],
+  "gaps": [
+    "CRITICAL \u2014 DATA FRESHNESS: calculate_sale_cost_breakdown is NOT registered in hooks.py doc_events for Sales Invoice on_submit/on_cancel. grep across the whole repo finds it only at its definition (profit_intelligence.py:21) and the manual recalculate_breakdown caller (:734). The Sales Invoice on_submit list in hooks.py registers commission, stock_reduction, and reservation_manager but NOT profit_intelligence. Therefore in a deployed system, Sale Cost Breakdown records are NEVER auto-created, and get_profit_summary/get_margin_analysis/get_margin_heatmap/get_cost_component_trends ALL return empty/zero. The entire dashboard is blank unless an admin manually runs recalculate_breakdown per invoice. This is the #1 issue.",
+    "CRITICAL \u2014 NO on_cancel cleanup: there is no hook to delete/void Sale Cost Breakdown when a Sales Invoice is cancelled. Even if on_submit were wired, cancelled invoices would leave orphan breakdowns inflating profit. (The on_submit body self-deletes prior breakdowns for amend scenarios at :31, but cancel has no handler anywhere.)",
+    "CRITICAL \u2014 Recommendation engine never runs: generate_pricing_recommendations (tasks.py:889) is defined but NOT in scheduler_events (hooks.py scheduler only lists fetch_live_metal_rates for */60 cron). So Pricing Recommendation records are never auto-generated; the dashboard's Pricing tab is permanently empty unless an admin manually invokes the function.",
+    "CRITICAL \u2014 Broken 'Create Recommendation' button: WhatIfSimulator.vue:217 calls zevar_core.api.profit_intelligence.create_recommendation, which does not exist anywhere in the codebase (grep for 'def create_recommendation' returns nothing). The button throws a 404/wrong-method error.",
+    "CRITICAL \u2014 Broken Approve/Reject buttons: PricingRecommendationsPanel.vue:113 calls handleReview(rec.name, 'Approved') and confirmReject passes 'Rejected', but review_recommendation (profit_intelligence.py:846-876) checks `if action == 'approve'` / `elif action == 'reject'` (lowercase) and throws 'Invalid action' otherwise. Casing mismatch -> every click hits the frappe.throw branch.",
+    "CRITICAL \u2014 Margin Heatmap data-shape mismatch: backend get_margin_heatmap (profit_intelligence.py:739-773) returns a FLAT array of {jewelry_type, metal_type, revenue, gross_profit, avg_margin, count}. Frontend MarginHeatmap.vue (rows/cols/getCellValue at :97-122) expects a PIVOTED structure with row.margins[metalType].margin_pct. The pivot never exists, so columns is always empty and every cell renders '--'. The heatmap tab is non-functional.",
+    "BUG \u2014 Confidence bar always 0%: PricingRecommendationsPanel.vue treats rec.confidence as a number (lines 99, 103, 219-223 use c>=80), but the doctype field is confidence_level = Select('High'|'Medium'|'Low') and get_recommendations does not return a numeric confidence. Bar renders gray/0% for every row.",
+    "COGS model gap \u2014 NO making charge: jewelry profitability fundamentally includes making/maintenance charges (per-gram or per-piece), which can be 10-30% of price. Not modeled anywhere in Sale Cost Breakdown (no field, no allocation). This is the largest jewelry-specific accuracy hole.",
+    "COGS model gap \u2014 NO alloy/wastage: net_weight x gold_rate assumes pure metal at marked purity with no manufacturing loss. Real jewelry COGS applies wastage % (typically 5-12%) and alloy mix. Not modeled.",
+    "COGS model gap \u2014 gemstone value is static Item-master cost, not replacement/lot cost: _get_gemstone_value (profit_intelligence.py:193-203) sums Item Gemstone.amount \u2014 a fixed field. It ignores melee-parcel lot costing, exchange-rate moves on imported stones, and certificate premium. Aged inventory's gemstones are often under-costed vs replacement.",
+    "COGS model gap \u2014 labor is a guessed constant, not actual: _allocate_labor (profit_intelligence.py:206-296) uses default_minutes_per_sale (default 30) x hourly_rate, scaled by split_percent. It ignores ticket complexity, bench-jeweler repair labor on the same sale, and the labor_burden_percent field defined in Cost Center Allocation is NEVER applied (the field exists but _allocate_labor reads only hourly_rate, not hourly_rate x (1+burden)).",
+    "Margin by STORE \u2014 not supported: get_margin_analysis groups by jewelry_type/metal_type/purity/salesperson/invoice only. There is no store/branch dimension despite Cost Center Allocation being store-relevant. No multi-store profit consolidation.",
+    "Margin by CATEGORY (beyond jewelry_type) \u2014 partial: no item_group/brand/collection grouping; jewelry_type is a single custom field.",
+    "No Price/Volume/Mix (PVM) bridge: period-over-period profit change is shown as a single delta, not decomposed into price effect vs volume effect vs mix effect vs cost effect. This is table-stakes for a 'Profit Intelligence' exec product.",
+    "No margin-waterfall visualization: nowhere does the UI show revenue -> minus metal -> minus gems -> minus labor -> minus commission -> minus payment -> minus overhead -> gross profit as a waterfall. The CostBreakdownChart shows the components as a stacked bar but not the bridge.",
+    "No gold-rate pass-through analysis: no view of 'how much of recent margin change is explained by gold moving +/-X%' vs pricing discipline. The pricing_tools.get_pricing_action_items detects gold moves >3% but does not quantify pass-through %.",
+    "No unrealized gain/loss on inventory: gold held in stock appreciates/depreciates with spot; no MTM view. (Out of scope for COGS but expected in a 'Profit Intelligence' suite.)",
+    "No markdown/velocity (AIMS) engine: Pricing Recommendation supports a 'Clearance' type, but there is no aged-inventory spiff+markdown+signage algorithm \u2014 just a flat 15% markdown for >90-day slow movers (tasks.py:1032).",
+    "No margin-floor enforcement at POS: nothing prevents a POS sale below a configured minimum margin; the breakdown is computed after the fact only.",
+    "No interchange-tier granularity: payment cost uses one credit_card_rate (2.9%) for all cards \u2014 no Visa/MC/Amex tiering, no corporate/regulated signature rates.",
+    "Overhead allocation only 2 methods, no ABC/driver-based: 'Equal Per Invoice' and 'Proportional to Revenue'. No activity-based (per-transaction, per-sq-ft, per-headcount) drivers despite operating_hours_daily and labor_burden_percent fields existing unused.",
+    "Backed-up UI gaps (capabilities the API has but the UI never exposes): get_cost_breakdown_detail (per-invoice drill-down) has no UI; get_profit_trends quarterly mode not exposed; get_margin_analysis group_by=invoice/metal_type/purity not selectable (UI hardcodes jewelry_type); recalculate_breakdown has no button; pricing_tools.get_pricing_action_items not surfaced; pricing_tools.get_slow_moving_inventory not surfaced; sale-cost-breakdown gold_rate_source/timestamp not shown; RAG auditability fields (rag_sources, similar_events_count) not rendered on recommendation cards."
+  ],
+  "structural_issues": [
+    "Integration gap is the dominant structural flaw: the module is a well-designed island with no bridge to the invoice lifecycle. on_submit hook unwired + on_cancel absent + generator unscheduled = the module produces no data automatically. The previous internal audit (plan/02_current_state_audit/module_audit_raw.json:332) incorrectly asserts the hook IS wired and that reports.py does not recompute margin \u2014 both claims are false per direct grep. Treat that audit as unreliable.",
+    "Margin math is defined 7 different ways across the codebase (see math_integrity / data_model below), only one of which (Sale Cost Breakdown) is 'correct'. Because the SCB path is unwired, the system effectively runs on the WRONG margin definitions (commission.py and top_profitability_by_product.py) wherever margin drives money or reporting today.",
+    "The 'what-if' margin (pricing_tools.simulate_price_change) uses a DIFFERENT, thinner COGS than the canonical SCB model \u2014 so a price simulated at 28% margin will be recorded as ~22% when the sale actually posts (if SCB were wired). This will destroy user trust in the simulator.",
+    "Frontend/backend contract drift with no type-checking: 3 of the 6 frontend interactions with the backend are broken (create_recommendation 404, approve/reject casing, heatmap pivot shape, confidence number-vs-string). There is no OpenAPI/schema contract and no integration test catching these.",
+    "Cost Center Allocation is a global singleton \u2014 it cannot represent per-store overhead or per-store payment rates, which structurally blocks multi-store profit intelligence even before UI work.",
+    "No caching/materialization layer beyond the SCB rows themselves: get_margin_heatmap and get_cost_component_trends run raw GROUP BY SQL over SCB on every page load. Fine at low volume; will degrade without an index hint or rollup table at scale.",
+    "Permission asymmetry: get_recommendations is readable by Sales Manager, but review_recommendation allows Store Manager to approve and AUTO-APPLY a price change to Item.custom_msrp (profit_intelligence.py:863-864) \u2014 a price-change power with no secondary approval or audit log beyond the doc fields. Defensible but worth noting."
+  ],
+  "data_model": [
+    "Sale Cost Breakdown (autoname SCB-YY-MM-#####; unique on sales_invoice): total_revenue, total_qty, gold_rate_at_sale (+source+timestamp), total_metal_cogs, total_gemstone_cogs, total_item_cogs, total_labor_cost (+JSON detail), total_commission, total_payment_cost (+JSON detail), overhead_per_invoice (+method), total_cost, gross_profit, gross_margin_pct, calculation_log (JSON), calculated_by/at. Correct and complete for the 6-bucket model. MISSING fields: making_charge, alloy/wastage, store/cost_center, item_group, gemstone_replacement_vs_cost flag.",
+    "Pricing Recommendation (autoname PR-YY-MM-#####): recommendation_type (6 options incl. Clearance & Premium Positioning), current_price/margin_pct/gold_rate, recommended_price, projected_margin_pct, price_change_pct, confidence_level (High/Med/Low), reasoning, rag_query_id/similar_events_count/rag_sources, gold_rate_at_generation, generated_by (default 'AI (Qwen)'), generation_method (rag_pipeline|manual), status lifecycle (Draft->Pending Review->Approved->Applied/Rejected), valid_until, reviewed_by/at, applied_at. Strong schema; the RAG fields are the standout.",
+    "Cost Center Allocation (singleton): rent/utilities/insurance/marketing/depreciation/miscellaneous_monthly, overhead_allocation_method (Equal|Proportional), operating_hours_daily, labor_burden_percent (UNUSED by code), payment rates (credit_card_rate+flat, debit, cash_handling, wire_flat, gift_card, financing_partner). Singleton = no per-store.",
+    "Labor Cost Pool: pool_name, employee (optional), role (Sales Associate/Bench Jeweler/Store Manager/Appraiser/Manager), hourly_rate ('Fully Loaded'), hours_per_week, allocation_method (Per Hour/Per Sale/Per Repair/Salary Spread), default_minutes_per_sale. allocation_method field is read inconsistently \u2014 _allocate_labor always does Per-Sale math regardless of this value.",
+    "Gold Rate Log: metal, purity, rate_per_gram, source, timestamp (read in pricing.py:333-365; written hourly by tasks.fetch_live_metal_rates). Functions as the spot-price cache; correct.",
+    "Item custom fields consumed: custom_net_weight_g, custom_metal_type, custom_purity, custom_gross_weight_g, custom_jewelry_type, custom_msrp, custom_cost_price, valuation_rate (ERPNext), gemstones child table (Item Gemstone: amount).",
+    "Sales Commission Split: sales_invoice, employee, commission_amount, split_percent \u2014 read by both commission.py and profit_intelligence._get_commission_total."
+  ],
+  "tech_debt": [
+    "DRY violation \u2014 margin defined 7 ways: (1) profit_intelligence.py:74 [canonical, 6-bucket]; (2) commission.py:104-109 [valuation_rate only, drives real payouts]; (3) top_profitability_by_product.py:70-71 [valuation_rate only, joins SCB but ignores its gross_profit column \u2014 ironic]; (4) analytics_hub.py:1012 _margin_pct [custom_cost_price basis]; (5) pricing_tools.py:210 [gold-rate + gems only, no labor/comm/payment/overhead]; (6) repair_accounting.py:704 [material-only, labor excluded as 'pure service']; (7) gemstone_value_service.py:125 [markup-on-cost denominator]. Same key names (gross_profit, margin_pct) across all 7.",
+    "commission.py calculate_commissions runs on on_submit BEFORE the (unwired) SCB hook and uses a 1-bucket margin \u2014 salespeople on 'By Profit Margin' rules earn commission against an inflated margin. Highest-impact tech debt because it moves money.",
+    "top_profitability_by_product report joins Sale Cost Breakdown only to filter, then recomputes a cruder gross_profit from sii.valuation_rate \u2014 the canonical number is one column away and ignored.",
+    "WhatIfSimulator vs SCB inconsistency: simulator's projected_margin_pct will not match the SCB gross_margin_pct later recorded for the same item (simulator omits 4 cost buckets).",
+    "labor_burden_percent and operating_hours_daily fields defined in Cost Center Allocation but never read by _allocate_labor or _allocate_overhead \u2014 dead config.",
+    "Labor Cost Pool.allocation_method (Per Hour/Per Repair/Salary Spread) ignored \u2014 _allocate_labor always computes Per-Sale.",
+    "Hardcoded fallback gold price $4400/oz in fetch_live_metal_rates (tasks.py:171) vs $3300/oz in pricing._get_hardcoded_fallback_rates (pricing.py:210) \u2014 two different fallback numbers for the same concept.",
+    "Previous internal audit doc (plan/02_current_state_audit/module_audit_raw.json) records two false claims (hook is wired; no margin duplication) \u2014 the planning artifacts are built on an incorrect baseline and should be corrected before redesign work proceeds.",
+    "get_margin_heatmap and get_cost_component_trends use DATE_FORMAT string grouping in raw SQL with no rollup/materialization \u2014 acceptable now, scaling risk later.",
+    "Frontend uses ad-hoc frappe.call (WhatIfSimulator.vue:190) bypassing the frappe-ui resource pattern used by the store \u2014 inconsistent data-fetching style."
+  ],
+  "recommendations": [
+    "P0 \u2014 Wire the hook: add 'zevar_core.api.profit_intelligence.calculate_sale_cost_breakdown' to hooks.py doc_events['Sales Invoice']['on_submit'] (after commission.calculate_commissions so commission splits are available, as the docstring already assumes), and add an on_cancel handler that sets the SCB row docstatus cancelled or deletes it. Without this, no other work matters.",
+    "P0 \u2014 Schedule the generator: add 'zevar_core.tasks.generate_pricing_recommendations' to scheduler_events (e.g. daily '0 7 * * *' or weekly) so Pricing Recommendation records actually populate.",
+    "P0 \u2014 Fix the 4 broken frontend/backend contracts in one pass: (a) implement create_recommendation OR repoint WhatIfSimulator to an existing endpoint; (b) make review_recommendation accept case-insensitive action (or change the panel to send lowercase); (c) either pivot get_margin_heatmap output to {category, margins:{metal:{margin_pct}}} or rewrite MarginHeatmap.vue to pivot the flat array client-side; (d) map confidence_level High/Medium/Low to a numeric for the bar, or change the panel to show the label.",
+    "P0 \u2014 Unify margin math: extract a single get_item_cogs(item) and compute_invoice_margin(invoice) into a shared module (e.g. zevar_core.services.profit_math) and refactor commission.py, top_profitability_by_product.py, analytics_hub._margin_pct, and pricing_tools.simulate_price_change to call it. This is the single highest-leverage refactor for trust \u2014 every 'margin' number in the system becomes reconcilable.",
+    "P1 \u2014 Extend the COGS model for jewelry accuracy: add making_charge (per-gram and per-piece columns on Item, summed into a new SCB field), alloy/wastage % (applied to metal_cogs), and apply labor_burden_percent to labor (field exists, unused). Add a gemstone costing mode flag (cost vs replacement).",
+    "P1 \u2014 Add store/cost-center dimension: convert Cost Center Allocation from singleton to per-store (or add a Cost Center child table), add store to Sale Cost Breakdown, and add group_by='store' to get_margin_analysis plus a multi-store consolidation view. Required for any multi-location owner.",
+    "P1 \u2014 Build the exec views the redesign needs: (a) margin waterfall (revenue -> metal -> gems -> making -> labor -> commission -> payment -> overhead -> gross profit); (b) PVM bridge decomposing period-over-period profit delta into price/volume/mix/cost effects; (c) gold pass-through analysis (margin delta attributable to gold moves). These are what separates 'reports' from 'Profit Intelligence'.",
+    "P1 \u2014 Make the what-if simulator authoritative: have simulate_price_change call the SAME compute_invoice_margin used at posting time, and let the user toggle inclusion of overhead/payment (since those are invoice-level, not item-level). Add confidence bands on the annual projection (current point estimate has no range). Let the simulator sweep a price RANGE, not a single price, and show the margin curve.",
+    "P2 \u2014 Surface the backend capabilities the UI hides: per-invoice cost drill-down (get_cost_breakdown_detail), group-by selector for margin analysis, recalculate button, pricing action items feed, slow-moving inventory, and the RAG sources/similar-events on recommendation cards (the RAG auditability is a differentiator \u2014 show it).",
+    "P2 \u2014 Add margin-floor enforcement at POS: a configurable minimum-margin per category/metal that blocks or warns at checkout, computed from the same shared profit_math. Turns Profit Intelligence from descriptive to prescriptive.",
+    "P2 \u2014 Add an on_cancel hook and idempotency: re-key SCB on amend (the on_submit body self-deletes at :31, good), but formalize cancel handling and add a backfill bench command to populate SCB for historical invoices after the hook is wired.",
+    "P2 \u2014 Correct the internal planning artifacts (plan/02_current_state_audit/module_audit_raw.json and the wf1_consolidated baseline) which falsely state the hook is wired and no margin duplication exists \u2014 the redesign plan is currently built on an incorrect baseline."
+  ],
+  "math_integrity": {
+    "canonical_definition": "profit_intelligence.py:71-75 \u2014 gross_profit = total_revenue - (metal_cogs + gemstone_cogs + labor + commission + payment_cost + overhead); margin = gross_profit / total_revenue * 100. Metal_cogs = net_weight * gold_rate * qty (gold_rate from Gold Rate Log, point-in-time). This is the ONLY definition that includes all 6 cost buckets.",
+    "inconsistent_sites": [
+      {
+        "where": "commission.py:104-109",
+        "formula": "cogs = sum(item.valuation_rate * qty); profit_margin = (net_total - cogs)/net_total*100",
+        "buckets_missing": "gemstone, labor, commission, payment, overhead; also uses valuation_rate not gold_rate",
+        "impact": "Drives real salesperson commission payouts on 'By Profit Margin' rules \u2014 HIGHEST FINANCIAL IMPACT"
+      },
+      {
+        "where": "top_profitability_by_product.py:70-71",
+        "formula": "cogs = sum(sii.valuation_rate*qty); gross_profit = sum(sii.amount) - cogs",
+        "buckets_missing": "all 5 non-metal; joins SCB but ignores its gross_profit column",
+        "impact": "Official profitability report contradicts the SCB table it joins"
+      },
+      {
+        "where": "analytics_hub.py:1012 (_margin_pct)",
+        "formula": "(price - cost)/price*100, cost = custom_cost_price or valuation_rate",
+        "buckets_missing": "all 6 (item-level pre-sale)",
+        "impact": "Populates current_margin_pct / projected_margin_pct on Pricing Recommendation \u2014 same field names as SCB, different math"
+      },
+      {
+        "where": "pricing_tools.simulate_price_change:210",
+        "formula": "(price - (net_weight*gold_rate + gemstone_value))/price*100",
+        "buckets_missing": "labor, commission, payment, overhead",
+        "impact": "Simulator's projected margin will not match posted SCB margin for the same sale \u2014 trust killer"
+      },
+      {
+        "where": "repair_accounting.py:704",
+        "formula": "gross_profit = revenue - material (labor excluded as 'pure service')",
+        "buckets_missing": "labor excluded by design; different domain",
+        "impact": "Reuses gross_profit/gross_margin_pct key names \u2014 cross-module aggregation hazard"
+      },
+      {
+        "where": "gemstone_value_service.py:125",
+        "formula": "(sell_total - cost_total)/cost_total*100",
+        "buckets_missing": "markup-on-cost denominator not price",
+        "impact": "Same margin_pct key, inverted denominator \u2014 labeling trap"
+      },
+      {
+        "where": "finance.py:351",
+        "formula": "net_profit_mtd = GL_income_total - GL_expense_total",
+        "buckets_missing": "different system (GL vs transaction)",
+        "impact": "Accounting-net-profit will not reconcile with SCB gross_profit \u2014 both shown to users"
+      }
+    ],
+    "net_assessment": "The canonical SCB definition is correct and best-in-class in design, but because the hook is unwired the system today effectively runs on the valuation_rate-only margins in commission.py and the top_profitability report \u2014 i.e., the wrong definition is the operative one. Even after wiring the hook, 6 other sites will continue to show different numbers for 'margin' until the shared profit_math refactor is done."
+  }
+}
