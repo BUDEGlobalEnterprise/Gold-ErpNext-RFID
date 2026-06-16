@@ -187,24 +187,27 @@ def simulate_price_change(item_code: str, new_price: float, gold_rate: float | N
 		if last:
 			current_price = flt(last[0][0])
 
-	# Calculate COGS
-	net_weight = flt(item.custom_net_weight_g)
+	# Phase 0: COGS basis comes from profit_math (the same per-item basis the Sale
+	# Cost Breakdown uses) so the simulator's projected margin reconciles with the
+	# posted margin.
+	from zevar_core.services.profit_math import get_item_cogs
+
+	cogs = get_item_cogs(item_code)
 	if gold_rate:
-		rate = flt(gold_rate)
-	else:
-		rate = _get_gold_rate(item.custom_metal_type or "Yellow Gold", item.custom_purity or "22Kt")
-
-	metal_cogs = net_weight * rate
-
-	# Get gemstone value
-	gemstone_value = 0.0
-	try:
-		gems = frappe.get_all("Item Gemstone", filters={"parent": item_code}, fields=["amount"])
-		gemstone_value = sum(flt(g.amount) for g in gems)
-	except Exception:
-		pass
-
-	total_cogs = metal_cogs + gemstone_value
+		# honour the explicit gold-rate override on the metal component only
+		metal_override = flt(item.custom_net_weight_g) * flt(gold_rate)
+		cogs = {
+			"metal_cogs": metal_override,
+			"gemstone_cogs": cogs["gemstone_cogs"],
+			"item_cogs": metal_override + cogs["gemstone_cogs"],
+		}
+	total_cogs = cogs["item_cogs"]
+	net_weight = flt(item.custom_net_weight_g)
+	rate_used = (
+		flt(gold_rate)
+		if gold_rate
+		else (cogs["metal_cogs"] / net_weight if net_weight > 0 and cogs["metal_cogs"] > 0 else 0.0)
+	)
 
 	# Calculate margins
 	current_margin = ((current_price - total_cogs) / current_price * 100) if current_price else 0
@@ -226,7 +229,7 @@ def simulate_price_change(item_code: str, new_price: float, gold_rate: float | N
 	direction = "increase" if flt(new_price) > current_price else "decrease"
 	message = (
 		f"Price {direction}: ${current_price:,.2f} → ${flt(new_price):,.2f} ({abs(price_change_pct):.1f}% {direction})\n"
-		f"COGS: ${total_cogs:,.2f} (Metal: ${metal_cogs:,.2f}, Gems: ${gemstone_value:,.2f})\n"
+		f"COGS: ${total_cogs:,.2f} (Metal: ${cogs['metal_cogs']:,.2f}, Gems: ${cogs['gemstone_cogs']:,.2f})\n"
 		f"Margin: {current_margin:.1f}% → {projected_margin:.1f}% (+{projected_margin - current_margin:.1f}pp)\n"
 		f"Annual profit projection: ${current_annual_profit:,.0f} → ${projected_annual_profit:,.0f}"
 	)
@@ -239,11 +242,11 @@ def simulate_price_change(item_code: str, new_price: float, gold_rate: float | N
 		"new_price": flt(new_price),
 		"price_change_pct": flt(price_change_pct, 2),
 		"cogs": {
-			"metal": flt(metal_cogs),
-			"gemstone": flt(gemstone_value),
+			"metal": flt(cogs["metal_cogs"]),
+			"gemstone": flt(cogs["gemstone_cogs"]),
 			"total": flt(total_cogs),
 		},
-		"gold_rate_used": flt(rate),
+		"gold_rate_used": flt(rate_used),
 		"current_margin_pct": flt(current_margin, 2),
 		"projected_margin_pct": flt(projected_margin, 2),
 		"margin_change_pp": flt(projected_margin - current_margin, 2),

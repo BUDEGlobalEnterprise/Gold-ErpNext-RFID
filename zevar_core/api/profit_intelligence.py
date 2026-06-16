@@ -30,96 +30,56 @@ def calculate_sale_cost_breakdown(doc, method=None):
 	# Clean previous breakdown (handles amend scenarios)
 	frappe.db.delete("Sale Cost Breakdown", {"sales_invoice": doc.name})
 
-	log = {"steps": [], "invoice": doc.name}
+	# Single source of truth: profit_math.compute_invoice_margin (Phase 0 / M0 gate).
+	# The SCB simply persists its result so every surface reads one number.
+	from zevar_core.services.profit_math import compute_invoice_margin
 
-	# --- Revenue ---
-	total_revenue = flt(doc.base_grand_total) or flt(doc.grand_total)
-	total_qty = sum(flt(item.qty) for item in doc.items)
-	log["steps"].append({"step": "revenue", "total_revenue": total_revenue, "total_qty": total_qty})
+	m = compute_invoice_margin(doc)
 
-	# --- Metal & Gemstone COGS ---
-	metal_cogs, gemstone_cogs, gold_rate, gold_source, gold_ts = _calculate_item_cogs(doc)
-	item_cogs = flt(metal_cogs) + flt(gemstone_cogs)
-	log["steps"].append(
-		{
-			"step": "cogs",
-			"metal_cogs": metal_cogs,
-			"gemstone_cogs": gemstone_cogs,
-			"item_cogs": item_cogs,
-			"gold_rate_used": gold_rate,
-			"gold_rate_source": gold_source,
-		}
-	)
-
-	# --- Labor Cost ---
-	labor_cost, labor_detail = _allocate_labor(doc)
-	log["steps"].append({"step": "labor", "total_labor": labor_cost, "detail": labor_detail})
-
-	# --- Commission ---
-	commission_total = _get_commission_total(doc.name)
-	log["steps"].append({"step": "commission", "total_commission": commission_total})
-
-	# --- Payment Processing Cost ---
-	payment_cost, payment_detail = _calculate_payment_costs(doc)
-	log["steps"].append({"step": "payment", "total_cost": payment_cost, "detail": payment_detail})
-
-	# --- Overhead Allocation ---
-	overhead_cost, overhead_method = _allocate_overhead(total_revenue, doc.posting_date)
-	log["steps"].append({"step": "overhead", "overhead_cost": overhead_cost, "method": overhead_method})
-
-	# --- Totals ---
-	total_cost = (
-		flt(item_cogs) + flt(labor_cost) + flt(commission_total) + flt(payment_cost) + flt(overhead_cost)
-	)
-	gross_profit = flt(total_revenue) - flt(total_cost)
-	gross_margin_pct = (flt(gross_profit) / flt(total_revenue) * 100) if total_revenue else 0
-
-	# --- Create Breakdown Record ---
 	breakdown = frappe.new_doc("Sale Cost Breakdown")
 	breakdown.sales_invoice = doc.name
 	breakdown.posting_date = doc.posting_date or today()
 	breakdown.customer = doc.customer
 
-	breakdown.total_revenue = total_revenue
-	breakdown.total_qty = total_qty
+	breakdown.total_revenue = m["revenue"]
+	breakdown.total_qty = m["total_qty"]
 
-	breakdown.gold_rate_at_sale = gold_rate
-	breakdown.gold_rate_source = gold_source
-	breakdown.gold_rate_timestamp = gold_ts
-	breakdown.total_metal_cogs = metal_cogs
-	breakdown.total_gemstone_cogs = gemstone_cogs
-	breakdown.total_item_cogs = item_cogs
+	breakdown.gold_rate_at_sale = m["gold_rate_at_sale"]
+	breakdown.gold_rate_source = m["gold_rate_source"]
+	breakdown.gold_rate_timestamp = m["gold_rate_timestamp"]
+	breakdown.total_metal_cogs = m["metal_cogs"]
+	breakdown.total_gemstone_cogs = m["gemstone_cogs"]
+	breakdown.total_item_cogs = m["item_cogs"]
 
-	breakdown.total_labor_cost = labor_cost
-	breakdown.labor_allocation_detail = json.dumps(labor_detail, default=str) if labor_detail else ""
-	breakdown.total_commission = commission_total
+	breakdown.total_labor_cost = m["labor"]
+	breakdown.labor_allocation_detail = json.dumps(m["labor_detail"], default=str) if m["labor_detail"] else ""
+	breakdown.total_commission = m["commission"]
 
-	breakdown.total_payment_cost = payment_cost
-	breakdown.payment_cost_detail = json.dumps(payment_detail, default=str) if payment_detail else ""
+	breakdown.total_payment_cost = m["payment_cost"]
+	breakdown.payment_cost_detail = json.dumps(m["payment_detail"], default=str) if m["payment_detail"] else ""
 
-	breakdown.overhead_per_invoice = overhead_cost
-	breakdown.overhead_method = overhead_method
+	breakdown.overhead_per_invoice = m["overhead"]
+	breakdown.overhead_method = m["overhead_method"]
 
-	breakdown.total_cost = total_cost
-	breakdown.gross_profit = gross_profit
-	breakdown.gross_margin_pct = flt(gross_margin_pct, 2)
+	breakdown.total_cost = m["total_cost"]
+	breakdown.gross_profit = m["gross_profit"]
+	breakdown.gross_margin_pct = m["gross_margin_pct"]
 
-	breakdown.calculation_log = json.dumps(log, default=str, indent=2)
+	breakdown.calculation_log = json.dumps(
+		{"invoice": doc.name, "source": "profit_math.compute_invoice_margin", "breakdown": m},
+		default=str,
+		indent=2,
+	)
 	breakdown.calculated_by = doc.owner or frappe.session.user
 	breakdown.calculated_at = now_datetime()
 
 	breakdown.insert(ignore_permissions=True)
 
-	log["result"] = {
-		"total_cost": total_cost,
-		"gross_profit": gross_profit,
-		"margin_pct": flt(gross_margin_pct, 2),
-	}
 	frappe.logger().info(
-		"Sale Cost Breakdown created for %s: profit=$%.2f margin=%.1f%%",
+		"Sale Cost Breakdown created for %s (via profit_math): profit=$%.2f margin=%.1f%%",
 		doc.name,
-		gross_profit,
-		gross_margin_pct,
+		m["gross_profit"],
+		m["gross_margin_pct"],
 	)
 
 

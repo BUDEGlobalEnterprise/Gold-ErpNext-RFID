@@ -58,6 +58,11 @@ def get_data(filters):
 	values["limit"] = limit
 
 	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
+	# Phase 0: profitability comes straight from the SCB's gross_profit (the one
+	# true margin), allocated to each item by its revenue share of the invoice -
+	# not recomputed from the inflated stock-ledger valuation_rate.
+	# SCB is a non-submittable (draft-only) doctype, so docstatus is 0 (cancelled
+	# invoices' rows are deleted on_cancel); the active-invoice guard is si.docstatus=1.
 	data = frappe.db.sql(  # nosemgrep
 		f"""
 		SELECT
@@ -67,13 +72,16 @@ def get_data(filters):
 			i.custom_metal_type AS metal_type,
 			SUM(sii.qty) AS units_sold,
 			SUM(sii.amount) AS revenue,
-			SUM(sii.qty * IFNULL(sii.valuation_rate, 0)) AS cogs,
-			SUM(sii.amount) - SUM(sii.qty * IFNULL(sii.valuation_rate, 0)) AS gross_profit
+			SUM(
+				CASE WHEN si.base_net_total > 0
+				     THEN scb.gross_profit * (sii.amount / si.base_net_total)
+				     ELSE 0 END
+			) AS gross_profit
 		FROM `tabSale Cost Breakdown` scb
 		INNER JOIN `tabSales Invoice` si ON si.name = scb.sales_invoice
 		INNER JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
 		INNER JOIN `tabItem` i ON i.name = sii.item_code
-		WHERE scb.docstatus = 1 AND si.docstatus = 1 {conditions}
+		WHERE si.docstatus = 1 AND scb.docstatus < 2 {conditions}
 		GROUP BY sii.item_code
 		ORDER BY gross_profit DESC
 		LIMIT %(limit)s
@@ -85,6 +93,7 @@ def get_data(filters):
 	for row in data:
 		revenue = flt(row.get("revenue", 0))
 		gross_profit = flt(row.get("gross_profit", 0))
+		row["cogs"] = revenue - gross_profit
 		row["margin"] = flt((gross_profit / revenue) * 100) if revenue > 0 else 0
 
 	return data

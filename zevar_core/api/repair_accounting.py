@@ -701,6 +701,10 @@ def get_profitability_report(
 		report["summary"]["total_labor_cost"] += labor
 		report["summary"]["total_material_cost"] += material
 		report["summary"]["total_cost"] += material
+		# NOTE: this is repair-SERVICE profitability (revenue minus materials;
+		# labor is the service margin), intentionally distinct from the
+		# invoice-level gross_profit in profit_math / Sale Cost Breakdown.
+		# Do not conflate the two margins.
 		report["summary"]["gross_profit"] += revenue - material
 
 		# Group by repair type

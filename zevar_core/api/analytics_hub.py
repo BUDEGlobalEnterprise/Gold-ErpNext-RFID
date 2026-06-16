@@ -969,7 +969,15 @@ def _submit_markdown_action(action_type: str, items: list[str], params: dict) ->
 			frappe.throw(_("Item not found: {0}").format(item_code))
 		item = frappe.db.get_value("Item", item_code, _item_value_fields(), as_dict=True) or {}
 		current_price = flt(item.get("custom_msrp")) or flt(item.get("standard_rate"))
-		cost = flt(item.get("custom_cost_price")) or flt(item.get("valuation_rate"))
+		# Phase 0: margin basis is the true item COGS (metal + gemstone) from
+		# profit_math, not the stock-ledger valuation_rate that understates gold.
+		from zevar_core.services.profit_math import get_item_cogs
+
+		cost = (
+			get_item_cogs(item_code)["item_cogs"]
+			or flt(item.get("custom_cost_price"))
+			or flt(item.get("valuation_rate"))
+		)
 		recommended_price = flt(current_price * (1 - markdown_pct / 100), 2)
 		doc = frappe.get_doc(
 			{
