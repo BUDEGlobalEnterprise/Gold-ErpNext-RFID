@@ -134,4 +134,5 @@ bench_commands = [
 	"zevar_core.migration.items_transfer.export_items",
 	"zevar_core.migration.items_transfer.import_items",
 	"zevar_core.stock_cli.stock_cli",
+	"zevar_core.backfill_cli.backfill_cli",
 ]

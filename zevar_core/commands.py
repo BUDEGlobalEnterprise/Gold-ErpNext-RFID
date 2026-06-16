@@ -3,6 +3,7 @@
 import click
 from frappe.commands import get_site, pass_context
 
+from zevar_core.backfill_cli import backfill_cli
 from zevar_core.migration.commands import import_legacy_data, show_mapping_info
 from zevar_core.rag.commands import build_dev_index, build_rag_index, rag_stats
 
@@ -65,4 +66,5 @@ commands = [
 	build_rag_index,
 	rag_stats,
 	build_dev_index,
+	backfill_cli,
 ]

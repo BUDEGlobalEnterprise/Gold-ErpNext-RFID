@@ -131,6 +131,20 @@ def log_sale_event(doc, method=None):
 		if not employee or split_pct <= 0:
 			continue
 
+		# Idempotent: never create a duplicate 'Sale Completed' log for the same
+		# (employee, reference_document). Lets the backfill replay history safely
+		# (Performance Logs are immutable and cannot be delete-and-recreated) and
+		# guards against any accidental double-fire of on_submit.
+		if frappe.db.exists(
+			"Performance Log",
+			{
+				"employee": employee,
+				"event_type": "Sale Completed",
+				"reference_document": doc.name,
+			},
+		):
+			continue
+
 		sp_revenue = net_total * (split_pct / 100)
 		sp_commission = commission_map.get(employee, 0)
 
