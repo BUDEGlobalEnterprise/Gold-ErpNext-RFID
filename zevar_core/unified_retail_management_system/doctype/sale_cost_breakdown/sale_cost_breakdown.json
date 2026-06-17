@@ -9,6 +9,8 @@
   "sales_invoice",
   "posting_date",
   "customer",
+  "store",
+  "item_group",
   "column_break_ref",
   "total_revenue",
   "total_qty",
@@ -20,6 +22,8 @@
   "column_break_metal",
   "total_gemstone_cogs",
   "total_item_cogs",
+  "making_charge",
+  "alloy_wastage_amount",
   "section_break_labor",
   "total_labor_cost",
   "labor_allocation_detail",
@@ -34,6 +38,7 @@
   "total_cost",
   "gross_profit",
   "gross_margin_pct",
+  "net_contribution_margin_pct",
   "section_break_audit",
   "calculation_log",
   "column_break_audit",
@@ -232,6 +237,36 @@
    "fieldname": "calculated_at",
    "fieldtype": "Datetime",
    "label": "Calculated At"
+  },
+  {
+   "fieldname": "store",
+   "fieldtype": "Link",
+   "label": "Store",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "making_charge",
+   "fieldtype": "Currency",
+   "label": "Making Charge",
+   "description": "Per-item making charge. Populated when item-level making decomposition lands; 0 until then."
+  },
+  {
+   "fieldname": "alloy_wastage_amount",
+   "fieldtype": "Currency",
+   "label": "Alloy Wastage Amount",
+   "description": "Alloy/wastage cost. Populated when item-level alloy decomposition lands; 0 until then."
+  },
+  {
+   "fieldname": "net_contribution_margin_pct",
+   "fieldtype": "Percent",
+   "label": "Net Contribution Margin %",
+   "description": "Revenue - all cost buckets - payment - overhead."
   }
  ],
  "grid_page_length": 50,

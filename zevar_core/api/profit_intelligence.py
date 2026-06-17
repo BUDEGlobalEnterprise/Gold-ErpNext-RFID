@@ -64,6 +64,16 @@ def calculate_sale_cost_breakdown(doc, method=None):
 	breakdown.total_cost = m["total_cost"]
 	breakdown.gross_profit = m["gross_profit"]
 	breakdown.gross_margin_pct = m["gross_margin_pct"]
+	# Phase 1 schema fields. making_charge/alloy_wastage_amount are 0 until
+	# item-level making/alloy decomposition lands; store/item_group/net_contribution
+	# carry real values now.
+	breakdown.net_contribution_margin_pct = m["net_contribution_margin_pct"]
+	breakdown.making_charge = m["making_charge"]
+	breakdown.alloy_wastage_amount = m["alloy_adjustment"]
+	breakdown.store = getattr(doc, "set_warehouse", None)
+	breakdown.item_group = (
+		frappe.db.get_value("Item", doc.items[0].item_code, "item_group") if doc.items else None
+	)
 
 	breakdown.calculation_log = json.dumps(
 		{"invoice": doc.name, "source": "profit_math.compute_invoice_margin", "breakdown": m},
