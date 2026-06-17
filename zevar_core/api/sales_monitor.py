@@ -16,7 +16,7 @@ from typing import Any
 
 import frappe
 from frappe import _
-from frappe.utils import flt, get_datetime, now_datetime, today
+from frappe.utils import add_days, flt, get_datetime, now_datetime, today
 
 _MONITOR_ROLES = ["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"]
 
@@ -339,4 +339,74 @@ def get_pace(from_date: str | None = None, to_date: str | None = None, store: st
 		"upt": summary["upt"],
 		"aov": summary["aov"],
 	}
+
+
+# ---------------------------------------------------------------------------
+# Phase 0 — Daily Store Sales Rollup (materialized for sub-100ms reads)
+# ---------------------------------------------------------------------------
+
+
+@frappe.whitelist()
+def rebuild_daily_rollup(from_date: str | None = None, to_date: str | None = None) -> dict:
+	"""Idempotent batch rebuild of the Daily Store Sales Rollup for a range.
+
+	One row per (date x store x category x metal). Revenue is summed per line;
+	COGS/gross_profit are the SCB's values allocated to each line by its revenue
+	share (same basis as top_profitability_by_product). Delete-then-insert over
+	the range, so it is safe to re-run. Scheduled nightly; also runnable by hand.
+	"""
+	frappe.only_for(["System Manager"])
+	if not from_date:
+		from_date = add_days(today(), -90)
+	if not to_date:
+		to_date = today()
+
+	frappe.db.delete("Daily Store Sales Rollup", {"date": ["between", [from_date, to_date]]})
+
+	rows = frappe.db.sql(
+		"""
+        SELECT
+            si.posting_date AS date,
+            si.set_warehouse AS store,
+            i.custom_jewelry_type AS category,
+            i.custom_metal_type AS metal,
+            COUNT(DISTINCT si.name) AS invoice_count,
+            COALESCE(SUM(sii.qty), 0) AS unit_count,
+            COALESCE(SUM(sii.amount), 0) AS net_revenue,
+            COALESCE(SUM(sii.amount), 0) AS gross_revenue,
+            COALESCE(SUM(CASE WHEN si.base_net_total > 0
+                THEN scb.total_cost * (sii.amount / si.base_net_total) ELSE 0 END), 0) AS cogs_total,
+            COALESCE(SUM(CASE WHEN si.base_net_total > 0
+                THEN scb.gross_profit * (sii.amount / si.base_net_total) ELSE 0 END), 0) AS gross_profit,
+            AVG(scb.gold_rate_at_sale) AS gold_rate_avg
+        FROM `tabSales Invoice` si
+        LEFT JOIN `tabSale Cost Breakdown` scb ON scb.sales_invoice = si.name
+        JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
+        JOIN `tabItem` i ON i.name = sii.item_code
+        WHERE si.is_pos = 1 AND si.docstatus = 1
+          AND si.posting_date >= %s AND si.posting_date <= %s
+        GROUP BY si.posting_date, si.set_warehouse, i.custom_jewelry_type, i.custom_metal_type
+        """,
+		(from_date, to_date),
+		as_dict=True,
+	)
+
+	for r in rows:
+		doc = frappe.new_doc("Daily Store Sales Rollup")
+		doc.date = r.date
+		doc.store = r.store
+		doc.category = r.category
+		doc.metal = r.metal
+		doc.invoice_count = int(r.invoice_count or 0)
+		doc.unit_count = int(r.unit_count or 0)
+		doc.net_revenue = flt(r.net_revenue, 2)
+		doc.gross_revenue = flt(r.gross_revenue, 2)
+		doc.cogs_total = flt(r.cogs_total, 2)
+		doc.gross_profit = flt(r.gross_profit, 2)
+		doc.gold_rate_avg = flt(r.gold_rate_avg, 2) or 0
+		doc.insert(ignore_permissions=True)
+
+	frappe.db.commit()
+	return {"rebuilt": len(rows), "from_date": from_date, "to_date": to_date}
+
 
