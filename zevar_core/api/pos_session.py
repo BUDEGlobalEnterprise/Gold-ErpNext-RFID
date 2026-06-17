@@ -1503,6 +1503,55 @@ def get_all_active_sessions() -> dict:
 
 		enriched.append(session_dict)
 
+	# Also surface users who are LOGGED IN (active Frappe session) but have no open
+	# register, so the live monitor reflects everyone actually online — not just
+	# open cash drawers. Merged in with status "Logged In".
+	registered_users = {s["user"] for s in enriched}
+	try:
+		logged_in = frappe.db.sql(
+			"""SELECT s.user AS user, MAX(s.lastupdate) AS lastseen
+            FROM `tabSessions` s
+            WHERE s.lastupdate >= (NOW() - INTERVAL 15 MINUTE)
+              AND s.user NOT IN ('Guest')
+            GROUP BY s.user
+            ORDER BY lastseen DESC
+            LIMIT 50""",
+			as_dict=True,
+		)
+	except Exception:
+		logged_in = []
+
+	for li in logged_in:
+		if not li.user or li.user in registered_users:
+			continue
+		full_name = frappe.db.get_value("User", li.user, "full_name") or li.user
+		today_sales = frappe.db.sql(
+			"""SELECT COUNT(*) AS c, COALESCE(SUM(grand_total), 0) AS t
+            FROM `tabSales Invoice`
+            WHERE owner = %s AND posting_date = %s AND docstatus = 1""",
+			(li.user, nowdate()),
+			as_dict=True,
+		)[0]
+		enriched.append(
+			{
+				"name": f"login-{li.user}",
+				"user": li.user,
+				"user_full_name": full_name,
+				"pos_profile": None,
+				"company": None,
+				"period_start_date": None,
+				"status": "Logged In",
+				"opening_amount": 0,
+				"warehouse": None,
+				"sales_count": today_sales.c or 0,
+				"sales_total": flt(today_sales.t or 0),
+				"today_sales_count": today_sales.c or 0,
+				"today_sales_total": flt(today_sales.t or 0),
+				"duration_hours": 0,
+				"last_seen": str(li.lastseen) if li.lastseen else None,
+			}
+		)
+
 	return {
 		"sessions": enriched,
 		"total_count": len(enriched),
@@ -1590,10 +1639,10 @@ def get_live_sales_feed(hours: int = 24) -> dict:
 	"""
 	frappe.only_for(["Sales Manager", "Store Manager", "System Manager"])
 
-	from frappe.utils import add_hours
+	from frappe.utils import add_to_date
 	from frappe.utils import now_datetime as _now
 
-	since = add_hours(_now(), -int(hours or 24))
+	since = add_to_date(_now(), hours=-int(hours or 24))
 
 	# Get recent POS invoices
 	invoices = frappe.get_all(
