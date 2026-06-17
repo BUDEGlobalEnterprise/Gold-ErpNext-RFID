@@ -92,6 +92,7 @@
 </template>
 
 <script setup>
+import { fmt } from '@/utils/format'
 /**
  * RevenueTab — Plan §7.1, 180 LOC budget.
  * Reuses the existing revenue_dashboard.get_dashboard_data API.
@@ -118,9 +119,4 @@ async function load() {
 	}
 }
 onMounted(load)
-
-function fmt(n) {
-	if (n == null) return '0.00'
-	return Number(n).toFixed(2)
-}
 </script>

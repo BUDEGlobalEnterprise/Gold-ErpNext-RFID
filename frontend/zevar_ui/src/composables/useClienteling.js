@@ -16,6 +16,16 @@ export function useClienteling() {
 		auto: false,
 	})
 
+	const createTaskResource = createResource({
+		url: 'zevar_core.api.clienteling.create_crm_task_from_pos',
+		auto: false,
+	})
+
+	const createLeadResource = createResource({
+		url: 'zevar_core.api.crm_hooks.create_lead_for_customer',
+		auto: false,
+	})
+
 	async function loadIntelligence(customerName) {
 		if (!customerName) return
 		loading.value = true
@@ -48,12 +58,49 @@ export function useClienteling() {
 		}
 	}
 
+	async function createTask(customerName, title, dueDate, description) {
+		if (!customerName || !title?.trim()) return
+		try {
+			const result = await createTaskResource.submit({
+				customer: customerName,
+				title: title.trim(),
+				due_date: dueDate || null,
+				description: description || null,
+			})
+			// Reload intelligence to refresh tasks
+			await loadIntelligence(customerName)
+			return result
+		} catch (e) {
+			console.error('Create task error:', e)
+			throw e
+		}
+	}
+
+	async function createLead(customerName) {
+		if (!customerName) return
+		try {
+			const result = await createLeadResource.submit({
+				customer: customerName,
+			})
+			// Reload intelligence to refresh pipeline
+			await loadIntelligence(customerName)
+			return result
+		} catch (e) {
+			console.error('Create lead error:', e)
+			throw e
+		}
+	}
+
 	const upcomingOccasions = computed(() => customerData.value?.upcoming_occasions || [])
 	const hasUrgentOccasion = computed(() =>
 		upcomingOccasions.value.some((o) => o.days_until <= 14)
 	)
 	const profile = computed(() => customerData.value?.profile || null)
 	const recentPurchases = computed(() => customerData.value?.recent_purchases || [])
+	const pipeline = computed(() => customerData.value?.pipeline || { lead: null, deal: null, tasks: [] })
+	const hasCRMLead = computed(() => !!pipeline.value?.lead)
+	const hasCRMDeal = computed(() => !!pipeline.value?.deal)
+	const openTasks = computed(() => pipeline.value?.tasks || [])
 
 	return {
 		customerData,
@@ -61,9 +108,15 @@ export function useClienteling() {
 		error,
 		loadIntelligence,
 		addNote,
+		createTask,
+		createLead,
 		upcomingOccasions,
 		hasUrgentOccasion,
 		profile,
 		recentPurchases,
+		pipeline,
+		hasCRMLead,
+		hasCRMDeal,
+		openTasks,
 	}
 }

@@ -140,11 +140,6 @@ async function load() {
 	}
 }
 onMounted(load)
-
-function fmt(n) {
-	if (n == null) return '0.00'
-	return Number(n).toFixed(2)
-}
 function stateClass(s) {
 	const map = {
 		'In Progress': 'bg-blue-500/15 text-blue-600 dark:text-blue-400',

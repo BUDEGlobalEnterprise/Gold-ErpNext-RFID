@@ -342,6 +342,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { createResource, call } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
+import { fmt } from '@/utils/format'
 import { useSessionStore } from '@/stores/session.js'
 
 const session = useSessionStore()
@@ -460,13 +461,6 @@ async function confirmForceClose(session) {
 	} catch (e) {
 		console.error('Force close failed:', e)
 	}
-}
-
-function fmt(n) {
-	return Number(n || 0).toLocaleString('en-US', {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	})
 }
 
 function formatTime(ts) {

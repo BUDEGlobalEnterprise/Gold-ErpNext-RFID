@@ -799,7 +799,7 @@ const inventoryResource = createResource({
 		return {
 			warehouse: session.currentWarehouse,
 			display_case: f.display_case || undefined,
-			page_length: 500,
+			page_length: 9999,
 		}
 	},
 	onSuccess(data) {

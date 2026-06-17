@@ -30,6 +30,20 @@ def _resolve_employee_from_sales_person(sales_person: str) -> str | None:
 	return frappe.db.get_value("Sales Person", sales_person, "employee")
 
 
+def _resolve_store_location_from_warehouse(warehouse: str | None) -> str | None:
+	"""Map a Warehouse to the Store Location whose ``default_warehouse`` it is.
+
+	``Performance Log.store_location`` is a Link to the ``Store Location`` doctype
+	(not ``Warehouse``), so we must resolve the store from the invoice's warehouse
+	rather than storing the warehouse id directly. This is the same resolution used
+	by the POS receipt print formats. Returns ``None`` when no Store Location maps
+	to this warehouse (``store_location`` is non-mandatory on Performance Log).
+	"""
+	if not warehouse:
+		return None
+	return frappe.db.get_value("Store Location", {"default_warehouse": warehouse}, "name")
+
+
 def _get_active_target(employee: str, date=None) -> str | None:
 	"""Find the active Performance Target for an employee on a given date."""
 	if not date:
@@ -117,6 +131,20 @@ def log_sale_event(doc, method=None):
 		if not employee or split_pct <= 0:
 			continue
 
+		# Idempotent: never create a duplicate 'Sale Completed' log for the same
+		# (employee, reference_document). Lets the backfill replay history safely
+		# (Performance Logs are immutable and cannot be delete-and-recreated) and
+		# guards against any accidental double-fire of on_submit.
+		if frappe.db.exists(
+			"Performance Log",
+			{
+				"employee": employee,
+				"event_type": "Sale Completed",
+				"reference_document": doc.name,
+			},
+		):
+			continue
+
 		sp_revenue = net_total * (split_pct / 100)
 		sp_commission = commission_map.get(employee, 0)
 
@@ -134,7 +162,7 @@ def log_sale_event(doc, method=None):
 			item_count=len(doc.items) if hasattr(doc, "items") else 0,
 			customer=doc.customer,
 			commission_amount=sp_commission,
-			store_location=getattr(doc, "set_warehouse", None),
+			store_location=_resolve_store_location_from_warehouse(getattr(doc, "set_warehouse", None)),
 			performance_target=performance_target,
 			period_type=period_type,
 		)
@@ -167,7 +195,7 @@ def log_sale_cancel_event(doc, method=None):
 			reference_doctype="Sales Invoice",
 			reference_document=doc.name,
 			revenue_amount=-(abs(sp_revenue)),  # Negative to indicate return
-			store_location=getattr(doc, "set_warehouse", None),
+			store_location=_resolve_store_location_from_warehouse(getattr(doc, "set_warehouse", None)),
 			performance_target=performance_target,
 			period_type=period_type,
 		)

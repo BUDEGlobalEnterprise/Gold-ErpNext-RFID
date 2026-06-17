@@ -460,6 +460,7 @@
 
 <script setup>
 import AppLayout from '@/components/AppLayout.vue'
+import { fmt } from '@/utils/format'
 import KPICard from '@/components/reports/KPICard.vue'
 import { ref, computed, onMounted } from 'vue'
 import { call } from 'frappe-ui'
@@ -498,14 +499,6 @@ const slaArc = computed(() => {
 function barHeight(val, max) {
 	if (!max || !val) return '2px'
 	return Math.max(2, (val / max) * 100) + '%'
-}
-
-function fmt(n) {
-	if (n == null) return '0.00'
-	return Number(n).toLocaleString('en-US', {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	})
 }
 
 async function refresh() {

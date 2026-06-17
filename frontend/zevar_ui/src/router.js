@@ -49,6 +49,10 @@ const routes = [
 		meta: { requiresAuth: true },
 	},
 	{
+		path: '/pos',
+		redirect: '/terminal',
+	},
+	{
 		path: '/transactions',
 		name: 'Transactions',
 		component: () => import('./pages/SalesHistory.vue'),
@@ -187,6 +191,12 @@ const routes = [
 		component: () => import('./pages/ReportViewer.vue'),
 		meta: { requiresAuth: true, requiresManagement: true },
 	},
+	{
+		path: '/reports/eod',
+		name: 'EODReport',
+		component: () => import('./pages/EODReport.vue'),
+		meta: { requiresAuth: true, requiresManagement: true },
+	},
 	// ── Dashboards — granular RBAC by access tier ──
 	{
 		path: '/reports/dashboards/revenue',
@@ -213,10 +223,15 @@ const routes = [
 		meta: { requiresAuth: true, reportRoles: ['admin'] },
 	},
 	{
+		path: '/reports/dashboards/command-center',
+		name: 'CommandCenter',
+		component: () => import('./pages/dashboards/CommandCenter.vue'),
+		meta: { requiresAuth: true, reportRoles: ['manager', 'admin'] },
+	},
+	{
+		// Q10: collapsed the dead LiveMonitor stub into the role-aware Command Center.
 		path: '/live-monitor',
-		name: 'LiveMonitor',
-		component: () => import('./pages/LiveMonitor.vue'),
-		meta: { requiresAuth: true, reportRoles: ['admin', 'manager'] },
+		redirect: '/reports/dashboards/command-center',
 	},
 	// Employee Live Monitor - accessible to all authenticated users
 	{

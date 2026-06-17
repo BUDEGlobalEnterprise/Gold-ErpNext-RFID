@@ -1269,6 +1269,7 @@ def import_transactions(backup_path: str, dry_run: bool = False) -> dict:
 
 			doc = frappe.new_doc("Sales Invoice")
 			doc.title = f"Legacy Trans #{transno}"
+			doc.set_posting_time = 1
 			doc.posting_date = format_date(record.get("date")) or frappe.utils.today()
 			doc.update_stock = 0
 

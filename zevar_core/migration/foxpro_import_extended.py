@@ -784,11 +784,11 @@ def import_payment_tenders(backup_path: str, dry_run: bool = False) -> dict:
 
 	company = frappe.defaults.get_global_default("company") if not dry_run else "Default"
 
-	# Build SI cache for linking
+	# Build SI cache for linking (only submitted invoices can be referenced)
 	si_cache = {}
 	for si in frappe.get_all(
 		"Sales Invoice",
-		filters={"custom_legacy_trans_no": ["!=", ""]},
+		filters={"custom_legacy_trans_no": ["!=", ""], "docstatus": 1},
 		fields=["name", "custom_legacy_trans_no", "customer", "grand_total"],
 	):
 		si_cache[si.custom_legacy_trans_no] = si
@@ -804,6 +804,14 @@ def import_payment_tenders(backup_path: str, dry_run: bool = False) -> dict:
 			amount = clean_float(record.get("amount"))
 
 			if amount <= 0:
+				stats["skipped"] += 1
+				continue
+
+			cardnum = clean_str(record.get("cardnum"))
+			ref_no = cardnum or transno
+
+			# Dedup: skip tenders already imported (idempotent re-run)
+			if frappe.db.exists("Payment Entry", {"reference_no": ref_no, "company": company}):
 				stats["skipped"] += 1
 				continue
 
@@ -823,6 +831,8 @@ def import_payment_tenders(backup_path: str, dry_run: bool = False) -> dict:
 			doc.party = customer
 			doc.paid_amount = amount
 			doc.received_amount = amount
+			doc.source_exchange_rate = 1.0
+			doc.target_exchange_rate = 1.0
 
 			# Mode of payment
 			tender_code = clean_str(record.get("tendercode"))
@@ -830,11 +840,10 @@ def import_payment_tenders(backup_path: str, dry_run: bool = False) -> dict:
 			doc.mode_of_payment = mode
 
 			# Reference
-			cardnum = clean_str(record.get("cardnum"))
-			doc.reference_no = cardnum or transno
+			doc.reference_no = ref_no
 			doc.reference_date = format_date(record.get("transdate")) or frappe.utils.today()
 
-			# Link to Sales Invoice if available
+			# Link to Sales Invoice only if it is submitted
 			if si_info:
 				doc.append(
 					"references",
@@ -1129,13 +1138,15 @@ def import_layaway_contracts(backup_path: str, dry_run: bool = False) -> dict:
 				doc.maximum_duration_months = "6"
 
 			# Add a placeholder item
+			line_total = total_amount if total_amount > 0 else balance
 			doc.append(
 				"items",
 				{
 					"item_code": _get_default_item(),
 					"item_name": f"Layaway #{arnum}",
 					"qty": 1,
-					"rate": total_amount if total_amount > 0 else balance,
+					"rate": line_total if line_total > 0 else 0,
+					"amount": line_total if line_total > 0 else 0,
 				},
 			)
 
@@ -1199,6 +1210,8 @@ def import_layaway_links(backup_path: str, dry_run: bool = False) -> dict:
 			doc.party = default_customer
 			doc.paid_amount = amount
 			doc.received_amount = amount
+			doc.source_exchange_rate = 1.0
+			doc.target_exchange_rate = 1.0
 
 			trans_type = clean_str(record.get("transtype")) or "LAYAWAY"
 			pay_type = clean_str(record.get("paytype"))

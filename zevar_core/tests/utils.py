@@ -126,6 +126,11 @@ def ensure_pos_profile(
 	customer = ensure_customer("Walk-In Customer")
 	ensure_mode_of_payment("Cash", payment_type="Cash")
 
+	# Find a valid asset/cash account to avoid link validation failure
+	cash_account = frappe.db.get_value("Account", {"account_type": "Cash", "company": company}, "name")
+	if not cash_account:
+		cash_account = frappe.db.get_value("Account", {"root_type": "Asset", "is_group": 0, "company": company}, "name")
+
 	profile = frappe.new_doc("POS Profile")
 	profile.name = profile_name
 	profile.company = company
@@ -134,6 +139,8 @@ def ensure_pos_profile(
 	profile.customer = customer
 	profile.selling_price_list = "Standard Selling"
 	profile.custom_enforce_fixed_float = 0
+	if cash_account:
+		profile.custom_float_gl_account = cash_account
 	profile.append("payments", {"mode_of_payment": "Cash", "default": 1})
 	profile.insert(ignore_permissions=True, ignore_mandatory=True)
 	return profile.name

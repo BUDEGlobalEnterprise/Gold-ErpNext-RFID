@@ -32,6 +32,7 @@
 </template>
 
 <script setup>
+import { fmt } from '@/utils/format'
 import { ref, onMounted } from 'vue'
 import { call } from 'frappe-ui'
 import DetailListDrawer from './DetailListDrawer.vue'
@@ -58,11 +59,6 @@ onMounted(async () => {
 		console.error('LayawayDetailDrawer load:', e)
 	}
 })
-
-function fmt(n) {
-	if (n == null) return '0.00'
-	return Number(n).toFixed(2)
-}
 function isOverdue(r) {
 	if (!r.next_payment_due) return false
 	return new Date(r.next_payment_due) < new Date()

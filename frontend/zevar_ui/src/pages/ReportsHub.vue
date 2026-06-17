@@ -132,6 +132,7 @@
 import AppLayout from '@/components/AppLayout.vue'
 import { createResource } from 'frappe-ui'
 import { computed, ref, provide } from 'vue'
+import { useRouter } from 'vue-router'
 import DailyBrief from '@/components/reports/DailyBrief.vue'
 import AllReports from '@/components/reports/AllReports.vue'
 import Dashboards from '@/components/reports/Dashboards.vue'
@@ -208,11 +209,11 @@ const scopeBadgeClass = computed(() => {
 
 function openReport(report) {
 	if (report.route) {
-		window.location.href = `/pos${report.route}`
+		useRouter().push(report.route)
 		return
 	}
 	if (report.external_url) {
-		window.location.href = report.external_url
+		window.open(report.external_url, '_blank', 'noopener')
 		return
 	}
 	if (report.report_name) {
@@ -225,10 +226,14 @@ function openReport(report) {
 }
 
 function openReportById(reportId) {
+	// The unified EOD closeout page replaces the bare Frappe query report
+	if (reportId === 'eod_stream_summary') {
+		useRouter().push('/reports/eod')
+		return
+	}
 	const report = reports.value.find((r) => r.id === reportId)
 	if (report) return openReport(report)
 	const fallbackMap = {
-		eod_stream_summary: 'EOD Stream Summary',
 		cash_drawer_reconciliation: 'Cash Drawer Reconciliation',
 		payment_method_summary: 'Payment Method Summary',
 		refunds_voids_discounts: 'Refunds Voids and Discounts',
@@ -242,7 +247,7 @@ function drillToReport(reportId) {
 }
 
 function openDashboard(name) {
-	window.location.href = `/pos/reports/dashboards/${name}`
+	useRouter().push(`/reports/dashboards/${name}`)
 }
 
 function openSubscribeModal(reportId) {

@@ -30,97 +30,82 @@ def calculate_sale_cost_breakdown(doc, method=None):
 	# Clean previous breakdown (handles amend scenarios)
 	frappe.db.delete("Sale Cost Breakdown", {"sales_invoice": doc.name})
 
-	log = {"steps": [], "invoice": doc.name}
+	# Single source of truth: profit_math.compute_invoice_margin (Phase 0 / M0 gate).
+	# The SCB simply persists its result so every surface reads one number.
+	from zevar_core.services.profit_math import compute_invoice_margin
 
-	# --- Revenue ---
-	total_revenue = flt(doc.base_grand_total) or flt(doc.grand_total)
-	total_qty = sum(flt(item.qty) for item in doc.items)
-	log["steps"].append({"step": "revenue", "total_revenue": total_revenue, "total_qty": total_qty})
+	m = compute_invoice_margin(doc)
 
-	# --- Metal & Gemstone COGS ---
-	metal_cogs, gemstone_cogs, gold_rate, gold_source, gold_ts = _calculate_item_cogs(doc)
-	item_cogs = flt(metal_cogs) + flt(gemstone_cogs)
-	log["steps"].append(
-		{
-			"step": "cogs",
-			"metal_cogs": metal_cogs,
-			"gemstone_cogs": gemstone_cogs,
-			"item_cogs": item_cogs,
-			"gold_rate_used": gold_rate,
-			"gold_rate_source": gold_source,
-		}
-	)
-
-	# --- Labor Cost ---
-	labor_cost, labor_detail = _allocate_labor(doc)
-	log["steps"].append({"step": "labor", "total_labor": labor_cost, "detail": labor_detail})
-
-	# --- Commission ---
-	commission_total = _get_commission_total(doc.name)
-	log["steps"].append({"step": "commission", "total_commission": commission_total})
-
-	# --- Payment Processing Cost ---
-	payment_cost, payment_detail = _calculate_payment_costs(doc)
-	log["steps"].append({"step": "payment", "total_cost": payment_cost, "detail": payment_detail})
-
-	# --- Overhead Allocation ---
-	overhead_cost, overhead_method = _allocate_overhead(total_revenue, doc.posting_date)
-	log["steps"].append({"step": "overhead", "overhead_cost": overhead_cost, "method": overhead_method})
-
-	# --- Totals ---
-	total_cost = (
-		flt(item_cogs) + flt(labor_cost) + flt(commission_total) + flt(payment_cost) + flt(overhead_cost)
-	)
-	gross_profit = flt(total_revenue) - flt(total_cost)
-	gross_margin_pct = (flt(gross_profit) / flt(total_revenue) * 100) if total_revenue else 0
-
-	# --- Create Breakdown Record ---
 	breakdown = frappe.new_doc("Sale Cost Breakdown")
 	breakdown.sales_invoice = doc.name
 	breakdown.posting_date = doc.posting_date or today()
 	breakdown.customer = doc.customer
 
-	breakdown.total_revenue = total_revenue
-	breakdown.total_qty = total_qty
+	breakdown.total_revenue = m["revenue"]
+	breakdown.total_qty = m["total_qty"]
 
-	breakdown.gold_rate_at_sale = gold_rate
-	breakdown.gold_rate_source = gold_source
-	breakdown.gold_rate_timestamp = gold_ts
-	breakdown.total_metal_cogs = metal_cogs
-	breakdown.total_gemstone_cogs = gemstone_cogs
-	breakdown.total_item_cogs = item_cogs
+	breakdown.gold_rate_at_sale = m["gold_rate_at_sale"]
+	breakdown.gold_rate_source = m["gold_rate_source"]
+	breakdown.gold_rate_timestamp = m["gold_rate_timestamp"]
+	breakdown.total_metal_cogs = m["metal_cogs"]
+	breakdown.total_gemstone_cogs = m["gemstone_cogs"]
+	breakdown.total_item_cogs = m["item_cogs"]
 
-	breakdown.total_labor_cost = labor_cost
-	breakdown.labor_allocation_detail = json.dumps(labor_detail, default=str) if labor_detail else ""
-	breakdown.total_commission = commission_total
+	breakdown.total_labor_cost = m["labor"]
+	breakdown.labor_allocation_detail = json.dumps(m["labor_detail"], default=str) if m["labor_detail"] else ""
+	breakdown.total_commission = m["commission"]
 
-	breakdown.total_payment_cost = payment_cost
-	breakdown.payment_cost_detail = json.dumps(payment_detail, default=str) if payment_detail else ""
+	breakdown.total_payment_cost = m["payment_cost"]
+	breakdown.payment_cost_detail = json.dumps(m["payment_detail"], default=str) if m["payment_detail"] else ""
 
-	breakdown.overhead_per_invoice = overhead_cost
-	breakdown.overhead_method = overhead_method
+	breakdown.overhead_per_invoice = m["overhead"]
+	breakdown.overhead_method = m["overhead_method"]
 
-	breakdown.total_cost = total_cost
-	breakdown.gross_profit = gross_profit
-	breakdown.gross_margin_pct = flt(gross_margin_pct, 2)
+	breakdown.total_cost = m["total_cost"]
+	breakdown.gross_profit = m["gross_profit"]
+	breakdown.gross_margin_pct = m["gross_margin_pct"]
+	# Phase 1 schema fields. making_charge/alloy_wastage_amount are 0 until
+	# item-level making/alloy decomposition lands; store/item_group/net_contribution
+	# carry real values now.
+	breakdown.net_contribution_margin_pct = m["net_contribution_margin_pct"]
+	breakdown.making_charge = m["making_charge"]
+	breakdown.alloy_wastage_amount = m["alloy_adjustment"]
+	breakdown.store = getattr(doc, "set_warehouse", None)
+	breakdown.item_group = (
+		frappe.db.get_value("Item", doc.items[0].item_code, "item_group") if doc.items else None
+	)
 
-	breakdown.calculation_log = json.dumps(log, default=str, indent=2)
+	breakdown.calculation_log = json.dumps(
+		{"invoice": doc.name, "source": "profit_math.compute_invoice_margin", "breakdown": m},
+		default=str,
+		indent=2,
+	)
 	breakdown.calculated_by = doc.owner or frappe.session.user
 	breakdown.calculated_at = now_datetime()
 
 	breakdown.insert(ignore_permissions=True)
 
-	log["result"] = {
-		"total_cost": total_cost,
-		"gross_profit": gross_profit,
-		"margin_pct": flt(gross_margin_pct, 2),
-	}
 	frappe.logger().info(
-		"Sale Cost Breakdown created for %s: profit=$%.2f margin=%.1f%%",
+		"Sale Cost Breakdown created for %s (via profit_math): profit=$%.2f margin=%.1f%%",
 		doc.name,
-		gross_profit,
-		gross_margin_pct,
+		m["gross_profit"],
+		m["gross_margin_pct"],
 	)
+
+
+def cancel_sale_cost_breakdown(doc, method=None):
+	"""Hook: Sales Invoice on_cancel. Remove the Sale Cost Breakdown for this invoice.
+
+	Sale Cost Breakdown is a non-submittable (draft-only) record kept in sync 1:1 with
+	its invoice (``sales_invoice`` is unique), so it cannot be set to docstatus=2.
+	On cancel we delete the row so profit reports never reflect a cancelled sale.
+	This mirrors the amend-cleanup ``db.delete`` already performed at the top of
+	``calculate_sale_cost_breakdown``.
+	"""
+	if not doc.is_pos:
+		return
+
+	frappe.db.delete("Sale Cost Breakdown", {"sales_invoice": doc.name})
 
 
 # ---------------------------------------------------------------------------
@@ -767,10 +752,24 @@ def get_margin_heatmap(from_date=None, to_date=None):
 		as_dict=True,
 	)
 
+	# Pivot into the shape components/profit/MarginHeatmap.vue expects:
+	# [ { jewelry_type, margins: { <metal_type>: { margin_pct, revenue, gross_profit, count } } }, ... ]
+	pivot = {}
+	row_order = []
 	for r in results:
-		r["avg_margin"] = flt(r.get("avg_margin"), 2)
+		jtype = r.get("jewelry_type") or "Unknown"
+		metal = r.get("metal_type") or "Unknown"
+		if jtype not in pivot:
+			pivot[jtype] = {"jewelry_type": jtype, "margins": {}}
+			row_order.append(jtype)
+		pivot[jtype]["margins"][metal] = {
+			"margin_pct": flt(r.get("avg_margin"), 2),
+			"revenue": flt(r.get("revenue"), 2),
+			"gross_profit": flt(r.get("gross_profit"), 2),
+			"count": r.get("count") or 0,
+		}
 
-	return {"data": results, "period": {"from_date": from_date, "to_date": to_date}}
+	return [pivot[j] for j in row_order]
 
 
 @frappe.whitelist()
@@ -812,6 +811,83 @@ def get_cost_component_trends(from_date=None, to_date=None, granularity="weekly"
 	}
 
 
+_CONFIDENCE_SCORES = {"high": 90, "medium": 70, "low": 50}
+
+
+def _confidence_to_score(level):
+	"""Map a High/Medium/Low confidence label to a 0-100 score for the UI badge."""
+	return _CONFIDENCE_SCORES.get((level or "").strip().lower(), 0)
+
+
+@frappe.whitelist()
+def create_recommendation(
+	item_code, new_price, simulation_data=None, recommendation_type=None, notes=None
+):
+	"""Create a Pricing Recommendation from a What-If simulation.
+
+	Consumed by components/pricing/WhatIfSimulator.vue (item_code, new_price,
+	simulation_data). Previously this endpoint did not exist, so saving a
+	simulated price 404'd.
+	"""
+	frappe.only_for(["System Manager", "Store Manager", "Sales Manager"])
+
+	if not item_code or new_price in (None, ""):
+		frappe.throw(_("Item code and new price are required."))
+
+	if not frappe.db.exists("Item", item_code):
+		frappe.throw(_("Item {0} not found.").format(item_code))
+
+	item_name, current_price = frappe.db.get_value(
+		"Item", item_code, ["item_name", "custom_msrp"]
+	) or (None, 0)
+	current_price = flt(current_price)
+	recommended_price = flt(new_price)
+
+	if recommendation_type:
+		rec_type = recommendation_type
+	elif recommended_price > current_price:
+		rec_type = "Price Increase"
+	elif recommended_price < current_price:
+		rec_type = "Price Decrease"
+	else:
+		rec_type = "Premium Positioning"
+
+	price_change_pct = (
+		((recommended_price - current_price) / current_price * 100) if current_price else 0
+	)
+
+	reasoning = ["Created from What-If simulator."]
+	projected_margin = None
+	if simulation_data:
+		try:
+			sim = json.loads(simulation_data) if isinstance(simulation_data, str) else simulation_data
+			if isinstance(sim, dict):
+				projected_margin = flt(sim.get("margin_pct") or sim.get("projected_margin_pct"))
+				reasoning.append("Simulation data attached.")
+		except Exception:
+			reasoning.append("Simulation data attached.")
+
+	if notes:
+		reasoning.append(notes)
+
+	doc = frappe.new_doc("Pricing Recommendation")
+	doc.item_code = item_code
+	doc.item_name = item_name
+	doc.recommendation_type = rec_type
+	doc.current_price = current_price
+	doc.recommended_price = recommended_price
+	doc.price_change_pct = flt(price_change_pct, 2)
+	if projected_margin is not None:
+		doc.projected_margin_pct = flt(projected_margin, 2)
+	doc.confidence_level = "Medium"
+	doc.reasoning = " ".join(reasoning)
+	doc.generated_by = frappe.session.user
+	doc.status = "Pending Review"
+	doc.insert(ignore_permissions=True)
+
+	return {"success": True, "name": doc.name}
+
+
 @frappe.whitelist()
 def get_recommendations(status="Pending Review", limit=20):
 	"""Get pricing recommendations for the dashboard."""
@@ -839,6 +915,11 @@ def get_recommendations(status="Pending Review", limit=20):
 		limit_page_length=int(limit),
 	)
 
+	for rec in recommendations:
+		# PricingRecommendationsPanel reads `confidence` as a 0-100 number for the
+		# badge width/colour; the doctype stores High/Medium/Low in confidence_level.
+		rec["confidence"] = _confidence_to_score(rec.get("confidence_level"))
+
 	return {"recommendations": recommendations, "total": len(recommendations)}
 
 
@@ -852,7 +933,9 @@ def review_recommendation(recommendation, action, notes=None):
 
 	doc = frappe.get_doc("Pricing Recommendation", recommendation)
 
-	if action == "approve":
+	# Accept any casing/tense the UI sends: approve, approved, reject, rejected.
+	action_norm = (action or "").strip().lower()
+	if action_norm in ("approve", "approved"):
 		doc.status = "Approved"
 		doc.reviewed_by = frappe.session.user
 		doc.reviewed_at = now_datetime()
@@ -865,7 +948,7 @@ def review_recommendation(recommendation, action, notes=None):
 			doc.status = "Applied"
 			doc.applied_at = now_datetime()
 			doc.save(ignore_permissions=True)
-	elif action == "reject":
+	elif action_norm in ("reject", "rejected"):
 		doc.status = "Rejected"
 		doc.reviewed_by = frappe.session.user
 		doc.reviewed_at = now_datetime()
@@ -873,6 +956,399 @@ def review_recommendation(recommendation, action, notes=None):
 			doc.notes = notes
 		doc.save(ignore_permissions=True)
 	else:
-		frappe.throw(_("Invalid action. Use 'approve' or 'reject'."))
+		frappe.throw(_("Invalid action {0}. Use 'approve' or 'reject'.").format(action))
 
 	return {"success": True, "status": doc.status, "recommendation": doc.name}
+
+
+# ---------------------------------------------------------------------------
+# Phase 1 — Margin Waterfall, What-If (M1 reconciliation), PVM bridge
+# ---------------------------------------------------------------------------
+
+_PROFIT_ROLES = ["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"]
+
+
+def _waterfall_from_margin(m: dict) -> dict:
+	"""Shape a compute_invoice_margin result into a waterfall for charts."""
+	steps = [
+		{"label": "Revenue", "value": flt(m["revenue"], 2), "type": "start"},
+		{"label": "Metal COGS", "value": -flt(m["metal_cogs"], 2), "type": "deduct"},
+		{"label": "Gemstone COGS", "value": -flt(m["gemstone_cogs"], 2), "type": "deduct"},
+		{"label": "Making", "value": -flt(m["making_charge"], 2), "type": "deduct"},
+		{"label": "Alloy", "value": -flt(m["alloy_adjustment"], 2), "type": "deduct"},
+		{"label": "Labor", "value": -flt(m["labor"], 2), "type": "deduct"},
+		{"label": "Commission", "value": -flt(m["commission"], 2), "type": "deduct"},
+		{"label": "Payment Cost", "value": -flt(m["payment_cost"], 2), "type": "deduct"},
+		{"label": "Overhead", "value": -flt(m["overhead"], 2), "type": "deduct"},
+		{"label": "Gross Profit", "value": flt(m["gross_profit"], 2), "type": "end"},
+	]
+	return {
+		"revenue": flt(m["revenue"], 2),
+		"metal_cogs": flt(m["metal_cogs"], 2),
+		"gemstone_cogs": flt(m["gemstone_cogs"], 2),
+		"making_charge": flt(m["making_charge"], 2),
+		"alloy_adjustment": flt(m["alloy_adjustment"], 2),
+		"labor": flt(m["labor"], 2),
+		"commission": flt(m["commission"], 2),
+		"payment_cost": flt(m["payment_cost"], 2),
+		"overhead": flt(m["overhead"], 2),
+		"total_cost": flt(m["total_cost"], 2),
+		"gross_profit": flt(m["gross_profit"], 2),
+		"gross_margin_pct": flt(m["gross_margin_pct"], 2),
+		"net_contribution_margin_pct": flt(m["net_contribution_margin_pct"], 2),
+		"steps": steps,
+	}
+
+
+@frappe.whitelist()
+def get_margin_waterfall(sales_invoice=None, from_date=None, to_date=None):
+	"""Margin waterfall: revenue -> each cost bucket -> gross profit.
+
+	For a single invoice (the What-If / drill-down case) it comes straight from
+	profit_math. For a period it aggregates the Sale Cost Breakdown rows.
+	"""
+	frappe.only_for(_PROFIT_ROLES)
+
+	if sales_invoice:
+		from zevar_core.services.profit_math import compute_invoice_margin
+
+		m = compute_invoice_margin(sales_invoice)
+		wf = _waterfall_from_margin(m)
+		wf["scope"] = {"sales_invoice": sales_invoice}
+		return wf
+
+	if not from_date:
+		from_date = add_days(today(), -30)
+	if not to_date:
+		to_date = today()
+
+	row = frappe.db.sql(
+		"""SELECT
+            COALESCE(SUM(total_revenue),0) AS revenue,
+            COALESCE(SUM(total_metal_cogs),0) AS metal_cogs,
+            COALESCE(SUM(total_gemstone_cogs),0) AS gemstone_cogs,
+            COALESCE(SUM(total_labor_cost),0) AS labor,
+            COALESCE(SUM(total_commission),0) AS commission,
+            COALESCE(SUM(total_payment_cost),0) AS payment_cost,
+            COALESCE(SUM(overhead_per_invoice),0) AS overhead,
+            COALESCE(SUM(total_cost),0) AS total_cost,
+            COALESCE(SUM(gross_profit),0) AS gross_profit
+        FROM `tabSale Cost Breakdown`
+        WHERE posting_date >= %s AND posting_date <= %s""",
+		(from_date, to_date),
+		as_dict=True,
+	)[0]
+
+	revenue = flt(row.revenue)
+	gross_profit = flt(row.gross_profit)
+	m = {
+		"revenue": revenue,
+		"metal_cogs": row.metal_cogs,
+		"gemstone_cogs": row.gemstone_cogs,
+		"making_charge": 0.0,
+		"alloy_adjustment": 0.0,
+		"labor": row.labor,
+		"commission": row.commission,
+		"payment_cost": row.payment_cost,
+		"overhead": row.overhead,
+		"total_cost": row.total_cost,
+		"gross_profit": gross_profit,
+		"gross_margin_pct": (gross_profit / revenue * 100) if revenue else 0,
+		"net_contribution_margin_pct": (gross_profit / revenue * 100) if revenue else 0,
+	}
+	wf = _waterfall_from_margin(m)
+	wf["scope"] = {"from_date": from_date, "to_date": to_date}
+	return wf
+
+
+@frappe.whitelist()
+def simulate_whatif(sales_invoice, new_price=None, gold_rate=None, persist=True):
+	"""What-If simulator reconciled to the posted SCB margin (M1 gate).
+
+	At ``new_price`` == the item's sold rate (or omitted) the returned margin
+	equals the SCB's ``gross_margin_pct`` exactly, because both come from
+	``profit_math.compute_invoice_margin``. Sweeping ``new_price`` produces the
+	margin curve; ``gold_rate`` overrides the metal component.
+	"""
+	frappe.only_for(_PROFIT_ROLES)
+	from zevar_core.services.profit_math import compute_invoice_margin, get_item_cogs
+
+	doc = frappe.get_doc("Sales Invoice", sales_invoice)
+	base = compute_invoice_margin(doc)
+
+	# Primary item = the highest-value line (the slider's subject).
+	primary = max(doc.items or [], key=lambda i: flt(i.amount)) if doc.items else None
+	primary_qty = flt(primary.qty) if primary else 0
+	primary_revenue = flt(primary.amount) if primary else 0
+	primary_rate = (primary_revenue / primary_qty) if primary_qty else 0
+
+	# Recompute costs (metal may move with a gold-rate override).
+	total_cost = flt(base["total_cost"])
+	if gold_rate and primary:
+		new_metal = flt(item_custom_net_weight(primary.item_code)) * flt(gold_rate) * primary_qty
+		total_cost = total_cost - flt(base["metal_cogs"]) + new_metal
+
+	target_price = flt(new_price) if new_price not in (None, "") else primary_rate
+	new_revenue = flt(base["revenue"]) - primary_revenue + (target_price * primary_qty)
+	new_gross_profit = new_revenue - total_cost
+	simulated_margin = (new_gross_profit / new_revenue * 100) if new_revenue else 0
+
+	# Margin curve across a +/- 20% price sweep.
+	curve = []
+	if primary_rate > 0:
+		for mult in (0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.10, 1.15, 1.20):
+			p = primary_rate * mult
+			rev = flt(base["revenue"]) - primary_revenue + (p * primary_qty)
+			gp = rev - total_cost
+			curve.append(
+				{
+					"price": flt(p, 2),
+					"margin_pct": flt((gp / rev * 100) if rev else 0, 2),
+					"gross_profit": flt(gp, 2),
+					"is_current": abs(mult - 1.0) < 1e-9,
+				}
+			)
+
+	result = {
+		"sales_invoice": sales_invoice,
+		"base_margin_pct": flt(base["gross_margin_pct"], 2),
+		"simulated_margin_pct": flt(simulated_margin, 2),
+		"revenue": flt(new_revenue, 2),
+		"gross_profit": flt(new_gross_profit, 2),
+		"primary_item": primary.item_code if primary else None,
+		"primary_rate": flt(primary_rate, 2),
+		"target_price": flt(target_price, 2),
+		"margin_curve": curve,
+	}
+
+	if persist and frappe.db.exists("DocType", "What-if Simulation Run"):
+		_persist_whatif_run(doc, result)
+
+	return result
+
+
+def item_custom_net_weight(item_code):
+	"""Helper returning the item's net weight in grams (kept module-local)."""
+	return flt(frappe.db.get_value("Item", item_code, "custom_net_weight_g") or 0)
+
+
+def _persist_whatif_run(invoice_doc, result):
+	"""Best-effort persistence of a What-if Simulation Run (Phase 1 doctype)."""
+	try:
+		run = frappe.new_doc("What-if Simulation Run")
+		run.sales_invoice = invoice_doc.name
+		run.posting_date = invoice_doc.posting_date or today()
+		run.item_code = result.get("primary_item")
+		run.target_price = result.get("target_price")
+		run.base_margin_pct = result.get("base_margin_pct")
+		run.simulated_margin_pct = result.get("simulated_margin_pct")
+		run.simulated_by = frappe.session.user
+		run.simulated_at = now_datetime()
+		run.curve = json.dumps(result.get("margin_curve", []), default=str)
+		run.insert(ignore_permissions=True)
+	except Exception:
+		frappe.log_error(title="What-if Simulation Run persist failed", message=frappe.get_traceback())
+
+
+@frappe.whitelist()
+def get_pvm_bridge(
+	period_a_from, period_a_to, period_b_from, period_b_to, scope="revenue"
+):
+	"""Price/Volume/Mix bridge between two periods, read from SCB rows.
+
+	Returns revenue and gross-profit bridges with explicit price, volume, cost
+	and a residual 'honesty' row so the decomposition always foots to the actual
+	delta. ``scope`` is 'revenue' (default) or 'profit'.
+	"""
+	frappe.only_for(_PROFIT_ROLES)
+
+	def _period_stats(frm, to):
+		row = frappe.db.sql(
+			"""SELECT
+                COALESCE(SUM(total_revenue),0) AS revenue,
+                COALESCE(SUM(total_qty),0) AS units,
+                COALESCE(SUM(total_cost),0) AS total_cost,
+                COALESCE(SUM(gross_profit),0) AS gross_profit
+            FROM `tabSale Cost Breakdown`
+            WHERE posting_date >= %s AND posting_date <= %s""",
+			(frm, to),
+			as_dict=True,
+		)[0]
+		revenue = flt(row.revenue)
+		units = flt(row.units)
+		cost = flt(row.total_cost)
+		profit = flt(row.gross_profit)
+		return {
+			"revenue": revenue,
+			"units": units,
+			"total_cost": cost,
+			"gross_profit": profit,
+			"avg_price": (revenue / units) if units else 0,
+			"avg_cost": (cost / units) if units else 0,
+			"unit_profit": (profit / units) if units else 0,
+			"margin_pct": (profit / revenue * 100) if revenue else 0,
+		}
+
+	a = _period_stats(period_a_from, period_a_to)
+	b = _period_stats(period_b_from, period_b_to)
+
+	# Revenue bridge: price x volume, mix + residual absorbs the rest.
+	price_effect = (b["avg_price"] - a["avg_price"]) * b["units"]
+	volume_effect = (b["units"] - a["units"]) * a["avg_price"]
+	revenue_delta = b["revenue"] - a["revenue"]
+	mix_residual = revenue_delta - price_effect - volume_effect
+
+	# Profit bridge: a price change drops straight to profit; cost change hurts;
+	# volume contributes at A's unit profit; the rest is mix/residual.
+	price_profit = price_effect  # pure
+	cost_effect = (a["avg_cost"] - b["avg_cost"]) * b["units"]  # cost down => profit up
+	volume_profit = (b["units"] - a["units"]) * a["unit_profit"]
+	profit_delta = b["gross_profit"] - a["gross_profit"]
+	profit_residual = profit_delta - price_profit - cost_effect - volume_profit
+
+	return {
+		"period_a": {"from": period_a_from, "to": period_a_to, **{k: flt(v, 2) for k, v in a.items()}},
+		"period_b": {"from": period_b_from, "to": period_b_to, **{k: flt(v, 2) for k, v in b.items()}},
+		"scope": scope,
+		"revenue_bridge": {
+			"price_effect": flt(price_effect, 2),
+			"volume_effect": flt(volume_effect, 2),
+			"mix_residual": flt(mix_residual, 2),
+			"total_delta": flt(revenue_delta, 2),
+		},
+		"profit_bridge": {
+			"price_effect": flt(price_profit, 2),
+			"cost_effect": flt(cost_effect, 2),
+			"volume_effect": flt(volume_profit, 2),
+			"residual": flt(profit_residual, 2),
+			"total_delta": flt(profit_delta, 2),
+		},
+	}
+
+
+def _gold_rate_at(metal, purity, as_of_datetime):
+	"""Latest Gold Rate Log rate for a metal/purity at/before a datetime."""
+	filters = {"timestamp": ["<=", as_of_datetime]}
+	if metal:
+		filters["metal"] = metal
+	if purity:
+		filters["purity"] = purity
+	rows = frappe.get_all(
+		"Gold Rate Log", filters=filters, fields=["rate_per_gram"], order_by="timestamp desc", limit=1
+	)
+	return flt(rows[0].rate_per_gram) if rows else 0.0
+
+
+@frappe.whitelist()
+def get_gold_pass_through(from_date=None, to_date=None, metal=None, purity=None):
+	"""Margin delta attributable to gold moves over the period.
+
+	Reads the period's gold-rate swing (from Gold Rate Log) and the gold weight
+	sold (SCB -> items) to quantify how much gold appreciation flowed through to
+	COGS (a margin headwind when gold rises), plus the pass-through % of revenue
+	that is raw metal.
+	"""
+	frappe.only_for(_PROFIT_ROLES)
+	if not from_date:
+		from_date = add_days(today(), -30)
+	if not to_date:
+		to_date = today()
+
+	agg = frappe.db.sql(
+		"""SELECT
+            COALESCE(SUM(total_revenue),0) AS revenue,
+            COALESCE(SUM(total_metal_cogs),0) AS metal_cogs
+        FROM `tabSale Cost Breakdown`
+        WHERE posting_date >= %s AND posting_date <= %s""",
+		(from_date, to_date),
+		as_dict=True,
+	)[0]
+
+	gold_weight = frappe.db.sql(
+		"""SELECT COALESCE(SUM(i.custom_net_weight_g * sii.qty), 0)
+        FROM `tabSale Cost Breakdown` scb
+        JOIN `tabSales Invoice` si ON si.name = scb.sales_invoice
+        JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
+        JOIN `tabItem` i ON i.name = sii.item_code
+        WHERE si.docstatus = 1 AND scb.posting_date >= %s AND scb.posting_date <= %s
+          AND i.custom_net_weight_g > 0""",
+		(from_date, to_date),
+	)[0][0]
+
+	start = _gold_rate_at(metal, purity, f"{from_date} 00:00:00")
+	end = _gold_rate_at(metal, purity, f"{to_date} 23:59:59")
+	delta = end - start
+	delta_pct = (delta / start * 100) if start else 0
+	margin_impact = delta * flt(gold_weight)  # headwind when gold rises
+
+	revenue = flt(agg.revenue)
+	metal_cogs = flt(agg.metal_cogs)
+	return {
+		"from_date": from_date,
+		"to_date": to_date,
+		"metal": metal,
+		"gold_rate_start": flt(start, 2),
+		"gold_rate_end": flt(end, 2),
+		"gold_delta_per_gram": flt(delta, 2),
+		"gold_delta_pct": flt(delta_pct, 2),
+		"gold_weight_sold_g": flt(gold_weight, 3),
+		"margin_impact": flt(margin_impact, 2),
+		"metal_cogs": flt(metal_cogs, 2),
+		"revenue": flt(revenue, 2),
+		"pass_through_pct": flt((metal_cogs / revenue * 100) if revenue else 0, 2),
+	}
+
+
+@frappe.whitelist()
+def get_unrealized_gain_loss(as_of_date=None):
+	"""Mark-to-market on gold inventory: book cost (valuation_rate) vs replacement
+	(current Gold Rate Log rate) across on-hand stock. No migrate needed — reads
+	Item net weight, valuation_rate, and Bin stock.
+	"""
+	frappe.only_for(_PROFIT_ROLES)
+	as_of_dt = f"{as_of_date or today()} 23:59:59"
+
+	items = frappe.db.sql(
+		"""SELECT
+            i.name, i.custom_metal_type, i.custom_purity,
+            i.custom_net_weight_g, i.valuation_rate,
+            COALESCE((SELECT SUM(b.actual_qty) FROM `tabBin` b WHERE b.item_code = i.name), 0) AS stock_qty
+        FROM `tabItem` i
+        WHERE i.custom_net_weight_g > 0 AND i.disabled = 0""",
+		as_dict=True,
+	)
+
+	total_book = 0.0
+	total_market = 0.0
+	by_metal = {}
+	rate_cache = {}
+
+	def _rate(mtl, prt):
+		key = (mtl, prt)
+		if key not in rate_cache:
+			rate_cache[key] = _gold_rate_at(mtl, prt, as_of_dt)
+		return rate_cache[key]
+
+	for it in items:
+		qty = flt(it.stock_qty)
+		if qty <= 0:
+			continue
+		weight = flt(it.custom_net_weight_g) * qty
+		book = flt(it.valuation_rate) * qty
+		market = weight * _rate(it.custom_metal_type, it.custom_purity)
+		total_book += book
+		total_market += market
+		key = it.custom_metal_type or "Unknown"
+		bucket = by_metal.setdefault(key, {"book": 0.0, "market": 0.0, "weight_g": 0.0})
+		bucket["book"] += book
+		bucket["market"] += market
+		bucket["weight_g"] += weight
+
+	return {
+		"as_of_date": as_of_date or today(),
+		"total_book_cost": flt(total_book, 2),
+		"total_market_cost": flt(total_market, 2),
+		"unrealized_gain_loss": flt(total_market - total_book, 2),
+		"by_metal": {k: {kk: flt(vv, 2) for kk, vv in v.items()} for k, v in by_metal.items()},
+	}
+

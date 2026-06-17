@@ -58,6 +58,38 @@
 				</div>
 			</div>
 
+			<!-- Live Sales (Q7) — the #1 owner metric, absent before -->
+			<div v-if="sales" class="premium-card mb-4 p-4 flex-shrink-0">
+				<div class="flex items-center justify-between mb-2">
+					<h3 class="text-sm font-bold text-gray-900 dark:text-white">Live Sales Today</h3>
+					<span class="text-[10px] text-gray-400"
+						>{{ sales.txn_count }} txn · {{ sales.units }} units</span
+					>
+				</div>
+				<div class="grid grid-cols-4 gap-3">
+					<div>
+						<p class="text-[10px] text-gray-400 uppercase">Revenue</p>
+						<p class="text-lg font-bold text-emerald-600">${{ fmt(sales.revenue) }}</p>
+					</div>
+					<div>
+						<p class="text-[10px] text-gray-400 uppercase">AOV</p>
+						<p class="text-lg font-bold text-gray-900 dark:text-white">
+							${{ fmt(sales.aov) }}
+						</p>
+					</div>
+					<div>
+						<p class="text-[10px] text-gray-400 uppercase">UPT</p>
+						<p class="text-lg font-bold text-gray-900 dark:text-white">{{ sales.upt }}</p>
+					</div>
+					<div>
+						<p class="text-[10px] text-gray-400 uppercase">Projected</p>
+						<p class="text-lg font-bold text-blue-600">
+							${{ fmt(sales.projected_day_close ?? sales.revenue) }}
+						</p>
+					</div>
+				</div>
+			</div>
+
 			<div v-else class="flex-1 overflow-auto space-y-4 pr-1">
 				<!-- System-Wide KPIs -->
 				<div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
@@ -280,6 +312,7 @@
 
 <script setup>
 import AppLayout from '@/components/AppLayout.vue'
+import { fmt } from '@/utils/format'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { call } from 'frappe-ui'
 
@@ -289,6 +322,7 @@ const feedEvents = ref([])
 const feedHours = ref(4)
 const isConnected = ref(false)
 const realtimeEvents = ref([])
+const sales = ref(null)
 
 const sys = computed(() => data.value?.system || {})
 const stores = computed(() => data.value?.stores || [])
@@ -300,6 +334,7 @@ async function refresh() {
 		data.value = await call('zevar_core.api.live_monitor.get_command_center_data')
 		isConnected.value = true
 		await loadFeed()
+		await loadSales()
 	} catch (e) {
 		console.error('Command center load failed:', e)
 		isConnected.value = false
@@ -316,6 +351,15 @@ async function loadFeed() {
 			})) || []
 	} catch (e) {
 		console.error('Feed load failed:', e)
+	}
+}
+
+async function loadSales() {
+	// Q7: live sales hero (the #1 owner metric, absent before).
+	try {
+		sales.value = await call('zevar_core.api.sales_monitor.get_summary')
+	} catch (e) {
+		console.error('Sales load failed:', e)
 	}
 }
 
@@ -377,12 +421,6 @@ onBeforeUnmount(() => {
 })
 
 // Helpers
-function fmt(n) {
-	return Number(n || 0).toLocaleString('en-US', {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	})
-}
 function formatTime(ts) {
 	if (!ts) return ''
 	try {

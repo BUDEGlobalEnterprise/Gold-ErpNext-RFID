@@ -20,7 +20,7 @@
 
 	<div
 		v-else
-		class="h-[100dvh] w-full flex overflow-hidden bg-gray-50 dark:bg-[#05070a] font-display text-gray-900 dark:text-gray-100 selection:bg-emerald-500/30 relative transition-colors duration-500"
+		class="h-[100dvh] w-full flex overflow-hidden bg-gray-50 dark:bg-[#0b0f19] font-display text-gray-900 dark:text-gray-100 selection:bg-emerald-500/30 relative transition-colors duration-500"
 	>
 		<!-- Mobile Sidebar Overlay -->
 		<div
@@ -157,10 +157,20 @@
 				<!-- Header Actions (Tablet) -->
 				<button
 					@click="mobileMenuOpen = !mobileMenuOpen"
-					class="hidden sm:flex lg:hidden w-10 h-10 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 items-center justify-center text-gray-500 dark:text-white/70"
+					class="hidden sm:flex lg:hidden w-10 h-10 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 items-center justify-center text-gray-500 dark:text-white/70 hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
 				>
 					<span class="material-symbols-outlined icon-loading-guard">{{
 						mobileMenuOpen ? "close" : "menu"
+					}}</span>
+				</button>
+
+				<!-- Sidebar Toggle (Desktop) -->
+				<button
+					@click="sidebarCollapsed = !sidebarCollapsed"
+					class="hidden lg:flex w-10 h-10 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 items-center justify-center text-gray-500 dark:text-white/70 hover:bg-gray-50 dark:hover:bg-white/10 transition-colors ml-4"
+				>
+					<span class="material-symbols-outlined icon-loading-guard">{{
+						sidebarCollapsed ? "menu" : "menu_open"
 					}}</span>
 				</button>
 

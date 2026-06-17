@@ -319,3 +319,12 @@ export function getPrimaryRoleLabel() {
 	if (session.hasAnyRole(['Employee', 'Employee Self Service'])) return 'Employee'
 	return 'User'
 }
+
+/**
+ * Check if user can access Quick Actions sidebar
+ * @returns {boolean}
+ */
+export function canAccessQuickActions() {
+	const session = useSessionStore()
+	return session.hasAnyRole(['Employee', 'Employee Self Service'])
+}

@@ -25,7 +25,18 @@ def get_pos_profiles() -> dict:
 
 	# Check if user has broad read permission or specific POS roles
 	has_full_read = frappe.has_permission("POS Profile", ptype="read")
-	pos_roles = ["POS Manager", "Sales User", "Employee", "Employee Self Service"]
+	pos_roles = [
+		"POS Manager",
+		"Sales User",
+		"Sales Manager",
+		"System Manager",
+		"POS User",
+		"Cashier",
+		"Store Manager",
+		"Stock Manager",
+		"Employee",
+		"Employee Self Service",
+	]
 	user_roles = frappe.get_roles(user)
 
 	if not has_full_read and not any(role in pos_roles for role in user_roles):
@@ -219,7 +230,18 @@ def set_active_profile(profile_name: str) -> dict:
 
 	# Check authorization
 	has_full_read = frappe.has_permission("POS Profile", ptype="read")
-	pos_roles = ["POS Manager", "Sales User", "Employee", "Employee Self Service"]
+	pos_roles = [
+		"POS Manager",
+		"Sales User",
+		"Sales Manager",
+		"System Manager",
+		"POS User",
+		"Cashier",
+		"Store Manager",
+		"Stock Manager",
+		"Employee",
+		"Employee Self Service",
+	]
 	user_roles = frappe.get_roles(user)
 
 	if not has_full_read:
@@ -276,7 +298,18 @@ def get_profile_settings(profile_name: str) -> dict:
 
 	# Check authorization
 	has_full_read = frappe.has_permission("POS Profile", ptype="read")
-	pos_roles = ["POS Manager", "Sales User", "Employee", "Employee Self Service"]
+	pos_roles = [
+		"POS Manager",
+		"Sales User",
+		"Sales Manager",
+		"System Manager",
+		"POS User",
+		"Cashier",
+		"Store Manager",
+		"Stock Manager",
+		"Employee",
+		"Employee Self Service",
+	]
 	user_roles = frappe.get_roles(user)
 
 	if not has_full_read:

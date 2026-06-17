@@ -100,13 +100,14 @@ def calculate_commissions(doc, method=None):
 	discount_amount = flt(doc.discount_amount)
 	discount_percent = (discount_amount / (net_total + discount_amount) * 100) if discount_amount else 0
 
-	# Compute profit margin for profit-margin rules
-	cogs = 0.0
-	for item in doc.items:
-		vr = flt(item.get("valuation_rate", 0)) if hasattr(item, "valuation_rate") else 0
-		cogs += vr * flt(item.qty)
-	total_profit = net_total - cogs
-	profit_margin = (total_profit / net_total * 100) if net_total else 0
+	# Compute profit margin for profit-margin rules (Phase 0 / B3 fix): use
+	# profit_math's true-COGS margin instead of the inflated valuation_rate-only
+	# margin that overpays commission. include_commission=False gives the
+	# contribution margin *before* this sale's commission (calculate_commissions
+	# runs before the splits exist; the full payout-trace is Phase 3).
+	from zevar_core.services.profit_math import compute_invoice_margin
+
+	profit_margin = flt(compute_invoice_margin(doc, include_commission=False)["gross_margin_pct"], 2)
 
 	for sp in sales_persons:
 		rule = _get_applicable_rule(sp["employee"])
@@ -139,6 +140,24 @@ def calculate_commissions(doc, method=None):
 		split_doc.commission_amount = commission_amount
 		split_doc.status = "Calculated"
 		split_doc.insert(ignore_permissions=True)
+
+
+def reverse_commissions(doc, method=None):
+	"""Hook: Sales Invoice on_cancel. Remove commission splits for this invoice.
+
+	Symmetric to ``calculate_commissions``: splits are draft records tied 1:1 to the
+	invoice (created via ``insert``, never submitted), so on cancel we delete them
+	so no orphaned commission amount survives a cancelled/returned sale.
+
+	NOTE: this function was referenced in ``hooks.py`` ``on_cancel`` but was missing,
+	which broke Sales Invoice cancellation entirely (Frappe resolves doc_events via
+	``frappe.get_attr`` and raised on every cancel). Added as part of the Q1/Q2
+	wiring sprint.
+	"""
+	if not doc.is_pos:
+		return
+
+	frappe.db.delete("Sales Commission Split", {"sales_invoice": doc.name})
 
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,117 @@
+{
+  "$version": 4,
+  "fastModel": "",
+  "permissions": {
+    "allow": [
+      "Bash(/home/frappe/.local/bin/bench help)",
+      "Bash(/home/frappe/.local/bin/bench --help)",
+      "Bash(/home/frappe/.local/bin/bench src)",
+      "Bash(/workspace/development/frappe-bench/env/bin/python -c \":*)",
+      "Bash(/home/frappe/.local/bin/bench --version)",
+      "Bash(/workspace/development/frappe-bench/env/bin/frappe --help)",
+      "Bash(/workspace/development/frappe-bench/env/bin/python /workspace/development/frappe-bench/apps/frappe/frappe/utils/bench.py --help)",
+      "Bash(/workspace/development/frappe-bench/env/bin/python -m frappe --help)",
+      "Bash(/workspace/development/frappe-bench/env/bin/python -m frappe.commands.utils mariadb --help)",
+      "Bash(mysql -h mariadb -u _d32887a0d3e9d25f -pUvEl2LqkWAcBbidU _d32887a0d3e9d25f -e \"SHOW TABLES LIKE ''tabStore%'';\")",
+      "Bash(mysql -h mariadb -u _d32887a0d3e9d25f -pUvEl2LqkWAcBbidU _d32887a0d3e9d25f -e \":*)",
+      "Bash(git add plans/)",
+      "Bash(grep -n \"def \" *.py)",
+      "Bash(grep -E \"\\.\\(json|js\\)$\")",
+      "Bash(find /workspace/development/frappe-bench -name *workspace* -o -name *desktop*)",
+      "Bash(git restore:*)",
+      "Bash(git commit:*)",
+      "Bash(bench --site zevar.localhost console 2)",
+      "Bash(chmod +x /workspace/development/setup-agents.sh)",
+      "Bash(ls *)",
+      "Bash(npm run *)",
+      "Bash(find *)",
+      "Bash(bench *)",
+      "Bash(python *)",
+      "Bash(do *)",
+      "Bash(node *)",
+      "Bash(done)",
+      "Bash(cat *)",
+      "Bash(doc *)",
+      "Bash(\"page\", *)",
+      "Bash(print)",
+      "Bash(eof)",
+      "Bash(curl *)",
+      "Bash(sleep *)",
+      "Bash(xargs *)",
+      "Bash(grep *)",
+      "Bash(rm *)",
+      "Bash(cat)",
+      "Bash(import *)",
+      "Bash(frappe.init)",
+      "Bash(frappe.connect)",
+      "Bash(try:)",
+      "Bash(ws *)",
+      "Bash(\"workspace\", *)",
+      "Bash(ws.content *)",
+      "Bash(ws.save)",
+      "Bash(frappe.db.commit)",
+      "Bash(ws2 *)",
+      "Bash(except *)",
+      "Bash(traceback.print_exc)",
+      "Bash(finally:)",
+      "Bash(frappe.destroy)",
+      "Bash(source *)",
+      "Bash(mv *)",
+      "Bash(env/bin/python)",
+      "Bash(frappe.delete_doc)",
+      "Bash(else:)",
+      "Bash(workspaces *)",
+      "Bash(pyeof)",
+      "Bash(pip show *)",
+      "Bash(pip install *)",
+      "Read(//home/frappe/.bench/**)",
+      "Read(//home/frappe/.bench/bench/utils/**)",
+      "Read(//home/frappe/.shared-agents/impeccable/.claude/skills/**)",
+      "Read(//home/frappe/.shared-agents/impeccable/**)"
+    ],
+    "additionalDirectories": [
+      "/workspace"
+    ]
+  },
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic",
+    "ANTHROPIC_AUTH_TOKEN": "c44c537b8aac47fa9dd99da8102a438e.2dsmdB9ozJjETDMB",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5.2[1m]",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-5.2[1m]",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-5.1"
+  },
+  "mcpServers": {
+    "web-search-prime": {
+      "type": "streamableHttp",
+      "url": "https://api.z.ai/api/mcp/web_search_prime/mcp",
+      "headers": {
+        "Authorization": "c44c537b8aac47fa9dd99da8102a438e.2dsmdB9ozJjETDMB"
+      }
+    },
+    "web-reader": {
+      "type": "streamableHttp",
+      "url": "https://api.z.ai/api/mcp/web_reader/mcp",
+      "headers": {
+        "Authorization": "c44c537b8aac47fa9dd99da8102a438e.2dsmdB9ozJjETDMB"
+      }
+    },
+    "zread": {
+      "type": "streamableHttp",
+      "url": "https://api.z.ai/api/mcp/zread/mcp",
+      "headers": {
+        "Authorization": "c44c537b8aac47fa9dd99da8102a438e.2dsmdB9ozJjETDMB"
+      }
+    },
+    "zai-vision": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@z_ai/mcp-server"
+      ],
+      "env": {
+        "Z_AI_API_KEY": "c44c537b8aac47fa9dd99da8102a438e.2dsmdB9ozJjETDMB",
+        "Z_AI_MODE": "ZAI"
+      }
+    }
+  }
+}

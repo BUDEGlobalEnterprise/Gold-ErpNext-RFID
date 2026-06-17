@@ -15,52 +15,25 @@ from frappe.utils import add_days, cint, flt, getdate, now_datetime, today
 
 
 def publish_repair_event(event_type: str, data: dict) -> None:
-	"""Publish a repair-related event via frappe.publish_realtime.
+	"""Publish a repair-related event.
 
-	Called from RepairOrder controller hooks and repair API endpoints.
-	Events are broadcast to the 'repair_monitor' room.
+	Called from RepairOrder controller hooks and repair API endpoints. Routed
+	through the central realtime bus (``zevar_core.api.realtime.bus``) so the
+	envelope and the privacy rule are consistent. The event name
+	(``repair_live_event``) and payload fields are preserved so existing callers
+	and the CommandCenter subscription keep working.
 	"""
-	payload = {
-		"event_type": event_type,
-		"timestamp": str(now_datetime()),
-		"user": frappe.session.user,
-		"user_name": frappe.db.get_value("User", frappe.session.user, "full_name") or frappe.session.user,
-		**data,
-	}
-	frappe.publish_realtime(
-		event="repair_live_event",
-		message=payload,
-		after_commit=True,
-	)
+	from zevar_core.api.realtime.bus import publish
 
-
-def publish_anomaly_alert(alert: dict) -> None:
-	"""Publish an anomaly alert to all connected admin users."""
-	frappe.publish_realtime(
-		event="repair_anomaly_alert",
-		message={
-			"timestamp": str(now_datetime()),
-			**alert,
-		},
-		after_commit=True,
-	)
-
-
-def publish_employee_event(employee: str, event_type: str, data: dict) -> None:
-	"""Publish a user-scoped event to a specific employee's live monitor.
-
-	The employee's frontend subscribes to the 'employee_event' channel
-	and filters by their own employee ID.
-	"""
-	frappe.publish_realtime(
-		event="employee_event",
-		message={
-			"employee": employee,
+	publish(
+		"repair_live_event",
+		{
 			"event_type": event_type,
-			"timestamp": str(now_datetime()),
+			"user": frappe.session.user,
+			"user_name": frappe.db.get_value("User", frappe.session.user, "full_name")
+			or frappe.session.user,
 			**data,
 		},
-		after_commit=True,
 	)
 
 
@@ -112,8 +85,33 @@ def _get_store_metrics(today_date: str) -> list[dict]:
 			)
 		)
 
-		if active == 0:
-			# Skip stores with no repair activity
+		# Live sales today for this store (Q7 - the #1 owner metric).
+		sales_today = flt(
+			frappe.db.sql(
+				"""
+            SELECT COALESCE(SUM(base_net_total), 0) FROM `tabSales Invoice`
+            WHERE is_pos = 1 AND docstatus = 1 AND posting_date = %(today)s
+              AND set_warehouse = %(wh)s
+            """,
+				{"today": today_date, "wh": wh.name},
+			)[0][0],
+			2,
+		)
+		sales_txn_today = cint(
+			frappe.db.count(
+				"Sales Invoice",
+				filters={
+					"is_pos": 1,
+					"docstatus": 1,
+					"posting_date": today_date,
+					"set_warehouse": wh.name,
+				},
+			)
+		)
+
+		# Never omit a quiet store that is selling (Q7 fix): only skip stores with
+		# neither repair activity nor a sale today.
+		if active == 0 and sales_txn_today == 0:
 			continue
 
 		# Overdue count
@@ -183,6 +181,8 @@ def _get_store_metrics(today_date: str) -> list[dict]:
 				"completed_today": completed_today,
 				"received_today": received_today,
 				"revenue_today": revenue,
+				"sales_today": sales_today,
+				"sales_txn_today": sales_txn_today,
 				"status_breakdown": {r.status: r.cnt for r in status_data},
 				"health": "critical" if overdue > 5 else ("warning" if overdue > 2 else "healthy"),
 			}
@@ -269,12 +269,13 @@ def run_anomaly_detection() -> list[dict[str, Any]]:
 	# Rule 1: Severely overdue (>7 days)
 	severe_overdue = frappe.db.sql(
 		"""
-        SELECT name, customer_name, promised_date, status, warehouse,
-               DATEDIFF(%(today)s, promised_date) as days_overdue
-        FROM `tabRepair Order`
-        WHERE status NOT IN ('Delivered', 'Cancelled')
-          AND promised_date IS NOT NULL
-          AND DATEDIFF(%(today)s, promised_date) > 7
+        SELECT ro.name, c.customer_name, ro.promised_date, ro.status, ro.warehouse,
+               DATEDIFF(%(today)s, ro.promised_date) as days_overdue
+        FROM `tabRepair Order` ro
+        LEFT JOIN `tabCustomer` c ON c.name = ro.customer
+        WHERE ro.status NOT IN ('Delivered', 'Cancelled')
+          AND ro.promised_date IS NOT NULL
+          AND DATEDIFF(%(today)s, ro.promised_date) > 7
         ORDER BY days_overdue DESC
         LIMIT 10
         """,
@@ -287,7 +288,7 @@ def run_anomaly_detection() -> list[dict[str, Any]]:
 				"severity": "critical",
 				"type": "severe_overdue",
 				"title": f"Severely overdue: {r.name}",
-				"message": f"{r.customer_name} — {r.days_overdue} days past due ({r.status})",
+				"message": f"{r.customer_name or '—'} — {r.days_overdue} days past due ({r.status})",
 				"repair": r.name,
 				"warehouse": r.warehouse,
 			}
@@ -296,11 +297,12 @@ def run_anomaly_detection() -> list[dict[str, Any]]:
 	# Rule 2: Stuck repairs (no activity in 5+ days on active repairs)
 	stuck = frappe.db.sql(
 		"""
-        SELECT name, customer_name, status, modified, warehouse,
-               DATEDIFF(%(today)s, modified) as days_stuck
-        FROM `tabRepair Order`
-        WHERE status IN ('In Progress', 'Waiting for Parts', 'Estimated')
-          AND DATEDIFF(%(today)s, modified) >= 5
+        SELECT ro.name, c.customer_name, ro.status, ro.modified, ro.warehouse,
+               DATEDIFF(%(today)s, ro.modified) as days_stuck
+        FROM `tabRepair Order` ro
+        LEFT JOIN `tabCustomer` c ON c.name = ro.customer
+        WHERE ro.status IN ('In Progress', 'Waiting for Parts', 'Estimated')
+          AND DATEDIFF(%(today)s, ro.modified) >= 5
         ORDER BY days_stuck DESC
         LIMIT 10
         """,
@@ -393,10 +395,11 @@ def get_repair_live_feed(hours: int = 4) -> list[dict[str, Any]]:
 		"""
         SELECT
             sl.status, sl.timestamp, sl.changed_by, sl.notes,
-            ro.name as repair_order, ro.customer_name, ro.warehouse,
-            ro.repair_type_name
+            ro.name as repair_order, c.customer_name, ro.warehouse,
+            ro.repair_type
         FROM `tabRepair Status Log` sl
         JOIN `tabRepair Order` ro ON sl.parent = ro.name
+        LEFT JOIN `tabCustomer` c ON c.name = ro.customer
         WHERE sl.timestamp >= %(since)s
         ORDER BY sl.timestamp DESC
         LIMIT 100
@@ -421,7 +424,7 @@ def get_repair_live_feed(hours: int = 4) -> list[dict[str, Any]]:
 				"timestamp": str(ev.timestamp),
 				"user": ev.changed_by,
 				"user_name": user_name,
-				"repair_type": ev.repair_type_name,
+				"repair_type": ev.repair_type,
 				"notes": ev.notes or "",
 			}
 		)

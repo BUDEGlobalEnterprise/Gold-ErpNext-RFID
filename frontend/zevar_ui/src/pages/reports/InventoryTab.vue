@@ -113,6 +113,7 @@
 </template>
 
 <script setup>
+import { fmt } from '@/utils/format'
 /**
  * InventoryTab — Plan §7.1, 180 LOC budget.
  * Reuses inventory_dashboard.get_dashboard_data + get_aging_buckets + get_stock_by_warehouse.
@@ -161,11 +162,6 @@ async function load() {
 	}
 }
 onMounted(load)
-
-function fmt(n) {
-	if (n == null) return '0.00'
-	return Number(n).toFixed(2)
-}
 function bucketColor(bucket) {
 	const b = String(bucket)
 	if (b.includes('90') || b.includes('120') || b.includes('180')) return 'bg-red-500'
