@@ -108,6 +108,7 @@
 </template>
 
 <script setup>
+import { fmt } from '@/utils/format'
 /**
  * CustomersTab — Plan §7.1, 160 LOC budget.
  */
@@ -147,9 +148,4 @@ async function load() {
 	}
 }
 onMounted(load)
-
-function fmt(n) {
-	if (n == null) return '0.00'
-	return Number(n).toFixed(2)
-}
 </script>

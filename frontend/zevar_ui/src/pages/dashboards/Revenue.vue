@@ -72,25 +72,11 @@
 							>progress_activity</span
 						>
 					</div>
-					<div v-else-if="hourlyData.length" class="h-40 sm:h-64 overflow-x-auto">
-						<div class="flex items-end gap-1 min-w-[360px] h-full">
-							<div
-								v-for="(bar, i) in hourlyData"
-								:key="i"
-								class="flex-1 flex flex-col items-center gap-1 group cursor-default"
-							>
-								<span
-									class="text-[8px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
-									>${{ fmt(bar.total) }}</span
-								>
-								<div
-									class="w-full rounded-t bg-emerald-500/70 dark:bg-emerald-400/50 transition-all min-h-[2px] hover:bg-emerald-500"
-									:style="{ height: bar.height + '%' }"
-								></div>
-								<span class="text-[8px] text-gray-400">{{ bar.label }}</span>
-							</div>
-						</div>
-					</div>
+					<EChart
+						v-else-if="hourlyData.length"
+						:option="hourlyOption"
+						height="256px"
+					/>
 					<p v-else class="text-xs text-gray-400 text-center py-8">
 						No sales data for today
 					</p>
@@ -181,12 +167,41 @@
 
 <script setup>
 import AppLayout from '@/components/AppLayout.vue'
+import EChart from '@/components/charts/EChart.vue'
 import { fmt } from '@/utils/format'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import KPICard from '@/components/reports/KPICard.vue'
 
 const summary = ref({ today_sales: 0, txn_count: 0, avg_ticket: 0, yoy_pct: 0 })
 const hourlyData = ref([])
+
+// ECharts option for the hourly bar chart (Q9 — replaces the bespoke CSS bars).
+const hourlyOption = computed(() => ({
+	grid: { left: 8, right: 8, top: 16, bottom: 8, containLabel: true },
+	tooltip: {
+		trigger: 'axis',
+		formatter: (p) => `${p[0].name} → $${fmt(p[0].value)}`,
+	},
+	xAxis: {
+		type: 'category',
+		data: hourlyData.value.map((b) => b.label),
+		axisLabel: { fontSize: 10, color: '#9ca3af' },
+		axisLine: { lineStyle: { color: '#374151' } },
+	},
+	yAxis: {
+		type: 'value',
+		splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+		axisLabel: { fontSize: 10, color: '#9ca3af' },
+	},
+	series: [
+		{
+			type: 'bar',
+			data: hourlyData.value.map((b) => Number(b.total || 0)),
+			itemStyle: { color: '#10b981', borderRadius: [4, 4, 0, 0] },
+			barMaxWidth: 28,
+		},
+	],
+}))
 const categoryData = ref([])
 const topSalespeople = ref([])
 const loading = ref(true)

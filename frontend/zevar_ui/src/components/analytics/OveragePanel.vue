@@ -65,6 +65,7 @@
 </template>
 
 <script setup>
+import { fmt } from '@/utils/format'
 import { onMounted, ref } from 'vue'
 import { useOverageActions } from '@/composables/analytics/useOverageActions'
 import OverageActionModal from './OverageActionModal.vue'
@@ -98,13 +99,6 @@ async function submit({ actionType, params }) {
 	} finally {
 		submitting.value = false
 	}
-}
-
-function fmt(value) {
-	return Number(value || 0).toLocaleString(undefined, {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	})
 }
 </script>
 

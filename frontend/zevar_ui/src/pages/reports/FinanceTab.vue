@@ -68,6 +68,7 @@
 </template>
 
 <script setup>
+import { fmt } from '@/utils/format'
 /**
  * FinanceTab — Plan §7.1, 140 LOC budget.
  * Wraps the existing ERPNext script reports (Plan §6.7).
@@ -126,11 +127,6 @@ async function load() {
 	}
 }
 onMounted(load)
-
-function fmt(n) {
-	if (n == null) return '0.00'
-	return Number(n).toFixed(2)
-}
 function goHub() {
 	router.push('/reports/all')
 }

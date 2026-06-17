@@ -17,12 +17,14 @@
   "dependencies": {
     "@zxing/browser": "^0.2.0",
     "@zxing/library": "^0.23.0",
+    "echarts": "^6.1.0",
     "engine.io-client": "^6.6.4",
     "feather-icons": "^4.28.0",
     "frappe-ui": "^0.1.62",
     "pinia": "^2.1.7",
     "showdown": "^2.1.0",
     "vue": "^3.4.21",
+    "vue-echarts": "^8.0.1",
     "vue-router": "^4.3.0"
   },
   "devDependencies": {

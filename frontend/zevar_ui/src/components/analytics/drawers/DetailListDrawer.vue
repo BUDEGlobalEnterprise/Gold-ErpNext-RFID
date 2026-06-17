@@ -40,6 +40,7 @@
 </template>
 
 <script setup>
+import { fmt } from '@/utils/format'
 /**
  * DetailListDrawer — shared list renderer used by all 7 hub drawers.
  */
@@ -62,10 +63,6 @@ function cellClass(c) {
 	const a = c.align === 'right' ? 'text-right' : c.align === 'center' ? 'text-center' : ''
 	const m = c.mono ? 'font-mono' : ''
 	return [a, m].filter(Boolean).join(' ')
-}
-function fmt(n) {
-	if (n == null) return '0.00'
-	return Number(n).toFixed(2)
 }
 function getVal(row, key) {
 	return row?.[key] ?? ''
