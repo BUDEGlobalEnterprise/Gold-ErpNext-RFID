@@ -1215,3 +1215,130 @@ def get_pvm_bridge(
 		},
 	}
 
+
+def _gold_rate_at(metal, purity, as_of_datetime):
+	"""Latest Gold Rate Log rate for a metal/purity at/before a datetime."""
+	filters = {"timestamp": ["<=", as_of_datetime]}
+	if metal:
+		filters["metal"] = metal
+	if purity:
+		filters["purity"] = purity
+	rows = frappe.get_all(
+		"Gold Rate Log", filters=filters, fields=["rate_per_gram"], order_by="timestamp desc", limit=1
+	)
+	return flt(rows[0].rate_per_gram) if rows else 0.0
+
+
+@frappe.whitelist()
+def get_gold_pass_through(from_date=None, to_date=None, metal=None, purity=None):
+	"""Margin delta attributable to gold moves over the period.
+
+	Reads the period's gold-rate swing (from Gold Rate Log) and the gold weight
+	sold (SCB -> items) to quantify how much gold appreciation flowed through to
+	COGS (a margin headwind when gold rises), plus the pass-through % of revenue
+	that is raw metal.
+	"""
+	frappe.only_for(_PROFIT_ROLES)
+	if not from_date:
+		from_date = add_days(today(), -30)
+	if not to_date:
+		to_date = today()
+
+	agg = frappe.db.sql(
+		"""SELECT
+            COALESCE(SUM(total_revenue),0) AS revenue,
+            COALESCE(SUM(total_metal_cogs),0) AS metal_cogs
+        FROM `tabSale Cost Breakdown`
+        WHERE posting_date >= %s AND posting_date <= %s""",
+		(from_date, to_date),
+		as_dict=True,
+	)[0]
+
+	gold_weight = frappe.db.sql(
+		"""SELECT COALESCE(SUM(i.custom_net_weight_g * sii.qty), 0)
+        FROM `tabSale Cost Breakdown` scb
+        JOIN `tabSales Invoice` si ON si.name = scb.sales_invoice
+        JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
+        JOIN `tabItem` i ON i.name = sii.item_code
+        WHERE si.docstatus = 1 AND scb.posting_date >= %s AND scb.posting_date <= %s
+          AND i.custom_net_weight_g > 0""",
+		(from_date, to_date),
+	)[0][0]
+
+	start = _gold_rate_at(metal, purity, f"{from_date} 00:00:00")
+	end = _gold_rate_at(metal, purity, f"{to_date} 23:59:59")
+	delta = end - start
+	delta_pct = (delta / start * 100) if start else 0
+	margin_impact = delta * flt(gold_weight)  # headwind when gold rises
+
+	revenue = flt(agg.revenue)
+	metal_cogs = flt(agg.metal_cogs)
+	return {
+		"from_date": from_date,
+		"to_date": to_date,
+		"metal": metal,
+		"gold_rate_start": flt(start, 2),
+		"gold_rate_end": flt(end, 2),
+		"gold_delta_per_gram": flt(delta, 2),
+		"gold_delta_pct": flt(delta_pct, 2),
+		"gold_weight_sold_g": flt(gold_weight, 3),
+		"margin_impact": flt(margin_impact, 2),
+		"metal_cogs": flt(metal_cogs, 2),
+		"revenue": flt(revenue, 2),
+		"pass_through_pct": flt((metal_cogs / revenue * 100) if revenue else 0, 2),
+	}
+
+
+@frappe.whitelist()
+def get_unrealized_gain_loss(as_of_date=None):
+	"""Mark-to-market on gold inventory: book cost (valuation_rate) vs replacement
+	(current Gold Rate Log rate) across on-hand stock. No migrate needed — reads
+	Item net weight, valuation_rate, and Bin stock.
+	"""
+	frappe.only_for(_PROFIT_ROLES)
+	as_of_dt = f"{as_of_date or today()} 23:59:59"
+
+	items = frappe.db.sql(
+		"""SELECT
+            i.name, i.custom_metal_type, i.custom_purity,
+            i.custom_net_weight_g, i.valuation_rate,
+            COALESCE((SELECT SUM(b.actual_qty) FROM `tabBin` b WHERE b.item_code = i.name), 0) AS stock_qty
+        FROM `tabItem` i
+        WHERE i.custom_net_weight_g > 0 AND i.disabled = 0""",
+		as_dict=True,
+	)
+
+	total_book = 0.0
+	total_market = 0.0
+	by_metal = {}
+	rate_cache = {}
+
+	def _rate(mtl, prt):
+		key = (mtl, prt)
+		if key not in rate_cache:
+			rate_cache[key] = _gold_rate_at(mtl, prt, as_of_dt)
+		return rate_cache[key]
+
+	for it in items:
+		qty = flt(it.stock_qty)
+		if qty <= 0:
+			continue
+		weight = flt(it.custom_net_weight_g) * qty
+		book = flt(it.valuation_rate) * qty
+		market = weight * _rate(it.custom_metal_type, it.custom_purity)
+		total_book += book
+		total_market += market
+		key = it.custom_metal_type or "Unknown"
+		bucket = by_metal.setdefault(key, {"book": 0.0, "market": 0.0, "weight_g": 0.0})
+		bucket["book"] += book
+		bucket["market"] += market
+		bucket["weight_g"] += weight
+
+	return {
+		"as_of_date": as_of_date or today(),
+		"total_book_cost": flt(total_book, 2),
+		"total_market_cost": flt(total_market, 2),
+		"unrealized_gain_loss": flt(total_market - total_book, 2),
+		"by_metal": {k: {kk: flt(vv, 2) for kk, vv in v.items()} for k, v in by_metal.items()},
+	}
+
