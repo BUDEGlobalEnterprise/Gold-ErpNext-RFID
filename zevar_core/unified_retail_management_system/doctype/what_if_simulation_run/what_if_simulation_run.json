@@ -1,0 +1,139 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "format:WIF-{YY}-{MM}-{#####}",
+ "creation": "2026-06-17 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sales_invoice",
+  "posting_date",
+  "item_code",
+  "column_break_1",
+  "target_price",
+  "base_margin_pct",
+  "simulated_margin_pct",
+  "section_curve",
+  "curve",
+  "column_break_audit",
+  "simulated_by",
+  "simulated_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "target_price",
+   "fieldtype": "Currency",
+   "label": "Target Price"
+  },
+  {
+   "fieldname": "base_margin_pct",
+   "fieldtype": "Percent",
+   "label": "Base Margin %"
+  },
+  {
+   "fieldname": "simulated_margin_pct",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Simulated Margin %"
+  },
+  {
+   "fieldname": "section_curve",
+   "fieldtype": "Section Break",
+   "label": "Margin Curve"
+  },
+  {
+   "fieldname": "curve",
+   "fieldtype": "Code",
+   "label": "Margin Curve",
+   "options": "JSON"
+  },
+  {
+   "fieldname": "column_break_audit",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "simulated_by",
+   "fieldtype": "Link",
+   "label": "Simulated By",
+   "options": "User"
+  },
+  {
+   "fieldname": "simulated_at",
+   "fieldtype": "Datetime",
+   "label": "Simulated At"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-06-17 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Unified Retail Management System",
+ "name": "What-if Simulation Run",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 0
+  },
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 0
+  }
+ ],
+ "sort_field": "simulated_at",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "sales_invoice"
+}
