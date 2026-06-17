@@ -15,7 +15,11 @@ import frappe
 from frappe import _
 from frappe.utils import flt, getdate, today
 
-from zevar_core.api.performance import _get_active_target, get_employee_performance_summary
+from zevar_core.api.performance import (
+	_get_active_target,
+	get_employee_performance_summary,
+	get_team_performance,
+)
 
 _WF_ROLES = ["System Manager", "HR Manager", "Store Manager", "Sales Manager"]
 
