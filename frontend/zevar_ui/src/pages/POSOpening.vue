@@ -347,6 +347,9 @@ async function loadProfiles() {
 			headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
 		})
 		const json = await res.json()
+		if (!res.ok) {
+			throw new Error(json.message || 'Not authorized to access POS profiles.')
+		}
 		const data = json.message || json
 		profiles.value = data.profiles || []
 		if (profiles.value.length === 1) {
@@ -355,7 +358,7 @@ async function loadProfiles() {
 		}
 	} catch (err) {
 		console.error('Failed to load profiles:', err)
-		profileError.value = 'Failed to load POS profiles. Check permissions.'
+		profileError.value = err.message || 'Failed to load POS profiles. Check permissions.'
 	}
 }
 

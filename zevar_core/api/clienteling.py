@@ -145,6 +145,9 @@ def get_customer_intelligence(customer: str) -> dict:
 					}
 				)
 
+	# --- CRM Pipeline ---
+	pipeline = _get_crm_pipeline(customer, customer_doc, safe_get)
+
 	# --- Notes ---
 	notes = safe_get("custom_internal_notes")
 
@@ -153,7 +156,113 @@ def get_customer_intelligence(customer: str) -> dict:
 		"recent_purchases": recent_purchases,
 		"upcoming_occasions": occasions,
 		"notes": notes,
+		"pipeline": pipeline,
 	}
+
+
+def _get_crm_pipeline(customer_name, customer_doc, safe_get):
+	"""Build CRM pipeline data for a customer (lead, deal, open tasks)."""
+	pipeline = {"lead": None, "deal": None, "tasks": []}
+
+	if "crm" not in frappe.get_installed_apps():
+		return pipeline
+
+	# Check CRM Lead link
+	crm_lead = None
+	try:
+		crm_lead = customer_doc.get("custom_crm_lead")
+	except Exception:
+		pass
+
+	if crm_lead:
+		try:
+			lead = frappe.get_doc("CRM Lead", crm_lead)
+			pipeline["lead"] = {
+				"name": lead.name,
+				"status": lead.status,
+				"source": lead.source or "",
+				"lead_owner": lead.lead_owner or "",
+				"created_on": str(lead.creation),
+			}
+		except Exception:
+			pass
+
+	# Check CRM Deal link
+	crm_deal = None
+	try:
+		crm_deal = customer_doc.get("custom_crm_deal")
+	except Exception:
+		pass
+
+	if crm_deal:
+		try:
+			deal = frappe.get_doc("CRM Deal", crm_deal)
+			pipeline["deal"] = {
+				"name": deal.name,
+				"status": deal.status,
+				"deal_value": deal.deal_value or 0,
+				"probability": deal.probability or 0,
+				"next_step": deal.next_step or "",
+				"expected_closure_date": str(deal.expected_closure_date) if deal.expected_closure_date else "",
+				"deal_owner": deal.deal_owner or "",
+			}
+		except Exception:
+			pass
+
+	# Open tasks for this customer
+	try:
+		tasks = frappe.get_all(
+			"CRM Task",
+			filters={
+				"reference_doctype": "Customer",
+				"reference_docname": customer_name,
+				"status": ["not in", ["Done", "Canceled"]],
+			},
+			fields=["name", "title", "due_date", "status", "priority"],
+			order_by="due_date asc",
+			limit=5,
+		)
+		pipeline["tasks"] = [
+			{
+				"name": t.name,
+				"title": t.title,
+				"due_date": str(t.due_date) if t.due_date else "",
+				"status": t.status,
+				"priority": t.priority,
+			}
+			for t in tasks
+		]
+	except Exception:
+		pass
+
+	return pipeline
+
+
+@frappe.whitelist()
+def create_crm_task_from_pos(customer: str, title: str, due_date: str = None, description: str = None) -> dict:
+	"""Create a CRM Task from the POS clienteling drawer."""
+	if "crm" not in frappe.get_installed_apps():
+		frappe.throw(_("CRM app is not installed."))
+
+	if not customer or not frappe.db.exists("Customer", customer):
+		frappe.throw(_("Customer '{0}' not found.").format(customer))
+
+	if not title or not title.strip():
+		frappe.throw(_("Task title is required."))
+
+	task = frappe.get_doc({
+		"doctype": "CRM Task",
+		"title": title.strip(),
+		"status": "Todo",
+		"priority": "Medium",
+		"due_date": due_date,
+		"description": description or "",
+		"assigned_to": frappe.session.user,
+		"reference_doctype": "Customer",
+		"reference_docname": customer,
+	})
+	task.insert(ignore_permissions=True)
+	return {"success": True, "task": task.name}
 
 
 @frappe.whitelist(methods=["POST"])

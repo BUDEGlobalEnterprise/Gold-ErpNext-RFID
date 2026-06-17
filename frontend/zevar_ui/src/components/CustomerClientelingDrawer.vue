@@ -275,6 +275,142 @@
 								No notes yet
 							</div>
 						</div>
+
+						<!-- CRM Tab -->
+						<div v-if="activeTab === 'crm'">
+							<!-- Create Lead Button (when no lead exists) -->
+							<div v-if="!hasCRMLead" class="mb-4">
+								<button
+									@click="handleCreateLead"
+									:disabled="creatingLead"
+									class="w-full px-4 py-2.5 bg-[#D4AF37] text-black font-bold text-xs rounded-lg hover:bg-[#b5952f] disabled:opacity-50 transition flex items-center justify-center gap-2"
+								>
+									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+									{{ creatingLead ? 'Creating...' : 'Create CRM Lead' }}
+								</button>
+								<p class="text-[10px] text-gray-400 mt-1.5 text-center">Capture this customer in the CRM pipeline</p>
+							</div>
+
+							<!-- Lead Card -->
+							<div v-if="pipeline?.lead" class="mb-3 p-3 rounded-xl bg-white dark:bg-warm-dark-800 border border-[#EFEAE2] dark:border-warm-border/20">
+								<div class="flex items-center justify-between mb-1.5">
+									<span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">CRM Lead</span>
+									<span
+										class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+										:class="{
+											'bg-blue-100 text-blue-700': pipeline.lead.status === 'Open',
+											'bg-amber-100 text-amber-700': pipeline.lead.status === 'Contacted',
+											'bg-green-100 text-green-700': pipeline.lead.status === 'Qualified',
+											'bg-teal-100 text-teal-700': pipeline.lead.status === 'Converted',
+											'bg-gray-100 text-gray-600': !['Open','Contacted','Qualified','Converted'].includes(pipeline.lead.status),
+										}"
+									>{{ pipeline.lead.status }}</span>
+								</div>
+								<p class="text-xs text-gray-600 dark:text-gray-300">{{ pipeline.lead.name }}</p>
+								<div class="flex gap-3 mt-1.5 text-[10px] text-gray-400">
+									<span v-if="pipeline.lead.source">Source: {{ pipeline.lead.source }}</span>
+									<span v-if="pipeline.lead.lead_owner">Owner: {{ pipeline.lead.lead_owner }}</span>
+								</div>
+							</div>
+
+							<!-- Deal Card -->
+							<div v-if="pipeline?.deal" class="mb-3 p-3 rounded-xl bg-white dark:bg-warm-dark-800 border border-[#EFEAE2] dark:border-warm-border/20">
+								<div class="flex items-center justify-between mb-1.5">
+									<span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">CRM Deal</span>
+									<span
+										class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+										:class="{
+											'bg-blue-100 text-blue-700': pipeline.deal.status === 'Qualification',
+											'bg-amber-100 text-amber-700': pipeline.deal.status === 'Proposal',
+											'bg-orange-100 text-orange-700': pipeline.deal.status === 'Negotiation',
+											'bg-green-100 text-green-700': pipeline.deal.status === 'Won',
+											'bg-red-100 text-red-700': pipeline.deal.status === 'Lost',
+											'bg-gray-100 text-gray-600': !['Qualification','Proposal','Negotiation','Won','Lost'].includes(pipeline.deal.status),
+										}"
+									>{{ pipeline.deal.status }}</span>
+								</div>
+								<p class="text-xs text-gray-600 dark:text-gray-300">{{ pipeline.deal.name }}</p>
+								<div class="grid grid-cols-2 gap-2 mt-2">
+									<div class="text-center p-1.5 rounded-lg bg-gray-50 dark:bg-warm-dark-700">
+										<p class="text-[10px] text-gray-400">Value</p>
+										<p class="text-xs font-bold text-gray-700 dark:text-gray-200">{{ formatCurrency(pipeline.deal.deal_value) }}</p>
+									</div>
+									<div class="text-center p-1.5 rounded-lg bg-gray-50 dark:bg-warm-dark-700">
+										<p class="text-[10px] text-gray-400">Probability</p>
+										<p class="text-xs font-bold text-gray-700 dark:text-gray-200">{{ pipeline.deal.probability }}%</p>
+									</div>
+								</div>
+								<div v-if="pipeline.deal.next_step" class="mt-2 text-[10px] text-gray-500">
+									Next: {{ pipeline.deal.next_step }}
+								</div>
+								<div v-if="pipeline.deal.expected_closure_date" class="text-[10px] text-gray-400">
+									Expected close: {{ pipeline.deal.expected_closure_date }}
+								</div>
+							</div>
+
+							<!-- Open Tasks -->
+							<div class="mt-3">
+								<div class="flex items-center justify-between mb-2">
+									<span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Tasks</span>
+									<button
+										@click="showTaskForm = !showTaskForm"
+										class="text-[10px] text-[#D4AF37] font-medium hover:underline"
+									>
+										{{ showTaskForm ? 'Cancel' : '+ Add Task' }}
+									</button>
+								</div>
+
+								<!-- Task Creation Form -->
+								<div v-if="showTaskForm" class="mb-3 p-3 rounded-xl bg-white dark:bg-warm-dark-800 border border-[#D4AF37]/30">
+									<input
+										v-model="newTaskTitle"
+										type="text"
+										placeholder="Task title..."
+										class="w-full px-3 py-1.5 bg-gray-50 dark:bg-warm-dark-700 border border-[#E8E0D4] dark:border-warm-border/40 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 mb-2"
+									/>
+									<input
+										v-model="newTaskDueDate"
+										type="date"
+										class="w-full px-3 py-1.5 bg-gray-50 dark:bg-warm-dark-700 border border-[#E8E0D4] dark:border-warm-border/40 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 mb-2"
+									/>
+									<button
+										@click="handleCreateTask"
+										:disabled="creatingTask || !newTaskTitle.trim()"
+										class="w-full px-3 py-1.5 bg-[#D4AF37] text-black font-bold text-[10px] rounded-lg hover:bg-[#b5952f] disabled:opacity-50 transition"
+									>
+										{{ creatingTask ? 'Creating...' : 'Create Task' }}
+									</button>
+								</div>
+
+								<!-- Task List -->
+								<div v-if="openTasks.length" class="space-y-2">
+									<div
+										v-for="task in openTasks"
+										:key="task.name"
+										class="p-2.5 rounded-lg bg-white dark:bg-warm-dark-800 border border-[#EFEAE2] dark:border-warm-border/20"
+									>
+										<div class="flex items-center justify-between">
+											<span class="text-xs font-medium text-gray-700 dark:text-gray-200">{{ task.title }}</span>
+											<span
+												class="px-1.5 py-0.5 rounded text-[9px] font-bold"
+												:class="{
+													'bg-red-100 text-red-700': task.priority === 'High',
+													'bg-amber-100 text-amber-700': task.priority === 'Medium',
+													'bg-gray-100 text-gray-500': task.priority === 'Low',
+												}"
+											>{{ task.priority }}</span>
+										</div>
+										<div class="flex gap-2 mt-1 text-[10px] text-gray-400">
+											<span v-if="task.due_date">Due: {{ task.due_date }}</span>
+											<span>{{ task.status }}</span>
+										</div>
+									</div>
+								</div>
+								<div v-else-if="!showTaskForm" class="text-center py-4 text-gray-300 dark:text-gray-600 italic text-xs">
+									No open tasks
+								</div>
+							</div>
+						</div>
 					</div>
 				</template>
 			</div>
@@ -298,19 +434,31 @@ const {
 	error,
 	loadIntelligence,
 	addNote,
+	createTask,
+	createLead,
 	upcomingOccasions,
 	hasUrgentOccasion,
 	profile,
 	recentPurchases,
+	pipeline,
+	hasCRMLead,
+	hasCRMDeal,
+	openTasks,
 } = useClienteling()
 
 const activeTab = ref('history')
 const newNote = ref('')
 const savingNote = ref(false)
+const creatingLead = ref(false)
+const showTaskForm = ref(false)
+const newTaskTitle = ref('')
+const newTaskDueDate = ref('')
+const creatingTask = ref(false)
 
 const tabs = [
 	{ key: 'history', label: 'History' },
 	{ key: 'sizes', label: 'Sizes' },
+	{ key: 'crm', label: 'CRM' },
 	{ key: 'notes', label: 'Notes' },
 ]
 
@@ -381,5 +529,32 @@ function getInitial(name) {
 function formatCurrency(val) {
 	if (!val) return '$0.00'
 	return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val)
+}
+
+async function handleCreateLead() {
+	if (!props.customerName) return
+	creatingLead.value = true
+	try {
+		await createLead(props.customerName)
+	} catch (e) {
+		console.error('Create lead failed:', e)
+	} finally {
+		creatingLead.value = false
+	}
+}
+
+async function handleCreateTask() {
+	if (!props.customerName || !newTaskTitle.value.trim()) return
+	creatingTask.value = true
+	try {
+		await createTask(props.customerName, newTaskTitle.value, newTaskDueDate.value || null)
+		newTaskTitle.value = ''
+		newTaskDueDate.value = ''
+		showTaskForm.value = false
+	} catch (e) {
+		console.error('Create task failed:', e)
+	} finally {
+		creatingTask.value = false
+	}
 }
 </script>

@@ -38,3 +38,7 @@ frontend/zevar_ui/node_modules/
 
 # Semgrep rules (cloned at CI runtime by linter workflow)
 frappe-semgrep-rules/
+
+# Documents & Images
+Images/
+plans/

@@ -30,3 +30,5 @@ zevar_core.patches.v1_1.add_salesperson_split_fields
 zevar_core.patches.v1_2.fix_stock_reservation_schema_drift
 zevar_core.patches.v1_2.seed_metal_purity_reference
 zevar_core.patches.v1_2.backfill_pricing_method
+zevar_core.patches.v1_2.setup_crm_lead_sources
+zevar_core.patches.v1_2.add_crm_integration_fields

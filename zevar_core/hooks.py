@@ -28,6 +28,10 @@ app_include_js = [
 ]
 app_include_css = ["/assets/zevar_core/css/desk.css"]
 
+# Doctype JS
+doctype_js = {
+	"Address": "public/js/address.js"
+}
 # Jinja
 jinja = {"methods": ["zevar_core.utils.assets.get_frontend_asset"]}
 
@@ -50,6 +54,9 @@ fixtures = ["Item Attribute", "Custom Field", "Property Setter"]
 # Document Events
 doc_events = {
 	"Item": {"validate": "zevar_core.item_events.calculate_net_weight_g"},
+	"Customer": {
+		"after_insert": "zevar_core.api.crm_hooks.on_customer_created",
+	},
 	"Sales Invoice": {
 		"validate": [
 			"zevar_core.tax_events.apply_store_tax",
@@ -67,6 +74,7 @@ doc_events = {
 			"zevar_core.api.monitor_hooks.on_invoice_submit",
 			"zevar_core.services.stock_reduction.detect_stock_reduction",
 			"zevar_core.services.reservation_manager.release_reservation_for_invoice",
+			"zevar_core.api.crm_hooks.on_invoice_submit_crm",
 		],
 		"on_cancel": [
 			"zevar_core.api.commission.reverse_commissions",
@@ -81,8 +89,10 @@ scheduler_events = {
 		"*/60 * * * *": ["zevar_core.tasks.fetch_live_metal_rates"],
 		"*/2 * * * *": ["zevar_core.api.realtime.hooks.run_anomaly_push"],
 		"*/5 * * * *": ["zevar_core.api.realtime.hooks.run_health_heartbeat"],
+		"30 0 * * *": ["zevar_core.api.sales_monitor.rebuild_daily_rollup"],
 		"0 2 1 * *": ["zevar_core.api.finance.apply_finance_charges"],
 		"7 2 * * *": ["zevar_core.tasks.generate_pricing_recommendations"],
+		"0 7 * * *": ["zevar_core.tasks.generate_occasion_reminders"],
 		"0 8 * * *": [
 			"zevar_core.api.layaway.check_overdue_and_forfeit",
 			"zevar_core.api.layaway.send_payment_reminders",

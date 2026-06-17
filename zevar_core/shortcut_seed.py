@@ -8,6 +8,7 @@ from __future__ import annotations
 def get_default_shortcuts() -> list[dict]:
 	"""Return the default shortcut registry used for bootstrap and migration."""
 	pos_roles = ["Sales User", "POS Manager", "Store Manager", "System Manager"]
+	crm_roles = ["Sales User", "Sales Manager", "System Manager"]
 	customer_roles = ["Sales User", "Store Manager", "Accounts Manager", "System Manager"]
 	source_roles = ["Purchase User", "Stock Manager", "Store Manager", "System Manager"]
 	report_roles = ["Sales User", "Sales Manager", "Store Manager", "Accounts Manager", "System Manager"]
@@ -16,6 +17,64 @@ def get_default_shortcuts() -> list[dict]:
 	admin_roles = ["System Manager"]
 
 	return [
+		{
+			"shortcut_name": "POS",
+			"section_name": "POS",
+			"link_type": "URL",
+			"link_to": "/pos",
+			"icon_name": "shopping-cart",
+			"color": "#2563eb",
+			"description": "Point of Sale terminal.",
+			"sequence": 5,
+			"keyboard_shortcut": "alt+p",
+			"roles": pos_roles,
+		},
+		{
+			"shortcut_name": "Employee Portal",
+			"section_name": "Time Clock",
+			"link_type": "URL",
+			"link_to": "/employee-portal",
+			"icon_name": "user",
+			"color": "#6b7280",
+			"description": "Open the employee dashboard and portal.",
+			"sequence": 6,
+			"keyboard_shortcut": "alt+e",
+			"roles": time_clock_roles,
+		},
+		{
+			"shortcut_name": "CRM",
+			"section_name": "CRM",
+			"link_type": "URL",
+			"link_to": "/crm",
+			"icon_name": "users",
+			"color": "#7c3aed",
+			"description": "Manage leads, deals, and customer relationships.",
+			"sequence": 7,
+			"keyboard_shortcut": "alt+c",
+			"roles": crm_roles,
+		},
+		{
+			"shortcut_name": "CRM Leads",
+			"section_name": "CRM",
+			"link_type": "DocType",
+			"link_to": "CRM Lead",
+			"icon_name": "user",
+			"color": "#2563eb",
+			"description": "View and manage sales leads.",
+			"sequence": 8,
+			"roles": crm_roles,
+		},
+		{
+			"shortcut_name": "CRM Deals",
+			"section_name": "CRM",
+			"link_type": "DocType",
+			"link_to": "CRM Deal",
+			"icon_name": "bar-chart-2",
+			"color": "#059669",
+			"description": "Track deal pipeline and closures.",
+			"sequence": 9,
+			"roles": crm_roles,
+		},
 		{
 			"shortcut_name": "Sale / Return",
 			"section_name": "POS",

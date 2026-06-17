@@ -636,6 +636,12 @@
 									Print Receipt
 								</button>
 								<router-link
+									:to="{ path: '/reports/eod', query: { date: 'today' } }"
+									class="px-6 py-3 border border-[#D4AF37] text-[#D4AF37] rounded-lg font-bold text-sm hover:bg-[#D4AF37] hover:text-black transition"
+								>
+									View EOD Report
+								</router-link>
+								<router-link
 									to="/terminal"
 									class="px-8 py-3 bg-[#D4AF37] text-black font-bold rounded-lg hover:bg-[#b5952f] transition"
 								>

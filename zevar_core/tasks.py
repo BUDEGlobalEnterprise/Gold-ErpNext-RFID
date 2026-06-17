@@ -1057,3 +1057,183 @@ def generate_pricing_recommendations():
 		generated += 1
 
 	frappe.logger().info(f"Generated {generated} pricing recommendations")
+
+
+# ---------------------------------------------------------------------------
+# CRM Occasion Reminder Scheduler
+# Runs daily at 7 AM. Creates CRM Tasks for upcoming birthdays/anniversaries.
+# ---------------------------------------------------------------------------
+
+def generate_occasion_reminders():
+	"""
+	Daily scheduled job: create CRM Task reminders for upcoming birthdays
+	and anniversaries within the configured window.
+	"""
+	import calendar as _calendar
+
+	if "crm" not in frappe.get_installed_apps():
+		return
+
+	days_before = 14
+	try:
+		days_before = int(
+			frappe.db.get_single_value("FCRM Settings", "custom_occasion_reminder_days_before") or 14
+		)
+	except Exception:
+		pass
+
+	today = getdate(nowdate())
+	window_end = add_days(today, days_before)
+
+	# Build occasion fields to check
+	occasion_fields = [
+		("custom_birth_date", "Birthday"),
+		("custom_marriage_date", "Anniversary"),
+	]
+
+	created_count = 0
+
+	for field_name, occasion_type in occasion_fields:
+		# Check if the field exists on Customer
+		if not frappe.db.has_column("Customer", field_name):
+			continue
+
+		# Fetch customers with dates set
+		customers = frappe.db.sql(
+			f"""SELECT name, customer_name, {field_name} AS occ_date
+			FROM `tabCustomer`
+			WHERE disabled = 0
+			AND {field_name} IS NOT NULL
+			AND {field_name} != ''""",
+			as_dict=True,
+		)
+
+		for cust in customers:
+			try:
+				orig = getdate(cust.occ_date)
+			except Exception:
+				continue
+
+			# Calculate next occurrence (this year or next year)
+			try:
+				next_occ = orig.replace(year=today.year)
+			except ValueError:
+				# Feb 29 in non-leap year
+				target = today.year
+				last_day = 29 if _calendar.isleap(target) else 28
+				next_occ = orig.replace(year=target, day=last_day)
+
+			if next_occ < today:
+				try:
+					next_occ = orig.replace(year=today.year + 1)
+				except ValueError:
+					target_next = today.year + 1
+					last_day = 29 if _calendar.isleap(target_next) else 28
+					next_occ = orig.replace(year=target_next, day=last_day)
+
+			# Check if within the reminder window
+			if next_occ > window_end:
+				continue
+
+			# Duplicate check: already have a task for this occasion this year?
+			task_title = f"{occasion_type} reminder: {cust.customer_name}"
+			existing = frappe.db.exists(
+				"CRM Task",
+				{
+					"reference_doctype": "Customer",
+					"reference_docname": cust.name,
+					"title": task_title,
+				},
+			)
+			if existing:
+				continue
+
+			# Build gift suggestion from customer preferences
+			suggestion = _build_occasion_suggestion(cust.name, occasion_type)
+
+			# Determine assignee: last salesperson or store manager
+			assignee = _get_customer_assignee(cust.name)
+
+			task = frappe.get_doc({
+				"doctype": "CRM Task",
+				"title": task_title,
+				"priority": "Medium" if (next_occ - today).days <= 7 else "Low",
+				"status": "Todo",
+				"due_date": str(next_occ),
+				"start_date": str(today),
+				"assigned_to": assignee,
+				"reference_doctype": "Customer",
+				"reference_docname": cust.name,
+				"description": suggestion,
+			})
+
+			try:
+				task.insert(ignore_permissions=True)
+				created_count += 1
+			except Exception:
+				frappe.log_error(
+					frappe.get_traceback(),
+					f"Failed to create {occasion_type} reminder for {cust.name}",
+				)
+
+	if created_count:
+		frappe.logger().info(f"Generated {created_count} occasion reminder tasks")
+
+
+def _build_occasion_suggestion(customer_name, occasion_type):
+	"""Build a gift suggestion based on customer purchase history and preferences."""
+	suggestion = f"<p><strong>{occasion_type} upcoming!</strong></p>"
+
+	# Get preferred metal/purity if available
+	meta = frappe.get_meta("Customer")
+	cust_doc = frappe.get_doc("Customer", customer_name)
+
+	pref_metal = ""
+	pref_purity = ""
+	if meta.has_field("custom_preferred_metal"):
+		pref_metal = cust_doc.get("custom_preferred_metal") or ""
+	if meta.has_field("custom_preferred_purity"):
+		pref_purity = cust_doc.get("custom_preferred_purity") or ""
+
+	if pref_metal or pref_purity:
+		suggestion += f"<p>Preferred: {pref_metal} {pref_purity}</p>"
+
+	# Get recent purchases for context
+	recent = frappe.get_all(
+		"Sales Invoice",
+		filters={"customer": customer_name, "docstatus": 1, "is_return": 0},
+		fields=["name", "grand_total"],
+		order_by="posting_date desc",
+		limit=3,
+	)
+
+	if recent:
+		suggestion += "<p>Recent purchases:</p><ul>"
+		for inv in recent:
+			suggestion += f"<li>{inv.name} - ${inv.grand_total:,.2f}</li>"
+		suggestion += "</ul>"
+
+	suggestion += "<p>Consider reaching out with a personalized offer or gift suggestion.</p>"
+	return suggestion
+
+
+def _get_customer_assignee(customer_name):
+	"""Get the most recent salesperson for a customer, or a store manager."""
+	# Try from most recent POS invoice
+	last_invoice = frappe.db.sql(
+		"""SELECT owner FROM `tabSales Invoice`
+		WHERE customer = %s AND docstatus = 1 AND is_pos = 1
+		ORDER BY posting_date DESC LIMIT 1""",
+		(customer_name,),
+		as_dict=True,
+	)
+	if last_invoice:
+		return last_invoice[0].owner
+
+	# Fallback: first store manager
+	manager = frappe.db.get_value(
+		"Has Role",
+		{"role": "Store Manager"},
+		"parent",
+	)
+	return manager or "Administrator"

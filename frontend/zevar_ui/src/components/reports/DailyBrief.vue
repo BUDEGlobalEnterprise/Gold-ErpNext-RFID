@@ -20,14 +20,14 @@
 					</h3>
 					<span class="text-[10px] font-bold text-gray-400">{{ brief.date }}</span>
 				</div>
-				<button
+				<router-link
 					v-if="roleContext.can_closeout"
-					@click="$emit('openReport', 'eod_stream_summary')"
+					to="/reports/eod"
 					class="text-xs font-bold text-[#D4AF37] hover:underline flex items-center gap-1"
 				>
 					Full EOD Report
 					<span class="material-symbols-outlined !text-sm">arrow_forward</span>
-				</button>
+				</router-link>
 			</div>
 
 			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -315,6 +315,7 @@
 </template>
 
 <script setup>
+import { fmt } from '@/utils/format'
 import YoYBadge from './YoYBadge.vue'
 
 defineProps({
@@ -359,11 +360,6 @@ const eodActions = [
 		text: 'text-red-500',
 	},
 ]
-
-function fmt(n) {
-	if (n == null) return '0.00'
-	return Number(n).toFixed(2)
-}
 
 function formatTime(ts) {
 	if (!ts) return ''

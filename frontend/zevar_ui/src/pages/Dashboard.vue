@@ -47,7 +47,7 @@
 				<strong>{{ session.user?.full_name?.split(' ')[0] || 'User' }}</strong>
 			</div>
 
-			<div class="dashboard-layout">
+			<div class="dashboard-layout" @click.capture="onBuildingClick">
 				<!-- Main Content -->
 				<main class="dashboard-main">
 					<!-- Hero: POS Tile -->
@@ -172,6 +172,7 @@
 								v-if="visibility.reportsTile"
 								to="/reports"
 								class="tile-secondary"
+								data-building
 							>
 								<div class="tile-icon-sm" style="background: #3b82f6">
 									<svg
@@ -191,6 +192,7 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">End Of Day Reports</h3>
+								<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<!-- Customer List -->
 							<router-link to="/customers" class="tile-secondary">
@@ -235,6 +237,7 @@
 								v-if="visibility.reportsTile"
 								to="/reports"
 								class="tile-secondary"
+						data-building
 							>
 								<div class="tile-icon-sm" style="background: #ec4899">
 									<svg
@@ -251,6 +254,7 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Reports</h3>
+						<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<!-- Inventory -->
 							<router-link to="/inventory" class="tile-secondary">
@@ -292,7 +296,7 @@
 								<h3 class="tile-title-sm">Time Clock</h3>
 							</router-link>
 							<!-- Back Up -->
-							<router-link to="/support" class="tile-secondary">
+							<router-link to="/support" class="tile-secondary" data-building>
 								<div class="tile-icon-sm" style="background: #6b7280">
 									<svg
 										viewBox="0 0 24 24"
@@ -308,6 +312,8 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Back Up</h3>
+							<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
+								<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<!-- Repairs -->
 							<router-link to="/repairs" class="tile-secondary">
@@ -335,7 +341,7 @@
 						<h4 class="section-label">Core Operations</h4>
 						<div class="tile-row-4">
 							<!-- Sales -->
-							<router-link to="/transactions" class="tile-secondary">
+							<router-link to="/transactions" class="tile-secondary" data-building>
 								<div class="tile-icon-sm" style="background: #3b82f6">
 									<svg
 										viewBox="0 0 24 24"
@@ -354,6 +360,7 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Sales</h3>
+					<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<!-- Quotes -->
 							<router-link to="/quotes" class="tile-secondary">
@@ -749,7 +756,7 @@
 					>
 						<h4 class="section-label">Accounting</h4>
 						<div class="tile-row-4">
-							<router-link to="/accounting/transactions" class="tile-secondary">
+							<router-link to="/accounting/transactions" class="tile-secondary" data-building>
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -766,6 +773,8 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Transactions</h3>
+										<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
+								<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<router-link to="/closing" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
@@ -788,6 +797,7 @@
 								v-if="visibility.accountingSection"
 								to="/reports"
 								class="tile-secondary"
+						data-building
 							>
 								<div class="tile-icon-sm" style="background: #ec4899">
 									<svg
@@ -804,8 +814,9 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Reports</h3>
+								<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
-							<router-link to="/accounting/terminals" class="tile-secondary">
+							<router-link to="/accounting/terminals" class="tile-secondary" data-building>
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -828,8 +839,9 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Terminals</h3>
+								<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
-							<router-link to="/accounting/invoices" class="tile-secondary">
+							<router-link to="/accounting/invoices" class="tile-secondary" data-building>
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -848,10 +860,12 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Invoices to be Processed</h3>
+								<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<router-link
 								to="/accounting/invoices?tab=purchase"
 								class="tile-secondary"
+						data-building
 							>
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
@@ -875,6 +889,7 @@
 							<router-link
 								to="/accounting/invoices?tab=sales"
 								class="tile-secondary"
+						data-building
 							>
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
@@ -894,10 +909,12 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Outgoing Invoices</h3>
+											<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<router-link
 								to="/accounting/credit-notes?tab=incoming"
 								class="tile-secondary"
+						data-building
 							>
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
@@ -917,10 +934,12 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Incoming Credit Notes</h3>
+<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<router-link
 								to="/accounting/credit-notes?tab=outgoing"
 								class="tile-secondary"
+						data-building
 							>
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
@@ -940,6 +959,7 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Outgoing Credit Notes</h3>
+									<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<router-link to="/accounting/export-ubl" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
@@ -1104,6 +1124,17 @@
 				</aside>
 			</div>
 		</div>
+		<!-- Building Toast -->
+		<Transition name="toast">
+			<div v-if="buildingToast" class="building-toast">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<circle cx="12" cy="12" r="10"></circle>
+					<line x1="12" y1="8" x2="12" y2="12"></line>
+					<line x1="12" y1="16" x2="12.01" y2="16"></line>
+				</svg>
+				This feature is under construction — coming soon!
+			</div>
+		</Transition>
 	</div>
 </template>
 
@@ -1189,6 +1220,20 @@ function formatPurityLabel(key) {
 
 function handleLogout() {
 	session.logoutResource.submit()
+}
+
+// Building tiles — features under construction
+const buildingToast = ref(false)
+let toastTimer = null
+
+function onBuildingClick(e) {
+	const tile = e.target.closest('[data-building]')
+	if (!tile) return
+	e.stopImmediatePropagation()
+	e.preventDefault()
+	buildingToast.value = true
+	if (toastTimer) clearTimeout(toastTimer)
+	toastTimer = setTimeout(() => { buildingToast.value = false }, 3000)
 }
 
 onMounted(() => {
@@ -1478,6 +1523,61 @@ onUnmounted(() => {
 	font-weight: 500;
 }
 
+/* Building badge for tiles under construction */
+[data-building] {
+	position: relative;
+	opacity: 0.75;
+}
+.building-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	padding: 2px 8px;
+	background: #f59e0b;
+	color: white;
+	font-size: 9px;
+	font-weight: 700;
+	border-radius: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	line-height: 1.4;
+	margin-top: 4px;
+	width: fit-content;
+}
+.building-badge svg {
+	width: 10px;
+	height: 10px;
+}
+.building-toast {
+	position: fixed;
+	bottom: 24px;
+	left: 50%;
+	transform: translateX(-50%);
+	background: #1e1b18;
+	color: #f5f0e8;
+	padding: 12px 24px;
+	border-radius: 12px;
+	font-size: 13px;
+	font-weight: 500;
+	box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+	z-index: 9999;
+	border: 1px solid rgba(212,175,55,0.3);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	animation: toast-in 0.3s ease-out;
+}
+.building-toast svg {
+	width: 18px;
+	height: 18px;
+	color: #f59e0b;
+	flex-shrink: 0;
+}
+@keyframes toast-in {
+	from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+	to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
 /* Admin Section */
 .admin-section {
 	margin-top: 0.5rem;
@@ -1726,6 +1826,16 @@ html.dark .tile-title-sm {
 }
 html.dark .tile-sub-sm {
 	color: #a09484 !important;
+}
+html.dark [data-building] {
+	opacity: 0.8 !important;
+}
+html.dark .building-badge {
+	background: #b45309 !important;
+}
+html.dark .building-toast {
+	background: #1e1b18 !important;
+	border-color: rgba(212,175,55,0.3) !important;
 }
 html.dark .section-label {
 	color: #a09484 !important;
