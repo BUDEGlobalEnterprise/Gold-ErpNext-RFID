@@ -15,6 +15,7 @@ from __future__ import annotations
 from typing import Any
 
 import frappe
+from frappe import _
 from frappe.utils import flt, get_datetime, now_datetime, today
 
 _MONITOR_ROLES = ["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"]
@@ -139,3 +140,203 @@ def get_hourly(from_date: str | None = None, to_date: str | None = None, store: 
 		{"hour": h, "count": int(by_hour[h]["count"]) if h in by_hour else 0, "revenue": flt(by_hour[h]["revenue"], 2) if h in by_hour else 0.0}
 		for h in range(24)
 	]
+
+
+# ---------------------------------------------------------------------------
+# Phase 2 — leaderboard / breakdown / trend / pace
+# ---------------------------------------------------------------------------
+
+
+@frappe.whitelist()
+def get_leaderboard(from_date: str | None = None, to_date: str | None = None, store: str | None = None) -> list[dict]:
+	"""Per-associate leaderboard from Performance Log 'Sale Completed' events:
+	revenue, txn_count, units, UPT, commission.
+	"""
+	frappe.only_for(_MONITOR_ROLES)
+	from_date, to_date = _date_range(from_date, to_date)
+
+	filters = {
+		"event_type": "Sale Completed",
+		"event_date": ["between", [from_date, to_date]],
+	}
+	if store:
+		filters["store_location"] = store
+
+	rows = frappe.db.sql(
+		"""
+        SELECT employee, employee_name,
+               COUNT(*) AS txn_count,
+               COALESCE(SUM(revenue_amount), 0) AS revenue,
+               COALESCE(SUM(item_count), 0) AS units,
+               COALESCE(SUM(commission_amount), 0) AS commission
+        FROM `tabPerformance Log`
+        WHERE event_type = 'Sale Completed'
+          AND event_date >= %(from)s AND event_date <= %(to)s
+          {store_cond}
+        GROUP BY employee
+        ORDER BY revenue DESC
+        """.replace("{store_cond}", "AND store_location = %(store)s" if store else ""),
+		{"from": from_date, "to": to_date, **({"store": store} if store else {})},
+		as_dict=True,
+	)
+
+	out = []
+	for r in rows:
+		txn = int(r.txn_count or 0)
+		out.append(
+			{
+				"employee": r.employee,
+				"employee_name": r.employee_name,
+				"revenue": flt(r.revenue, 2),
+				"txn_count": txn,
+				"units": int(r.units or 0),
+				"upt": flt((r.units or 0) / txn, 3) if txn else 0.0,
+				"commission": flt(r.commission, 2),
+			}
+		)
+	return out
+
+
+@frappe.whitelist()
+def get_breakdown(
+	from_date: str | None = None,
+	to_date: str | None = None,
+	store: str | None = None,
+	dimension: str = "category",
+) -> list[dict]:
+	"""Revenue/units by dimension: category | metal | item_group | salesperson."""
+	frappe.only_for(_MONITOR_ROLES)
+	from_date, to_date = _date_range(from_date, to_date)
+	store_cond, store_params = _store_condition(store)
+
+	dim_column = {
+		"category": "i.custom_jewelry_type",
+		"metal": "i.custom_metal_type",
+		"item_group": "i.item_group",
+	}.get(dimension)
+
+	if dim_column:
+		rows = frappe.db.sql(
+			f"""
+            SELECT {dim_column} AS dim,
+                   COALESCE(SUM(sii.amount), 0) AS revenue,
+                   COALESCE(SUM(sii.qty), 0) AS units,
+                   COUNT(*) AS line_count
+            FROM `tabSales Invoice` si
+            JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
+            JOIN `tabItem` i ON i.name = sii.item_code
+            WHERE si.is_pos = 1 AND si.docstatus = 1
+              AND si.posting_date >= %(from)s AND si.posting_date <= %(to)s
+              {store_cond}
+            GROUP BY {dim_column}
+            ORDER BY revenue DESC
+            """,
+			{"from": from_date, "to": to_date, **store_params},
+			as_dict=True,
+		)
+		return [
+			{"dimension": r.dim or "Unknown", "revenue": flt(r.revenue, 2), "units": int(r.units or 0)}
+			for r in rows
+		]
+
+	if dimension == "salesperson":
+		rows = frappe.db.sql(
+			f"""
+            SELECT ss.employee AS dim,
+                   COALESCE(SUM(si.base_net_total * ss.split_percent / 100), 0) AS revenue,
+                   COUNT(DISTINCT si.name) AS txn_count
+            FROM `tabSales Invoice` si
+            JOIN `tabSalesperson Split Detail` ss ON ss.parent = si.name AND ss.parenttype = 'Sales Invoice'
+            WHERE si.is_pos = 1 AND si.docstatus = 1
+              AND si.posting_date >= %(from)s AND si.posting_date <= %(to)s
+              {store_cond}
+            GROUP BY ss.employee
+            ORDER BY revenue DESC
+            """,
+			{"from": from_date, "to": to_date, **store_params},
+			as_dict=True,
+		)
+		return [
+			{
+				"dimension": r.dim,
+				"dimension_name": frappe.db.get_value("Employee", r.dim, "employee_name") if r.dim else "Unknown",
+				"revenue": flt(r.revenue, 2),
+				"txn_count": int(r.txn_count or 0),
+			}
+			for r in rows
+		]
+
+	frappe.throw(_("Unknown dimension {0}. Use category, metal, item_group, or salesperson.").format(dimension))
+
+
+@frappe.whitelist()
+def get_trend(
+	from_date: str | None = None,
+	to_date: str | None = None,
+	store: str | None = None,
+	metric: str = "revenue",
+) -> list[dict]:
+	"""Daily series of {date, revenue, txn_count, units} for trend lines."""
+	frappe.only_for(_MONITOR_ROLES)
+	from_date, to_date = _date_range(from_date, to_date)
+	store_cond, store_params = _store_condition(store)
+
+	rows = frappe.db.sql(
+		f"""
+        SELECT si.posting_date AS date,
+               COALESCE(SUM(si.base_net_total), 0) AS revenue,
+               COUNT(*) AS txn_count,
+               COALESCE(SUM(sii.qty), 0) AS units
+        FROM `tabSales Invoice` si
+        LEFT JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
+        WHERE si.is_pos = 1 AND si.docstatus = 1
+          AND si.posting_date >= %(from)s AND si.posting_date <= %(to)s
+          {store_cond}
+        GROUP BY si.posting_date
+        ORDER BY si.posting_date
+        """,
+		{"from": from_date, "to": to_date, **store_params},
+		as_dict=True,
+	)
+	return [
+		{
+			"date": str(r.date),
+			"revenue": flt(r.revenue, 2),
+			"txn_count": int(r.txn_count or 0),
+			"units": int(r.units or 0),
+		}
+		for r in rows
+	]
+
+
+@frappe.whitelist()
+def get_pace(from_date: str | None = None, to_date: str | None = None, store: str | None = None) -> dict:
+	"""Pace-to-target: today's run-rate projection + attainment vs Sales Target (if any)."""
+	frappe.only_for(_MONITOR_ROLES)
+	summary = get_summary(from_date, to_date, store)
+
+	target = None
+	attainment_pct = None
+	if frappe.db.exists("DocType", "Sales Target"):
+		# One row per store/period; sum any covering the range.
+		t = frappe.db.sql(
+			"""SELECT COALESCE(SUM(target_revenue), 0) AS target
+            FROM `tabSales Target`
+            WHERE period_start <= %(to)s AND period_end >= %(from)s
+              AND (%(store)s = '' OR store = %(store)s OR store IS NULL)""",
+			{"from": summary["from_date"], "to": summary["to_date"], "store": store or ""},
+		)[0][0]
+		target = flt(t)
+		if target > 0:
+			attainment_pct = flt(summary["revenue"] / target * 100, 1)
+
+	return {
+		"revenue_so_far": summary["revenue"],
+		"run_rate": summary["run_rate"],
+		"projected_day_close": summary["projected_day_close"],
+		"target_revenue": target,
+		"attainment_pct": attainment_pct,
+		"upt": summary["upt"],
+		"aov": summary["aov"],
+	}
+
