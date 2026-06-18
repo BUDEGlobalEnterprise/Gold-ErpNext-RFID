@@ -99,14 +99,14 @@
 								v-else
 								class="h-px bg-white/10 dark:bg-warm-border-subtle mx-2 mb-3 opacity-50"
 							></div>
-							<div
-								v-show="isSidebarCollapsed || !collapsedSections[section.label]"
-								class="space-y-1"
-							>
-								<component
-									:is="item.external ? 'a' : 'router-link'"
-									v-for="item in section.items"
-									:key="item.to"
+<div
+							v-show="isSidebarCollapsed || !collapsedSections[section.label]"
+							class="space-y-1"
+						>
+							<component
+								:is="item.external ? 'a' : 'router-link'"
+								v-for="item in section.items.filter(i => !i.hidden)"
+								:key="item.to"
 									:to="item.disabled ? '#' : item.to"
 									:href="item.disabled ? '#' : item.to"
 									:target="item.external ? '_blank' : null"
@@ -241,10 +241,11 @@
 					<div class="relative ml-1 min-w-0 flex-1">
 						<select
 							v-model="session.currentWarehouse"
-							@change="session.setWarehouse($event.target.value)"
+							@change="session.setWarehouse(session.currentWarehouse)"
 							class="h-8 w-full bg-gray-50/50 dark:bg-warm-dark-900/50 border border-gray-200 dark:border-warm-border/50 pl-2 pr-6 rounded-lg text-xs font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] cursor-pointer appearance-none truncate"
 						>
-							<option :value="null" disabled>Store...</option>
+							<option :value="null" disabled v-if="!canViewAllStores()">Store...</option>
+							<option :value="null" v-if="canViewAllStores()">All Stores</option>
 							<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
 								{{
 									wh.name.replace('Zevar US Stores - ', '').replace(' - ZUS', '')
@@ -259,10 +260,11 @@
 					<div class="relative group">
 						<select
 							v-model="session.currentWarehouse"
-							@change="session.setWarehouse($event.target.value)"
+							@change="session.setWarehouse(session.currentWarehouse)"
 							class="h-11 bg-gray-50/50 dark:bg-warm-dark-900/50 border border-gray-200 dark:border-warm-border/50 pl-4 pr-10 rounded-lg text-sm font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#D4AF37] cursor-pointer min-w-[200px] shadow-sm outline-none"
 						>
-							<option :value="null" disabled>Select Store Location</option>
+							<option :value="null" disabled v-if="!canViewAllStores()">Select Store Location</option>
+							<option :value="null" v-if="canViewAllStores()">All Stores</option>
 							<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
 								{{ wh.name }}
 							</option>
@@ -774,10 +776,11 @@
 				<div class="relative">
 					<select
 						v-model="session.currentWarehouse"
-						@change="session.setWarehouse($event.target.value)"
+						@change="session.setWarehouse(session.currentWarehouse)"
 						class="h-11 w-full bg-gray-800/50 border border-gray-700 text-gray-200 rounded-lg px-3 focus:ring-2 focus:ring-[#D4AF37] text-sm appearance-none"
 					>
-						<option :value="null" disabled>Store</option>
+						<option :value="null" disabled v-if="!canViewAllStores()">Store</option>
+						<option :value="null" v-if="canViewAllStores()">All Stores</option>
 						<option v-for="wh in warehouses.data" :key="wh.name" :value="wh.name">
 							{{ wh.name }}
 						</option>
@@ -861,7 +864,7 @@ import { createResource, call } from 'frappe-ui'
 import { onMounted, ref, computed, watch, onUnmounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useBreakpoint } from '@/composables/useBreakpoint.js'
-import { canAccessReports, canAccessMonitor, canAccessQuickActions } from '@/utils/permissions.js'
+import { canAccessReports, canAccessMonitor, canViewAllStores } from '@/utils/permissions.js'
 import CartSidebar from '@/components/CartSidebar.vue'
 import CheckoutModal from '@/components/CheckoutModal.vue'
 import AiAssistant from '@/components/ai/AiAssistant.vue'
@@ -932,40 +935,6 @@ const bottomNavItems = [
 const sidebarSections = computed(() => {
 	const sections = []
 
-	if (canAccessQuickActions()) {
-		sections.push({
-			label: 'Quick Actions',
-			items: [
-				{
-					to: '/terminal',
-					label: 'Quick Sale',
-					subtitle: 'New transaction',
-					icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z',
-				},
-				{
-					to: '/customers',
-					label: 'Lookup Customer',
-					subtitle: 'Search or add',
-					icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
-				},
-				{
-					to: '/employee-portal/#/attendance',
-					label: 'Clock In/Out',
-					subtitle: 'Track shift',
-					icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
-					external: true,
-				},
-				{
-					to: '/quotes',
-					label: 'Create Quote',
-					subtitle: 'New estimate',
-					icon: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z',
-					disabled: true,
-				},
-			],
-		})
-	}
-
 	sections.push(
 		{
 			label: 'Operations',
@@ -979,6 +948,7 @@ const sidebarSections = computed(() => {
 					to: '/my-dashboard',
 					label: 'My Dashboard',
 					icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+					hidden: true,
 				},
 				{
 					to: '/terminal',
@@ -1057,34 +1027,12 @@ const sidebarSections = computed(() => {
 		{ label: 'Management', items: [] },
 	)
 	const managementSection = sections.find(s => s.label === 'Management')
-	// Add reports conditionally
-	if (canAccessReports()) {
+	// Single Reports parent
+	if (canAccessReports() || canAccessMonitor()) {
 		managementSection.items.push({
 			to: '/reports',
 			label: 'Reports',
 			icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
-		})
-	}
-	if (canAccessMonitor()) {
-		managementSection.items.push({
-			to: '/reports/dashboards/admin',
-			label: 'Live Monitor',
-			icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z',
-		})
-		managementSection.items.push({
-			to: '/reports/dashboards/revenue',
-			label: 'Sales Monitor',
-			icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
-		})
-		managementSection.items.push({
-			to: '/reports/dashboards/profit',
-			label: 'Profit Intelligence',
-			icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-		})
-		managementSection.items.push({
-			to: '/reports/dashboards/workforce',
-			label: 'Workforce Intelligence',
-			icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
 		})
 	}
 	managementSection.items.push(
@@ -1184,29 +1132,49 @@ function formatShortLabel(key) {
 	return key.toUpperCase()
 }
 
+function validateAndHealWarehouse(data) {
+	if (!data || data.length === 0) return
+	const validNames = data.map((w) => w.name || w)
+	if (session.currentWarehouse && !validNames.includes(session.currentWarehouse)) {
+		console.warn(
+			`AppShell: currentWarehouse '${session.currentWarehouse}' is invalid. Healing to '${data[0]?.name}'.`
+		)
+		session.setWarehouse(data[0]?.name || null)
+	} else if (!session.currentWarehouse) {
+		session.setWarehouse(data[0]?.name || null)
+	}
+}
+
 // Warehouses
 const warehouses = createResource({
 	url: 'frappe.client.get_list',
 	params: {
 		doctype: 'Warehouse',
-		filters: { is_group: 0, parent_warehouse: ['like', '%Zevar US Stores%'] },
+		filters: { is_group: 0, parent_warehouse: ['like', '%ZFJ'] },
 		fields: ['name'],
 	},
 	auto: true,
 	onSuccess(data) {
-		if (!data || data.length === 0) warehouseFallback.fetch()
+		if (!data || data.length === 0) {
+			warehouseFallback.fetch()
+		} else {
+			validateAndHealWarehouse(data)
+		}
 	},
 })
 const warehouseFallback = createResource({
 	url: 'frappe.client.get_list',
 	params: {
 		doctype: 'Warehouse',
-		filters: { is_group: 0 },
+		filters: { is_group: 0, name: ['like', '%- ZFJ'] },
 		fields: ['name'],
 		limit_page_length: 50,
 	},
 	onSuccess(data) {
-		if (data?.length > 0) warehouses.data = data
+		if (data?.length > 0) {
+			warehouses.data = data
+			validateAndHealWarehouse(data)
+		}
 	},
 })
 

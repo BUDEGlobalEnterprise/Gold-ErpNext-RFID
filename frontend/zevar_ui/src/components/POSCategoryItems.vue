@@ -199,6 +199,7 @@ const items = createResource({
 			page_length: PAGE_LENGTH,
 			start: start.value,
 			search_term: ui.searchQuery || undefined,
+			inventory_only: 1,
 			filters: JSON.stringify({
 				custom_jewelry_type: custom_jewelry_type || undefined,
 				custom_metal_type: custom_metal_type || undefined,

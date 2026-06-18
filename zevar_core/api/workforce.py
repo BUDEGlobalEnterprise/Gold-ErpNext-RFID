@@ -132,3 +132,122 @@ def get_team_scorecard(store_location: str | None = None, date: str | None = Non
 		)
 	out.sort(key=lambda x: x["revenue"], reverse=True)
 	return out
+
+
+@frappe.whitelist(methods=["GET"])
+def get_employee_efficiency(from_date=None, to_date=None, store=None) -> list[dict]:
+	"""ATV, capture rate, checkout time per employee."""
+	frappe.only_for(_WF_ROLES)
+
+	if not from_date:
+		from_date = frappe.utils.add_days(today(), -30)
+	if not to_date:
+		to_date = today()
+
+	store_cond = ""
+	store_params: dict = {}
+	if store:
+		store_cond = "AND si.set_warehouse = %(store)s"
+		store_params = {"store": store}
+
+	rows = frappe.db.sql(
+		f"""
+		SELECT
+			scs.employee,
+			emp.employee_name,
+			COUNT(DISTINCT si.name) AS txn_count,
+			COALESCE(SUM(scs.sale_amount), 0) AS revenue,
+			COALESCE(SUM(scs.commission_amount), 0) AS commission
+		FROM `tabSales Commission Split` scs
+		JOIN `tabEmployee` emp ON scs.employee = emp.name
+		JOIN `tabSales Invoice` si ON scs.sales_invoice = si.name
+		WHERE si.docstatus = 1 AND si.is_pos = 1
+		  AND si.posting_date >= %(from)s AND si.posting_date <= %(to)s
+		  {store_cond}
+		GROUP BY scs.employee, emp.employee_name
+		ORDER BY revenue DESC
+		""",
+		{"from": from_date, "to": to_date, **store_params},
+		as_dict=True,
+	)
+
+	result = []
+	for r in rows:
+		txn = int(r.txn_count or 0)
+		revenue = flt(r.revenue, 2)
+		result.append({
+			"employee": r.employee,
+			"employee_name": r.employee_name,
+			"revenue": revenue,
+			"txn_count": txn,
+			"aov": flt(revenue / txn, 2) if txn else 0.0,
+			"commission": flt(r.commission, 2),
+		})
+	return result
+
+
+@frappe.whitelist(methods=["GET"])
+def get_staffing_heatmap(from_date=None, to_date=None, store=None) -> list[dict]:
+	"""Sales volume vs staffing levels by hour."""
+	frappe.only_for(_WF_ROLES)
+
+	if not from_date:
+		from_date = frappe.utils.add_days(today(), -30)
+	if not to_date:
+		to_date = today()
+
+	store_cond = ""
+	store_params: dict = {}
+	if store:
+		store_cond = "AND si.set_warehouse = %(store)s"
+		store_params = {"store": store}
+
+	# Hourly sales from Sales Invoice
+	hourly_sales = frappe.db.sql(
+		f"""
+		SELECT
+			HOUR(si.creation) AS hour,
+			COALESCE(SUM(si.base_net_total), 0) AS sales,
+			COUNT(*) AS txn_count
+		FROM `tabSales Invoice` si
+		WHERE si.is_pos = 1 AND si.docstatus = 1
+		  AND si.posting_date >= %(from)s AND si.posting_date <= %(to)s
+		  {store_cond}
+		GROUP BY HOUR(si.creation)
+		ORDER BY hour
+		""",
+		{"from": from_date, "to": to_date, **store_params},
+		as_dict=True,
+	)
+
+	sales_by_hour = {int(r.hour): r for r in hourly_sales}
+
+	# Staffing from Attendance (present employees per hour)
+	staffing = frappe.db.sql(
+		"""SELECT HOUR(creation) AS hour, COUNT(DISTINCT employee) AS staff_count
+		FROM `tabAttendance`
+		WHERE attendance_date >= %s AND attendance_date <= %s
+		  AND status = 'Present'
+		GROUP BY HOUR(creation)
+		ORDER BY hour""",
+		(from_date, to_date),
+		as_dict=True,
+	)
+
+	staff_by_hour = {int(r.hour): r.staff_count for r in staffing}
+	avg_staff = sum(staff_by_hour.values()) / max(len(staff_by_hour), 1)
+
+	result = []
+	for h in range(24):
+		sales_row = sales_by_hour.get(h)
+		sales_val = flt(sales_row.sales, 2) if sales_row else 0
+		staff_count = staff_by_hour.get(h) or avg_staff
+		result.append({
+			"hour": h,
+			"sales": sales_val,
+			"txn_count": int(sales_row.txn_count if sales_row else 0),
+			"staff_count": round(staff_count, 1),
+			"sales_per_staff": flt(sales_val / staff_count, 2) if staff_count else 0,
+		})
+
+	return result

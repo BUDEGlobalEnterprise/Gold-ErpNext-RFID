@@ -1,19 +1,10 @@
 <template>
 	<AppLayout>
-		<div class="eod-report flex flex-col h-full">
-			<!-- ============ Header ============ -->
-			<div
-				class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4 flex-shrink-0 no-print"
-			>
-				<div class="flex items-center gap-3">
-					<span class="material-symbols-outlined text-[#D4AF37] !text-2xl">point_of_sale</span>
-					<div>
-						<h2 class="premium-title !text-xl sm:!text-2xl leading-tight">End of Day Report</h2>
-						<p class="text-[11px] text-gray-500 dark:text-gray-400">
-							Z-Report &middot; {{ report?.meta?.primary_role || '' }}
-							<span v-if="isToday" class="text-[#D4AF37]">&middot; Live</span>
-						</p>
-					</div>
+		<div class="reports-layout flex flex-col gap-4 h-full">
+			<header class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+				<div>
+					<h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Command Center</h1>
+					<p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Unified reporting and analytics</p>
 				</div>
 				<div class="flex flex-col sm:flex-row gap-2 sm:items-center">
 					<input
@@ -44,7 +35,24 @@
 						Refresh
 					</button>
 				</div>
-			</div>
+			</header>
+
+			<CommandCenterTabs />
+
+			<div class="flex-1 overflow-auto min-h-0 pt-2 flex flex-col">
+				<!-- ============ Header ============ -->
+				<div
+					class="flex items-center gap-3 mb-4 flex-shrink-0 no-print"
+				>
+					<span class="material-symbols-outlined text-[#D4AF37] !text-2xl">point_of_sale</span>
+					<div>
+						<h2 class="premium-title !text-xl sm:!text-2xl leading-tight">End of Day Report</h2>
+						<p class="text-[11px] text-gray-500 dark:text-gray-400">
+							Z-Report &middot; {{ report?.meta?.primary_role || '' }}
+							<span v-if="isToday" class="text-[#D4AF37]">&middot; Live</span>
+						</p>
+					</div>
+				</div>
 
 			<!-- ============ Loading ============ -->
 			<div v-if="eodResource.loading && !report" class="flex-1 flex items-center justify-center">
@@ -543,6 +551,7 @@
 				<p class="text-center text-[10px] text-gray-400 mt-3">Generated {{ formatDateTime(report.meta.generated_at) }}</p>
 			</div>
 		</div>
+		</div>
 	</AppLayout>
 </template>
 
@@ -552,6 +561,7 @@ import { useRoute } from 'vue-router'
 import { createResource } from 'frappe-ui'
 import AppLayout from '@/components/AppLayout.vue'
 import YoYBadge from '@/components/reports/YoYBadge.vue'
+import CommandCenterTabs from '@/components/reports/CommandCenterTabs.vue'
 
 const route = useRoute()
 

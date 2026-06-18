@@ -328,3 +328,14 @@ export function canAccessQuickActions() {
 	const session = useSessionStore()
 	return session.hasAnyRole(['Employee', 'Employee Self Service'])
 }
+
+/**
+ * Check if user can view all stores (admin/general manager level)
+ * Only System Manager and Administrator roles can see the All Stores option
+ * and monitor all activity across all locations.
+ * @returns {boolean}
+ */
+export function canViewAllStores() {
+	const session = useSessionStore()
+	return session.hasAnyRole(['System Manager', 'Administrator'])
+}

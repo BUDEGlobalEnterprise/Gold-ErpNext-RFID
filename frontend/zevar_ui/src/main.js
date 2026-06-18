@@ -30,7 +30,7 @@ app.mount('#app')
 if ('serviceWorker' in navigator) {
 	window.addEventListener('load', () => {
 		navigator.serviceWorker
-			.register('/api/method/zevar_core.api.pos.serve_sw?v=16', { scope: '/pos/' })
+			.register('/api/method/zevar_core.api.pos.serve_sw?v=20', { scope: '/pos/' })
 			.then((registration) => {
 				// Auto-activate new SW immediately
 				registration.addEventListener('updatefound', () => {

@@ -150,8 +150,10 @@ def _create_pos_invoice_internal(
 		if not frappe.db.exists("Item", item_code):
 			checkout_bouncer(_("Item '{0}' not found in the system.").format(item_code), "invoice_failed")
 
-	if not warehouse:
-		# Try to get warehouse from user's POS Opening Entry (most reliable)
+	# Fall back to a valid warehouse if the provided one doesn't exist
+	if not warehouse or not frappe.db.exists("Warehouse", warehouse):
+		fallback_wh = None
+		# 1. Try active POS Opening Entry profile warehouse
 		active_pos = frappe.db.get_value(
 			"POS Opening Entry",
 			filters={"user": frappe.session.user, "docstatus": 1, "status": "Open"},
@@ -159,9 +161,26 @@ def _create_pos_invoice_internal(
 			order_by="creation desc",
 		)
 		if active_pos:
-			pos_wh = frappe.db.get_value("POS Profile", active_pos, "warehouse")
-			if pos_wh:
-				warehouse = pos_wh
+			fallback_wh = frappe.db.get_value("POS Profile", active_pos, "warehouse")
+
+		# 2. Try global default warehouse
+		if not fallback_wh or not frappe.db.exists("Warehouse", fallback_wh):
+			fallback_wh = frappe.db.get_single_value("Global Defaults", "default_warehouse")
+
+		# 3. Try first available warehouse for the company
+		if not fallback_wh or not frappe.db.exists("Warehouse", fallback_wh):
+			company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value(
+				"Global Defaults", "default_company"
+			)
+			if company:
+				fallback_wh = frappe.db.get_value(
+					"Warehouse",
+					{"company": company, "is_group": 0, "disabled": 0},
+					"name",
+				)
+
+		if fallback_wh and frappe.db.exists("Warehouse", fallback_wh):
+			warehouse = fallback_wh
 
 	if not warehouse:
 		checkout_bouncer(
@@ -332,7 +351,7 @@ def _create_pos_invoice_internal(
 		tax_template = None
 		if store_location:
 			store_info = store_location[0]
-			if store_info.get("pos_profile"):
+			if store_info.get("pos_profile") and frappe.db.exists("POS Profile", store_info.get("pos_profile")):
 				si.pos_profile = store_info.get("pos_profile")
 			tax_template = store_info.get("tax_template")
 
@@ -343,7 +362,7 @@ def _create_pos_invoice_internal(
 				fieldname="pos_profile",
 				order_by="creation desc",
 			)
-			if active_pos_profile:
+			if active_pos_profile and frappe.db.exists("POS Profile", active_pos_profile):
 				si.pos_profile = active_pos_profile
 
 		for item in items_list:
@@ -513,6 +532,7 @@ def _create_pos_invoice_internal(
 				},
 			)
 
+		si.set_account_for_mode_of_payment()
 		si.calculate_taxes_and_totals()
 
 		# Auto-correct small rounding differences (e.g., tax rounding mismatches)
@@ -954,7 +974,7 @@ def serve_sw():
 	"""Serve the POS service worker with correct headers for scope."""
 	import os
 
-	from flask import make_response
+	from werkzeug.wrappers import Response
 
 	sw_path = frappe.get_app_path("zevar_core", "public", "pos", "sw.js")
 	if not os.path.exists(sw_path):
@@ -963,8 +983,7 @@ def serve_sw():
 	with open(sw_path) as f:
 		sw_content = f.read()
 
-	resp = make_response(sw_content)
-	resp.headers["Content-Type"] = "text/javascript; charset=utf-8"
+	resp = Response(sw_content, content_type="text/javascript; charset=utf-8")
 	resp.headers["Service-Worker-Allowed"] = "/"
 	resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
 	return resp

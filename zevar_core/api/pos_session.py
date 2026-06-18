@@ -165,6 +165,63 @@ def get_session_status() -> dict:
 	}
 
 
+@frappe.whitelist()
+def get_sessions_list() -> dict:
+	"""
+	Get a list of POS Sessions (Opening/Closing) for the dashboard.
+	Managers see all sessions, Employees see only their own.
+	"""
+	frappe.only_for(["Sales User", "Sales Manager", "System Manager"])
+	user = frappe.session.user
+	
+	filters = {}
+	if "Sales Manager" not in frappe.get_roles(user) and "System Manager" not in frappe.get_roles(user):
+		filters["user"] = user
+
+	sessions = frappe.get_all(
+		"POS Opening Entry",
+		filters=filters,
+		fields=[
+			"name",
+			"user",
+			"status",
+			"pos_profile",
+			"period_start_date",
+			"pos_closing_entry",
+			"company",
+		],
+		order_by="period_start_date desc",
+		limit_page_length=100
+	)
+
+	for session in sessions:
+		if session.pos_closing_entry:
+			closing_details = frappe.db.get_value(
+				"POS Closing Entry",
+				session.pos_closing_entry,
+				["period_end_date", "grand_total", "net_total"],
+				as_dict=True
+			)
+			if closing_details:
+				session.update(closing_details)
+				
+				# calculate total expected cash and variance if needed (from payment reconciliation)
+				payment_recon = frappe.get_all(
+					"POS Closing Entry Detail",
+					filters={"parent": session.pos_closing_entry},
+					fields=["mode_of_payment", "expected_amount", "closing_amount"]
+				)
+				cash_recon = next((p for p in payment_recon if p.mode_of_payment == "Cash"), None)
+				if cash_recon:
+					session.expected_cash = cash_recon.expected_amount
+					session.closing_cash = cash_recon.closing_amount
+					session.cash_variance = flt(cash_recon.closing_amount) - flt(cash_recon.expected_amount)
+				else:
+					session.cash_variance = 0.0
+					
+	return {"sessions": sessions}
+
+
 def _mark_opening_entry_closed(session_name: str, closing_entry_name: str) -> None:
 	"""Close the opening entry without hitting ERPNext's stale-save edge case."""
 	frappe.db.set_value(

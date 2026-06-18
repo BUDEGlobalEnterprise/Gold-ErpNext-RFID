@@ -63,6 +63,7 @@ def get_pos_items(
 	source_filter: str | None = None,
 	min_price: float | None = None,
 	max_price: float | None = None,
+	inventory_only: bool | str = False,
 ) -> list:
 	"""
 	Fetch items for POS catalog with filtering, search, and pagination.
@@ -79,6 +80,7 @@ def get_pos_items(
 	    source_filter: Filter by custom_source
 	    min_price: Minimum price filter
 	    max_price: Maximum price filter
+	    inventory_only: Only return items that have a Bin record in the given warehouse
 
 	Returns:
 	    List of item dictionaries with stock and price information
@@ -101,6 +103,7 @@ def get_pos_items(
 	# Convert string booleans from frontend
 	in_stock_only = in_stock_only in (True, "true", "1", 1)
 	out_of_stock_only = out_of_stock_only in (True, "true", "1", 1)
+	inventory_only = inventory_only in (True, "true", "1", 1)
 
 	# Convert price filters from string to float
 	if min_price is not None and min_price != "":
@@ -216,6 +219,20 @@ def get_pos_items(
 	page_length = int(page_length)
 	has_post_filters = in_stock_only or out_of_stock_only or min_price or max_price
 	fetch_length = page_length * 5 if has_post_filters else page_length
+
+	# When inventory_only is True and a warehouse is specified, pre-filter
+	# item codes by Bin at the SQL level so we never fetch thousands of
+	# irrelevant items from the Item table. Each store typically has ~1000
+	# items while the total catalog is 5000+.
+	if inventory_only and warehouse:
+		warehouse_item_codes = frappe.db.get_all(
+			"Bin",
+			filters={"warehouse": warehouse},
+			pluck="item_code",
+		)
+		if not warehouse_item_codes:
+			return []
+		query_filters.append(["name", "in", warehouse_item_codes])
 
 	# Fetch items
 	items = frappe.get_list(

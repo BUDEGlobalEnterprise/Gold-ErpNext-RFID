@@ -18,7 +18,7 @@
 						></path>
 					</svg>
 				</div>
-				<div class="min-w-0 flex-1">
+				<div class="min-w-0 flex-1 cursor-pointer" @click="$emit('open-profile')">
 					<div class="font-bold text-gray-900 dark:text-white text-xs truncate">
 						{{ customer.display_name || customer.customer_name || customer.name }}
 						<span
@@ -302,7 +302,7 @@ const props = defineProps({
 	},
 })
 
-const emit = defineEmits(['selected', 'cleared', 'open-clienteling'])
+const emit = defineEmits(['selected', 'cleared', 'open-clienteling', 'open-profile'])
 
 const cart = useCartStore()
 const session = useSessionStore()

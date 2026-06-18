@@ -1,0 +1,36 @@
+[error] WebSocket connection to 'ws://localhost:8080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED
+[error] Hardware bridge error: Event
+[log] Hardware bridge disconnected
+[REQUEST FAILED] https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2 - net::ERR_ABORTED
+[error] WebSocket connection to 'ws://localhost:8080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED
+[error] Hardware bridge error: Event
+[log] Hardware bridge disconnected
+[log] session.js: userResource received data: {user: Administrator, full_name: Administrator, roles: Array(61)}
+[error] WebSocket connection to 'ws://localhost:8080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED
+[error] Hardware bridge error: Event
+[log] Hardware bridge disconnected
+[error] TypeError: Cannot read properties of undefined (reading 'hidden')
+    at http://zevar.localhost:8000/assets/zevar_core/pos/assets/AppLayout-CfV7MSEX.js:30:3544
+    at ed (http://zevar.localhost:8000/assets/zevar_core/pos/assets/index-CwEIEAJo.js:14:17416)
+    at Proxy.<anonymous> (http://zevar.localhost:8000/assets/zevar_core/pos/assets/AppLayout-CfV7MSEX.js:30:2955)
+    at cl (http://zevar.localhost:8000/assets/zevar_core/pos/assets/index-CwEIEAJo.js:14:27101)
+    at Ca.B [as fn] (http://zevar.localhost:8000/assets/zevar_core/pos/assets/index-CwEIEAJo.js:14:36946)
+    at Ca.run (http://zevar.localhost:8000/assets/zevar_core/pos/assets/index-CwEIEAJo.js:10:1927)
+    at J (http://zevar.localhost:8000/assets/zevar_core/pos/assets/index-CwEIEAJo.js:14:37335)
+    at Z (http://zevar.localhost:8000/assets/zevar_core/pos/assets/index-CwEIEAJo.js:14:35991)
+    at V (http://zevar.localhost:8000/assets/zevar_core/pos/assets/index-CwEIEAJo.js:14:35763)
+    at y (http://zevar.localhost:8000/assets/zevar_core/pos/assets/index-CwEIEAJo.js:14:32440)
+[log] session.js: userResource received data: {user: Administrator, full_name: Administrator, roles: Array(61)}
+[log] 🔍 POS Items API Params: {warehouse: Brooklyn Store - ZFJ, display_case: undefined, page_length: 50, start: 0, search_term: undefined}
+[log] 🎯 Active Filters: Proxy(Object)
+[error] TypeError: Cannot read properties of undefined (reading 'hidden')
+    at http://zevar.localhost:8000/assets/zevar_core/pos/assets/AppLayout-CfV7MSEX.js:30:3544
+    at ed (http://zevar.localhost:8000/assets/zevar_core/pos/assets/index-CwEIEAJo.js:14:17416)
+    at Proxy.<anonymous> (http://zevar.localhost:8000/assets/zevar_core/pos/assets/AppLayout-CfV7MSEX.js:30:2955)
+    at cl (http://zevar.localhost:8000/assets/zevar_core/pos/assets/index-CwEIEAJo.js:14:27101)
+    at Ca.B [as fn] (http://zevar.localhost:8000/assets/zevar_core/pos/assets/index-CwEIEAJo.js:14:36505)
+    at Ca.run (http://zevar.localhost:8000/assets/zevar_core/pos/assets/index-CwEIEAJo.js:10:1927)
+    at Ca.runIfDirty (http://zevar.localhost:8000/assets/zevar_core/pos/assets/index-CwEIEAJo.js:10:2237)
+    at qr (http://zevar.localhost:8000/assets/zevar_core/pos/assets/index-CwEIEAJo.js:14:46)
+    at ec (http://zevar.localhost:8000/assets/zevar_core/pos/assets/index-CwEIEAJo.js:14:1797)
+[log] ✅ POS Items API Response: 0 items

@@ -168,10 +168,42 @@ const routes = [
 	},
 	// ── Reports Hub — all authenticated users can open it; content is role-filtered ──
 	{
-		path: '/reports',
-		name: 'Reports',
+		path: '/reports/hub',
+		name: 'AnalyticsHub',
 		component: () => import('./pages/reports/AnalyticsHub.vue'),
 		meta: { requiresAuth: true },
+	},
+	{
+		path: '/reports',
+		component: () => import('./pages/reports/ReportsLayout.vue'),
+		meta: { requiresAuth: true, reportRoles: ['manager', 'admin'] },
+		children: [
+			{
+				path: '',
+				redirect: '/reports/executive'
+			},
+			{
+				path: 'executive',
+				name: 'ExecutiveOverview',
+				component: () => import('./pages/reports/ExecutiveOverview.vue')
+			},
+			{
+				path: 'sales',
+				name: 'SalesMonitor',
+				component: () => import('./pages/reports/SalesMonitor.vue')
+			},
+			{
+				path: 'profit',
+				name: 'ProfitIntelligence',
+				component: () => import('./pages/reports/ProfitIntelligence.vue'),
+				meta: { reportRoles: ['admin'] }
+			},
+			{
+				path: 'workforce',
+				name: 'WorkforceIntelligence',
+				component: () => import('./pages/reports/WorkforceIntelligence.vue')
+			}
+		]
 	},
 	// /dashboard redirects to the unified hub
 	{
@@ -224,14 +256,12 @@ const routes = [
 	},
 	{
 		path: '/reports/dashboards/command-center',
-		name: 'CommandCenter',
-		component: () => import('./pages/dashboards/CommandCenter.vue'),
-		meta: { requiresAuth: true, reportRoles: ['manager', 'admin'] },
+		redirect: '/reports/executive',
 	},
 	{
 		// Q10: collapsed the dead LiveMonitor stub into the role-aware Command Center.
 		path: '/live-monitor',
-		redirect: '/reports/dashboards/command-center',
+		redirect: '/reports/executive',
 	},
 	// Employee Live Monitor - accessible to all authenticated users
 	{
@@ -268,6 +298,12 @@ const routes = [
 		path: '/closing',
 		name: 'POSClosing',
 		component: () => import('./pages/POSClosing.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/pos-sessions',
+		name: 'POSSessionsList',
+		component: () => import('./pages/POSSessionsList.vue'),
 		meta: { requiresAuth: true },
 	},
 	// Phase 1: Stock
@@ -485,12 +521,18 @@ const routes = [
 		component: () => import('./pages/Settings.vue'),
 		meta: { requiresAuth: true },
 	},
-	// Workforce Intelligence — Manager+ only
+	// Old routes redirecting to new reports layout
+	{
+		path: '/reports/dashboards/executive',
+		redirect: '/reports/executive',
+	},
+	{
+		path: '/reports/dashboards/sales-monitor',
+		redirect: '/reports/sales',
+	},
 	{
 		path: '/reports/dashboards/workforce',
-		name: 'WorkforceIntelligence',
-		component: () => import('./pages/dashboards/WorkforceIntelligence.vue'),
-		meta: { requiresAuth: true, reportRoles: ['manager', 'admin'] },
+		redirect: '/reports/workforce',
 	},
 	{
 		path: '/reports/dashboards/workforce/associate/:employeeId',
@@ -498,12 +540,9 @@ const routes = [
 		component: () => import('./pages/dashboards/AssociateDetailPerformance.vue'),
 		meta: { requiresAuth: true, reportRoles: ['manager', 'admin'] },
 	},
-	// Profit Intelligence — Admin only (contains pricing engine, AI predictions)
 	{
 		path: '/reports/dashboards/profit',
-		name: 'ProfitIntelligence',
-		component: () => import('./pages/dashboards/ProfitIntelligence.vue'),
-		meta: { requiresAuth: true, reportRoles: ['admin'] },
+		redirect: '/reports/profit',
 	},
 	// Catch-all → Dashboard
 	{

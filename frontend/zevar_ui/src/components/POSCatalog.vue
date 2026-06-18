@@ -55,12 +55,14 @@
 import ItemCard from '@/components/ItemCard.vue'
 import ProductModal from '@/components/POSProductModal.vue'
 import { useCartStore } from '@/stores/cart.js'
+import { useSessionStore } from '@/stores/session.js'
 import { createResource } from 'frappe-ui'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
+const session = useSessionStore()
 const cart = useCartStore()
 const categories = ref([])
 const loading = ref(false)
@@ -70,7 +72,7 @@ const selectedItemCode = ref(null)
 const catalogResource = createResource({
 	url: 'zevar_core.api.catalog.get_pos_items',
 	makeParams() {
-		return { page_length: 50 }
+		return { page_length: 50, warehouse: session.currentWarehouse, inventory_only: 1 }
 	},
 	onSuccess(data) {
 		const items = data.items || data || []

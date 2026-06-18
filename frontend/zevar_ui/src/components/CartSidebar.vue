@@ -165,12 +165,13 @@
 								<CustomerSelector
 									v-if="cart.customerType !== 'Walkin'"
 									@open-clienteling="showClienteling = true"
+									@open-profile="showCRMModal = true"
 								/>
 								<button
 									v-if="cart.customer?.name && cart.customerType !== 'Walkin'"
-									@click.prevent="showClienteling = true"
+									@click.prevent="showCRMModal = true"
 									class="mt-2 w-full flex items-center justify-center gap-1.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#D4AF37] hover:bg-[#D4AF37]/10 rounded-lg transition-colors border border-[#D4AF37]/20"
-									title="Client Intelligence"
+									title="View Customer Profile"
 								>
 									<svg
 										class="w-3.5 h-3.5"
@@ -485,6 +486,11 @@
 			:customer-name="cart.customer?.name || ''"
 			@close="showClienteling = false"
 		/>
+		<CustomerCRMModal
+			:show="showCRMModal"
+			:customer-name="cart.customer?.name || ''"
+			@close="showCRMModal = false"
+		/>
 	</div>
 </template>
 
@@ -494,6 +500,7 @@ import { usePosSessionStore } from '@/stores/posSession.js'
 import CheckoutModal from '@/components/CheckoutModal.vue'
 import CustomerSelector from '@/components/CustomerSelector.vue'
 import CustomerClientelingDrawer from './CustomerClientelingDrawer.vue'
+import CustomerCRMModal from './CustomerCRMModal.vue'
 import { ref, computed } from 'vue'
 
 const baseUrl = import.meta.env.BASE_URL
@@ -588,6 +595,7 @@ const ui = useUIStore()
 const router = useRouter()
 const showCheckout = ref(false)
 const showClienteling = ref(false)
+const showCRMModal = ref(false)
 const holdingCart = ref(false)
 
 async function holdCurrentCart() {

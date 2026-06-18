@@ -540,7 +540,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { createResource } from 'frappe-ui'
+import { createResource, toast } from 'frappe-ui'
 import { formatDate, formatDateTime } from '@/utils/dates.js'
 import BaseModal from './BaseModal.vue'
 import CheckoutModal from '@/components/CheckoutModal.vue'
@@ -618,11 +618,18 @@ watch(
 async function fetchDetails() {
 	loading.value = true
 	loadError.value = ''
+	showCancelConfirm.value = false
+	showPaymentModal.value = false
+	showExtendDialog.value = false
+	cancelling.value = false
+	extending.value = false
+	extendForm.value = { months: null, reason: '' }
 	try {
-		const result = unwrapResponse(
-			await detailsResource.submit({ layaway_id: props.layawayId })
-		)
-		layaway.value = result
+		const result = await detailsResource.submit({ layaway_id: props.layawayId })
+		layaway.value = unwrapResponse(result)
+		if (!layaway.value) {
+			throw new Error("Empty response received from server")
+		}
 	} catch (error) {
 		console.error('Failed to fetch layaway details:', error)
 		layaway.value = null
@@ -638,13 +645,12 @@ async function cancelLayaway() {
 		const rawResult = await cancelResource.submit({ layaway_id: props.layawayId })
 		const result = rawResult?.message ?? rawResult
 		if (result?.success) {
-			alert(
-				`Layaway cancelled. Store Credit ${
-					result.store_credit_id
-				} generated for ${formatCurrency(
-					result.amount_refunded
-				)}. Cancellation fee: ${formatCurrency(result.cancellation_fee)}`
-			)
+			toast({
+				title: 'Layaway Cancelled',
+				message: `Store Credit ${result.store_credit_id} generated for ${formatCurrency(result.amount_refunded)}. Cancellation fee: ${formatCurrency(result.cancellation_fee)}`,
+				icon: 'check',
+				intent: 'success',
+			})
 			showCancelConfirm.value = false
 			emit('refresh')
 			close()
@@ -671,7 +677,12 @@ async function cancelLayaway() {
 			errorMsg = error?.message || 'Unknown error'
 		}
 		errorMsg = errorMsg.replace(/<[^>]+>/g, '')
-		alert('Failed to cancel layaway: ' + errorMsg)
+		toast({
+			title: 'Cancellation Failed',
+			message: errorMsg,
+			icon: 'alert-triangle',
+			intent: 'error',
+		})
 	} finally {
 		cancelling.value = false
 	}
@@ -731,7 +742,11 @@ function close() {
 	emit('close')
 	layaway.value = null
 	loadError.value = ''
+	showCancelConfirm.value = false
+	showPaymentModal.value = false
 	showExtendDialog.value = false
+	cancelling.value = false
+	extending.value = false
 	extendForm.value = { months: null, reason: '' }
 }
 

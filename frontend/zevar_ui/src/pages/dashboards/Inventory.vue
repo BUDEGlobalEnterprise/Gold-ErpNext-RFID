@@ -175,9 +175,11 @@
 <script setup>
 import AppLayout from '@/components/AppLayout.vue'
 import { fmt } from '@/utils/format'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import KPICard from '@/components/reports/KPICard.vue'
+import { useSessionStore } from '@/stores/session.js'
 
+const session = useSessionStore()
 const kpi = ref({ total_items: 0, total_value: 0, low_stock: 0, in_transit: 0 })
 const storeValues = ref([])
 const agingBuckets = ref([
@@ -194,12 +196,16 @@ async function refresh() {
 	loading.value = true
 	error.value = null
 	try {
-		const res = await fetch(
+		const url = new URL(
 			'/api/method/zevar_core.api.inventory_dashboard.get_dashboard_data',
-			{
-				headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
-			}
+			window.location.origin
 		)
+		if (session.currentWarehouse) {
+			url.searchParams.append('warehouse', session.currentWarehouse)
+		}
+		const res = await fetch(url.toString(), {
+			headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
+		})
 		if (!res.ok) throw new Error('Failed to load inventory data')
 		const json = await res.json()
 		const data = json.message || json
@@ -214,6 +220,8 @@ async function refresh() {
 		loading.value = false
 	}
 }
+
+watch(() => session.currentWarehouse, refresh)
 
 refresh()
 </script>

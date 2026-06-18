@@ -75,10 +75,12 @@ doc_events = {
 			"zevar_core.services.stock_reduction.detect_stock_reduction",
 			"zevar_core.services.reservation_manager.release_reservation_for_invoice",
 			"zevar_core.api.crm_hooks.on_invoice_submit_crm",
+			"zevar_core.api.report_center._invalidate_report_cache",
 		],
 		"on_cancel": [
 			"zevar_core.api.commission.reverse_commissions",
 			"zevar_core.api.monitor_hooks.on_invoice_cancel",
+			"zevar_core.api.report_center._invalidate_report_cache",
 		],
 	},
 }

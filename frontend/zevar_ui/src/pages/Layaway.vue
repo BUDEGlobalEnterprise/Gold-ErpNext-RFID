@@ -616,6 +616,8 @@ onMounted(() => {
 			cart.setCustomer({ name: route.query.customer, customer_name: route.query.customer })
 		}
 		showCreateModal.value = true
+	} else if (route.query.contract) {
+		viewDetails(route.query.contract)
 	}
 })
 
@@ -632,10 +634,24 @@ watch(
 			if (!showCreateModal.value) {
 				showCreateModal.value = true
 			}
+		} else if (query.contract) {
+			viewDetails(query.contract)
 		}
 	},
 	{ deep: true }
 )
+
+// Clear the contract query param and refresh list when the detail modal is closed
+watch(showDetailModal, (newVal) => {
+	if (!newVal) {
+		fetchLayaways()
+		if (route.query.contract) {
+			const newQuery = { ...route.query }
+			delete newQuery.contract
+			router.replace({ name: 'Layaway', query: newQuery })
+		}
+	}
+})
 </script>
 
 <style scoped>
