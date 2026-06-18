@@ -1558,6 +1558,146 @@ def get_all_active_sessions() -> dict:
 	}
 
 
+@frappe.whitelist()
+def get_live_user_detail(user: str) -> dict:
+	"""Everything about a logged-in associate's live activity for the Live Monitor
+	detail drawer: their POS session, today's KPIs (revenue, txn, AOV, UPT, units,
+	items/hr, commission), the sale-by-sale feed, and hourly pace. Admin/manager.
+	"""
+	frappe.only_for(["Sales Manager", "Store Manager", "System Manager"])
+	if not user:
+		frappe.throw(_("user is required"))
+
+	full_name = frappe.db.get_value("User", user, "full_name") or user
+	employee = frappe.db.get_value("Employee", {"user_id": user}, ["name", "employee_name"], as_dict=True)
+
+	# --- open POS register (if any) ---
+	session = frappe.get_all(
+		"POS Opening Entry",
+		filters={"docstatus": 1, "status": ["in", ["Open", "Suspended"]], "user": user},
+		fields=["name", "pos_profile", "company", "period_start_date", "status"],
+		limit=1,
+	)
+	session_doc = session[0] if session else None
+	opening_amount = 0.0
+	warehouse = None
+	duration_hours = 0.0
+	if session_doc:
+		opening_amount = sum(
+			flt(d.opening_amount) for d in frappe.get_doc("POS Opening Entry", session_doc.name).balance_details
+		)
+		warehouse = frappe.db.get_value("POS Profile", session_doc.pos_profile, "warehouse")
+		duration_hours = round(time_diff_in_hours(now_datetime(), get_datetime(session_doc.period_start_date)), 2)
+
+	# --- today's KPIs (owner = user) ---
+	kpi = frappe.db.sql(
+		"""SELECT COUNT(*) AS txn, COALESCE(SUM(grand_total),0) AS revenue,
+                  COALESCE(SUM(net_total),0) AS net_revenue
+        FROM `tabSales Invoice`
+        WHERE owner=%s AND posting_date=%s AND docstatus=1 AND is_pos=1""",
+		(user, nowdate()),
+		as_dict=True,
+	)[0]
+	txn = int(kpi.txn or 0)
+	revenue = flt(kpi.revenue)
+	items_row = frappe.db.sql(
+		"""SELECT COALESCE(SUM(sii.qty),0) AS units, COUNT(DISTINCT si.name) AS inv
+        FROM `tabSales Invoice` si
+        JOIN `tabSales Invoice Item` sii ON sii.parent=si.name
+        WHERE si.owner=%s AND si.posting_date=%s AND si.docstatus=1 AND si.is_pos=1""",
+		(user, nowdate()),
+		as_dict=True,
+	)[0]
+	units = flt(items_row.units or 0)
+	aov = revenue / txn if txn else 0
+	upt = units / txn if txn else 0
+	items_per_hour = units / duration_hours if duration_hours > 0 else 0
+
+	# --- commission today ---
+	commission = 0.0
+	if employee:
+		commission = flt(
+			frappe.db.sql(
+				"""SELECT COALESCE(SUM(commission_amount),0) FROM `tabSales Commission Split`
+                WHERE employee=%s AND posting_date=%s""",
+				(employee.name, nowdate()),
+			)[0][0]
+		)
+
+	# --- recent sale-by-sale feed ---
+	recent = frappe.get_all(
+		"Sales Invoice",
+		filters={"owner": user, "docstatus": 1, "is_pos": 1, "posting_date": nowdate()},
+		fields=["name", "customer", "grand_total", "creation"],
+		order_by="creation desc",
+		limit=15,
+	)
+	for r in recent:
+		r["item_lines"] = frappe.db.count("Sales Invoice Item", {"parent": r.name})
+
+	# --- hourly pace ---
+	hourly = frappe.db.sql(
+		"""SELECT HOUR(creation) AS h, COUNT(*) AS c, COALESCE(SUM(grand_total),0) AS rev
+        FROM `tabSales Invoice`
+        WHERE owner=%s AND posting_date=%s AND docstatus=1 AND is_pos=1
+        GROUP BY HOUR(creation)""",
+		(user, nowdate()),
+		as_dict=True,
+	)
+	hourly_pace = {int(r["h"]): {"count": int(r["c"]), "revenue": flt(r["rev"])} for r in hourly}
+
+	# --- last activity / presence ---
+	last_sale = frappe.db.get_value(
+		"Sales Invoice", {"owner": user, "docstatus": 1, "is_pos": 1}, "creation", order_by="creation desc"
+	)
+	last_seen_row = frappe.db.sql("SELECT MAX(lastupdate) FROM `tabSessions` WHERE user=%s", (user,))
+	last_seen = last_seen_row[0][0] if last_seen_row and last_seen_row[0] else None
+	status = session_doc.status if session_doc else ("Logged In" if last_seen else "Offline")
+
+	return {
+		"user": user,
+		"user_full_name": full_name,
+		"employee": employee.name if employee else None,
+		"employee_name": employee.employee_name if employee else full_name,
+		"status": status,
+		"session": (
+			{
+				"name": session_doc.name,
+				"pos_profile": session_doc.pos_profile,
+				"warehouse": warehouse,
+				"opening_amount": opening_amount,
+				"period_start_date": str(session_doc.period_start_date),
+				"duration_hours": duration_hours,
+			}
+			if session_doc
+			else None
+		),
+		"kpi": {
+			"revenue": revenue,
+			"net_revenue": flt(kpi.net_revenue),
+			"txn_count": txn,
+			"units": int(units),
+			"aov": flt(aov, 2),
+			"upt": flt(upt, 2),
+			"items_per_hour": flt(items_per_hour, 2),
+			"commission": flt(commission, 2),
+		},
+		"recent_sales": [
+			{
+				"name": r.name,
+				"customer": r.customer,
+				"total": flt(r.grand_total),
+				"items": r.item_lines,
+				"time": str(r.creation),
+			}
+			for r in recent
+		],
+		"hourly_pace": hourly_pace,
+		"last_sale_time": str(last_sale) if last_sale else None,
+		"last_seen": str(last_seen) if last_seen else None,
+	}
+
+
 @frappe.whitelist(methods=["POST"])
 def force_close_session(session_name: str, reason: str | None = None) -> dict:
 	"""

@@ -151,7 +151,8 @@
 						<div
 							v-for="s in sessions"
 							:key="s.name"
-							class="p-4 bg-white dark:bg-[#1a1c23] rounded-xl border border-gray-100 dark:border-warm-border flex items-center justify-between"
+							@click="openUserDetail(s)"
+							class="p-4 bg-white dark:bg-[#1a1c23] rounded-xl border border-gray-100 dark:border-warm-border flex items-center justify-between cursor-pointer hover:border-blue-300 dark:hover:border-blue-700 transition"
 						>
 							<div class="flex items-center gap-3">
 								<div
@@ -188,7 +189,7 @@
 								</p>
 							</div>
 							<button
-								@click="confirmForceClose(s)"
+								@click.stop="confirmForceClose(s)"
 								class="ml-4 px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition"
 							>
 								Force Close
@@ -335,6 +336,134 @@
 				</div>
 			</div>
 		</div>
+		<!-- User detail drawer (click a session to open) -->
+		<Teleport to="body">
+			<div v-if="selectedUser" class="fixed inset-0 z-50 flex justify-end" @click.self="closeUserDetail">
+				<div class="absolute inset-0 bg-black/40"></div>
+				<div class="relative w-full max-w-md h-full bg-white dark:bg-[#1a1c23] shadow-2xl overflow-y-auto">
+					<!-- header -->
+					<div class="sticky top-0 bg-white dark:bg-[#1a1c23] border-b border-gray-100 dark:border-warm-border p-4 flex items-center justify-between z-10">
+						<div class="flex items-center gap-3">
+							<div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+								<span class="text-sm font-bold text-blue-600 dark:text-blue-400">{{
+									(userDetail?.user_full_name || selectedUser.user || '?')[0].toUpperCase()
+								}}</span>
+							</div>
+							<div>
+								<p class="text-sm font-bold text-gray-900 dark:text-white">
+									{{ userDetail?.user_full_name || selectedUser.user_full_name || selectedUser.user }}
+								</p>
+								<p class="text-[10px] flex items-center gap-1">
+									<span
+										class="px-1.5 py-0.5 rounded text-[9px] font-bold"
+										:class="userDetail?.status === 'Open'
+											? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+											: userDetail?.status === 'Logged In'
+												? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+												: 'bg-gray-100 text-gray-500'"
+										>{{ userDetail?.status || '...' }}</span>
+									<span class="text-gray-400">{{ userDetail?.employee_name || '' }}</span>
+								</p>
+							</div>
+						</div>
+						<button @click="closeUserDetail" class="text-gray-400 hover:text-gray-700">
+							<span class="material-symbols-outlined">close</span>
+						</button>
+					</div>
+
+					<div v-if="detailLoading" class="flex justify-center py-16">
+						<span class="material-symbols-outlined animate-spin text-gray-300">progress_activity</span>
+					</div>
+
+					<div v-else-if="userDetail" class="p-4 space-y-4">
+						<!-- KPI grid -->
+						<div class="grid grid-cols-3 gap-2">
+							<div class="premium-card !p-2 text-center">
+								<p class="text-[9px] text-gray-400 uppercase">Revenue</p>
+								<p class="text-sm font-bold text-emerald-600">${{ fmt(userDetail.kpi.revenue) }}</p>
+							</div>
+							<div class="premium-card !p-2 text-center">
+								<p class="text-[9px] text-gray-400 uppercase">Txn</p>
+								<p class="text-sm font-bold text-gray-900 dark:text-white">{{ userDetail.kpi.txn_count }}</p>
+							</div>
+							<div class="premium-card !p-2 text-center">
+								<p class="text-[9px] text-gray-400 uppercase">AOV</p>
+								<p class="text-sm font-bold text-amber-600">${{ fmt(userDetail.kpi.aov) }}</p>
+							</div>
+							<div class="premium-card !p-2 text-center">
+								<p class="text-[9px] text-gray-400 uppercase">Units</p>
+								<p class="text-sm font-bold text-gray-900 dark:text-white">{{ userDetail.kpi.units }}</p>
+							</div>
+							<div class="premium-card !p-2 text-center">
+								<p class="text-[9px] text-gray-400 uppercase">UPT</p>
+								<p class="text-sm font-bold text-amber-600">{{ userDetail.kpi.upt }}</p>
+							</div>
+							<div class="premium-card !p-2 text-center">
+								<p class="text-[9px] text-gray-400 uppercase">Items/hr</p>
+								<p class="text-sm font-bold text-purple-600">{{ userDetail.kpi.items_per_hour }}</p>
+							</div>
+						</div>
+						<div class="grid grid-cols-2 gap-2">
+							<div class="premium-card !p-2">
+								<p class="text-[9px] text-gray-400 uppercase">Commission today</p>
+								<p class="text-base font-bold text-emerald-600">${{ fmt(userDetail.kpi.commission) }}</p>
+							</div>
+							<div class="premium-card !p-2">
+								<p class="text-[9px] text-gray-400 uppercase">Last sale</p>
+								<p class="text-xs font-bold text-gray-900 dark:text-white">
+									{{ userDetail.last_sale_time ? formatTime(userDetail.last_sale_time) : '—' }}
+								</p>
+							</div>
+						</div>
+
+						<!-- Session -->
+						<div v-if="userDetail.session" class="premium-card !p-3">
+							<div class="flex items-center justify-between">
+								<p class="text-xs font-bold text-gray-900 dark:text-white">Open Register</p>
+								<button
+									@click="endSession"
+									:disabled="endingSession"
+									class="px-2.5 py-1 text-[10px] font-bold text-red-600 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50"
+								>
+									{{ endingSession ? 'Closing…' : 'End Session' }}
+								</button>
+							</div>
+							<p class="text-[10px] text-gray-400 mt-1">
+								{{ userDetail.session.pos_profile }} · {{ userDetail.session.warehouse || 'N/A' }} ·
+								{{ userDetail.session.duration_hours }}h · ${{ fmt(userDetail.session.opening_amount) }} float
+							</p>
+						</div>
+						<div v-else class="premium-card !p-3 text-center">
+							<p class="text-[11px] text-gray-400">
+								No open register<span v-if="userDetail.status === 'Logged In'"> — logged in but no cash drawer open.</span>
+							</p>
+						</div>
+
+						<!-- Recent sales feed -->
+						<div>
+							<div class="flex items-center justify-between mb-2">
+								<p class="text-xs font-bold text-gray-900 dark:text-white">Recent Sales (today)</p>
+								<button @click="reloadDetail" class="text-[10px] text-blue-500 hover:underline">refresh</button>
+							</div>
+							<div v-if="userDetail.recent_sales.length === 0" class="text-[11px] text-gray-400 text-center py-4">
+								No sales yet today.
+							</div>
+							<div
+								v-for="r in userDetail.recent_sales"
+								:key="r.name"
+								class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-gray-800/50"
+							>
+								<div>
+									<p class="text-xs font-medium text-gray-900 dark:text-white">{{ r.customer || 'Walk-in' }}</p>
+									<p class="text-[10px] text-gray-400">{{ r.items }} item(s) · {{ formatTime(r.time) }}</p>
+								</div>
+								<span class="text-xs font-bold text-emerald-600">${{ fmt(r.total) }}</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</Teleport>
 	</AppLayout>
 </template>
 
@@ -364,6 +493,12 @@ const auditSummary = ref({ total_events: 0, warning_events: 0 })
 
 const latestSaleEvent = ref(null)
 const latestSessionEvent = ref(null)
+
+// User detail drawer
+const selectedUser = ref(null)
+const userDetail = ref(null)
+const detailLoading = ref(false)
+const endingSession = ref(false)
 
 // Resources
 const liveFeedResource = createResource({
@@ -460,6 +595,57 @@ async function confirmForceClose(session) {
 		liveFeedResource.submit({ hours: feedHours.value })
 	} catch (e) {
 		console.error('Force close failed:', e)
+	}
+}
+
+async function openUserDetail(s) {
+	selectedUser.value = s
+	userDetail.value = null
+	detailLoading.value = true
+	try {
+		userDetail.value = await call('zevar_core.api.pos_session.get_live_user_detail', { user: s.user })
+	} catch (e) {
+		console.error('User detail failed:', e)
+	} finally {
+		detailLoading.value = false
+	}
+}
+
+function closeUserDetail() {
+	selectedUser.value = null
+	userDetail.value = null
+}
+
+async function reloadDetail() {
+	if (!selectedUser.value) return
+	detailLoading.value = true
+	try {
+		userDetail.value = await call('zevar_core.api.pos_session.get_live_user_detail', {
+			user: selectedUser.value.user,
+		})
+	} catch (e) {
+		console.error('Reload detail failed:', e)
+	} finally {
+		detailLoading.value = false
+	}
+}
+
+async function endSession() {
+	if (!userDetail.value?.session?.name) return
+	if (!confirm(`End ${userDetail.value.user_full_name}'s register session?`)) return
+	endingSession.value = true
+	try {
+		await call('zevar_core.api.pos_session.force_close_session', {
+			session_name: userDetail.value.session.name,
+			reason: 'Closed from Live Monitor detail',
+		})
+		await reloadDetail()
+		sessionsResource.submit()
+		liveFeedResource.submit({ hours: feedHours.value })
+	} catch (e) {
+		console.error('End session failed:', e)
+	} finally {
+		endingSession.value = false
 	}
 }
 
