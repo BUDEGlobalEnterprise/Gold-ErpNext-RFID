@@ -9,54 +9,54 @@ from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
 
 @frappe.whitelist()
-def get_dashboard_data():
+def get_dashboard_data(warehouse=None):
 	"""Single-call payload for the Inventory Dashboard page."""
 	frappe.only_for(
 		["System Manager", "Store Manager", "Stock Manager", "Inventory Manager", "Sales Manager"]
 	)
 	today = nowdate()
 	return {
-		"kpi": _get_kpi_summary(today),
-		"store_values": _get_stock_by_warehouse(),
-		"aging": _get_aging_buckets(today),
-		"shrinkage": _get_shrinkage_trend(today),
+		"kpi": _get_kpi_summary(today, warehouse),
+		"store_values": _get_stock_by_warehouse(warehouse),
+		"aging": _get_aging_buckets(today, warehouse),
+		"shrinkage": _get_shrinkage_trend(today, warehouse),
 	}
 
 
 @frappe.whitelist()
-def get_kpi_summary():
+def get_kpi_summary(warehouse=None):
 	"""Total items, total value, low stock count, in-transit count."""
 	frappe.only_for(
 		["System Manager", "Store Manager", "Stock Manager", "Inventory Manager", "Sales Manager"]
 	)
-	return _get_kpi_summary(nowdate())
+	return _get_kpi_summary(nowdate(), warehouse)
 
 
 @frappe.whitelist()
-def get_stock_by_warehouse():
+def get_stock_by_warehouse(warehouse=None):
 	"""Stock valuation grouped by warehouse."""
 	frappe.only_for(
 		["System Manager", "Store Manager", "Stock Manager", "Inventory Manager", "Sales Manager"]
 	)
-	return _get_stock_by_warehouse()
+	return _get_stock_by_warehouse(warehouse)
 
 
 @frappe.whitelist()
-def get_aging_buckets():
+def get_aging_buckets(warehouse=None):
 	"""Item count grouped by days since last movement."""
 	frappe.only_for(
 		["System Manager", "Store Manager", "Stock Manager", "Inventory Manager", "Sales Manager"]
 	)
-	return _get_aging_buckets(nowdate())
+	return _get_aging_buckets(nowdate(), warehouse)
 
 
 @frappe.whitelist()
-def get_shrinkage_trend():
+def get_shrinkage_trend(warehouse=None):
 	"""Monthly shrinkage (write-offs / stock reconciliation variance) for 6 months."""
 	frappe.only_for(
 		["System Manager", "Store Manager", "Stock Manager", "Inventory Manager", "Sales Manager"]
 	)
-	return _get_shrinkage_trend(nowdate())
+	return _get_shrinkage_trend(nowdate(), warehouse)
 
 
 # ---------------------------------------------------------------------------
@@ -64,27 +64,39 @@ def get_shrinkage_trend():
 # ---------------------------------------------------------------------------
 
 
-def _get_kpi_summary(today):
+def _get_kpi_summary(today, warehouse=None):
 	"""Aggregate inventory KPIs."""
 	# Total active items
-	total_items = frappe.db.count("Item", filters={"disabled": 0, "is_stock_item": 1})
+	if warehouse:
+		bin_items = frappe.db.sql(
+			"SELECT COUNT(DISTINCT item_code) as cnt FROM `tabBin` WHERE warehouse = %s AND actual_qty > 0",
+			(warehouse,), as_dict=True
+		)
+		total_items = bin_items[0].cnt if bin_items else 0
+	else:
+		total_items = frappe.db.count("Item", filters={"disabled": 0, "is_stock_item": 1})
 
 	# Total stock value from Bin
+	bin_cond = "AND warehouse = %s" if warehouse else ""
+	params = (warehouse,) if warehouse else ()
 	bin_val = frappe.db.sql(
-		"""SELECT
+		f"""SELECT
 			COALESCE(SUM(stock_value), 0) as total_value,
 			COUNT(CASE WHEN actual_qty <= 2 AND actual_qty > 0 THEN 1 END) as low_stock
 		FROM `tabBin`
-		WHERE actual_qty > 0""",
+		WHERE actual_qty > 0 {bin_cond}""",
+		params,
 		as_dict=True,
 	)
 	r = bin_val[0] if bin_val else {}
 
 	# In transit: items on active Material Request or Purchase Order
+	transit_cond = "AND poi.warehouse = %s" if warehouse else ""
 	in_transit = frappe.db.sql(
-		"""SELECT COUNT(*) as cnt FROM `tabPurchase Order Item` poi
+		f"""SELECT COUNT(*) as cnt FROM `tabPurchase Order Item` poi
 		JOIN `tabPurchase Order` po ON poi.parent = po.name
-		WHERE po.docstatus = 1 AND po.status = 'To Receive and Bill'""",
+		WHERE po.docstatus = 1 AND po.status = 'To Receive and Bill' {transit_cond}""",
+		params,
 		as_dict=True,
 	)
 	transit_count = in_transit[0].cnt if in_transit else 0
@@ -97,19 +109,22 @@ def _get_kpi_summary(today):
 	}
 
 
-def _get_stock_by_warehouse():
+def _get_stock_by_warehouse(warehouse=None):
 	"""Stock value by non-group, non-disabled warehouses."""
+	wh_cond = "AND w.name = %s" if warehouse else ""
+	params = (warehouse,) if warehouse else ()
 	rows = frappe.db.sql(
-		"""SELECT
+		f"""SELECT
 			w.name AS warehouse,
 			w.warehouse_name AS name,
 			COALESCE(SUM(b.stock_value), 0) AS value
 		FROM `tabWarehouse` w
 		LEFT JOIN `tabBin` b ON b.warehouse = w.name AND b.actual_qty > 0
-		WHERE w.is_group = 0 AND w.disabled = 0
+		WHERE w.is_group = 0 AND w.disabled = 0 {wh_cond}
 		GROUP BY w.name
 		HAVING value > 0
 		ORDER BY value DESC""",
+		params,
 		as_dict=True,
 	)
 
@@ -121,7 +136,7 @@ def _get_stock_by_warehouse():
 	return rows
 
 
-def _get_aging_buckets(today):
+def _get_aging_buckets(today, warehouse=None):
 	"""Items grouped by days since last Stock Ledger Entry movement."""
 	buckets = [
 		{"label": "< 30 days", "min_days": 0, "max_days": 30},
@@ -131,13 +146,16 @@ def _get_aging_buckets(today):
 	]
 
 	# Get last movement date per item
+	wh_cond = "AND sle.warehouse = %s" if warehouse else ""
+	params = (warehouse,) if warehouse else ()
 	last_moves = frappe.db.sql(
-		"""SELECT
+		f"""SELECT
 			sle.item_code,
 			MAX(sle.posting_date) AS last_move
 		FROM `tabStock Ledger Entry` sle
-		WHERE sle.docstatus = 1
+		WHERE sle.docstatus = 1 {wh_cond}
 		GROUP BY sle.item_code""",
+		params,
 		as_dict=True,
 	)
 

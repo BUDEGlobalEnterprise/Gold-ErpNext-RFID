@@ -180,7 +180,7 @@
 												)
 											}}
 										</div>
-										<div class="font-bold text-gray-900 dark:text-white">
+										<div class="font-bold text-gray-900 dark:text-white cursor-pointer hover:text-[#D4AF37] transition-colors" @click.stop="selectedCRMCustomer = customer.name; showCRMModal = true">
 											{{ customer.customer_name || customer.name }}
 										</div>
 									</div>
@@ -492,6 +492,11 @@
 				</div>
 			</div>
 		</div>
+		<CustomerCRMModal
+			:show="showCRMModal"
+			:customer-name="selectedCRMCustomer"
+			@close="showCRMModal = false"
+		/>
 		<CustomerCreationModal
 			v-if="showCustomerModal"
 			:show="showCustomerModal"
@@ -509,6 +514,7 @@ import AppLayout from '@/components/AppLayout.vue'
 import ViewToggle from '@/components/ViewToggle.vue'
 import CustomerFilterBar from '@/components/CustomerFilterBar.vue'
 import CustomerCreationModal from '@/components/CustomerCreationModal.vue'
+import CustomerCRMModal from '@/components/CustomerCRMModal.vue'
 import { ref, onMounted, computed, watch } from 'vue'
 import { createResource } from 'frappe-ui'
 import { formatDate } from '@/utils/dates.js'
@@ -539,6 +545,8 @@ const vipCount = ref(0)
 const showCustomerModal = ref(false)
 const isEditMode = ref(false)
 const editingCustomerName = ref('')
+const showCRMModal = ref(false)
+const selectedCRMCustomer = ref('')
 
 const pagination = ref({
 	page: 1,
@@ -722,9 +730,14 @@ function getInitials(name) {
 }
 
 function openCustomer(name, edit = false) {
-	editingCustomerName.value = name
-	isEditMode.value = true
-	showCustomerModal.value = true
+	if (edit) {
+		editingCustomerName.value = name
+		isEditMode.value = true
+		showCustomerModal.value = true
+	} else {
+		selectedCRMCustomer.value = name
+		showCRMModal.value = true
+	}
 }
 
 function editCustomer(name) {

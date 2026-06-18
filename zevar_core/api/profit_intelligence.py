@@ -450,7 +450,7 @@ def _allocate_overhead(invoice_revenue, invoice_date):
 @frappe.whitelist()
 def get_profit_summary(from_date=None, to_date=None):
 	"""Return aggregated profit KPIs for a date range."""
-	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
+	frappe.only_for(["System Manager", "Sales Manager", "Accounts Manager"])
 
 	if not from_date:
 		from_date = add_days(today(), -30)
@@ -523,7 +523,7 @@ def get_profit_summary(from_date=None, to_date=None):
 @frappe.whitelist()
 def get_margin_analysis(from_date=None, to_date=None, group_by="jewelry_type"):
 	"""Group margins by jewelry_type, metal_type, purity, or salesperson."""
-	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
+	frappe.only_for(["System Manager", "Sales Manager", "Accounts Manager"])
 
 	if not from_date:
 		from_date = add_days(today(), -30)
@@ -616,7 +616,7 @@ def get_margin_analysis(from_date=None, to_date=None, group_by="jewelry_type"):
 @frappe.whitelist()
 def get_cost_breakdown_detail(sales_invoice):
 	"""Return full cost breakdown for a single Sales Invoice."""
-	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
+	frappe.only_for(["System Manager", "Sales Manager", "Accounts Manager"])
 
 	if not sales_invoice or not frappe.db.exists("Sales Invoice", sales_invoice):
 		frappe.throw(_("Sales Invoice '{0}' not found.").format(sales_invoice))
@@ -669,7 +669,7 @@ def get_cost_breakdown_detail(sales_invoice):
 @frappe.whitelist()
 def get_profit_trends(period="monthly", months=12):
 	"""Return time-series data for profit trends."""
-	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
+	frappe.only_for(["System Manager", "Sales Manager", "Accounts Manager"])
 
 	from_date = add_days(today(), -int(months) * 30)
 
@@ -724,7 +724,7 @@ def recalculate_breakdown(sales_invoice):
 @frappe.whitelist()
 def get_margin_heatmap(from_date=None, to_date=None):
 	"""Return margin data structured for heatmap: jewelry_type x metal_type."""
-	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
+	frappe.only_for(["System Manager", "Sales Manager", "Accounts Manager"])
 
 	if not from_date:
 		from_date = add_days(today(), -30)
@@ -775,7 +775,7 @@ def get_margin_heatmap(from_date=None, to_date=None):
 @frappe.whitelist()
 def get_cost_component_trends(from_date=None, to_date=None, granularity="weekly"):
 	"""Return cost component time series for stacked bar charts."""
-	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
+	frappe.only_for(["System Manager", "Sales Manager", "Accounts Manager"])
 
 	if not from_date:
 		from_date = add_days(today(), -90)
@@ -829,7 +829,7 @@ def create_recommendation(
 	simulation_data). Previously this endpoint did not exist, so saving a
 	simulated price 404'd.
 	"""
-	frappe.only_for(["System Manager", "Store Manager", "Sales Manager"])
+	frappe.only_for(["System Manager", "Sales Manager"])
 
 	if not item_code or new_price in (None, ""):
 		frappe.throw(_("Item code and new price are required."))
@@ -891,7 +891,7 @@ def create_recommendation(
 @frappe.whitelist()
 def get_recommendations(status="Pending Review", limit=20):
 	"""Get pricing recommendations for the dashboard."""
-	frappe.only_for(["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"])
+	frappe.only_for(["System Manager", "Sales Manager", "Accounts Manager"])
 
 	recommendations = frappe.get_all(
 		"Pricing Recommendation",
@@ -926,7 +926,7 @@ def get_recommendations(status="Pending Review", limit=20):
 @frappe.whitelist()
 def review_recommendation(recommendation, action, notes=None):
 	"""Approve or reject a pricing recommendation."""
-	frappe.only_for(["System Manager", "Store Manager", "Sales Manager"])
+	frappe.only_for(["System Manager", "Sales Manager"])
 
 	if not frappe.db.exists("Pricing Recommendation", recommendation):
 		frappe.throw(_("Pricing Recommendation '{0}' not found.").format(recommendation))
@@ -965,7 +965,7 @@ def review_recommendation(recommendation, action, notes=None):
 # Phase 1 — Margin Waterfall, What-If (M1 reconciliation), PVM bridge
 # ---------------------------------------------------------------------------
 
-_PROFIT_ROLES = ["System Manager", "Store Manager", "Sales Manager", "Accounts Manager"]
+_PROFIT_ROLES = ["System Manager", "Sales Manager", "Accounts Manager"]
 
 
 def _waterfall_from_margin(m: dict) -> dict:
@@ -1237,6 +1237,86 @@ def _gold_rate_at(metal, purity, as_of_datetime):
 		"Gold Rate Log", filters=filters, fields=["rate_per_gram"], order_by="timestamp desc", limit=1
 	)
 	return flt(rows[0].rate_per_gram) if rows else 0.0
+
+
+@frappe.whitelist()
+def get_payment_method_breakdown(from_date=None, to_date=None):
+	"""Payment method distribution for pie chart."""
+	frappe.only_for(_PROFIT_ROLES)
+
+	if not from_date:
+		from_date = add_days(today(), -30)
+	if not to_date:
+		to_date = today()
+
+	rows = frappe.db.sql(
+		"""SELECT
+			sip.mode_of_payment AS method,
+			COALESCE(SUM(sip.amount), 0) AS total,
+			COUNT(*) AS count
+		FROM `tabSales Invoice Payment` sip
+		JOIN `tabSales Invoice` si ON sip.parent = si.name
+		WHERE si.docstatus = 1 AND si.is_pos = 1
+		  AND si.posting_date >= %s AND si.posting_date <= %s
+		GROUP BY sip.mode_of_payment
+		ORDER BY total DESC""",
+		(from_date, to_date),
+		as_dict=True,
+	)
+
+	return [
+		{"method": r.method or "Other", "total": flt(r.total, 2), "count": r.count}
+		for r in rows
+	]
+
+
+@frappe.whitelist()
+def get_customer_mix(from_date=None, to_date=None):
+	"""New vs returning customer ratio."""
+	frappe.only_for(_PROFIT_ROLES)
+
+	if not from_date:
+		from_date = add_days(today(), -30)
+	if not to_date:
+		to_date = today()
+
+	# New customers: first purchase in period
+	new_customers = frappe.db.sql(
+		"""SELECT COUNT(DISTINCT si.customer) AS cnt
+		FROM `tabSales Invoice` si
+		WHERE si.docstatus = 1 AND si.is_pos = 1
+		  AND si.posting_date >= %s AND si.posting_date <= %s
+		  AND si.customer IS NOT NULL AND si.customer != ''
+		  AND NOT EXISTS (
+			SELECT 1 FROM `tabSales Invoice` si2
+			WHERE si2.customer = si.customer AND si2.docstatus = 1 AND si2.is_pos = 1
+			  AND si2.posting_date < %s
+		  )""",
+		(from_date, to_date, from_date),
+		as_dict=True,
+	)
+	new_count = new_customers[0].cnt if new_customers else 0
+
+	# Total unique customers in period
+	total_customers = frappe.db.sql(
+		"""SELECT COUNT(DISTINCT si.customer) AS cnt
+		FROM `tabSales Invoice` si
+		WHERE si.docstatus = 1 AND si.is_pos = 1
+		  AND si.posting_date >= %s AND si.posting_date <= %s
+		  AND si.customer IS NOT NULL AND si.customer != ''""",
+		(from_date, to_date),
+		as_dict=True,
+	)
+	total = total_customers[0].cnt if total_customers else 0
+	returning_count = max(total - new_count, 0)
+
+	return {
+		"new_customers": new_count,
+		"returning_customers": returning_count,
+		"total_customers": total,
+		"new_pct": flt((new_count / total * 100) if total else 0, 1),
+		"returning_pct": flt((returning_count / total * 100) if total else 0, 1),
+	}
 
 
 @frappe.whitelist()

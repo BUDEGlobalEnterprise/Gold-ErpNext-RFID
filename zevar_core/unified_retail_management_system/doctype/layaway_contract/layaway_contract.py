@@ -7,7 +7,12 @@ from frappe.utils import add_months, flt
 
 
 class LayawayContract(Document):
+	def _validate_links(self):
+		self._heal_store_location()
+		super()._validate_links()
+
 	def validate(self):
+		self._heal_store_location()
 		self._set_target_completion_date()
 		self._set_customer_details()
 		self._calculate_amounts()
@@ -21,6 +26,15 @@ class LayawayContract(Document):
 		self._set_default_store()
 		if not self.original_target_date and self.target_completion_date:
 			self.original_target_date = self.target_completion_date
+
+	def _heal_store_location(self):
+		"""Heal invalid/legacy store location names like 'SO' to 'SOH'."""
+		if self.store_location == "SO":
+			self.store_location = "SOH"
+		elif self.store_location and not frappe.db.exists("Store Location", self.store_location):
+			active_store = frappe.db.get_value("Store Location", {"is_active": 1}, "name")
+			if active_store:
+				self.store_location = active_store
 
 	def _set_default_store(self):
 		"""Set default store location if not specified."""

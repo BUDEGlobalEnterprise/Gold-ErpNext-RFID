@@ -597,6 +597,28 @@
 							</label>
 						</div>
 					</div>
+					<div>
+						<label
+							class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1"
+							>Applicable Users</label
+						>
+						<div class="space-y-1 max-h-32 overflow-y-auto border border-gray-200 dark:border-warm-dark-700 rounded-lg p-2">
+							<div v-if="!store.settings?.users?.length" class="text-xs text-gray-400 p-1">No users found</div>
+							<label
+								v-for="u in store.settings?.users"
+								:key="u.email"
+								class="flex items-center gap-2 px-2 py-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-warm-dark-700 rounded"
+							>
+								<input
+									type="checkbox"
+									:value="u.email"
+									v-model="profileForm.users"
+									class="rounded border-gray-300"
+								/>
+								{{ u.full_name || u.email }}
+							</label>
+						</div>
+					</div>
 				</div>
 				<div
 					class="p-4 border-t border-gray-200 dark:border-warm-dark-700 flex items-center justify-between"
@@ -869,6 +891,7 @@ function openCreateProfile() {
 		selling_price_list: '',
 		cost_center: '',
 		payments: [],
+		users: [],
 	}
 	showProfileModal.value = true
 }
@@ -883,12 +906,16 @@ function editProfile(profile) {
 		selling_price_list: profile.selling_price_list || '',
 		cost_center: profile.cost_center || '',
 		payments: [],
+		users: [],
 	}
 	store.loadPosProfile(profile.name).then((data) => {
 		if (data?.profile?.payment_methods) {
 			profileForm.value.payments = data.profile.payment_methods
 				.filter((p) => p.default)
 				.map((p) => p.mode_of_payment)
+		}
+		if (data?.profile?.users) {
+			profileForm.value.users = data.profile.users
 		}
 	})
 	showProfileModal.value = true
@@ -900,6 +927,8 @@ async function handleSaveProfile() {
 		const paymentsJson = JSON.stringify(
 			profileForm.value.payments.map((mode) => ({ mode_of_payment: mode, default: 1 }))
 		)
+		const usersJson = JSON.stringify(profileForm.value.users)
+		
 		if (editingProfile.value) {
 			await store.updatePosProfile(editingProfile.value.name, {
 				warehouse: profileForm.value.warehouse,
@@ -908,6 +937,7 @@ async function handleSaveProfile() {
 				cost_center: profileForm.value.cost_center,
 				posa_pos_profile_name: profileForm.value.name,
 				payments_json: paymentsJson,
+				users_json: usersJson,
 			})
 		} else {
 			await store.createPosProfile({
@@ -918,6 +948,7 @@ async function handleSaveProfile() {
 				cost_center: profileForm.value.cost_center || undefined,
 				name_override: profileForm.value.name || undefined,
 				payments_json: paymentsJson,
+				users_json: usersJson,
 			})
 		}
 		showProfileModal.value = false

@@ -174,6 +174,11 @@ def get_pos_profile(name):
 			}
 		)
 
+	users_list = []
+	for row in doc.get("applicable_for_users", []):
+		if row.get("user"):
+			users_list.append(row.get("user"))
+
 	return {
 		"success": True,
 		"profile": {
@@ -189,6 +194,7 @@ def get_pos_profile(name):
 			"currency": getattr(doc, "currency", ""),
 			"payment_methods": payment_methods,
 			"item_groups": item_groups_list,
+			"users": users_list,
 		},
 	}
 
@@ -203,6 +209,7 @@ def create_pos_profile(
 	income_account=None,
 	expense_account=None,
 	payments_json=None,
+	users_json=None,
 	name_override=None,
 ):
 	frappe.only_for("System Manager", "Administrator")
@@ -238,6 +245,19 @@ def create_pos_profile(
 				{
 					"mode_of_payment": mode,
 					"default": cint(p.get("default", 0)),
+				},
+			)
+
+	if users_json:
+		users = json.loads(users_json) if isinstance(users_json, str) else users_json
+		for u in users:
+			user_email = cstr(u).strip()
+			if not user_email:
+				continue
+			profile.append(
+				"applicable_for_users",
+				{
+					"user": user_email,
 				},
 			)
 
@@ -287,6 +307,26 @@ def update_pos_profile(name, **kwargs):
 				{
 					"mode_of_payment": mode,
 					"default": cint(p.get("default", 0)),
+				},
+			)
+
+	if "users_json" in kwargs:
+		import json
+
+		doc.applicable_for_users = []
+		users = (
+			json.loads(kwargs["users_json"])
+			if isinstance(kwargs["users_json"], str)
+			else kwargs["users_json"]
+		)
+		for u in users:
+			user_email = cstr(u).strip()
+			if not user_email:
+				continue
+			doc.append(
+				"applicable_for_users",
+				{
+					"user": user_email,
 				},
 			)
 

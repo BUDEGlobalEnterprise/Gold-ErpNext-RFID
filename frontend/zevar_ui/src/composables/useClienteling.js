@@ -67,7 +67,6 @@ export function useClienteling() {
 				due_date: dueDate || null,
 				description: description || null,
 			})
-			// Reload intelligence to refresh tasks
 			await loadIntelligence(customerName)
 			return result
 		} catch (e) {
@@ -82,7 +81,6 @@ export function useClienteling() {
 			const result = await createLeadResource.submit({
 				customer: customerName,
 			})
-			// Reload intelligence to refresh pipeline
 			await loadIntelligence(customerName)
 			return result
 		} catch (e) {
@@ -91,6 +89,7 @@ export function useClienteling() {
 		}
 	}
 
+	// Core data
 	const upcomingOccasions = computed(() => customerData.value?.upcoming_occasions || [])
 	const hasUrgentOccasion = computed(() =>
 		upcomingOccasions.value.some((o) => o.days_until <= 14)
@@ -101,6 +100,16 @@ export function useClienteling() {
 	const hasCRMLead = computed(() => !!pipeline.value?.lead)
 	const hasCRMDeal = computed(() => !!pipeline.value?.deal)
 	const openTasks = computed(() => pipeline.value?.tasks || [])
+
+	// Enhanced profile computed properties
+	const customerStatus = computed(() => profile.value?.customer_status || 'Regular')
+	const lifetimeValue = computed(() => profile.value?.lifetime_value || profile.value?.total_spent || 0)
+	const ytdSpend = computed(() => profile.value?.ytd_spend || 0)
+	const discountRate = computed(() => profile.value?.discount_rate || 0)
+	const totalInvoices = computed(() => profile.value?.visit_count || 0)
+	const avgTicket = computed(() => profile.value?.avg_order_value || 0)
+	const lastVisit = computed(() => profile.value?.last_purchase_date || null)
+	const jewelryPreferences = computed(() => profile.value?.jewelry_preferences || '')
 
 	return {
 		customerData,
@@ -118,5 +127,14 @@ export function useClienteling() {
 		hasCRMLead,
 		hasCRMDeal,
 		openTasks,
+		// Enhanced profile
+		customerStatus,
+		lifetimeValue,
+		ytdSpend,
+		discountRate,
+		totalInvoices,
+		avgTicket,
+		lastVisit,
+		jewelryPreferences,
 	}
 }

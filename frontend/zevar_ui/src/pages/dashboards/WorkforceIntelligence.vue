@@ -26,84 +26,115 @@
 				</button>
 			</div>
 
-			<div class="flex-1 overflow-auto space-y-4 pr-1">
-				<!-- KPI strip -->
-				<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-					<KPICard label="Associates" :value="rows.length" icon="groups" color="rose" :loading="loading" />
-					<KPICard
-						label="Team Revenue"
-						:value="'$' + fmt(teamRevenue)"
-						icon="payments"
-						color="emerald"
-						:loading="loading"
-					/>
-					<KPICard
-						label="Team UPT"
-						:value="teamUpt.toFixed(2)"
-						icon="sell"
-						color="blue"
-						:loading="loading"
-					/>
-					<KPICard
-						label="Commission"
-						:value="'$' + fmt(teamCommission)"
-						icon="savings"
-						color="amber"
-						:loading="loading"
-					/>
-				</div>
+			<!-- Tabs -->
+			<div class="border-b border-gray-200 dark:border-gray-700 mb-4 flex-shrink-0">
+				<nav class="flex space-x-4 overflow-x-auto -mb-px">
+					<button
+						v-for="tab in tabs"
+						:key="tab.key"
+						@click="activeTab = tab.key"
+						:class="[
+							activeTab === tab.key
+								? 'border-rose-500 text-rose-600 dark:text-rose-400'
+								: 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
+							'whitespace-nowrap py-2.5 px-1 border-b-2 font-medium text-xs transition-colors',
+						]"
+					>
+						{{ tab.label }}
+					</button>
+				</nav>
+			</div>
 
-				<!-- Team scoreboard -->
-				<div class="premium-card !p-3 sm:!p-5">
-					<h3 class="text-sm font-bold text-gray-900 dark:text-white mb-3">Team Scoreboard</h3>
-					<div v-if="loading" class="space-y-2">
-						<div v-for="n in 3" :key="n" class="h-10 bg-gray-100 dark:bg-gray-800 rounded animate-pulse"></div>
+			<div class="flex-1 overflow-auto space-y-4 pr-1">
+				<!-- Scoreboard Tab -->
+				<template v-if="activeTab === 'scoreboard'">
+					<!-- KPI strip -->
+					<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+						<KPICard label="Associates" :value="rows.length" icon="groups" color="rose" :loading="loading" />
+						<KPICard
+							label="Team Revenue"
+							:value="'$' + fmt(teamRevenue)"
+							icon="payments"
+							color="emerald"
+							:loading="loading"
+						/>
+						<KPICard
+							label="Team UPT"
+							:value="teamUpt.toFixed(2)"
+							icon="sell"
+							color="blue"
+							:loading="loading"
+						/>
+						<KPICard
+							label="Commission"
+							:value="'$' + fmt(teamCommission)"
+							icon="savings"
+							color="amber"
+							:loading="loading"
+						/>
 					</div>
-					<table v-else-if="rows.length" class="w-full text-xs">
-						<thead>
-							<tr class="text-left text-gray-400 border-b border-gray-100 dark:border-gray-800">
-								<th class="py-2 font-bold">#</th>
-								<th class="py-2 font-bold">Associate</th>
-								<th class="py-2 font-bold text-right">Revenue</th>
-								<th class="py-2 font-bold text-right">Txn</th>
-								<th class="py-2 font-bold text-right">UPT</th>
-								<th class="py-2 font-bold text-right">Commission</th>
-								<th class="py-2 font-bold text-right">Pace</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr
-								v-for="(r, i) in rows"
-								:key="r.employee"
-								class="border-b border-gray-50 dark:border-gray-800/50"
-							>
-								<td class="py-2 text-gray-400 font-bold">{{ i + 1 }}</td>
-								<td class="py-2 font-bold text-gray-900 dark:text-white truncate max-w-[160px]">
-									{{ r.employee_name || r.employee }}
-								</td>
-								<td class="py-2 text-right font-bold text-emerald-600 dark:text-emerald-400">
-									${{ fmt(r.revenue) }}
-								</td>
-								<td class="py-2 text-right text-gray-600 dark:text-gray-300">{{ r.txn_count }}</td>
-								<td class="py-2 text-right text-gray-600 dark:text-gray-300">{{ r.upt }}</td>
-								<td class="py-2 text-right text-gray-900 dark:text-white">${{ fmt(r.commission) }}</td>
-								<td class="py-2 text-right">
-									<div class="inline-block w-20 bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden align-middle">
-										<div
-											class="h-full bg-rose-500"
-											:style="{ width: Math.min(r.pace_pct || 0, 100) + '%' }"
-										></div>
-									</div>
-									<span class="ml-1 text-[10px] text-gray-400">{{ Math.round(r.pace_pct || 0) }}%</span>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-					<p v-else class="text-xs text-gray-400 text-center py-8">
-						No salesperson data yet. Performance Logs are created when a POS sale with a salesperson
-						split is submitted.
-					</p>
-				</div>
+
+					<!-- Team scoreboard -->
+					<div class="premium-card !p-3 sm:!p-5">
+						<h3 class="text-sm font-bold text-gray-900 dark:text-white mb-3">Team Scoreboard</h3>
+						<div v-if="loading" class="space-y-2">
+							<div v-for="n in 3" :key="n" class="h-10 bg-gray-100 dark:bg-gray-800 rounded animate-pulse"></div>
+						</div>
+						<table v-else-if="rows.length" class="w-full text-xs">
+							<thead>
+								<tr class="text-left text-gray-400 border-b border-gray-100 dark:border-gray-800">
+									<th class="py-2 font-bold">#</th>
+									<th class="py-2 font-bold">Associate</th>
+									<th class="py-2 font-bold text-right">Revenue</th>
+									<th class="py-2 font-bold text-right">Txn</th>
+									<th class="py-2 font-bold text-right">UPT</th>
+									<th class="py-2 font-bold text-right">Commission</th>
+									<th class="py-2 font-bold text-right">Pace</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr
+									v-for="(r, i) in rows"
+									:key="r.employee"
+									class="border-b border-gray-50 dark:border-gray-800/50"
+								>
+									<td class="py-2 text-gray-400 font-bold">{{ i + 1 }}</td>
+									<td class="py-2 font-bold text-gray-900 dark:text-white truncate max-w-[160px]">
+										{{ r.employee_name || r.employee }}
+									</td>
+									<td class="py-2 text-right font-bold text-emerald-600 dark:text-emerald-400">
+										${{ fmt(r.revenue) }}
+									</td>
+									<td class="py-2 text-right text-gray-600 dark:text-gray-300">{{ r.txn_count }}</td>
+									<td class="py-2 text-right text-gray-600 dark:text-gray-300">{{ r.upt }}</td>
+									<td class="py-2 text-right text-gray-900 dark:text-white">${{ fmt(r.commission) }}</td>
+									<td class="py-2 text-right">
+										<div class="inline-block w-20 bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden align-middle">
+											<div
+												class="h-full bg-rose-500"
+												:style="{ width: Math.min(r.pace_pct || 0, 100) + '%' }"
+											></div>
+										</div>
+										<span class="ml-1 text-[10px] text-gray-400">{{ Math.round(r.pace_pct || 0) }}%</span>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<p v-else class="text-xs text-gray-400 text-center py-8">
+							No salesperson data yet.
+						</p>
+					</div>
+				</template>
+
+				<!-- Efficiency Tab -->
+				<template v-if="activeTab === 'efficiency'">
+					<EfficiencyMetrics :data="efficiencyData" :loading="loadingEfficiency" />
+				</template>
+
+				<!-- Heatmap Tab -->
+				<template v-if="activeTab === 'heatmap'">
+					<StaffHeatmap :data="heatmapData" :loading="loadingHeatmap" />
+				</template>
 			</div>
 		</div>
 	</AppLayout>
@@ -112,12 +143,25 @@
 <script setup>
 import AppLayout from '@/components/AppLayout.vue'
 import KPICard from '@/components/reports/KPICard.vue'
+import EfficiencyMetrics from '@/components/workforce/EfficiencyMetrics.vue'
+import StaffHeatmap from '@/components/workforce/StaffHeatmap.vue'
 import { fmt } from '@/utils/format'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { call } from 'frappe-ui'
 
 const loading = ref(false)
 const rows = ref([])
+const activeTab = ref('scoreboard')
+const efficiencyData = ref([])
+const heatmapData = ref([])
+const loadingEfficiency = ref(false)
+const loadingHeatmap = ref(false)
+
+const tabs = [
+	{ key: 'scoreboard', label: 'Scoreboard' },
+	{ key: 'efficiency', label: 'Efficiency' },
+	{ key: 'heatmap', label: 'Heatmap' },
+]
 
 const teamRevenue = computed(() => rows.value.reduce((s, r) => s + (r.revenue || 0), 0))
 const teamCommission = computed(() => rows.value.reduce((s, r) => s + (r.commission || 0), 0))
@@ -127,12 +171,10 @@ const teamUpt = computed(() => {
 	return t ? u / t : 0
 })
 
-async function refresh() {
+async function loadScoreboard() {
 	loading.value = true
 	try {
-		// get_leaderboard reads Performance Log (works without Performance Targets).
 		const leaderboard = (await call('zevar_core.api.sales_monitor.get_leaderboard')) || []
-		// enrich with a quota-pace % per associate (best-effort).
 		const enriched = await Promise.all(
 			(leaderboard || []).map(async (r) => {
 				let pace = 0
@@ -152,6 +194,39 @@ async function refresh() {
 		loading.value = false
 	}
 }
+
+async function loadEfficiency() {
+	loadingEfficiency.value = true
+	try {
+		efficiencyData.value = (await call('zevar_core.api.workforce.get_employee_efficiency')) || []
+	} catch (e) {
+		console.error('Efficiency load failed:', e)
+	} finally {
+		loadingEfficiency.value = false
+	}
+}
+
+async function loadHeatmap() {
+	loadingHeatmap.value = true
+	try {
+		heatmapData.value = (await call('zevar_core.api.workforce.get_staffing_heatmap')) || []
+	} catch (e) {
+		console.error('Heatmap load failed:', e)
+	} finally {
+		loadingHeatmap.value = false
+	}
+}
+
+async function refresh() {
+	await loadScoreboard()
+	if (activeTab.value === 'efficiency') await loadEfficiency()
+	if (activeTab.value === 'heatmap') await loadHeatmap()
+}
+
+watch(activeTab, (tab) => {
+	if (tab === 'efficiency' && !efficiencyData.value.length) loadEfficiency()
+	if (tab === 'heatmap' && !heatmapData.value.length) loadHeatmap()
+})
 
 onMounted(refresh)
 </script>

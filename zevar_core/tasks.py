@@ -1087,8 +1087,8 @@ def generate_occasion_reminders():
 
 	# Build occasion fields to check
 	occasion_fields = [
-		("custom_birth_date", "Birthday"),
-		("custom_marriage_date", "Anniversary"),
+		("custom_birthday", "Birthday"),
+		("custom_anniversary", "Anniversary"),
 	]
 
 	created_count = 0

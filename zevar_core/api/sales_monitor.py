@@ -347,6 +347,87 @@ def get_pace(from_date: str | None = None, to_date: str | None = None, store: st
 
 
 @frappe.whitelist()
+def get_top_bottom_items(
+	from_date: str | None = None,
+	to_date: str | None = None,
+	store: str | None = None,
+	limit: int = 5,
+) -> dict[str, Any]:
+	"""Top N items by revenue + bottom N (dead stock candidates)."""
+	frappe.only_for(_MONITOR_ROLES)
+	from_date, to_date = _date_range(from_date, to_date)
+	store_cond, store_params = _store_condition(store)
+
+	top_rows = frappe.db.sql(
+		f"""
+		SELECT
+			sii.item_code,
+			i.item_name,
+			COALESCE(SUM(sii.qty), 0) AS units_sold,
+			COALESCE(SUM(sii.amount), 0) AS revenue
+		FROM `tabSales Invoice` si
+		JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
+		JOIN `tabItem` i ON i.name = sii.item_code
+		WHERE si.is_pos = 1 AND si.docstatus = 1
+		  AND si.posting_date >= %(from)s AND si.posting_date <= %(to)s
+		  {store_cond}
+		GROUP BY sii.item_code, i.item_name
+		ORDER BY revenue DESC
+		LIMIT %(limit)s
+		""",
+		{"from": from_date, "to": to_date, "limit": limit, **store_params},
+		as_dict=True,
+	)
+
+	bottom_rows = frappe.db.sql(
+		f"""
+		SELECT
+			i.name AS item_code,
+			i.item_name,
+			COALESCE(SUM(b.actual_qty), 0) AS stock_qty,
+			COALESCE(SUM(sii.qty), 0) AS units_sold,
+			COALESCE(SUM(sii.amount), 0) AS revenue
+		FROM `tabItem` i
+		LEFT JOIN `tabBin` b ON b.item_code = i.name
+		LEFT JOIN `tabSales Invoice Item` sii ON sii.item_code = i.name
+			AND sii.docstatus = 1
+		LEFT JOIN `tabSales Invoice` si ON si.name = sii.parent
+			AND si.is_pos = 1 AND si.docstatus = 1
+			AND si.posting_date >= %(from)s AND si.posting_date <= %(to)s
+		WHERE i.disabled = 0
+		GROUP BY i.name, i.item_name
+		HAVING stock_qty > 0 AND units_sold = 0
+		ORDER BY stock_qty DESC
+		LIMIT %(limit)s
+		""",
+		{"from": from_date, "to": to_date, "limit": limit, **store_params},
+		as_dict=True,
+	)
+
+	return {
+		"top": [
+			{
+				"item_code": r.item_code,
+				"item_name": r.item_name,
+				"units_sold": int(r.units_sold or 0),
+				"revenue": flt(r.revenue, 2),
+			}
+			for r in top_rows
+		],
+		"bottom": [
+			{
+				"item_code": r.item_code,
+				"item_name": r.item_name,
+				"stock_qty": int(r.stock_qty or 0),
+				"units_sold": int(r.units_sold or 0),
+				"revenue": flt(r.revenue, 2),
+			}
+			for r in bottom_rows
+		],
+	}
+
+
+@frappe.whitelist()
 def rebuild_daily_rollup(from_date: str | None = None, to_date: str | None = None) -> dict:
 	"""Idempotent batch rebuild of the Daily Store Sales Rollup for a range.
 

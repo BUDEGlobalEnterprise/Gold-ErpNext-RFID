@@ -167,13 +167,31 @@
 					<div class="admin-section">
 						<h4 class="section-label">Primary Operations</h4>
 						<div class="tile-row-4">
+							<!-- Open Register -->
+							<router-link to="/opening" class="tile-secondary">
+								<div class="tile-icon-sm" style="background: #10b981">
+									<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+										<path d="M7 11V7a5 5 0 0110 0v4"></path>
+									</svg>
+								</div>
+								<h3 class="tile-title-sm">Open Register</h3>
+							</router-link>
+							<!-- Close Register -->
+							<router-link to="/closing" class="tile-secondary">
+								<div class="tile-icon-sm" style="background: #f43f5e">
+									<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+										<path d="M7 11V7a5 5 0 019.9-1"></path>
+									</svg>
+								</div>
+								<h3 class="tile-title-sm">Close Register</h3>
+							</router-link>
 							<!-- End Of Day Reports -->
 							<router-link
 								v-if="visibility.reportsTile"
 								to="/reports"
-								class="tile-secondary"
-								data-building
-							>
+								class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #3b82f6">
 									<svg
 										viewBox="0 0 24 24"
@@ -192,7 +210,6 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">End Of Day Reports</h3>
-								<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<!-- Customer List -->
 							<router-link to="/customers" class="tile-secondary">
@@ -236,9 +253,7 @@
 							<router-link
 								v-if="visibility.reportsTile"
 								to="/reports"
-								class="tile-secondary"
-						data-building
-							>
+								class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #ec4899">
 									<svg
 										viewBox="0 0 24 24"
@@ -254,7 +269,6 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Reports</h3>
-						<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<!-- Inventory -->
 							<router-link to="/inventory" class="tile-secondary">
@@ -296,7 +310,7 @@
 								<h3 class="tile-title-sm">Time Clock</h3>
 							</router-link>
 							<!-- Back Up -->
-							<router-link to="/support" class="tile-secondary" data-building>
+							<router-link to="/support" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #6b7280">
 									<svg
 										viewBox="0 0 24 24"
@@ -312,8 +326,6 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Back Up</h3>
-							<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
-								<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<!-- Repairs -->
 							<router-link to="/repairs" class="tile-secondary">
@@ -341,7 +353,7 @@
 						<h4 class="section-label">Core Operations</h4>
 						<div class="tile-row-4">
 							<!-- Sales -->
-							<router-link to="/transactions" class="tile-secondary" data-building>
+							<router-link to="/transactions" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #3b82f6">
 									<svg
 										viewBox="0 0 24 24"
@@ -360,7 +372,6 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Sales</h3>
-					<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<!-- Quotes -->
 							<router-link to="/quotes" class="tile-secondary">
@@ -756,7 +767,16 @@
 					>
 						<h4 class="section-label">Accounting</h4>
 						<div class="tile-row-4">
-							<router-link to="/accounting/transactions" class="tile-secondary" data-building>
+							<router-link to="/pos-sessions" class="tile-secondary">
+								<div class="tile-icon-sm" style="background: #D4AF37">
+									<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<circle cx="12" cy="12" r="10"></circle>
+										<polyline points="12 6 12 12 16 14"></polyline>
+									</svg>
+								</div>
+								<h3 class="tile-title-sm">Session History</h3>
+							</router-link>
+							<router-link to="/accounting/transactions" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -773,8 +793,6 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Transactions</h3>
-										<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
-								<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<router-link to="/closing" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
@@ -796,9 +814,7 @@
 							<router-link
 								v-if="visibility.accountingSection"
 								to="/reports"
-								class="tile-secondary"
-						data-building
-							>
+								class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #ec4899">
 									<svg
 										viewBox="0 0 24 24"
@@ -814,9 +830,8 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Reports</h3>
-								<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
-							<router-link to="/accounting/terminals" class="tile-secondary" data-building>
+							<router-link to="/accounting/terminals" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -839,9 +854,8 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Terminals</h3>
-								<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
-							<router-link to="/accounting/invoices" class="tile-secondary" data-building>
+							<router-link to="/accounting/invoices" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -860,13 +874,10 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Invoices to be Processed</h3>
-								<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<router-link
 								to="/accounting/invoices?tab=purchase"
-								class="tile-secondary"
-						data-building
-							>
+								class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -888,9 +899,7 @@
 							</router-link>
 							<router-link
 								to="/accounting/invoices?tab=sales"
-								class="tile-secondary"
-						data-building
-							>
+								class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -909,13 +918,10 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Outgoing Invoices</h3>
-											<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<router-link
 								to="/accounting/credit-notes?tab=incoming"
-								class="tile-secondary"
-						data-building
-							>
+								class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -934,13 +940,10 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Incoming Credit Notes</h3>
-<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<router-link
 								to="/accounting/credit-notes?tab=outgoing"
-								class="tile-secondary"
-						data-building
-							>
+								class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
 									<svg
 										viewBox="0 0 24 24"
@@ -959,7 +962,6 @@
 									</svg>
 								</div>
 								<h3 class="tile-title-sm">Outgoing Credit Notes</h3>
-									<span class="building-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg> Building</span>
 							</router-link>
 							<router-link to="/accounting/export-ubl" class="tile-secondary">
 								<div class="tile-icon-sm" style="background: #14b8a6">
@@ -1028,35 +1030,64 @@
 					<!-- Quick Actions -->
 					<div
 						class="sidebar-section"
-						v-if="
-							session.hasAnyRole([
-								'Store Manager',
-								'System Manager',
-								'Administrator',
-								'Inventory Manager',
-							])
-						"
+						v-if="quickActions.length > 0"
 					>
 						<h4 class="sidebar-label">Quick Actions</h4>
-						<router-link to="/inventory/add" class="quick-action-btn">
-							<div class="quick-action-icon">
-								<svg
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-linecap="round"
-									stroke-linejoin="round"
+						<div class="flex flex-col gap-3">
+							<template v-for="action in quickActions" :key="action.label">
+								<a
+									v-if="action.external"
+									:href="action.disabled ? '#' : action.to"
+									target="_blank"
+									class="quick-action-btn"
+									:class="{ 'pointer-events-none opacity-50': action.disabled }"
 								>
-									<line x1="12" y1="5" x2="12" y2="19"></line>
-									<line x1="5" y1="12" x2="19" y2="12"></line>
-								</svg>
-							</div>
-							<div class="quick-action-text">
-								<h5>Add to Inventory</h5>
-								<p>Item with Vendor & SKU</p>
-							</div>
-						</router-link>
+									<div class="quick-action-icon" :style="{ background: action.iconBg }">
+										<svg
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2"
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											style="width: 20px; height: 20px;"
+										>
+											<path :d="action.icon" />
+										</svg>
+									</div>
+									<div class="quick-action-text">
+										<h5>{{ action.label }}</h5>
+										<p>{{ action.subtitle }}</p>
+									</div>
+									<span v-if="action.disabled" class="text-[9px] bg-gray-200 dark:bg-gray-700 px-1.5 rounded ml-auto text-gray-700 dark:text-gray-300">Soon</span>
+								</a>
+								<router-link
+									v-else
+									:to="action.disabled ? '#' : action.to"
+									class="quick-action-btn"
+									:class="{ 'pointer-events-none opacity-50': action.disabled }"
+								>
+									<div class="quick-action-icon" :style="{ background: action.iconBg }">
+										<svg
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2"
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											style="width: 20px; height: 20px;"
+										>
+											<path :d="action.icon" />
+										</svg>
+									</div>
+									<div class="quick-action-text">
+										<h5>{{ action.label }}</h5>
+										<p>{{ action.subtitle }}</p>
+									</div>
+									<span v-if="action.disabled" class="text-[9px] bg-gray-200 dark:bg-gray-700 px-1.5 rounded ml-auto text-gray-700 dark:text-gray-300">Soon</span>
+								</router-link>
+							</template>
+						</div>
 					</div>
 
 					<!-- Market Prices -->
@@ -1184,6 +1215,112 @@ const DASHBOARD_RATE_PRIORITIES = [
 	'Silver-925 Sterling',
 	'Silver-999 Fine',
 ]
+
+const quickActions = computed(() => {
+	const actions = []
+
+	// Quick Sale - visible to Employee, Employee Self Service, Sales Associate, Store Manager, System Manager, Administrator
+	if (
+		session.hasAnyRole([
+			'Employee',
+			'Employee Self Service',
+			'Sales Associate',
+			'Store Manager',
+			'System Manager',
+			'Administrator',
+		])
+	) {
+		actions.push({
+			to: '/terminal',
+			label: 'Quick Sale',
+			subtitle: 'New transaction',
+			icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z',
+			iconBg: '#f97316',
+		})
+	}
+
+	// Lookup Customer - visible to Employee, Employee Self Service, Sales Associate, Store Manager, System Manager, Administrator
+	if (
+		session.hasAnyRole([
+			'Employee',
+			'Employee Self Service',
+			'Sales Associate',
+			'Store Manager',
+			'System Manager',
+			'Administrator',
+		])
+	) {
+		actions.push({
+			to: '/customers',
+			label: 'Lookup Customer',
+			subtitle: 'Search or add',
+			icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
+			iconBg: '#10b981',
+		})
+	}
+
+	// Add to Inventory - visible to Store Manager, System Manager, Administrator, Inventory Manager
+	if (
+		session.hasAnyRole([
+			'Store Manager',
+			'System Manager',
+			'Administrator',
+			'Inventory Manager',
+		])
+	) {
+		actions.push({
+			to: '/inventory/add',
+			label: 'Add to Inventory',
+			subtitle: 'Item with Vendor & SKU',
+			icon: 'M12 5v14M5 12h14',
+			iconBg: '#8b5cf6',
+		})
+	}
+
+	// Clock In/Out - visible to Employee, Employee Self Service, Sales Associate, Store Manager, System Manager, Administrator
+	if (
+		session.hasAnyRole([
+			'Employee',
+			'Employee Self Service',
+			'Sales Associate',
+			'Store Manager',
+			'System Manager',
+			'Administrator',
+		])
+	) {
+		actions.push({
+			to: '/employee-portal/#/attendance',
+			label: 'Clock In/Out',
+			subtitle: 'Track shift',
+			icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+			iconBg: '#f43f5e',
+			external: true,
+		})
+	}
+
+	// Create Quote - visible to Employee, Employee Self Service, Sales Associate, Store Manager, System Manager, Administrator
+	if (
+		session.hasAnyRole([
+			'Employee',
+			'Employee Self Service',
+			'Sales Associate',
+			'Store Manager',
+			'System Manager',
+			'Administrator',
+		])
+	) {
+		actions.push({
+			to: '/quotes',
+			label: 'Create Quote',
+			subtitle: 'New estimate',
+			icon: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z',
+			iconBg: '#0ea5e9',
+			disabled: true,
+		})
+	}
+
+	return actions
+})
 
 const sortedRates = computed(() => {
 	if (!goldStore.rates) return []

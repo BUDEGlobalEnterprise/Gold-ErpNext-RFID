@@ -10,7 +10,22 @@
 			v-if="loading"
 			class="h-6 w-24 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"
 		></div>
-		<p v-else class="text-lg font-black" :class="valueClass">{{ value }}</p>
+		<template v-else>
+			<p class="text-lg font-black" :class="valueClass">{{ value }}</p>
+			<div
+				v-if="comparisonLabel && previousValue != null"
+				class="flex items-center gap-1 mt-1"
+			>
+				<span
+					class="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+					:class="popBadgeClass"
+				>
+					<span class="material-symbols-outlined !text-[10px]">{{ popIcon }}</span>
+					{{ popText }}
+				</span>
+				<span class="text-[9px] text-gray-400 dark:text-gray-500">{{ comparisonLabel }}</span>
+			</div>
+		</template>
 	</div>
 </template>
 
@@ -23,6 +38,37 @@ const props = defineProps({
 	icon: { type: String, default: 'analytics' },
 	color: { type: String, default: 'gray' },
 	loading: { type: Boolean, default: false },
+	previousValue: { type: [String, Number, null], default: null },
+	comparisonLabel: { type: String, default: '' },
+	trend: { type: String, default: null },
+})
+
+const popDelta = computed(() => {
+	if (props.previousValue == null || !props.previousValue) return null
+	const current = parseFloat(String(props.value).replace(/[^0-9.\-]/g, ''))
+	const previous = parseFloat(String(props.previousValue).replace(/[^0-9.\-]/g, ''))
+	if (!previous) return null
+	return ((current - previous) / Math.abs(previous)) * 100
+})
+
+const popText = computed(() => {
+	if (popDelta.value == null) return ''
+	const sign = popDelta.value >= 0 ? '+' : ''
+	return `${sign}${popDelta.value.toFixed(1)}%`
+})
+
+const popIcon = computed(() => {
+	if (props.trend === 'up' || (popDelta.value != null && popDelta.value > 0)) return 'trending_up'
+	if (props.trend === 'down' || (popDelta.value != null && popDelta.value < 0)) return 'trending_down'
+	return 'trending_flat'
+})
+
+const popBadgeClass = computed(() => {
+	if (props.trend === 'up' || (popDelta.value != null && popDelta.value > 0))
+		return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+	if (props.trend === 'down' || (popDelta.value != null && popDelta.value < 0))
+		return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+	return 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
 })
 
 const colors = {

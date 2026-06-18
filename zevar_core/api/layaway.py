@@ -858,6 +858,18 @@ def cancel_layaway(layaway_id: str, cancellation_reason: str | None = None) -> d
 
 	doc = frappe.get_doc("Layaway Contract", layaway_id)
 
+	if doc.status == "Cancelled":
+		refund_amount = flt(doc.total_paid) - flt(doc.cancellation_fee_amount)
+		if refund_amount < 0:
+			refund_amount = 0
+		return {
+			"success": True,
+			"amount_refunded": refund_amount,
+			"cancellation_fee": flt(doc.cancellation_fee_amount),
+			"message": _("Layaway is already cancelled."),
+			"store_credit_id": doc.store_credit_reference,
+		}
+
 	if doc.status not in ("Active", "Overdue"):
 		frappe.throw(_("Layaway is {0}, cannot cancel.").format(doc.status))
 
