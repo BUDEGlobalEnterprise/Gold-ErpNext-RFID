@@ -630,10 +630,8 @@ export const useCartStore = defineStore('cart', () => {
 	 * @param {string} [options.overrideReference] - Reference ID for tax override.
 	 * @returns {Promise<object>} The API response.
 	 */
-	async function submitOrder(
-		payments,
-		{ taxExempt = false, warehouse, giftCardNumber, overrideReference, irs8300Details } = {}
-	) {
+	async function submitOrder(payments, options = {}) {
+		const { taxExempt = false, warehouse, giftCardNumber, overrideReference, irs8300Details } = options
 		const itemsPayload = items.value.map((i) => ({
 			item_code: i.item_code,
 			qty: i.qty || 1,
@@ -682,6 +680,11 @@ export const useCartStore = defineStore('cart', () => {
 					split: sp.split,
 				}))
 			)
+		}
+		
+		// Attach online_checkout_gateway if provided
+		if (options.online_checkout_gateway) {
+			params.online_checkout_gateway = options.online_checkout_gateway
 		}
 
 		// Attach trade-ins if any are present

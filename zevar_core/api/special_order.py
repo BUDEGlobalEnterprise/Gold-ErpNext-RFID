@@ -1,263 +1,256 @@
-"""
-Special Order API - CRUD, deposit, fulfillment, and pickup workflow
-
-Provides endpoints for:
-- Creating special orders from POS
-- Recording deposit payments
-- Marking items received from vendor
-- Sending arrival notifications
-- Creating pickup invoices
-- Listing/searching orders
-"""
-
-import json
-
 import frappe
-from frappe import _
-from frappe.utils import cint, flt
+import json
+from frappe.utils import flt, cint
 
-# ---------------------------------------------------------------------------
-# CRUD
-# ---------------------------------------------------------------------------
+@frappe.whitelist(allow_guest=False)
+def get_live_quote(metal_type=None, metal_purity=None, metal_weight=None, stones=None, labor_cost=None, overhead_cost=None, margin_percent=None, **kwargs):
+	if isinstance(stones, str):
+		try:
+			stones = json.loads(stones)
+		except Exception:
+			stones = []
+	if not stones:
+		stones = []
 
+	weight_g = flt(metal_weight) or flt(kwargs.get("weight_g"))
+	labor_cost = flt(labor_cost)
+	overhead_cost = flt(overhead_cost)
+	margin_percent = flt(margin_percent)
 
-@frappe.whitelist()
-def create_special_order(
-	customer: str,
-	items_json: str,
-	expected_delivery_date: str | None = None,
-	deposit_amount: float = 0,
-	supplier: str | None = None,
-	store_location: str | None = None,
-	sales_person: str | None = None,
-	notes: str | None = None,
-) -> dict:
-	frappe.has_permission("Special Order", ptype="create", throw=True)
+	# Mocked live quoting logic based on payload
+	metal_cost = weight_g * 85.0
+	stone_cost = sum([flt(s.get("carat_weight", s.get("carat", 0))) * flt(s.get("unit_price", 0)) for s in stones])
+	
+	subtotal = metal_cost + stone_cost + labor_cost + overhead_cost
+	total = subtotal * (1 + margin_percent / 100.0)
 
-	items = json.loads(items_json)
-	doc = frappe.new_doc("Special Order")
-	doc.customer = customer
-	doc.expected_delivery_date = expected_delivery_date
-	doc.deposit_amount = flt(deposit_amount)
-	doc.supplier = supplier
-	doc.store_location = store_location
-	doc.sales_person = sales_person
-	doc.notes = notes
-
-	for item in items:
-		doc.append(
-			"items",
-			{
-				"item_code": item["item_code"],
-				"qty": cint(item.get("qty", 1)),
-				"rate": flt(item.get("rate", 0)),
-				"vendor_item_code": item.get("vendor_item_code"),
-				"description": item.get("description"),
-			},
-		)
-
-	doc.insert()
-	return {"success": True, "name": doc.name, "status": doc.status, "total_amount": doc.total_amount}
-
-
-@frappe.whitelist()
-def get_special_order(order_name: str) -> dict:
-	frappe.has_permission("Special Order", ptype="read", throw=True)
-	doc = frappe.get_doc("Special Order", order_name)
 	return {
-		"name": doc.name,
-		"customer": doc.customer,
-		"customer_name": doc.customer_name,
-		"order_date": doc.order_date,
-		"expected_delivery_date": doc.expected_delivery_date,
-		"status": doc.status,
-		"total_amount": doc.total_amount,
-		"deposit_amount": doc.deposit_amount,
-		"deposit_paid": doc.deposit_paid,
-		"balance_due": doc.balance_due,
-		"supplier": doc.supplier,
-		"store_location": doc.store_location,
-		"sales_person": doc.sales_person,
-		"tracking_number": doc.tracking_number,
-		"items": [
-			{
-				"name": i.name,
-				"item_code": i.item_code,
-				"item_name": i.item_name,
-				"qty": i.qty,
-				"qty_filled": i.qty_filled,
-				"rate": i.rate,
-				"amount": i.amount,
-				"vendor_item_code": i.vendor_item_code,
-			}
-			for i in doc.items
-		],
+		"metal_cost": metal_cost,
+		"stone_cost": stone_cost,
+		"labor_cost": labor_cost,
+		"overhead_cost": overhead_cost,
+		"subtotal": subtotal,
+		"margin": total - subtotal,
+		"total": total
 	}
 
+@frappe.whitelist(allow_guest=False)
+def create_special_order(payload=None, **kwargs):
+	"""
+	API endpoint for the Special Order Wizard to create a Special Order
+	along with its linked Job Bag.
+	"""
+	if not payload:
+		payload = kwargs
+	elif isinstance(payload, str):
+		try:
+			payload = json.loads(payload)
+		except Exception:
+			payload = kwargs
 
-@frappe.whitelist()
-def get_special_orders(
-	status: str | None = None,
-	customer: str | None = None,
-	page: int = 1,
-	page_size: int = 20,
-) -> dict:
-	frappe.has_permission("Special Order", ptype="read", throw=True)
+	customer = payload.get("customer")
+	if not customer:
+		frappe.throw("Customer is mandatory for a Special Order. Please select a customer.")
 
+	so = frappe.get_doc({
+		"doctype": "Zevar Special Order",
+		"customer": customer,
+		"ring_size": payload.get("ring_size"),
+		"metal_type": payload.get("metal_type"),
+		"metal_purity": payload.get("metal_purity"),
+		"estimated_weight_grams": payload.get("metal_weight"),
+		"estimated_total_price": payload.get("grand_total"),
+		"workflow_status": "Draft",
+	})
+
+	stones = payload.get("stones", [])
+	if isinstance(stones, str):
+		stones = json.loads(stones)
+
+	for stone in stones:
+		sourcing = stone.get("sourcingMethod") or stone.get("sourcing_method") or "In-House"
+		item_code = stone.get("item_code") or stone.get("stone_id") or ""
+		serial_no = stone.get("serial_no")
+		supplier_id = stone.get("supplierId") or stone.get("supplier_id")
+		unit_price = stone.get("unit_price") or stone.get("unitPrice") or 0
+
+		# If sourcing requires an item and none is provided, generate a dummy item
+		if sourcing == "Memo Request" and not item_code:
+			item_code = f"CUST-STONE-{frappe.generate_hash(length=6)}"
+			try:
+				frappe.get_doc({
+					"doctype": "Item",
+					"item_code": item_code,
+					"item_name": f"Custom {stone.get('shape', '')} {stone.get('caratWeight', '')}ct",
+					"item_group": "Products",
+					"is_stock_item": 0,
+					"stock_uom": "Nos",
+				}).insert(ignore_permissions=True)
+			except Exception:
+				pass
+
+		so.append("stones", {
+			"stone_item_code": item_code,
+			"shape": stone.get("shape") or "",
+			"carat_weight": stone.get("caratWeight") or stone.get("carat") or 0,
+			"clarity": stone.get("clarity") or "",
+			"color": stone.get("color") or "",
+			"sourcing_method": sourcing,
+		})
+
+		if sourcing == "In-Stock" and serial_no:
+			try:
+				from zevar_core.api.inventory_v2 import acquire_inventory_lock
+				acquire_inventory_lock(serial_no=serial_no, lock_owner=f"Special Order {so.name}")
+			except Exception:
+				pass
+		elif sourcing == "Memo Request" and supplier_id:
+			try:
+				from zevar_core.api.memo import create_memo
+				create_memo({
+					"memo_class": "Vendor Memo",
+					"vendor": supplier_id,
+					"items": [{
+						"item_code": item_code,
+						"qty": 1,
+						"memo_price": flt(unit_price),
+					}],
+					"notes": f"Auto-generated for Special Order {so.name}",
+				})
+			except Exception as e:
+				frappe.log_error(title=f"Failed to create memo for SO {so.name}", message=frappe.get_traceback())
+
+	so.insert(ignore_permissions=True)
+
+	jb = frappe.get_doc({
+		"doctype": "Zevar Job Bag",
+		"special_order": so.name,
+	})
+	jb.insert(ignore_permissions=True)
+
+	frappe.db.commit()
+
+	return {"status": "success", "order_id": so.name, "job_bag": jb.name}
+
+@frappe.whitelist(allow_guest=False)
+def get_job_bag_list(status=None):
+	"""Return a list of Job Bag cards for the Shop Floor Kanban."""
 	filters = {"docstatus": ["!=", 2]}
-	if status:
+	if status and status != "all":
 		filters["status"] = status
-	if customer:
-		filters["customer"] = customer
 
-	orders = frappe.get_all(
-		"Special Order",
+	jobs = frappe.get_all(
+		"Zevar Job Bag",
 		filters=filters,
-		fields=[
-			"name",
-			"customer",
-			"customer_name",
-			"order_date",
-			"expected_delivery_date",
-			"status",
-			"total_amount",
-			"deposit_paid",
-			"balance_due",
-			"supplier",
-		],
-		order_by="order_date desc",
-		limit_page_length=cint(page_size),
-		limit_start=(cint(page) - 1) * cint(page_size),
+		fields=["name", "special_order", "status", "custom_order_number",
+				"custom_priority", "custom_assigned_to", "custom_due_date",
+				"custom_item_description", "customer_name", "customer"],
+		order_by="modified desc",
 	)
 
-	total = frappe.db.count("Special Order", filters=filters)
+	# Enrich with Special Order data
+	for job in jobs:
+		if not job.get("customer") or not job.get("customer_name"):
+			so = frappe.db.get_value(
+				"Zevar Special Order",
+				job.special_order,
+				["customer", "customer_name", "custom_item_description"],
+				as_dict=True,
+			)
+			if so:
+				job.update({
+					"customer": so.customer,
+					"customer_name": so.customer_name,
+					"custom_item_description": so.custom_item_description,
+				})
+		if not job.get("custom_priority"):
+			job["custom_priority"] = ""
+		if not job.get("custom_due_date"):
+			job["custom_due_date"] = ""
+		if not job.get("custom_item_description"):
+			job["custom_item_description"] = "Special Order"
 
-	return {
-		"orders": orders,
-		"page": cint(page),
-		"page_size": cint(page_size),
-		"total": total,
-	}
+	return jobs
 
+@frappe.whitelist(allow_guest=False, methods=["POST"])
+def update_job_status(job_name, new_status):
+	"""Update the workflow status of a Job Bag (used by Kanban drag-and-drop)."""
+	job = frappe.get_doc("Zevar Job Bag", job_name)
+	job.status = new_status
+	job.save(ignore_permissions=True)
+	frappe.db.commit()
+	return {"status": "success", "name": job.name, "new_status": new_status}
 
-# ---------------------------------------------------------------------------
-# Lifecycle actions
-# ---------------------------------------------------------------------------
+@frappe.whitelist(allow_guest=False)
+def get_memo_suppliers():
+	"""Return a list of suppliers for the Memo Request stone sourcing."""
+	suppliers = frappe.get_all(
+		"Supplier",
+		filters={"disabled": 0},
+		fields=["name", "supplier_name"],
+		order_by="supplier_name asc",
+	)
+	return [{"value": s.name, "label": s.supplier_name} for s in suppliers]
 
-
-@frappe.whitelist(methods=["POST"])
-def record_deposit(order_name: str, amount: float, mode_of_payment: str = "Cash") -> dict:
-	frappe.has_permission("Special Order", ptype="write", throw=True)
-	doc = frappe.get_doc("Special Order", order_name)
-	if doc.docstatus != 1:
-		frappe.throw(_("Order must be submitted before recording deposits."))
-	doc.record_deposit(flt(amount), mode_of_payment)
-	return {
-		"success": True,
-		"status": doc.status,
-		"deposit_paid": doc.deposit_paid,
-		"balance_due": doc.balance_due,
-	}
-
-
-@frappe.whitelist(methods=["POST"])
-def mark_received(order_name: str, received_items_json: str) -> dict:
-	frappe.has_permission("Special Order", ptype="write", throw=True)
-	doc = frappe.get_doc("Special Order", order_name)
-	if doc.docstatus != 1:
-		frappe.throw(_("Order must be submitted before marking received."))
-	received_items = json.loads(received_items_json)
-	doc.mark_received(received_items)
-	return {
-		"success": True,
-		"status": doc.status,
-		"qty_ordered": doc.qty_ordered,
-		"qty_received": doc.qty_received,
-	}
-
-
-@frappe.whitelist(methods=["POST"])
-def send_arrival_notification(order_name: str) -> dict:
-	frappe.has_permission("Special Order", ptype="write", throw=True)
-	doc = frappe.get_doc("Special Order", order_name)
-	if doc.status not in ("Received at Store", "Partially Received"):
-		frappe.throw(_("Order must be received before sending notification."))
-	doc.send_arrival_notification()
-	return {"success": True, "status": doc.status}
-
-
-@frappe.whitelist(methods=["POST"])
-def mark_picked_up(order_name: str) -> dict:
-	frappe.has_permission("Special Order", ptype="write", throw=True)
-	doc = frappe.get_doc("Special Order", order_name)
-	doc.mark_picked_up()
-	return {"success": True, "status": doc.status}
-
-
-@frappe.whitelist(methods=["POST"])
-def close_order(order_name: str) -> dict:
-	frappe.only_for(["Sales Manager", "Store Manager", "System Manager"])
-	doc = frappe.get_doc("Special Order", order_name)
-	doc.close_order()
-	return {"success": True, "status": doc.status}
-
-
-# ---------------------------------------------------------------------------
-# Pickup Invoice
-# ---------------------------------------------------------------------------
-
-
-@frappe.whitelist(methods=["POST"])
-def create_pickup_invoice(order_name: str) -> dict:
-	frappe.has_permission("Sales Invoice", ptype="create", throw=True)
-	order = frappe.get_doc("Special Order", order_name)
-	if order.status not in ("Customer Notified", "Received at Store", "Partially Received"):
-		frappe.throw(_("Order must be received before creating pickup invoice."))
-
-	invoice = frappe.new_doc("Sales Invoice")
-	invoice.customer = order.customer
-	invoice.is_pos = 1
-
-	for item in order.items:
-		invoice.append(
-			"items",
-			{
-				"item_code": item.item_code,
-				"qty": item.qty_filled or item.qty,
-				"rate": item.rate,
-			},
+def on_special_order_validate(doc, method=None):
+	"""
+	Fetches default ring size via Jewel360 logic.
+	Generates estimated_total_price via PIRO BOM logic.
+	Triggered on 'validate' of Zevar Special Order.
+	"""
+	if doc.customer and not doc.ring_size:
+		# Mocking the Jewel360 logic.
+		customer_doc = frappe.get_doc("Customer", doc.customer)
+		if hasattr(customer_doc, "custom_ring_size") and customer_doc.custom_ring_size:
+			doc.ring_size = customer_doc.custom_ring_size
+		else:
+			doc.ring_size = "7"
+			
+	# Mocking the PIRO BOM logic
+	if not doc.estimated_total_price:
+		# We can call the get_live_quote logic
+		quote = get_live_quote(
+			metal_type=doc.metal_type,
+			purity=doc.metal_purity,
+			weight_g=doc.estimated_weight_grams,
+			stones=[s.as_dict() for s in doc.stones] if doc.stones else []
 		)
+		doc.estimated_total_price = quote["total"]
 
-	invoice.insert()
-	return {"success": True, "invoice": invoice.name}
+def generate_job_bag_barcode(doc, method=None):
+	"""
+	Auto-generates a Code128 string on save.
+	Triggered on 'before_save' of Zevar Job Bag.
+	"""
+	if not doc.barcode:
+		# Generate a Code128 string
+		# E.g., combining 'JB' and the order it's linked to, or just a timestamp/hash
+		import time
+		doc.barcode = f"128-JB-{int(time.time())}"
 
-
-# ---------------------------------------------------------------------------
-# Dashboard stats
-# ---------------------------------------------------------------------------
-
-
-@frappe.whitelist()
-def get_special_order_stats() -> dict:
-	frappe.has_permission("Special Order", ptype="read", throw=True)
-	statuses = [
-		"Pending Deposit",
-		"Ordered from Vendor",
-		"Partially Received",
-		"Received at Store",
-		"Customer Notified",
-		"Picked Up",
-	]
-	stats = {}
-	for s in statuses:
-		stats[s] = frappe.db.count("Special Order", {"status": s, "docstatus": 1})
-
-	stats["overdue"] = frappe.db.count(
-		"Special Order",
-		{
-			"docstatus": 1,
-			"expected_delivery_date": ["<", frappe.utils.today()],
-			"status": ["not in", ["Picked Up", "Closed", "Cancelled"]],
-		},
-	)
-	return stats
+@frappe.whitelist(allow_guest=True)
+def track_special_order(order_id):
+	"""
+	Guest-accessible tracking API. Returns minimal status info.
+	Requires exact Order ID.
+	"""
+	if not order_id:
+		return {"error": "Order ID is required."}
+		
+	# Zevar Special Order ID format is typically SPO-XXXX
+	try:
+		so = frappe.get_doc("Zevar Special Order", order_id)
+		# Don't expose pricing or full details to guests
+		return {
+			"status": "success",
+			"order_id": so.name,
+			"customer_name": f"{so.customer_name[0]}***" if so.customer_name else "Unknown",
+			"metal_type": so.metal_type,
+			"workflow_status": so.workflow_status or "Draft",
+			"creation": so.creation,
+			"modified": so.modified
+		}
+	except frappe.DoesNotExistError:
+		return {"error": "Order not found. Please check your Order ID."}
+	except Exception as e:
+		return {"error": str(e)}

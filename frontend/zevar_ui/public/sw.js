@@ -5,9 +5,9 @@
  * Cache is ONLY used as offline fallback, never served when network is available.
  * This prevents stale content issues permanently.
  */
-
-const CACHE_NAME = 'zevar-pos-v21'
-const API_CACHE = 'zevar-api-v21'
+// Force cache update for Special Order Wizard fix
+const CACHE_NAME = 'zevar-pos-v22'
+const API_CACHE = 'zevar-api-v22'
 
 const OFFLINE_FALLBACK_ASSETS = ['/pos/', '/pos/index.html']
 

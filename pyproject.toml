@@ -12,6 +12,7 @@ dependencies = [
     "dbfread>=2.0.7",
     "chromadb>=0.4.22",
     "sentence-transformers>=2.6.1",
+    "squareup>=36.0.0",
 ]
 
 [build-system]

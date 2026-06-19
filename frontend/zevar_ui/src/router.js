@@ -89,6 +89,18 @@ const routes = [
 		meta: { requiresAuth: true },
 	},
 	{
+		path: '/special-orders/job-bag',
+		name: 'JobBagDashboard',
+		component: () => import('./pages/JobBagDashboard.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/track',
+		name: 'SpecialOrderPortal',
+		component: () => import('./pages/SpecialOrderPortal.vue'),
+		meta: { guest: true },
+	},
+	{
 		path: '/layaway',
 		name: 'Layaway',
 		component: () => import('./pages/Layaway.vue'),

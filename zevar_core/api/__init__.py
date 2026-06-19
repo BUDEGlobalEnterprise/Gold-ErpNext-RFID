@@ -101,7 +101,7 @@ from zevar_core.api.live_monitor import (
 	run_anomaly_detection,
 )
 from zevar_core.api.payroll import get_payroll_summary, get_salary_slip_details, get_salary_slips
-from zevar_core.api.pos import calculate_invoice_totals, create_pos_invoice, get_pos_settings
+from zevar_core.api.pos import calculate_invoice_totals, cancel_pos_invoice, create_pos_invoice, get_pos_settings, initiate_online_checkout, simulate_payment_success
 from zevar_core.api.pricing import (
 	get_item_price,
 	get_live_metal_rates,
@@ -178,6 +178,7 @@ __all__ = [
 	"add_ticket_reply",
 	"attach_repair_photo",
 	"calculate_invoice_totals",
+	"cancel_pos_invoice",
 	"clock_in",
 	"clock_out",
 	"create_attendance_issue",
@@ -232,6 +233,7 @@ __all__ = [
 	"get_items_for_brand",
 	"get_items_in_group",
 	"get_layaway_preview_shim",
+	"initiate_online_checkout",
 	"get_live_metal_rates",
 	"get_live_rate_history",
 	"get_multi_store_stats",
@@ -279,6 +281,7 @@ __all__ = [
 	"refresh_gold_rates",
 	"run_anomaly_detection",
 	"search_customers",
+	"simulate_payment_success",
 	"submit_expense_claim",
 	"suggest_technician",
 	"track_trending_click",
