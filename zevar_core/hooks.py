@@ -57,6 +57,15 @@ doc_events = {
 	"Customer": {
 		"after_insert": "zevar_core.api.crm_hooks.on_customer_created",
 	},
+	"Payment Request": {
+		"on_update": "zevar_core.api.pos.on_payment_request_update"
+	},
+	"Zevar Special Order": {
+		"validate": "zevar_core.api.special_order.on_special_order_validate",
+	},
+	"Zevar Job Bag": {
+		"before_save": "zevar_core.api.special_order.generate_job_bag_barcode",
+	},
 	"Sales Invoice": {
 		"validate": [
 			"zevar_core.tax_events.apply_store_tax",

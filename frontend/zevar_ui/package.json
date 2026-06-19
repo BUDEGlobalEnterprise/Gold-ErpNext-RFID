@@ -22,6 +22,7 @@
     "feather-icons": "^4.28.0",
     "frappe-ui": "^0.1.62",
     "pinia": "^2.1.7",
+    "qrcode.vue": "^3.10.0",
     "showdown": "^2.1.0",
     "vue": "^3.4.21",
     "vue-echarts": "^8.0.1",

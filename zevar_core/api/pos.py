@@ -10,6 +10,41 @@ from zevar_core.constants import DEFAULT_TAX_RATES, PAYMENT_MODES
 
 
 @frappe.whitelist(methods=["POST"])
+def initiate_online_checkout(reference_doctype: str, reference_name: str, gateway: str) -> dict:
+	"""
+	Generates an online checkout URL (e.g., Stripe, Square) for a given document.
+	"""
+	frappe.only_for(["Sales User", "Sales Manager", "Store Manager", "System Manager"])
+
+	doc = frappe.get_doc(reference_doctype, reference_name)
+	
+	amount = doc.outstanding_amount if hasattr(doc, "outstanding_amount") else doc.grand_total
+	if amount <= 0:
+		frappe.throw(_("No outstanding amount to pay."))
+
+	payment_gateway = frappe.db.get_value("Payment Gateway", {"gateway_name": gateway})
+	if not payment_gateway:
+		frappe.throw(_("Payment Gateway '{0}' not found.").format(gateway))
+
+	pr = frappe.new_doc("Payment Request")
+	pr.reference_doctype = reference_doctype
+	pr.reference_name = reference_name
+	pr.payment_gateway_account = gateway
+	pr.payment_request_type = "Inward"
+	pr.message = "Payment for POS Order"
+	pr.insert(ignore_permissions=True)
+	pr.submit()
+
+	# The get_payment_url is natively handled by frappe/payments based on gateway controller
+	payment_url = pr.get_payment_url()
+
+	return {
+		"success": True,
+		"payment_request_name": pr.name,
+		"checkout_url": payment_url
+	}
+
+@frappe.whitelist(methods=["POST"])
 def create_pos_invoice(
 	items: str,
 	payments: str,
@@ -24,6 +59,7 @@ def create_pos_invoice(
 	override_reference: str | None = None,
 	idempotency_key: str | None = None,
 	irs_8300_details: str | None = None,
+	online_checkout_gateway: str | None = None,
 ) -> dict:
 	frappe.only_for(
 		["Sales User", "Sales Manager", "Store Manager", "POS Manager", "Employee", "System Manager"]
@@ -56,6 +92,7 @@ def create_pos_invoice(
 			override_reference,
 			idempotency_key,
 			irs_8300_details,
+			online_checkout_gateway,
 		)
 	except Exception:
 		frappe.log_error(title="POS Invoice Sync Failed", message=frappe.get_traceback())
@@ -76,6 +113,7 @@ def _create_pos_invoice_internal(
 	override_reference: str | None = None,
 	idempotency_key: str | None = None,
 	irs_8300_details: str | None = None,
+	online_checkout_gateway: str | None = None,
 ) -> dict:
 	"""
 	Create a complete POS Invoice with:
@@ -130,7 +168,7 @@ def _create_pos_invoice_internal(
 	if not items_list:
 		checkout_bouncer(_("At least one item is required."), "invoice_failed")
 
-	if not payments_list:
+	if not payments_list and not online_checkout_gateway:
 		checkout_bouncer(_("At least one payment mode is required."), "invoice_failed")
 
 	# Validate all items before creating invoice
@@ -652,6 +690,18 @@ def _create_pos_invoice_internal(
 			except Exception:
 				frappe.log_error("POS Sync Log Creation Failed", frappe.get_traceback())
 
+		checkout_url = None
+		payment_request_name = None
+		if online_checkout_gateway:
+			try:
+				from zevar_core.api.pos import initiate_online_checkout
+				online_res = initiate_online_checkout("Sales Invoice", si.name, online_checkout_gateway)
+				checkout_url = online_res.get("checkout_url")
+				payment_request_name = online_res.get("payment_request_name")
+			except Exception as e:
+				frappe.log_error("Online Checkout Failed", frappe.get_traceback())
+				frappe.throw(f"Failed to generate online checkout link: {e}")
+
 		return {
 			"success": True,
 			"invoice_name": si.name,
@@ -659,6 +709,8 @@ def _create_pos_invoice_internal(
 			"grand_total": si.grand_total,
 			"outstanding_amount": si.outstanding_amount,
 			"form_8300_triggered": form_8300_triggered,
+			"checkout_url": checkout_url,
+			"payment_request_name": payment_request_name,
 			"message": f"Successfully created invoice {si.name}",
 		}
 
@@ -969,6 +1021,23 @@ def get_pending_overrides() -> dict:
 	}
 
 
+@frappe.whitelist()
+def get_pos_profile(name: str | None = None):
+	"""Return POS profile info including available warehouses."""
+	profile_name = name or frappe.db.get_single_value("POS Settings", "default_pos_profile")
+	if not profile_name:
+		return {"warehouses": []}
+	profile = frappe.get_doc("POS Profile", profile_name)
+	warehouses = []
+	if profile.get("companies"):
+		for c in profile.companies:
+			if c.get("warehouse"):
+				warehouses.append(c.warehouse)
+	elif profile.get("warehouse"):
+		warehouses.append(profile.warehouse)
+	return {"warehouses": warehouses, "name": profile_name}
+
+
 @frappe.whitelist(allow_guest=True)
 def serve_sw():
 	"""Serve the POS service worker with correct headers for scope."""
@@ -1174,3 +1243,81 @@ def validate_pos_cart(items: str, warehouse: str | None = None):
 
 	blocking = any(i.get("blocking") for i in issues)
 	return {"ok": not blocking, "issues": issues}
+
+@frappe.whitelist(methods=["POST"])
+def cancel_pos_invoice(invoice_name: str):
+	frappe.only_for(["Sales User", "Sales Manager", "Store Manager", "System Manager", "Employee"])
+	
+	try:
+		doc = frappe.get_doc("Sales Invoice", invoice_name)
+		if doc.status == "Cancelled":
+			return {"success": True, "message": "Already cancelled."}
+		doc.cancel()
+		
+		# Also cancel any linked Payment Request
+		prs = frappe.get_all("Payment Request", filters={"reference_name": invoice_name, "docstatus": 1})
+		for pr in prs:
+			pr_doc = frappe.get_doc("Payment Request", pr.name)
+			pr_doc.cancel()
+			
+		return {"success": True, "message": "Invoice and pending payment requests cancelled successfully."}
+	except Exception as e:
+		frappe.log_error("POS Invoice Cancel Failed", frappe.get_traceback())
+		frappe.throw(f"Failed to cancel invoice: {str(e)}")
+
+def on_payment_request_update(doc, method):
+	"""Listen for payment requests linked to POS invoices becoming Paid"""
+	if doc.status == "Paid" and doc.reference_doctype == "Sales Invoice":
+		invoice = frappe.get_doc("Sales Invoice", doc.reference_name)
+		if invoice.is_pos:
+			# Notify the frontend POS session that this invoice was paid via QR code
+			frappe.publish_realtime(
+				event="payment_received",
+				message={"invoice": doc.reference_name, "amount": doc.grand_total},
+				user=invoice.owner
+			)
+
+
+@frappe.whitelist(methods=["POST"])
+def simulate_payment_success(payment_request_name: str):
+	"""
+	DEV ONLY: Simulates a webhook from Stripe/Square by marking a Payment Request as Paid.
+	This will trigger the on_payment_request_update hook and send the socket event.
+	"""
+	frappe.only_for(["System Manager", "Administrator"])
+	
+	try:
+		pr = frappe.get_doc("Payment Request", payment_request_name)
+		if pr.status != "Paid":
+			# Simulate what the gateway's webhook does
+			frappe.db.set_value("Payment Request", pr.name, "status", "Paid")
+			
+			# We must also create a dummy Payment Entry to satisfy accounting
+			pe = frappe.new_doc("Payment Entry")
+			pe.payment_type = "Receive"
+			pe.party_type = "Customer"
+			pe.party = pr.reference_name # Need to get customer from the Sales Invoice
+			
+			invoice = frappe.get_doc("Sales Invoice", pr.reference_name)
+			pe.party = invoice.customer
+			pe.paid_amount = pr.grand_total
+			pe.received_amount = pr.grand_total
+			pe.mode_of_payment = "Wire Transfer" # Mock
+			
+			pe.append("references", {
+				"reference_doctype": "Sales Invoice",
+				"reference_name": invoice.name,
+				"allocated_amount": pr.grand_total
+			})
+			pe.insert(ignore_permissions=True)
+			pe.submit()
+			
+			# Manually trigger the hook since we used db.set_value
+			from zevar_core.api.pos import on_payment_request_update
+			pr.status = "Paid"
+			on_payment_request_update(pr, "on_update")
+			
+		return {"success": True, "message": "Payment simulated successfully"}
+	except Exception as e:
+		frappe.log_error("Simulated Payment Failed", frappe.get_traceback())
+		frappe.throw(f"Failed to simulate payment: {str(e)}")

@@ -1146,6 +1146,31 @@
 			</div>
 		</template>
 
+		
+		<!-- ============ QR PAYMENT STATE ============ -->
+		<template v-else-if="step === 'qr_payment'">
+			<div class="p-8 flex flex-col items-center justify-center text-center w-full min-h-[400px]">
+				<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Customer Scan to Pay</h3>
+				<p class="text-sm text-gray-500 mb-8">Have the customer scan this QR code with their mobile device to complete the {{ formatCurrency(onlinePaymentMode?.amount || 0) }} payment.</p>
+				
+				<div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 dark:border-warm-border inline-block mb-8">
+					<qrcode-vue v-if="checkoutUrl" :value="checkoutUrl" :size="250" level="H" />
+				</div>
+				
+				<div class="flex gap-4">
+					<button @click="cancelOnlinePayment" class="px-6 py-2 border border-gray-300 dark:border-warm-border text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-warm-dark-900 transition-colors">
+						Cancel & Back
+					</button>
+					<button @click="pollPaymentStatus" class="px-6 py-2 bg-[#D4AF37] text-white rounded-lg font-medium hover:bg-[#B5952F] transition-colors flex items-center gap-2">
+						<i class="w-4 h-4" data-feather="refresh-cw"></i> Refresh Status
+					</button>
+					<button @click="simulatePayment" class="px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center gap-2">
+						Simulate Payment (Dev)
+					</button>
+				</div>
+			</div>
+		</template>
+
 		<!-- ============ SUCCESS STATE ============ -->
 		<template v-if="step === 'success'">
 			<div
@@ -1299,9 +1324,11 @@ import { useSessionStore } from '@/stores/session.js'
 import { useOfflineStore } from '@/stores/offline.js'
 import { hardwareService } from '@/services/HardwareService.js'
 import { usePaymentGateway } from '@/composables/usePaymentGateway.js'
+import QrcodeVue from 'qrcode.vue'
 import BaseModal from './BaseModal.vue'
 import FinancingApplicationModal from './FinancingApplicationModal.vue'
 import IDScannerPanel from './IDScannerPanel.vue'
+import { onUnmounted } from 'vue'
 
 const props = defineProps({
 	show: { type: Boolean, default: false },
@@ -1322,6 +1349,9 @@ const session = useSessionStore()
 const offlineStore = useOfflineStore()
 
 const processing = ref(false)
+const checkoutUrl = ref('')
+const checkoutPaymentRequest = ref('')
+const onlinePaymentMode = ref(null)
 const showMoreModes = ref(false)
 const error = ref('')
 const step = ref('review')
@@ -1666,13 +1696,37 @@ async function processFinalPayment() {
 			// Use submitOrderSafe so auth-expiry errors come back with a
 			// stable {code: 'session_expired'} shape and DON'T fall through
 			// to the offline-queue branch (which would mask the real issue).
-			const result = await cart.submitOrderSafe(selectedPayments.value, {
+			const onlinePayment = selectedPayments.value.find(p => ['Apple Pay', 'Google Pay', 'Credit Card'].includes(p.mode))
+			let paymentsToSubmit = selectedPayments.value
+			let onlineGateway = undefined
+
+			if (onlinePayment && !gateway.isTerminalReady.value) {
+				onlineGateway = 'Stripe' // Hardcoded to Stripe for now based on plan
+				onlinePaymentMode.value = onlinePayment
+				paymentsToSubmit = paymentsToSubmit.filter(p => p !== onlinePayment)
+			}
+
+			const result = await cart.submitOrderSafe(paymentsToSubmit, {
 				taxExempt: taxExempt.value,
 				warehouse: session.currentWarehouse,
 				giftCardNumber: gcPayment ? giftCardNumber.value : undefined,
 				irs8300Details: step.value === 'irs_8300_form' ? irs8300Details.value : undefined,
+				online_checkout_gateway: onlineGateway,
 			})
+			
 			const invoiceName = result?.invoice_name || result?.data?.invoice_name
+			successInvoiceId.value = invoiceName || null
+			
+			if (result?.checkout_url) {
+				checkoutUrl.value = result.checkout_url
+				checkoutPaymentRequest.value = result.payment_request_name
+				step.value = 'qr_payment'
+				processing.value = false
+				
+				// Start polling or listening to socket here
+				return
+			}
+
 			successInvoiceId.value = invoiceName || null
 			successBreakdown.value = payments
 			step.value = 'success'
@@ -1969,4 +2023,60 @@ function formatCurrency(val) {
 	if (!val) return '$0.00'
 	return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val)
 }
+
+	async function pollPaymentStatus() {
+		try {
+			processing.value = true
+			const pr = await call('frappe.client.get', { doctype: 'Payment Request', name: checkoutPaymentRequest.value })
+			if (pr && pr.status === 'Paid') {
+				// Payment is complete!
+				step.value = 'success'
+				successBreakdown.value = selectedPayments.value // include the online payment
+			} else {
+				error.value = 'Payment not yet received.'
+				setTimeout(() => { error.value = '' }, 3000)
+			}
+		} catch (e) {
+			error.value = 'Failed to check status'
+		} finally {
+			processing.value = false
+		}
+	}
+
+	async function simulatePayment() {
+		try {
+			processing.value = true
+			await call('zevar_core.api.pos.simulate_payment_success', { payment_request_name: checkoutPaymentRequest.value })
+			// Socket event should fire automatically and complete the UI flow
+		} catch (e) {
+			error.value = 'Simulation failed: ' + (e.message || String(e))
+		} finally {
+			processing.value = false
+		}
+	}
+
+	function handlePaymentReceived(data) {
+		if (step.value === 'qr_payment' && successInvoiceId.value === data.invoice) {
+			step.value = 'success'
+			successBreakdown.value = selectedPayments.value
+			// Play a success chime if needed
+			try {
+				const audio = new Audio('/assets/zevar_core/sounds/success.mp3')
+				audio.play()
+			} catch (e) {}
+		}
+	}
+
+	onMounted(() => {
+		if (window.frappe?.socketio) {
+			window.frappe.socketio.socket?.on('payment_received', handlePaymentReceived)
+		}
+	})
+
+	onUnmounted(() => {
+		if (window.frappe?.socketio) {
+			window.frappe.socketio.socket?.off('payment_received', handlePaymentReceived)
+		}
+	})
 </script>
+
