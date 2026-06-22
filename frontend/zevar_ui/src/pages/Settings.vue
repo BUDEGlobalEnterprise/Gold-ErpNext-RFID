@@ -335,6 +335,25 @@
 										>
 									</div>
 									<button
+										v-if="user.roles?.includes('Sales Manager') || user.roles?.includes('System Manager')"
+										@click="openSetPin(user)"
+										class="p-1 rounded hover:bg-gray-100 dark:hover:bg-warm-dark-700"
+										title="Set Manager PIN"
+									>
+										<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+										</svg>
+									</button>
+									<button
+										@click="openSetLoginPassword(user)"
+										class="p-1 rounded hover:bg-gray-100 dark:hover:bg-warm-dark-700"
+										title="Set Login Password"
+									>
+										<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4v-3.252l7.536-7.536A6 6 0 1121 9z" />
+										</svg>
+									</button>
+									<button
 										@click="openEditRoles(user)"
 										class="p-1 rounded hover:bg-gray-100 dark:hover:bg-warm-dark-700"
 										title="Edit Roles"
@@ -722,6 +741,87 @@
 		</div>
 
 		<div
+			v-if="showPinModal"
+			class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+			@click.self="showPinModal = false"
+		>
+			<div class="bg-white dark:bg-warm-dark-800 rounded-xl shadow-2xl w-full max-w-sm mx-4">
+				<div class="p-4 border-b border-gray-200 dark:border-warm-dark-700 flex items-center justify-between">
+					<h3 class="text-lg font-bold text-gray-900 dark:text-white">Set Manager PIN</h3>
+					<button
+						@click="showPinModal = false"
+						class="p-1 rounded hover:bg-gray-100 dark:hover:bg-warm-dark-700"
+					>
+						<svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						</svg>
+					</button>
+				</div>
+				<div class="p-4 space-y-4">
+					<div class="text-sm text-gray-600 dark:text-gray-400">
+						Setting PIN for: <span class="font-bold text-gray-900 dark:text-gray-100">{{ pinEditUser?.full_name || pinEditUser?.email }}</span>
+					</div>
+					<div>
+						<label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">New PIN (min 4 digits)</label>
+						<input
+							v-model="newPin"
+							type="password"
+							class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-warm-dark-600 bg-white dark:bg-warm-dark-700 text-gray-900 dark:text-white"
+							placeholder="Enter new PIN"
+							maxlength="10"
+						/>
+					</div>
+				</div>
+				<div class="p-4 border-t border-gray-200 dark:border-warm-dark-700 flex justify-end gap-2">
+					<button
+						@click="showPinModal = false"
+						class="px-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-warm-dark-600 text-gray-700 dark:text-gray-300"
+					>
+						Cancel
+					</button>
+					<button
+						@click="handleSavePin"
+						:disabled="savingPin || newPin.length < 4"
+						class="px-4 py-2 text-sm font-bold rounded-lg bg-[#D4AF37] text-white hover:bg-[#B8962E] transition disabled:opacity-50"
+					>
+						{{ savingPin ? 'Saving...' : 'Set PIN' }}
+					</button>
+				</div>
+			</div>
+		</div>
+		<div
+			v-if="showLoginPasswordModal"
+			class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+			@click.self="showLoginPasswordModal = false"
+		>
+			<div class="bg-white dark:bg-warm-dark-800 rounded-xl shadow-2xl w-full max-w-sm mx-4">
+				<div class="p-4 border-b border-gray-200 dark:border-warm-dark-700 flex items-center justify-between">
+					<h3 class="text-lg font-bold text-gray-900 dark:text-white">Set Login Password</h3>
+					<button @click="showLoginPasswordModal = false" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-warm-dark-700">
+						<svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						</svg>
+					</button>
+				</div>
+				<div class="p-4 space-y-4">
+					<div class="text-sm text-gray-600 dark:text-gray-400">
+						Setting Login Password for: <span class="font-bold text-gray-900 dark:text-gray-100">{{ pwdEditUser?.full_name || pwdEditUser?.email }}</span>
+					</div>
+					<div>
+						<label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">New Password</label>
+						<input v-model="newLoginPassword" type="password" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-warm-dark-600 bg-white dark:bg-warm-dark-700 text-gray-900 dark:text-white" placeholder="Enter new password" />
+					</div>
+				</div>
+				<div class="p-4 border-t border-gray-200 dark:border-warm-dark-700 flex justify-end gap-2">
+					<button @click="showLoginPasswordModal = false" class="px-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-warm-dark-600 text-gray-700 dark:text-gray-300">Cancel</button>
+					<button @click="handleSaveLoginPassword" :disabled="savingLoginPassword || !newLoginPassword" class="px-4 py-2 text-sm font-bold rounded-lg bg-[#D4AF37] text-white hover:bg-[#B8962E] transition disabled:opacity-50">
+						{{ savingLoginPassword ? 'Saving...' : 'Set Password' }}
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div
 			v-if="showCreateUser"
 			class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
 			@click.self="showCreateUser = false"
@@ -858,7 +958,17 @@ const savingRoles = ref(false)
 
 const showCreateUser = ref(false)
 const savingUser = ref(false)
-const newUser = ref({ email: '', first_name: '', last_name: '', roles: [] })
+const newUser = ref({ email: '', first_name: '', last_name: '', password: '', roles: [] })
+
+const showPinModal = ref(false)
+const pinEditUser = ref(null)
+const newPin = ref('')
+const savingPin = ref(false)
+
+const showLoginPasswordModal = ref(false)
+const pwdEditUser = ref(null)
+const newLoginPassword = ref('')
+const savingLoginPassword = ref(false)
 
 const userList = ref([])
 
@@ -993,6 +1103,42 @@ async function handleSaveRoles() {
 	}
 }
 
+function openSetPin(user) {
+	pinEditUser.value = user
+	newPin.value = ''
+	showPinModal.value = true
+}
+
+async function handleSavePin() {
+	if (newPin.value.length < 4) return
+	savingPin.value = true
+	try {
+		await store.setManagerPin(newPin.value, pinEditUser.value.name || pinEditUser.value.email)
+		showPinModal.value = false
+		newPin.value = ''
+	} finally {
+		savingPin.value = false
+	}
+}
+
+function openSetLoginPassword(user) {
+	pwdEditUser.value = user
+	newLoginPassword.value = ''
+	showLoginPasswordModal.value = true
+}
+
+async function handleSaveLoginPassword() {
+	if (!newLoginPassword.value) return
+	savingLoginPassword.value = true
+	try {
+		await store.setUserPassword(pwdEditUser.value.email, newLoginPassword.value)
+		showLoginPasswordModal.value = false
+		newLoginPassword.value = ''
+	} finally {
+		savingLoginPassword.value = false
+	}
+}
+
 async function handleCreateUser() {
 	savingUser.value = true
 	try {
@@ -1000,10 +1146,11 @@ async function handleCreateUser() {
 			email: newUser.value.email,
 			first_name: newUser.value.first_name,
 			last_name: newUser.value.last_name || undefined,
+			password: newUser.value.password || undefined,
 			roles_json: JSON.stringify(newUser.value.roles),
 		})
 		showCreateUser.value = false
-		newUser.value = { email: '', first_name: '', last_name: '', roles: [] }
+		newUser.value = { email: '', first_name: '', last_name: '', password: '', roles: [] }
 		await loadUsers()
 	} finally {
 		savingUser.value = false

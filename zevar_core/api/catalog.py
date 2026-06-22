@@ -220,6 +220,18 @@ def get_pos_items(
 	has_post_filters = in_stock_only or out_of_stock_only or min_price or max_price
 	fetch_length = page_length * 5 if has_post_filters else page_length
 
+	# Resolve child warehouses once so both inventory_only pre-filter and
+	# the stock aggregation below include Showcase, Back Stock, Safe, etc.
+	_warehouse_list = None
+	if warehouse:
+		_roots = frappe.get_all("Warehouse", filters={"name": warehouse}, pluck="name")
+		_children = frappe.get_all(
+			"Warehouse",
+			filters={"parent_warehouse": warehouse, "is_group": 0},
+			pluck="name",
+		)
+		_warehouse_list = list(set(_roots + _children)) or [warehouse]
+
 	# When inventory_only is True and a warehouse is specified, pre-filter
 	# item codes by Bin at the SQL level so we never fetch thousands of
 	# irrelevant items from the Item table. Each store typically has ~1000
@@ -227,7 +239,7 @@ def get_pos_items(
 	if inventory_only and warehouse:
 		warehouse_item_codes = frappe.db.get_all(
 			"Bin",
-			filters={"warehouse": warehouse},
+			filters={"warehouse": ["in", _warehouse_list or [warehouse]]},
 			pluck="item_code",
 		)
 		if not warehouse_item_codes:
@@ -254,12 +266,15 @@ def get_pos_items(
 	stock_map = {}
 
 	if warehouse:
+		# _warehouse_list already resolved above (includes child warehouses)
 		bin_entries = frappe.db.get_all(
 			"Bin",
-			filters={"item_code": ["in", item_codes], "warehouse": warehouse},
+			filters={"item_code": ["in", item_codes], "warehouse": ["in", _warehouse_list or [warehouse]]},
 			fields=["item_code", "actual_qty"],
 		)
-		stock_map = {b.item_code: b.actual_qty for b in bin_entries}
+		stock_map = {}
+		for b in bin_entries:
+			stock_map[b.item_code] = stock_map.get(b.item_code, 0) + b.actual_qty
 	else:
 		# Sum stock across all warehouses
 		bin_entries = (
@@ -827,3 +842,33 @@ def _get_custom_sort_key(item: dict, sort_by: str):
 	elif sort_by == "name_asc":
 		return name
 	return (0, name)
+
+
+@frappe.whitelist()
+def get_warehouse_list() -> list:
+	"""Return non-group warehouses for the POS store selector.
+
+	Uses ``ignore_permissions`` so that Employees (who may not have Warehouse
+	read permission at the DocType level) can still populate the store
+	selector in the app shell.
+	"""
+	warehouses = frappe.get_all(
+		"Warehouse",
+		filters={"is_group": 0, "parent_warehouse": ["like", "%ZFJ"]},
+		fields=["name", "warehouse_name", "parent_warehouse"],
+		order_by="name",
+		ignore_permissions=True,
+	)
+
+	if not warehouses:
+		# Fallback: any non-group warehouse whose name ends with the company suffix
+		warehouses = frappe.get_all(
+			"Warehouse",
+			filters={"is_group": 0, "name": ["like", "%- ZFJ"]},
+			fields=["name", "warehouse_name", "parent_warehouse"],
+			order_by="name",
+			limit_page_length=50,
+			ignore_permissions=True,
+		)
+
+	return warehouses

@@ -405,7 +405,7 @@ def update_user_roles(user_email, roles_json):
 
 
 @frappe.whitelist(allow_guest=False)
-def create_user(email, first_name, last_name=None, roles_json=None, send_welcome_email=1):
+def create_user(email, first_name, last_name=None, roles_json=None, send_welcome_email=1, password=None):
 	frappe.only_for("System Manager", "Administrator")
 
 	import json
@@ -423,6 +423,8 @@ def create_user(email, first_name, last_name=None, roles_json=None, send_welcome
 	user.first_name = first_name
 	user.last_name = cstr(last_name).strip() if last_name else ""
 	user.send_welcome_email = cint(send_welcome_email)
+	if password:
+		user.send_welcome_email = 0
 	user.user_type = "System User"
 
 	if roles_json:
@@ -432,7 +434,26 @@ def create_user(email, first_name, last_name=None, roles_json=None, send_welcome
 				user.append("roles", {"role": role})
 
 	user.insert(ignore_permissions=True)
+	
+	if password:
+		from frappe.utils.password import update_password
+		update_password(user.name, password)
+
 	return {"success": True, "name": user.name}
+
+
+@frappe.whitelist(methods=["POST"])
+def set_user_password(email, password):
+	frappe.only_for("System Manager", "Administrator")
+	
+	if not frappe.db.exists("User", email):
+		frappe.throw("User not found")
+		
+	from frappe.utils.password import update_password
+	update_password(email, password)
+	
+	return {"success": True, "message": "Password updated successfully"}
+
 
 
 @frappe.whitelist(allow_guest=False)

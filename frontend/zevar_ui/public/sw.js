@@ -6,8 +6,8 @@
  * This prevents stale content issues permanently.
  */
 // Force cache update for Special Order Wizard fix
-const CACHE_NAME = 'zevar-pos-v22'
-const API_CACHE = 'zevar-api-v22'
+const CACHE_NAME = 'zevar-pos-v25'
+const API_CACHE = 'zevar-api-v25'
 
 const OFFLINE_FALLBACK_ASSETS = ['/pos/', '/pos/index.html']
 
@@ -22,7 +22,7 @@ const SENSITIVE_METHODS = ['get_user_info', 'get_logged_user', 'logout', 'login'
 // ── Install: cache shell for offline fallback only ──
 
 self.addEventListener('install', (event) => {
-	console.log('[SW v18] Installing — network-first strategy')
+	console.log('[SW v24] Installing — network-first strategy')
 	event.waitUntil(
 		caches
 			.open(CACHE_NAME)
@@ -34,7 +34,7 @@ self.addEventListener('install', (event) => {
 // ── Activate: purge ALL old caches ──
 
 self.addEventListener('activate', (event) => {
-	console.log('[SW v18] Activating — clearing old caches')
+	console.log('[SW v24] Activating — clearing old caches')
 	event.waitUntil(
 		caches
 			.keys()
@@ -42,7 +42,7 @@ self.addEventListener('activate', (event) => {
 				Promise.all(
 					names.map((n) => {
 						if (n !== CACHE_NAME && n !== API_CACHE) {
-							console.log('[SW v18] Purging:', n)
+							console.log('[SW v24] Purging:', n)
 							return caches.delete(n)
 						}
 					})

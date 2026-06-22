@@ -80,7 +80,8 @@
 							<span
 								class="text-sm font-bold text-emerald-600 dark:text-emerald-400 font-mono"
 							>
-								${{ formatAmount(posSession.status.session?.today_sales_total) }}
+								<span v-if="isBlindClose">***</span>
+								<span v-else>${{ formatAmount(posSession.status.session?.today_sales_total) }}</span>
 							</span>
 						</div>
 						<div class="flex flex-col gap-1">
@@ -88,7 +89,8 @@
 								>Today's Count</span
 							>
 							<span class="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-								{{ posSession.status.session?.today_sales_count || 0 }}
+								<span v-if="isBlindClose">***</span>
+								<span v-else>{{ posSession.status.session?.today_sales_count || 0 }}</span>
 							</span>
 						</div>
 						<div class="flex flex-col gap-1">
@@ -98,7 +100,8 @@
 							<span
 								class="text-sm font-bold text-gray-900 dark:text-white font-mono"
 							>
-								${{ formatAmount(posSession.status.session?.sales_total) }}
+								<span v-if="isBlindClose">***</span>
+								<span v-else>${{ formatAmount(posSession.status.session?.sales_total) }}</span>
 							</span>
 						</div>
 						<div class="flex flex-col gap-1">
@@ -106,7 +109,8 @@
 								>Session Count</span
 							>
 							<span class="text-sm font-bold text-gray-900 dark:text-white">
-								{{ posSession.status.session?.sales_count }}
+								<span v-if="isBlindClose">***</span>
+								<span v-else>{{ posSession.status.session?.sales_count }}</span>
 							</span>
 						</div>
 						<div class="flex flex-col gap-1">
@@ -411,6 +415,15 @@
 
 						<!-- STEP 2: RECONCILE & CLOSE -->
 						<div v-else class="space-y-6">
+							<!-- Back Button -->
+							<button
+								type="button"
+								@click="currentStep = 1"
+								class="text-sm font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white flex items-center gap-1 transition"
+							>
+								← Back to Step 1
+							</button>
+
 							<div
 								class="bg-gray-50 dark:bg-warm-dark-700/30 border border-gray-100 dark:border-warm-border rounded-xl p-5 space-y-4"
 							>
@@ -419,7 +432,7 @@
 								>
 									🔒 Count Sealed Successfully
 								</h4>
-								<div class="grid grid-cols-2 gap-4 text-sm">
+								<div class="grid gap-4 text-sm" :class="isBlindClose ? 'grid-cols-1' : 'grid-cols-2'">
 									<div class="flex flex-col">
 										<span class="text-xs text-gray-500"
 											>Your Counted Cash</span
@@ -429,7 +442,7 @@
 											>${{ formatAmount(form.closing_balance) }}</span
 										>
 									</div>
-									<div class="flex flex-col">
+									<div v-if="!isBlindClose" class="flex flex-col">
 										<span class="text-xs text-gray-500"
 											>Expected Cash Balance</span
 										>
@@ -441,6 +454,7 @@
 								</div>
 
 								<div
+									v-if="!isBlindClose"
 									class="text-center p-4 rounded-lg mt-2"
 									:class="{
 										'bg-green-500/10 border border-green-500/20':
@@ -473,7 +487,7 @@
 							</div>
 
 							<!-- Variance Reason Code Dropdown (Required if variance exists) -->
-							<div v-if="Math.abs(variance) > 0.01">
+							<div v-if="!isBlindClose && Math.abs(variance) > 0.01">
 								<label
 									class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
 								>
@@ -513,12 +527,13 @@
 											Manager Authorization Required
 										</h5>
 										<p class="text-xs text-gray-400 mt-0.5">
-											The variance of ${{
+											<span v-if="isBlindClose">A variance was detected that requires manager authorization.</span>
+											<span v-else>The variance of ${{
 												formatAmount(Math.abs(variance))
 											}}
 											exceeds your profile's alert threshold of ${{
 												formatAmount(alertThreshold)
-											}}.
+											}}.</span>
 										</p>
 									</div>
 								</div>
@@ -922,7 +937,7 @@ async function submitStep1() {
 }
 
 async function submitStep2() {
-	if (Math.abs(previewData.value?.variance || 0) > 0.01 && !varianceReasonCode.value) {
+	if (!isBlindClose.value && Math.abs(previewData.value?.variance || 0) > 0.01 && !varianceReasonCode.value) {
 		alert('Please select a Variance Reason Code.')
 		return
 	}
@@ -938,7 +953,7 @@ async function doClose() {
 	try {
 		const res = await step2Resource.submit({
 			session_name: posSession.status.session?.name,
-			variance_reason_code: varianceReasonCode.value,
+			variance_reason_code: varianceReasonCode.value || (Math.abs(variance.value || 0) > 0.01 ? 'System Error' : ''),
 			notes: form.value.notes,
 		})
 

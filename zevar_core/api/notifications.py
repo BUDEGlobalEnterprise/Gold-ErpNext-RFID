@@ -267,12 +267,12 @@ def _get_cash_alerts() -> list[dict]:
 	if frappe.db.table_exists("POS Closing Entry"):
 		variances = frappe.db.sql(
 			"""
-			SELECT name, pos_period_start_date, pos_period_end_date,
+			SELECT name, period_start_date, period_end_date,
 			       grand_closing_amount, grand_opening_amount,
 			       (grand_closing_amount - grand_opening_amount) as net_difference
 			FROM `tabPOS Closing Entry`
 			WHERE docstatus = 1
-			  AND pos_period_end_date = %(today)s
+			  AND period_end_date = %(today)s
 			  AND ABS(grand_closing_amount - grand_opening_amount) > 20
 			ORDER BY ABS(grand_closing_amount - grand_opening_amount) DESC
 			LIMIT 5

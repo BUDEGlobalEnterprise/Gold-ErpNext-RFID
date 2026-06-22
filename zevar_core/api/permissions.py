@@ -10,39 +10,39 @@ from frappe.utils import flt, now_datetime
 
 # Permission levels for POS operations
 POS_PERMISSIONS = {
-	"pos_access": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
-	"create_invoice": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
-	"apply_discount": {"roles": ["Sales User", "Sales Manager", "System Manager"], "limit": 10},
+	"pos_access": {"roles": ["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"]},
+	"create_invoice": {"roles": ["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"]},
+	"apply_discount": {"roles": ["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"], "limit": 10},
 	"apply_large_discount": {"roles": ["Sales Manager", "System Manager"], "limit": 100},
 	"void_invoice": {"roles": ["Sales Manager", "System Manager"]},
 	"process_return": {"roles": ["Sales Manager", "System Manager"]},
 	"override_price": {"roles": ["Sales Manager", "System Manager"]},
 	"view_reports": {"roles": ["Sales Manager", "System Manager"]},
 	"manage_users": {"roles": ["System Manager"]},
-	"open_close_register": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
-	"process_trade_in": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
+	"open_close_register": {"roles": ["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"]},
+	"process_trade_in": {"roles": ["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"]},
 	"override_trade_in_2x": {"roles": ["Sales Manager", "System Manager"]},
-	"create_layaway": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
+	"create_layaway": {"roles": ["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"]},
 	"cancel_layaway": {"roles": ["Sales Manager", "System Manager"]},
-	"record_cash_movement": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
-	"cash_in": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
-	"cash_out": {"roles": ["Sales User", "Sales Manager", "System Manager"], "limit": 100},
+	"record_cash_movement": {"roles": ["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"]},
+	"cash_in": {"roles": ["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"]},
+	"cash_out": {"roles": ["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"], "limit": 100},
 	"cash_out_unlimited": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
-	"safe_drop": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
+	"safe_drop": {"roles": ["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"]},
 	"bank_drop": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
 	"float_entry": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
 	"tender_removal": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
-	"open_session": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
-	"close_session": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
-	"suspend_session": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
-	"resume_session": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
+	"open_session": {"roles": ["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"]},
+	"close_session": {"roles": ["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"]},
+	"suspend_session": {"roles": ["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"]},
+	"resume_session": {"roles": ["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"]},
 	"force_close_session": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
-	"view_x_report": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
+	"view_x_report": {"roles": ["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"]},
 	"view_z_report": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
 	"view_variance_report": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
 	"view_all_sessions": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
-	"view_own_sessions": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
-	"blind_close": {"roles": ["Sales User", "Sales Manager", "System Manager"]},
+	"view_own_sessions": {"roles": ["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"]},
+	"blind_close": {"roles": ["Sales User", "Sales Manager", "System Manager", "Employee", "Employee Self Service"]},
 	"verify_opening_count": {"roles": ["Sales Manager", "System Manager", "Store Manager"]},
 }
 
@@ -342,12 +342,13 @@ def verify_manager_pin(pin):
 
 
 @frappe.whitelist(methods=["POST"])
-def set_manager_pin(pin: str) -> dict:
+def set_manager_pin(pin: str, user: str | None = None) -> dict:
 	"""
-	Set or update the current user's manager PIN (hashed with bcrypt).
+	Set or update a user's manager PIN (hashed with bcrypt).
 
 	Args:
 		pin: The new PIN to set (will be hashed before storage)
+		user: Optional user ID/email to set the PIN for. Defaults to current user.
 
 	Returns:
 		Success status
@@ -365,13 +366,15 @@ def set_manager_pin(pin: str) -> dict:
 	except ImportError:
 		frappe.throw(_("bcrypt is required to set a manager PIN."))
 
+	target_user = user or frappe.session.user
+
 	# Hash the PIN with bcrypt
 	hashed_pin = bcrypt.hashpw(pin.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 	# Update user's hashed PIN
 	frappe.db.set_value(
 		"User",
-		frappe.session.user,
+		target_user,
 		"pos_manager_pin_hash",
 		hashed_pin,
 	)
@@ -479,7 +482,65 @@ def get_user_allowed_warehouses(user: str | None = None) -> list[str] | None:
 		pluck="parent",
 	)
 	if not assigned:
-		return []
+		# Fallback: for Employee / Employee Self Service users without a direct
+		# POS Profile assignment, try to resolve a warehouse via the Employee
+		# record or the first active Store Location.  This lets floor staff
+		# open the register and view stock without needing an explicit
+		# POS Profile User row.
+		fallback_roots: set[str] = set()
+
+		# (a) Employee doc linked to this user → custom_warehouse field
+		employee_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
+		if employee_id:
+			emp_wh = frappe.db.get_value(
+				"Employee", employee_id, "custom_warehouse"
+			) or frappe.db.get_value("Employee", employee_id, "warehouse")
+			if emp_wh:
+				fallback_roots.add(emp_wh)
+
+		# (b) Store Location with default_warehouse (any active one)
+		if not fallback_roots:
+			store_wh = frappe.db.get_value(
+				"Store Location",
+				{"is_active": 1},
+				"default_warehouse",
+			)
+			if store_wh:
+				fallback_roots.add(store_wh)
+
+		# (c) First enabled POS Profile (last resort)
+		if not fallback_roots:
+			profile_wh = frappe.db.get_value(
+				"POS Profile",
+				{"disabled": 0},
+				"warehouse",
+				order_by="creation",
+			)
+			if profile_wh:
+				fallback_roots.add(profile_wh)
+
+		if not fallback_roots:
+			return []
+
+		roots = fallback_roots
+		allowed: set[str] = set(roots)
+		for wh in roots:
+			try:
+				descendants = frappe.db.get_descendants("Warehouse", wh) or []
+				allowed.update(descendants)
+			except Exception:
+				try:
+					lft, rgt = frappe.db.get_value("Warehouse", wh, ["lft", "rgt"]) or (None, None)
+					if lft is not None and rgt is not None:
+						rows = frappe.db.get_all(
+							"Warehouse",
+							filters={"lft": [">=", lft], "rgt": ["<=", rgt]},
+							pluck="name",
+						)
+						allowed.update(rows)
+				except Exception:
+					pass
+		return sorted(allowed)
 
 	profiles = frappe.get_all(
 		"POS Profile",

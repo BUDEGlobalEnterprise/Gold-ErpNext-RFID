@@ -1147,12 +1147,7 @@ function validateAndHealWarehouse(data) {
 
 // Warehouses
 const warehouses = createResource({
-	url: 'frappe.client.get_list',
-	params: {
-		doctype: 'Warehouse',
-		filters: { is_group: 0, parent_warehouse: ['like', '%ZFJ'] },
-		fields: ['name'],
-	},
+	url: 'zevar_core.api.catalog.get_warehouse_list',
 	auto: true,
 	onSuccess(data) {
 		if (!data || data.length === 0) {
@@ -1161,15 +1156,14 @@ const warehouses = createResource({
 			validateAndHealWarehouse(data)
 		}
 	},
+	onError(err) {
+		console.error('AppShell: Failed to load warehouses:', err)
+		// Retry via fallback after a short delay
+		setTimeout(() => warehouseFallback.fetch(), 2000)
+	},
 })
 const warehouseFallback = createResource({
-	url: 'frappe.client.get_list',
-	params: {
-		doctype: 'Warehouse',
-		filters: { is_group: 0, name: ['like', '%- ZFJ'] },
-		fields: ['name'],
-		limit_page_length: 50,
-	},
+	url: 'zevar_core.api.catalog.get_warehouse_list',
 	onSuccess(data) {
 		if (data?.length > 0) {
 			warehouses.data = data
