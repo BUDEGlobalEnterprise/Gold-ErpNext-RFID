@@ -119,6 +119,7 @@ scheduler_events = {
 		"0 * * * *": [
 			"zevar_core.tasks.expire_stale_reservations",
 			"zevar_core.api.pos_activation.auto_deactivate_profiles",
+			"zevar_core.api.pos_session.check_abandoned_pos_sessions",
 		],
 		"0 */2 * * *": ["zevar_core.tasks.run_report_subscriptions"],
 		"30 8 * * *": [

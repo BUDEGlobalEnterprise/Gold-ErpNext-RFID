@@ -2,6 +2,7 @@ import './index.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import router from './router'
 import App from './App.vue'
 
@@ -12,6 +13,7 @@ hardwareService.connect()
 
 const app = createApp(App)
 const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
 
 setConfig('resourceFetcher', frappeRequest)
 
@@ -30,7 +32,7 @@ app.mount('#app')
 if ('serviceWorker' in navigator) {
 	window.addEventListener('load', () => {
 		navigator.serviceWorker
-			.register('/api/method/zevar_core.api.pos.serve_sw?v=20', { scope: '/pos/' })
+			.register('/api/method/zevar_core.api.pos.serve_sw?v=24', { scope: '/pos/' })
 			.then((registration) => {
 				// Auto-activate new SW immediately
 				registration.addEventListener('updatefound', () => {

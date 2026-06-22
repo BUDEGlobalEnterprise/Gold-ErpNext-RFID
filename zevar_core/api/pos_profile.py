@@ -82,7 +82,18 @@ def get_pos_profiles() -> dict:
 		allowed_names = list(set(assigned_profiles + public_profiles))
 
 		if not allowed_names:
-			return {"profiles": [], "count": 0}
+			# Fallback: if the employee has no POS Profile assignment and there are
+			# no "public" profiles, expose all enabled profiles so the employee can
+			# still open a register. Without this the POS Opening screen would
+			# show "No POS profiles found" even though profiles exist.
+			allowed_names = frappe.get_all(
+				"POS Profile",
+				filters={"disabled": 0},
+				pluck="name",
+				ignore_permissions=True,
+			)
+			if not allowed_names:
+				return {"profiles": [], "count": 0}
 
 		profiles = frappe.get_all(
 			"POS Profile",

@@ -1,5 +1,427 @@
 [
  {
+  "attribute_name": "Color",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Item Attribute",
+  "from_range": 0.0,
+  "increment": 0.0,
+  "item_attribute_values": [
+   {
+    "abbr": "CO01",
+    "attribute_value": "D"
+   },
+   {
+    "abbr": "CO02",
+    "attribute_value": "D/E"
+   },
+   {
+    "abbr": "CO03",
+    "attribute_value": "E"
+   },
+   {
+    "abbr": "CO04",
+    "attribute_value": "E/F"
+   },
+   {
+    "abbr": "CO05",
+    "attribute_value": "F"
+   },
+   {
+    "abbr": "CO06",
+    "attribute_value": "F/G"
+   },
+   {
+    "abbr": "CO07",
+    "attribute_value": "G"
+   },
+   {
+    "abbr": "CO08",
+    "attribute_value": "G/H"
+   },
+   {
+    "abbr": "CO09",
+    "attribute_value": "H"
+   },
+   {
+    "abbr": "CO10",
+    "attribute_value": "H/I"
+   },
+   {
+    "abbr": "CO11",
+    "attribute_value": "I"
+   },
+   {
+    "abbr": "CO12",
+    "attribute_value": "I/J"
+   },
+   {
+    "abbr": "CO13",
+    "attribute_value": "J"
+   },
+   {
+    "abbr": "CO14",
+    "attribute_value": "J/K"
+   },
+   {
+    "abbr": "CO15",
+    "attribute_value": "K"
+   },
+   {
+    "abbr": "CO16",
+    "attribute_value": "K/L"
+   },
+   {
+    "abbr": "CO17",
+    "attribute_value": "L"
+   },
+   {
+    "abbr": "CO18",
+    "attribute_value": "L/M"
+   },
+   {
+    "abbr": "CO19",
+    "attribute_value": "M"
+   },
+   {
+    "abbr": "CO20",
+    "attribute_value": "Other"
+   },
+   {
+    "abbr": "CO21",
+    "attribute_value": "purple"
+   },
+   {
+    "abbr": "CO22",
+    "attribute_value": "reddish purple"
+   },
+   {
+    "abbr": "CO23",
+    "attribute_value": "red-purple"
+   },
+   {
+    "abbr": "CO24",
+    "attribute_value": "purple-red"
+   },
+   {
+    "abbr": "CO25",
+    "attribute_value": "strongly purplish red"
+   },
+   {
+    "abbr": "CO26",
+    "attribute_value": "slight purplish red"
+   },
+   {
+    "abbr": "CO27",
+    "attribute_value": "red"
+   },
+   {
+    "abbr": "CO28",
+    "attribute_value": "orangy red"
+   },
+   {
+    "abbr": "CO29",
+    "attribute_value": "red-orange"
+   },
+   {
+    "abbr": "CO30",
+    "attribute_value": "orange-red"
+   },
+   {
+    "abbr": "CO31",
+    "attribute_value": "reddish orange"
+   },
+   {
+    "abbr": "CO32",
+    "attribute_value": "orange"
+   },
+   {
+    "abbr": "CO33",
+    "attribute_value": "yellowish orange"
+   },
+   {
+    "abbr": "CO34",
+    "attribute_value": "orangy yellow"
+   },
+   {
+    "abbr": "CO35",
+    "attribute_value": "yellow-green"
+   },
+   {
+    "abbr": "CO36",
+    "attribute_value": "green-yellow"
+   },
+   {
+    "abbr": "CO37",
+    "attribute_value": "strongly yellowish green"
+   },
+   {
+    "abbr": "CO38",
+    "attribute_value": "yellowish green"
+   },
+   {
+    "abbr": "CO39",
+    "attribute_value": "slightly yellowish green"
+   },
+   {
+    "abbr": "CO40",
+    "attribute_value": "green"
+   },
+   {
+    "abbr": "CO41",
+    "attribute_value": "very slightly bluish green"
+   },
+   {
+    "abbr": "CO42",
+    "attribute_value": "slightly bluish green"
+   },
+   {
+    "abbr": "CO43",
+    "attribute_value": "green-blue"
+   },
+   {
+    "abbr": "CO44",
+    "attribute_value": "blue-green"
+   },
+   {
+    "abbr": "CO45",
+    "attribute_value": "very strongly greenish blue"
+   },
+   {
+    "abbr": "CO46",
+    "attribute_value": "blue"
+   },
+   {
+    "abbr": "CO47",
+    "attribute_value": "violetish blue"
+   },
+   {
+    "abbr": "CO48",
+    "attribute_value": "bluish violet"
+   },
+   {
+    "abbr": "CO49",
+    "attribute_value": "bluish purple"
+   },
+   {
+    "abbr": "CO50",
+    "attribute_value": "violet"
+   },
+   {
+    "abbr": "CO51",
+    "attribute_value": "M/N"
+   },
+   {
+    "abbr": "CO52",
+    "attribute_value": "N"
+   },
+   {
+    "abbr": "CO53",
+    "attribute_value": "N/O"
+   },
+   {
+    "abbr": "CO54",
+    "attribute_value": "O"
+   },
+   {
+    "abbr": "CO55",
+    "attribute_value": "O/P"
+   },
+   {
+    "abbr": "CO56",
+    "attribute_value": "P"
+   },
+   {
+    "abbr": "CO57",
+    "attribute_value": "P/Q"
+   },
+   {
+    "abbr": "CO58",
+    "attribute_value": "Q"
+   }
+  ],
+  "modified": "2026-06-16 17:26:51.570670",
+  "name": "Color",
+  "numeric_values": 0,
+  "to_range": 0.0
+ },
+ {
+  "attribute_name": "Clarity",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Item Attribute",
+  "from_range": 0.0,
+  "increment": 0.0,
+  "item_attribute_values": [
+   {
+    "abbr": "CL01",
+    "attribute_value": "FL"
+   },
+   {
+    "abbr": "CL02",
+    "attribute_value": "IF"
+   },
+   {
+    "abbr": "CL03",
+    "attribute_value": "VVS1"
+   },
+   {
+    "abbr": "CL04",
+    "attribute_value": "VVS1/VVS2"
+   },
+   {
+    "abbr": "CL05",
+    "attribute_value": "VVS2"
+   },
+   {
+    "abbr": "CL06",
+    "attribute_value": "VVS2/VS1"
+   },
+   {
+    "abbr": "CL07",
+    "attribute_value": "VS1"
+   },
+   {
+    "abbr": "CL08",
+    "attribute_value": "VS1/VS2"
+   },
+   {
+    "abbr": "CL09",
+    "attribute_value": "VS2"
+   },
+   {
+    "abbr": "CL10",
+    "attribute_value": "VS2/SI1"
+   },
+   {
+    "abbr": "CL11",
+    "attribute_value": "SI1"
+   },
+   {
+    "abbr": "CL12",
+    "attribute_value": "SI1/SI2"
+   },
+   {
+    "abbr": "CL13",
+    "attribute_value": "SI2"
+   },
+   {
+    "abbr": "CL14",
+    "attribute_value": "SI2/SI3"
+   },
+   {
+    "abbr": "CL15",
+    "attribute_value": "SI3"
+   },
+   {
+    "abbr": "CL16",
+    "attribute_value": "SI3/I1"
+   },
+   {
+    "abbr": "CL17",
+    "attribute_value": "I1"
+   },
+   {
+    "abbr": "CL18",
+    "attribute_value": "I1/I2"
+   },
+   {
+    "abbr": "CL19",
+    "attribute_value": "I2"
+   },
+   {
+    "abbr": "CL20",
+    "attribute_value": "I2/I3"
+   },
+   {
+    "abbr": "CL21",
+    "attribute_value": "I3"
+   },
+   {
+    "abbr": "CL22",
+    "attribute_value": "TYPE I"
+   },
+   {
+    "abbr": "CL23",
+    "attribute_value": "TYPE II"
+   },
+   {
+    "abbr": "CL24",
+    "attribute_value": "TYPE III"
+   },
+   {
+    "abbr": "CL25",
+    "attribute_value": "TYPE IV"
+   }
+  ],
+  "modified": "2026-06-16 17:26:51.665240",
+  "name": "Clarity",
+  "numeric_values": 0,
+  "to_range": 0.0
+ },
+ {
+  "attribute_name": "Cut",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Item Attribute",
+  "from_range": 0.0,
+  "increment": 0.0,
+  "item_attribute_values": [
+   {
+    "abbr": "CU01",
+    "attribute_value": "Round"
+   },
+   {
+    "abbr": "CU02",
+    "attribute_value": "Marquise"
+   },
+   {
+    "abbr": "CU03",
+    "attribute_value": "Emerald"
+   },
+   {
+    "abbr": "CU04",
+    "attribute_value": "Radiant"
+   },
+   {
+    "abbr": "CU05",
+    "attribute_value": "Pear"
+   },
+   {
+    "abbr": "CU06",
+    "attribute_value": "Oval"
+   },
+   {
+    "abbr": "CU07",
+    "attribute_value": "Heart"
+   },
+   {
+    "abbr": "CU08",
+    "attribute_value": "Juell"
+   },
+   {
+    "abbr": "CU09",
+    "attribute_value": "Princess Cut"
+   },
+   {
+    "abbr": "CU10",
+    "attribute_value": "Royal Cut"
+   },
+   {
+    "abbr": "CU11",
+    "attribute_value": "Trilliant"
+   },
+   {
+    "abbr": "CU12",
+    "attribute_value": "Baguette"
+   }
+  ],
+  "modified": "2026-06-17 10:31:31.024162",
+  "name": "Cut",
+  "numeric_values": 0,
+  "to_range": 0.0
+ },
+ {
   "attribute_name": "Test Size",
   "disabled": 0,
   "docstatus": 0,

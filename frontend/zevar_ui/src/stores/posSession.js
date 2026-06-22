@@ -198,4 +198,8 @@ export const usePosSessionStore = defineStore('posSession', () => {
 		fetchRepairActivity,
 		fetchSales,
 	}
+}, {
+	persist: {
+		paths: ['status']
+	}
 })

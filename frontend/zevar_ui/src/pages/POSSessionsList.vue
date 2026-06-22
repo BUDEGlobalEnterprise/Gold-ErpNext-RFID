@@ -32,7 +32,7 @@
 								<th class="px-6 py-4 font-bold text-gray-500 dark:text-gray-400">Profile</th>
 								<th class="px-6 py-4 font-bold text-gray-500 dark:text-gray-400">Status</th>
 								<th class="px-6 py-4 font-bold text-gray-500 dark:text-gray-400">Start / End Time</th>
-								<th class="px-6 py-4 font-bold text-gray-500 dark:text-gray-400 text-right">Variance</th>
+								<th class="px-6 py-4 font-bold text-gray-500 dark:text-gray-400 text-right">Variance / Actions</th>
 							</tr>
 						</thead>
 						<tbody class="divide-y divide-gray-100 dark:divide-warm-border/50">
@@ -74,6 +74,14 @@
 										>
 											{{ formatCurrency(session.cash_variance) }}
 										</div>
+									</template>
+									<template v-else-if="session.status === 'Open' || session.status === 'Suspended'">
+										<button 
+											@click="forceClose(session.name)"
+											class="px-3 py-1 bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 rounded text-xs font-bold transition"
+										>
+											Force Close
+										</button>
 									</template>
 									<span v-else class="text-gray-400">-</span>
 								</td>
@@ -135,6 +143,28 @@ function formatCurrency(amount) {
 	const num = Number(amount)
 	const prefix = num > 0 ? '+' : ''
 	return prefix + '$' + Math.abs(num).toFixed(2)
+}
+
+async function forceClose(sessionName) {
+	const reason = window.prompt(`Are you sure you want to force close session ${sessionName}?\nPlease enter a reason:`)
+	if (reason === null) return // cancelled
+	
+	try {
+		const res = await fetch('/api/method/zevar_core.api.pos_session.force_close_session', {
+			method: 'POST',
+			headers: { 
+				'Content-Type': 'application/json',
+				'X-Frappe-CSRF-Token': window.csrf_token || '' 
+			},
+			body: JSON.stringify({ session_name: sessionName, reason: reason || 'Manager Override' })
+		})
+		const json = await res.json()
+		if (!res.ok) throw new Error(json.message || 'Failed to force close')
+		
+		fetchSessions()
+	} catch (e) {
+		alert(e.message)
+	}
 }
 
 onMounted(() => {
